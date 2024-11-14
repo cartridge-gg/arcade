@@ -10,6 +10,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "arcade_slot"
+version = "0.0.0"
+dependencies = [
+ "dojo",
+ "dojo_cairo_test",
+]
+
+[[package]]
 name = "arcade_trophy"
 version = "0.0.0"
 dependencies = [
