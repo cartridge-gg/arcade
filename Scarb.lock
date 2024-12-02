@@ -19,8 +19,8 @@ dependencies = [
 
 [[package]]
 name = "dojo"
-version = "1.0.1"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.0.1#d7335e6f5c76a1dda887ec00c594c2c019b4a05f"
+version = "1.0.3"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.0.3#c65c25788d900325fa5e6e9d464da633cfabc468"
 dependencies = [
  "dojo_plugin",
 ]
@@ -28,7 +28,7 @@ dependencies = [
 [[package]]
 name = "dojo_cairo_test"
 version = "1.0.0-rc.0"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.0.1#d7335e6f5c76a1dda887ec00c594c2c019b4a05f"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.0.3#c65c25788d900325fa5e6e9d464da633cfabc468"
 dependencies = [
  "dojo",
 ]
