@@ -1,7 +1,7 @@
 {
   "world": {
-    "class_hash": "0x79d9ce84b97bcc2a631996c3100d57966fc2f5b061fb1ec4dfd0040976bcac6",
-    "address": "0x7f2e83a348505cdffc89cc89518ffc26277bffa4bd9fb225633fa2311308afa",
+    "class_hash": "0x45575a88cc5cef1e444c77ce60b7b4c9e73a01cbbe20926d5a4c72a94011410",
+    "address": "0x385b375729599785931a46a17cf3101288e97d9c1fbdcca58fb5dbcb45c89ca",
     "seed": "arcade",
     "name": "Cartridge World",
     "entrypoints": [
@@ -92,6 +92,10 @@
           {
             "name": "metadata_uri",
             "type": "core::byte_array::ByteArray"
+          },
+          {
+            "name": "metadata_hash",
+            "type": "core::felt252"
           }
         ]
       },
@@ -1002,6 +1006,11 @@
             "name": "uri",
             "type": "core::byte_array::ByteArray",
             "kind": "data"
+          },
+          {
+            "name": "hash",
+            "type": "core::felt252",
+            "kind": "data"
           }
         ]
       },
@@ -1243,230 +1252,8 @@
   },
   "contracts": [
     {
-      "address": "0x490e67f5aed3498e7c5b3ff1614f90e6ea33b95b9924878278f8a168bedc06a",
-      "class_hash": "0x1411c001996f2ba10ce3953cd56ac90ace486dafd746cde530888514ee88825",
-      "abi": [
-        {
-          "type": "impl",
-          "name": "Pinner__ContractImpl",
-          "interface_name": "dojo::contract::interface::IContract"
-        },
-        {
-          "type": "interface",
-          "name": "dojo::contract::interface::IContract",
-          "items": []
-        },
-        {
-          "type": "impl",
-          "name": "Pinner__DeployedContractImpl",
-          "interface_name": "dojo::meta::interface::IDeployedResource"
-        },
-        {
-          "type": "struct",
-          "name": "core::byte_array::ByteArray",
-          "members": [
-            {
-              "name": "data",
-              "type": "core::array::Array::<core::bytes_31::bytes31>"
-            },
-            {
-              "name": "pending_word",
-              "type": "core::felt252"
-            },
-            {
-              "name": "pending_word_len",
-              "type": "core::integer::u32"
-            }
-          ]
-        },
-        {
-          "type": "interface",
-          "name": "dojo::meta::interface::IDeployedResource",
-          "items": [
-            {
-              "type": "function",
-              "name": "dojo_name",
-              "inputs": [],
-              "outputs": [
-                {
-                  "type": "core::byte_array::ByteArray"
-                }
-              ],
-              "state_mutability": "view"
-            }
-          ]
-        },
-        {
-          "type": "impl",
-          "name": "PinnerImpl",
-          "interface_name": "arcade::systems::pinner::IPinner"
-        },
-        {
-          "type": "interface",
-          "name": "arcade::systems::pinner::IPinner",
-          "items": [
-            {
-              "type": "function",
-              "name": "pin",
-              "inputs": [
-                {
-                  "name": "achievement_id",
-                  "type": "core::felt252"
-                }
-              ],
-              "outputs": [],
-              "state_mutability": "view"
-            },
-            {
-              "type": "function",
-              "name": "unpin",
-              "inputs": [
-                {
-                  "name": "achievement_id",
-                  "type": "core::felt252"
-                }
-              ],
-              "outputs": [],
-              "state_mutability": "view"
-            }
-          ]
-        },
-        {
-          "type": "function",
-          "name": "dojo_init",
-          "inputs": [],
-          "outputs": [],
-          "state_mutability": "view"
-        },
-        {
-          "type": "impl",
-          "name": "WorldProviderImpl",
-          "interface_name": "dojo::contract::components::world_provider::IWorldProvider"
-        },
-        {
-          "type": "struct",
-          "name": "dojo::world::iworld::IWorldDispatcher",
-          "members": [
-            {
-              "name": "contract_address",
-              "type": "core::starknet::contract_address::ContractAddress"
-            }
-          ]
-        },
-        {
-          "type": "interface",
-          "name": "dojo::contract::components::world_provider::IWorldProvider",
-          "items": [
-            {
-              "type": "function",
-              "name": "world_dispatcher",
-              "inputs": [],
-              "outputs": [
-                {
-                  "type": "dojo::world::iworld::IWorldDispatcher"
-                }
-              ],
-              "state_mutability": "view"
-            }
-          ]
-        },
-        {
-          "type": "impl",
-          "name": "UpgradeableImpl",
-          "interface_name": "dojo::contract::components::upgradeable::IUpgradeable"
-        },
-        {
-          "type": "interface",
-          "name": "dojo::contract::components::upgradeable::IUpgradeable",
-          "items": [
-            {
-              "type": "function",
-              "name": "upgrade",
-              "inputs": [
-                {
-                  "name": "new_class_hash",
-                  "type": "core::starknet::class_hash::ClassHash"
-                }
-              ],
-              "outputs": [],
-              "state_mutability": "external"
-            }
-          ]
-        },
-        {
-          "type": "constructor",
-          "name": "constructor",
-          "inputs": []
-        },
-        {
-          "type": "event",
-          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
-          "kind": "struct",
-          "members": [
-            {
-              "name": "class_hash",
-              "type": "core::starknet::class_hash::ClassHash",
-              "kind": "data"
-            }
-          ]
-        },
-        {
-          "type": "event",
-          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
-          "kind": "enum",
-          "variants": [
-            {
-              "name": "Upgraded",
-              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
-              "kind": "nested"
-            }
-          ]
-        },
-        {
-          "type": "event",
-          "name": "dojo::contract::components::world_provider::world_provider_cpt::Event",
-          "kind": "enum",
-          "variants": []
-        },
-        {
-          "type": "event",
-          "name": "achievement::components::pinnable::PinnableComponent::Event",
-          "kind": "enum",
-          "variants": []
-        },
-        {
-          "type": "event",
-          "name": "arcade::systems::pinner::Pinner::Event",
-          "kind": "enum",
-          "variants": [
-            {
-              "name": "UpgradeableEvent",
-              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
-              "kind": "nested"
-            },
-            {
-              "name": "WorldProviderEvent",
-              "type": "dojo::contract::components::world_provider::world_provider_cpt::Event",
-              "kind": "nested"
-            },
-            {
-              "name": "PinnableEvent",
-              "type": "achievement::components::pinnable::PinnableComponent::Event",
-              "kind": "flat"
-            }
-          ]
-        }
-      ],
-      "init_calldata": [],
-      "tag": "ARCADE-Pinner",
-      "selector": "0x31f65cff5a1a8ec1430aaf76958f8f3e621846763aa047828df543ee3feec93",
-      "systems": [
-        "upgrade"
-      ]
-    },
-    {
-      "address": "0x10eaf49256a4a7a43f84e9f3b04a18ba7776d0b9ba3c24a643ed1ebdc16b20",
-      "class_hash": "0x13e69ce8dcc6f595e55cff97d8845598310799b11eae9b8e82e6bbf90375afd",
+      "address": "0x574699971f23a9d40eb5ce9b078854386f0db3b46988d90ff7a1fd18ee15e93",
+      "class_hash": "0x7ae3d47f39c52d66433e1cb161cf6027245b81251f69d2f05882cb96103277d",
       "abi": [
         {
           "type": "impl",
@@ -1567,6 +1354,30 @@
           "type": "interface",
           "name": "arcade::systems::registry::IRegistry",
           "items": [
+            {
+              "type": "function",
+              "name": "pin",
+              "inputs": [
+                {
+                  "name": "achievement_id",
+                  "type": "core::felt252"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "view"
+            },
+            {
+              "type": "function",
+              "name": "unpin",
+              "inputs": [
+                {
+                  "name": "achievement_id",
+                  "type": "core::felt252"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "view"
+            },
             {
               "type": "function",
               "name": "register_game",
@@ -2023,6 +1834,12 @@
         },
         {
           "type": "event",
+          "name": "achievement::components::pinnable::PinnableComponent::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
           "name": "arcade::systems::registry::Registry::Event",
           "kind": "enum",
           "variants": [
@@ -2050,6 +1867,11 @@
               "name": "TrackableEvent",
               "type": "registry::components::trackable::TrackableComponent::Event",
               "kind": "flat"
+            },
+            {
+              "name": "PinnableEvent",
+              "type": "achievement::components::pinnable::PinnableComponent::Event",
+              "kind": "flat"
             }
           ]
         }
@@ -2064,7 +1886,7 @@
       ]
     },
     {
-      "address": "0x5658b002b30df4f33715936e72ab95bf881399d3fe1e0e24656fc1aa26991c1",
+      "address": "0x13fc6504be0dbe9bfcd127208822e32334887ee4e3c7366bb356e0eaf0e438a",
       "class_hash": "0xeff274bcfc8782f81351d52a6c0809135c315159815019ffff5122410cf19f",
       "abi": [
         {
@@ -2345,7 +2167,7 @@
       ]
     },
     {
-      "address": "0x7e02509b8033a924f2fd06434a0fb08337b847ce035c987dfd2abb77856f438",
+      "address": "0x63a6cdd3722036859b1d3650d8b2ff9de8ede1a1d6406546a23a7a8c32bbc48",
       "class_hash": "0x352e56826f28843dde3c5814efe4ac5098e3514d59a28a14315e18280db6afe",
       "abi": [
         {
@@ -2913,7 +2735,7 @@
       ]
     },
     {
-      "address": "0x73d2533f3cc0d79a0096cfa127c76fa5592bd0416bef89841a1dbb6816db026",
+      "address": "0x764c8b778e11a48cd6c6f626eaa1b515c272a3ee3c52de2b13bd10969afec38",
       "class_hash": "0x580ba5d9a580a061630f436f0565dc5bb048f5daee84d79741fda5ce765c2f",
       "abi": [
         {
