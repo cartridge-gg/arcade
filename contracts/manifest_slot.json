@@ -1252,8 +1252,8 @@
   },
   "contracts": [
     {
-      "address": "0x574699971f23a9d40eb5ce9b078854386f0db3b46988d90ff7a1fd18ee15e93",
-      "class_hash": "0x7ae3d47f39c52d66433e1cb161cf6027245b81251f69d2f05882cb96103277d",
+      "address": "0x1b6ffe59b903e633e87ef0f22aa59902efe6c3cea2b45a9543e4bc6329effda",
+      "class_hash": "0x14fb684a4dee1fb56a15dc5faa4f2c1df6d22b4ad86576223b21806c1d06c3f",
       "abi": [
         {
           "type": "impl",
@@ -1323,34 +1323,6 @@
           "interface_name": "arcade::systems::registry::IRegistry"
         },
         {
-          "type": "enum",
-          "name": "core::option::Option::<core::felt252>",
-          "variants": [
-            {
-              "name": "Some",
-              "type": "core::felt252"
-            },
-            {
-              "name": "None",
-              "type": "()"
-            }
-          ]
-        },
-        {
-          "type": "enum",
-          "name": "core::option::Option::<core::byte_array::ByteArray>",
-          "variants": [
-            {
-              "name": "Some",
-              "type": "core::byte_array::ByteArray"
-            },
-            {
-              "name": "None",
-              "type": "()"
-            }
-          ]
-        },
-        {
           "type": "interface",
           "name": "arcade::systems::registry::IRegistry",
           "items": [
@@ -1396,43 +1368,43 @@
                 },
                 {
                   "name": "color",
-                  "type": "core::option::Option::<core::felt252>"
+                  "type": "core::felt252"
                 },
                 {
                   "name": "name",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "description",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "image",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "banner",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "discord",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "telegram",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "twitter",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "youtube",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "website",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 }
               ],
               "outputs": [],
@@ -1452,43 +1424,43 @@
                 },
                 {
                   "name": "color",
-                  "type": "core::option::Option::<core::felt252>"
+                  "type": "core::felt252"
                 },
                 {
                   "name": "name",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "description",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "image",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "banner",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "discord",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "telegram",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "twitter",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "youtube",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "website",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 }
               ],
               "outputs": [],
@@ -1881,7 +1853,9 @@
       ],
       "tag": "ARCADE-Registry",
       "selector": "0x54d3bcd441104e039ceaec4a413e72de393b65f79d1df74dc3346dc7f861173",
-      "systems": ["upgrade"]
+      "systems": [
+        "upgrade"
+      ]
     },
     {
       "address": "0x13fc6504be0dbe9bfcd127208822e32334887ee4e3c7366bb356e0eaf0e438a",
@@ -2160,15 +2134,17 @@
       "init_calldata": [],
       "tag": "ARCADE-Slot",
       "selector": "0x16361cb59732e8b56d69550297b7d8f86c6d1be2fc71b5dde135aeb1d16f3f7",
-      "systems": ["upgrade"]
+      "systems": [
+        "upgrade"
+      ]
     },
     {
-      "address": "0x63a6cdd3722036859b1d3650d8b2ff9de8ede1a1d6406546a23a7a8c32bbc48",
-      "class_hash": "0x352e56826f28843dde3c5814efe4ac5098e3514d59a28a14315e18280db6afe",
+      "address": "0x73e3dcc0388e307032e1ba2e2db407336495bca5bbc5c03b419df5456f442a8",
+      "class_hash": "0x6d0e156b1f19f6ec14ce9d80b4fa04c9704a568c81521ae047082327f46a831",
       "abi": [
         {
           "type": "impl",
-          "name": "Society__ContractImpl",
+          "name": "Social__ContractImpl",
           "interface_name": "dojo::contract::interface::IContract"
         },
         {
@@ -2178,7 +2154,7 @@
         },
         {
           "type": "impl",
-          "name": "Society__DeployedContractImpl",
+          "name": "Social__DeployedContractImpl",
           "interface_name": "dojo::meta::interface::IDeployedResource"
         },
         {
@@ -2218,36 +2194,8 @@
         },
         {
           "type": "impl",
-          "name": "SocietyImpl",
-          "interface_name": "arcade::systems::society::ISociety"
-        },
-        {
-          "type": "enum",
-          "name": "core::option::Option::<core::felt252>",
-          "variants": [
-            {
-              "name": "Some",
-              "type": "core::felt252"
-            },
-            {
-              "name": "None",
-              "type": "()"
-            }
-          ]
-        },
-        {
-          "type": "enum",
-          "name": "core::option::Option::<core::byte_array::ByteArray>",
-          "variants": [
-            {
-              "name": "Some",
-              "type": "core::byte_array::ByteArray"
-            },
-            {
-              "name": "None",
-              "type": "()"
-            }
-          ]
+          "name": "SocialImpl",
+          "interface_name": "arcade::systems::social::ISocial"
         },
         {
           "type": "enum",
@@ -2265,7 +2213,7 @@
         },
         {
           "type": "interface",
-          "name": "arcade::systems::society::ISociety",
+          "name": "arcade::systems::social::ISocial",
           "items": [
             {
               "type": "function",
@@ -2297,43 +2245,43 @@
               "inputs": [
                 {
                   "name": "color",
-                  "type": "core::option::Option::<core::felt252>"
+                  "type": "core::felt252"
                 },
                 {
                   "name": "name",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "description",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "image",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "banner",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "discord",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "telegram",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "twitter",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "youtube",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "website",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 }
               ],
               "outputs": [],
@@ -2426,43 +2374,43 @@
               "inputs": [
                 {
                   "name": "color",
-                  "type": "core::option::Option::<core::felt252>"
+                  "type": "core::felt252"
                 },
                 {
                   "name": "name",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "description",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "image",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "banner",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "discord",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "telegram",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "twitter",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "youtube",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 },
                 {
                   "name": "website",
-                  "type": "core::option::Option::<core::byte_array::ByteArray>"
+                  "type": "core::byte_array::ByteArray"
                 }
               ],
               "outputs": [],
@@ -2674,25 +2622,25 @@
         },
         {
           "type": "event",
-          "name": "society::components::allianceable::AllianceableComponent::Event",
+          "name": "social::components::allianceable::AllianceableComponent::Event",
           "kind": "enum",
           "variants": []
         },
         {
           "type": "event",
-          "name": "society::components::followable::FollowableComponent::Event",
+          "name": "social::components::followable::FollowableComponent::Event",
           "kind": "enum",
           "variants": []
         },
         {
           "type": "event",
-          "name": "society::components::guildable::GuildableComponent::Event",
+          "name": "social::components::guildable::GuildableComponent::Event",
           "kind": "enum",
           "variants": []
         },
         {
           "type": "event",
-          "name": "arcade::systems::society::Society::Event",
+          "name": "arcade::systems::social::Social::Event",
           "kind": "enum",
           "variants": [
             {
@@ -2707,26 +2655,28 @@
             },
             {
               "name": "AllianceableEvent",
-              "type": "society::components::allianceable::AllianceableComponent::Event",
+              "type": "social::components::allianceable::AllianceableComponent::Event",
               "kind": "flat"
             },
             {
               "name": "FollowableEvent",
-              "type": "society::components::followable::FollowableComponent::Event",
+              "type": "social::components::followable::FollowableComponent::Event",
               "kind": "flat"
             },
             {
               "name": "GuildableEvent",
-              "type": "society::components::guildable::GuildableComponent::Event",
+              "type": "social::components::guildable::GuildableComponent::Event",
               "kind": "flat"
             }
           ]
         }
       ],
       "init_calldata": [],
-      "tag": "ARCADE-Society",
-      "selector": "0x11d3443ddda56afc016a818156b817be5668888312fafd0e31705f1120eddc1",
-      "systems": ["upgrade"]
+      "tag": "ARCADE-Social",
+      "selector": "0x28532a65d3bfdb030133a56031e467c489058fee53a3bd903adc719735aa6c5",
+      "systems": [
+        "upgrade"
+      ]
     },
     {
       "address": "0x764c8b778e11a48cd6c6f626eaa1b515c272a3ee3c52de2b13bd10969afec38",
@@ -2921,7 +2871,9 @@
       "init_calldata": [],
       "tag": "ARCADE-Wallet",
       "selector": "0x69ba9525fdd6458dfaea7f06bcfd0cf5fef14d66c5516cf8548c2e2b845c6a5",
-      "systems": ["upgrade"]
+      "systems": [
+        "upgrade"
+      ]
     }
   ],
   "models": [
@@ -2945,7 +2897,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x465212d5a289fbf8bf5eb122866b7a41dcfe1e369bca5a90bc9657cfb849676",
+      "class_hash": "0x7df003249b5e6e8245535a62572e64cc5e659bbf0dfd8371a7535f2d5e35fcf",
       "tag": "ARCADE-Alliance",
       "selector": "0x74a88ab0bed983c65d7e57761329312c125ef0be4ef7889f560153000132866"
     },
@@ -2975,13 +2927,13 @@
     },
     {
       "members": [],
-      "class_hash": "0x70ef31c81bda95eea90a15e2156deea23537ad9d13fb29cfbafae65ea9bd5b8",
+      "class_hash": "0x1185b7a812122ae5f379da16f06cd9fcd04c2772f7175d50b13540f4989c1fc",
       "tag": "ARCADE-Guild",
       "selector": "0x95501f151f575b4fab06c5ceb7237739dd0608982727cbc226273aecf006aa"
     },
     {
       "members": [],
-      "class_hash": "0x7b293a8785e51acba3c0eb8ed8356bbd40700d7f5b55e8fe8d3b8de613b512a",
+      "class_hash": "0x4a047a959c45cda7b6e9abced79278c26c08413a829e15165004dc964749678",
       "tag": "ARCADE-Member",
       "selector": "0x7b9b4b91d2d7823ac5c041c32867f856e6393905bedb2c4b7f58d56bf13ec43"
     },
@@ -3007,7 +2959,7 @@
   "events": [
     {
       "members": [],
-      "class_hash": "0x53ac068c49f133ab7ddd4c0fef626a8fa94eb46d113b37abd8c2f3f9738e31e",
+      "class_hash": "0x1d83651f32df4a5e3a1c8ef52c8f77fc9b99463c41246839203d11a54c8e631",
       "tag": "ARCADE-Follow",
       "selector": "0x38866790c8a50b1c2d43786d8d06856b7ab65ce7a59e136bc47fbae18b147f1"
     },

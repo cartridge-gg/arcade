@@ -19,7 +19,7 @@ default = "ARCADE"
 ]
 
 [writers]
-"ARCADE" = ["ARCADE-Registry", "ARCADE-Slot", "ARCADE-Society", "ARCADE-Wallet"]
+"ARCADE" = ["ARCADE-Registry", "ARCADE-Slot", "ARCADE-Social", "ARCADE-Wallet"]
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/arcade/katana"

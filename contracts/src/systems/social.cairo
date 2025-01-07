@@ -1,7 +1,7 @@
 // Interfaces
 
 #[starknet::interface]
-trait ISociety<TContractState> {
+trait ISocial<TContractState> {
     fn follow(self: @TContractState, target: felt252,);
     fn unfollow(self: @TContractState, target: felt252,);
     fn create_alliance(
@@ -53,16 +53,16 @@ trait ISociety<TContractState> {
 // Contracts
 
 #[dojo::contract]
-mod Society {
+mod Social {
     // Dojo imports
 
     use dojo::world::WorldStorage;
 
     // Component imports
 
-    use society::components::allianceable::AllianceableComponent;
-    use society::components::followable::FollowableComponent;
-    use society::components::guildable::GuildableComponent;
+    use social::components::allianceable::AllianceableComponent;
+    use social::components::followable::FollowableComponent;
+    use social::components::guildable::GuildableComponent;
 
     // Internal imports
 
@@ -70,7 +70,7 @@ mod Society {
 
     // Local imports
 
-    use super::ISociety;
+    use super::ISocial;
 
     // Components
 
@@ -109,7 +109,7 @@ mod Society {
     // Implementations
 
     #[abi(embed_v0)]
-    impl SocietyImpl of ISociety<ContractState> {
+    impl SocialImpl of ISocial<ContractState> {
         fn follow(self: @ContractState, target: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();

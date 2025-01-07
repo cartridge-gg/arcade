@@ -9,7 +9,7 @@ import EventEmitter from "eventemitter3";
 import { Account, AccountInterface, AllowArray, Call } from "starknet";
 import { NAMESPACE } from "../constants";
 import { TransactionType } from "./types";
-import { Society } from "./society";
+import { Social } from "./social";
 import { Registry } from "./registry";
 import { Slot } from "./slot";
 export { TransactionType };
@@ -49,7 +49,7 @@ function ApplyEventEmitter<T extends new (...args: any[]) => {}>(Base: T) {
 export const DojoEmitterProvider = ApplyEventEmitter(DojoProvider);
 
 export class ArcadeProvider extends DojoEmitterProvider {
-  public society: Society;
+  public social: Social;
   public registry: Registry;
   public slot: Slot;
 
@@ -68,7 +68,7 @@ export class ArcadeProvider extends DojoEmitterProvider {
       return worldAddress;
     };
 
-    this.society = new Society(manifest, this);
+    this.social = new Social(manifest, this);
     this.registry = new Registry(manifest, this);
     this.slot = new Slot(manifest, this);
   }

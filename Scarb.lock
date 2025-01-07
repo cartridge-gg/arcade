@@ -55,7 +55,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "society"
+name = "social"
 version = "0.0.0"
 dependencies = [
  "dojo",

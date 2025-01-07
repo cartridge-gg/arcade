@@ -18,7 +18,7 @@ dependencies = [
  "dojo_cairo_test",
  "provider",
  "registry",
- "society",
+ "social",
 ]
 
 [[package]]
@@ -64,7 +64,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "society"
+name = "social"
 version = "0.0.0"
 dependencies = [
  "dojo",

@@ -1,5 +1,5 @@
 [package]
-name = "society"
+name = "social"
 version.workspace = true
 
 [dependencies]

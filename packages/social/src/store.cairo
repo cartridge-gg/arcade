@@ -12,10 +12,10 @@ use dojo::event::EventStorage;
 
 // Models imports
 
-use society::models::alliance::Alliance;
-use society::models::guild::Guild;
-use society::models::member::Member;
-use society::events::follow::{Follow, FollowTrait};
+use social::models::alliance::Alliance;
+use social::models::guild::Guild;
+use social::models::member::Member;
+use social::events::follow::{Follow, FollowTrait};
 
 // Structs
 

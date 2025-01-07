@@ -170,7 +170,7 @@ export interface GameValue {
   owner: BigNumberish;
 }
 
-// Type definition for `society::models::index::Alliance` struct
+// Type definition for `social::models::index::Alliance` struct
 export interface Alliance {
   id: BigNumberish;
   open: boolean;
@@ -180,7 +180,7 @@ export interface Alliance {
   socials: string;
 }
 
-// Type definition for `society::models::index::AllianceValue` struct
+// Type definition for `social::models::index::AllianceValue` struct
 export interface AllianceValue {
   open: boolean;
   free: boolean;
@@ -189,7 +189,7 @@ export interface AllianceValue {
   socials: string;
 }
 
-// Type definition for `society::models::index::Guild` struct
+// Type definition for `social::models::index::Guild` struct
 export interface Guild {
   id: BigNumberish;
   open: boolean;
@@ -202,7 +202,7 @@ export interface Guild {
   socials: string;
 }
 
-// Type definition for `society::models::index::GuildValue` struct
+// Type definition for `social::models::index::GuildValue` struct
 export interface GuildValue {
   open: boolean;
   free: boolean;
@@ -214,7 +214,7 @@ export interface GuildValue {
   socials: string;
 }
 
-// Type definition for `society::models::index::Member` struct
+// Type definition for `social::models::index::Member` struct
 export interface Member {
   id: BigNumberish;
   role: BigNumberish;
@@ -222,7 +222,7 @@ export interface Member {
   pending_guild_id: BigNumberish;
 }
 
-// Type definition for `society::models::index::MemberValue` struct
+// Type definition for `social::models::index::MemberValue` struct
 export interface MemberValue {
   role: BigNumberish;
   guild_id: BigNumberish;
@@ -256,7 +256,7 @@ export interface SchemaType extends ISchemaType {
     Game: WithFieldOrder<Game>;
     GameValue: WithFieldOrder<GameValue>;
   };
-  society: {
+  social: {
     Alliance: WithFieldOrder<Alliance>;
     AllianceValue: WithFieldOrder<AllianceValue>;
     Guild: WithFieldOrder<Guild>;
@@ -440,7 +440,7 @@ export const schema: SchemaType = {
       owner: 0,
     },
   },
-  society: {
+  social: {
     Alliance: {
       fieldOrder: ["id", "open", "free", "guild_count", "metadata", "socials"],
       id: 0,
@@ -527,10 +527,10 @@ export enum ModelsMapping {
   AchievementValue = "registry-AchievementValue",
   Game = "registry-Game",
   GameValue = "registry-GameValue",
-  Alliance = "society-Alliance",
-  AllianceValue = "society-AllianceValue",
-  Guild = "society-Guild",
-  GuildValue = "society-GuildValue",
-  Member = "society-Member",
-  MemberValue = "society-MemberValue",
+  Alliance = "social-Alliance",
+  AllianceValue = "social-AllianceValue",
+  Guild = "social-Guild",
+  GuildValue = "social-GuildValue",
+  Member = "social-Member",
+  MemberValue = "social-MemberValue",
 }

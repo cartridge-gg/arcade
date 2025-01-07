@@ -22,8 +22,8 @@ mod setup {
     use controller::models::{index as controller_models};
     use provider::models::{index as provider_models};
     use registry::models::{index as registry_models};
-    use society::models::{index as society_models};
-    use society::events::{index as society_events};
+    use social::models::{index as social_models};
+    use social::events::{index as social_events};
     use achievement::events::{index as achievement_events};
 
     // Internal imports
@@ -31,7 +31,7 @@ mod setup {
     use arcade::constants::NAMESPACE;
     use arcade::systems::registry::{Registry, IRegistryDispatcher};
     use arcade::systems::slot::{Slot, ISlotDispatcher};
-    use arcade::systems::society::{Society, ISocietyDispatcher};
+    use arcade::systems::social::{Social, ISocialDispatcher};
     use arcade::systems::wallet::{Wallet, IWalletDispatcher};
 
     // Constant
@@ -48,7 +48,7 @@ mod setup {
     struct Systems {
         registry: IRegistryDispatcher,
         slot: ISlotDispatcher,
-        society: ISocietyDispatcher,
+        social: ISocialDispatcher,
         wallet: IWalletDispatcher,
     }
 
@@ -71,14 +71,14 @@ mod setup {
                 TestResource::Model(registry_models::m_Access::TEST_CLASS_HASH),
                 TestResource::Model(registry_models::m_Achievement::TEST_CLASS_HASH),
                 TestResource::Model(registry_models::m_Game::TEST_CLASS_HASH),
-                TestResource::Model(society_models::m_Alliance::TEST_CLASS_HASH),
-                TestResource::Model(society_models::m_Guild::TEST_CLASS_HASH),
-                TestResource::Model(society_models::m_Member::TEST_CLASS_HASH),
-                TestResource::Event(society_events::e_Follow::TEST_CLASS_HASH),
+                TestResource::Model(social_models::m_Alliance::TEST_CLASS_HASH),
+                TestResource::Model(social_models::m_Guild::TEST_CLASS_HASH),
+                TestResource::Model(social_models::m_Member::TEST_CLASS_HASH),
+                TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH),
                 TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH),
                 TestResource::Contract(Registry::TEST_CLASS_HASH),
                 TestResource::Contract(Slot::TEST_CLASS_HASH),
-                TestResource::Contract(Society::TEST_CLASS_HASH),
+                TestResource::Contract(Social::TEST_CLASS_HASH),
                 TestResource::Contract(Wallet::TEST_CLASS_HASH),
             ].span()
         }
@@ -92,7 +92,7 @@ mod setup {
             ContractDefTrait::new(@NAMESPACE(), @"Slot")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(array![].span()),
-            ContractDefTrait::new(@NAMESPACE(), @"Society")
+            ContractDefTrait::new(@NAMESPACE(), @"Social")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span()),
             ContractDefTrait::new(@NAMESPACE(), @"Wallet")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span()),
@@ -109,12 +109,12 @@ mod setup {
         // [Setup] Systems
         let (registry_address, _) = world.dns(@"Registry").unwrap();
         let (slot_address, _) = world.dns(@"Slot").unwrap();
-        let (society_address, _) = world.dns(@"Society").unwrap();
+        let (social_address, _) = world.dns(@"Social").unwrap();
         let (wallet_address, _) = world.dns(@"Wallet").unwrap();
         let systems = Systems {
             registry: IRegistryDispatcher { contract_address: registry_address },
             slot: ISlotDispatcher { contract_address: slot_address },
-            society: ISocietyDispatcher { contract_address: society_address },
+            social: ISocialDispatcher { contract_address: social_address },
             wallet: IWalletDispatcher { contract_address: wallet_address },
         };
 

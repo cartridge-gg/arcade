@@ -2,10 +2,10 @@ import { DojoProvider } from "@dojoengine/core";
 import { BigNumberish, ByteArray } from "starknet";
 
 export function setupWorld(provider: DojoProvider) {
-  const Society_follow = async (target: BigNumberish) => {
+  const Social_follow = async (target: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "follow",
         calldata: [target],
       });
@@ -14,10 +14,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_unfollow = async (target: BigNumberish) => {
+  const Social_unfollow = async (target: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "unfollow",
         calldata: [target],
       });
@@ -26,7 +26,7 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_createAlliance = async (
+  const Social_createAlliance = async (
     color: BigNumberish,
     name: ByteArray,
     description: ByteArray,
@@ -40,7 +40,7 @@ export function setupWorld(provider: DojoProvider) {
   ) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "create_alliance",
         calldata: [color, name, description, image, banner, discord, telegram, twitter, youtube, website],
       });
@@ -49,10 +49,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_openAlliance = async (free: boolean) => {
+  const Social_openAlliance = async (free: boolean) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "open_alliance",
         calldata: [free],
       });
@@ -61,10 +61,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_closeAlliance = async () => {
+  const Social_closeAlliance = async () => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "close_alliance",
         calldata: [],
       });
@@ -73,10 +73,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_crownGuild = async (guildId: BigNumberish) => {
+  const Social_crownGuild = async (guildId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "crown_guild",
         calldata: [guildId],
       });
@@ -85,10 +85,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_hireGuild = async (guildId: BigNumberish) => {
+  const Social_hireGuild = async (guildId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "hire_guild",
         calldata: [guildId],
       });
@@ -97,10 +97,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_fireGuild = async (guildId: BigNumberish) => {
+  const Social_fireGuild = async (guildId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "fire_guild",
         calldata: [guildId],
       });
@@ -109,10 +109,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_requestAlliance = async (allianceId: BigNumberish) => {
+  const Social_requestAlliance = async (allianceId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "request_alliance",
         calldata: [allianceId],
       });
@@ -121,10 +121,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_cancelAlliance = async () => {
+  const Social_cancelAlliance = async () => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "cancel_alliance",
         calldata: [],
       });
@@ -133,10 +133,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_leaveAlliance = async () => {
+  const Social_leaveAlliance = async () => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "leave_alliance",
         calldata: [],
       });
@@ -145,7 +145,7 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_createGuild = async (
+  const Social_createGuild = async (
     color: BigNumberish,
     name: ByteArray,
     description: ByteArray,
@@ -159,7 +159,7 @@ export function setupWorld(provider: DojoProvider) {
   ) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "create_guild",
         calldata: [color, name, description, image, banner, discord, telegram, twitter, youtube, website],
       });
@@ -168,10 +168,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_openGuild = async (free: boolean) => {
+  const Social_openGuild = async (free: boolean) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "open_guild",
         calldata: [free],
       });
@@ -180,10 +180,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_closeGuild = async () => {
+  const Social_closeGuild = async () => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "close_guild",
         calldata: [],
       });
@@ -192,10 +192,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_crownMember = async (memberId: BigNumberish) => {
+  const Social_crownMember = async (memberId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "crown_member",
         calldata: [memberId],
       });
@@ -204,10 +204,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_promoteMember = async (memberId: BigNumberish) => {
+  const Social_promoteMember = async (memberId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "promote_member",
         calldata: [memberId],
       });
@@ -216,10 +216,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_demoteMember = async (memberId: BigNumberish) => {
+  const Social_demoteMember = async (memberId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "demote_member",
         calldata: [memberId],
       });
@@ -228,10 +228,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_hireMember = async (memberId: BigNumberish) => {
+  const Social_hireMember = async (memberId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "hire_member",
         calldata: [memberId],
       });
@@ -240,10 +240,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_fireMember = async (memberId: BigNumberish) => {
+  const Social_fireMember = async (memberId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "fire_member",
         calldata: [memberId],
       });
@@ -252,10 +252,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_requestGuild = async (guildId: BigNumberish) => {
+  const Social_requestGuild = async (guildId: BigNumberish) => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "request_guild",
         calldata: [guildId],
       });
@@ -264,10 +264,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_cancelGuild = async () => {
+  const Social_cancelGuild = async () => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "cancel_guild",
         calldata: [],
       });
@@ -276,10 +276,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const Society_leaveGuild = async () => {
+  const Social_leaveGuild = async () => {
     try {
       return await provider.call("ARCADE", {
-        contractName: "Society",
+        contractName: "Social",
         entrypoint: "leave_guild",
         calldata: [],
       });
@@ -613,29 +613,29 @@ export function setupWorld(provider: DojoProvider) {
   };
 
   return {
-    Society: {
-      follow: Society_follow,
-      unfollow: Society_unfollow,
-      createAlliance: Society_createAlliance,
-      openAlliance: Society_openAlliance,
-      closeAlliance: Society_closeAlliance,
-      crownGuild: Society_crownGuild,
-      hireGuild: Society_hireGuild,
-      fireGuild: Society_fireGuild,
-      requestAlliance: Society_requestAlliance,
-      cancelAlliance: Society_cancelAlliance,
-      leaveAlliance: Society_leaveAlliance,
-      createGuild: Society_createGuild,
-      openGuild: Society_openGuild,
-      closeGuild: Society_closeGuild,
-      crownMember: Society_crownMember,
-      promoteMember: Society_promoteMember,
-      demoteMember: Society_demoteMember,
-      hireMember: Society_hireMember,
-      fireMember: Society_fireMember,
-      requestGuild: Society_requestGuild,
-      cancelGuild: Society_cancelGuild,
-      leaveGuild: Society_leaveGuild,
+    Social: {
+      follow: Social_follow,
+      unfollow: Social_unfollow,
+      createAlliance: Social_createAlliance,
+      openAlliance: Social_openAlliance,
+      closeAlliance: Social_closeAlliance,
+      crownGuild: Social_crownGuild,
+      hireGuild: Social_hireGuild,
+      fireGuild: Social_fireGuild,
+      requestAlliance: Social_requestAlliance,
+      cancelAlliance: Social_cancelAlliance,
+      leaveAlliance: Social_leaveAlliance,
+      createGuild: Social_createGuild,
+      openGuild: Social_openGuild,
+      closeGuild: Social_closeGuild,
+      crownMember: Social_crownMember,
+      promoteMember: Social_promoteMember,
+      demoteMember: Social_demoteMember,
+      hireMember: Social_hireMember,
+      fireMember: Social_fireMember,
+      requestGuild: Social_requestGuild,
+      cancelGuild: Social_cancelGuild,
+      leaveGuild: Social_leaveGuild,
     },
     Registry: {
       pin: Registry_pin,

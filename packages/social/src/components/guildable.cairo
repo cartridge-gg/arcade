@@ -12,10 +12,10 @@ mod GuildableComponent {
 
     // Internal imports
 
-    use society::store::{Store, StoreTrait};
-    use society::models::guild::{Guild, GuildTrait, GuildAssert};
-    use society::models::member::{Member, MemberTrait, MemberAssert};
-    use society::types::role::Role;
+    use social::store::{Store, StoreTrait};
+    use social::models::guild::{Guild, GuildTrait, GuildAssert};
+    use social::models::member::{Member, MemberTrait, MemberAssert};
+    use social::types::role::Role;
 
     // Storage
 

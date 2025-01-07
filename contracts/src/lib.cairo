@@ -3,7 +3,7 @@ mod constants;
 mod systems {
     mod registry;
     mod slot;
-    mod society;
+    mod social;
     mod wallet;
 }
 

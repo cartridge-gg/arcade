@@ -1,7 +1,7 @@
 // Internal imports
 
-use society::models::index::Member;
-use society::types::role::Role;
+use social::models::index::Member;
+use social::types::role::Role;
 
 // Errors
 

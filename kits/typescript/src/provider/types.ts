@@ -1,7 +1,7 @@
 import { Account, AccountInterface, BigNumberish, ByteArray } from "starknet";
 
 export enum TransactionType {
-  // Society
+  // Social
   FOLLOW = "follow",
   UNFOLLOW = "unfollow",
   CREATE_ALLIANCE = "create_alliance",
@@ -54,15 +54,15 @@ interface SystemSigner {
   signer: AccountInterface | Account;
 }
 
-export interface SocietyFollowProps extends SystemSigner {
+export interface SocialFollowProps extends SystemSigner {
   target: BigNumberish;
 }
 
-export interface SocietyUnfollowProps extends SystemSigner {
+export interface SocialUnfollowProps extends SystemSigner {
   target: BigNumberish;
 }
 
-export interface SocietyCreateAllianceProps extends SystemSigner {
+export interface SocialCreateAllianceProps extends SystemSigner {
   color: BigNumberish;
   name: ByteArray;
   description: ByteArray;
@@ -75,33 +75,33 @@ export interface SocietyCreateAllianceProps extends SystemSigner {
   website: ByteArray;
 }
 
-export interface SocietyOpenAllianceProps extends SystemSigner {
+export interface SocialOpenAllianceProps extends SystemSigner {
   free: boolean;
 }
 
-export interface SocietyCloseAllianceProps extends SystemSigner {}
+export interface SocialCloseAllianceProps extends SystemSigner {}
 
-export interface SocietyCrownGuildProps extends SystemSigner {
+export interface SocialCrownGuildProps extends SystemSigner {
   guildId: BigNumberish;
 }
 
-export interface SocietyHireGuildProps extends SystemSigner {
+export interface SocialHireGuildProps extends SystemSigner {
   guildId: BigNumberish;
 }
 
-export interface SocietyFireGuildProps extends SystemSigner {
+export interface SocialFireGuildProps extends SystemSigner {
   guildId: BigNumberish;
 }
 
-export interface SocietyRequestAllianceProps extends SystemSigner {
+export interface SocialRequestAllianceProps extends SystemSigner {
   allianceId: BigNumberish;
 }
 
-export interface SocietyCancelAllianceProps extends SystemSigner {}
+export interface SocialCancelAllianceProps extends SystemSigner {}
 
-export interface SocietyLeaveAllianceProps extends SystemSigner {}
+export interface SocialLeaveAllianceProps extends SystemSigner {}
 
-export interface SocietyCreateGuildProps extends SystemSigner {
+export interface SocialCreateGuildProps extends SystemSigner {
   color: BigNumberish;
   name: ByteArray;
   description: ByteArray;
@@ -114,39 +114,39 @@ export interface SocietyCreateGuildProps extends SystemSigner {
   website: ByteArray;
 }
 
-export interface SocietyOpenGuildProps extends SystemSigner {
+export interface SocialOpenGuildProps extends SystemSigner {
   free: boolean;
 }
 
-export interface SocietyCloseGuildProps extends SystemSigner {}
+export interface SocialCloseGuildProps extends SystemSigner {}
 
-export interface SocietyCrownMemberProps extends SystemSigner {
+export interface SocialCrownMemberProps extends SystemSigner {
   memberId: BigNumberish;
 }
 
-export interface SocietyPromoteMemberProps extends SystemSigner {
+export interface SocialPromoteMemberProps extends SystemSigner {
   memberId: BigNumberish;
 }
 
-export interface SocietyDemoteMemberProps extends SystemSigner {
+export interface SocialDemoteMemberProps extends SystemSigner {
   memberId: BigNumberish;
 }
 
-export interface SocietyHireMemberProps extends SystemSigner {
+export interface SocialHireMemberProps extends SystemSigner {
   memberId: BigNumberish;
 }
 
-export interface SocietyFireMemberProps extends SystemSigner {
+export interface SocialFireMemberProps extends SystemSigner {
   memberId: BigNumberish;
 }
 
-export interface SocietyRequestGuildProps extends SystemSigner {
+export interface SocialRequestGuildProps extends SystemSigner {
   guildId: BigNumberish;
 }
 
-export interface SocietyCancelGuildProps extends SystemSigner {}
+export interface SocialCancelGuildProps extends SystemSigner {}
 
-export interface SocietyLeaveGuildProps extends SystemSigner {}
+export interface SocialLeaveGuildProps extends SystemSigner {}
 
 export interface RegistryPinProps extends SystemSigner {
   achievementId: BigNumberish;

@@ -1,6 +1,6 @@
 // Internal imports
 
-use society::events::index::Follow;
+use social::events::index::Follow;
 
 // Errors
 
