@@ -6,16 +6,16 @@ trait ISociety<TContractState> {
     fn unfollow(self: @TContractState, target: felt252,);
     fn create_alliance(
         self: @TContractState,
-        color: Option<felt252>,
-        name: Option<ByteArray>,
-        description: Option<ByteArray>,
-        image: Option<ByteArray>,
-        banner: Option<ByteArray>,
-        discord: Option<ByteArray>,
-        telegram: Option<ByteArray>,
-        twitter: Option<ByteArray>,
-        youtube: Option<ByteArray>,
-        website: Option<ByteArray>
+        color: felt252,
+        name: ByteArray,
+        description: ByteArray,
+        image: ByteArray,
+        banner: ByteArray,
+        discord: ByteArray,
+        telegram: ByteArray,
+        twitter: ByteArray,
+        youtube: ByteArray,
+        website: ByteArray
     );
     fn open_alliance(self: @TContractState, free: bool);
     fn close_alliance(self: @TContractState);
@@ -27,16 +27,16 @@ trait ISociety<TContractState> {
     fn leave_alliance(self: @TContractState);
     fn create_guild(
         self: @TContractState,
-        color: Option<felt252>,
-        name: Option<ByteArray>,
-        description: Option<ByteArray>,
-        image: Option<ByteArray>,
-        banner: Option<ByteArray>,
-        discord: Option<ByteArray>,
-        telegram: Option<ByteArray>,
-        twitter: Option<ByteArray>,
-        youtube: Option<ByteArray>,
-        website: Option<ByteArray>
+        color: felt252,
+        name: ByteArray,
+        description: ByteArray,
+        image: ByteArray,
+        banner: ByteArray,
+        discord: ByteArray,
+        telegram: ByteArray,
+        twitter: ByteArray,
+        youtube: ByteArray,
+        website: ByteArray
     );
     fn open_guild(self: @TContractState, free: bool);
     fn close_guild(self: @TContractState);
@@ -126,16 +126,16 @@ mod Society {
 
         fn create_alliance(
             self: @ContractState,
-            color: Option<felt252>,
-            name: Option<ByteArray>,
-            description: Option<ByteArray>,
-            image: Option<ByteArray>,
-            banner: Option<ByteArray>,
-            discord: Option<ByteArray>,
-            telegram: Option<ByteArray>,
-            twitter: Option<ByteArray>,
-            youtube: Option<ByteArray>,
-            website: Option<ByteArray>,
+            color: felt252,
+            name: ByteArray,
+            description: ByteArray,
+            image: ByteArray,
+            banner: ByteArray,
+            discord: ByteArray,
+            telegram: ByteArray,
+            twitter: ByteArray,
+            youtube: ByteArray,
+            website: ByteArray,
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -144,16 +144,16 @@ mod Society {
                 .create(
                     world,
                     caller,
-                    color,
-                    name,
-                    description,
-                    image,
-                    banner,
-                    discord,
-                    telegram,
-                    twitter,
-                    youtube,
-                    website
+                    Option::Some(color),
+                    Option::Some(name),
+                    Option::Some(description),
+                    Option::Some(image),
+                    Option::Some(banner),
+                    Option::Some(discord),
+                    Option::Some(telegram),
+                    Option::Some(twitter),
+                    Option::Some(youtube),
+                    Option::Some(website),
                 );
         }
 
@@ -209,16 +209,16 @@ mod Society {
 
         fn create_guild(
             self: @ContractState,
-            color: Option<felt252>,
-            name: Option<ByteArray>,
-            description: Option<ByteArray>,
-            image: Option<ByteArray>,
-            banner: Option<ByteArray>,
-            discord: Option<ByteArray>,
-            telegram: Option<ByteArray>,
-            twitter: Option<ByteArray>,
-            youtube: Option<ByteArray>,
-            website: Option<ByteArray>,
+            color: felt252,
+            name: ByteArray,
+            description: ByteArray,
+            image: ByteArray,
+            banner: ByteArray,
+            discord: ByteArray,
+            telegram: ByteArray,
+            twitter: ByteArray,
+            youtube: ByteArray,
+            website: ByteArray,
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -227,16 +227,16 @@ mod Society {
                 .create(
                     world,
                     caller,
-                    color,
-                    name,
-                    description,
-                    image,
-                    banner,
-                    discord,
-                    telegram,
-                    twitter,
-                    youtube,
-                    website
+                    Option::Some(color),
+                    Option::Some(name),
+                    Option::Some(description),
+                    Option::Some(image),
+                    Option::Some(banner),
+                    Option::Some(discord),
+                    Option::Some(telegram),
+                    Option::Some(twitter),
+                    Option::Some(youtube),
+                    Option::Some(website),
                 );
         }
 
