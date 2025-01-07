@@ -2,10 +2,10 @@
 
 #[starknet::interface]
 trait ISocial<TContractState> {
-    fn follow(self: @TContractState, target: felt252,);
-    fn unfollow(self: @TContractState, target: felt252,);
+    fn follow(ref self: TContractState, target: felt252,);
+    fn unfollow(ref self: TContractState, target: felt252,);
     fn create_alliance(
-        self: @TContractState,
+        ref self: TContractState,
         color: felt252,
         name: ByteArray,
         description: ByteArray,
@@ -17,16 +17,16 @@ trait ISocial<TContractState> {
         youtube: ByteArray,
         website: ByteArray
     );
-    fn open_alliance(self: @TContractState, free: bool);
-    fn close_alliance(self: @TContractState);
-    fn crown_guild(self: @TContractState, guild_id: u32);
-    fn hire_guild(self: @TContractState, guild_id: u32);
-    fn fire_guild(self: @TContractState, guild_id: u32);
-    fn request_alliance(self: @TContractState, alliance_id: u32);
-    fn cancel_alliance(self: @TContractState);
-    fn leave_alliance(self: @TContractState);
+    fn open_alliance(ref self: TContractState, free: bool);
+    fn close_alliance(ref self: TContractState);
+    fn crown_guild(ref self: TContractState, guild_id: u32);
+    fn hire_guild(ref self: TContractState, guild_id: u32);
+    fn fire_guild(ref self: TContractState, guild_id: u32);
+    fn request_alliance(ref self: TContractState, alliance_id: u32);
+    fn cancel_alliance(ref self: TContractState);
+    fn leave_alliance(ref self: TContractState);
     fn create_guild(
-        self: @TContractState,
+        ref self: TContractState,
         color: felt252,
         name: ByteArray,
         description: ByteArray,
@@ -38,16 +38,16 @@ trait ISocial<TContractState> {
         youtube: ByteArray,
         website: ByteArray
     );
-    fn open_guild(self: @TContractState, free: bool);
-    fn close_guild(self: @TContractState);
-    fn crown_member(self: @TContractState, member_id: felt252);
-    fn promote_member(self: @TContractState, member_id: felt252);
-    fn demote_member(self: @TContractState, member_id: felt252);
-    fn hire_member(self: @TContractState, member_id: felt252);
-    fn fire_member(self: @TContractState, member_id: felt252);
-    fn request_guild(self: @TContractState, guild_id: u32);
-    fn cancel_guild(self: @TContractState);
-    fn leave_guild(self: @TContractState);
+    fn open_guild(ref self: TContractState, free: bool);
+    fn close_guild(ref self: TContractState);
+    fn crown_member(ref self: TContractState, member_id: felt252);
+    fn promote_member(ref self: TContractState, member_id: felt252);
+    fn demote_member(ref self: TContractState, member_id: felt252);
+    fn hire_member(ref self: TContractState, member_id: felt252);
+    fn fire_member(ref self: TContractState, member_id: felt252);
+    fn request_guild(ref self: TContractState, guild_id: u32);
+    fn cancel_guild(ref self: TContractState);
+    fn leave_guild(ref self: TContractState);
 }
 
 // Contracts
@@ -110,13 +110,13 @@ mod Social {
 
     #[abi(embed_v0)]
     impl SocialImpl of ISocial<ContractState> {
-        fn follow(self: @ContractState, target: felt252) {
+        fn follow(ref self: ContractState, target: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.followable.follow(world, caller, target);
         }
 
-        fn unfollow(self: @ContractState, target: felt252) {
+        fn unfollow(ref self: ContractState, target: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.followable.unfollow(world, caller, target);
@@ -125,7 +125,7 @@ mod Social {
         // Alliance
 
         fn create_alliance(
-            self: @ContractState,
+            ref self: ContractState,
             color: felt252,
             name: ByteArray,
             description: ByteArray,
@@ -157,49 +157,49 @@ mod Social {
                 );
         }
 
-        fn open_alliance(self: @ContractState, free: bool) {
+        fn open_alliance(ref self: ContractState, free: bool) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.open(world, caller, free);
         }
 
-        fn close_alliance(self: @ContractState) {
+        fn close_alliance(ref self: ContractState) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.close(world, caller);
         }
 
-        fn crown_guild(self: @ContractState, guild_id: u32) {
+        fn crown_guild(ref self: ContractState, guild_id: u32) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.crown(world, caller, guild_id);
         }
 
-        fn hire_guild(self: @ContractState, guild_id: u32) {
+        fn hire_guild(ref self: ContractState, guild_id: u32) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.hire(world, caller, guild_id);
         }
 
-        fn fire_guild(self: @ContractState, guild_id: u32) {
+        fn fire_guild(ref self: ContractState, guild_id: u32) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.fire(world, caller, guild_id);
         }
 
-        fn request_alliance(self: @ContractState, alliance_id: u32) {
+        fn request_alliance(ref self: ContractState, alliance_id: u32) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.request(world, caller, alliance_id);
         }
 
-        fn cancel_alliance(self: @ContractState) {
+        fn cancel_alliance(ref self: ContractState) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.cancel(world, caller);
         }
 
-        fn leave_alliance(self: @ContractState) {
+        fn leave_alliance(ref self: ContractState) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.allianceable.leave(world, caller);
@@ -208,7 +208,7 @@ mod Social {
         // Guild
 
         fn create_guild(
-            self: @ContractState,
+            ref self: ContractState,
             color: felt252,
             name: ByteArray,
             description: ByteArray,
@@ -240,61 +240,61 @@ mod Social {
                 );
         }
 
-        fn open_guild(self: @ContractState, free: bool) {
+        fn open_guild(ref self: ContractState, free: bool) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.open(world, caller, free);
         }
 
-        fn close_guild(self: @ContractState) {
+        fn close_guild(ref self: ContractState) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.close(world, caller);
         }
 
-        fn crown_member(self: @ContractState, member_id: felt252) {
+        fn crown_member(ref self: ContractState, member_id: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.crown(world, caller, member_id);
         }
 
-        fn promote_member(self: @ContractState, member_id: felt252) {
+        fn promote_member(ref self: ContractState, member_id: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.promote(world, caller, member_id);
         }
 
-        fn demote_member(self: @ContractState, member_id: felt252) {
+        fn demote_member(ref self: ContractState, member_id: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.demote(world, caller, member_id);
         }
 
-        fn hire_member(self: @ContractState, member_id: felt252) {
+        fn hire_member(ref self: ContractState, member_id: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.hire(world, caller, member_id);
         }
 
-        fn fire_member(self: @ContractState, member_id: felt252) {
+        fn fire_member(ref self: ContractState, member_id: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.fire(world, caller, member_id);
         }
 
-        fn request_guild(self: @ContractState, guild_id: u32) {
+        fn request_guild(ref self: ContractState, guild_id: u32) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.request(world, caller, guild_id);
         }
 
-        fn cancel_guild(self: @ContractState) {
+        fn cancel_guild(ref self: ContractState) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.cancel(world, caller);
         }
 
-        fn leave_guild(self: @ContractState) {
+        fn leave_guild(ref self: ContractState) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.guildable.leave(world, caller);

@@ -1,4 +1,4 @@
-import { Account, AccountInterface, BigNumberish, ByteArray } from "starknet";
+import { BigNumberish, ByteArray } from "starknet";
 
 export enum TransactionType {
   // Social
@@ -50,19 +50,15 @@ export enum TransactionType {
   FIRE = "fire",
 }
 
-interface SystemSigner {
-  signer: AccountInterface | Account;
-}
-
-export interface SocialFollowProps extends SystemSigner {
+export interface SocialFollowProps {
   target: BigNumberish;
 }
 
-export interface SocialUnfollowProps extends SystemSigner {
+export interface SocialUnfollowProps {
   target: BigNumberish;
 }
 
-export interface SocialCreateAllianceProps extends SystemSigner {
+export interface SocialCreateAllianceProps {
   color: BigNumberish;
   name: ByteArray;
   description: ByteArray;
@@ -75,33 +71,33 @@ export interface SocialCreateAllianceProps extends SystemSigner {
   website: ByteArray;
 }
 
-export interface SocialOpenAllianceProps extends SystemSigner {
+export interface SocialOpenAllianceProps {
   free: boolean;
 }
 
-export interface SocialCloseAllianceProps extends SystemSigner {}
+export interface SocialCloseAllianceProps {}
 
-export interface SocialCrownGuildProps extends SystemSigner {
+export interface SocialCrownGuildProps {
   guildId: BigNumberish;
 }
 
-export interface SocialHireGuildProps extends SystemSigner {
+export interface SocialHireGuildProps {
   guildId: BigNumberish;
 }
 
-export interface SocialFireGuildProps extends SystemSigner {
+export interface SocialFireGuildProps {
   guildId: BigNumberish;
 }
 
-export interface SocialRequestAllianceProps extends SystemSigner {
+export interface SocialRequestAllianceProps {
   allianceId: BigNumberish;
 }
 
-export interface SocialCancelAllianceProps extends SystemSigner {}
+export interface SocialCancelAllianceProps {}
 
-export interface SocialLeaveAllianceProps extends SystemSigner {}
+export interface SocialLeaveAllianceProps {}
 
-export interface SocialCreateGuildProps extends SystemSigner {
+export interface SocialCreateGuildProps {
   color: BigNumberish;
   name: ByteArray;
   description: ByteArray;
@@ -114,49 +110,49 @@ export interface SocialCreateGuildProps extends SystemSigner {
   website: ByteArray;
 }
 
-export interface SocialOpenGuildProps extends SystemSigner {
+export interface SocialOpenGuildProps {
   free: boolean;
 }
 
-export interface SocialCloseGuildProps extends SystemSigner {}
+export interface SocialCloseGuildProps {}
 
-export interface SocialCrownMemberProps extends SystemSigner {
+export interface SocialCrownMemberProps {
   memberId: BigNumberish;
 }
 
-export interface SocialPromoteMemberProps extends SystemSigner {
+export interface SocialPromoteMemberProps {
   memberId: BigNumberish;
 }
 
-export interface SocialDemoteMemberProps extends SystemSigner {
+export interface SocialDemoteMemberProps {
   memberId: BigNumberish;
 }
 
-export interface SocialHireMemberProps extends SystemSigner {
+export interface SocialHireMemberProps {
   memberId: BigNumberish;
 }
 
-export interface SocialFireMemberProps extends SystemSigner {
+export interface SocialFireMemberProps {
   memberId: BigNumberish;
 }
 
-export interface SocialRequestGuildProps extends SystemSigner {
+export interface SocialRequestGuildProps {
   guildId: BigNumberish;
 }
 
-export interface SocialCancelGuildProps extends SystemSigner {}
+export interface SocialCancelGuildProps {}
 
-export interface SocialLeaveGuildProps extends SystemSigner {}
+export interface SocialLeaveGuildProps {}
 
-export interface RegistryPinProps extends SystemSigner {
+export interface RegistryPinProps {
   achievementId: BigNumberish;
 }
 
-export interface RegistryUnpinProps extends SystemSigner {
+export interface RegistryUnpinProps {
   achievementId: BigNumberish;
 }
 
-export interface RegistryRegisterGameProps extends SystemSigner {
+export interface RegistryRegisterGameProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   project: BigNumberish;
@@ -172,7 +168,7 @@ export interface RegistryRegisterGameProps extends SystemSigner {
   website: ByteArray;
 }
 
-export interface RegistryUpdateGameProps extends SystemSigner {
+export interface RegistryUpdateGameProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   color: BigNumberish;
@@ -187,93 +183,93 @@ export interface RegistryUpdateGameProps extends SystemSigner {
   website: ByteArray;
 }
 
-export interface RegistryPublishGameProps extends SystemSigner {
+export interface RegistryPublishGameProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
 }
 
-export interface RegistryHideGameProps extends SystemSigner {
+export interface RegistryHideGameProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
 }
 
-export interface RegistryWhitelistGameProps extends SystemSigner {
+export interface RegistryWhitelistGameProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
 }
 
-export interface RegistryBlacklistGameProps extends SystemSigner {
+export interface RegistryBlacklistGameProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
 }
 
-export interface RegistryRemoveGameProps extends SystemSigner {
+export interface RegistryRemoveGameProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
 }
 
-export interface RegistryRegisterAchievementProps extends SystemSigner {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  identifier: BigNumberish;
-  karma: BigNumberish;
-}
-
-export interface RegistryUpdateAchievementProps extends SystemSigner {
+export interface RegistryRegisterAchievementProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   identifier: BigNumberish;
   karma: BigNumberish;
 }
 
-export interface RegistryPublishAchievementProps extends SystemSigner {
+export interface RegistryUpdateAchievementProps {
+  worldAddress: BigNumberish;
+  namespace: BigNumberish;
+  identifier: BigNumberish;
+  karma: BigNumberish;
+}
+
+export interface RegistryPublishAchievementProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   identifier: BigNumberish;
 }
 
-export interface RegistryHideAchievementProps extends SystemSigner {
+export interface RegistryHideAchievementProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   identifier: BigNumberish;
 }
 
-export interface RegistryWhitelistAchievementProps extends SystemSigner {
+export interface RegistryWhitelistAchievementProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   identifier: BigNumberish;
 }
 
-export interface RegistryBlacklistAchievementProps extends SystemSigner {
+export interface RegistryBlacklistAchievementProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   identifier: BigNumberish;
 }
 
-export interface RegistryRemoveAchievementProps extends SystemSigner {
+export interface RegistryRemoveAchievementProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
   identifier: BigNumberish;
 }
 
-export interface SlotDeployProps extends SystemSigner {
+export interface SlotDeployProps {
   service: BigNumberish;
   project: BigNumberish;
   tier: BigNumberish;
 }
 
-export interface SlotRemoveProps extends SystemSigner {
+export interface SlotRemoveProps {
   service: BigNumberish;
   project: BigNumberish;
 }
 
-export interface SlotHireProps extends SystemSigner {
+export interface SlotHireProps {
   project: BigNumberish;
   accountId: BigNumberish;
   role: BigNumberish;
 }
 
-export interface SlotFireProps extends SystemSigner {
+export interface SlotFireProps {
   project: BigNumberish;
   accountId: BigNumberish;
 }

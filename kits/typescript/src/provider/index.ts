@@ -12,6 +12,7 @@ import { TransactionType } from "./types";
 import { Social } from "./social";
 import { Registry } from "./registry";
 import { Slot } from "./slot";
+import { manifests, Network } from "../manifests";
 export { TransactionType };
 
 function ApplyEventEmitter<T extends new (...args: any[]) => {}>(Base: T) {
@@ -59,18 +60,19 @@ export class ArcadeProvider extends DojoEmitterProvider {
    * @param manifest - The manifest containing contract info
    * @param url - Optional RPC URL
    */
-  constructor(manifest: any, url?: string) {
-    super(manifest, url);
-    this.manifest = manifest;
+  constructor(manifest?: any, url?: string) {
+    const config = manifest ? manifest : manifests[Network.Slot];
+    super(config, url);
+    this.manifest = config;
 
     this.getWorldAddress = function () {
       const worldAddress = this.manifest.world.address;
       return worldAddress;
     };
 
-    this.social = new Social(manifest, this);
-    this.registry = new Registry(manifest, this);
-    this.slot = new Slot(manifest, this);
+    this.social = new Social(manifest);
+    this.registry = new Registry(manifest);
+    this.slot = new Slot(manifest);
   }
 
   /**

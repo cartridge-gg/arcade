@@ -6,43 +6,39 @@
  */
 import { NAMESPACE } from "../constants";
 import * as SystemProps from "./types";
-import { ArcadeProvider } from "./index";
 import { getContractByName } from "./helpers";
+import { AllowArray, Call } from "starknet";
 
 export class Registry {
   private manifest: any;
-  private provider: ArcadeProvider;
 
-  constructor(manifest: any, provider: ArcadeProvider) {
+  constructor(manifest: any) {
     this.manifest = manifest;
-    this.provider = provider;
   }
 
-  public async pin(props: SystemProps.RegistryPinProps) {
-    const { achievementId, signer } = props;
+  public pin(props: SystemProps.RegistryPinProps): AllowArray<Call> {
+    const { achievementId } = props;
     const entrypoint = "pin";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [achievementId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async unpin(props: SystemProps.RegistryUnpinProps) {
-    const { achievementId, signer } = props;
+  public unpin(props: SystemProps.RegistryUnpinProps): AllowArray<Call> {
+    const { achievementId } = props;
     const entrypoint = "unpin";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [achievementId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async register_game(props: SystemProps.RegistryRegisterGameProps) {
+  public register_game(props: SystemProps.RegistryRegisterGameProps): AllowArray<Call> {
     const {
       worldAddress,
       namespace,
@@ -57,11 +53,10 @@ export class Registry {
       twitter,
       youtube,
       website,
-      signer,
     } = props;
     const entrypoint = "register_game";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [
@@ -80,10 +75,9 @@ export class Registry {
         website,
       ],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async update_game(props: SystemProps.RegistryUpdateGameProps) {
+  public update_game(props: SystemProps.RegistryUpdateGameProps): AllowArray<Call> {
     const {
       worldAddress,
       namespace,
@@ -97,11 +91,10 @@ export class Registry {
       twitter,
       youtube,
       website,
-      signer,
     } = props;
     const entrypoint = "update_game";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [
@@ -119,102 +112,93 @@ export class Registry {
         website,
       ],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async publish_game(props: SystemProps.RegistryPublishGameProps) {
-    const { worldAddress, namespace, signer } = props;
+  public publish_game(props: SystemProps.RegistryPublishGameProps): AllowArray<Call> {
+    const { worldAddress, namespace } = props;
     const entrypoint = "publish_game";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async hide_game(props: SystemProps.RegistryHideGameProps) {
-    const { worldAddress, namespace, signer } = props;
+  public hide_game(props: SystemProps.RegistryHideGameProps): AllowArray<Call> {
+    const { worldAddress, namespace } = props;
     const entrypoint = "hide_game";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async whitelist_game(props: SystemProps.RegistryWhitelistGameProps) {
-    const { worldAddress, namespace, signer } = props;
+  public whitelist_game(props: SystemProps.RegistryWhitelistGameProps): AllowArray<Call> {
+    const { worldAddress, namespace } = props;
     const entrypoint = "whitelist_game";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async blacklist_game(props: SystemProps.RegistryBlacklistGameProps) {
-    const { worldAddress, namespace, signer } = props;
+  public blacklist_game(props: SystemProps.RegistryBlacklistGameProps): AllowArray<Call> {
+    const { worldAddress, namespace } = props;
     const entrypoint = "blacklist_game";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async remove_game(props: SystemProps.RegistryRemoveGameProps) {
-    const { worldAddress, namespace, signer } = props;
+  public remove_game(props: SystemProps.RegistryRemoveGameProps): AllowArray<Call> {
+    const { worldAddress, namespace } = props;
     const entrypoint = "remove_game";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async register_achievement(props: SystemProps.RegistryRegisterAchievementProps) {
-    const { worldAddress, namespace, identifier, karma, signer } = props;
+  public register_achievement(props: SystemProps.RegistryRegisterAchievementProps): AllowArray<Call> {
+    const { worldAddress, namespace, identifier, karma } = props;
     const entrypoint = "register_achievement";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace, identifier, karma],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async update_achievement(props: SystemProps.RegistryUpdateAchievementProps) {
-    const { worldAddress, namespace, identifier, karma, signer } = props;
+  public update_achievement(props: SystemProps.RegistryUpdateAchievementProps): AllowArray<Call> {
+    const { worldAddress, namespace, identifier, karma } = props;
     const entrypoint = "update_achievement";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace, identifier, karma],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async remove_achievement(props: SystemProps.RegistryRemoveAchievementProps) {
-    const { worldAddress, namespace, identifier, signer } = props;
+  public remove_achievement(props: SystemProps.RegistryRemoveAchievementProps): AllowArray<Call> {
+    const { worldAddress, namespace, identifier } = props;
     const entrypoint = "remove_achievement";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
       entrypoint,
       calldata: [worldAddress, namespace, identifier],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 }

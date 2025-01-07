@@ -2,283 +2,252 @@
  * Provider class for interacting with the Cartridge World contracts
  *
  * @param manifest - The manifest containing contract addresses and ABIs
- * @param url - Optional RPC URL for the provider
  */
 import { NAMESPACE } from "../constants";
 import * as SystemProps from "./types";
-import { ArcadeProvider } from "./index";
 import { getContractByName } from "./helpers";
+import { AllowArray, Call } from "starknet";
 
 export class Social {
   private manifest: any;
-  private provider: ArcadeProvider;
 
-  constructor(manifest: any, provider: ArcadeProvider) {
+  constructor(manifest: any) {
     this.manifest = manifest;
-    this.provider = provider;
   }
 
-  public async follow(props: SystemProps.SocialFollowProps) {
-    const { target, signer } = props;
+  public follow(props: SystemProps.SocialFollowProps): AllowArray<Call> {
+    const { target } = props;
     const entrypoint = "follow";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [target],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async unfollow(props: SystemProps.SocialUnfollowProps) {
-    const { target, signer } = props;
+  public unfollow(props: SystemProps.SocialUnfollowProps): AllowArray<Call> {
+    const { target } = props;
     const entrypoint = "unfollow";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [target],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async create_alliance(props: SystemProps.SocialCreateAllianceProps) {
-    const { color, name, description, image, banner, discord, telegram, twitter, youtube, signer } = props;
+  public create_alliance(props: SystemProps.SocialCreateAllianceProps): AllowArray<Call> {
+    const { color, name, description, image, banner, discord, telegram, twitter, youtube } = props;
     const entrypoint = "create_alliance";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [color, name, description, image, banner, discord, telegram, twitter, youtube],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async open_alliance(props: SystemProps.SocialOpenAllianceProps) {
-    const { free, signer } = props;
+  public open_alliance(props: SystemProps.SocialOpenAllianceProps): AllowArray<Call> {
+    const { free } = props;
     const entrypoint = "open_alliance";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [free],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async close_alliance(props: SystemProps.SocialCloseAllianceProps) {
-    const { signer } = props;
+  public close_alliance(props: SystemProps.SocialCloseAllianceProps): AllowArray<Call> {
     const entrypoint = "close_alliance";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async crown_guild(props: SystemProps.SocialCrownGuildProps) {
-    const { guildId, signer } = props;
+  public crown_guild(props: SystemProps.SocialCrownGuildProps): AllowArray<Call> {
+    const { guildId } = props;
     const entrypoint = "crown_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [guildId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async hire_guild(props: SystemProps.SocialHireGuildProps) {
-    const { guildId, signer } = props;
+  public hire_guild(props: SystemProps.SocialHireGuildProps): AllowArray<Call> {
+    const { guildId } = props;
     const entrypoint = "hire_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [guildId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async fire_guild(props: SystemProps.SocialFireGuildProps) {
-    const { guildId, signer } = props;
+  public fire_guild(props: SystemProps.SocialFireGuildProps): AllowArray<Call> {
+    const { guildId } = props;
     const entrypoint = "fire_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [guildId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async request_alliance(props: SystemProps.SocialRequestAllianceProps) {
-    const { allianceId, signer } = props;
+  public request_alliance(props: SystemProps.SocialRequestAllianceProps): AllowArray<Call> {
+    const { allianceId } = props;
     const entrypoint = "request_alliance";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [allianceId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async cancel_alliance(props: SystemProps.SocialCancelAllianceProps) {
-    const { signer } = props;
+  public cancel_alliance(props: SystemProps.SocialCancelAllianceProps): AllowArray<Call> {
     const entrypoint = "cancel_alliance";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async leave_alliance(props: SystemProps.SocialLeaveAllianceProps) {
-    const { signer } = props;
+  public leave_alliance(props: SystemProps.SocialLeaveAllianceProps): AllowArray<Call> {
     const entrypoint = "leave_alliance";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async create_guild(props: SystemProps.SocialCreateGuildProps) {
-    const { color, name, description, image, banner, discord, telegram, twitter, youtube, signer } = props;
+  public create_guild(props: SystemProps.SocialCreateGuildProps): AllowArray<Call> {
+    const { color, name, description, image, banner, discord, telegram, twitter, youtube } = props;
     const entrypoint = "create_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [color, name, description, image, banner, discord, telegram, twitter, youtube],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async open_guild(props: SystemProps.SocialOpenGuildProps) {
-    const { free, signer } = props;
+  public open_guild(props: SystemProps.SocialOpenGuildProps): AllowArray<Call> {
+    const { free } = props;
     const entrypoint = "open_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [free],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async close_guild(props: SystemProps.SocialCloseGuildProps) {
-    const { signer } = props;
+  public close_guild(props: SystemProps.SocialCloseGuildProps): AllowArray<Call> {
     const entrypoint = "close_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async crown_member(props: SystemProps.SocialCrownMemberProps) {
-    const { memberId, signer } = props;
+  public crown_member(props: SystemProps.SocialCrownMemberProps): AllowArray<Call> {
+    const { memberId } = props;
     const entrypoint = "crown_member";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [memberId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async promote_member(props: SystemProps.SocialPromoteMemberProps) {
-    const { memberId, signer } = props;
+  public promote_member(props: SystemProps.SocialPromoteMemberProps): AllowArray<Call> {
+    const { memberId } = props;
     const entrypoint = "promote_member";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [memberId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async demote_member(props: SystemProps.SocialDemoteMemberProps) {
-    const { memberId, signer } = props;
+  public demote_member(props: SystemProps.SocialDemoteMemberProps): AllowArray<Call> {
+    const { memberId } = props;
     const entrypoint = "demote_member";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [memberId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async hire_member(props: SystemProps.SocialHireMemberProps) {
-    const { memberId, signer } = props;
+  public hire_member(props: SystemProps.SocialHireMemberProps): AllowArray<Call> {
+    const { memberId } = props;
     const entrypoint = "hire_member";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [memberId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async fire_member(props: SystemProps.SocialFireMemberProps) {
-    const { memberId, signer } = props;
+  public fire_member(props: SystemProps.SocialFireMemberProps): AllowArray<Call> {
+    const { memberId } = props;
     const entrypoint = "fire_member";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [memberId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async request_guild(props: SystemProps.SocialRequestGuildProps) {
-    const { guildId, signer } = props;
+  public request_guild(props: SystemProps.SocialRequestGuildProps): AllowArray<Call> {
+    const { guildId } = props;
     const entrypoint = "request_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [guildId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async cancel_guild(props: SystemProps.SocialCancelGuildProps) {
-    const { signer } = props;
+  public cancel_guild(props: SystemProps.SocialCancelGuildProps): AllowArray<Call> {
     const entrypoint = "cancel_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async leave_guild(props: SystemProps.SocialLeaveGuildProps) {
-    const { signer } = props;
+  public leave_guild(props: SystemProps.SocialLeaveGuildProps): AllowArray<Call> {
     const entrypoint = "leave_guild";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-social`),
       entrypoint,
       calldata: [],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 }

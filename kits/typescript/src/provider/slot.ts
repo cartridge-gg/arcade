@@ -2,67 +2,60 @@
  * Provider class for interacting with the Cartridge World contracts
  *
  * @param manifest - The manifest containing contract addresses and ABIs
- * @param url - Optional RPC URL for the provider
  */
 import { NAMESPACE } from "../constants";
 import * as SystemProps from "./types";
-import { ArcadeProvider } from "./index";
 import { getContractByName } from "./helpers";
+import { AllowArray, Call } from "starknet";
 
 export class Slot {
   private manifest: any;
-  private provider: ArcadeProvider;
 
-  constructor(manifest: any, provider: ArcadeProvider) {
+  constructor(manifest: any) {
     this.manifest = manifest;
-    this.provider = provider;
   }
 
-  public async deploy(props: SystemProps.SlotDeployProps) {
-    const { service, project, tier, signer } = props;
+  public deploy(props: SystemProps.SlotDeployProps): AllowArray<Call> {
+    const { service, project, tier } = props;
     const entrypoint = "deploy";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-slot`),
       entrypoint,
       calldata: [service, project, tier],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async remove(props: SystemProps.SlotRemoveProps) {
-    const { service, project, signer } = props;
+  public remove(props: SystemProps.SlotRemoveProps): AllowArray<Call> {
+    const { service, project } = props;
     const entrypoint = "remove";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-slot`),
       entrypoint,
       calldata: [service, project],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async hire(props: SystemProps.SlotHireProps) {
-    const { project, accountId, role, signer } = props;
+  public hire(props: SystemProps.SlotHireProps): AllowArray<Call> {
+    const { project, accountId, role } = props;
     const entrypoint = "hire";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-slot`),
       entrypoint,
       calldata: [project, accountId, role],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 
-  public async fire(props: SystemProps.SlotFireProps) {
-    const { project, accountId, signer } = props;
+  public fire(props: SystemProps.SlotFireProps): AllowArray<Call> {
+    const { project, accountId } = props;
     const entrypoint = "fire";
 
-    const calls = {
+    return {
       contractAddress: getContractByName(this.manifest, `${NAMESPACE}-slot`),
       entrypoint,
       calldata: [project, accountId],
     };
-    return await this.provider.invoke(signer, calls, entrypoint);
   }
 }
