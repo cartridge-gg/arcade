@@ -1,0 +1,39 @@
+@layer base {
+  :root {
+    --background: 220 60% 99%;
+    --foreground: 0 0% 0%;
+
+    --popover: 220 60% 99%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 255 73% 61%;
+    --primary-foreground: 220 60% 99%;
+
+    --secondary: 210 22% 96%;
+    --secondary-foreground: 0 0% 0%;
+
+    --tertiary: 255 73% 61%;
+    --tertiary-foreground: 220 60% 99%;
+
+    --quaternary: 210 2.48% 94.9%; /* bg.secondary */
+    --quaternary-foreground: 0 0% 50%; /* text.secondary */
+
+    --quinary: 214 3% 91%; /* bg.tertiary */
+    --quinary-foreground: 0 0% 0%; /* TBD */
+
+    --muted: 207 15% 85%;
+    --muted-foreground: 0 0% 50%;
+
+    --accent: 207 15% 85%;
+    --accent-foreground: 132 6% 30%;
+
+    --destructive: 7 72% 65%;
+    --destructive-foreground: 7 72% 65%;
+
+    --border: 0 0% 50%;
+    --input: 210 2.48% 94.9%; /* bg.secondary */
+    --ring: 0 0% 0%;
+
+    --radius: 0.5rem;
+  }
+}

@@ -1,0 +1,38 @@
+@layer base {
+  .dark {
+    --solid-fills-spacer: 132 25% 8%; /* solid-fills/spacer */
+
+    --background: 135 15% 10%; /* bg.background */
+    --foreground: 0 0% 100%; /* text.primary */
+
+    --primary: 135 12% 13%; /* bg.primary */
+
+    --brand-primary: 44 96% 61%; /* brand.primary */
+    --brand-primary-foreground: 135 15% 10%; /* bg.primary */
+
+    --secondary: 135 12% 13%; /* bg.primary */
+    --secondary-foreground: 0 0% 100%; /* text.primary */
+
+    --tertiary: 120 57% 78%;
+    --tertiary-foreground: 0 0% 0%;
+
+    --quaternary: 120 7.5% 15.69%; /* bg.secondary */
+    --quaternary-foreground: 0 0% 50%; /* text.secondary */
+
+    --quinary: 120 11% 18%; /* bg.tertiary */
+    --quinary-foreground: 0 0% 0%; /* TBD */
+
+    --muted: 132 8% 24%; /* bg.muted */
+    --muted-foreground: 0 0% 50%; /* text.secondary */
+
+    --accent: 132 4% 23%; /* bg.accent */
+    --accent-foreground: 0 0% 61%; /* text.secondary-accent */
+
+    --destructive: 7 72% 65%; /* text.error */
+    --destructive-foreground: 7 72% 65%; /* text.error */
+
+    --border: 0 0% 50%;
+    --input: 120 7.5% 15.69%; /* bg.secondary */
+    --ring: 0 0% 100%; /* text.primary */
+  }
+}
