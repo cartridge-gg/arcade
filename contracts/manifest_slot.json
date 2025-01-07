@@ -1881,9 +1881,7 @@
       ],
       "tag": "ARCADE-Registry",
       "selector": "0x54d3bcd441104e039ceaec4a413e72de393b65f79d1df74dc3346dc7f861173",
-      "systems": [
-        "upgrade"
-      ]
+      "systems": ["upgrade"]
     },
     {
       "address": "0x13fc6504be0dbe9bfcd127208822e32334887ee4e3c7366bb356e0eaf0e438a",
@@ -2162,9 +2160,7 @@
       "init_calldata": [],
       "tag": "ARCADE-Slot",
       "selector": "0x16361cb59732e8b56d69550297b7d8f86c6d1be2fc71b5dde135aeb1d16f3f7",
-      "systems": [
-        "upgrade"
-      ]
+      "systems": ["upgrade"]
     },
     {
       "address": "0x63a6cdd3722036859b1d3650d8b2ff9de8ede1a1d6406546a23a7a8c32bbc48",
@@ -2730,9 +2726,7 @@
       "init_calldata": [],
       "tag": "ARCADE-Society",
       "selector": "0x11d3443ddda56afc016a818156b817be5668888312fafd0e31705f1120eddc1",
-      "systems": [
-        "upgrade"
-      ]
+      "systems": ["upgrade"]
     },
     {
       "address": "0x764c8b778e11a48cd6c6f626eaa1b515c272a3ee3c52de2b13bd10969afec38",
@@ -2927,9 +2921,7 @@
       "init_calldata": [],
       "tag": "ARCADE-Wallet",
       "selector": "0x69ba9525fdd6458dfaea7f06bcfd0cf5fef14d66c5516cf8548c2e2b845c6a5",
-      "systems": [
-        "upgrade"
-      ]
+      "systems": ["upgrade"]
     }
   ],
   "models": [
