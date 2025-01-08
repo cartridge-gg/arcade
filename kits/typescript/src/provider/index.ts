@@ -5,6 +5,7 @@
  * @param url - Optional RPC URL for the provider
  */
 import { DojoProvider } from "@dojoengine/core";
+import * as torii from "@dojoengine/torii-client";
 import EventEmitter from "eventemitter3";
 import { Account, AccountInterface, AllowArray, Call } from "starknet";
 import { NAMESPACE } from "../constants";
@@ -61,9 +62,7 @@ export class ArcadeProvider extends DojoEmitterProvider {
    * @param url - Optional RPC URL
    */
   constructor(manifest?: any, url?: string) {
-    console.log({ manifests });
     const config = manifest ? manifest : manifests[Network.Default];
-    console.log({ config });
     super(config, url);
     this.manifest = config;
 
@@ -75,6 +74,21 @@ export class ArcadeProvider extends DojoEmitterProvider {
     this.social = new Social(manifest);
     this.registry = new Registry(manifest);
     this.slot = new Slot(manifest);
+  }
+
+  /**
+   * Get a Torii client
+   * @param toriiUrl - The URL of the Torii client
+   * @returns A Torii client
+   */
+  async getToriiClient(rpcUrl: string, toriiUrl: string): Promise<torii.ToriiClient> {
+    const toriiClient = await torii.createClient({
+      rpcUrl: rpcUrl,
+      toriiUrl: toriiUrl,
+      relayUrl: "",
+      worldAddress: this.manifest.world.address,
+    });
+    return toriiClient;
   }
 
   /**

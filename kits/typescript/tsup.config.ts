@@ -9,7 +9,11 @@ export default defineConfig((options) => ({
   esbuildOptions(options, context) {
     if (context.format === "iife") {
       options.platform = "browser";
-      options.external = [...(options.external || []), "node:*"];
+      options.external = [
+        ...(options.external || []),
+        "node:*",
+        "*.wasm"
+      ];
     }
   },
 }));
