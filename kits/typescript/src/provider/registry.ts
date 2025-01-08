@@ -21,7 +21,7 @@ export class Registry {
     const entrypoint = "pin";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [achievementId],
     };
@@ -32,7 +32,7 @@ export class Registry {
     const entrypoint = "unpin";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [achievementId],
     };
@@ -57,7 +57,7 @@ export class Registry {
     const entrypoint = "register_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [
         worldAddress,
@@ -95,7 +95,7 @@ export class Registry {
     const entrypoint = "update_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [
         worldAddress,
@@ -119,7 +119,7 @@ export class Registry {
     const entrypoint = "publish_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -130,7 +130,7 @@ export class Registry {
     const entrypoint = "hide_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -141,7 +141,7 @@ export class Registry {
     const entrypoint = "whitelist_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -152,7 +152,7 @@ export class Registry {
     const entrypoint = "blacklist_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -163,7 +163,7 @@ export class Registry {
     const entrypoint = "remove_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -174,7 +174,7 @@ export class Registry {
     const entrypoint = "register_achievement";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace, identifier, karma],
     };
@@ -185,7 +185,7 @@ export class Registry {
     const entrypoint = "update_achievement";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace, identifier, karma],
     };
@@ -196,7 +196,7 @@ export class Registry {
     const entrypoint = "remove_achievement";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-registry`),
+      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
       entrypoint,
       calldata: [worldAddress, namespace, identifier],
     };

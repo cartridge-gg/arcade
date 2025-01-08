@@ -61,7 +61,9 @@ export class ArcadeProvider extends DojoEmitterProvider {
    * @param url - Optional RPC URL
    */
   constructor(manifest?: any, url?: string) {
-    const config = manifest ? manifest : manifests[Network.Slot];
+    console.log({ manifests });
+    const config = manifest ? manifest : manifests[Network.Default];
+    console.log({ config });
     super(config, url);
     this.manifest = config;
 

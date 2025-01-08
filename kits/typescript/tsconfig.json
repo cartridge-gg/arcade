@@ -8,14 +8,13 @@
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "moduleResolution": "node",
-    // "noUnusedParameters": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.json", "../../contracts/manifest_*.json"],
   "skipLibCheck": true,
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
