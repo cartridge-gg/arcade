@@ -1,6 +1,7 @@
 import * as torii from "@dojoengine/torii-client";
+import { NAMESPACE } from "../../constants";
 
-const MODEL_NAME = "ARCADE-TrophyPinning";
+const MODEL_NAME = `${NAMESPACE}-TrophyPinning`;
 const DEFAULT_KEYS_CLAUSES: torii.EntityKeysClause[] = [
   { Keys: { keys: [undefined, undefined], pattern_matching: "FixedLen", models: [MODEL_NAME] } },
 ];
@@ -8,11 +9,24 @@ const DEFAULT_CLAUSE: torii.Clause = {
   Keys: { keys: [undefined, undefined], pattern_matching: "FixedLen", models: [MODEL_NAME] },
 };
 
-export type PinningEvent = {
-  playerId: string;
-  achievementId: string;
-  time: number;
-};
+export class PinningEvent {
+  constructor(
+    public playerId: string,
+    public achievementId: string,
+    public time: number,
+  ) {
+    this.playerId = playerId;
+    this.achievementId = achievementId;
+    this.time = time;
+  }
+
+  static from(model: torii.Model) {
+    const playerId = BigInt(String(model.player_id.value)).toString(16);
+    const achievementId = BigInt(String(model.achievement_id.value)).toString(16);
+    const time = Number(model.time.value);
+    return new PinningEvent(playerId, achievementId, time);
+  }
+}
 
 export const Pinning = {
   client: undefined as torii.ToriiClient | undefined,
@@ -51,14 +65,8 @@ export const Pinning = {
       Object.values(entities).forEach((event: torii.Entity) => {
         if (!event[MODEL_NAME]) return;
         const model = event[MODEL_NAME];
-        const playerId = BigInt(String(model.player_id.value)).toString(16);
-        const achievementId = BigInt(String(model.achievement_id.value)).toString(16);
-        const time = Number(model.time.value);
-        events.push({
-          playerId,
-          achievementId,
-          time,
-        });
+        const pinningEvent = PinningEvent.from(model);
+        events.push(pinningEvent);
       });
       if (events.length < limit) break;
       offset += limit;
@@ -75,10 +83,7 @@ export const Pinning = {
     const wrappedCallback = (_fetchedEntities: any, event: any) => {
       if (!event[MODEL_NAME]) return;
       const model = event[MODEL_NAME];
-      const playerId = BigInt(String(model.player_id.value)).toString(16);
-      const achievementId = BigInt(String(model.achievement_id.value)).toString(16);
-      const time = Number(model.time.value);
-      const pinningEvent: PinningEvent = { playerId, achievementId, time };
+      const pinningEvent = PinningEvent.from(model);
       callback(pinningEvent);
     };
     const subscription = async () => {
