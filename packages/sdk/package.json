@@ -1,6 +1,6 @@
 {
-  "name": "@bal7hazar/arcade",
-  "version": "0.0.10",
+  "name": "@bal7hazar/arcade-sdk",
+  "version": "0.0.13",
   "description": "Cartridge Arcade SDK",
   "license": "MIT",
   "repository": {
