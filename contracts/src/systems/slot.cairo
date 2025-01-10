@@ -2,10 +2,10 @@
 
 #[starknet::interface]
 trait ISlot<TContractState> {
-    fn deploy(self: @TContractState, service: u8, project: felt252, tier: u8);
-    fn remove(self: @TContractState, service: u8, project: felt252);
-    fn hire(self: @TContractState, project: felt252, account_id: felt252, role: u8);
-    fn fire(self: @TContractState, project: felt252, account_id: felt252);
+    fn deploy(ref self: TContractState, service: u8, project: felt252, tier: u8);
+    fn remove(ref self: TContractState, service: u8, project: felt252);
+    fn hire(ref self: TContractState, project: felt252, account_id: felt252, role: u8);
+    fn fire(ref self: TContractState, project: felt252, account_id: felt252);
 }
 
 // Contracts
@@ -62,7 +62,7 @@ mod Slot {
 
     // Constructor
 
-    fn dojo_init(self: @ContractState) {
+    fn dojo_init(ref self: ContractState) {
         self.deployable.initialize(self.world_storage());
     }
 
@@ -70,25 +70,25 @@ mod Slot {
 
     #[abi(embed_v0)]
     impl SlotImpl of ISlot<ContractState> {
-        fn deploy(self: @ContractState, service: u8, project: felt252, tier: u8,) {
+        fn deploy(ref self: ContractState, service: u8, project: felt252, tier: u8,) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.deployable.deploy(world, caller, service.into(), project, tier.into())
         }
 
-        fn remove(self: @ContractState, service: u8, project: felt252,) {
+        fn remove(ref self: ContractState, service: u8, project: felt252,) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.deployable.remove(world, caller, service.into(), project);
         }
 
-        fn hire(self: @ContractState, project: felt252, account_id: felt252, role: u8) {
+        fn hire(ref self: ContractState, project: felt252, account_id: felt252, role: u8) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.groupable.add(world, caller, project, account_id, role.into());
         }
 
-        fn fire(self: @ContractState, project: felt252, account_id: felt252) {
+        fn fire(ref self: ContractState, project: felt252, account_id: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.groupable.remove(world, caller, project, account_id);

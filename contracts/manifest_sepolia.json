@@ -1252,8 +1252,8 @@
   },
   "contracts": [
     {
-      "address": "0x1b6ffe59b903e633e87ef0f22aa59902efe6c3cea2b45a9543e4bc6329effda",
-      "class_hash": "0x14fb684a4dee1fb56a15dc5faa4f2c1df6d22b4ad86576223b21806c1d06c3f",
+      "address": "0x3af383ca009f2066f44ec9c6e760072b58142468bdf2b2b87053e4ee0012ed2",
+      "class_hash": "0xaf5d998b4a58c533dece64bafc58e17915318454776611ae5b1684b775248f",
       "abi": [
         {
           "type": "impl",
@@ -1315,7 +1315,7 @@
             }
           ],
           "outputs": [],
-          "state_mutability": "view"
+          "state_mutability": "external"
         },
         {
           "type": "impl",
@@ -1336,7 +1336,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1348,7 +1348,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1408,7 +1408,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1464,7 +1464,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1480,7 +1480,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1496,7 +1496,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1512,7 +1512,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1528,7 +1528,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1544,7 +1544,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1568,7 +1568,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1592,7 +1592,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1612,7 +1612,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1632,7 +1632,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1652,7 +1652,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1672,7 +1672,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1692,7 +1692,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             }
           ]
         },
@@ -1849,17 +1849,34 @@
         }
       ],
       "init_calldata": [
-        "0x6677fe62ee39c7b07401f754138502bab7fac99d2d3c5d37df7d1c6fab10819"
+        "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753"
       ],
       "tag": "ARCADE-Registry",
       "selector": "0x54d3bcd441104e039ceaec4a413e72de393b65f79d1df74dc3346dc7f861173",
       "systems": [
+        "dojo_init",
+        "pin",
+        "unpin",
+        "register_game",
+        "update_game",
+        "publish_game",
+        "hide_game",
+        "whitelist_game",
+        "blacklist_game",
+        "remove_game",
+        "register_achievement",
+        "update_achievement",
+        "publish_achievement",
+        "hide_achievement",
+        "whitelist_achievement",
+        "blacklist_achievement",
+        "remove_achievement",
         "upgrade"
       ]
     },
     {
-      "address": "0x13fc6504be0dbe9bfcd127208822e32334887ee4e3c7366bb356e0eaf0e438a",
-      "class_hash": "0xeff274bcfc8782f81351d52a6c0809135c315159815019ffff5122410cf19f",
+      "address": "0x73576c09ed2112c95cd9c7a3aa6de2f0094edfe0acc569c2f79cb56147885ea",
+      "class_hash": "0x2d7bba9a10d280fc47fef76ad11406f6fcc0bec0a173e3e169c4b05a111bb83",
       "abi": [
         {
           "type": "impl",
@@ -1916,7 +1933,7 @@
           "name": "dojo_init",
           "inputs": [],
           "outputs": [],
-          "state_mutability": "view"
+          "state_mutability": "external"
         },
         {
           "type": "impl",
@@ -1945,7 +1962,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1961,7 +1978,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1981,7 +1998,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1997,7 +2014,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             }
           ]
         },
@@ -2135,12 +2152,17 @@
       "tag": "ARCADE-Slot",
       "selector": "0x16361cb59732e8b56d69550297b7d8f86c6d1be2fc71b5dde135aeb1d16f3f7",
       "systems": [
+        "dojo_init",
+        "deploy",
+        "remove",
+        "hire",
+        "fire",
         "upgrade"
       ]
     },
     {
-      "address": "0x73e3dcc0388e307032e1ba2e2db407336495bca5bbc5c03b419df5456f442a8",
-      "class_hash": "0x6d0e156b1f19f6ec14ce9d80b4fa04c9704a568c81521ae047082327f46a831",
+      "address": "0x259a19cf745d528e85492524d3d8c4721b1357fdad7538d7be22e88208fd89b",
+      "class_hash": "0x3fdbf2e7742eac51ec9bca06796e01d2e0dd9bbfdf26978df76fab130dba9d9",
       "abi": [
         {
           "type": "impl",
@@ -2225,7 +2247,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2237,7 +2259,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2285,7 +2307,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2297,14 +2319,14 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
               "name": "close_alliance",
               "inputs": [],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2316,7 +2338,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2328,7 +2350,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2340,7 +2362,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2352,21 +2374,21 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
               "name": "cancel_alliance",
               "inputs": [],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
               "name": "leave_alliance",
               "inputs": [],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2414,7 +2436,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2426,14 +2448,14 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
               "name": "close_guild",
               "inputs": [],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2445,7 +2467,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2457,7 +2479,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2469,7 +2491,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2481,7 +2503,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2493,7 +2515,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2505,21 +2527,21 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
               "name": "cancel_guild",
               "inputs": [],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
               "name": "leave_guild",
               "inputs": [],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             }
           ]
         },
@@ -2675,6 +2697,28 @@
       "tag": "ARCADE-Social",
       "selector": "0x28532a65d3bfdb030133a56031e467c489058fee53a3bd903adc719735aa6c5",
       "systems": [
+        "follow",
+        "unfollow",
+        "create_alliance",
+        "open_alliance",
+        "close_alliance",
+        "crown_guild",
+        "hire_guild",
+        "fire_guild",
+        "request_alliance",
+        "cancel_alliance",
+        "leave_alliance",
+        "create_guild",
+        "open_guild",
+        "close_guild",
+        "crown_member",
+        "promote_member",
+        "demote_member",
+        "hire_member",
+        "fire_member",
+        "request_guild",
+        "cancel_guild",
+        "leave_guild",
         "upgrade"
       ]
     },

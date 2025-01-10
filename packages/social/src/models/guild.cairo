@@ -6,9 +6,9 @@ use registry::helpers::json::JsonifiableTrait;
 
 // Internal imports
 
-use society::constants::MAX_MEMBER_COUNT;
-use society::models::index::Guild;
-use society::types::role::Role;
+use social::constants::MAX_MEMBER_COUNT;
+use social::models::index::Guild;
+use social::types::role::Role;
 
 // Errors
 

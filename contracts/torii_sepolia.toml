@@ -1,0 +1,16 @@
+# db_dir = "./torii-db"
+rpc = "https://api.cartridge.gg/x/starknet/sepolia"
+world = "0x385b375729599785931a46a17cf3101288e97d9c1fbdcca58fb5dbcb45c89ca"
+
+[indexing]
+events_chunk_size = 1024
+blocks_chunk_size = 1024
+pending = true
+polling_interval = 500
+max_concurrent_tasks = 100
+world_block = 1
+contracts = []
+
+[events]
+raw = true
+historical = ["ARCADE-TrophyCreation", "ARCADE-TrophyProgression"]

@@ -15,7 +15,7 @@ achievement = { path = ".." }
 controller = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
-society = { path = ".." }
+social = { path = ".." }
 starknet = "2.8.4"
 cairo_test = "2.8.4"
 
@@ -36,10 +36,12 @@ build-external-contracts = [
     "registry::models::index::m_Access",
     "registry::models::index::m_Achievement",
     "registry::models::index::m_Game",
-    "society::models::index::m_Alliance",
-    "society::models::index::m_Guild",
-    "society::models::index::m_Member",
-    "society::events::index::e_Follow",
+    "social::models::index::m_Alliance",
+    "social::models::index::m_Guild",
+    "social::models::index::m_Member",
+    "social::events::index::e_Follow",
 ]
 
 [profile.slot]
+[profile.sepolia]
+[profile.mainnet]

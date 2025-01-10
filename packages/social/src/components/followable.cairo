@@ -6,7 +6,7 @@ mod FollowableComponent {
 
     // Internal imports
 
-    use society::store::{Store, StoreTrait};
+    use social::store::{Store, StoreTrait};
 
     // Storage
 

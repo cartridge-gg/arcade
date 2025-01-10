@@ -2,72 +2,72 @@
 
 #[starknet::interface]
 trait IRegistry<TContractState> {
-    fn pin(self: @TContractState, achievement_id: felt252);
-    fn unpin(self: @TContractState, achievement_id: felt252);
+    fn pin(ref self: TContractState, achievement_id: felt252);
+    fn unpin(ref self: TContractState, achievement_id: felt252);
     fn register_game(
-        self: @TContractState,
+        ref self: TContractState,
         world_address: felt252,
         namespace: felt252,
         project: felt252,
-        color: Option<felt252>,
-        name: Option<ByteArray>,
-        description: Option<ByteArray>,
-        image: Option<ByteArray>,
-        banner: Option<ByteArray>,
-        discord: Option<ByteArray>,
-        telegram: Option<ByteArray>,
-        twitter: Option<ByteArray>,
-        youtube: Option<ByteArray>,
-        website: Option<ByteArray>,
+        color: felt252,
+        name: ByteArray,
+        description: ByteArray,
+        image: ByteArray,
+        banner: ByteArray,
+        discord: ByteArray,
+        telegram: ByteArray,
+        twitter: ByteArray,
+        youtube: ByteArray,
+        website: ByteArray,
     );
     fn update_game(
-        self: @TContractState,
+        ref self: TContractState,
         world_address: felt252,
         namespace: felt252,
-        color: Option<felt252>,
-        name: Option<ByteArray>,
-        description: Option<ByteArray>,
-        image: Option<ByteArray>,
-        banner: Option<ByteArray>,
-        discord: Option<ByteArray>,
-        telegram: Option<ByteArray>,
-        twitter: Option<ByteArray>,
-        youtube: Option<ByteArray>,
-        website: Option<ByteArray>,
+        color: felt252,
+        name: ByteArray,
+        description: ByteArray,
+        image: ByteArray,
+        banner: ByteArray,
+        discord: ByteArray,
+        telegram: ByteArray,
+        twitter: ByteArray,
+        youtube: ByteArray,
+        website: ByteArray,
     );
-    fn publish_game(self: @TContractState, world_address: felt252, namespace: felt252);
-    fn hide_game(self: @TContractState, world_address: felt252, namespace: felt252);
-    fn whitelist_game(self: @TContractState, world_address: felt252, namespace: felt252);
-    fn blacklist_game(self: @TContractState, world_address: felt252, namespace: felt252);
-    fn remove_game(self: @TContractState, world_address: felt252, namespace: felt252);
+    fn publish_game(ref self: TContractState, world_address: felt252, namespace: felt252);
+    fn hide_game(ref self: TContractState, world_address: felt252, namespace: felt252);
+    fn whitelist_game(ref self: TContractState, world_address: felt252, namespace: felt252);
+    fn blacklist_game(ref self: TContractState, world_address: felt252, namespace: felt252);
+    fn remove_game(ref self: TContractState, world_address: felt252, namespace: felt252);
     fn register_achievement(
-        self: @TContractState,
+        ref self: TContractState,
         world_address: felt252,
         namespace: felt252,
         identifier: felt252,
         karma: u16,
     );
     fn update_achievement(
-        self: @TContractState,
+        ref self: TContractState,
         world_address: felt252,
         namespace: felt252,
         identifier: felt252,
         karma: u16,
     );
     fn publish_achievement(
-        self: @TContractState, world_address: felt252, namespace: felt252, identifier: felt252
+        ref self: TContractState, world_address: felt252, namespace: felt252, identifier: felt252
     );
     fn hide_achievement(
-        self: @TContractState, world_address: felt252, namespace: felt252, identifier: felt252
+        ref self: TContractState, world_address: felt252, namespace: felt252, identifier: felt252
     );
     fn whitelist_achievement(
-        self: @TContractState, world_address: felt252, namespace: felt252, identifier: felt252
+        ref self: TContractState, world_address: felt252, namespace: felt252, identifier: felt252
     );
     fn blacklist_achievement(
-        self: @TContractState, world_address: felt252, namespace: felt252, identifier: felt252
+        ref self: TContractState, world_address: felt252, namespace: felt252, identifier: felt252
     );
     fn remove_achievement(
-        self: @TContractState, world_address: felt252, namespace: felt252, identifier: felt252
+        ref self: TContractState, world_address: felt252, namespace: felt252, identifier: felt252
     );
 }
 
@@ -136,7 +136,7 @@ mod Registry {
 
     // Constructor
 
-    fn dojo_init(self: @ContractState, owner: felt252) {
+    fn dojo_init(ref self: ContractState, owner: felt252) {
         self.initializable.initialize(self.world_storage(), owner);
     }
 
@@ -145,20 +145,20 @@ mod Registry {
     #[abi(embed_v0)]
     impl RegistryImpl of IRegistry<ContractState> {
         fn register_game(
-            self: @ContractState,
+            ref self: ContractState,
             world_address: felt252,
             namespace: felt252,
             project: felt252,
-            color: Option<felt252>,
-            name: Option<ByteArray>,
-            description: Option<ByteArray>,
-            image: Option<ByteArray>,
-            banner: Option<ByteArray>,
-            discord: Option<ByteArray>,
-            telegram: Option<ByteArray>,
-            twitter: Option<ByteArray>,
-            youtube: Option<ByteArray>,
-            website: Option<ByteArray>,
+            color: felt252,
+            name: ByteArray,
+            description: ByteArray,
+            image: ByteArray,
+            banner: ByteArray,
+            discord: ByteArray,
+            telegram: ByteArray,
+            twitter: ByteArray,
+            youtube: ByteArray,
+            website: ByteArray,
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -170,33 +170,33 @@ mod Registry {
                     world_address,
                     namespace,
                     project,
-                    color,
-                    name,
-                    description,
-                    image,
-                    banner,
-                    discord,
-                    telegram,
-                    twitter,
-                    youtube,
-                    website,
+                    Option::Some(color),
+                    Option::Some(name),
+                    Option::Some(description),
+                    Option::Some(image),
+                    Option::Some(banner),
+                    Option::Some(discord),
+                    Option::Some(telegram),
+                    Option::Some(twitter),
+                    Option::Some(youtube),
+                    Option::Some(website),
                 )
         }
 
         fn update_game(
-            self: @ContractState,
+            ref self: ContractState,
             world_address: felt252,
             namespace: felt252,
-            color: Option<felt252>,
-            name: Option<ByteArray>,
-            description: Option<ByteArray>,
-            image: Option<ByteArray>,
-            banner: Option<ByteArray>,
-            discord: Option<ByteArray>,
-            telegram: Option<ByteArray>,
-            twitter: Option<ByteArray>,
-            youtube: Option<ByteArray>,
-            website: Option<ByteArray>,
+            color: felt252,
+            name: ByteArray,
+            description: ByteArray,
+            image: ByteArray,
+            banner: ByteArray,
+            discord: ByteArray,
+            telegram: ByteArray,
+            twitter: ByteArray,
+            youtube: ByteArray,
+            website: ByteArray,
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -207,51 +207,51 @@ mod Registry {
                     caller,
                     world_address,
                     namespace,
-                    color,
-                    name,
-                    description,
-                    image,
-                    banner,
-                    discord,
-                    telegram,
-                    twitter,
-                    youtube,
-                    website,
+                    Option::Some(color),
+                    Option::Some(name),
+                    Option::Some(description),
+                    Option::Some(image),
+                    Option::Some(banner),
+                    Option::Some(discord),
+                    Option::Some(telegram),
+                    Option::Some(twitter),
+                    Option::Some(youtube),
+                    Option::Some(website),
                 )
         }
 
-        fn publish_game(self: @ContractState, world_address: felt252, namespace: felt252) {
+        fn publish_game(ref self: ContractState, world_address: felt252, namespace: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.registerable.publish(world, caller, world_address, namespace);
         }
 
-        fn hide_game(self: @ContractState, world_address: felt252, namespace: felt252) {
+        fn hide_game(ref self: ContractState, world_address: felt252, namespace: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.registerable.hide(world, caller, world_address, namespace);
         }
 
-        fn whitelist_game(self: @ContractState, world_address: felt252, namespace: felt252) {
+        fn whitelist_game(ref self: ContractState, world_address: felt252, namespace: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.registerable.whitelist(world, caller, world_address, namespace);
         }
 
-        fn blacklist_game(self: @ContractState, world_address: felt252, namespace: felt252) {
+        fn blacklist_game(ref self: ContractState, world_address: felt252, namespace: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.registerable.blacklist(world, caller, world_address, namespace);
         }
 
-        fn remove_game(self: @ContractState, world_address: felt252, namespace: felt252) {
+        fn remove_game(ref self: ContractState, world_address: felt252, namespace: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.registerable.remove(world, caller, world_address, namespace);
         }
 
         fn register_achievement(
-            self: @ContractState,
+            ref self: ContractState,
             world_address: felt252,
             namespace: felt252,
             identifier: felt252,
@@ -263,7 +263,7 @@ mod Registry {
         }
 
         fn update_achievement(
-            self: @ContractState,
+            ref self: ContractState,
             world_address: felt252,
             namespace: felt252,
             identifier: felt252,
@@ -275,7 +275,7 @@ mod Registry {
         }
 
         fn publish_achievement(
-            self: @ContractState, world_address: felt252, namespace: felt252, identifier: felt252
+            ref self: ContractState, world_address: felt252, namespace: felt252, identifier: felt252
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -283,7 +283,7 @@ mod Registry {
         }
 
         fn hide_achievement(
-            self: @ContractState, world_address: felt252, namespace: felt252, identifier: felt252
+            ref self: ContractState, world_address: felt252, namespace: felt252, identifier: felt252
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -291,7 +291,7 @@ mod Registry {
         }
 
         fn whitelist_achievement(
-            self: @ContractState, world_address: felt252, namespace: felt252, identifier: felt252
+            ref self: ContractState, world_address: felt252, namespace: felt252, identifier: felt252
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -299,7 +299,7 @@ mod Registry {
         }
 
         fn blacklist_achievement(
-            self: @ContractState, world_address: felt252, namespace: felt252, identifier: felt252
+            ref self: ContractState, world_address: felt252, namespace: felt252, identifier: felt252
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
@@ -307,20 +307,20 @@ mod Registry {
         }
 
         fn remove_achievement(
-            self: @ContractState, world_address: felt252, namespace: felt252, identifier: felt252
+            ref self: ContractState, world_address: felt252, namespace: felt252, identifier: felt252
         ) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.trackable.remove(world, caller, world_address, namespace, identifier);
         }
 
-        fn pin(self: @ContractState, achievement_id: felt252) {
+        fn pin(ref self: ContractState, achievement_id: felt252) {
             let world: WorldStorage = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.pinnable.pin(world, caller, achievement_id);
         }
 
-        fn unpin(self: @ContractState, achievement_id: felt252) {
+        fn unpin(ref self: ContractState, achievement_id: felt252) {
             let world: WorldStorage = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
             self.pinnable.unpin(world, caller, achievement_id);

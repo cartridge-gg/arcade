@@ -12,11 +12,11 @@ mod AllianceableComponent {
 
     // Internal imports
 
-    use society::store::{Store, StoreTrait};
-    use society::models::alliance::{Alliance, AllianceTrait, AllianceAssert};
-    use society::models::guild::{Guild, GuildTrait, GuildAssert};
-    use society::models::member::{Member, MemberTrait, MemberAssert};
-    use society::types::role::Role;
+    use social::store::{Store, StoreTrait};
+    use social::models::alliance::{Alliance, AllianceTrait, AllianceAssert};
+    use social::models::guild::{Guild, GuildTrait, GuildAssert};
+    use social::models::member::{Member, MemberTrait, MemberAssert};
+    use social::types::role::Role;
 
     // Storage
 

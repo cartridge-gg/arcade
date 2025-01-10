@@ -3,7 +3,7 @@ members = [
     "packages/controller",
     "packages/provider",
     "packages/registry",
-    "packages/society",
+    "packages/social",
     "packages/achievement",
 ]
 description = "Dojo achievement library"
