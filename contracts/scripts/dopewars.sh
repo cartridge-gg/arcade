@@ -9,7 +9,7 @@ starkli invoke \
         str:"dopewars" \
         str:"ryomainnet" \
         0 \
-        0 0 0 \
+        bytearray:"" \
         0 0 0 \
         0 0 0 \
         0 0 0 \

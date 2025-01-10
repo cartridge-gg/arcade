@@ -1,14 +1,9 @@
-import * as torii from "@dojoengine/torii-client";
 import { NAMESPACE } from "../../constants";
-import { shortString } from "starknet";
+import { shortString, addAddressPadding } from "starknet";
+import { SchemaType } from "../../bindings";
+import { ParsedEntity, QueryBuilder, SDK, StandardizedQueryResult } from "@dojoengine/sdk";
 
-const MODEL_NAME = `${NAMESPACE}-Game`;
-const DEFAULT_KEYS_CLAUSES: torii.EntityKeysClause[] = [
-  { Keys: { keys: [undefined, undefined], pattern_matching: "FixedLen", models: [MODEL_NAME] } },
-];
-const DEFAULT_CLAUSE: torii.Clause = {
-  Keys: { keys: [undefined, undefined], pattern_matching: "FixedLen", models: [MODEL_NAME] },
-};
+const MODEL_NAME = "Game";
 
 export class GameModel {
   constructor(
@@ -37,18 +32,18 @@ export class GameModel {
     this.owner = owner;
   }
 
-  static from(model: torii.Model) {
-    const worldAddress = String(model.world_address.value);
-    const namespace = shortString.decodeShortString(String(model.namespace.value));
-    const project = shortString.decodeShortString(String(model.project.value));
-    const active = !!model.active.value;
-    const published = !!model.published.value;
-    const whitelisted = !!model.whitelisted.value;
-    const priority = Number(model.priority.value);
-    const karma = Number(model.karma.value);
-    const metadata = Metadata.from(String(model.metadata.value));
-    const socials = Socials.from(String(model.socials.value));
-    const owner = BigInt(String(model.owner.value)).toString(16);
+  static from(model: any) {
+    const worldAddress = addAddressPadding(model.world_address);
+    const namespace = shortString.decodeShortString(`0x${BigInt(model.namespace).toString(16)}`);
+    const project = shortString.decodeShortString(`0x${BigInt(model.project).toString(16)}`);
+    const active = !!model.active;
+    const published = !!model.published;
+    const whitelisted = !!model.whitelisted;
+    const priority = Number(model.priority);
+    const karma = Number(model.karma);
+    const metadata = Metadata.from(model.metadata);
+    const socials = Socials.from(model.socials);
+    const owner = addAddressPadding(model.owner);
     return new GameModel(
       worldAddress,
       namespace,
@@ -81,8 +76,13 @@ export class Metadata {
   }
 
   static from(value: string) {
-    const json = JSON.parse(value);
-    return new Metadata(json.color, json.name, json.description, json.image, json.banner);
+    try {
+      const json = JSON.parse(value);
+      return new Metadata(json.color, json.name, json.description, json.image, json.banner);
+    } catch (error) {
+      console.error("Error parsing metadata:", value);
+      return new Metadata("", "", "", "", "");
+    }
   }
 }
 
@@ -102,81 +102,74 @@ export class Socials {
   }
 
   static from(value: string) {
-    const json = JSON.parse(value);
-    return new Socials(json.discord, json.telegram, json.twitter, json.youtube, json.website);
+    try {
+      const json = JSON.parse(value);
+      return new Socials(json.discord, json.telegram, json.twitter, json.youtube, json.website);
+    } catch (error) {
+      console.error("Error parsing socials:", value);
+      return new Socials("", "", "", "", "");
+    }
   }
 }
 
 export const Game = {
-  client: undefined as torii.ToriiClient | undefined,
-  unsubscribe: undefined as torii.Subscription | undefined,
+  sdk: undefined as SDK<SchemaType> | undefined,
+  unsubscribe: undefined as (() => void) | undefined,
 
-  init: (toriiClient: torii.ToriiClient) => {
-    Game.client = toriiClient;
+  init: (sdk: SDK<SchemaType>) => {
+    Game.sdk = sdk;
   },
 
   fetch: async (
     callback: (models: GameModel[]) => void,
-    clause: torii.Clause = DEFAULT_CLAUSE,
-    limit: number = 1000,
-    offset: number = 0,
-    order_by: torii.OrderBy[] = [],
-    entity_models: string[] = [],
-    dont_include_hashed_keys: boolean = false,
-    entity_updated_after: number = 0,
-    historical: boolean = false,
   ) => {
-    if (!Game.client) return;
-    const models: GameModel[] = [];
-    while (true) {
-      const entities: torii.Entities = await Game.client.getEventMessages(
-        {
-          limit,
-          offset,
-          clause,
-          order_by,
-          entity_models,
-          dont_include_hashed_keys,
-          entity_updated_after,
-        },
-        historical,
-      );
-      Object.values(entities).forEach((event: torii.Entity) => {
-        if (!event[MODEL_NAME]) return;
-        const model = event[MODEL_NAME];
-        const gameModel = GameModel.from(model);
-        models.push(gameModel);
-      });
-      if (models.length < limit) break;
-      offset += limit;
-    }
-    callback(models);
+    if (!Game.sdk) return;
+
+    const wrappedCallback = ({ data, error }: { data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined; error?: Error | undefined; }) => {
+      if (error) {
+        console.error("Error fetching entities:", error);
+        return;
+      }
+      if (!data) return;
+      const models = (data as ParsedEntity<SchemaType>[]).map((entity) => GameModel.from(entity.models[NAMESPACE][MODEL_NAME]));
+      callback(models);
+    };
+
+    const query = new QueryBuilder<SchemaType>()
+      .namespace(NAMESPACE, (namespace) =>
+        namespace.entity(MODEL_NAME, (entity) => entity.neq("world_address", "0x0")))
+      .build()
+
+    await Game.sdk.getEntities({ query, callback: wrappedCallback });
   },
 
   sub: async (
     callback: (event: GameModel) => void,
-    clauses: torii.EntityKeysClause[] = DEFAULT_KEYS_CLAUSES,
-    historical: boolean = false,
   ) => {
-    if (!Game.client) return;
-    const wrappedCallback = (_fetchedEntities: any, event: any) => {
-      if (!event[MODEL_NAME]) return;
-      const model = event[MODEL_NAME];
-      const gameModel = GameModel.from(model);
-      callback(gameModel);
+    if (!Game.sdk) return;
+    
+    const wrappedCallback = ({ data, error }: { data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined; error?: Error | undefined; }) => {
+      if (error) {
+        console.error("Error subscribing to entities:", error);
+        return;
+      }
+      if (!data || (data[0] as ParsedEntity<SchemaType>).entityId === "0x0") return;
+      const entity = (data as ParsedEntity<SchemaType>[])[0];
+      callback(GameModel.from(entity.models[NAMESPACE][MODEL_NAME]));
     };
-    const subscription = async () => {
-      if (!Game.client) return;
-      return Game.client.onEventMessageUpdated(clauses, historical, wrappedCallback);
-    };
-    subscription()
-      .then((sync) => (Game.unsubscribe = sync))
-      .catch((error) => console.error("Error setting up entity sync:", error));
+
+    const query = new QueryBuilder<SchemaType>()
+      .namespace(NAMESPACE, (namespace) =>
+        namespace.entity(MODEL_NAME, (entity) => entity.neq("world_address", "0x0")))
+      .build()
+
+    const subscription = await Game.sdk.subscribeEntityQuery({ query, callback: wrappedCallback });
+    Game.unsubscribe = () => subscription.cancel();
   },
 
   unsub: () => {
     if (!Game.unsubscribe) return;
-    Game.unsubscribe.cancel();
+    Game.unsubscribe();
     Game.unsubscribe = undefined;
   },
 };
