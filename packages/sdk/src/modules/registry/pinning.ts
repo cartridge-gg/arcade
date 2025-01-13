@@ -32,35 +32,44 @@ export const Pinning = {
     Pinning.sdk = sdk;
   },
 
-  fetch: async (
-    callback: (models: PinningEvent[]) => void,
-  ) => {
+  fetch: async (callback: (models: PinningEvent[]) => void) => {
     if (!Pinning.sdk) return;
 
-    const wrappedCallback = ({ data, error }: { data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined; error?: Error | undefined; }) => {
+    const wrappedCallback = ({
+      data,
+      error,
+    }: {
+      data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined;
+      error?: Error | undefined;
+    }) => {
       if (error) {
         console.error("Error fetching entities:", error);
         return;
       }
       if (!data) return;
-      const models = (data as ParsedEntity<SchemaType>[]).map((entity) => PinningEvent.from(entity.models[NAMESPACE][MODEL_NAME]));
+      const models = (data as ParsedEntity<SchemaType>[]).map((entity) =>
+        PinningEvent.from(entity.models[NAMESPACE][MODEL_NAME]),
+      );
       callback(models);
     };
 
     const query = new QueryBuilder<SchemaType>()
-      .namespace(NAMESPACE, (namespace) =>
-        namespace.entity(MODEL_NAME, (entity) => entity.neq("player_id", "0x0")))
-      .build()
+      .namespace(NAMESPACE, (namespace) => namespace.entity(MODEL_NAME, (entity) => entity.neq("player_id", "0x0")))
+      .build();
 
     await Pinning.sdk.getEventMessages({ query, callback: wrappedCallback });
   },
 
-  sub: async (
-    callback: (event: PinningEvent) => void,
-  ) => {
+  sub: async (callback: (event: PinningEvent) => void) => {
     if (!Pinning.sdk) return;
-    
-    const wrappedCallback = ({ data, error }: { data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined; error?: Error | undefined; }) => {
+
+    const wrappedCallback = ({
+      data,
+      error,
+    }: {
+      data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined;
+      error?: Error | undefined;
+    }) => {
       if (error) {
         console.error("Error subscribing to entities:", error);
         return;
@@ -71,9 +80,8 @@ export const Pinning = {
     };
 
     const query = new QueryBuilder<SchemaType>()
-      .namespace(NAMESPACE, (namespace) =>
-        namespace.entity(MODEL_NAME, (entity) => entity.neq("player_id", "0x0")))
-      .build()
+      .namespace(NAMESPACE, (namespace) => namespace.entity(MODEL_NAME, (entity) => entity.neq("player_id", "0x0")))
+      .build();
 
     const subscription = await Pinning.sdk.subscribeEventQuery({ query, callback: wrappedCallback });
     Pinning.unsubscribe = () => subscription.cancel();

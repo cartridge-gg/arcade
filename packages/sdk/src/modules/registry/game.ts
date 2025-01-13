@@ -120,35 +120,44 @@ export const Game = {
     Game.sdk = sdk;
   },
 
-  fetch: async (
-    callback: (models: GameModel[]) => void,
-  ) => {
+  fetch: async (callback: (models: GameModel[]) => void) => {
     if (!Game.sdk) return;
 
-    const wrappedCallback = ({ data, error }: { data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined; error?: Error | undefined; }) => {
+    const wrappedCallback = ({
+      data,
+      error,
+    }: {
+      data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined;
+      error?: Error | undefined;
+    }) => {
       if (error) {
         console.error("Error fetching entities:", error);
         return;
       }
       if (!data) return;
-      const models = (data as ParsedEntity<SchemaType>[]).map((entity) => GameModel.from(entity.models[NAMESPACE][MODEL_NAME]));
+      const models = (data as ParsedEntity<SchemaType>[]).map((entity) =>
+        GameModel.from(entity.models[NAMESPACE][MODEL_NAME]),
+      );
       callback(models);
     };
 
     const query = new QueryBuilder<SchemaType>()
-      .namespace(NAMESPACE, (namespace) =>
-        namespace.entity(MODEL_NAME, (entity) => entity.neq("world_address", "0x0")))
-      .build()
+      .namespace(NAMESPACE, (namespace) => namespace.entity(MODEL_NAME, (entity) => entity.neq("world_address", "0x0")))
+      .build();
 
     await Game.sdk.getEntities({ query, callback: wrappedCallback });
   },
 
-  sub: async (
-    callback: (event: GameModel) => void,
-  ) => {
+  sub: async (callback: (event: GameModel) => void) => {
     if (!Game.sdk) return;
-    
-    const wrappedCallback = ({ data, error }: { data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined; error?: Error | undefined; }) => {
+
+    const wrappedCallback = ({
+      data,
+      error,
+    }: {
+      data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined;
+      error?: Error | undefined;
+    }) => {
       if (error) {
         console.error("Error subscribing to entities:", error);
         return;
@@ -159,9 +168,8 @@ export const Game = {
     };
 
     const query = new QueryBuilder<SchemaType>()
-      .namespace(NAMESPACE, (namespace) =>
-        namespace.entity(MODEL_NAME, (entity) => entity.neq("world_address", "0x0")))
-      .build()
+      .namespace(NAMESPACE, (namespace) => namespace.entity(MODEL_NAME, (entity) => entity.neq("world_address", "0x0")))
+      .build();
 
     const subscription = await Game.sdk.subscribeEntityQuery({ query, callback: wrappedCallback });
     Game.unsubscribe = () => subscription.cancel();
