@@ -1253,7 +1253,7 @@
   "contracts": [
     {
       "address": "0x3af383ca009f2066f44ec9c6e760072b58142468bdf2b2b87053e4ee0012ed2",
-      "class_hash": "0xaf5d998b4a58c533dece64bafc58e17915318454776611ae5b1684b775248f",
+      "class_hash": "0x3334d5af1426126dd5a64dd4efdc2658e4ff1127891b214fd2394b4b6b75858",
       "abi": [
         {
           "type": "impl",
@@ -1326,30 +1326,6 @@
           "type": "interface",
           "name": "arcade::systems::registry::IRegistry",
           "items": [
-            {
-              "type": "function",
-              "name": "pin",
-              "inputs": [
-                {
-                  "name": "achievement_id",
-                  "type": "core::felt252"
-                }
-              ],
-              "outputs": [],
-              "state_mutability": "external"
-            },
-            {
-              "type": "function",
-              "name": "unpin",
-              "inputs": [
-                {
-                  "name": "achievement_id",
-                  "type": "core::felt252"
-                }
-              ],
-              "outputs": [],
-              "state_mutability": "external"
-            },
             {
               "type": "function",
               "name": "register_game",
@@ -1806,12 +1782,6 @@
         },
         {
           "type": "event",
-          "name": "achievement::components::pinnable::PinnableComponent::Event",
-          "kind": "enum",
-          "variants": []
-        },
-        {
-          "type": "event",
           "name": "arcade::systems::registry::Registry::Event",
           "kind": "enum",
           "variants": [
@@ -1839,11 +1809,6 @@
               "name": "TrackableEvent",
               "type": "registry::components::trackable::TrackableComponent::Event",
               "kind": "flat"
-            },
-            {
-              "name": "PinnableEvent",
-              "type": "achievement::components::pinnable::PinnableComponent::Event",
-              "kind": "flat"
             }
           ]
         }
@@ -1855,8 +1820,6 @@
       "selector": "0x54d3bcd441104e039ceaec4a413e72de393b65f79d1df74dc3346dc7f861173",
       "systems": [
         "dojo_init",
-        "pin",
-        "unpin",
         "register_game",
         "update_game",
         "publish_game",
@@ -2162,7 +2125,7 @@
     },
     {
       "address": "0x259a19cf745d528e85492524d3d8c4721b1357fdad7538d7be22e88208fd89b",
-      "class_hash": "0x3fdbf2e7742eac51ec9bca06796e01d2e0dd9bbfdf26978df76fab130dba9d9",
+      "class_hash": "0x7c1d38f9d0fd0327e7a693a8280b0ef66e3d5b1ccf3d5ccc19d22ccd3af7bdd",
       "abi": [
         {
           "type": "impl",
@@ -2237,6 +2200,30 @@
           "type": "interface",
           "name": "arcade::systems::social::ISocial",
           "items": [
+            {
+              "type": "function",
+              "name": "pin",
+              "inputs": [
+                {
+                  "name": "achievement_id",
+                  "type": "core::felt252"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "unpin",
+              "inputs": [
+                {
+                  "name": "achievement_id",
+                  "type": "core::felt252"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
             {
               "type": "function",
               "name": "follow",
@@ -2644,6 +2631,12 @@
         },
         {
           "type": "event",
+          "name": "achievement::components::pinnable::PinnableComponent::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
           "name": "social::components::allianceable::AllianceableComponent::Event",
           "kind": "enum",
           "variants": []
@@ -2676,6 +2669,11 @@
               "kind": "nested"
             },
             {
+              "name": "PinnableEvent",
+              "type": "achievement::components::pinnable::PinnableComponent::Event",
+              "kind": "flat"
+            },
+            {
               "name": "AllianceableEvent",
               "type": "social::components::allianceable::AllianceableComponent::Event",
               "kind": "flat"
@@ -2697,6 +2695,8 @@
       "tag": "ARCADE-Social",
       "selector": "0x28532a65d3bfdb030133a56031e467c489058fee53a3bd903adc719735aa6c5",
       "systems": [
+        "pin",
+        "unpin",
         "follow",
         "unfollow",
         "create_alliance",
