@@ -10,9 +10,11 @@ import { AllowArray, Call } from "starknet";
 
 export class Slot {
   private manifest: any;
+  private name: string;
 
   constructor(manifest: any) {
     this.manifest = manifest;
+    this.name = `${NAMESPACE}-Slot`;
   }
 
   public deploy(props: SystemProps.SlotDeployProps): AllowArray<Call> {
@@ -20,7 +22,7 @@ export class Slot {
     const entrypoint = "deploy";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Slot`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [service, project, tier],
     };
@@ -31,7 +33,7 @@ export class Slot {
     const entrypoint = "remove";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Slot`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [service, project],
     };
@@ -42,7 +44,7 @@ export class Slot {
     const entrypoint = "hire";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Slot`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [project, accountId, role],
     };
@@ -53,7 +55,7 @@ export class Slot {
     const entrypoint = "fire";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Slot`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [project, accountId],
     };

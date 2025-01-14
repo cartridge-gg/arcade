@@ -10,9 +10,33 @@ import { AllowArray, Call } from "starknet";
 
 export class Social {
   private manifest: unknown;
+  private name: string;
 
   constructor(manifest: any) {
     this.manifest = manifest;
+    this.name = `${NAMESPACE}-Social`;
+  }
+
+  public pin(props: SystemProps.RegistryPinProps): AllowArray<Call> {
+    const { achievementId } = props;
+    const entrypoint = "pin";
+
+    return {
+      contractAddress: getContractByName(this.manifest, this.name),
+      entrypoint,
+      calldata: [achievementId],
+    };
+  }
+
+  public unpin(props: SystemProps.RegistryUnpinProps): AllowArray<Call> {
+    const { achievementId } = props;
+    const entrypoint = "unpin";
+
+    return {
+      contractAddress: getContractByName(this.manifest, this.name),
+      entrypoint,
+      calldata: [achievementId],
+    };
   }
 
   public follow(props: SystemProps.SocialFollowProps): AllowArray<Call> {
@@ -20,7 +44,7 @@ export class Social {
     const entrypoint = "follow";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [target],
     };
@@ -31,7 +55,7 @@ export class Social {
     const entrypoint = "unfollow";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [target],
     };
@@ -42,7 +66,7 @@ export class Social {
     const entrypoint = "create_alliance";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [color, name, description, image, banner, discord, telegram, twitter, youtube],
     };
@@ -53,7 +77,7 @@ export class Social {
     const entrypoint = "open_alliance";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [free],
     };
@@ -63,7 +87,7 @@ export class Social {
     const entrypoint = "close_alliance";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [],
     };
@@ -74,7 +98,7 @@ export class Social {
     const entrypoint = "crown_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [guildId],
     };
@@ -85,7 +109,7 @@ export class Social {
     const entrypoint = "hire_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [guildId],
     };
@@ -96,7 +120,7 @@ export class Social {
     const entrypoint = "fire_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [guildId],
     };
@@ -107,7 +131,7 @@ export class Social {
     const entrypoint = "request_alliance";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [allianceId],
     };
@@ -117,7 +141,7 @@ export class Social {
     const entrypoint = "cancel_alliance";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [],
     };
@@ -127,7 +151,7 @@ export class Social {
     const entrypoint = "leave_alliance";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [],
     };
@@ -138,7 +162,7 @@ export class Social {
     const entrypoint = "create_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [color, name, description, image, banner, discord, telegram, twitter, youtube],
     };
@@ -149,7 +173,7 @@ export class Social {
     const entrypoint = "open_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [free],
     };
@@ -159,7 +183,7 @@ export class Social {
     const entrypoint = "close_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [],
     };
@@ -170,7 +194,7 @@ export class Social {
     const entrypoint = "crown_member";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [memberId],
     };
@@ -181,7 +205,7 @@ export class Social {
     const entrypoint = "promote_member";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [memberId],
     };
@@ -192,7 +216,7 @@ export class Social {
     const entrypoint = "demote_member";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [memberId],
     };
@@ -203,7 +227,7 @@ export class Social {
     const entrypoint = "hire_member";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [memberId],
     };
@@ -214,7 +238,7 @@ export class Social {
     const entrypoint = "fire_member";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [memberId],
     };
@@ -225,7 +249,7 @@ export class Social {
     const entrypoint = "request_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [guildId],
     };
@@ -235,7 +259,7 @@ export class Social {
     const entrypoint = "cancel_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [],
     };
@@ -245,7 +269,7 @@ export class Social {
     const entrypoint = "leave_guild";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Social`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [],
     };

@@ -11,31 +11,11 @@ import { AllowArray, Call } from "starknet";
 
 export class Registry {
   private manifest: any;
+  private name: string;
 
   constructor(manifest: any) {
     this.manifest = manifest;
-  }
-
-  public pin(props: SystemProps.RegistryPinProps): AllowArray<Call> {
-    const { achievementId } = props;
-    const entrypoint = "pin";
-
-    return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
-      entrypoint,
-      calldata: [achievementId],
-    };
-  }
-
-  public unpin(props: SystemProps.RegistryUnpinProps): AllowArray<Call> {
-    const { achievementId } = props;
-    const entrypoint = "unpin";
-
-    return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
-      entrypoint,
-      calldata: [achievementId],
-    };
+    this.name = `${NAMESPACE}-Registry`;
   }
 
   public register_game(props: SystemProps.RegistryRegisterGameProps): AllowArray<Call> {
@@ -57,7 +37,7 @@ export class Registry {
     const entrypoint = "register_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [
         worldAddress,
@@ -95,7 +75,7 @@ export class Registry {
     const entrypoint = "update_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [
         worldAddress,
@@ -119,7 +99,7 @@ export class Registry {
     const entrypoint = "publish_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -130,7 +110,7 @@ export class Registry {
     const entrypoint = "hide_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -141,7 +121,7 @@ export class Registry {
     const entrypoint = "whitelist_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -152,7 +132,7 @@ export class Registry {
     const entrypoint = "blacklist_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -163,7 +143,7 @@ export class Registry {
     const entrypoint = "remove_game";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace],
     };
@@ -174,7 +154,7 @@ export class Registry {
     const entrypoint = "register_achievement";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace, identifier, karma],
     };
@@ -185,7 +165,7 @@ export class Registry {
     const entrypoint = "update_achievement";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace, identifier, karma],
     };
@@ -196,7 +176,7 @@ export class Registry {
     const entrypoint = "remove_achievement";
 
     return {
-      contractAddress: getContractByName(this.manifest, `${NAMESPACE}-Registry`),
+      contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
       calldata: [worldAddress, namespace, identifier],
     };
