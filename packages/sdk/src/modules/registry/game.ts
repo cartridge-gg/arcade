@@ -155,5 +155,5 @@ export const Game = {
     { name: "whitelist_game", entrypoint: "whitelist_game", description: "Whitelist a game." },
     { name: "blacklist_game", entrypoint: "blacklist_game", description: "Blacklist a game." },
     { name: "remove_game", entrypoint: "remove_game", description: "Remove a game." },
-  ]
+  ],
 };

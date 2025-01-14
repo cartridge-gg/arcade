@@ -127,6 +127,5 @@ export const Achievement = {
     { name: "whitelist_achievement", entrypoint: "whitelist_achievement", description: "Whitelist an achievement." },
     { name: "blacklist_achievement", entrypoint: "blacklist_achievement", description: "Blacklist an achievement." },
     { name: "remove_achievement", entrypoint: "remove_achievement", description: "Remove an achievement." },
-  ]
+  ],
 };
-

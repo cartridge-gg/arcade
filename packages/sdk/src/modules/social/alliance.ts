@@ -129,6 +129,5 @@ export const Alliance = {
     { name: "request_alliance", entrypoint: "request_alliance", description: "Request to join an alliance." },
     { name: "cancel_alliance", entrypoint: "cancel_alliance", description: "Cancel a request to join an alliance." },
     { name: "leave_alliance", entrypoint: "leave_alliance", description: "Leave an alliance." },
-  ]
+  ],
 };
-

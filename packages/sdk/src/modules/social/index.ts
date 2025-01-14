@@ -36,7 +36,13 @@ export const Social = {
         [Social.address]: {
           name: "Social",
           description: "Social contract to manage your social activities",
-          methods: [...Pin.methods(), ...Follow.methods(), ...Member.methods(), ...Guild.methods(), ...Alliance.methods()],
+          methods: [
+            ...Pin.methods(),
+            ...Follow.methods(),
+            ...Member.methods(),
+            ...Guild.methods(),
+            ...Alliance.methods(),
+          ],
         },
       },
     };

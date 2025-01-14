@@ -128,6 +128,5 @@ export const Guild = {
     { name: "demote_member", entrypoint: "demote_member", description: "Demote an officer to member." },
     { name: "hire_member", entrypoint: "hire_member", description: "Hire a member to the guild." },
     { name: "fire_member", entrypoint: "fire_member", description: "Fire a member from the guild." },
-  ]
+  ],
 };
-

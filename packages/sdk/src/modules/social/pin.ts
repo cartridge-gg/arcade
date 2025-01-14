@@ -113,5 +113,5 @@ export const Pin = {
   methods: () => [
     { name: "pin", entrypoint: "pin", description: "Pin an achievement." },
     { name: "unpin", entrypoint: "unpin", description: "Unpin an achievement." },
-  ]
+  ],
 };

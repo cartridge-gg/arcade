@@ -113,6 +113,5 @@ export const Member = {
     };
   },
 
-  methods: () => []
+  methods: () => [],
 };
-

@@ -113,5 +113,5 @@ export const Follow = {
   methods: () => [
     { name: "follow", entrypoint: "follow", description: "Follow another player." },
     { name: "unfollow", entrypoint: "unfollow", description: "Unfollow a player." },
-  ]
+  ],
 };
