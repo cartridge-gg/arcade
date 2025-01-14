@@ -5,7 +5,7 @@ import { ParsedEntity, QueryBuilder, SDK, StandardizedQueryResult } from "@dojoe
 
 const MODEL_NAME = "TrophyPinning";
 
-export class PinningEvent {
+export class PinEvent {
   constructor(
     public playerId: string,
     public achievementId: string,
@@ -20,20 +20,22 @@ export class PinningEvent {
     const playerId = addAddressPadding(model.player_id);
     const achievementId = `0x${BigInt(String(model.achievement_id)).toString(16)}`;
     const time = Number(model.time);
-    return new PinningEvent(playerId, achievementId, time);
+    return new PinEvent(playerId, achievementId, time);
   }
 }
 
-export const Pinning = {
+export const Pin = {
+  address: undefined as string | undefined,
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>) => {
-    Pinning.sdk = sdk;
+  init: (sdk: SDK<SchemaType>, address: string) => {
+    Pin.sdk = sdk;
+    Pin.address = address;
   },
 
-  fetch: async (callback: (models: PinningEvent[]) => void) => {
-    if (!Pinning.sdk) return;
+  fetch: async (callback: (models: PinEvent[]) => void) => {
+    if (!Pin.sdk) return;
 
     const wrappedCallback = ({
       data,
@@ -48,7 +50,7 @@ export const Pinning = {
       }
       if (!data) return;
       const models = (data as ParsedEntity<SchemaType>[]).map((entity) =>
-        PinningEvent.from(entity.models[NAMESPACE][MODEL_NAME]),
+        PinEvent.from(entity.models[NAMESPACE][MODEL_NAME]),
       );
       callback(models);
     };
@@ -57,11 +59,11 @@ export const Pinning = {
       .namespace(NAMESPACE, (namespace) => namespace.entity(MODEL_NAME, (entity) => entity.neq("player_id", "0x0")))
       .build();
 
-    await Pinning.sdk.getEventMessages({ query, callback: wrappedCallback });
+    await Pin.sdk.getEventMessages({ query, callback: wrappedCallback });
   },
 
-  sub: async (callback: (event: PinningEvent) => void) => {
-    if (!Pinning.sdk) return;
+  sub: async (callback: (event: PinEvent) => void) => {
+    if (!Pin.sdk) return;
 
     const wrappedCallback = ({
       data,
@@ -76,20 +78,40 @@ export const Pinning = {
       }
       if (!data || (data[0] as ParsedEntity<SchemaType>).entityId === "0x0") return;
       const entity = (data as ParsedEntity<SchemaType>[])[0];
-      callback(PinningEvent.from(entity.models[NAMESPACE][MODEL_NAME]));
+      callback(PinEvent.from(entity.models[NAMESPACE][MODEL_NAME]));
     };
 
     const query = new QueryBuilder<SchemaType>()
       .namespace(NAMESPACE, (namespace) => namespace.entity(MODEL_NAME, (entity) => entity.neq("player_id", "0x0")))
       .build();
 
-    const subscription = await Pinning.sdk.subscribeEventQuery({ query, callback: wrappedCallback });
-    Pinning.unsubscribe = () => subscription.cancel();
+    const subscription = await Pin.sdk.subscribeEventQuery({ query, callback: wrappedCallback });
+    Pin.unsubscribe = () => subscription.cancel();
   },
 
   unsub: () => {
-    if (!Pinning.unsubscribe) return;
-    Pinning.unsubscribe();
-    Pinning.unsubscribe = undefined;
+    if (!Pin.unsubscribe) return;
+    Pin.unsubscribe();
+    Pin.unsubscribe = undefined;
   },
+
+  policies: () => {
+    if (!Pin.address) {
+      throw new Error("Pin module is not initialized");
+    }
+    return {
+      contracts: {
+        [Pin.address]: {
+          name: "Social",
+          description: "Social contract to manage your social activities",
+          methods: Pin.methods(),
+        },
+      },
+    };
+  },
+
+  methods: () => [
+    { name: "pin", entrypoint: "pin", description: "Pin an achievement." },
+    { name: "unpin", entrypoint: "unpin", description: "Unpin an achievement." },
+  ]
 };

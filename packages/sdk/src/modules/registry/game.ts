@@ -2,6 +2,7 @@ import { NAMESPACE } from "../../constants";
 import { shortString, addAddressPadding } from "starknet";
 import { SchemaType } from "../../bindings";
 import { ParsedEntity, QueryBuilder, SDK, StandardizedQueryResult } from "@dojoengine/sdk";
+import { Metadata, Socials } from "../../classes";
 
 const MODEL_NAME = "Game";
 
@@ -60,64 +61,14 @@ export class GameModel {
   }
 }
 
-export class Metadata {
-  constructor(
-    public color: string,
-    public name: string,
-    public description: string,
-    public image: string,
-    public banner: string,
-  ) {
-    this.color = color;
-    this.name = name;
-    this.description = description;
-    this.image = image;
-    this.banner = banner;
-  }
-
-  static from(value: string) {
-    try {
-      const json = JSON.parse(value);
-      return new Metadata(json.color, json.name, json.description, json.image, json.banner);
-    } catch (error: unknown) {
-      console.error("Error parsing metadata:", error);
-      return new Metadata("", "", "", "", "");
-    }
-  }
-}
-
-export class Socials {
-  constructor(
-    public discord: string,
-    public telegram: string,
-    public twitter: string,
-    public youtube: string,
-    public website: string,
-  ) {
-    this.discord = discord;
-    this.telegram = telegram;
-    this.twitter = twitter;
-    this.youtube = youtube;
-    this.website = website;
-  }
-
-  static from(value: string) {
-    try {
-      const json = JSON.parse(value);
-      return new Socials(json.discord, json.telegram, json.twitter, json.youtube, json.website);
-    } catch (error: unknown) {
-      console.error("Error parsing socials:", error);
-      return new Socials("", "", "", "", "");
-    }
-  }
-}
-
 export const Game = {
+  address: undefined as string | undefined,
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>) => {
+  init: (sdk: SDK<SchemaType>, address: string) => {
     Game.sdk = sdk;
+    Game.address = address;
   },
 
   fetch: async (callback: (models: GameModel[]) => void) => {
@@ -180,4 +131,29 @@ export const Game = {
     Game.unsubscribe();
     Game.unsubscribe = undefined;
   },
+
+  policies: () => {
+    if (!Game.address) {
+      throw new Error("Game module is not initialized");
+    }
+    return {
+      contracts: {
+        [Game.address]: {
+          name: "Registry",
+          description: "Registry contract for games and achievements",
+          methods: Game.methods(),
+        },
+      },
+    };
+  },
+
+  methods: () => [
+    { name: "register_game", entrypoint: "register_game", description: "Register a game." },
+    { name: "update_game", entrypoint: "update_game", description: "Update a game." },
+    { name: "publish_game", entrypoint: "publish_game", description: "Publish a game." },
+    { name: "hide_game", entrypoint: "hide_game", description: "Hide a game." },
+    { name: "whitelist_game", entrypoint: "whitelist_game", description: "Whitelist a game." },
+    { name: "blacklist_game", entrypoint: "blacklist_game", description: "Blacklist a game." },
+    { name: "remove_game", entrypoint: "remove_game", description: "Remove a game." },
+  ]
 };

@@ -61,11 +61,8 @@ export class ArcadeProvider extends DojoEmitterProvider {
    * @param chainId - The chain ID
    */
   constructor(chainId: constants.StarknetChainId) {
-    console.log("chainId", chainId);
-    console.log("configs", configs);
     const config = configs[chainId];
-    console.log("config", config);
-    super(config, config.rpcUrl);
+    super(config.manifest, config.rpcUrl);
     this.manifest = config.manifest;
 
     this.getWorldAddress = function () {

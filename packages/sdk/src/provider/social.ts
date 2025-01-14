@@ -11,7 +11,7 @@ import { AllowArray, Call } from "starknet";
 export class Social {
   private manifest: unknown;
 
-  constructor(manifest: unknown) {
+  constructor(manifest: any) {
     this.manifest = manifest;
   }
 

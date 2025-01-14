@@ -1,4 +1,5 @@
 export * from "./registry";
+export * from "./social";
 import { init } from "@dojoengine/sdk";
 import { configs } from "../configs";
 import { SchemaType, schema } from "../bindings/models.gen";

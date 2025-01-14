@@ -2,38 +2,6 @@ import { DojoProvider } from "@dojoengine/core";
 import { Account, AccountInterface, BigNumberish, ByteArray } from "starknet";
 
 export function setupWorld(provider: DojoProvider) {
-  const Registry_pin = async (snAccount: Account | AccountInterface, achievementId: BigNumberish) => {
-    try {
-      return await provider.execute(
-        snAccount,
-        {
-          contractName: "Registry",
-          entrypoint: "pin",
-          calldata: [achievementId],
-        },
-        "ARCADE",
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const Registry_unpin = async (snAccount: Account | AccountInterface, achievementId: BigNumberish) => {
-    try {
-      return await provider.execute(
-        snAccount,
-        {
-          contractName: "Registry",
-          entrypoint: "unpin",
-          calldata: [achievementId],
-        },
-        "ARCADE",
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const Registry_registerGame = async (
     snAccount: Account | AccountInterface,
     worldAddress: BigNumberish,
@@ -363,6 +331,37 @@ export function setupWorld(provider: DojoProvider) {
           contractName: "Registry",
           entrypoint: "remove_achievement",
           calldata: [worldAddress, namespace, identifier],
+        },
+        "ARCADE",
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const Social_pin = async (snAccount: Account | AccountInterface, achievementId: BigNumberish) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        {
+          contractName: "Social",
+          entrypoint: "pin",
+          calldata: [achievementId],
+        },
+        "ARCADE",
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const Social_unpin = async (snAccount: Account | AccountInterface, achievementId: BigNumberish) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        {
+          contractName: "Social",
+          entrypoint: "unpin",
+          calldata: [achievementId],
         },
         "ARCADE",
       );
@@ -823,8 +822,6 @@ export function setupWorld(provider: DojoProvider) {
 
   return {
     Registry: {
-      pin: Registry_pin,
-      unpin: Registry_unpin,
       registerGame: Registry_registerGame,
       updateGame: Registry_updateGame,
       publishGame: Registry_publishGame,
@@ -841,6 +838,8 @@ export function setupWorld(provider: DojoProvider) {
       removeAchievement: Registry_removeAchievement,
     },
     Social: {
+      pin: Social_pin,
+      unpin: Social_unpin,
       follow: Social_follow,
       unfollow: Social_unfollow,
       createAlliance: Social_createAlliance,

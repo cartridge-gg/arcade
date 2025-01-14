@@ -34,11 +34,13 @@ export class AchievementModel {
 }
 
 export const Achievement = {
+  address: undefined as string | undefined,
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>) => {
+  init: (sdk: SDK<SchemaType>, address: string) => {
     Achievement.sdk = sdk;
+    Achievement.address = address;
   },
 
   fetch: async (callback: (models: AchievementModel[]) => void) => {
@@ -101,4 +103,30 @@ export const Achievement = {
     Achievement.unsubscribe();
     Achievement.unsubscribe = undefined;
   },
+
+  policies: () => {
+    if (!Achievement.address) {
+      throw new Error("Achievement module is not initialized");
+    }
+    return {
+      contracts: {
+        [Achievement.address]: {
+          name: "Registry",
+          description: "Registry contract for games and achievements",
+          methods: Achievement.methods(),
+        },
+      },
+    };
+  },
+
+  methods: () => [
+    { name: "register_achievement", entrypoint: "register_achievement", description: "Register an achievement." },
+    { name: "update_achievement", entrypoint: "update_achievement", description: "Update an achievement." },
+    { name: "publish_achievement", entrypoint: "publish_achievement", description: "Publish an achievement." },
+    { name: "hide_achievement", entrypoint: "hide_achievement", description: "Hide an achievement." },
+    { name: "whitelist_achievement", entrypoint: "whitelist_achievement", description: "Whitelist an achievement." },
+    { name: "blacklist_achievement", entrypoint: "blacklist_achievement", description: "Blacklist an achievement." },
+    { name: "remove_achievement", entrypoint: "remove_achievement", description: "Remove an achievement." },
+  ]
 };
+
