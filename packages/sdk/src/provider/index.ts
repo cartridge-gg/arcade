@@ -7,13 +7,13 @@
 import { DojoProvider } from "@dojoengine/core";
 import * as torii from "@dojoengine/torii-client";
 import EventEmitter from "eventemitter3";
-import { Account, AccountInterface, AllowArray, Call } from "starknet";
+import { Account, AccountInterface, AllowArray, Call, constants } from "starknet";
 import { NAMESPACE } from "../constants";
 import { TransactionType } from "./types";
 import { Social } from "./social";
 import { Registry } from "./registry";
 import { Slot } from "./slot";
-import { manifests, Network } from "../manifests";
+import { configs } from "../configs";
 export { TransactionType };
 
 function ApplyEventEmitter<T extends new (...args: any[]) => {}>(Base: T) {
@@ -58,12 +58,11 @@ export class ArcadeProvider extends DojoEmitterProvider {
   /**
    * Create a new ArcadeProvider instance
    *
-   * @param manifest - The manifest containing contract info
-   * @param url - Optional RPC URL
+   * @param chainId - The chain ID
    */
-  constructor(manifest?: any, url?: string) {
-    const config = manifest ? manifest : manifests[Network.Default];
-    super(config, url);
+  constructor(chainId: constants.StarknetChainId) {
+    const config = configs[chainId];
+    super(config, config.rpcUrl);
     this.manifest = config;
 
     this.getWorldAddress = function () {
@@ -71,9 +70,9 @@ export class ArcadeProvider extends DojoEmitterProvider {
       return worldAddress;
     };
 
-    this.social = new Social(manifest);
-    this.registry = new Registry(manifest);
-    this.slot = new Slot(manifest);
+    this.social = new Social(config.manifest);
+    this.registry = new Registry(config.manifest);
+    this.slot = new Slot(config.manifest);
   }
 
   /**

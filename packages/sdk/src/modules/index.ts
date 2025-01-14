@@ -1,10 +1,12 @@
 export * from "./registry";
 import { init } from "@dojoengine/sdk";
-import { config } from "../configs";
+import { configs } from "../configs";
 import { SchemaType, schema } from "../bindings/models.gen";
+import { constants, shortString } from "starknet";
 
-export const initSDK = async () =>
-  init<SchemaType>(
+export const initSDK = async (chainId: constants.StarknetChainId) => {
+  const config = configs[chainId];
+  return init<SchemaType>(
     {
       client: {
         rpcUrl: config.rpcUrl,
@@ -15,9 +17,10 @@ export const initSDK = async () =>
       domain: {
         name: "Arcade",
         version: "1.0",
-        chainId: "KATANA",
+        chainId: shortString.decodeShortString(chainId),
         revision: "1",
       },
     },
     schema,
   );
+};
