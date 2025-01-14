@@ -79,8 +79,8 @@ export class Metadata {
     try {
       const json = JSON.parse(value);
       return new Metadata(json.color, json.name, json.description, json.image, json.banner);
-    } catch (error) {
-      console.error("Error parsing metadata:", value);
+    } catch (error: unknown) {
+      console.error("Error parsing metadata:", error);
       return new Metadata("", "", "", "", "");
     }
   }
@@ -105,8 +105,8 @@ export class Socials {
     try {
       const json = JSON.parse(value);
       return new Socials(json.discord, json.telegram, json.twitter, json.youtube, json.website);
-    } catch (error) {
-      console.error("Error parsing socials:", value);
+    } catch (error: unknown) {
+      console.error("Error parsing socials:", error);
       return new Socials("", "", "", "", "");
     }
   }

@@ -9,9 +9,9 @@ import { getContractByName } from "./helpers";
 import { AllowArray, Call } from "starknet";
 
 export class Social {
-  private manifest: any;
+  private manifest: unknown;
 
-  constructor(manifest: any) {
+  constructor(manifest: unknown) {
     this.manifest = manifest;
   }
 
@@ -59,7 +59,7 @@ export class Social {
     };
   }
 
-  public close_alliance(props: SystemProps.SocialCloseAllianceProps): AllowArray<Call> {
+  public close_alliance(): AllowArray<Call> {
     const entrypoint = "close_alliance";
 
     return {
@@ -113,7 +113,7 @@ export class Social {
     };
   }
 
-  public cancel_alliance(props: SystemProps.SocialCancelAllianceProps): AllowArray<Call> {
+  public cancel_alliance(): AllowArray<Call> {
     const entrypoint = "cancel_alliance";
 
     return {
@@ -123,7 +123,7 @@ export class Social {
     };
   }
 
-  public leave_alliance(props: SystemProps.SocialLeaveAllianceProps): AllowArray<Call> {
+  public leave_alliance(): AllowArray<Call> {
     const entrypoint = "leave_alliance";
 
     return {
@@ -155,7 +155,7 @@ export class Social {
     };
   }
 
-  public close_guild(props: SystemProps.SocialCloseGuildProps): AllowArray<Call> {
+  public close_guild(): AllowArray<Call> {
     const entrypoint = "close_guild";
 
     return {
@@ -231,7 +231,7 @@ export class Social {
     };
   }
 
-  public cancel_guild(props: SystemProps.SocialCancelGuildProps): AllowArray<Call> {
+  public cancel_guild(): AllowArray<Call> {
     const entrypoint = "cancel_guild";
 
     return {
@@ -241,7 +241,7 @@ export class Social {
     };
   }
 
-  public leave_guild(props: SystemProps.SocialLeaveGuildProps): AllowArray<Call> {
+  public leave_guild(): AllowArray<Call> {
     const entrypoint = "leave_guild";
 
     return {
