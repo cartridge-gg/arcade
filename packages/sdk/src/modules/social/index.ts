@@ -1,15 +1,15 @@
 import { initSDK } from "..";
 import { constants } from "starknet";
-import Pin, { PinEvent } from "./pin";
-import Follow, { FollowEvent } from "./follow";
-import Guild, { GuildModel } from "./guild";
-import Alliance, { AllianceModel } from "./alliance";
-import Member, { MemberModel } from "./member";
+import { Pin, PinEvent } from "./pin";
+import { Follow, FollowEvent } from "./follow";
+import { Guild, GuildModel } from "./guild";
+import { Alliance, AllianceModel } from "./alliance";
+import { Member, MemberModel } from "./member";
 
 export * from "./policies";
 export type { PinEvent, FollowEvent, GuildModel, AllianceModel, MemberModel };
 
-const Social = {
+export const Social = {
   Pin: Pin,
   Follow: Follow,
   Guild: Guild,
@@ -25,5 +25,3 @@ const Social = {
     Alliance.init(sdk);
   },
 };
-
-export default Social;

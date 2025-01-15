@@ -33,7 +33,7 @@ export class GuildModel {
   }
 }
 
-const Guild = {
+export const Guild = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
@@ -113,5 +113,3 @@ const Guild = {
     { name: "fire_member", entrypoint: "fire_member", description: "Fire a member from the guild." },
   ],
 };
-
-export default Guild;

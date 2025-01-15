@@ -33,7 +33,7 @@ export class AllianceModel {
   }
 }
 
-const Alliance = {
+export const Alliance = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
@@ -114,5 +114,3 @@ const Alliance = {
     { name: "leave_alliance", entrypoint: "leave_alliance", description: "Leave an alliance." },
   ],
 };
-
-export default Alliance;

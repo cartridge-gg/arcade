@@ -24,7 +24,7 @@ export class PinEvent {
   }
 }
 
-const Pin = {
+export const Pin = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
@@ -98,5 +98,3 @@ const Pin = {
     { name: "unpin", entrypoint: "unpin", description: "Unpin an achievement." },
   ],
 };
-
-export default Pin;

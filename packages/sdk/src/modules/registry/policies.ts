@@ -2,19 +2,22 @@ import { constants } from "starknet";
 import { configs } from "../../configs";
 import { NAMESPACE } from "../../constants";
 import { getContractByName } from "../../provider/helpers";
-import Game from "./game";
-import Achievement from "./achievement";
+import { Game } from "./game";
+import { Achievement } from "./achievement";
 
 const CONTRACT_NAME = "Registry";
 const CONTRACT_TAG = `${NAMESPACE}-${CONTRACT_NAME}`;
 const CONTRACT_DESCRIPTION = "Registry contract for games and achievements";
 
 export type RegistryOptions = {
-    game?: boolean;
-    achievement?: boolean;
-  };
+  game?: boolean;
+  achievement?: boolean;
+};
 
-const getRegistryPolicies = (chainId: constants.StarknetChainId, options: RegistryOptions = { game: true, achievement: true }) => {
+export const getRegistryPolicies = (
+  chainId: constants.StarknetChainId,
+  options: RegistryOptions = { game: true, achievement: true },
+) => {
   const config = configs[chainId];
   const address: string = getContractByName(config.manifest, CONTRACT_TAG);
   return {
@@ -22,13 +25,8 @@ const getRegistryPolicies = (chainId: constants.StarknetChainId, options: Regist
       [address]: {
         name: CONTRACT_NAME,
         description: CONTRACT_DESCRIPTION,
-        methods: [
-          ...(options.game ? Game.getMethods() : []),
-          ...(options.achievement ? Achievement.getMethods() : []),
-        ],
+        methods: [...(options.game ? Game.getMethods() : []), ...(options.achievement ? Achievement.getMethods() : [])],
       },
     },
   };
-}
-
-export default getRegistryPolicies;
+};

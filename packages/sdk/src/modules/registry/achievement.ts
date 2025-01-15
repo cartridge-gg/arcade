@@ -33,7 +33,7 @@ export class AchievementModel {
   }
 }
 
-const Achievement = {
+export const Achievement = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
@@ -112,5 +112,3 @@ const Achievement = {
     { name: "remove_achievement", entrypoint: "remove_achievement", description: "Remove an achievement." },
   ],
 };
-
-export default Achievement;

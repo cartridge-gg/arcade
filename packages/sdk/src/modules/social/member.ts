@@ -27,7 +27,7 @@ export class MemberModel {
   }
 }
 
-const Member = {
+export const Member = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
@@ -98,5 +98,3 @@ const Member = {
 
   getMethods: () => [],
 };
-
-export default Member;

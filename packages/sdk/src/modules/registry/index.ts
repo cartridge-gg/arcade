@@ -1,12 +1,12 @@
-import Game, { GameModel } from "./game";
 import { initSDK } from "..";
 import { constants } from "starknet";
-import Achievement from "./achievement";
+import { Game, GameModel } from "./game";
+import { Achievement, AchievementModel } from "./achievement";
 
 export * from "./policies";
-export type { GameModel };
+export type { GameModel, AchievementModel };
 
-const Registry = {
+export const Registry = {
   Game: Game,
   Achievement: Achievement,
 
@@ -16,5 +16,3 @@ const Registry = {
     Achievement.init(sdk);
   },
 };
-
-export default Registry;

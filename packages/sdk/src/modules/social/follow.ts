@@ -24,7 +24,7 @@ export class FollowEvent {
   }
 }
 
-const Follow = {
+export const Follow = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
@@ -98,5 +98,3 @@ const Follow = {
     { name: "unfollow", entrypoint: "unfollow", description: "Unfollow a player." },
   ],
 };
-
-export default Follow;

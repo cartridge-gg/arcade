@@ -61,7 +61,7 @@ export class GameModel {
   }
 }
 
-const Game = {
+export const Game = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
@@ -140,5 +140,3 @@ const Game = {
     { name: "remove_game", entrypoint: "remove_game", description: "Remove a game." },
   ],
 };
-
-export default Game;
