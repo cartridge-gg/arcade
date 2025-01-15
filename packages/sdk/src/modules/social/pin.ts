@@ -24,14 +24,12 @@ export class PinEvent {
   }
 }
 
-export const Pin = {
-  address: undefined as string | undefined,
+const Pin = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>, address: string) => {
+  init: (sdk: SDK<SchemaType>) => {
     Pin.sdk = sdk;
-    Pin.address = address;
   },
 
   fetch: async (callback: (models: PinEvent[]) => void) => {
@@ -95,23 +93,10 @@ export const Pin = {
     Pin.unsubscribe = undefined;
   },
 
-  policies: () => {
-    if (!Pin.address) {
-      throw new Error("Pin module is not initialized");
-    }
-    return {
-      contracts: {
-        [Pin.address]: {
-          name: "Social",
-          description: "Social contract to manage your social activities",
-          methods: Pin.methods(),
-        },
-      },
-    };
-  },
-
-  methods: () => [
+  getMethods: () => [
     { name: "pin", entrypoint: "pin", description: "Pin an achievement." },
     { name: "unpin", entrypoint: "unpin", description: "Unpin an achievement." },
   ],
 };
+
+export default Pin;

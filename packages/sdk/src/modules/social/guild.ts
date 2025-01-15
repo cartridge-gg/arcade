@@ -33,14 +33,12 @@ export class GuildModel {
   }
 }
 
-export const Guild = {
-  address: undefined as string | undefined,
+const Guild = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>, address: string) => {
+  init: (sdk: SDK<SchemaType>) => {
     Guild.sdk = sdk;
-    Guild.address = address;
   },
 
   fetch: async (callback: (models: GuildModel[]) => void) => {
@@ -104,22 +102,7 @@ export const Guild = {
     Guild.unsubscribe = undefined;
   },
 
-  policies: () => {
-    if (!Guild.address) {
-      throw new Error("Guild module is not initialized");
-    }
-    return {
-      contracts: {
-        [Guild.address]: {
-          name: "Social",
-          description: "Social contract to manage your social activities",
-          methods: Guild.methods(),
-        },
-      },
-    };
-  },
-
-  methods: () => [
+  getMethods: () => [
     { name: "create_guild", entrypoint: "create_guild", description: "Create a guild." },
     { name: "open_guild", entrypoint: "open_guild", description: "Open a guild." },
     { name: "close_guild", entrypoint: "close_guild", description: "Close a guild." },
@@ -130,3 +113,5 @@ export const Guild = {
     { name: "fire_member", entrypoint: "fire_member", description: "Fire a member from the guild." },
   ],
 };
+
+export default Guild;

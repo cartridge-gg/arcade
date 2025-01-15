@@ -27,14 +27,12 @@ export class MemberModel {
   }
 }
 
-export const Member = {
-  address: undefined as string | undefined,
+const Member = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>, address: string) => {
+  init: (sdk: SDK<SchemaType>) => {
     Member.sdk = sdk;
-    Member.address = address;
   },
 
   fetch: async (callback: (models: MemberModel[]) => void) => {
@@ -98,20 +96,7 @@ export const Member = {
     Member.unsubscribe = undefined;
   },
 
-  policies: () => {
-    if (!Member.address) {
-      throw new Error("Member module is not initialized");
-    }
-    return {
-      contracts: {
-        [Member.address]: {
-          name: "Social",
-          description: "Social contract to manage your social activities",
-          methods: Member.methods(),
-        },
-      },
-    };
-  },
-
-  methods: () => [],
+  getMethods: () => [],
 };
+
+export default Member;

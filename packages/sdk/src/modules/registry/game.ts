@@ -61,14 +61,12 @@ export class GameModel {
   }
 }
 
-export const Game = {
-  address: undefined as string | undefined,
+const Game = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>, address: string) => {
+  init: (sdk: SDK<SchemaType>) => {
     Game.sdk = sdk;
-    Game.address = address;
   },
 
   fetch: async (callback: (models: GameModel[]) => void) => {
@@ -132,22 +130,7 @@ export const Game = {
     Game.unsubscribe = undefined;
   },
 
-  policies: () => {
-    if (!Game.address) {
-      throw new Error("Game module is not initialized");
-    }
-    return {
-      contracts: {
-        [Game.address]: {
-          name: "Registry",
-          description: "Registry contract for games and achievements",
-          methods: Game.methods(),
-        },
-      },
-    };
-  },
-
-  methods: () => [
+  getMethods: () => [
     { name: "register_game", entrypoint: "register_game", description: "Register a game." },
     { name: "update_game", entrypoint: "update_game", description: "Update a game." },
     { name: "publish_game", entrypoint: "publish_game", description: "Publish a game." },
@@ -157,3 +140,5 @@ export const Game = {
     { name: "remove_game", entrypoint: "remove_game", description: "Remove a game." },
   ],
 };
+
+export default Game;

@@ -1,14 +1,15 @@
 import { initSDK } from "..";
 import { constants } from "starknet";
-import { configs } from "../../configs";
-import { getContractByName } from "../../provider/helpers";
-import { Pin } from "./pin";
-import { Follow } from "./follow";
-import { Guild } from "./guild";
-import { Alliance } from "./alliance";
-import { Member } from "./member";
-export const Social = {
-  address: undefined as string | undefined,
+import Pin, { PinEvent } from "./pin";
+import Follow, { FollowEvent } from "./follow";
+import Guild, { GuildModel } from "./guild";
+import Alliance, { AllianceModel } from "./alliance";
+import Member, { MemberModel } from "./member";
+
+export * from "./policies";
+export type { PinEvent, FollowEvent, GuildModel, AllianceModel, MemberModel };
+
+const Social = {
   Pin: Pin,
   Follow: Follow,
   Guild: Guild,
@@ -16,35 +17,13 @@ export const Social = {
   Member: Member,
 
   init: async (chainId: constants.StarknetChainId) => {
-    const config = configs[chainId];
-    const address = getContractByName(config.manifest, "Social");
     const sdk = await initSDK(chainId);
-    Social.address = address;
-    Pin.init(sdk, address);
-    Follow.init(sdk, address);
-    Member.init(sdk, address);
-    Guild.init(sdk, address);
-    Alliance.init(sdk, address);
-  },
-
-  policies: () => {
-    if (!Social.address) {
-      throw new Error("Social module is not initialized");
-    }
-    return {
-      contracts: {
-        [Social.address]: {
-          name: "Social",
-          description: "Social contract to manage your social activities",
-          methods: [
-            ...Pin.methods(),
-            ...Follow.methods(),
-            ...Member.methods(),
-            ...Guild.methods(),
-            ...Alliance.methods(),
-          ],
-        },
-      },
-    };
+    Pin.init(sdk);
+    Follow.init(sdk);
+    Member.init(sdk);
+    Guild.init(sdk);
+    Alliance.init(sdk);
   },
 };
+
+export default Social;

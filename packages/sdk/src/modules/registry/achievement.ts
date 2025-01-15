@@ -33,14 +33,12 @@ export class AchievementModel {
   }
 }
 
-export const Achievement = {
-  address: undefined as string | undefined,
+const Achievement = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>, address: string) => {
+  init: (sdk: SDK<SchemaType>) => {
     Achievement.sdk = sdk;
-    Achievement.address = address;
   },
 
   fetch: async (callback: (models: AchievementModel[]) => void) => {
@@ -104,22 +102,7 @@ export const Achievement = {
     Achievement.unsubscribe = undefined;
   },
 
-  policies: () => {
-    if (!Achievement.address) {
-      throw new Error("Achievement module is not initialized");
-    }
-    return {
-      contracts: {
-        [Achievement.address]: {
-          name: "Registry",
-          description: "Registry contract for games and achievements",
-          methods: Achievement.methods(),
-        },
-      },
-    };
-  },
-
-  methods: () => [
+  getMethods: () => [
     { name: "register_achievement", entrypoint: "register_achievement", description: "Register an achievement." },
     { name: "update_achievement", entrypoint: "update_achievement", description: "Update an achievement." },
     { name: "publish_achievement", entrypoint: "publish_achievement", description: "Publish an achievement." },
@@ -129,3 +112,5 @@ export const Achievement = {
     { name: "remove_achievement", entrypoint: "remove_achievement", description: "Remove an achievement." },
   ],
 };
+
+export default Achievement;

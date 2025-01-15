@@ -24,14 +24,12 @@ export class FollowEvent {
   }
 }
 
-export const Follow = {
-  address: undefined as string | undefined,
+const Follow = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>, address: string) => {
+  init: (sdk: SDK<SchemaType>) => {
     Follow.sdk = sdk;
-    Follow.address = address;
   },
 
   fetch: async (callback: (models: FollowEvent[]) => void) => {
@@ -95,23 +93,10 @@ export const Follow = {
     Follow.unsubscribe = undefined;
   },
 
-  policies: () => {
-    if (!Follow.address) {
-      throw new Error("Follow module is not initialized");
-    }
-    return {
-      contracts: {
-        [Follow.address]: {
-          name: "Social",
-          description: "Social contract to manage your social activities",
-          methods: Follow.methods(),
-        },
-      },
-    };
-  },
-
-  methods: () => [
+  getMethods: () => [
     { name: "follow", entrypoint: "follow", description: "Follow another player." },
     { name: "unfollow", entrypoint: "unfollow", description: "Unfollow a player." },
   ],
 };
+
+export default Follow;

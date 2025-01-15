@@ -33,14 +33,12 @@ export class AllianceModel {
   }
 }
 
-export const Alliance = {
-  address: undefined as string | undefined,
+const Alliance = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubscribe: undefined as (() => void) | undefined,
 
-  init: (sdk: SDK<SchemaType>, address: string) => {
+  init: (sdk: SDK<SchemaType>) => {
     Alliance.sdk = sdk;
-    Alliance.address = address;
   },
 
   fetch: async (callback: (models: AllianceModel[]) => void) => {
@@ -104,22 +102,7 @@ export const Alliance = {
     Alliance.unsubscribe = undefined;
   },
 
-  policies: () => {
-    if (!Alliance.address) {
-      throw new Error("Alliance module is not initialized");
-    }
-    return {
-      contracts: {
-        [Alliance.address]: {
-          name: "Social",
-          description: "Social contract to manage your social activities",
-          methods: Alliance.methods(),
-        },
-      },
-    };
-  },
-
-  methods: () => [
+  getMethods: () => [
     { name: "create_alliance", entrypoint: "create_alliance", description: "Create an alliance." },
     { name: "open_alliance", entrypoint: "open_alliance", description: "Open an alliance." },
     { name: "close_alliance", entrypoint: "close_alliance", description: "Close an alliance." },
@@ -131,3 +114,5 @@ export const Alliance = {
     { name: "leave_alliance", entrypoint: "leave_alliance", description: "Leave an alliance." },
   ],
 };
+
+export default Alliance;
