@@ -29,7 +29,6 @@ export interface ItemTask {
   description: string;
 }
 
-
 export interface Counters {
   [player: string]: { [quest: string]: { count: number; timestamp: number }[] };
 }
