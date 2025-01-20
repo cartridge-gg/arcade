@@ -14,8 +14,8 @@ cairo-version = "2.8.4"
 version = "0.0.0"
 
 [workspace.dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.9" }
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.9" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.12" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.12" }
 starknet = "2.8.4"
 cairo_test = "2.8.4"
 
