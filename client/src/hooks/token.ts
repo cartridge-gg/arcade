@@ -9,7 +9,7 @@ export function useTokens(accountAddress?: string, tokens?: string[]) {
   return useERC20Balance({
     address: accountAddress ?? address,
     contractAddress: [...options, ...(tokens ?? [])],
-    provider,
+    provider: provider as any, // Type assertion to bypass type mismatch
     interval: isVisible ? 3000 : undefined,
   });
 }

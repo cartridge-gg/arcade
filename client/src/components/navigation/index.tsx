@@ -6,7 +6,7 @@ import {
   TrophyIcon,
 } from "@cartridge/ui-next";
 import { useMemo } from "react";
-import { Link, useLocation, useMatch } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export function Navigation() {
   return (
