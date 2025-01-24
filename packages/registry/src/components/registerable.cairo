@@ -71,6 +71,7 @@ mod RegisterableComponent {
             caller_id: felt252,
             world_address: felt252,
             namespace: felt252,
+            project: felt252,
             preset: felt252,
             color: Option<felt252>,
             name: Option<ByteArray>,
@@ -96,7 +97,7 @@ mod RegisterableComponent {
             // [Effect] Update game
             let metadata = MetadataTrait::new(color, name, description, image, banner);
             let socials = SocialsTrait::new(discord, telegram, twitter, youtube, website);
-            game.update(preset, metadata, socials);
+            game.update(project, preset, metadata, socials);
 
             // [Effect] Update game
             store.set_game(@game);

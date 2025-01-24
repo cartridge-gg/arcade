@@ -86,6 +86,7 @@ fn test_registrable_update() {
         .update(
             WORLD_ADDRESS,
             NAMEPSACE,
+            PROJECT,
             PRESET,
             color,
             Option::None,

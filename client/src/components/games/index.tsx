@@ -1,20 +1,36 @@
 import { JoystickIcon, ScrollArea, SparklesIcon, cn } from "@cartridge/ui-next";
-import { useCallback, useState } from "react";
-import { useTheme } from "@/hooks/context";
+import { useCallback, useMemo, useState } from "react";
+import { useData, useTheme } from "@/hooks/context";
 import {
   ControllerTheme,
   controllerConfigs as configs,
 } from "@cartridge/controller";
 import { useArcade } from "@/hooks/arcade";
+import { useProject } from "@/hooks/project";
+import { useAccount } from "@/hooks/account";
 
 export const Games = () => {
   const [selected, setSelected] = useState(0);
   const { games } = useArcade();
+  const { address } = useAccount();
+  const {
+    trophies: { players },
+  } = useData();
+
+  const points = useMemo(() => {
+    return (
+      players.find(
+        (player) => BigInt(player.address || 0) === BigInt(address || 0),
+      )?.earnings || 0
+    );
+  }, [address, players]);
 
   return (
     <div className="flex flex-col gap-y-px w-[324px] rounded-lg pb-8 grow overflow-y-auto h-[661px]">
       <Game
         index={0}
+        project="arcade"
+        namespace=""
         preset="default"
         name="All"
         icon=""
@@ -27,10 +43,12 @@ export const Games = () => {
           <Game
             key={`${game.worldAddress}-${game.namespace}`}
             index={index + 1}
+            project={game.project}
+            namespace={game.namespace}
             preset={game.preset ?? "default"}
             name={game.metadata.name}
             icon={game.metadata.image}
-            points={game.karma}
+            points={points}
             active={selected === index + 1}
             setSelected={setSelected}
           />
@@ -42,6 +60,8 @@ export const Games = () => {
 
 export const Game = ({
   index,
+  project,
+  namespace,
   preset,
   name,
   icon,
@@ -50,6 +70,8 @@ export const Game = ({
   setSelected,
 }: {
   index: number;
+  project: string;
+  namespace: string;
   preset: string;
   name: string;
   icon: string;
@@ -58,9 +80,12 @@ export const Game = ({
   setSelected: (index: number) => void;
 }) => {
   const { theme, setTheme, resetTheme } = useTheme();
+  const { setProject, setNamespace } = useProject();
 
   const handleClick = useCallback(() => {
     setSelected(index);
+    setProject(project);
+    setNamespace(namespace);
     const config = configs[preset.toLowerCase()].theme;
     if (!config || !config.colors) {
       return resetTheme();
@@ -73,7 +98,7 @@ export const Game = ({
       },
     };
     setTheme(newTheme);
-  }, [index, theme, setSelected, setTheme]);
+  }, [index, project, namespace, theme, setSelected, setTheme, setProject]);
 
   return (
     <div

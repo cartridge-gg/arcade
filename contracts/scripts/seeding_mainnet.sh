@@ -22,12 +22,12 @@ starkli invoke \
     / 0xc46f7e578f31c3fa6bb669164f04d696427818ba69f177ddc152f31ed5f119 register_game \
         0x6a9e4c6f0799160ea8ddc43ff982a5f83d7f633e9732ce42701de1288ff705f \
         str:"s0_eternum" \
-        str:"eternum-prod" \
+        str:"eternum" \
         str:"eternum" \
         str:"#FF00FF" \
         0 str:"Eternum" 0x7 \
         0 str:"Rule the Hex." 0xd \
-        2 str:"https://github.com/cartridge-gg" str:"/presets/blob/main/configs/eter" str:"num/icon.png?raw=true" 0x15 \
+        2 str:"https://github.com/cartridge-gg" str:"/presets/blob/main/configs/eter" str:"num/icon.gif?raw=true" 0x15 \
         2 str:"https://github.com/cartridge-gg" str:"/presets/blob/main/configs/eter" str:"num/cover.png?raw=true" 0x16 \
         0 str:"https://discord.gg/CEXUEJF3" 0x1b \
         0 0 0 \
@@ -41,11 +41,26 @@ starkli invoke \
         str:"dark-shuffle" \
         str:"#F59100" \
         0 str:"Dark Shuffle" 0x7 \
-        2 str:"A Provable Roguelike Deck-build" str:"ing Game on Starknet, powered b" str:"y $LORDS." 0x9 \
+        2 str:"A Provable Roguelike Deck-build" str:"ing Game on Starknet, powered b" str:"y LORDS." 0x8 \
         2 str:"https://github.com/cartridge-gg" str:"/presets/blob/main/configs/dark" str:"-shuffle/icon.png?raw=true" 0x1a \
         2 str:"https://github.com/cartridge-gg" str:"/presets/blob/main/configs/dark" str:"-shuffle/cover.png?raw=true" 0x1b \
         0 str:"https://discord.gg/CEXUEJF3" 0x1b \
         0 0 0 \
         0 str:"https://x.com/await_0x" 0x16 \
         0 0 0 \
-        0 str:"https://darkshuffle.dev/" 0x18
+        0 str:"https://darkshuffle.dev/" 0x18 \
+    / 0xc46f7e578f31c3fa6bb669164f04d696427818ba69f177ddc152f31ed5f119 register_game \
+        0x030d5d5c610dd736faea146b20b850af64e34ca6e5c5a66462f76f32f48dd997 \
+        str:"zkube" \
+        str:"zkube-mainnet" \
+        str:"zkube" \
+        str:"#5bc3e6" \
+        0 str:"zKube" 0x5 \
+        0 str:"Reversed tetris fully onchain." 0x1e \
+        2 str:"https://github.com/cartridge-gg" str:"/presets/blob/main/configs/zkub" str:"e/icon.png?raw=true" 0x13 \
+        2 str:"https://github.com/cartridge-gg" str:"/presets/blob/main/configs/zkub" str:"e/cover.png?raw=true" 0x14 \
+        0 str:"https://discord.gg/CEXUEJF3" 0x1b \
+        0 0 0 \
+        0 str:"https://x.com/zKorp_" 0x14 \
+        0 0 0 \
+        0 str:"https://app.zkube.xyz/" 0x16

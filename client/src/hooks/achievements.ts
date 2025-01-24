@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { TROPHY, PROGRESS } from "@/constants";
 import { Trophy, Progress, Task } from "@/models";
-import { useConnection } from "./context";
-import { useAccount } from "./account";
+import { useAccount } from "@starknet-react/core";
 import { useProgressions } from "./progressions";
 import { useTrophies } from "./trophies";
+import { useProject } from "./project";
 
 export interface Item {
   id: string;
@@ -45,73 +45,34 @@ export interface Player {
 }
 
 export function useAchievements(accountAddress?: string) {
-  const { project, namespace } = useConnection();
+  const { project, namespace } = useProject();
   const { address } = useAccount();
 
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Item[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [cachedTrophies, setCachedTrophies] = useState<Trophy[]>([]);
-  const [cachedProgressions, setCachedProgressions] = useState<Progress[]>([]);
 
   const currentAddress = useMemo(() => {
-    return accountAddress || address;
+    return `0x${BigInt(accountAddress || address || "0x0").toString(16)}`;
   }, [accountAddress, address]);
 
-  const { trophies: rawTrophies, isFetching: isFetchingTrophies } = useTrophies(
-    {
-      namespace: namespace ?? "",
-      name: TROPHY,
-      project: project ?? "",
-      parser: Trophy.parse,
-    },
-  );
+  const { trophies } = useTrophies({
+    namespace: namespace ?? "",
+    name: TROPHY,
+    project: project ?? "",
+    parser: Trophy.parse,
+  });
 
-  const { progressions: rawProgressions, isFetching: isFetchingProgressions } =
-    useProgressions({
-      namespace: namespace ?? "",
-      name: PROGRESS,
-      project: project ?? "",
-      parser: Progress.parse,
-    });
-
-  useEffect(() => {
-    if (!isFetchingTrophies && cachedTrophies.length !== rawTrophies.length) {
-      setCachedTrophies(rawTrophies);
-    }
-    if (
-      !isFetchingProgressions &&
-      Math.max(...rawProgressions.map((p) => p.timestamp)) >
-        Math.max(...cachedProgressions.map((p) => p.timestamp))
-    ) {
-      setCachedProgressions(rawProgressions);
-    }
-  }, [
-    rawTrophies,
-    rawProgressions,
-    cachedTrophies,
-    cachedProgressions,
-    isFetchingTrophies,
-    isFetchingProgressions,
-  ]);
+  const { progressions } = useProgressions({
+    namespace: namespace ?? "",
+    name: PROGRESS,
+    project: project ?? "",
+    parser: Progress.parse,
+  });
 
   // Compute achievements and players
   useEffect(() => {
-    if (!cachedTrophies.length || !currentAddress) return;
-
-    // Merge trophies
-    const trophies: { [id: string]: Trophy } = {};
-    cachedTrophies.forEach((trophy) => {
-      if (Object.keys(trophies).includes(trophy.id)) {
-        trophy.tasks.forEach((task) => {
-          if (!trophies[trophy.id].tasks.find((t) => t.id === task.id)) {
-            trophies[trophy.id].tasks.push(task);
-          }
-        });
-      } else {
-        trophies[trophy.id] = trophy;
-      }
-    });
+    if (!Object.values(trophies).length || !currentAddress) return;
 
     // Compute players and achievement stats
     const data: {
@@ -125,13 +86,15 @@ export function useAchievements(accountAddress?: string) {
         };
       };
     } = {};
-    cachedProgressions.forEach((progress: Progress) => {
+    Object.values(progressions).forEach((progress: Progress) => {
       const { achievementId, playerId, taskId, taskTotal, total, timestamp } =
         progress;
 
       // Compute player
       const detaultTasks: { [taskId: string]: boolean } = {};
-      trophies[achievementId].tasks.forEach((task: Task) => {
+      const trophy = trophies[achievementId];
+      if (!trophy) return;
+      trophy.tasks.forEach((task: Task) => {
         detaultTasks[task.id] = false;
       });
       data[playerId] = data[playerId] || {};
@@ -228,13 +191,7 @@ export function useAchievements(accountAddress?: string) {
     );
     // Update loading state
     setIsLoading(false);
-  }, [
-    currentAddress,
-    isFetchingTrophies,
-    isFetchingProgressions,
-    cachedTrophies,
-    cachedProgressions,
-  ]);
+  }, [currentAddress, trophies, progressions]);
 
   return { achievements, players, isLoading };
 }

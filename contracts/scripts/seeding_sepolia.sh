@@ -22,7 +22,7 @@ starkli invoke \
     / 0xc46f7e578f31c3fa6bb669164f04d696427818ba69f177ddc152f31ed5f119 register_game \
         0x6a9e4c6f0799160ea8ddc43ff982a5f83d7f633e9732ce42701de1288ff705f \
         str:"s0_eternum" \
-        str:"eternum-prod" \
+        str:"eternum" \
         str:"eternum" \
         str:"#FF00FF" \
         0 str:"Eternum" 0x7 \

@@ -18,7 +18,8 @@ export const useProject = () => {
     );
   }
 
-  const { isReady, indexerUrl } = context;
+  const { isReady, project, namespace, indexerUrl, setProject, setNamespace } =
+    context;
 
-  return { isReady, indexerUrl };
+  return { isReady, project, namespace, indexerUrl, setProject, setNamespace };
 };

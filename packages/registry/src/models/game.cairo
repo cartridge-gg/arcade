@@ -77,8 +77,11 @@ impl GameImpl of GameTrait {
     }
 
     #[inline]
-    fn update(ref self: Game, preset: felt252, metadata: Metadata, socials: Socials) {
+    fn update(
+        ref self: Game, project: felt252, preset: felt252, metadata: Metadata, socials: Socials
+    ) {
         // [Effect] Update Game
+        self.project = project;
         self.preset = preset;
         self.metadata = metadata.jsonify();
         self.socials = socials.jsonify();
@@ -262,14 +265,16 @@ mod tests {
             socials: core::Default::default(),
             owner: OWNER,
         );
-        let preset = 'SETPRE';
+        let project = 'TCEJORP';
+        let preset = 'TESERP';
         let metadata = MetadataTrait::new(
             Option::Some('123456'), Option::None, Option::None, Option::None, Option::None
         );
         let socials = SocialsTrait::new(
             Option::Some("discord"), Option::None, Option::None, Option::None, Option::None
         );
-        game.update(preset, metadata.clone(), socials.clone());
+        game.update(project, preset, metadata.clone(), socials.clone());
+        assert_eq!(game.project, project);
         assert_eq!(game.preset, preset);
         assert_eq!(game.metadata, metadata.clone().jsonify());
         assert_eq!(game.socials, socials.clone().jsonify());

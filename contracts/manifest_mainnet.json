@@ -1253,7 +1253,7 @@
   "contracts": [
     {
       "address": "0xc46f7e578f31c3fa6bb669164f04d696427818ba69f177ddc152f31ed5f119",
-      "class_hash": "0x5e1763655cb615aa7e6296c0ee1350198266ccf335c191d7cc0cb3b2c203341",
+      "class_hash": "0x1a07f7bce8ac8fd51cc09b5a9d4072023a3f001eb1f483c0879e9ee6bf5c304",
       "abi": [
         {
           "type": "impl",
@@ -1400,6 +1400,10 @@
                 },
                 {
                   "name": "namespace",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "project",
                   "type": "core::felt252"
                 },
                 {
