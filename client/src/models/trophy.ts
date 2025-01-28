@@ -14,7 +14,7 @@ export interface RawTrophy {
   taskId: string;
   taskTotal: number;
   taskDescription: string;
-  data: string;
+  data?: string | null;
 }
 
 export interface Task {
@@ -36,7 +36,7 @@ export class Trophy {
   title: string;
   description: string;
   tasks: Task[];
-  data: string;
+  data?: string | null;
 
   constructor(
     key: string,

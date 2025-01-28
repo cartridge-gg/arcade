@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Project, useAchievementsQuery } from "@cartridge/utils/api/cartridge";
+import { Project, useAchievementsQuery, AchievementsQuery } from "@cartridge/utils/api/cartridge";
 import { RawTrophy, Trophy, getSelectorFromTag } from "@/models";
-
-interface Response {
-  items: { meta: { project: string }; achievements: RawTrophy[] }[];
-}
 
 export interface TrophiesProps {
   namespace: string;
@@ -36,18 +32,17 @@ export function useTrophies({
   }, [props]);
 
   const onSuccess = useCallback(
-    ({ achievements }: { achievements: Response }) => {
+    ({ achievements }: { achievements: AchievementsQuery["achievements"] }) => {
       const trophies: { [key: string]: { [key: string]: Trophy } } = {};
-      achievements.items.forEach((item) => {
+      for (const item of achievements.items) {
         const project = item.meta.project;
-        const achievements = item.achievements
+        trophies[project] = item.achievements
           .map(parser)
           .reduce((acc: { [key: string]: Trophy }, achievement: Trophy) => {
             acc[achievement.key] = achievement;
             return acc;
           }, {});
-        trophies[project] = achievements;
-      });
+      }
       setRawTrophies(trophies);
     },
     [parser, setRawTrophies],
