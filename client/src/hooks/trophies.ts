@@ -54,7 +54,7 @@ export function useTrophies({
     [parser, setRawTrophies],
   );
 
-  const { refetch: fetchAchievements, isFetching } = useAchievementsQuery(
+  const { data, refetch: fetchAchievements, isFetching, error } = useAchievementsQuery(
     {
       projects,
     },
@@ -62,9 +62,12 @@ export function useTrophies({
       enabled: props.length > 0,
       queryKey: ["achievements", props],
       refetchInterval: 600_000, // Refetch every 10 minutes
-      onSuccess,
+      keepPreviousData: true,
     },
   );
+
+  // TODO wip this should return partial data 😡
+  console.log('data', data, 'error', error, 'isFetching', isFetching);
 
   useEffect(() => {
     if (props.length === 0) return;
