@@ -49,9 +49,7 @@ export const Social = {
   fetchEntities: async (callback: (models: SocialModel[]) => void, options: SocialOptions) => {
     if (!Social.sdk) return;
 
-    const wrappedCallback = (
-      entities: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[]
-    ) => {
+    const wrappedCallback = (entities: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[]) => {
       if (!entities) return;
       const models: SocialModel[] = [];
       (entities as ParsedEntity<SchemaType>[]).forEach((entity: ParsedEntity<SchemaType>) => {
@@ -78,9 +76,7 @@ export const Social = {
 
   fetchEvents: async (callback: (models: SocialModel[]) => void, options: SocialOptions) => {
     if (!Social.sdk) return;
-    const wrappedCallback = (
-      entities: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[]
-    ) => {
+    const wrappedCallback = (entities: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[]) => {
       if (!entities) return;
       const events: SocialModel[] = [];
       (entities as ParsedEntity<SchemaType>[]).forEach((entity: ParsedEntity<SchemaType>) => {

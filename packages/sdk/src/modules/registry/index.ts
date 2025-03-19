@@ -33,7 +33,9 @@ export const Registry = {
   fetchEntities: async (callback: (models: RegistryModel[]) => void, options: RegistryOptions) => {
     if (!Registry.sdk) return;
 
-    const wrappedCallback = (entities?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[]) => {
+    const wrappedCallback = (
+      entities?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[],
+    ) => {
       if (!entities) return;
       const models: RegistryModel[] = [];
       (entities as ParsedEntity<SchemaType>[]).forEach((entity: ParsedEntity<SchemaType>) => {

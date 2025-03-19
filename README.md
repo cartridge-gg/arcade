@@ -11,3 +11,14 @@ Players can earn achievements by progressing in games.
 #### Profile (coming soon)
 
 Players can view their profile accross all registered games and track their progress.
+
+
+## Installation 
+```bash
+pnpm install
+```
+
+## Dev
+```bash
+pnpm dev
+```
