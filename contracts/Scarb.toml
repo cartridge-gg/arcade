@@ -1,5 +1,5 @@
 [package]
-cairo-version = "2.9.2"
+cairo-version = "2.9.4"
 edition = "2024_07"
 name = "arcade"
 version = "0.0.0"
@@ -11,17 +11,17 @@ sierra-replace-ids = true
 dev = "sozo clean && sozo build --typescript && sozo migrate plan && sozo migrate apply"
 
 [dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.3.1" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.0" }
 achievement = { path = ".." }
 controller = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
 social = { path = ".." }
-starknet = "2.9.2"
+starknet = "2.9.4"
 
 [dev-dependencies]
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.3.1" }
-cairo_test = "2.9.2"
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.0" }
+cairo_test = "2.9.4"
 
 [[target.starknet-contract]]
 build-external-contracts = [
