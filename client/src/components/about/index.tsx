@@ -7,7 +7,7 @@ export function About() {
     <div className="flex flex-col gap-4 py-4">
       <Media />
       <Details content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." />
-      <Metrics txsCount={10500} playerCount={540} />
+      <Metrics />
     </div>
   );
 }
