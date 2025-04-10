@@ -11,6 +11,7 @@ import { ProjectProvider } from "./project";
 import { CollectionProvider } from "./collection";
 import { TokenProvider } from "./token";
 import { ActivitiesProvider } from "./activities";
+import { MetricsProvider } from "./metrics";
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
@@ -29,7 +30,11 @@ export function Provider({ children }: PropsWithChildren) {
                     <CollectionProvider>
                       <TokenProvider>
                         <ActivitiesProvider>
-                          <AchievementProvider>{children}</AchievementProvider>
+                          <MetricsProvider>
+                            <AchievementProvider>
+                              {children}
+                            </AchievementProvider>
+                          </MetricsProvider>
                         </ActivitiesProvider>
                       </TokenProvider>
                     </CollectionProvider>

@@ -1,10 +1,9 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { TabsContent, Thumbnail, TabValue } from "@cartridge/ui-next";
 import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { GameModel } from "@bal7hazar/arcade-sdk";
-import { useAddress } from "@/hooks/address";
 import cartridge from "@/assets/cartridge-logo.png";
 import {
   GameSocialDiscord,
@@ -20,14 +19,7 @@ import { AboutScene } from "../scenes/about";
 
 export function GamePage({ game }: { game: GameModel | undefined }) {
   const [searchParams] = useSearchParams();
-  const { address } = useAddress();
-
   const navigate = useNavigate();
-  const defaultValue = useMemo(() => {
-    // Default tab is ignored if there is no address,
-    // meanning the user is not connected and doesnt inspect another user
-    return searchParams.get("gameTab") || "activity";
-  }, [searchParams, address]);
 
   const handleClick = useCallback(
     (value: string) => {
@@ -44,6 +36,23 @@ export function GamePage({ game }: { game: GameModel | undefined }) {
     if (!game) return ["activity", "leaderboard", "marketplace"];
     return ["activity", "leaderboard", "marketplace", "guilds", "about"];
   }, [game]);
+
+  const defaultValue = useMemo(() => {
+    // Default tab is ignored if there is no address,
+    // meanning the user is not connected and doesnt inspect another user
+    const value = searchParams.get("gameTab") || "activity";
+    if (!order.includes(value as TabValue)) return "activity";
+    return value as TabValue;
+  }, [searchParams, order]);
+
+  useEffect(() => {
+    const value = searchParams.get("gameTab") || "activity";
+    if (!order.includes(value as TabValue)) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("gameTab", "activity");
+      navigate(url.toString().replace(window.location.origin, ""));
+    }
+  }, [searchParams, order, navigate]);
 
   return (
     <>

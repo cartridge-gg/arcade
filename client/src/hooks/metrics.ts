@@ -1,15 +1,36 @@
-import { MetricsQuery, useMetricsQuery } from "@cartridge/utils/api/cartridge";
-import { UseQueryOptions } from "react-query";
+import { useContext, useMemo } from "react";
+import { MetricsContext } from "../context/metrics";
+import { useProject } from "./project";
 
-export const useMetrics = (projectName: string, options?: UseQueryOptions<MetricsQuery>) => {
+/**
+ * Custom hook to access the Metric context and account information.
+ * Must be used within a MetricProvider component.
+ *
+ * @returns An object containing:
+ * - metrics: The registered metrics
+ * - status: The status of the metrics
+ * @throws {Error} If used outside of a MetricProvider context
+ */
+export const useMetrics = () => {
+  const context = useContext(MetricsContext);
+  const { project } = useProject();
 
-  const { data: _data, isLoading, isError } = useMetricsQuery({ projects: { project: projectName } }, options);
-
-  const data = _data?.metrics.items || [];
-
-  return {
-    data,
-    isLoading,
-    isError,
+  if (!context) {
+    throw new Error(
+      "The `useMetrics` hook must be used within a `MetricProvider`",
+    );
   }
-}
+
+  const { metrics: allMetrics, status } = context;
+
+  const metrics = useMemo(() => {
+    if (!project) return allMetrics;
+    return allMetrics.filter((metric) =>
+      project === "ryomainnet"
+        ? metric.project === "dopewarsbal"
+        : metric.project === project,
+    );
+  }, [project, allMetrics]);
+
+  return { metrics, status };
+};

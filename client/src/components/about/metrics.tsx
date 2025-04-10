@@ -24,7 +24,7 @@ ChartJS.register(
   LineElement,
   Tooltip,
   Filler,
-  zoomPlugin
+  zoomPlugin,
 );
 
 export interface MetricsProps {
@@ -34,7 +34,7 @@ export interface MetricsProps {
 
 export function Metrics() {
   const { theme } = useTheme();
-  const { data, isLoading, isError } = useMetrics("dopewarsbal");
+  const { metrics: allMetrics, status } = useMetrics();
   const chartRef = useRef<ChartJS<"line">>(null);
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
@@ -48,26 +48,23 @@ export function Metrics() {
     today.setHours(0, 0, 0, 0);
 
     // Process all data points
-    data.forEach((item) => {
-      item.metrics.forEach((metric) => {
-        const date = new Date(metric.transactionDate);
-        date.setHours(0, 0, 0, 0);
-
+    allMetrics.forEach((metrics) => {
+      metrics.data.forEach(({ date, transactionCount }) => {
         // Calculate days difference
         const dayDiff = Math.floor(
-          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
+          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
         );
 
         // Only include data from the last 49 days (7 weeks)
         if (dayDiff >= 0 && dayDiff < 49) {
-          totalTxs += metric.transactionCount;
+          totalTxs += transactionCount;
           dayCount++;
         }
       });
     });
 
     return dayCount > 0 ? totalTxs / dayCount : 0;
-  }, [data]);
+  }, [allMetrics]);
 
   const avgDailyPlayers = useMemo(() => {
     let totalPlayers = 0;
@@ -78,26 +75,22 @@ export function Metrics() {
     today.setHours(0, 0, 0, 0);
 
     // Process all data points
-    data.forEach((item) => {
-      item.metrics.forEach((metric) => {
-        const date = new Date(metric.transactionDate);
-        date.setHours(0, 0, 0, 0);
-
+    allMetrics.forEach((metrics) => {
+      metrics.data.forEach(({ date, callerCount }) => {
         // Calculate days difference
         const dayDiff = Math.floor(
-          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
+          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
         );
-
         // Only include data from the last 49 days (7 weeks)
         if (dayDiff >= 0 && dayDiff < 49) {
-          totalPlayers += metric.callerCount;
+          totalPlayers += callerCount;
           dayCount++;
         }
       });
     });
 
     return dayCount > 0 ? totalPlayers / dayCount : 0;
-  }, [data]);
+  }, [allMetrics]);
 
   const chartData = useMemo(() => {
     // Create a map to store daily data
@@ -108,14 +101,11 @@ export function Metrics() {
     today.setHours(0, 0, 0, 0);
 
     // Process all data points
-    data.forEach((item) => {
-      item.metrics.forEach((metric) => {
-        const date = new Date(metric.transactionDate);
-        date.setHours(0, 0, 0, 0);
-
+    allMetrics.forEach((metrics) => {
+      metrics.data.forEach(({ date, transactionCount, callerCount }) => {
         // Calculate days difference
         const dayDiff = Math.floor(
-          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
+          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
         );
 
         // Only include data from the last 49 days (7 weeks)
@@ -131,8 +121,8 @@ export function Metrics() {
           }
 
           const dayData = dailyData.get(dayKey);
-          dayData.transactionCount += metric.transactionCount;
-          dayData.callerCount += metric.callerCount;
+          dayData.transactionCount += transactionCount;
+          dayData.callerCount += callerCount;
         }
       });
     });
@@ -153,7 +143,7 @@ export function Metrics() {
         dayLabels.unshift(`${month}/${day}`);
 
         counts.unshift(
-          activeTab === "txs" ? dayData.transactionCount : dayData.callerCount
+          activeTab === "txs" ? dayData.transactionCount : dayData.callerCount,
         );
       } else {
         // If no data for a day, use placeholder
@@ -186,7 +176,7 @@ export function Metrics() {
       },
     ];
     return { labels: dayLabels, datasets };
-  }, [theme, data, activeTab]);
+  }, [theme, allMetrics, activeTab]);
 
   const options: ChartOptions<"line"> = useMemo(() => {
     return {
@@ -276,6 +266,8 @@ export function Metrics() {
     }
   };
 
+  if (allMetrics.length === 0) return null;
+
   return (
     <div className="flex flex-col gap-2">
       <div className="h-10 flex items-center justify-between">
@@ -293,23 +285,31 @@ export function Metrics() {
         <div className="flex gap-4 w-full">
           <Tab
             label="Daily Transactions"
-            value={isLoading ? "0" : Math.round(avgDailyTxs).toLocaleString()}
+            value={
+              status === "loading"
+                ? "0"
+                : Math.round(avgDailyTxs).toLocaleString()
+            }
             active={activeTab === "txs"}
             onClick={() => setActiveTab("txs")}
           />
           <Tab
             label="Daily Active Players"
-            value={isLoading ? "0" : Math.round(avgDailyPlayers).toLocaleString()}
+            value={
+              status === "loading"
+                ? "0"
+                : Math.round(avgDailyPlayers).toLocaleString()
+            }
             active={activeTab === "players"}
             onClick={() => setActiveTab("players")}
           />
         </div>
-        {isLoading && (
+        {status === "loading" && (
           <div className="flex items-center justify-center h-64">
             <p className="text-sm text-foreground-400">Loading...</p>
           </div>
         )}
-        {isError && (
+        {status === "error" && (
           <div className="flex items-center justify-center h-64">
             <p className="text-sm text-red-500">Error loading metrics</p>
           </div>
@@ -342,7 +342,7 @@ function Tab({
         "grow px-6 py-4 flex flex-col gap-2 border border-transparent border-b-background-200 bg-background-100 cursor-pointer transition-all duration-300",
         "hover:bg-background-125 hover:border-b-background-300",
         "data-[active=true]:rounded data-[active=true]:border-primary data-[active=true]:bg-background-150",
-        "data-[active=true]:hover:bg-background-200"
+        "data-[active=true]:hover:bg-background-200",
       )}
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
@@ -354,7 +354,7 @@ function Tab({
       <p
         className={cn(
           "text-sm text-foreground-300 transition-all duration-300",
-          !hover && !active && "text-foreground-400"
+          !hover && !active && "text-foreground-400",
         )}
       >
         {label}

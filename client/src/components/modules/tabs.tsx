@@ -137,6 +137,11 @@ export const ArcadeTabs = ({
     return () => observer.disconnect();
   }, [order, containerRef.current, visibleTabs, overflowTabs, tabRefs]);
 
+  useEffect(() => {
+    if (order.includes(active)) return;
+    setActive(defaultValue);
+  }, [order, active, defaultValue]);
+
   const overflowActive = useMemo(
     () => overflowTabs.includes(active),
     [overflowTabs, active],
@@ -145,6 +150,7 @@ export const ArcadeTabs = ({
   return (
     <Tabs
       defaultValue={defaultValue}
+      value={active}
       onValueChange={(value: string) => setActive(value as TabValue)}
       className="h-full flex flex-col overflow-hidden"
     >
