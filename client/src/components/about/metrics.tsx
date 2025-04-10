@@ -24,7 +24,7 @@ ChartJS.register(
   LineElement,
   Tooltip,
   Filler,
-  zoomPlugin,
+  zoomPlugin
 );
 
 export interface MetricsProps {
@@ -38,6 +38,7 @@ export function Metrics() {
   const chartRef = useRef<ChartJS<"line">>(null);
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const avgDailyTxs = useMemo(() => {
     let totalTxs = 0;
@@ -52,7 +53,7 @@ export function Metrics() {
       metrics.data.forEach(({ date, transactionCount }) => {
         // Calculate days difference
         const dayDiff = Math.floor(
-          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
+          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
         );
 
         // Only include data from the last 49 days (7 weeks)
@@ -79,7 +80,7 @@ export function Metrics() {
       metrics.data.forEach(({ date, callerCount }) => {
         // Calculate days difference
         const dayDiff = Math.floor(
-          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
+          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
         );
         // Only include data from the last 49 days (7 weeks)
         if (dayDiff >= 0 && dayDiff < 49) {
@@ -105,7 +106,7 @@ export function Metrics() {
       metrics.data.forEach(({ date, transactionCount, callerCount }) => {
         // Calculate days difference
         const dayDiff = Math.floor(
-          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
+          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000)
         );
 
         // Only include data from the last 49 days (7 weeks)
@@ -143,7 +144,7 @@ export function Metrics() {
         dayLabels.unshift(`${month}/${day}`);
 
         counts.unshift(
-          activeTab === "txs" ? dayData.transactionCount : dayData.callerCount,
+          activeTab === "txs" ? dayData.transactionCount : dayData.callerCount
         );
       } else {
         // If no data for a day, use placeholder
@@ -156,7 +157,7 @@ export function Metrics() {
       }
     }
 
-    const datasets: ChartDataset<"line", unknown>[] = [
+    const datasets = [
       {
         fill: true,
         label:
@@ -174,11 +175,11 @@ export function Metrics() {
         pointRadius: 2,
         tension: 0.4,
       },
-    ];
+    ] satisfies ChartDataset<"line", unknown>[];
     return { labels: dayLabels, datasets };
   }, [theme, allMetrics, activeTab]);
 
-  const options: ChartOptions<"line"> = useMemo(() => {
+  const options = useMemo(() => {
     return {
       responsive: true,
       interaction: {
@@ -202,7 +203,6 @@ export function Metrics() {
             left: 8,
             right: 8,
           },
-          margin: 8,
           bodyColor: `${theme?.colors?.primary}` || "#fbcb4a",
           callbacks: {
             title: () => "",
@@ -228,6 +228,9 @@ export function Metrics() {
             //   enabled: true
             // },
             mode: "x",
+            onZoomComplete: () => {
+              setIsZoomed(true);
+            },
           },
         },
       },
@@ -257,12 +260,13 @@ export function Metrics() {
           },
         },
       },
-    };
+    } satisfies ChartOptions<"line">;
   }, [theme, activeTab]);
 
   const resetZoom = () => {
     if (chartRef.current) {
       chartRef.current.resetZoom();
+      setIsZoomed(false);
     }
   };
 
@@ -274,12 +278,14 @@ export function Metrics() {
         <p className="text-xs tracking-wider font-semibold text-foreground-400">
           Metrics
         </p>
-        <button
-          onClick={resetZoom}
-          className="px-3 py-1 text-xs bg-background-200 hover:bg-background-300 rounded transition-colors duration-200"
-        >
-          Reset Zoom
-        </button>
+        {isZoomed && (
+          <button
+            onClick={resetZoom}
+            className="px-3 py-1 text-xs bg-background-200 hover:bg-background-300 rounded transition-colors duration-200"
+          >
+            Reset Zoom
+          </button>
+        )}
       </div>
       <div className="flex flex-col gap-4 w-full">
         <div className="flex gap-4 w-full">
@@ -342,7 +348,7 @@ function Tab({
         "grow px-6 py-4 flex flex-col gap-2 border border-transparent border-b-background-200 bg-background-100 cursor-pointer transition-all duration-300",
         "hover:bg-background-125 hover:border-b-background-300",
         "data-[active=true]:rounded data-[active=true]:border-primary data-[active=true]:bg-background-150",
-        "data-[active=true]:hover:bg-background-200",
+        "data-[active=true]:hover:bg-background-200"
       )}
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
@@ -354,7 +360,7 @@ function Tab({
       <p
         className={cn(
           "text-sm text-foreground-300 transition-all duration-300",
-          !hover && !active && "text-foreground-400",
+          !hover && !active && "text-foreground-400"
         )}
       >
         {label}

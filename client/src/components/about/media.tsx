@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import ReactPlayer from "react-player/lazy";
 import { cn } from "@cartridge/ui-next";
+import { YoutubeEmbedIcon } from "./youtube-icon";
 
 const VIDEOS = [
   "https://youtu.be/bkNF9VdY2-o?si=Fh2KQLC1-qQmYPlG",
@@ -100,17 +101,33 @@ export function Media() {
                     url={video}
                     width="100%"
                     height="100%"
-                    loop
-                    controls
+                    loop={true}
+                    controls={false}
                     muted={true}
                     playing={current === index + 1}
+                    config={{
+                      // attempting to remove recommendation
+                      youtube: {
+                        playerVars: {
+                          modestbranding: 1,
+                          rel: 0,
+                          showinfo: 0,
+                          iv_load_policy: 3
+                        },
+                      }
+                    }}
                   />
-                  <div
-                    className={cn(
-                      "absolute inset-0 z-10",
-                      current === index + 1 && "pointer-events-none"
-                    )}
-                  />
+                  <div className="absolute inset-0 z-10">
+                    {/* <p className="absolute bottom-10 right-10">test</p> */}
+                    <a href={video} target="_blank" rel="noopener noreferrer" className="absolute bottom-5 right-5">
+                      <YoutubeEmbedIcon
+                        className="hover:scale-110 transition-all duration-300"
+                        width={100}
+                        height={24}
+                        fill="white"
+                      />
+                    </a>
+                  </div>
                 </div>
               </CarouselItem>
             ))}
