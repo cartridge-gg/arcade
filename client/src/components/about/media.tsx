@@ -106,7 +106,7 @@ export function Media() {
                     muted={true}
                     playing={current === index + 1}
                     config={{
-                      // attempting to remove recommendation
+                      // attempting to remove recommendation(not working)
                       youtube: {
                         playerVars: {
                           modestbranding: 1,
@@ -118,7 +118,6 @@ export function Media() {
                     }}
                   />
                   <div className="absolute inset-0 z-10">
-                    {/* <p className="absolute bottom-10 right-10">test</p> */}
                     <a href={video} target="_blank" rel="noopener noreferrer" className="absolute bottom-5 right-5">
                       <YoutubeEmbedIcon
                         className="hover:scale-110 transition-all duration-300"
