@@ -65,7 +65,7 @@ export function Media() {
                 key={index}
                 className={cn(
                   "flex justify-center items-center h-3.5 w-3.5 select-none cursor-pointer opacity-50 hover:opacity-100 transition-all duration-300",
-                  current === index + 1 && "opacity-100",
+                  current === index + 1 && "opacity-100"
                 )}
                 onClick={() => api?.scrollTo(index)}
               >
@@ -73,7 +73,7 @@ export function Media() {
                   key={index}
                   className={cn(
                     "size-[3px] bg-foreground-100 rounded-full",
-                    current === index + 1 && "size-1",
+                    current === index + 1 && "size-1"
                   )}
                 />
               </div>
@@ -88,41 +88,43 @@ export function Media() {
             }}
           />
           <CarouselContent className="flex gap-4">
-            {Array.from({ length: VIDEOS.length }).map((_, index) => (
+            {VIDEOS.map((video, index) => (
               <CarouselItem key={index} className="basis-[600px]">
                 <div
                   className={cn(
                     "relative rounded-lg overflow-hidden w-[600px] h-[320px]",
-                    index === VIDEOS.length - 1 && !IMAGES.length && "pr-4",
+                    index === VIDEOS.length - 1 && !IMAGES.length && "pr-4"
                   )}
                 >
                   <ReactPlayer
-                    url={VIDEOS[index]}
+                    url={video}
                     width="100%"
                     height="100%"
                     loop
                     controls
+                    muted={true}
+                    playing={current === index + 1}
                   />
                   <div
                     className={cn(
                       "absolute inset-0 z-10",
-                      current === index + 1 && "pointer-events-none",
+                      current === index + 1 && "pointer-events-none"
                     )}
                   />
                 </div>
               </CarouselItem>
             ))}
-            {Array.from({ length: IMAGES.length }).map((_, index) => (
+            {IMAGES.map((image, index) => (
               <CarouselItem key={index} className="basis-[600px]">
                 <div
                   className={cn(
                     "rounded-lg overflow-hidden w-[600px] h-[320px]",
-                    index === IMAGES.length - 1 && "pr-4",
+                    index === IMAGES.length - 1 && "pr-4"
                   )}
                 >
                   <img
                     className="w-full h-full object-cover"
-                    src={IMAGES[index]}
+                    src={image}
                     alt={`Image ${index}`}
                   />
                 </div>
