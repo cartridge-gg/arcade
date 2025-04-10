@@ -293,13 +293,13 @@ export function Metrics() {
         <div className="flex gap-4 w-full">
           <Tab
             label="Daily Transactions"
-            value={isLoading ? "0" : avgDailyTxs.toLocaleString()}
+            value={isLoading ? "0" : Math.round(avgDailyTxs).toLocaleString()}
             active={activeTab === "txs"}
             onClick={() => setActiveTab("txs")}
           />
           <Tab
             label="Daily Active Players"
-            value={isLoading ? "0" : avgDailyPlayers.toLocaleString()}
+            value={isLoading ? "0" : Math.round(avgDailyPlayers).toLocaleString()}
             active={activeTab === "players"}
             onClick={() => setActiveTab("players")}
           />
