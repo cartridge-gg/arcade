@@ -33,17 +33,16 @@ export function App() {
   return (
     <SceneLayout>
       <div
-        className="h-full w-full overflow-y-scroll"
+        className="h-full w-full overflow-y-scroll px-3 lg:px-0"
         style={{ scrollbarWidth: "none" }}
       >
-        <div className="w-[1112px] pt-8 pb-6 gap-8 flex items-stretch m-auto h-full overflow-clip">
+        <div className="lg:w-[1112px] lg:pt-8 pb-6 gap-8 flex items-stretch m-auto h-full overflow-clip">
           <Games />
           <div
             className={cn(
-              "relative grow h-full flex flex-col rounded-xl gap-2 overflow-hidden",
-              "border border-background-200 bg-background-100",
+              "relative grow h-full flex flex-col rounded-xl gap-2 overflow-hidden border border-background-200 bg-background-100",
               !isZero &&
-                "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
+              "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
             )}
           >
             {isZero ? <GamePage game={game} /> : <PlayerPage game={game} />}

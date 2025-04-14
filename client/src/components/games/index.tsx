@@ -33,7 +33,7 @@ export const Games = () => {
   }, [games, search]);
 
   return (
-    <div className="self-start flex flex-col gap-px bg-background-200 overflow-clip rounded-xl border border-background-200 min-w-[360px]">
+    <div className="self-start hidden lg:flex flex-col gap-px bg-background-200 overflow-clip rounded-xl border border-background-200 min-w-[360px]">
       <div className="flex flex-col gap-3 bg-background-100 p-4">
         <Search search={search} setSearch={setSearch} />
         <div className="flex flex-col gap-1">
