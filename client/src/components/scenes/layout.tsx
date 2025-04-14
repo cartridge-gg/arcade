@@ -4,6 +4,7 @@ import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import banner from "@/assets/banner.png";
+import { SidebarOverlay } from "../sidebar-overlay";
 
 export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
   const { games } = useArcade();
@@ -67,6 +68,7 @@ export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         <Header />
+        <SidebarOverlay />
         {children}
       </div>
     </div>

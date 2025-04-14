@@ -1,4 +1,4 @@
-import { CardListContent, Input, SearchIcon } from "@cartridge/ui-next";
+import { CardListContent, Input, SearchIcon, useMediaQuery } from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/hooks/context";
 import {
@@ -15,11 +15,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import cartridge from "@/assets/cartridge-logo.png";
 import banner from "@/assets/banner.png";
 import ArcadeGameSelect from "../modules/game-select";
+import { useSidebar } from "@/hooks/sidebar";
+import { cn } from "@cartridge/ui-next";
 
 export const Games = () => {
   const [search, setSearch] = useState("");
   const { address } = useAccount();
   const { games } = useArcade();
+  const { isOpen } = useSidebar();
+  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   const [searchParams] = useSearchParams();
   const selected = useMemo(() => {
@@ -33,10 +37,18 @@ export const Games = () => {
   }, [games, search]);
 
   return (
-    <div className="self-start hidden lg:flex flex-col gap-px bg-background-200 overflow-clip rounded-xl border border-background-200 min-w-[360px]">
-      <div className="flex flex-col gap-3 bg-background-100 p-4">
+    <div
+      className={cn(
+        "self-start flex-col gap-px bg-background-200 overflow-clip rounded-xl border border-background-200 min-w-[360px]",
+        "lg:flex", // Always visible on large screens
+        isMobile && "fixed z-50 top-16 left-0 bottom-0 h-[calc(100vh-4rem)]", // Fixed position for mobile
+        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0", // Slide in/out animation
+        "transition-transform duration-300 ease-in-out" // Smooth transition
+      )}
+    >
+      <div className="flex flex-col gap-3 bg-background-100 p-4 h-full">
         <Search search={search} setSearch={setSearch} />
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 flex-grow overflow-hidden">
           <Game
             project=""
             namespace=""
@@ -50,7 +62,7 @@ export const Games = () => {
             Games
           </p>
           <CardListContent
-            className="p-0 overflow-y-scroll"
+            className="p-0 overflow-y-auto flex-grow"
             style={{ scrollbarWidth: "none" }}
           >
             {filteredGames.map((game) => (
@@ -136,6 +148,7 @@ export const Game = ({
     setProject,
     setNamespace,
   } = useProject();
+  const { close } = useSidebar();
 
   const isOwner = useMemo(() => {
     return BigInt(game?.owner || "0x0") === BigInt(address || "0x0");
@@ -147,7 +160,10 @@ export const Game = ({
     const url = new URL(window.location.href);
     url.searchParams.set("game", name);
     navigate(url.toString().replace(window.location.origin, ""));
-  }, [name, navigate]);
+
+    // Close sidebar on mobile when a game is selected
+    close();
+  }, [name, navigate, close]);
 
   useEffect(() => {
     if (
@@ -188,6 +204,8 @@ export const Game = ({
     setProject,
     setNamespace,
     setCover,
+    resetTheme,
+    resetCover,
   ]);
 
   return (
