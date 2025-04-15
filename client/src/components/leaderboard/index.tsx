@@ -75,6 +75,21 @@ export function Leaderboard({ game }: { game?: GameModel }) {
     let rank = 0;
     const data = gamePlayers.map((player, index) => {
       if (BigInt(player.address) === BigInt(address || "0x0")) rank = index + 1;
+      const ids = pins[getChecksumAddress(player.address)] || [];
+      const pinneds: { id: string; icon: string }[] = gameAchievements
+        .filter(
+          (item) =>
+            player.completeds.includes(item.id) &&
+            (ids.length === 0 || ids.includes(item.id)),
+        )
+        .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+        .slice(0, 3)
+        .map((item) => {
+          return {
+            id: item.id,
+            icon: item.icon,
+          };
+        });
       return {
         address: player.address,
         name:
@@ -83,12 +98,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
         rank: index + 1,
         points: player.earnings,
         highlight: BigInt(player.address) === BigInt(address || "0x0"),
-        pins: pins[getChecksumAddress(player.address)]
-          ?.map((id) => {
-            const achievement = gameAchievements.find((a) => a?.id === id);
-            return achievement ? { id, icon: achievement.icon } : undefined;
-          })
-          .filter(Boolean) as { id: string; icon: string }[],
+        pins: pinneds,
       };
     });
     if (rank <= 100) {

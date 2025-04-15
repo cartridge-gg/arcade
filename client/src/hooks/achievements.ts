@@ -117,7 +117,11 @@ export function usePlayerGameStats(project: string) {
   const { pinneds, completed, total } = useMemo(() => {
     const ids = pins[addAddressPadding(address)] || [];
     const pinneds = gameAchievements
-      .filter((item) => ids.includes(item.id))
+      .filter((item) =>
+        ids.length > 0
+          ? ids.includes(item.id) && item.completed
+          : item.completed,
+      )
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     const completed = gameAchievements.filter((item) => item.completed).length;

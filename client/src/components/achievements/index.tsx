@@ -31,7 +31,9 @@ export function Achievements({ game }: { game?: GameModel }) {
   const { pinneds } = useMemo(() => {
     const ids = pins[getChecksumAddress(address)] || [];
     const pinneds = gameAchievements
-      .filter((item) => ids.includes(item.id))
+      .filter(
+        (item) => item.completed && (ids.length === 0 || ids.includes(item.id)),
+      )
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     return { pinneds };
@@ -124,7 +126,9 @@ export function GameRow({
   const { pinneds } = useMemo(() => {
     const ids = pins[getChecksumAddress(address)] || [];
     const pinneds = gameAchievements
-      .filter((item) => ids.includes(item.id))
+      .filter(
+        (item) => item.completed && (ids.length === 0 || ids.includes(item.id)),
+      )
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     return { pinneds };
