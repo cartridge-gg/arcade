@@ -2,6 +2,7 @@ import { cn } from "@cartridge/ui-next";
 import { HTMLAttributes, SVGProps } from "react";
 import { SidebarToggle } from "../sidebar-toggle";
 import { useMediaQuery } from "@cartridge/ui-next";
+import { useSidebar } from "@/hooks/sidebar";
 
 export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> { }
 
@@ -12,12 +13,20 @@ export const ArcadeHeader = ({
 }: ArcadeHeaderProps) => {
 
   const isMobile = useMediaQuery("(max-width: 1024px)");
+  const { isOpen } = useSidebar();
 
   return (
-    <div className="w-full flex gap-x-px h-14" {...props}>
+    <div
+      className={cn(
+        "w-full flex gap-x-px h-14",
+        "transition-transform duration-300 ease-in-out will-change-transform",
+        isMobile && isOpen ? "translate-x-[360px]" : "translate-x-0"
+      )}
+      {...props}
+    >
       {
         isMobile ? (
-          <SidebarToggle className="lg:hidden absolute top-4 left-4 z-10" />
+          <SidebarToggle className="lg:hidden absolute top-2 left-2 z-10" />
         ) : (
           <div
             className={cn(

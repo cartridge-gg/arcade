@@ -35,6 +35,7 @@ const AppContent = () => {
   const { isZero } = useAddress();
   const { games, projects, setProjects } = useArcade();
   const { project, namespace } = useProject();
+  const { isOpen } = useSidebar();
 
   const game: GameModel | undefined = useMemo(() => {
     return Object.values(games).find(
@@ -54,7 +55,9 @@ const AppContent = () => {
 
   return (
     <div
-      className="h-full w-full overflow-y-scroll px-3 lg:px-0"
+      className={cn("h-full w-full overflow-y-scroll lg:px-0",
+        isOpen ? "px-0 pl-3" : "px-3",
+      )}
       style={{ scrollbarWidth: "none" }}
     >
       <div

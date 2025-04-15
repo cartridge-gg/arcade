@@ -39,14 +39,14 @@ export const Games = () => {
   return (
     <div
       className={cn(
-        "self-start flex-col gap-px bg-background-200 overflow-clip rounded-xl border border-background-200 min-w-[360px]",
+        "self-start flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border border-background-200 min-w-[360px]",
         "lg:flex", // Always visible on large screens
-        isMobile && "fixed z-50 top-16 left-0 bottom-0 h-[calc(100vh-4rem)]", // Fixed position for mobile
+        isMobile && "fixed z-50 top-0 left-0 h-full", // Fixed position for mobile
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0", // Slide in/out animation
         "transition-transform duration-300 ease-in-out" // Smooth transition
       )}
     >
-      <div className="flex flex-col gap-3 bg-background-100 p-4 h-full">
+      <div className="flex flex-col gap-3 bg-spacer-100 lg:bg-background-100 p-4 h-full">
         <Search search={search} setSearch={setSearch} />
         <div className="flex flex-col gap-1 flex-grow overflow-hidden">
           <Game
@@ -81,9 +81,9 @@ export const Games = () => {
             ))}
           </CardListContent>
         </div>
-      </div>
-      <div className="flex items-center justify-center p-3 gap-2.5 bg-background-100">
-        <Register />
+        <div className="flex items-center justify-center p-3 gap-2.5 bg-background-100">
+          <Register />
+        </div>
       </div>
     </div>
   );
