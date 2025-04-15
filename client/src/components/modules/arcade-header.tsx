@@ -26,7 +26,9 @@ export const ArcadeHeader = ({
     >
       {
         isMobile ? (
-          <SidebarToggle className="lg:hidden absolute top-2 left-2 z-10" />
+          <div className="p-2">
+            <SidebarToggle className="lg:hidden" />
+          </div>
         ) : (
           <div
             className={cn(
