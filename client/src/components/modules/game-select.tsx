@@ -1,10 +1,10 @@
-import { CardTitle, cn, SparklesIcon, Thumbnail } from "@cartridge/ui-next";
+import { CardTitle, cn, SparklesIcon, Thumbnail, useMediaQuery } from "@cartridge/ui-next";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useState } from "react";
 
 interface ArcadeGameSelectProps
   extends HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof arcadeGameSelectVariants> {
+  VariantProps<typeof arcadeGameSelectVariants> {
   name: string;
   logo?: string;
   cover?: string;
@@ -44,11 +44,12 @@ export const ArcadeGameSelect = ({
   ...props
 }: ArcadeGameSelectProps) => {
   const [hover, setHover] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   return (
     <div
       data-active={active}
-      className={cn(arcadeGameSelectVariants({ variant }), className)}
+      className={cn(arcadeGameSelectVariants({ variant }), isMobile && "bg-spacer-100", className)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       {...props}
