@@ -8,11 +8,11 @@ import placeholder from "@/assets/placeholder.svg";
 import { useAddress } from "@/hooks/address";
 import { Token } from "@/context/token";
 
-const DEFAULT_TOKENS_COUNT = 4;
+const DEFAULT_TOKENS_COUNT = 3;
 
 export const Tokens = () => {
   const [unfolded, setUnfolded] = useState(false);
-  const { tokens } = useTokens();
+  const { tokens, credits } = useTokens();
 
   const filteredTokens = useMemo(() => {
     return tokens.filter((token) => token.balance.amount > 0);
@@ -23,6 +23,7 @@ export const Tokens = () => {
       className={cn("rounded overflow-y-scroll w-full flex flex-col gap-y-px")}
       style={{ scrollbarWidth: "none" }}
     >
+      <Item key={credits.metadata.address} token={credits} />
       {filteredTokens
         .slice(0, unfolded ? filteredTokens.length : DEFAULT_TOKENS_COUNT)
         .map((token) => (
@@ -62,8 +63,6 @@ function Item({ token }: { token: Token }) {
     const path = `inventory/token/${token.metadata.address}/send`;
     controller.openProfileTo(path);
   }, [token.metadata.address, connector]);
-
-  if (token.balance.amount === 0) return null;
 
   return (
     <TokenCard

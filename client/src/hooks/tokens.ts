@@ -1,6 +1,9 @@
 import { useContext, useMemo } from "react";
-import { TokenContext } from "../context/token";
+import { Token, TokenContext } from "../context/token";
 import { useProject } from "./project";
+import { useCreditBalance } from "@cartridge/utils";
+import { useUsername } from "./account";
+import { useAddress } from "./address";
 
 /**
  * Custom hook to access the Token context and account information.
@@ -12,6 +15,7 @@ import { useProject } from "./project";
  * @throws {Error} If used outside of a TokenProvider context
  */
 export const useTokens = () => {
+  const { address } = useAddress();
   const context = useContext(TokenContext);
   const { project } = useProject();
 
@@ -30,5 +34,28 @@ export const useTokens = () => {
     );
   }, [allTokens, project]);
 
-  return { tokens, status };
+  const { username } = useUsername({ address });
+
+  const creditBalance = useCreditBalance({
+    username,
+    interval: 3000,
+  });
+  const credits: Token = useMemo(() => {
+    return {
+      balance: {
+        amount: Number(creditBalance.balance.value),
+        value: Number(creditBalance.balance.value) / 10,
+        change: 0,
+      },
+      metadata: {
+        name: "Credits",
+        symbol: "Credits",
+        decimals: 0,
+        address: "0x0",
+        image: "https://static.cartridge.gg/presets/credit/icon.svg",
+      },
+    };
+  }, [creditBalance]);
+
+  return { tokens, status, credits };
 };
