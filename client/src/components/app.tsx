@@ -10,25 +10,35 @@ import { GameModel } from "@bal7hazar/arcade-sdk";
 import { useProject } from "@/hooks/project";
 import { SidebarProvider } from "@/context/sidebar";
 import { useSidebar } from "@/hooks/sidebar";
-import { useWindowDimensions } from "@/hooks/window";
+import { Header } from "./header";
 
 // Wrapper component to apply sidebar effects
 const MainContent = ({ children }: { children: React.ReactNode }) => {
   const { isOpen } = useSidebar();
   const { isZero } = useAddress();
-  const { width } = useWindowDimensions();
 
   return (
     <div
       className={cn(
-        "relative grow h-full flex flex-col rounded-xl gap-2 overflow-hidden border border-background-200 bg-background-100",
-        !isZero && "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
+        "relative grow flex flex-col",
         "transition-transform duration-300 ease-in-out will-change-transform",
-        isOpen ? width < 400 ? "lg:translate-x-0 translate-x-[330px]" : "lg:translate-x-0 translate-x-[360px]"  // Push content when sidebar is open on mobile
-          : "lg:translate-x-0 translate-x-0", // Reset position when sidebar is closed
+        isOpen
+          ? "translate-x-[calc(100vw-64px)] lg:translate-x-0"
+          : "lg:translate-x-0 translate-x-0",
       )}
     >
-      {children}
+      <div className="relative lg:hidden">
+        <Header />
+      </div>
+      <div
+        className={cn(
+          "relative grow h-full flex flex-col rounded-xl gap-2 overflow-hidden border border-background-200 bg-background-100",
+          !isZero &&
+            "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 };
@@ -57,14 +67,15 @@ const AppContent = () => {
 
   return (
     <div
-      className={cn("h-full w-full overflow-y-scroll lg:px-0",
+      className={cn(
+        "h-full w-full overflow-y-scroll lg:px-0",
         isOpen ? "px-0 pl-3" : "px-3",
       )}
       style={{ scrollbarWidth: "none" }}
     >
       <div
         className={cn(
-          "lg:w-[1112px] pt-2 lg:pt-8 pb-6 gap-8 flex items-stretch m-auto h-full overflow-clip",
+          "lg:w-[1112px] pt-2 lg:pt-8 pb-6 gap-3 lg:gap-8 flex items-stretch m-auto h-full overflow-clip",
           "transition-all duration-300 ease-in-out",
         )}
       >

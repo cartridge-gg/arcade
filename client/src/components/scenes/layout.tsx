@@ -42,7 +42,7 @@ export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div
-      className="h-screen overflow-cliprelative"
+      className="h-screen overflow-clip relative"
       style={{
         scrollbarWidth: "none",
       }}
@@ -66,7 +66,9 @@ export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
           background: `linear-gradient(to top, var(--background-100) 50%, transparent 100%)`,
         }}
       >
-        <Header />
+        <div className="w-full hidden lg:block">
+          <Header />
+        </div>
         {children}
       </div>
     </div>

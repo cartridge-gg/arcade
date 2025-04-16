@@ -1,4 +1,9 @@
-import { CardListContent, Input, SearchIcon, useMediaQuery } from "@cartridge/ui-next";
+import {
+  CardListContent,
+  Input,
+  SearchIcon,
+  useMediaQuery,
+} from "@cartridge/ui-next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/hooks/context";
 import {
@@ -17,13 +22,11 @@ import banner from "@/assets/banner.png";
 import ArcadeGameSelect from "../modules/game-select";
 import { useSidebar } from "@/hooks/sidebar";
 import { cn } from "@cartridge/ui-next";
-import { useWindowDimensions } from "@/hooks/window";
 
 export const Games = () => {
   const [search, setSearch] = useState("");
   const { address } = useAccount();
   const { games } = useArcade();
-  const { width } = useWindowDimensions();
   const { isOpen } = useSidebar();
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
@@ -42,11 +45,10 @@ export const Games = () => {
     <div
       className={cn(
         "self-start flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border border-background-200",
-        width < 400 ? "w-[330px]" : "min-w-[360px]", // Fixed width for mobile
-        "lg:flex", // Always visible on large screens
+        "w-[calc(100vw-64px)] lg:w-[360px] lg:flex",
         isMobile && "fixed z-50 top-0 left-0 h-full", // Fixed position for mobile
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0", // Slide in/out animation
-        "transition-transform duration-300 ease-in-out" // Smooth transition
+        "transition-transform duration-300 ease-in-out", // Smooth transition
       )}
     >
       <div className="flex flex-col gap-3 bg-spacer-100 lg:bg-background-100 p-4 h-full">

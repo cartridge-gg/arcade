@@ -2,48 +2,40 @@ import { cn } from "@cartridge/ui-next";
 import { HTMLAttributes, SVGProps } from "react";
 import { SidebarToggle } from "../sidebar-toggle";
 import { useMediaQuery } from "@cartridge/ui-next";
-import { useSidebar } from "@/hooks/sidebar";
-import { useWindowDimensions } from "@/hooks/window";
 
-export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> { }
+export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> {}
 
 export const ArcadeHeader = ({
   children,
   onClick,
   ...props
 }: ArcadeHeaderProps) => {
-
   const isMobile = useMediaQuery("(max-width: 1024px)");
-  const { width } = useWindowDimensions();
-  const { isOpen } = useSidebar();
 
   return (
     <div
       className={cn(
-        "w-full flex gap-x-px h-14",
+        "w-full flex items-center gap-x-px h-16 lg:h-14",
         "transition-transform duration-300 ease-in-out will-change-transform",
-        isMobile && isOpen ? width < 400 ? "translate-x-[330px]" : "translate-x-[360px]" : "translate-x-0"
       )}
       {...props}
     >
-      {
-        isMobile ? (
-          <div className="p-2">
-            <SidebarToggle className="lg:hidden" />
-          </div>
-        ) : (
-          <div
-            className={cn(
-              "flex items-center justify-center text-primary w-14",
-              onClick && "cursor-pointer",
-            )}
-            onClick={onClick}
-          >
-            <ArcadeIcon className="w-8 h-8 transition-colors duration-300" />
-          </div>
-        )
-      }
-      <div className="grow flex justify-end items-center gap-2 px-3 py-2 select-none">
+      {isMobile ? (
+        <div className="lg:hidden">
+          <SidebarToggle />
+        </div>
+      ) : (
+        <div
+          className={cn(
+            "flex items-center justify-center text-primary w-14",
+            onClick && "cursor-pointer",
+          )}
+          onClick={onClick}
+        >
+          <ArcadeIcon className="w-8 h-8 transition-colors duration-300" />
+        </div>
+      )}
+      <div className="grow flex justify-end items-center gap-2 lg:px-3 py-2 select-none">
         {children}
       </div>
     </div>
