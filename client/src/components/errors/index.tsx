@@ -29,7 +29,7 @@ export function Wrapper({
 
 export function Connect() {
   return (
-    <Wrapper className="pb-6">
+    <Wrapper className="pb-3 lg:pb-6">
       <div className="flex flex-col justify-center items-center gap-8 h-full">
         <div className="flex flex-col justify-center items-center gap-3">
           <p className="text-foreground-200 text-lg/[22px] font-semibold">
@@ -69,7 +69,7 @@ export function ActivityComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -79,7 +79,7 @@ export function ActivityError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -89,7 +89,7 @@ export function ActivityLoading() {
     <Error
       title="Loading..."
       Icon={<EmptyStateActivityIcon className="h-full w-full animate-pulse" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -108,7 +108,7 @@ export function GuildsComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateGuildIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -118,7 +118,7 @@ export function GuildsLoading() {
     <Error
       title="Loading..."
       Icon={<EmptyStateGuildIcon className="h-full w-full animate-pulse" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -128,7 +128,7 @@ export function GuildsError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateGuildIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -138,7 +138,7 @@ export function GuildsEmpty() {
     <Error
       title="It's lonely in here..."
       Icon={<EmptyStateGuildIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -148,7 +148,7 @@ export function MarketplaceComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -158,7 +158,7 @@ export function MarketplaceLoading() {
     <Error
       title="Loading..."
       Icon={<EmptyStateInventoryIcon className="h-full w-full animate-pulse" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -168,7 +168,7 @@ export function MarketplaceError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -178,7 +178,7 @@ export function MarketplaceEmpty() {
     <Error
       title="It's lonely in here..."
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -188,7 +188,7 @@ export function AboutComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -198,7 +198,7 @@ export function AboutLoading() {
     <Error
       title="Loading..."
       Icon={<EmptyStateActivityIcon className="h-full w-full animate-pulse" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -208,7 +208,7 @@ export function AboutError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -218,7 +218,7 @@ export function AboutEmpty() {
     <Error
       title="It's lonely in here..."
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -228,7 +228,7 @@ export function AchievementsComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -238,7 +238,7 @@ export function AchievementsError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -250,7 +250,7 @@ export function AchievementsLoading() {
       Icon={
         <EmptyStateAchievementIcon className="h-full w-full animate-pulse" />
       }
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -260,7 +260,7 @@ export function AchievementsEmpty() {
     <Error
       title="It's lonely in here..."
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -270,7 +270,7 @@ export function LeaderboardComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -280,7 +280,7 @@ export function LeaderboardError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -292,7 +292,7 @@ export function LeaderboardLoading() {
       Icon={
         <EmptyStateAchievementIcon className="h-full w-full animate-pulse" />
       }
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -302,7 +302,7 @@ export function LeaderboardEmpty() {
     <Error
       title="It's lonely in here..."
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -312,7 +312,7 @@ export function InventoryComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -322,7 +322,7 @@ export function InventoryError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -332,7 +332,7 @@ export function InventoryLoading() {
     <Error
       title="Loading..."
       Icon={<EmptyStateInventoryIcon className="h-full w-full animate-pulse" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -342,7 +342,7 @@ export function InventoryEmpty() {
     <Error
       title="It's lonely in here..."
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -352,7 +352,7 @@ export function DiscoverComingSoon() {
     <Error
       title="Coming soon"
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="pb-6"
+      className="pb-3 lg:pb-6"
     />
   );
 }
@@ -362,7 +362,7 @@ export function DiscoverError() {
     <Error
       title="Oops! Something went wrong"
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="pb-6"
+      className="pb-3 lg:pb-6"
     />
   );
 }
@@ -372,7 +372,7 @@ export function DiscoverLoading() {
     <Error
       title="Loading..."
       Icon={<EmptyStateActivityIcon className="h-full w-full animate-pulse" />}
-      className="py-6"
+      className="py-3 lg:py-6"
     />
   );
 }
@@ -382,7 +382,7 @@ export function DiscoverEmpty() {
     <Error
       title="It's lonely in here..."
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
-      className="pb-6"
+      className="pb-3 lg:pb-6"
     />
   );
 }

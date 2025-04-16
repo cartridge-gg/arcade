@@ -1,4 +1,4 @@
-import { LayoutContent } from "@cartridge/ui-next";
+import { LayoutContent, useMediaQuery } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { Trophies } from "./trophies";
 import { useArcade } from "@/hooks/arcade";
@@ -19,6 +19,8 @@ export function Achievements({ game }: { game?: GameModel }) {
   const { address, isSelf } = useAddress();
   const { achievements, players, isLoading, isError } = useAchievements();
   const { pins, games } = useArcade();
+
+  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   const gamePlayers = useMemo(() => {
     return players[game?.config.project || ""] || [];
@@ -69,8 +71,8 @@ export function Achievements({ game }: { game?: GameModel }) {
           className="p-0 mt-0 overflow-y-scroll"
           style={{ scrollbarWidth: "none" }}
         >
-          <div className="flex flex-col gap-4 py-6">
-            <div className="flex flex-col gap-y-4">
+          <div className="flex flex-col gap-3 lg:gap-4 py-3 lg:py-6">
+            <div className="flex flex-col gap-y-3 lg:gap-y-4">
               {filteredGames.map((item, index) => (
                 <GameRow
                   key={index}
@@ -79,7 +81,7 @@ export function Achievements({ game }: { game?: GameModel }) {
                   achievements={achievements}
                   pins={pins}
                   background={filteredGames.length > 1}
-                  header={!game}
+                  header={!game || isMobile}
                   variant={!game ? "default" : "dark"}
                 />
               ))}

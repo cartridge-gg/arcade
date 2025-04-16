@@ -1,141 +1,99 @@
 import {
+  ArcadeMenuButton,
   cn,
-  DiscordIcon,
-  GitHubIcon,
-  PlayIcon,
-  TelegramIcon,
-  XIcon,
+  Select,
+  SelectContent,
+  useMediaQuery,
 } from "@cartridge/ui-next";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes } from "react";
+import {
+  GameSocialDiscord,
+  GameSocialGithub,
+  GameSocialTelegram,
+  GameSocialTwitter,
+  GameSocialWebsite,
+} from "./game-social";
 
-interface GameSocialWebsiteProps
-  extends VariantProps<typeof GameSocialVariants> {
-  website: string;
-}
-export const GameSocialWebsite = ({
-  website,
-  variant,
-}: GameSocialWebsiteProps) => {
-  return (
-    <GameSocial
-      icon={<PlayIcon size="xs" />}
-      href={website}
-      label="Play"
-      variant={variant}
-      className="text-primary"
-    />
-  );
-};
-
-interface GameSocialDiscordProps
-  extends VariantProps<typeof GameSocialVariants> {
-  discord: string;
-}
-export const GameSocialDiscord = ({
-  discord,
-  variant,
-}: GameSocialDiscordProps) => {
-  return (
-    <GameSocial
-      icon={<DiscordIcon size="xs" />}
-      href={discord}
-      variant={variant}
-    />
-  );
-};
-
-interface GameSocialTwitterProps
-  extends VariantProps<typeof GameSocialVariants> {
-  twitter: string;
-}
-export const GameSocialTwitter = ({
-  twitter,
-  variant,
-}: GameSocialTwitterProps) => {
-  return (
-    <GameSocial icon={<XIcon size="xs" />} href={twitter} variant={variant} />
-  );
-};
-
-interface GameSocialGithubProps
-  extends VariantProps<typeof GameSocialVariants> {
-  github: string;
-}
-export const GameSocialGithub = ({
-  github,
-  variant,
-}: GameSocialGithubProps) => {
-  return (
-    <GameSocial
-      icon={<GitHubIcon size="xs" />}
-      href={github}
-      variant={variant}
-    />
-  );
-};
-
-interface GameSocialTelegramProps
-  extends VariantProps<typeof GameSocialVariants> {
-  telegram: string;
-}
-export const GameSocialTelegram = ({
-  telegram,
-  variant,
-}: GameSocialTelegramProps) => {
-  return (
-    <GameSocial
-      icon={<TelegramIcon size="xs" />}
-      href={telegram}
-      variant={variant}
-    />
-  );
-};
-
-const GameSocialVariants = cva(
-  "flex items-center gap-x-1 rounded px-3 py-2 cursor-pointer text-foreground-100",
-  {
-    variants: {
-      variant: {
-        default: "bg-background-100 hover:bg-background-200",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
+const gameSocialsVariants = cva("flex gap-2", {
+  variants: {
+    variant: {
+      darkest: "",
+      darker: "",
+      dark: "",
+      default: "",
+      light: "",
+      lighter: "",
+      lightest: "",
+      ghost: "",
     },
   },
-);
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
-export interface GameSocialProps
-  extends HTMLAttributes<HTMLAnchorElement>,
-    VariantProps<typeof GameSocialVariants> {
-  icon: React.ReactNode;
-  href: string;
-  label?: string;
+interface GameSocialsProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof gameSocialsVariants> {
+  socials?: {
+    website: string;
+    discord: string;
+    telegram: string;
+    twitter: string;
+    github: string;
+  };
 }
 
-const GameSocial = ({
-  icon,
-  href,
-  label,
+const GameSocials = ({
   variant,
   className,
-}: GameSocialProps) => {
+  socials,
+  ...props
+}: GameSocialsProps) => {
+  const isMobile = useMediaQuery("(max-width: 1024px)");
   return (
-    <a
-      href={href}
-      draggable={false}
-      target="_blank"
-      className={cn(GameSocialVariants({ variant }), className)}
-    >
-      {icon}
-      {label && (
-        <p className="px-0.5 text-xs font-medium tracking-normal hidden sm:block">
-          {label}
-        </p>
-      )}
-    </a>
+    <div className={cn(gameSocialsVariants({ variant }), className)} {...props}>
+      <Select>
+        <div className="grow flex justify-end items-center self-center">
+          <ArcadeMenuButton
+            active={false}
+            className={cn(
+              "bg-background-125 text-foreground-100 hover:bg-background-150 hover:text-foreground-100",
+              !isMobile && "hidden",
+            )}
+          />
+        </div>
+        <SelectContent className="bg-background-100">
+          {socials?.twitter && (
+            <GameSocialTwitter twitter={socials.twitter} label />
+          )}
+          {socials?.discord && (
+            <GameSocialDiscord discord={socials.discord} label />
+          )}
+          {socials?.telegram && (
+            <GameSocialTelegram telegram={socials.telegram} label />
+          )}
+          {socials?.github && (
+            <GameSocialGithub github={socials.github} label />
+          )}
+        </SelectContent>
+        {socials?.twitter && !isMobile && (
+          <GameSocialTwitter twitter={socials.twitter} />
+        )}
+        {socials?.discord && !isMobile && (
+          <GameSocialDiscord discord={socials.discord} />
+        )}
+        {socials?.telegram && !isMobile && (
+          <GameSocialTelegram telegram={socials.telegram} />
+        )}
+        {socials?.github && !isMobile && (
+          <GameSocialGithub github={socials.github} />
+        )}
+        {socials?.website && <GameSocialWebsite website={socials.website} />}
+      </Select>
+    </div>
   );
 };
 
-export default GameSocial;
+export default GameSocials;

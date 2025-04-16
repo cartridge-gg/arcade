@@ -46,7 +46,7 @@ export function Trophies({
   }, [achievements]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3 lg:gap-4">
       {Object.entries(groups)
         .filter(([group]) => group !== HIDDEN_GROUP)
         .map(([group, items]) => (

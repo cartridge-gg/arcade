@@ -157,7 +157,7 @@ export function Activity() {
     }
     case "success": {
       return (
-        <LayoutContent className="gap-y-6 select-none h-full overflow-y-scroll p-0 py-6">
+        <LayoutContent className="gap-y-6 select-none h-full overflow-y-scroll p-0 py-3 lg:py-6">
           {dates.length > 0 ? (
             dates.map((current) => {
               return (

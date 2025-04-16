@@ -20,7 +20,7 @@ export const Collections = () => {
     }
     default: {
       return (
-        <div className="grid grid-cols-3 gap-4 place-items-center select-none">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none">
           {collections.map((collection) => (
             <Item
               key={collection.address}

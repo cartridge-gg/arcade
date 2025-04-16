@@ -155,14 +155,14 @@ export function Discover({ game }: { game?: GameModel }) {
   return (
     <LayoutContent className="gap-y-6 select-none h-full overflow-clip p-0">
       <div
-        className="p-0 pt-6 mt-0 h-full overflow-y-scroll"
+        className="p-0 pt-3 lg:pt-6 mt-0 h-full overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}
       >
         <ArcadeSubTabs
           tabs={["all", "following"]}
           defaultValue={defaultValue as SubTabValue}
           onTabClick={(tab: SubTabValue) => handleTabClick(tab)}
-          className="mb-4"
+          className="mb-3 lg:mb-4"
         >
           <div
             className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
@@ -174,7 +174,7 @@ export function Discover({ game }: { game?: GameModel }) {
               gameEvents[0].all.length === 0 ? (
                 <DiscoverEmpty />
               ) : (
-                <div className="flex flex-col gap-y-4 pb-6">
+                <div className="flex flex-col gap-y-4 pb-3 lg:pb-6">
                   {filteredGames.map((item, index) => (
                     <GameRow
                       key={`${index}-${item.config.project}`}

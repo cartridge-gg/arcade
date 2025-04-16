@@ -190,20 +190,23 @@ export function Leaderboard({ game }: { game?: GameModel }) {
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
       <div
-        className="p-0 pt-6 mt-0 h-full overflow-y-scroll"
+        className="p-0 pt-3 lg:pt-6 mt-0 h-full overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}
       >
         <ArcadeSubTabs
           tabs={["all", "following"]}
           defaultValue={defaultValue as SubTabValue}
           onTabClick={(tab: SubTabValue) => handleTabClick(tab)}
-          className="mb-4"
+          className="mb-3 lg:mb-4"
         >
           <div
             className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
             style={{ scrollbarWidth: "none" }}
           >
-            <TabsContent className="p-0 pb-6 mt-0 grow w-full" value="all">
+            <TabsContent
+              className="p-0 pb-3 lg:pb-6 mt-0 grow w-full"
+              value="all"
+            >
               <AchievementLeaderboard className="h-full rounded">
                 {!game
                   ? gamesData.all.map((item, index) => (
