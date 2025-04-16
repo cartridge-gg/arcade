@@ -20,10 +20,10 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={cn(
-        "relative grow flex flex-col",
+        "relative grow flex flex-col w-full",
         "transition-transform duration-300 ease-in-out will-change-transform",
         isOpen
-          ? "translate-x-[calc(100vw-64px)] lg:translate-x-0"
+          ? "translate-x-[min(calc(100vw-64px),360px)] lg:translate-x-0"
           : "lg:translate-x-0 translate-x-0",
       )}
     >

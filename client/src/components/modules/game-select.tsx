@@ -1,10 +1,10 @@
-import { CardTitle, cn, SparklesIcon, Thumbnail, useMediaQuery } from "@cartridge/ui-next";
+import { cn, SparklesIcon, Thumbnail, useMediaQuery } from "@cartridge/ui-next";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useState } from "react";
 
 interface ArcadeGameSelectProps
   extends HTMLAttributes<HTMLDivElement>,
-  VariantProps<typeof arcadeGameSelectVariants> {
+    VariantProps<typeof arcadeGameSelectVariants> {
   name: string;
   logo?: string;
   cover?: string;
@@ -13,7 +13,7 @@ interface ArcadeGameSelectProps
 }
 
 export const arcadeGameSelectVariants = cva(
-  "select-none h-10 flex justify-between items-center p-2 gap-2 cursor-pointer data-[active=true]:cursor-default",
+  "select-none h-10 flex gap-3 justify-start items-center p-2 gap-2 cursor-pointer data-[active=true]:cursor-default",
   {
     variants: {
       variant: {
@@ -49,26 +49,28 @@ export const ArcadeGameSelect = ({
   return (
     <div
       data-active={active}
-      className={cn(arcadeGameSelectVariants({ variant }), isMobile && "bg-spacer-100", className)}
+      className={cn(
+        arcadeGameSelectVariants({ variant }),
+        isMobile && "bg-spacer-100",
+        className,
+      )}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       {...props}
     >
-      <div className="flex items-center gap-3">
-        <Thumbnail
-          icon={logo}
-          size="sm"
-          variant={active || hover ? "lightest" : "light"}
-        />
-        <CardTitle
-          className={cn(
-            "text-sm font-normal text-foreground-100 transition-colors duration-150 ease-in-out",
-            active && "text-primary",
-          )}
-        >
-          {name}
-        </CardTitle>
-      </div>
+      <Thumbnail
+        icon={logo}
+        size="sm"
+        variant={active || hover ? "lightest" : "light"}
+      />
+      <p
+        className={cn(
+          "grow text-sm font-normal text-foreground-100 transition-colors duration-150 ease-in-out truncate whitespace-nowrap",
+          active && "text-primary",
+        )}
+      >
+        {name}
+      </p>
       {!!points && (
         <ArcadePoints
           label={points.toLocaleString()}

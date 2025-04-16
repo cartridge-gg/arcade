@@ -45,7 +45,7 @@ export const Games = () => {
     <div
       className={cn(
         "self-start flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border border-background-200",
-        "w-[calc(100vw-64px)] lg:w-[360px] lg:flex",
+        "w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
         isMobile && "fixed z-50 top-0 left-0 h-full", // Fixed position for mobile
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0", // Slide in/out animation
         "transition-transform duration-300 ease-in-out", // Smooth transition
