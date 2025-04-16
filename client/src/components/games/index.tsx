@@ -44,16 +44,16 @@ export const Games = () => {
   return (
     <div
       className={cn(
-        "self-start flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border border-background-200",
-        "w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
-        isMobile && "fixed z-50 top-0 left-0 h-full", // Fixed position for mobile
+        "flex flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border-r border-spacer-100 lg:border lg:border-background-200",
+        "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
+        isMobile && "fixed z-50 top-0 left-0", // Fixed position for mobile
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0", // Slide in/out animation
         "transition-transform duration-300 ease-in-out", // Smooth transition
       )}
     >
-      <div className="flex flex-col gap-3 bg-spacer-100 lg:bg-background-100 p-4 h-full">
+      <div className="flex flex-col gap-3 bg-background-100 p-4 grow">
         <Search search={search} setSearch={setSearch} />
-        <div className="flex flex-col gap-1 flex-grow overflow-hidden">
+        <div className="flex flex-col gap-1">
           <Game
             project=""
             namespace=""
@@ -67,7 +67,7 @@ export const Games = () => {
             Games
           </p>
           <CardListContent
-            className="p-0 overflow-y-auto flex-grow"
+            className="p-0 overflow-y-auto grow"
             style={{ scrollbarWidth: "none" }}
           >
             {filteredGames.map((game) => (
@@ -86,9 +86,9 @@ export const Games = () => {
             ))}
           </CardListContent>
         </div>
-        <div className="flex items-center justify-center p-3 gap-2.5 bg-background-100">
-          <Register />
-        </div>
+      </div>
+      <div className="flex items-center justify-center p-3 gap-2.5 bg-background-100">
+        <Register />
       </div>
     </div>
   );

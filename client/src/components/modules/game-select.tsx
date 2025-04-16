@@ -1,4 +1,4 @@
-import { cn, SparklesIcon, Thumbnail, useMediaQuery } from "@cartridge/ui-next";
+import { cn, SparklesIcon, Thumbnail } from "@cartridge/ui-next";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useState } from "react";
 
@@ -44,16 +44,11 @@ export const ArcadeGameSelect = ({
   ...props
 }: ArcadeGameSelectProps) => {
   const [hover, setHover] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   return (
     <div
       data-active={active}
-      className={cn(
-        arcadeGameSelectVariants({ variant }),
-        isMobile && "bg-spacer-100",
-        className,
-      )}
+      className={cn(arcadeGameSelectVariants({ variant }), className)}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       {...props}

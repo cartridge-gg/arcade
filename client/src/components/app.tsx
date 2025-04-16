@@ -47,7 +47,7 @@ const AppContent = () => {
   const { isZero } = useAddress();
   const { games, projects, setProjects } = useArcade();
   const { project, namespace } = useProject();
-  const { isOpen } = useSidebar();
+  const { isOpen, toggle } = useSidebar();
 
   const game: GameModel | undefined = useMemo(() => {
     return Object.values(games).find(
@@ -68,7 +68,7 @@ const AppContent = () => {
   return (
     <div
       className={cn(
-        "h-full w-full overflow-y-scroll lg:px-0",
+        "h-full w-full overflow-y-scroll px-3 lg:px-0",
         isOpen ? "px-0 pl-3" : "px-3",
       )}
       style={{ scrollbarWidth: "none" }}
@@ -79,6 +79,13 @@ const AppContent = () => {
           "transition-all duration-300 ease-in-out",
         )}
       >
+        <div
+          className={cn(
+            "absolute inset-0 bg-transparent z-10",
+            !isOpen && "hidden",
+          )}
+          onClick={() => toggle()}
+        />
         <Games />
         <MainContent>
           {isZero ? <GamePage game={game} /> : <PlayerPage game={game} />}
