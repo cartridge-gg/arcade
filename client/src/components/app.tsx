@@ -10,11 +10,13 @@ import { GameModel } from "@bal7hazar/arcade-sdk";
 import { useProject } from "@/hooks/project";
 import { SidebarProvider } from "@/context/sidebar";
 import { useSidebar } from "@/hooks/sidebar";
+import { useWindowDimensions } from "@/hooks/window";
 
 // Wrapper component to apply sidebar effects
 const MainContent = ({ children }: { children: React.ReactNode }) => {
   const { isOpen } = useSidebar();
   const { isZero } = useAddress();
+  const { width } = useWindowDimensions();
 
   return (
     <div
@@ -22,7 +24,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
         "relative grow h-full flex flex-col rounded-xl gap-2 overflow-hidden border border-background-200 bg-background-100",
         !isZero && "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
         "transition-transform duration-300 ease-in-out will-change-transform",
-        isOpen ? "lg:translate-x-0 translate-x-[360px]" // Push content when sidebar is open on mobile
+        isOpen ? width < 400 ? "lg:translate-x-0 translate-x-[330px]" : "lg:translate-x-0 translate-x-[360px]"  // Push content when sidebar is open on mobile
           : "lg:translate-x-0 translate-x-0", // Reset position when sidebar is closed
       )}
     >

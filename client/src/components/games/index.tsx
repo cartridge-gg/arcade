@@ -17,11 +17,13 @@ import banner from "@/assets/banner.png";
 import ArcadeGameSelect from "../modules/game-select";
 import { useSidebar } from "@/hooks/sidebar";
 import { cn } from "@cartridge/ui-next";
+import { useWindowDimensions } from "@/hooks/window";
 
 export const Games = () => {
   const [search, setSearch] = useState("");
   const { address } = useAccount();
   const { games } = useArcade();
+  const { width } = useWindowDimensions();
   const { isOpen } = useSidebar();
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
@@ -39,7 +41,8 @@ export const Games = () => {
   return (
     <div
       className={cn(
-        "self-start flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border border-background-200 min-w-[360px]",
+        "self-start flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border border-background-200",
+        width < 400 ? "w-[330px]" : "min-w-[360px]", // Fixed width for mobile
         "lg:flex", // Always visible on large screens
         isMobile && "fixed z-50 top-0 left-0 h-full", // Fixed position for mobile
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0", // Slide in/out animation

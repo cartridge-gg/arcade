@@ -3,6 +3,7 @@ import { HTMLAttributes, SVGProps } from "react";
 import { SidebarToggle } from "../sidebar-toggle";
 import { useMediaQuery } from "@cartridge/ui-next";
 import { useSidebar } from "@/hooks/sidebar";
+import { useWindowDimensions } from "@/hooks/window";
 
 export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> { }
 
@@ -13,6 +14,7 @@ export const ArcadeHeader = ({
 }: ArcadeHeaderProps) => {
 
   const isMobile = useMediaQuery("(max-width: 1024px)");
+  const { width } = useWindowDimensions();
   const { isOpen } = useSidebar();
 
   return (
@@ -20,7 +22,7 @@ export const ArcadeHeader = ({
       className={cn(
         "w-full flex gap-x-px h-14",
         "transition-transform duration-300 ease-in-out will-change-transform",
-        isMobile && isOpen ? "translate-x-[360px]" : "translate-x-0"
+        isMobile && isOpen ? width < 400 ? "translate-x-[330px]" : "translate-x-[360px]" : "translate-x-0"
       )}
       {...props}
     >
