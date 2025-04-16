@@ -34,6 +34,7 @@ export function Achievements({ game }: { game?: GameModel }) {
       .filter(
         (item) => item.completed && (ids.length === 0 || ids.includes(item.id)),
       )
+      .sort((a, b) => a.id.localeCompare(b.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     return { pinneds };
@@ -129,6 +130,7 @@ export function GameRow({
       .filter(
         (item) => item.completed && (ids.length === 0 || ids.includes(item.id)),
       )
+      .sort((a, b) => a.id.localeCompare(b.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     return { pinneds };

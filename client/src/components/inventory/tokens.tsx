@@ -1,6 +1,6 @@
 import { useTokens } from "@/hooks/tokens";
-import { TokenCard } from "@cartridge/ui-next";
-import { useCallback } from "react";
+import { cn, MinusIcon, PlusIcon, TokenCard } from "@cartridge/ui-next";
+import { useCallback, useMemo, useState } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
 
@@ -8,17 +8,44 @@ import placeholder from "@/assets/placeholder.svg";
 import { useAddress } from "@/hooks/address";
 import { Token } from "@/context/token";
 
+const DEFAULT_TOKENS_COUNT = 3;
+
 export const Tokens = () => {
-  const { tokens } = useTokens();
+  const [unfolded, setUnfolded] = useState(false);
+  const { tokens, credits } = useTokens();
+
+  const filteredTokens = useMemo(() => {
+    return tokens.filter((token) => token.balance.amount > 0);
+  }, [tokens]);
 
   return (
     <div
-      className="rounded overflow-y-scroll w-full flex flex-col gap-y-px"
+      className={cn("rounded overflow-y-scroll w-full flex flex-col gap-y-px")}
       style={{ scrollbarWidth: "none" }}
     >
-      {tokens.map((token) => (
-        <Item key={token.metadata.address} token={token} />
-      ))}
+      <Item key={credits.metadata.address} token={credits} />
+      {filteredTokens
+        .slice(0, unfolded ? filteredTokens.length : DEFAULT_TOKENS_COUNT)
+        .map((token) => (
+          <Item key={token.metadata.address} token={token} />
+        ))}
+      <div
+        className={cn(
+          "flex justify-center items-center gap-1 p-2 rounded-b cursor-pointer",
+          "bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-200",
+          filteredTokens.length <= DEFAULT_TOKENS_COUNT && "hidden",
+        )}
+        onClick={() => setUnfolded(!unfolded)}
+      >
+        {unfolded ? (
+          <MinusIcon size="xs" />
+        ) : (
+          <PlusIcon variant="solid" size="xs" />
+        )}
+        <p className="text-sm font-medium">
+          {unfolded ? "Show Less" : "View All"}
+        </p>
+      </div>
     </div>
   );
 };
@@ -36,8 +63,6 @@ function Item({ token }: { token: Token }) {
     const path = `inventory/token/${token.metadata.address}/send`;
     controller.openProfileTo(path);
   }, [token.metadata.address, connector]);
-
-  if (token.balance.amount === 0) return null;
 
   return (
     <TokenCard

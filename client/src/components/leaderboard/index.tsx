@@ -49,6 +49,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
       // On click, we update the url param address to the address of the player
       const url = new URL(window.location.href);
       url.searchParams.set("address", address);
+      url.searchParams.set("playerTab", "achievements");
       navigate(url.toString().replace(window.location.origin, ""));
     },
     [navigate],
@@ -82,6 +83,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
             player.completeds.includes(item.id) &&
             (ids.length === 0 || ids.includes(item.id)),
         )
+        .sort((a, b) => a.id.localeCompare(b.id))
         .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
         .slice(0, 3)
         .map((item) => {

@@ -12,11 +12,15 @@ import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
 import { useAddress } from "@/hooks/address";
 import ActivityAchievementCard from "../modules/achievement-card";
+import { Link } from "react-router-dom";
+import { VoyagerUrl } from "@cartridge/utils";
+import { constants } from "starknet";
 
 interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
   key: string;
   transactionHash: string;
+  chainId: constants.StarknetChainId;
   amount: string;
   address: string;
   value: string;
@@ -40,6 +44,12 @@ export function Activity() {
   const { events } = useAchievements();
   const { playerActivities: activities, status: activitiesStatus } =
     useActivities();
+
+  const to = useCallback((transactionHash: string) => {
+    return VoyagerUrl(constants.StarknetChainId.SN_MAIN).transaction(
+      transactionHash,
+    );
+  }, []);
 
   const gameEvents = useMemo(() => {
     if (!project) return Object.values(events).flatMap((event) => event);
@@ -65,6 +75,16 @@ export function Activity() {
     }
   }, []);
 
+  const getChainId = useCallback((rpc: string | undefined) => {
+    if (!rpc) return undefined;
+    if (rpc.includes("mainnet")) {
+      return constants.StarknetChainId.SN_MAIN;
+    } else if (rpc.includes("testnet") || rpc.includes("sepolia")) {
+      return constants.StarknetChainId.SN_SEPOLIA;
+    }
+    return undefined;
+  }, []);
+
   const { data, dates } = useMemo(() => {
     const dates: string[] = [];
 
@@ -75,14 +95,14 @@ export function Activity() {
       }
       const title = activity.entrypoint;
       const game = games.find(
-        (game) =>
-          game.config.project === activity.project ||
-          game.config.project === "ryomainnet",
+        (game) => game.config.project === activity.project,
       );
+      const chainId = getChainId(game?.config.rpc);
       return {
         variant: "game",
         key: `${activity.entrypoint}-${activity.transactionHash}`,
         transactionHash: activity.transactionHash,
+        chainId: chainId,
         title: title.replace("_", " "),
         image: game?.metadata.image || "",
         website: game?.socials.website || "",
@@ -151,35 +171,50 @@ export function Activity() {
                       switch (props.variant) {
                         case "token":
                           return (
-                            <ActivityTokenCard
+                            <Link
                               key={index}
-                              amount={props.amount}
-                              address={props.address}
-                              value={props.value}
-                              image={props.image}
-                              action={props.action}
-                            />
+                              to={to(props.transactionHash)}
+                              target="_blank"
+                            >
+                              <ActivityTokenCard
+                                amount={props.amount}
+                                address={props.address}
+                                value={props.value}
+                                image={props.image}
+                                action={props.action}
+                              />
+                            </Link>
                           );
                         case "collectible":
                           return (
-                            <ActivityCollectibleCard
+                            <Link
                               key={index}
-                              name={props.name}
-                              collection={props.collection}
-                              address={props.address}
-                              image={props.image}
-                              action={props.action}
-                            />
+                              to={to(props.transactionHash)}
+                              target="_blank"
+                            >
+                              <ActivityCollectibleCard
+                                name={props.name}
+                                collection={props.collection}
+                                address={props.address}
+                                image={props.image}
+                                action={props.action}
+                              />
+                            </Link>
                           );
                         case "game":
                           return (
-                            <ActivityGameCard
+                            <Link
                               key={index}
-                              title={props.title}
-                              website={props.website}
-                              image={props.image}
-                              certified={props.certified}
-                            />
+                              to={to(props.transactionHash)}
+                              target="_blank"
+                            >
+                              <ActivityGameCard
+                                title={props.title}
+                                website={props.website}
+                                image={props.image}
+                                certified={props.certified}
+                              />
+                            </Link>
                           );
                         case "achievement":
                           return (

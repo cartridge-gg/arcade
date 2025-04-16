@@ -122,6 +122,7 @@ export function usePlayerGameStats(project: string) {
           ? ids.includes(item.id) && item.completed
           : item.completed,
       )
+      .sort((a, b) => a.id.localeCompare(b.id))
       .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     const completed = gameAchievements.filter((item) => item.completed).length;

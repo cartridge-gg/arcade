@@ -5,7 +5,7 @@ import { useUsernames } from "@/hooks/account";
 import { addAddressPadding } from "starknet";
 import { useAddress } from "@/hooks/address";
 
-const LIMIT = 100;
+const LIMIT = 1000;
 
 export type Activity = {
   project: string;
@@ -14,6 +14,7 @@ export type Activity = {
   transactionHash: string;
   entrypoint: string;
   timestamp: number;
+  count: number;
 };
 
 export type ActivitiesContextType = {
@@ -95,6 +96,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
               transactionHash: activity.transactionHash,
               entrypoint: activity.entrypoint,
               timestamp: new Date(activity.executedAt).getTime(),
+              count: 1,
             };
           });
         });
@@ -122,6 +124,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
               transactionHash: activity.transactionHash,
               entrypoint: activity.entrypoint,
               timestamp: new Date(activity.executedAt).getTime(),
+              count: 1,
             };
           });
         });

@@ -9,6 +9,7 @@ export function useUsername({ address }: { address: string }) {
     {
       enabled: true,
       queryKey: ["username", address],
+      cacheTime: 1000 * 60 * 60 * 24,
       refetchOnWindowFocus: false,
     },
   );
@@ -21,6 +22,7 @@ export function useUsernames({ addresses }: { addresses: string[] }) {
     { addresses },
     {
       queryKey: ["usernames", addresses],
+      cacheTime: 1000 * 60 * 60 * 24,
       refetchOnWindowFocus: false,
     },
   );

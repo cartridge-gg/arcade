@@ -29,7 +29,7 @@ export function Discover({ game }: { game?: GameModel }) {
   const [searchParams] = useSearchParams();
   const { isConnected, address } = useAccount();
   const {
-    allActivities,
+    aggregatedActivities,
     usernames: activitiesUsernames,
     status: activitiesStatus,
   } = useActivities();
@@ -58,6 +58,7 @@ export function Discover({ game }: { game?: GameModel }) {
       // On click, we update the url param address to the address of the player
       const url = new URL(window.location.href);
       url.searchParams.set("address", address);
+      url.searchParams.set("playerTab", "activity");
       navigate(url.toString().replace(window.location.origin, ""));
     },
     [navigate],
@@ -100,17 +101,18 @@ export function Discover({ game }: { game?: GameModel }) {
           };
         }) || [];
       const activities =
-        allActivities[game?.config.project]?.map((activity) => {
+        aggregatedActivities[game?.config.project]?.map((activity) => {
           const username =
             activitiesUsernames[addAddressPadding(activity.callerAddress)];
+          const count = activity.count;
           return {
             name: username,
             address: getChecksumAddress(activity.callerAddress),
             Icon: <UserAvatar username={username} />,
             data: {
-              title: activity.entrypoint,
+              title: count > 1 ? `${count} Actions` : activity.entrypoint,
               label: "performed",
-              icon: "fa-joystick",
+              icon: count > 1 ? "fa-layer-group" : "fa-joystick",
             },
             timestamp: Math.floor(activity.timestamp / 1000),
             onClick: () =>
@@ -138,7 +140,7 @@ export function Discover({ game }: { game?: GameModel }) {
     });
   }, [
     events,
-    allActivities,
+    aggregatedActivities,
     filteredGames,
     achievementsUsernames,
     activitiesUsernames,

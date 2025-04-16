@@ -76,7 +76,10 @@ export const AchievementSummary = ({
         id: a.id,
         icon: a.content.icon || "fa-trophy",
         name: a.content.title || "",
+        difficulty: a.content.difficulty,
       }))
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => a.difficulty - b.difficulty)
       .slice(0, 3);
   }, [achievements]);
 

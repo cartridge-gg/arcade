@@ -4,3 +4,5 @@ node_modules
 .turbo/
 *account*.json
 *keystore*.json
+
+server/*
