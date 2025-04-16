@@ -18,7 +18,8 @@ export const initialState: SidebarProviderContextType = {
   close: () => null,
 };
 
-export const SidebarContext = createContext<SidebarProviderContextType>(initialState);
+export const SidebarContext =
+  createContext<SidebarProviderContextType>(initialState);
 
 export function SidebarProvider({ children, ...props }: SidebarProviderProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
