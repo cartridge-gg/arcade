@@ -1,6 +1,7 @@
 import { useContext, useMemo } from "react";
 import { useProject } from "./project";
 import { ActivitiesContext } from "@/context";
+import { Activity } from "@/context/activities";
 
 /**
  * Custom hook to access the Activities context and account information.
@@ -28,6 +29,25 @@ export const useActivities = () => {
     status,
   } = context;
 
+  const aggregatedActivities: { [key: string]: Activity[] } = useMemo(() => {
+    const result: { [key: string]: Activity[] } = {};
+    Object.entries(allActivities).forEach(([project, activities]) => {
+      let username = "";
+      const aggregatedActivities: Activity[] = [];
+      activities.forEach((activity) => {
+        if (activity.callerAddress !== username) {
+          username = activity.callerAddress;
+          aggregatedActivities.push({ ...activity });
+        } else {
+          aggregatedActivities[aggregatedActivities.length - 1].count +=
+            activity.count;
+        }
+      });
+      result[project] = aggregatedActivities;
+    });
+    return result;
+  }, [allActivities]);
+
   const activities = useMemo(() => {
     if (!project)
       return Object.values(allActivities).flatMap((activities) => activities);
@@ -42,5 +62,11 @@ export const useActivities = () => {
     return allPlayerActivities[project];
   }, [project, allPlayerActivities]);
 
-  return { allActivities, usernames, activities, playerActivities, status };
+  return {
+    aggregatedActivities,
+    usernames,
+    activities,
+    playerActivities,
+    status,
+  };
 };
