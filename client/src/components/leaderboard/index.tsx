@@ -49,6 +49,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
       // On click, we update the url param address to the address of the player
       const url = new URL(window.location.href);
       url.searchParams.set("address", address);
+      url.searchParams.set("playerTab", "achievements");
       navigate(url.toString().replace(window.location.origin, ""));
     },
     [navigate],

@@ -29,6 +29,7 @@ export function User() {
       if (!address) return;
       const url = new URL(window.location.href);
       url.searchParams.set("address", address);
+      url.searchParams.set("playerTab", "inventory");
       navigate(url.toString().replace(window.location.origin, ""));
     },
     [navigate],
