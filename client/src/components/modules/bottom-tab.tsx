@@ -1,42 +1,28 @@
 import {
-  ArcadeMenuButton,
   ArcadeMenuItem,
   ArcadeTab,
+  BottomTab,
   ChestIcon,
+  ClockIcon,
   cn,
+  LayoutBottomTabs,
   LeaderboardIcon,
   ListIcon,
   MetricsIcon,
   PulseIcon,
-  Select,
-  SelectContent,
   ShoppingCartIcon,
   SwordsIcon,
   Tabs,
   TabsList,
   TrophyIcon,
+  UsersIcon,
 } from "@cartridge/ui-next";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { cva, VariantProps } from "class-variance-authority";
-
-const arcadeTabsVariants = cva(
-  "flex justify-start items-end w-full p-0 px-4 border-b rounded-none",
-  {
-    variants: {
-      variant: {
-        default: "bg-background-100 border-background-200",
-        light: "bg-background-125 border-background-200",
-      },
-      size: {
-        default: "gap-3 h-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-);
+import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cva } from "class-variance-authority";
+import { ArcadeTabsProps } from "./tabs";
+import { GameModel } from "@bal7hazar/arcade-sdk";
+import { useSidebar } from "@/hooks/sidebar";
 
 export type TabValue =
   | "inventory"
@@ -48,153 +34,90 @@ export type TabValue =
   | "about"
   | "marketplace";
 
-export interface ArcadeTabsProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof arcadeTabsVariants> {
-  defaultValue?: TabValue;
-  order?: TabValue[];
-  onTabClick?: (tab: TabValue) => void;
-}
+export const ArcadeBottomTabs = ({
+  game,
+}: { game: GameModel | undefined }) => {
+  const [searchParams] = useSearchParams();
 
-export const ArcadeTabs = ({
-  defaultValue = "activity",
-  order = [
-    "activity",
-    "leaderboard",
-    "about",
-    "metrics",
-    "marketplace",
-    "inventory",
-    "achievements",
-    "guilds",
-  ],
-  onTabClick,
-  variant,
-  size,
-  className,
-  children,
-}: ArcadeTabsProps) => {
-  const [active, setActive] = useState<TabValue>(defaultValue);
-  const [visibleTabs, setVisibleTabs] = useState<TabValue[]>(order);
-  const [overflowTabs, setOverflowTabs] = useState<TabValue[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const hiddenRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef(
-    new Map<TabValue, { width: number; visible: boolean }>(),
+  const order: TabValue[] = useMemo(() => {
+    if (!game) return ["activity", "leaderboard", "marketplace"];
+    return ["activity", "leaderboard", "marketplace", "guilds", "about"];
+  }, [game]);
+
+  const [active, setActive] = useState<TabValue>(() => {
+    const value = searchParams.get("gameTab") || "activity";
+    if (!order.includes(value as TabValue)) return "activity";
+    return value as TabValue;
+  });
+  const navigate = useNavigate();
+  const { isOpen } = useSidebar();
+
+  const handleClick = useCallback(
+    (value: string) => {
+      // Clicking on a tab updates the url param tab to the value of the tab
+      // So the tab is persisted in the url and the user can update and share the url
+      const url = new URL(window.location.href);
+      url.searchParams.set("gameTab", value);
+      navigate(url.toString().replace(window.location.origin, ""));
+    },
+    [navigate],
   );
 
   useEffect(() => {
-    if (!hiddenRef.current) return;
-    const tabWidths = new Map<TabValue, { width: number; visible: boolean }>();
-    hiddenRef.current.childNodes.forEach((node) => {
-      const element = node as HTMLDivElement;
-      const tab = element.textContent?.toLowerCase();
-      if (tab) {
-        const visible = order.includes(tab as TabValue);
-        tabWidths.set(tab as TabValue, { width: element.offsetWidth, visible });
-      }
-    });
-    tabRefs.current = tabWidths;
-  }, [tabRefs, hiddenRef, order]);
-
-  useEffect(() => {
-    const observer = new ResizeObserver(() => {
-      if (!containerRef.current) return;
-      const gap = 12;
-      const buttonWidth = 32;
-      const availableWidth =
-        containerRef.current.offsetWidth - buttonWidth - gap;
-      let usedWidth = 32;
-      const newVisibleTabs: TabValue[] = [];
-      const newOverflowTabs: TabValue[] = [];
-
-      order.forEach((tab) => {
-        const { width, visible } = tabRefs.current.get(tab) || {
-          width: 0,
-          visible: false,
-        };
-        if (!visible) return;
-        if (
-          usedWidth + width <= availableWidth &&
-          newOverflowTabs.length === 0
-        ) {
-          newVisibleTabs.push(tab);
-          usedWidth += width + gap;
-        } else {
-          newOverflowTabs.push(tab);
-        }
-      });
-
-      if (visibleTabs.join(",") !== newVisibleTabs.join(",")) {
-        setVisibleTabs(newVisibleTabs);
-      }
-      if (overflowTabs.join(",") !== newOverflowTabs.join(",")) {
-        setOverflowTabs(newOverflowTabs);
-      }
-    });
-
-    observer.observe(containerRef.current!);
-    return () => observer.disconnect();
-  }, [order, containerRef.current, visibleTabs, overflowTabs, tabRefs]);
-
-  useEffect(() => {
-    if (order.includes(active)) return;
-    setActive(defaultValue);
-  }, [order, active, defaultValue]);
-
-  const overflowActive = useMemo(
-    () => overflowTabs.includes(active),
-    [overflowTabs, active],
-  );
+    const value = searchParams.get("gameTab") || "activity";
+    if (!order.includes(value as TabValue)) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("gameTab", "activity");
+      navigate(url.toString().replace(window.location.origin, ""));
+    }
+  }, [searchParams, order, navigate]);
 
   return (
-    <Tabs
-      defaultValue={defaultValue}
-      value={active}
-      onValueChange={(value: string) => setActive(value as TabValue)}
-      className="h-full flex flex-col overflow-hidden"
-    >
-      <TabsList
-        ref={containerRef}
-        className={cn(arcadeTabsVariants({ variant, size }),"hidden lg:flex", className)}
-      >
-        <div ref={hiddenRef} className="flex gap-2 absolute invisible">
-          {order.map((tab) => (
-            <Tab key={tab} tab={tab} value={active} size={size} />
-          ))}
-        </div>
-        {visibleTabs.map((tab) => (
-          <Tab
-            key={tab}
-            tab={tab}
-            value={active}
-            size={size}
-            onTabClick={() => onTabClick?.(tab as TabValue)}
+    <LayoutBottomTabs className={cn("fixed bottom-0 left-0 z-50",
+      "transition-all duration-300 ease-in-out",
+      isOpen
+        ? "translate-x-[min(calc(100vw-64px),360px)] lg:translate-x-0"
+        : "lg:translate-x-0 translate-x-0",
+    )}>
+      <div className="w-full flex justify-around items-stretch shrink-0 bg-background-200 border-spacer-100 h-[72px] gap-x-2 px-0 py-0 border-t-0 shadow-none">
+        <BottomTab>
+          <PulseIcon
+            size="lg"
+            variant="line"
           />
-        ))}
-        <Select>
-          <div className="grow flex justify-end items-center self-center">
-            <ArcadeMenuButton
-              active={overflowActive}
-              className={cn(overflowTabs.length === 0 && "hidden")}
-            />
-          </div>
-          <SelectContent className="bg-background-100">
-            {overflowTabs.map((tab) => (
-              <Tab
-                key={tab}
-                tab={tab}
-                value={active}
-                size={size}
-                onTabClick={() => onTabClick?.(tab as TabValue)}
-                item={true}
-              />
-            ))}
-          </SelectContent>
-        </Select>
-      </TabsList>
-      {children}
-    </Tabs>
+        </BottomTab>
+        <BottomTab status="active">
+          <ChestIcon
+            size="lg"
+            variant="solid"
+          />
+        </BottomTab>
+        <BottomTab>
+          <TrophyIcon
+            size="lg"
+            variant="line"
+          />
+        </BottomTab>
+        <BottomTab>
+          <SwordsIcon
+            size="lg"
+            variant="line"
+          />
+        </BottomTab>
+        <BottomTab>
+          <UsersIcon
+            size="lg"
+            variant="line"
+          />
+        </BottomTab>
+        <BottomTab>
+          <ClockIcon
+            size="lg"
+            variant="line"
+          />
+        </BottomTab>
+      </div>
+    </LayoutBottomTabs>
   );
 };
 
@@ -527,5 +450,3 @@ const MarketplaceNavButton = React.forwardRef<
     />
   );
 });
-
-export default ArcadeTabs;

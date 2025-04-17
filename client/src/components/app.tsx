@@ -5,12 +5,13 @@ import { useEffect, useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { useAddress } from "@/hooks/address";
 import { PlayerPage } from "./pages/player";
-import { cn } from "@cartridge/ui-next";
+import { cn, useMediaQuery } from "@cartridge/ui-next";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import { useProject } from "@/hooks/project";
 import { SidebarProvider } from "@/context/sidebar";
 import { useSidebar } from "@/hooks/sidebar";
 import { Header } from "./header";
+import { ArcadeBottomTabs } from "./modules/bottom-tab";
 
 // Wrapper component to apply sidebar effects
 const MainContent = ({ children }: { children: React.ReactNode }) => {
@@ -34,7 +35,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
         className={cn(
           "relative grow h-full flex flex-col rounded-xl gap-2 overflow-hidden border border-background-200 bg-background-100",
           !isZero &&
-            "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
+          "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
         )}
       >
         {children}
@@ -48,6 +49,7 @@ const AppContent = () => {
   const { games, projects, setProjects } = useArcade();
   const { project, namespace } = useProject();
   const { isOpen, toggle } = useSidebar();
+  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   const game: GameModel | undefined = useMemo(() => {
     return Object.values(games).find(
@@ -90,6 +92,9 @@ const AppContent = () => {
         <MainContent>
           {isZero ? <GamePage game={game} /> : <PlayerPage game={game} />}
         </MainContent>
+        {isMobile && (
+          <ArcadeBottomTabs game={game} />
+        )}
       </div>
     </div>
   );
