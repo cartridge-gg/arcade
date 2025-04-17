@@ -5,7 +5,7 @@ import { LeaderboardScene } from "../scenes/leaderboard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import cartridge from "@/assets/cartridge-logo.png";
-import { ArcadeTabs } from "../modules";
+import { ArcadeBottomTabs, ArcadeTabs } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
 import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
