@@ -146,7 +146,9 @@ const GameSocial = ({
       className={cn(GameSocialVariants({ variant }), className)}
     >
       {icon}
-      {label && <p className="px-0.5 text-xs font-medium">{label}</p>}
+      {label && (
+        <p className="px-0.5 text-xs font-medium truncate max-w-32">{label}</p>
+      )}
     </a>
   );
 };

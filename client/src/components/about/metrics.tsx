@@ -287,8 +287,8 @@ export function Metrics() {
           </button>
         )}
       </div>
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex gap-4 w-full">
+      <div className="flex flex-col gap-3 lg:gap-4 w-full">
+        <div className="flex gap-3 lg:gap-4 w-full">
           <Tab
             label="Daily Transactions"
             value={
@@ -312,12 +312,14 @@ export function Metrics() {
         </div>
         {status === "loading" && (
           <div className="flex items-center justify-center h-64">
-            <p className="text-sm text-foreground-400">Loading...</p>
+            <p className="text-xs lg:text-sm text-foreground-400">Loading...</p>
           </div>
         )}
         {status === "error" && (
           <div className="flex items-center justify-center h-64">
-            <p className="text-sm text-red-500">Error loading metrics</p>
+            <p className="text-xs lg:text-sm text-red-500">
+              Error loading metrics
+            </p>
           </div>
         )}
         <div className="bg-background-200 rounded p-4">
@@ -345,7 +347,7 @@ function Tab({
     <div
       data-active={active}
       className={cn(
-        "grow px-6 py-4 flex flex-col gap-2 border border-transparent border-b-background-200 bg-background-100 cursor-pointer transition-all duration-300",
+        "w-1/2 px-4 py-3 lg:px-6 lg:py-4 flex flex-col gap-2 border border-transparent border-b-background-200 bg-background-100 cursor-pointer transition-all duration-300",
         "hover:bg-background-125 hover:border-b-background-300",
         "data-[active=true]:rounded data-[active=true]:border-primary data-[active=true]:bg-background-150",
         "data-[active=true]:hover:bg-background-200",
@@ -354,12 +356,12 @@ function Tab({
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <p className="text-xl font-light text-foreground-100 font-mono">
+      <p className="text-base lg:text-xl font-light text-foreground-100 font-mono">
         {value}
       </p>
       <p
         className={cn(
-          "text-sm text-foreground-300 transition-all duration-300",
+          "text-xs lg:text-sm text-foreground-300 transition-all duration-300",
           !hover && !active && "text-foreground-400",
         )}
       >

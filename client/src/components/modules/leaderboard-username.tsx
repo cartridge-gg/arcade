@@ -29,7 +29,9 @@ export const AchievementLeaderboardUsername = ({
           <UserAvatar username={username} size="sm" />
         )}
       </div>
-      <p className="text-sm">{username}</p>
+      <p className="text-sm truncate max-w-28 lg:max-w-none lg:truncate-none">
+        {username}
+      </p>
     </div>
   );
 };

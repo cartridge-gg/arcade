@@ -108,7 +108,7 @@ export function Discover({ game }: { game?: GameModel }) {
           return {
             name: username,
             address: getChecksumAddress(activity.callerAddress),
-            Icon: <UserAvatar username={username} />,
+            Icon: <UserAvatar username={username} size="sm" />,
             data: {
               title: count > 1 ? `${count} Actions` : activity.entrypoint,
               label: "performed",

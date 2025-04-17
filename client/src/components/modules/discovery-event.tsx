@@ -80,7 +80,7 @@ export const ArcadeDiscoveryEvent = ({
     >
       <div className="flex items-center gap-x-1.5">
         {Icon ? Icon : <SpaceInvaderIcon size="sm" variant="solid" />}
-        <CardTitle className="text-sm font-normal tracking-normal text-foreground-100">
+        <CardTitle className="text-sm font-normal tracking-normal text-foreground-100 truncate max-w-16 lg:max-w-none lg:truncate-none">
           {name}
         </CardTitle>
         {data && (
@@ -123,7 +123,9 @@ const DiscoveryEvent = ({
       <p className="text-xs text-foreground-300">{label}</p>
       <div className="flex items-center gap-1 p-1 border-background-400 border rounded-sm">
         <div className={cn(icon, "fa-solid w-3 h-3")} />
-        <p className="text-xs capitalize">{title.replace(/_/g, " ")}</p>
+        <p className="text-xs capitalize truncate max-w-16 lg:max-w-none lg:truncate-none">
+          {title.replace(/_/g, " ")}
+        </p>
       </div>
     </div>
   );

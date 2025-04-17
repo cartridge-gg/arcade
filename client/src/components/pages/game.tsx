@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { TabsContent, Thumbnail, TabValue } from "@cartridge/ui-next";
+import {
+  TabsContent,
+  Thumbnail,
+  TabValue,
+  ActivitySocialWebsite,
+} from "@cartridge/ui-next";
 import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -53,9 +58,18 @@ export function GamePage({ game }: { game: GameModel | undefined }) {
       <div className="relative flex items-center justify-between p-3 lg:p-6 pb-0">
         <div className="flex gap-3 items-center">
           <Thumbnail icon={game?.metadata.image || cartridge} size="xl" />
-          <p className="font-semibold text-lg/[22px] text-foreground-100">
-            {game?.metadata.name ?? "All Games"}
-          </p>
+          <div className="flex flex-col gap-0.5">
+            <p className="font-semibold text-lg/[22px] text-foreground-100">
+              {game?.metadata.name ?? "All Games"}
+            </p>
+            {game?.socials.website && (
+              <ActivitySocialWebsite
+                website={game.socials.website}
+                certified
+                className="text-foreground-300"
+              />
+            )}
+          </div>
         </div>
         <GameSocials socials={game?.socials} />
       </div>

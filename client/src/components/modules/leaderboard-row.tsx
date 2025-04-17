@@ -4,10 +4,10 @@ import {
   GoldTagIcon,
   SilverTagIcon,
   SparklesIcon,
-  AchievementPinIcons,
 } from "@cartridge/ui-next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AchievementLeaderboardUsername from "./leaderboard-username";
+import AchievementFollowTag from "./follow-tag";
 
 export interface AchievementLeaderboardRowProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -17,6 +17,7 @@ export interface AchievementLeaderboardRowProps
   points: number;
   icon?: string;
   highlight?: boolean;
+  following?: boolean;
 }
 
 export const AchievementLeaderboardRow = ({
@@ -26,10 +27,10 @@ export const AchievementLeaderboardRow = ({
   points,
   icon,
   highlight,
+  following,
   className,
   ...props
 }: AchievementLeaderboardRowProps) => {
-  const [hover, setHover] = useState(false);
   const [sticky, setSticky] = useState(false);
   const ref = useRef(null);
 
@@ -65,14 +66,12 @@ export const AchievementLeaderboardRow = ({
     <div
       ref={ref}
       className={cn(
-        "flex select-none py-2.5 px-3 justify-between bg-background-200 text-foreground-400 hover:bg-background-300 hover:text-foreground-300 cursor-pointer transition-colors",
+        "min-h-11 flex select-none py-2.5 px-3 justify-between bg-background-200 text-foreground-400 hover:bg-background-300 hover:text-foreground-300 cursor-pointer transition-colors",
         highlight &&
           "bg-background-300 text-foreground-300 sticky top-[-1px] bottom-[-1px] z-10",
         highlight && sticky && "border-y border-spacer-100",
         className,
       )}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
       {...props}
     >
       <div className="flex gap-x-2 items-center">
@@ -87,15 +86,16 @@ export const AchievementLeaderboardRow = ({
         />
       </div>
       <div className="flex gap-x-3 items-center">
-        <AchievementPinIcons
-          pins={pins}
-          variant={highlight || hover ? "light" : "default"}
-          size="md"
-          theme={highlight}
-        />
+        {following !== undefined && (
+          <AchievementFollowTag
+            active={following}
+            variant="default"
+            className={highlight ? "hidden" : ""}
+          />
+        )}
         <div
           className={cn(
-            "flex gap-1",
+            "flex gap-1 min-w-14 justify-end",
             highlight ? "text-primary" : "text-foreground-100",
           )}
         >

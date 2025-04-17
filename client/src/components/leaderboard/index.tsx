@@ -101,6 +101,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
         points: player.earnings,
         highlight: BigInt(player.address) === BigInt(address || "0x0"),
         pins: pinneds,
+        following: following.includes(getChecksumAddress(player.address)),
       };
     });
     if (rank <= 100) {
@@ -150,6 +151,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
         rank: index + 1,
         points: player.earnings,
         highlight: BigInt(player.address) === BigInt(address || "0x0"),
+        following: following.includes(getChecksumAddress(player.address)),
       };
     });
     if (rank <= 100) {
@@ -217,6 +219,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
                         name={item.name}
                         points={item.points}
                         highlight={item.highlight}
+                        following={item.following}
                         onClick={() => handleClick(item.address)}
                       />
                     ))
@@ -228,6 +231,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
                         name={item.name}
                         points={item.points}
                         highlight={item.highlight}
+                        following={item.following}
                         onClick={() => handleClick(item.address)}
                       />
                     ))}
