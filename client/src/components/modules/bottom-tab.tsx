@@ -1,9 +1,6 @@
 import {
-  ArcadeMenuItem,
-  ArcadeTab,
   BottomTab,
   ChestIcon,
-  ClockIcon,
   cn,
   LayoutBottomTabs,
   LeaderboardIcon,
@@ -12,15 +9,10 @@ import {
   PulseIcon,
   ShoppingCartIcon,
   SwordsIcon,
-  Tabs,
-  TabsList,
   TrophyIcon,
-  UsersIcon,
 } from "@cartridge/ui-next";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cva } from "class-variance-authority";
-import { ArcadeTabsProps } from "./tabs";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import { useSidebar } from "@/hooks/sidebar";
 
@@ -80,42 +72,53 @@ export const ArcadeBottomTabs = ({
         : "lg:translate-x-0 translate-x-0",
     )}>
       <div className="w-full flex justify-around items-stretch shrink-0 bg-background-200 border-spacer-100 h-[72px] gap-x-2 px-0 py-0 border-t-0 shadow-none">
-        <BottomTab>
-          <PulseIcon
-            size="lg"
-            variant="line"
+        {order.map((tab) => (
+          <Tab
+            key={tab}
+            tab={tab}
+            value={active}
+            onTabClick={() => {
+              setActive(tab);
+              handleClick(tab);
+            }}
           />
-        </BottomTab>
-        <BottomTab status="active">
-          <ChestIcon
-            size="lg"
-            variant="solid"
-          />
-        </BottomTab>
-        <BottomTab>
-          <TrophyIcon
-            size="lg"
-            variant="line"
-          />
-        </BottomTab>
-        <BottomTab>
-          <SwordsIcon
-            size="lg"
-            variant="line"
-          />
-        </BottomTab>
-        <BottomTab>
-          <UsersIcon
-            size="lg"
-            variant="line"
-          />
-        </BottomTab>
-        <BottomTab>
-          <ClockIcon
-            size="lg"
-            variant="line"
-          />
-        </BottomTab>
+        ))}
+        {/* <BottomTab> */}
+        {/*   <PulseIcon */}
+        {/*     size="lg" */}
+        {/*     variant="line" */}
+        {/*   /> */}
+        {/* </BottomTab> */}
+        {/* <BottomTab status="active"> */}
+        {/*   <ChestIcon */}
+        {/*     size="lg" */}
+        {/*     variant="solid" */}
+        {/*   /> */}
+        {/* </BottomTab> */}
+        {/* <BottomTab> */}
+        {/*   <TrophyIcon */}
+        {/*     size="lg" */}
+        {/*     variant="line" */}
+        {/*   /> */}
+        {/* </BottomTab> */}
+        {/* <BottomTab> */}
+        {/*   <SwordsIcon */}
+        {/*     size="lg" */}
+        {/*     variant="line" */}
+        {/*   /> */}
+        {/* </BottomTab> */}
+        {/* <BottomTab> */}
+        {/*   <UsersIcon */}
+        {/*     size="lg" */}
+        {/*     variant="line" */}
+        {/*   /> */}
+        {/* </BottomTab> */}
+        {/* <BottomTab> */}
+        {/*   <ClockIcon */}
+        {/*     size="lg" */}
+        {/*     variant="line" */}
+        {/*   /> */}
+        {/* </BottomTab> */}
       </div>
     </LayoutBottomTabs>
   );
@@ -124,22 +127,16 @@ export const ArcadeBottomTabs = ({
 const Tab = ({
   tab,
   value,
-  size,
   onTabClick,
-  item,
 }: {
   tab: TabValue;
   value: string;
-  size: "default" | null | undefined;
   onTabClick?: () => void;
-  item?: boolean;
 }) => {
   const props = {
     value: tab,
-    active: value === tab,
-    size,
+    active: value === tab ? "active" as const : null,
     onClick: onTabClick,
-    item,
   };
   switch (tab) {
     case "inventory":
@@ -163,290 +160,120 @@ const Tab = ({
   }
 };
 
+interface NavButtonProps {
+  value: string;
+  active: "active" | null | undefined;
+  onClick?: () => void;
+}
+
 const InventoryNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<ChestIcon variant="solid" size="sm" />}
-        label="Inventory"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<ChestIcon variant="solid" size="sm" />}
-      label="Inventory"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <ChestIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
 
 const AchievementsNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<TrophyIcon variant="solid" size="sm" />}
-        label="Achievements"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<TrophyIcon variant="solid" size="sm" />}
-      label="Achievements"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <TrophyIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
 
 const LeaderboardNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<LeaderboardIcon variant="solid" size="sm" />}
-        label="Leaderboard"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<LeaderboardIcon variant="solid" size="sm" />}
-      label="Leaderboard"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <LeaderboardIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
 
 const GuildsNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<SwordsIcon variant="solid" size="sm" />}
-        label="Guilds"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<SwordsIcon variant="solid" size="sm" />}
-      label="Guilds"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <SwordsIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
 
 const ActivityNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<PulseIcon variant="solid" size="sm" />}
-        label="Activity"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<PulseIcon variant="solid" size="sm" />}
-      label="Activity"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <PulseIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
 
 const MetricsNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<MetricsIcon variant="solid" size="sm" />}
-        label="Metrics"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<MetricsIcon variant="solid" size="sm" />}
-      label="Metrics"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <MetricsIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
 
 const AboutNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<ListIcon variant="solid" size="sm" />}
-        label="About"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<ListIcon variant="solid" size="sm" />}
-      label="About"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <ListIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
 
 const MarketplaceNavButton = React.forwardRef<
-  HTMLButtonElement,
-  {
-    value: string;
-    active: boolean;
-    size: "default" | null | undefined;
-    onClick?: () => void;
-    item?: boolean;
-  }
->(({ value, active, size, onClick, item }, ref) => {
-  if (item) {
-    return (
-      <ArcadeMenuItem
-        ref={ref}
-        value={value}
-        Icon={<ShoppingCartIcon variant="solid" size="sm" />}
-        label="Marketplace"
-        active={active}
-        size={size}
-        onClick={onClick}
-      />
-    );
-  }
+  HTMLDivElement,
+  NavButtonProps
+>(({ active, onClick }) => {
   return (
-    <ArcadeTab
-      ref={ref}
-      value={value}
-      Icon={<ShoppingCartIcon variant="solid" size="sm" />}
-      label="Marketplace"
-      active={active}
-      size={size}
-      onClick={onClick}
-    />
+    <BottomTab status={active} onClick={onClick}>
+      <ShoppingCartIcon
+        size="lg"
+        variant="solid"
+      />
+    </BottomTab>
   );
 });
