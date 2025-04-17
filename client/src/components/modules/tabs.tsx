@@ -90,6 +90,7 @@ export const ArcadeTabs = ({
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
   useEffect(() => {
+    if (isMobile) return;
     if (!hiddenRef.current) return;
     const tabWidths = new Map<TabValue, { width: number; visible: boolean }>();
     hiddenRef.current.childNodes.forEach((node) => {
@@ -101,7 +102,7 @@ export const ArcadeTabs = ({
       }
     });
     tabRefs.current = tabWidths;
-  }, [tabRefs, hiddenRef, order]);
+  }, [tabRefs, hiddenRef, order, isMobile]);
 
   useEffect(() => {
     if (isMobile) return;
@@ -163,7 +164,7 @@ export const ArcadeTabs = ({
     >
       {
         isMobile ? (
-          <LayoutBottomTabs className="lg:hidden fixed bottom-0 left-0 right-0 z-50 w-full">
+          <LayoutBottomTabs className="fixed bottom-0 left-0 right-0 z-50 w-full">
             <TabsList className="w-full flex justify-around items-stretch shrink-0 bg-background-200 border-spacer-100 h-[72px] gap-x-2 px-0 py-0 border-t-0 shadow-none">
               {order.map((tab) => (
                 <Tab
@@ -443,7 +444,6 @@ const GuildsNavButton = React.forwardRef<
       active={active}
       size={size}
       onClick={onClick}
-      className="w-full"
     />
   );
 });
