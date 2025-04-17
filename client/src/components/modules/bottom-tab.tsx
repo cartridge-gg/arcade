@@ -15,16 +15,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { GameModel } from "@bal7hazar/arcade-sdk";
 import { useSidebar } from "@/hooks/sidebar";
-
-export type TabValue =
-  | "inventory"
-  | "achievements"
-  | "leaderboard"
-  | "guilds"
-  | "activity"
-  | "metrics"
-  | "about"
-  | "marketplace";
+import { TabValue } from "./tabs";
 
 export const ArcadeBottomTabs = ({
   game,
@@ -65,7 +56,7 @@ export const ArcadeBottomTabs = ({
   }, [searchParams, order, navigate]);
 
   return (
-    <LayoutBottomTabs className={cn("fixed bottom-0 left-0 z-50",
+    <LayoutBottomTabs className={cn("lg:hidden fixed bottom-0 left-0 z-50",
       "transition-all duration-300 ease-in-out",
       isOpen
         ? "translate-x-[min(calc(100vw-64px),360px)] lg:translate-x-0"
@@ -83,42 +74,6 @@ export const ArcadeBottomTabs = ({
             }}
           />
         ))}
-        {/* <BottomTab> */}
-        {/*   <PulseIcon */}
-        {/*     size="lg" */}
-        {/*     variant="line" */}
-        {/*   /> */}
-        {/* </BottomTab> */}
-        {/* <BottomTab status="active"> */}
-        {/*   <ChestIcon */}
-        {/*     size="lg" */}
-        {/*     variant="solid" */}
-        {/*   /> */}
-        {/* </BottomTab> */}
-        {/* <BottomTab> */}
-        {/*   <TrophyIcon */}
-        {/*     size="lg" */}
-        {/*     variant="line" */}
-        {/*   /> */}
-        {/* </BottomTab> */}
-        {/* <BottomTab> */}
-        {/*   <SwordsIcon */}
-        {/*     size="lg" */}
-        {/*     variant="line" */}
-        {/*   /> */}
-        {/* </BottomTab> */}
-        {/* <BottomTab> */}
-        {/*   <UsersIcon */}
-        {/*     size="lg" */}
-        {/*     variant="line" */}
-        {/*   /> */}
-        {/* </BottomTab> */}
-        {/* <BottomTab> */}
-        {/*   <ClockIcon */}
-        {/*     size="lg" */}
-        {/*     variant="line" */}
-        {/*   /> */}
-        {/* </BottomTab> */}
       </div>
     </LayoutBottomTabs>
   );
