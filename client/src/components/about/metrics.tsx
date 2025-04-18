@@ -27,6 +27,8 @@ ChartJS.register(
   zoomPlugin,
 );
 
+type TimeRange = "week" | "month";
+
 export interface MetricsProps {
   txsCount: number;
   playerCount: number;
@@ -38,6 +40,7 @@ export function Metrics() {
   const chartRef = useRef<ChartJS<"line">>(null);
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
+  const [timeRange, setTimeRange] = useState<TimeRange>("week");
   const [isZoomed, setIsZoomed] = useState(false);
 
   const avgDailyTxs = useMemo(() => {
@@ -56,8 +59,8 @@ export function Metrics() {
           (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
         );
 
-        // Only include data from the last 49 days (7 weeks)
-        if (dayDiff >= 0 && dayDiff < 49) {
+        // Only include data from the last 7 days for weekly view
+        if (dayDiff >= 0 && dayDiff < 7) {
           totalTxs += transactionCount;
           dayCount++;
         }
@@ -82,8 +85,8 @@ export function Metrics() {
         const dayDiff = Math.floor(
           (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
         );
-        // Only include data from the last 49 days (7 weeks)
-        if (dayDiff >= 0 && dayDiff < 49) {
+        // Only include data from the last 7 days for weekly view
+        if (dayDiff >= 0 && dayDiff < 7) {
           totalPlayers += callerCount;
           dayCount++;
         }
@@ -94,8 +97,8 @@ export function Metrics() {
   }, [allMetrics]);
 
   const chartData = useMemo(() => {
-    // Create a map to store daily data
-    const dailyData = new Map();
+    // Create a map to store data points
+    const dataMap = new Map();
 
     // Get today's date
     const today = new Date();
@@ -109,50 +112,85 @@ export function Metrics() {
           (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
         );
 
-        // Only include data from the last 49 days (7 weeks)
-        if (dayDiff >= 0 && dayDiff < 49) {
-          const dayKey = dayDiff;
-
-          if (!dailyData.has(dayKey)) {
-            dailyData.set(dayKey, {
-              transactionCount: 0,
-              callerCount: 0,
-              date: date,
-            });
+        if (timeRange === "week") {
+          // Weekly view: show daily points for last 7 days
+          if (dayDiff >= 0 && dayDiff < 7) {
+            if (!dataMap.has(dayDiff)) {
+              dataMap.set(dayDiff, {
+                transactionCount: 0,
+                callerCount: 0,
+                date: date,
+              });
+            }
+            const dayData = dataMap.get(dayDiff);
+            dayData.transactionCount += transactionCount;
+            dayData.callerCount += callerCount;
           }
-
-          const dayData = dailyData.get(dayKey);
-          dayData.transactionCount += transactionCount;
-          dayData.callerCount += callerCount;
+        } else {
+          // Monthly view: aggregate by week
+          const weekDiff = Math.floor(dayDiff / 7);
+          if (weekDiff >= 0 && weekDiff < 4) {
+            if (!dataMap.has(weekDiff)) {
+              dataMap.set(weekDiff, {
+                transactionCount: 0,
+                callerCount: 0,
+                date: date,
+                dayCount: 0,
+              });
+            }
+            const weekData = dataMap.get(weekDiff);
+            weekData.transactionCount += transactionCount;
+            weekData.callerCount += callerCount;
+            weekData.dayCount++;
+          }
         }
       });
     });
 
     // Convert to arrays for chart
-    const dayLabels = [];
+    const labels = [];
     const counts = [];
 
-    // Process days in reverse order (most recent first)
-    for (let i = 0; i < 49; i++) {
-      if (dailyData.has(i)) {
-        const dayData = dailyData.get(i);
-        const date = dayData.date;
+    const maxPoints = timeRange === "week" ? 7 : 4;
 
-        // Format date as "M/D" (e.g., "2/20")
-        const month = date.getMonth() + 1; // JavaScript months are 0-indexed
-        const day = date.getDate();
-        dayLabels.unshift(`${month}/${day}`);
+    for (let i = 0; i < maxPoints; i++) {
+      if (dataMap.has(i)) {
+        const data = dataMap.get(i);
+        const date = data.date;
 
-        counts.unshift(
-          activeTab === "txs" ? dayData.transactionCount : dayData.callerCount,
-        );
+        if (timeRange === "week") {
+          // Format date as "M/D" for daily view
+          const month = date.getMonth() + 1;
+          const day = date.getDate();
+          labels.unshift(`${month}/${day}`);
+          counts.unshift(
+            activeTab === "txs" ? data.transactionCount : data.callerCount,
+          );
+        } else {
+          // Format date as "Week of M/D" for weekly view
+          const month = date.getMonth() + 1;
+          const day = date.getDate();
+          labels.unshift(`Week of ${month}/${day}`);
+          // Calculate average for the week
+          const avgCount = activeTab === "txs" 
+            ? Math.round(data.transactionCount / data.dayCount)
+            : Math.round(data.callerCount / data.dayCount);
+          counts.unshift(avgCount);
+        }
       } else {
-        // If no data for a day, use placeholder
+        // If no data for a point, use placeholder
         const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        dayLabels.unshift(`${month}/${day}`);
+        if (timeRange === "week") {
+          date.setDate(date.getDate() - i);
+          const month = date.getMonth() + 1;
+          const day = date.getDate();
+          labels.unshift(`${month}/${day}`);
+        } else {
+          date.setDate(date.getDate() - i * 7);
+          const month = date.getMonth() + 1;
+          const day = date.getDate();
+          labels.unshift(`Week of ${month}/${day}`);
+        }
         counts.unshift(0);
       }
     }
@@ -161,7 +199,13 @@ export function Metrics() {
       {
         fill: true,
         label:
-          activeTab === "txs" ? "Daily Transactions" : "Daily Active Players",
+          activeTab === "txs" 
+            ? timeRange === "week" 
+              ? "Daily Transactions" 
+              : "Weekly Average Transactions"
+            : timeRange === "week"
+              ? "Daily Active Players"
+              : "Weekly Average Players",
         data: counts,
         borderColor: "#2A2F2A",
         backgroundColor: "#212621",
@@ -176,8 +220,8 @@ export function Metrics() {
         tension: 0.4,
       },
     ] satisfies ChartDataset<"line", unknown>[];
-    return { labels: dayLabels, datasets };
-  }, [theme, allMetrics, activeTab]);
+    return { labels, datasets };
+  }, [theme, allMetrics, activeTab, timeRange]);
 
   const options = useMemo(() => {
     return {
@@ -278,14 +322,34 @@ export function Metrics() {
         <p className="text-xs tracking-wider font-semibold text-foreground-400">
           Metrics
         </p>
-        {isZoomed && (
+        <div className="flex gap-2">
           <button
-            onClick={resetZoom}
-            className="px-3 py-1 text-xs bg-background-200 hover:bg-background-300 rounded transition-colors duration-200"
+            onClick={() => setTimeRange("week")}
+            className={cn(
+              "px-3 py-1 text-xs bg-background-200 hover:bg-background-300 rounded transition-colors duration-200",
+              timeRange === "week" && "bg-background-300"
+            )}
           >
-            Reset Zoom
+            Weekly
           </button>
-        )}
+          <button
+            onClick={() => setTimeRange("month")}
+            className={cn(
+              "px-3 py-1 text-xs bg-background-200 hover:bg-background-300 rounded transition-colors duration-200",
+              timeRange === "month" && "bg-background-300"
+            )}
+          >
+            Monthly
+          </button>
+          {isZoomed && (
+            <button
+              onClick={resetZoom}
+              className="px-3 py-1 text-xs bg-background-200 hover:bg-background-300 rounded transition-colors duration-200"
+            >
+              Reset Zoom
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex flex-col gap-3 lg:gap-4 w-full">
         <div className="flex gap-3 lg:gap-4 w-full">
