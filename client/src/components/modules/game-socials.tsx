@@ -59,38 +59,44 @@ const GameSocials = ({
           <ArcadeMenuButton
             active={false}
             className={cn(
-              "bg-background-125 text-foreground-100 hover:bg-background-150 hover:text-foreground-100",
+              "bg-background-100 text-foreground-100 hover:bg-background-200 hover:text-foreground-100 w-9 h-9 rounded-full",
               !isMobile && "hidden",
             )}
           />
         </div>
         <SelectContent className="bg-background-100">
           {socials?.twitter && (
-            <GameSocialTwitter twitter={socials.twitter} label />
+            <GameSocialTwitter twitter={socials.twitter} label variant="dark" />
           )}
           {socials?.discord && (
-            <GameSocialDiscord discord={socials.discord} label />
+            <GameSocialDiscord discord={socials.discord} label variant="dark" />
           )}
           {socials?.telegram && (
-            <GameSocialTelegram telegram={socials.telegram} label />
+            <GameSocialTelegram
+              telegram={socials.telegram}
+              label
+              variant="dark"
+            />
           )}
           {socials?.github && (
-            <GameSocialGithub github={socials.github} label />
+            <GameSocialGithub github={socials.github} label variant="dark" />
           )}
         </SelectContent>
         {socials?.twitter && !isMobile && (
-          <GameSocialTwitter twitter={socials.twitter} />
+          <GameSocialTwitter twitter={socials.twitter} variant="dark" />
         )}
         {socials?.discord && !isMobile && (
-          <GameSocialDiscord discord={socials.discord} />
+          <GameSocialDiscord discord={socials.discord} variant="dark" />
         )}
         {socials?.telegram && !isMobile && (
-          <GameSocialTelegram telegram={socials.telegram} />
+          <GameSocialTelegram telegram={socials.telegram} variant="dark" />
         )}
         {socials?.github && !isMobile && (
-          <GameSocialGithub github={socials.github} />
+          <GameSocialGithub github={socials.github} variant="dark" />
         )}
-        {socials?.website && <GameSocialWebsite website={socials.website} />}
+        {socials?.website && (
+          <GameSocialWebsite website={socials.website} label={!isMobile} />
+        )}
       </Select>
     </div>
   );

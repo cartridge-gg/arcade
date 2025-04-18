@@ -1,7 +1,8 @@
-import { CheckIcon, cn, Tabs, TabsList, UsersIcon } from "@cartridge/ui-next";
+import { cn, Tabs, TabsList, UsersIcon } from "@cartridge/ui-next";
 import React, { useState } from "react";
 import { cva, VariantProps } from "class-variance-authority";
 import ArcadeSubTab from "./sub-tab";
+import { UserCheck } from "lucide-react";
 
 const arcadeSubTabsVariants = cva(
   "flex justify-between items-end w-full p-0 rounded-none w-full",
@@ -12,7 +13,7 @@ const arcadeSubTabsVariants = cva(
         light: "bg-background-125 border-background-200",
       },
       size: {
-        default: "gap-3 h-10",
+        default: "gap-4 h-10",
       },
     },
     defaultVariants: {
@@ -132,7 +133,7 @@ const FollowingNavButton = React.forwardRef<
     <ArcadeSubTab
       ref={ref}
       value={value}
-      Icon={<CheckIcon size="sm" />}
+      Icon={<UserCheck className="h-5 w-5 p-0.5" />}
       label="Following"
       active={active}
       size={size}

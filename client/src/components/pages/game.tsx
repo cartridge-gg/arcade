@@ -55,7 +55,7 @@ export function GamePage({ game }: { game: GameModel | undefined }) {
 
   return (
     <>
-      <div className="relative flex items-center justify-between p-3 lg:p-6 pb-0">
+      <div className="flex items-start justify-between p-3 lg:p-6 lg:pb-0 border-b border-background-200 lg:border-none">
         <div className="flex gap-3 items-center">
           <Thumbnail icon={game?.metadata.image || cartridge} size="xl" />
           <div className="flex flex-col gap-0.5">
@@ -71,7 +71,7 @@ export function GamePage({ game }: { game: GameModel | undefined }) {
             )}
           </div>
         </div>
-        <GameSocials socials={game?.socials} />
+        {!!game && <GameSocials socials={game?.socials} />}
       </div>
       <ArcadeTabs
         order={order}

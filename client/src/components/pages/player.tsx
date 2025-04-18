@@ -170,9 +170,9 @@ export function PlayerPage({ game }: { game: GameModel | undefined }) {
                 ? "bronze"
                 : "default"
         }
-        className="relative p-3 lg:p-6 pb-0"
+        className="relative p-3 pb-2 lg:p-6 lg:pb-0 gap-y-2 border-b border-background-200 lg:border-none"
       />
-      <div className="absolute flex gap-3 top-3 lg:top-4 right-3 lg:right-4">
+      <div className="absolute flex gap-3 top-3 right-3 lg:top-6 lg:right-6">
         {!isSelf && isConnected && (
           <FollowButton
             following={following}
@@ -222,9 +222,9 @@ function CloseButton({ handleClose }: { handleClose: () => void }) {
       variant="secondary"
       size="icon"
       onClick={handleClose}
-      className="bg-background-125 h-8 w-8"
+      className="bg-background-200 hover:bg-background-300 h-9 w-9 rounded-full"
     >
-      <TimesIcon size="xs" />
+      <TimesIcon size="sm" />
     </Button>
   );
 }

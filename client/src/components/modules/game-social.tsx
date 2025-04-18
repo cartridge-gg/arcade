@@ -12,16 +12,18 @@ import { HTMLAttributes } from "react";
 interface GameSocialWebsiteProps
   extends VariantProps<typeof GameSocialVariants> {
   website: string;
+  label?: boolean;
 }
 export const GameSocialWebsite = ({
   website,
+  label,
   variant,
 }: GameSocialWebsiteProps) => {
   return (
     <GameSocial
-      icon={<PlayIcon size="xs" />}
+      icon={<PlayIcon size="sm" />}
       href={website}
-      label="Play"
+      label={label ? "Play" : undefined}
       variant={variant}
       className="text-primary"
     />
@@ -40,7 +42,7 @@ export const GameSocialDiscord = ({
 }: GameSocialDiscordProps) => {
   return (
     <GameSocial
-      icon={<DiscordIcon size="xs" />}
+      icon={<DiscordIcon size="sm" />}
       href={discord}
       variant={variant}
       label={label ? "Discord" : undefined}
@@ -61,7 +63,7 @@ export const GameSocialTwitter = ({
   const xhandle = twitter.split("/").pop();
   return (
     <GameSocial
-      icon={<XIcon size="xs" />}
+      icon={<XIcon size="sm" />}
       href={twitter}
       variant={variant}
       label={label ? `@${xhandle}` : undefined}
@@ -81,7 +83,7 @@ export const GameSocialGithub = ({
 }: GameSocialGithubProps) => {
   return (
     <GameSocial
-      icon={<GitHubIcon size="xs" />}
+      icon={<GitHubIcon size="sm" />}
       href={github}
       variant={variant}
       label={label ? "GitHub" : undefined}
@@ -101,7 +103,7 @@ export const GameSocialTelegram = ({
 }: GameSocialTelegramProps) => {
   return (
     <GameSocial
-      icon={<TelegramIcon size="xs" />}
+      icon={<TelegramIcon size="sm" />}
       href={telegram}
       variant={variant}
       label={label ? "Telegram" : undefined}
@@ -110,11 +112,12 @@ export const GameSocialTelegram = ({
 };
 
 const GameSocialVariants = cva(
-  "flex items-center gap-x-1 rounded px-3 py-2 cursor-pointer text-foreground-100",
+  "flex items-center gap-x-0.5 rounded-full p-2 lg:px-3 cursor-pointer text-foreground-100",
   {
     variants: {
       variant: {
-        default: "bg-background-125 hover:bg-background-150",
+        dark: "bg-background-100 hover:bg-background-200",
+        default: "bg-background-200 hover:bg-background-300",
       },
     },
     defaultVariants: {
