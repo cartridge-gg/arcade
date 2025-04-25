@@ -6,11 +6,12 @@ import { useArcade } from "@/hooks/arcade";
 import { useAddress } from "@/hooks/address";
 import { PlayerPage } from "./pages/player";
 import { cn } from "@cartridge/ui-next";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
 import { useProject } from "@/hooks/project";
 import { SidebarProvider } from "@/context/sidebar";
 import { useSidebar } from "@/hooks/sidebar";
 import { Header } from "./header";
+import { DEFAULT_NAMESPACE, DEFAULT_PROJECT } from "@/constants";
 
 // Wrapper component to apply sidebar effects
 const MainContent = ({ children }: { children: React.ReactNode }) => {
@@ -43,25 +44,33 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
 
 const AppContent = () => {
   const { isZero } = useAddress();
-  const { games, projects, setProjects } = useArcade();
-  const { project, namespace } = useProject();
+  const { games, editions, setProjects } = useArcade();
+  const { gameId, project, namespace } = useProject();
   const { isOpen, toggle } = useSidebar();
 
   const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find(
-      (game) => game.namespace === namespace && game.config.project === project,
+    return Object.values(games).find((game) => game.id === gameId);
+  }, [games, gameId]);
+
+  const edition: EditionModel | undefined = useMemo(() => {
+    return Object.values(editions).find(
+      (edition) =>
+        edition.config.project === project && edition.namespace === namespace,
     );
-  }, [games, project, namespace]);
+  }, [editions, project, namespace]);
 
   useEffect(() => {
-    if (projects.length === Object.values(games).length) return;
-    setProjects(
-      games.map((game) => ({
-        namespace: game.namespace,
-        project: game.config.project,
+    setProjects([
+      {
+        namespace: DEFAULT_NAMESPACE,
+        project: DEFAULT_PROJECT,
+      },
+      ...editions.map((edition) => ({
+        namespace: edition.namespace,
+        project: edition.config.project,
       })),
-    );
-  }, [games, projects, setProjects]);
+    ]);
+  }, [editions, setProjects]);
 
   return (
     <div
@@ -83,7 +92,11 @@ const AppContent = () => {
         />
         <Games />
         <MainContent>
-          {isZero ? <GamePage game={game} /> : <PlayerPage game={game} />}
+          {isZero ? (
+            <GamePage game={game} edition={edition} />
+          ) : (
+            <PlayerPage edition={edition} />
+          )}
         </MainContent>
       </div>
     </div>

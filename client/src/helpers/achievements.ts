@@ -1,7 +1,5 @@
 import { Progress, Trophy, Task } from "@/models";
 
-export const GLOBAL = "arcade";
-
 export interface Progressions {
   [game: string]: { [key: string]: Progress };
 }

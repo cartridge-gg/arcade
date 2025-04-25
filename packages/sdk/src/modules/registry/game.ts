@@ -1,9 +1,7 @@
 import { NAMESPACE } from "../../constants";
-import { shortString, addAddressPadding } from "starknet";
 import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
-import { Metadata, Socials } from "../../classes";
-import { Config } from "../../classes/config";
+import { Attributes, Properties, Socials } from "../../classes";
 
 const MODEL_NAME = "Game";
 
@@ -12,75 +10,90 @@ export class GameModel {
 
   constructor(
     public identifier: string,
-    public worldAddress: string,
-    public namespace: string,
-    public active: boolean,
+    public id: number,
     public published: boolean,
     public whitelisted: boolean,
-    public priority: number,
-    public points: number,
-    public config: Config,
-    public metadata: Metadata,
+    public color: string,
+    public image: string,
+    public image_data: string,
+    public external_url: string,
+    public description: string,
+    public name: string,
+    public animation_url: string,
+    public youtube_url: string,
+    public attributes: Attributes,
+    public properties: Properties,
     public socials: Socials,
-    public owner: string,
   ) {
     this.identifier = identifier;
-    this.worldAddress = worldAddress;
-    this.namespace = namespace;
-    this.active = active;
+    this.id = id;
     this.published = published;
     this.whitelisted = whitelisted;
-    this.priority = priority;
-    this.points = points;
-    this.config = config;
-    this.metadata = metadata;
+    this.color = color;
+    this.image = image;
+    this.image_data = image_data;
+    this.external_url = external_url;
+    this.description = description;
+    this.name = name;
+    this.animation_url = animation_url;
+    this.youtube_url = youtube_url;
+    this.attributes = attributes;
+    this.properties = properties;
     this.socials = socials;
-    this.owner = owner;
   }
 
   static from(identifier: string, model: any) {
     if (!model) return GameModel.default(identifier);
-    const worldAddress = addAddressPadding(model.world_address);
-    const namespace = shortString.decodeShortString(`0x${BigInt(model.namespace).toString(16)}`);
-    const active = !!model.active;
+    const id = Number(model.id);
     const published = !!model.published;
     const whitelisted = !!model.whitelisted;
-    const priority = Number(model.priority);
-    const points = Number(model.points);
-    const config = Config.from(model.config.replace(`"{`, `{`).replace(`}"`, `}`));
-    const metadata = Metadata.from(model.metadata);
+    const color = model.color;
+    const image = model.image;
+    const image_data = model.image_data;
+    const external_url = model.external_url;
+    const description = model.description;
+    const name = model.name;
+    const animation_url = model.animation_url;
+    const youtube_url = model.youtube_url;
+    const attributes = Attributes.from(model.attributes);
+    const properties = Properties.from(model.properties);
     const socials = Socials.from(model.socials);
-    const owner = addAddressPadding(model.owner);
     return new GameModel(
       identifier,
-      worldAddress,
-      namespace,
-      active,
+      id,
       published,
       whitelisted,
-      priority,
-      points,
-      config,
-      metadata,
+      color,
+      image,
+      image_data,
+      external_url,
+      description,
+      name,
+      animation_url,
+      youtube_url,
+      attributes,
+      properties,
       socials,
-      owner,
     );
   }
 
   static default(identifier: string) {
     return new GameModel(
       identifier,
-      "0x0",
-      "",
-      false,
-      false,
-      false,
       0,
-      0,
-      new Config("", "", ""),
-      new Metadata("", "", "", "", "", ""),
-      new Socials("", "", "", "", "", "", [], []),
+      false,
+      false,
       "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      Attributes.default(),
+      Properties.default(),
+      Socials.default(),
     );
   }
 
@@ -89,7 +102,7 @@ export class GameModel {
   }
 
   exists() {
-    return this.worldAddress !== "0x0";
+    return this.name !== "";
   }
 }
 
@@ -103,7 +116,7 @@ export const Game = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${Game.getModelName()}`, "world_address", "Neq", "0x0");
+    return MemberClause(`${NAMESPACE}-${Game.getModelName()}`, "name", "Neq", "");
   },
 
   getMethods: () => [

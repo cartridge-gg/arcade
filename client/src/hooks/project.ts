@@ -6,7 +6,12 @@ import { ProjectContext } from "../context/project";
  * Must be used within a ProjectProvider component.
  *
  * @returns An object containing:
- * - indexer: The indexer url
+ * - project: The project name
+ * - namespace: The namespace name
+ * - gameId: The game id
+ * - setProject: A function to set the project name
+ * - setNamespace: A function to set the namespace name
+ * - setGameId: A function to set the game id
  * @throws {Error} If used outside of a ProjectProvider context
  */
 export const useProject = () => {
@@ -18,8 +23,8 @@ export const useProject = () => {
     );
   }
 
-  const { isReady, project, namespace, indexerUrl, setProject, setNamespace } =
+  const { project, namespace, gameId, setProject, setNamespace, setGameId } =
     context;
 
-  return { isReady, project, namespace, indexerUrl, setProject, setNamespace };
+  return { project, namespace, gameId, setProject, setNamespace, setGameId };
 };

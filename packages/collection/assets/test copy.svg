@@ -1,0 +1,58 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <rect width="300" height="300" fill="#161A17" />
+    <mask id="mask0_10793_49693" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="300"
+        height="300">
+        <rect width="300" height="300" fill="url(#paint0_linear_10793_49693)" />
+    </mask>
+    <g mask="url(#mask0_10793_49693)">
+        <path d="M0 0H300V300H0V0Z" fill="url(#pattern0_10793_49693)" />
+    </g>
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M227 54C227.552 54 228 54.4477 228 55V209C228 209.552 227.552 210 227 210H73C72.4477 210 72 209.552 72 209V55C72 54.4477 72.4477 54 73 54H227Z"
+        fill="#1E221F" />
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M227 54C227.552 54 228 54.4477 228 55V209C228 209.552 227.552 210 227 210H73C72.4477 210 72 209.552 72 209V55C72 54.4477 72.4477 54 73 54H227Z"
+        fill="url(#pattern1_10793_49693)" />
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M228 50V54H232V210H228V214H72V210H68V54H72V50H228ZM76 58H72V206H76V210H224V206H228V58H224V54H76V58Z"
+        fill="#D8232A" />
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M224 54V58H228V206H224V210H76V206H72V58H76V54H224ZM80 62H76V202H80V206H220V202H224V62H220V58H80V62Z"
+        fill="black" />
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M244 38H248V42H252V46H256V254H252V258H248V262H244V266H56V262H52V258H48V254H44V46H48V42H52V38H56V34H244V38ZM72 54H68V210H72V214H228V210H232V54H228V50H72V54Z"
+        fill="#2C2D2D" />
+    <path opacity="0.04"
+        d="M244 226V230H248V234H252V238H256V254H252V258H248V262H244V266H56V262H52V258H48V254H44V238H48V234H52V230H56V226H244Z"
+        fill="white" />
+    <rect x="56" y="246" width="8" height="4" fill="#222523" />
+    <rect x="56" y="242" width="8" height="4" fill="black" />
+    <rect x="236" y="246" width="8" height="4" fill="#222523" />
+    <rect x="236" y="242" width="8" height="4" fill="black" />
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M216 234V238H220V242H224V250H220V254H216V258H84V254H80V250H76V242H80V238H84V234H216Z" fill="#0F1210" />
+    <path opacity="0.08" d="M220 254H216V258H84V254H80V250H76V246H84V250H88V254H212V250H216V246H224V250H220V254Z"
+        fill="white" />
+    <path d="M220 238H216V234H84V238H80V242H76V246H84V242H88V238H212V242H216V246H224V242H220V238Z" fill="black" />
+    <path opacity="0.02" d="M56 222H60V226H56V230H52V234H48V238H44V46H48V42H52V38H56V222Z" fill="white" />
+    <path opacity="0.02" d="M244 222H240V226H244V230H248V234H252V238H256V46H252V42H248V38H244V222Z" fill="white" />
+    <path opacity="0.5" d="M256 50H260V258H256V262H252V266H248V270H60V266H244V262H248V258H252V254H256V50Z"
+        fill="black" />
+    <defs>
+        <pattern id="pattern0_10793_49693" patternContentUnits="objectBoundingBox" width="1" height="1">
+            <use xlink:href="#image0_10793_49693" transform="translate(-1) scale(0.002)" />
+        </pattern>
+        <pattern id="pattern1_10793_49693" patternContentUnits="objectBoundingBox" width="1" height="1">
+            <use xlink:href="#image1_10793_49693" transform="scale(0.00125)" />
+        </pattern>
+        <linearGradient id="paint0_linear_10793_49693" x1="150" y1="0" x2="150" y2="300" gradientUnits="userSpaceOnUse">
+            <stop stop-color="white" />
+            <stop offset="0.5" stop-color="white" stop-opacity="0" />
+        </linearGradient>
+        <image id="image0_10793_49693" width="1500" height="500" preserveAspectRatio="xMidYMin slice"
+            xlink:href="https://github.com/cartridge-gg/presets/blob/main/configs/dope-wars/cover.png?raw=true" />
+        <image id="image1_10793_49693" width="800" height="800" preserveAspectRatio="none"
+            xlink:href="https://github.com/cartridge-gg/presets/blob/main/configs/dope-wars/icon.png?raw=true" />
+    </defs>
+</svg>

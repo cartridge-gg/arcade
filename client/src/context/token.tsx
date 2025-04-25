@@ -39,7 +39,7 @@ export type Metadata = {
   name: string;
   symbol: string;
   decimals: number;
-  address: string;
+  address?: string;
   image?: string;
   project?: string;
 };

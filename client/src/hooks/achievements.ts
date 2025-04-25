@@ -100,18 +100,18 @@ export function usePlayerStats() {
   return { completed, total, rank, earnings };
 }
 
-export function usePlayerGameStats(project: string) {
+export function usePlayerGameStats(projects: string[]) {
   const { pins } = useArcade();
   const { address } = useAddress();
   const { achievements, players } = useAchievements();
 
   const gameAchievements = useMemo(() => {
-    return achievements[project || ""] || [];
-  }, [achievements, project]);
+    return projects.map((project) => achievements[project || ""] || []).flat();
+  }, [achievements, projects]);
 
   const gamePlayers = useMemo(
-    () => players[project || ""] || [],
-    [players, project],
+    () => projects.map((project) => players[project || ""] || []).flat(),
+    [players, projects],
   );
 
   const { pinneds, completed, total } = useMemo(() => {

@@ -137,11 +137,15 @@ const Timestamp = ({ timestamp }: { timestamp: number }) => {
     minutes: number;
     hours: number;
     days: number;
+    months: number;
+    years: number;
   }>({
     seconds: 0,
     minutes: 0,
     hours: 0,
     days: 0,
+    months: 0,
+    years: 0,
   });
 
   useEffect(() => {
@@ -153,6 +157,8 @@ const Timestamp = ({ timestamp }: { timestamp: number }) => {
         minutes: Math.floor(diff / (1000 * 60)),
         hours: Math.floor(diff / (1000 * 60 * 60)),
         days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        months: Math.floor(diff / (1000 * 60 * 60 * 24 * 30)),
+        years: Math.floor(diff / (1000 * 60 * 60 * 24 * 30 * 12)),
       });
     }, 1000);
 
@@ -160,6 +166,8 @@ const Timestamp = ({ timestamp }: { timestamp: number }) => {
   }, [timestamp]);
 
   const label = useMemo(() => {
+    if (state.years > 0) return `${state.years}y ago`;
+    if (state.months > 0) return `${state.months}mo ago`;
     if (state.days > 0) return `${state.days}d ago`;
     if (state.hours > 0) return `${state.hours}h ago`;
     if (state.minutes > 0) return `${state.minutes}m ago`;

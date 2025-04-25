@@ -1,6 +1,14 @@
+import { useArcade } from "@/hooks/arcade";
+import { useProject } from "@/hooks/project";
 import { defaultTheme, ControllerTheme } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
-import { createContext, useCallback, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 
 type ColorScheme = "dark" | "light" | "system";
@@ -42,6 +50,9 @@ export function ThemeProvider({
   storageKey = "vite-ui-colorScheme",
   ...props
 }: ThemeProviderProps) {
+  const { gameId } = useProject();
+  const { games } = useArcade();
+
   const [searchParams] = useSearchParams();
   const colorSchemeParam =
     (searchParams.get("colorMode") as ColorScheme) || null;
@@ -60,6 +71,10 @@ export function ThemeProvider({
       (localStorage.getItem(storageKey) as ColorScheme) ||
       defaultScheme,
   );
+
+  const game = useMemo(() => {
+    return games.find((game) => game.id === gameId);
+  }, [gameId, games]);
 
   const setColorScheme = useCallback(
     (colorScheme: ColorScheme) => {
@@ -82,6 +97,23 @@ export function ThemeProvider({
         },
     assetUrl: import.meta.env.VITE_KEYCHAIN_URL,
   });
+
+  useEffect(() => {
+    if (!game) {
+      resetTheme();
+      resetCover();
+      return;
+    }
+    if (game.color) {
+      setTheme({
+        ...defaultTheme,
+        colors: { ...defaultTheme.colors, primary: game.color },
+      });
+    }
+    if (game.properties.cover) {
+      setCover(game.properties.cover);
+    }
+  }, [defaultTheme, game]);
 
   const value = {
     colorScheme,

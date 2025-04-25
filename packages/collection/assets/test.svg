@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 300 300" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <path fill="#161A17" d="M0 0h300v300H0z" />
+    <mask id="b" width="300" height="300" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha">
+        <path fill="url(#a)" d="M0 0h300v300H0z" />
+    </mask>
+    <g mask="url(#b)">
+        <path fill="url(#c)" d="M0 0h300v300H0z" />
+    </g>
+    <path fill="#1E1F1F" d="M90 49q0-1 1-1h118q1 0 1 1v118q0 1-1 1H91a1 1 0 0 1-1-1z" />
+    <path fill="url(#d)" d="M90 49q0-1 1-1h118q1 0 1 1v118q0 1-1 1H91a1 1 0 0 1-1-1z" />
+    <path fill="#D8232A" fill-rule="evenodd"
+        d="M206 48v4h4v112h-4v4H94v-4h-4V52h4v-4zM98 56h-4v104h4v4h104v-4h4V56h-4v-4H98z" clip-rule="evenodd" />
+    <path fill="#000" fill-rule="evenodd"
+        d="M202 52v4h4v104h-4v4H98v-4h-4V56h4v-4zm-100 8h-4v96h4v4h96v-4h4V60h-4v-4h-96z" clip-rule="evenodd" />
+    <path fill="#2C2D2D" fill-rule="evenodd"
+        d="M210 40h4v4h4v4h4v184h-4v4h-4v4h-4v4h-4v4h-4v4h-4v4h-4v4H90v-4h-4v-4h-4v-4h-4V48h4v-4h4v-4h4v-4h120zM94 48v4h-4v112h4v4h112v-4h4V52h-4v-4z"
+        clip-rule="evenodd" />
+    <path fill="#000" d="M222 52h4v184h-4v4h-4v4h-4v4h-4v4h-4v4h-4v4h-4v4H94v-4h100v-4h4v-4h4v-4h4v-4h4v-4h4v-4h4v-4h4z"
+        opacity=".5" />
+    <path fill="#1E1F1F" fill-rule="evenodd" d="M110 180v4h4v60h-4v4H94v-4h-4v-60h4v-4z" clip-rule="evenodd" />
+    <path fill="#1E1F1F" fill-rule="evenodd"
+        d="M110 184h4v60h-4v4H94v-4h-4v-60h4v-4h16zm-12 4h-4v52h4v4h8v-4h4v-52h-4v-4h-8zm44-8v4h4v60h-4v4h-16v-4h-4v-60h4v-4zm32 0v4h4v60h-4v4h-16v-4h-4v-60h4v-4zm32 0v4h4v36h-4v4h-16v-4h-4v-36h4v-4z"
+        clip-rule="evenodd" />
+    <path fill="#1E1F1F" fill-rule="evenodd"
+        d="M142 184h4v60h-4v4h-16v-4h-4v-60h4v-4h16zm-12 4h-4v52h4v4h8v-4h4v-52h-4v-4h-8zm44-4h4v60h-4v4h-16v-4h-4v-60h4v-4h16zm-12 4h-4v52h4v4h8v-4h4v-52h-4v-4h-8zm44-4h4v36h-4v4h-16v-4h-4v-36h4v-4h16zm-12 4h-4v28h4v4h8v-4h4v-28h-4v-4h-8z"
+        clip-rule="evenodd" />
+    <defs>
+        <pattern id="c" width="1" height="1" patternContentUnits="objectBoundingBox">
+            <use href="#e" transform="translate(-1)scale(.002)" />
+        </pattern>
+        <pattern id="d" width="1" height="1" patternContentUnits="objectBoundingBox">
+            <use href="#f" transform="scale(.00125)" />
+        </pattern>
+        <image id="e" width="1500" height="500"
+            href="https://github.com/cartridge-gg/presets/blob/main/configs/dope-wars/cover.png?raw=true"
+            preserveAspectRatio="xMidYMin slice" />
+        <image id="f" width="800" height="800"
+            href="https://github.com/cartridge-gg/presets/blob/main/configs/dope-wars/icon.png?raw=true"
+            preserveAspectRatio="none" />
+        <linearGradient id="a" x1="150" x2="150" y1="0" y2="300" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#fff" />
+            <stop offset=".7" stop-color="#fff" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+</svg>

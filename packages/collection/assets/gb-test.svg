@@ -1,0 +1,70 @@
+<svg width="400" height="400" viewBox="-100 -100 600 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ombre portée -->
+  <filter id="shadow">
+    <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#000" />
+  </filter>
+
+  <!-- Cartouche top -->
+  <rect x="0" y="0" width="382.5" height="30" rx="5" ry="5" fill="#8c8c8c" filter="url(#shadow)" />
+
+  <!-- Header -->
+  <g transform="translate(0,22.5)">
+    <!-- Bande grise -->
+    <rect width="425" height="120" rx="5" ry="5" fill="#8c8c8c" />
+    <!-- Gaps -->
+    <rect width="425" height="84" fill="url(#headerGaps)" />
+    <!-- Bande centrale avec texte -->
+    <g transform="translate(53, 10)">
+      <rect width="319" height="100" rx="50" ry="50" fill="url(#brandGradient)" stroke="#8c8c8c" stroke-width="5" />
+      <text x="160" y="45" text-anchor="middle" font-size="14" font-family="Pretendo" fill="#8c8c8c"
+        filter="url(#textShadow)">Nintendo</text>
+      <text x="160" y="70" text-anchor="middle" font-size="30" font-family="Gill Sans MT Pro" fill="#8c8c8c"
+        letter-spacing="-3" filter="url(#textShadow)">GAME BOY</text>
+      <text x="160" y="85" text-anchor="middle" font-size="10" font-family="Lato" fill="#8c8c8c"
+        filter="url(#textShadow)">TM</text>
+    </g>
+  </g>
+
+  <!-- Corps principal -->
+  <g transform="translate(0,135)">
+    <rect width="425" height="315" rx="5" ry="5" fill="url(#cartridgeBody)" />
+
+    <!-- Parties latérales -->
+    <rect x="-1" y="81" width="21.25" height="236.25" fill="#5d5d5d" stroke="#444" stroke-width="3" />
+    <rect x="405" y="81" width="21.25" height="236.25" fill="#5d5d5d" stroke="#444" stroke-width="3" />
+    <rect x="" y="" width="314.5" height="100" rx="5" ry="5" fill="url(#labelGradient)" stroke="#444"
+      stroke-width="2" />
+
+    <!-- Arrow bottom -->
+    <g transform="translate(0, 0)">
+      <path d="M157.25 230 L127.25 200 L187.25 200 Z" fill="#555" filter="url(#arrowShadow)" />
+    </g>
+  </g>
+
+  <!-- Dégradés -->
+  <defs>
+    <linearGradient id="cartridgeBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8c8c8c" />
+      <stop offset="100%" stop-color="#666" />
+    </linearGradient>
+
+    <linearGradient id="labelGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#666" />
+      <stop offset="100%" stop-color="#555" />
+    </linearGradient>
+
+    <linearGradient id="brandGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#444" />
+      <stop offset="100%" stop-color="#777" />
+    </linearGradient>
+
+    <filter id="textShadow">
+      <feDropShadow dx="1" dy="2" stdDeviation="1" flood-opacity="0.3" />
+    </filter>
+
+    <filter id="arrowShadow">
+      <feDropShadow dx="0" dy="1" stdDeviation="0.5" flood-color="#999" />
+      <feDropShadow dx="0" dy="-1" stdDeviation="0.5" flood-color="#444" />
+    </filter>
+  </defs>
+</svg>

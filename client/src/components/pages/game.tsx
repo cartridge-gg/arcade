@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useMemo } from "react";
-import {
-  TabsContent,
-  Thumbnail,
-  TabValue,
-  ActivitySocialWebsite,
-} from "@cartridge/ui-next";
+import { TabsContent, Thumbnail, TabValue } from "@cartridge/ui-next";
 import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel, Socials } from "@bal7hazar/arcade-sdk";
 import cartridge from "@/assets/cartridge-logo.png";
 import { ArcadeTabs } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
 import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
 import GameSocials from "../modules/game-socials";
+import { Editions } from "../editions";
 
-export function GamePage({ game }: { game: GameModel | undefined }) {
+export function GamePage({
+  game,
+  edition,
+}: {
+  game?: GameModel;
+  edition?: EditionModel;
+}) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -57,21 +59,21 @@ export function GamePage({ game }: { game: GameModel | undefined }) {
     <>
       <div className="flex items-start justify-between p-3 lg:p-6 lg:pb-0 border-b border-background-200 lg:border-none">
         <div className="flex gap-3 items-center">
-          <Thumbnail icon={game?.metadata.image || cartridge} size="xl" />
-          <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-lg/[22px] text-foreground-100">
-              {game?.metadata.name ?? "All Games"}
+          <Thumbnail
+            icon={
+              edition?.properties.icon || game?.properties.icon || cartridge
+            }
+            size="xl"
+            className="w-16 h-16"
+          />
+          <div className="flex flex-col gap-2">
+            <p className="font-semibold text-xl/[24px] text-foreground-100">
+              {game?.name ?? "All Games"}
             </p>
-            {game?.socials.website && (
-              <ActivitySocialWebsite
-                website={game.socials.website}
-                certified
-                className="text-foreground-300"
-              />
-            )}
+            <Editions />
           </div>
         </div>
-        {!!game && <GameSocials socials={game?.socials} />}
+        <GameSocials socials={Socials.merge(edition?.socials, game?.socials)} />
       </div>
       <ArcadeTabs
         order={order}

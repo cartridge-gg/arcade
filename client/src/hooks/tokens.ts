@@ -44,14 +44,13 @@ export const useTokens = () => {
     return {
       balance: {
         amount: Number(creditBalance.balance.value),
-        value: Number(creditBalance.balance.value) / 10,
+        value: 0,
         change: 0,
       },
       metadata: {
         name: "Credits",
         symbol: "Credits",
         decimals: 0,
-        address: "0x0",
         image: "https://static.cartridge.gg/presets/credit/icon.svg",
       },
     };

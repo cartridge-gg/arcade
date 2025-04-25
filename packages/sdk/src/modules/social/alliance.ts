@@ -1,7 +1,7 @@
 import { NAMESPACE } from "../../constants";
 import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
-import { Metadata, Socials } from "../../classes";
+import { Properties, Socials } from "../../classes";
 
 const MODEL_NAME = "Alliance";
 
@@ -14,7 +14,7 @@ export class AllianceModel {
     public open: boolean,
     public free: boolean,
     public guildCount: number,
-    public metadata: Metadata,
+    public metadata: Properties,
     public socials: Socials,
   ) {
     this.identifier = identifier;
@@ -32,7 +32,7 @@ export class AllianceModel {
     const open = !!model.open;
     const free = !!model.free;
     const guildCount = Number(model.guild_count);
-    const metadata = Metadata.from(model.metadata);
+    const metadata = Properties.from(model.metadata);
     const socials = Socials.from(model.socials);
     return new AllianceModel(identifier, id, open, free, guildCount, metadata, socials);
   }
@@ -44,8 +44,8 @@ export class AllianceModel {
       false,
       false,
       0,
-      new Metadata("", "", "", "", "", ""),
-      new Socials("", "", "", "", "", "", [], []),
+      Properties.default(),
+      Socials.default(),
     );
   }
 

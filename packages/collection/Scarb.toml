@@ -1,0 +1,21 @@
+[package]
+name = "collection"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+openzeppelin_token = "1.0.0"
+openzeppelin_introspection = "1.0.0"
+openzeppelin_access = "1.0.0"
+openzeppelin_upgrades = "1.0.0"
+graffiti.workspace = true
+
+[dev-dependencies]
+dojo_cairo_test.workspace = true
+cairo_test.workspace = true
+
+[[target.starknet-contract]]
+sierra = true
+casm = false
+
+[lib]

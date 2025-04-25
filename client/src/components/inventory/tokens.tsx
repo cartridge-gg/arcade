@@ -1,18 +1,22 @@
 import { useTokens } from "@/hooks/tokens";
 import { cn, MinusIcon, PlusIcon, TokenCard } from "@cartridge/ui-next";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
 
 import placeholder from "@/assets/placeholder.svg";
 import { useAddress } from "@/hooks/address";
 import { Token } from "@/context/token";
+import { Chain, mainnet } from "@starknet-react/chains";
+import { EditionModel } from "@bal7hazar/arcade-sdk";
+import { useArcade } from "@/hooks/arcade";
 
 const DEFAULT_TOKENS_COUNT = 3;
 
 export const Tokens = () => {
-  const [unfolded, setUnfolded] = useState(false);
+  const { editions, chains } = useArcade();
   const { tokens, credits } = useTokens();
+  const [unfolded, setUnfolded] = useState(false);
 
   const filteredTokens = useMemo(() => {
     return tokens.filter((token) => token.balance.amount > 0);
@@ -23,11 +27,22 @@ export const Tokens = () => {
       className={cn("rounded overflow-y-scroll w-full flex flex-col gap-y-px")}
       style={{ scrollbarWidth: "none" }}
     >
-      <Item key={credits.metadata.address} token={credits} clickable={false} />
+      <Item
+        key={credits.metadata.address}
+        token={credits}
+        editions={editions}
+        chains={chains}
+        clickable={false}
+      />
       {filteredTokens
         .slice(0, unfolded ? filteredTokens.length : DEFAULT_TOKENS_COUNT)
         .map((token) => (
-          <Item key={token.metadata.address} token={token} />
+          <Item
+            key={token.metadata.address}
+            token={token}
+            editions={editions}
+            chains={chains}
+          />
         ))}
       <div
         className={cn(
@@ -52,23 +67,57 @@ export const Tokens = () => {
 
 function Item({
   token,
+  editions,
+  chains,
   clickable = true,
 }: {
   token: Token;
+  editions: EditionModel[];
+  chains: Chain[];
   clickable?: boolean;
 }) {
-  const { connector } = useAccount();
   const { isSelf } = useAddress();
+  const { connector } = useAccount();
+  const [username, setUsername] = useState<string>("");
+
+  const chain: Chain = useMemo(() => {
+    const edition = editions.find(
+      (edition) => edition.config.project === token.metadata.project,
+    );
+    return (
+      chains.find(
+        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
+      ) || mainnet
+    );
+  }, [chains]);
+
+  useEffect(() => {
+    async function fetch() {
+      try {
+        const name = await (connector as ControllerConnector)?.username();
+        if (!name) return;
+        setUsername(name);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetch();
+  }, [connector]);
 
   const handleClick = useCallback(async () => {
+    if (!username || !token.metadata.address) return;
     const controller = (connector as ControllerConnector)?.controller;
     if (!controller) {
       console.error("Connector not initialized");
       return;
     }
-    const path = `inventory/token/${token.metadata.address}/send`;
-    controller.openProfileTo(path);
-  }, [token.metadata.address, connector]);
+    let path = `account/${username}/inventory/token/${token.metadata.address}`;
+    if (token.metadata.project && token.metadata.project !== "extra") {
+      path = `account/${username}/inventory/token/${token.metadata.address}?ps=${token.metadata.project}`;
+    }
+    controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
+    controller.openProfileAt(path);
+  }, [token, username, connector]);
 
   return (
     <TokenCard

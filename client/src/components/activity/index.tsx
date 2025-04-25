@@ -40,7 +40,7 @@ interface CardProps {
 export function Activity() {
   const { address } = useAddress();
   const { project } = useProject();
-  const { games } = useArcade();
+  const { editions } = useArcade();
   const { events } = useAchievements();
   const { playerActivities: activities, status: activitiesStatus } =
     useActivities();
@@ -94,22 +94,22 @@ export function Activity() {
         dates.push(date);
       }
       const title = activity.entrypoint;
-      const game = games.find(
-        (game) => game.config.project === activity.project,
+      const edition = editions.find(
+        (edition) => edition.config.project === activity.project,
       );
-      const chainId = getChainId(game?.config.rpc);
+      const chainId = getChainId(edition?.config.rpc);
       return {
         variant: "game",
         key: `${activity.entrypoint}-${activity.transactionHash}`,
         transactionHash: activity.transactionHash,
         chainId: chainId,
         title: title.replace("_", " "),
-        image: game?.metadata.image || "",
-        website: game?.socials.website || "",
-        certified: !!game,
+        image: edition?.properties.icon || "",
+        website: edition?.socials.website || "",
+        certified: !!edition,
         timestamp: activity.timestamp / 1000,
         date: date,
-        color: game?.metadata.color,
+        color: edition?.color,
       } as CardProps;
     });
 
@@ -123,7 +123,9 @@ export function Activity() {
         if (!dates.includes(date)) {
           dates.push(date);
         }
-        const game = games.find((game) => game.config.project === gameKey);
+        const edition = editions.find(
+          (edition) => edition.config.project === gameKey,
+        );
         return {
           variant: "achievement",
           transactionHash: "",
@@ -131,10 +133,10 @@ export function Activity() {
           image: event.achievement.icon,
           timestamp: event.timestamp,
           date: date,
-          website: game?.socials.website || "",
-          certified: !!game,
+          website: edition?.socials.website || "",
+          certified: !!edition,
           points: event.achievement.points,
-          color: game?.metadata.color,
+          color: edition?.color,
         } as CardProps;
       });
     });
@@ -149,7 +151,7 @@ export function Activity() {
         (a, b) => b.timestamp - a.timestamp,
       ),
     };
-  }, [activities, gameEvents, address, games, getDate]);
+  }, [activities, gameEvents, address, editions, getDate]);
 
   switch (activitiesStatus) {
     case "loading": {

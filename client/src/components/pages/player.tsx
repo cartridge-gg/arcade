@@ -12,7 +12,7 @@ import {
 import { ActivityScene } from "../scenes/activity";
 import { ArcadeTabs } from "../modules";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
 import { useUsername, useUsernames } from "@/hooks/account";
 import { useAddress } from "@/hooks/address";
 import AchievementPlayerHeader from "../modules/player-header";
@@ -23,7 +23,7 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 
-export function PlayerPage({ game }: { game: GameModel | undefined }) {
+export function PlayerPage({ edition }: { edition: EditionModel | undefined }) {
   const [searchParams] = useSearchParams();
   const { address, isSelf, self } = useAddress();
   const { usernames, globals, players } = useAchievements();
@@ -56,8 +56,8 @@ export function PlayerPage({ game }: { game: GameModel | undefined }) {
   }, [navigate]);
 
   const { rank, points } = useMemo(() => {
-    if (game) {
-      const gamePlayers = players[game?.config.project || ""] || [];
+    if (edition) {
+      const gamePlayers = players[edition?.config.project || ""] || [];
       const points =
         gamePlayers.find((player) => BigInt(player.address) === BigInt(address))
           ?.earnings || 0;
@@ -75,7 +75,7 @@ export function PlayerPage({ game }: { game: GameModel | undefined }) {
         (player) => BigInt(player.address) === BigInt(address),
       ) + 1;
     return { rank, points };
-  }, [globals, address, game]);
+  }, [globals, address, edition]);
 
   const following = useMemo(() => {
     const followeds = follows[getChecksumAddress(self || "0x0")] || [];

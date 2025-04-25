@@ -1,7 +1,7 @@
 import { LayoutContent, TabsContent } from "@cartridge/ui-next";
 import { useCallback, useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel } from "@bal7hazar/arcade-sdk";
 import { useAchievements } from "@/hooks/achievements";
 import banner from "@/assets/banner.png";
 import {
@@ -25,7 +25,7 @@ interface Event {
   onClick: () => void;
 }
 
-export function Discover({ game }: { game?: GameModel }) {
+export function Discover({ edition }: { edition?: EditionModel }) {
   const [searchParams] = useSearchParams();
   const { isConnected, address } = useAccount();
   const {
@@ -39,7 +39,7 @@ export function Discover({ game }: { game?: GameModel }) {
     isLoading,
     isError,
   } = useAchievements();
-  const { games, follows } = useArcade();
+  const { editions, follows } = useArcade();
 
   const following = useMemo(() => {
     if (!address) return [];
@@ -48,9 +48,9 @@ export function Discover({ game }: { game?: GameModel }) {
     return [...addresses, getChecksumAddress(address)];
   }, [follows, address]);
 
-  const filteredGames = useMemo(() => {
-    return !game ? games : [game];
-  }, [games, game]);
+  const filteredEditions = useMemo(() => {
+    return !edition ? editions : [edition];
+  }, [editions, edition]);
 
   const navigate = useNavigate();
   const handleClick = useCallback(
@@ -81,10 +81,10 @@ export function Discover({ game }: { game?: GameModel }) {
     [navigate],
   );
 
-  const gameEvents = useMemo(() => {
-    return filteredGames.map((game) => {
+  const editionEvents = useMemo(() => {
+    return filteredEditions.map((edition) => {
       const achievements =
-        events[game?.config.project]?.map((event) => {
+        events[edition?.config.project]?.map((event) => {
           const username =
             achievementsUsernames[addAddressPadding(event.player)];
           return {
@@ -101,7 +101,7 @@ export function Discover({ game }: { game?: GameModel }) {
           };
         }) || [];
       const activities =
-        aggregatedActivities[game?.config.project]?.map((activity) => {
+        aggregatedActivities[edition?.config.project]?.map((activity) => {
           const username =
             activitiesUsernames[addAddressPadding(activity.callerAddress)];
           const count = activity.count;
@@ -123,7 +123,7 @@ export function Discover({ game }: { game?: GameModel }) {
         (a, b) => b.timestamp - a.timestamp,
       );
       if (!data) return { all: [], following: [] };
-      if (filteredGames.length > 1) {
+      if (filteredEditions.length > 1) {
         return {
           all: data.slice(0, 3),
           following: data
@@ -141,7 +141,7 @@ export function Discover({ game }: { game?: GameModel }) {
   }, [
     events,
     aggregatedActivities,
-    filteredGames,
+    filteredEditions,
     achievementsUsernames,
     activitiesUsernames,
     following,
@@ -169,18 +169,18 @@ export function Discover({ game }: { game?: GameModel }) {
             style={{ scrollbarWidth: "none" }}
           >
             <TabsContent className="p-0 mt-0 grow w-full" value="all">
-              {filteredGames.length === 1 &&
-              gameEvents.length > 0 &&
-              gameEvents[0].all.length === 0 ? (
+              {filteredEditions.length === 1 &&
+              editionEvents.length > 0 &&
+              editionEvents[0].all.length === 0 ? (
                 <DiscoverEmpty />
               ) : (
                 <div className="flex flex-col gap-y-4 pb-3 lg:pb-6">
-                  {filteredGames.map((item, index) => (
+                  {filteredEditions.map((item, index) => (
                     <GameRow
                       key={`${index}-${item.config.project}`}
-                      game={filteredGames.length > 1 ? item : undefined}
-                      events={gameEvents[index].all}
-                      covered={filteredGames.length > 1}
+                      edition={filteredEditions.length > 1 ? item : undefined}
+                      events={editionEvents[index].all}
+                      covered={filteredEditions.length > 1}
                     />
                   ))}
                 </div>
@@ -190,18 +190,18 @@ export function Discover({ game }: { game?: GameModel }) {
               {!isConnected ? (
                 <Connect />
               ) : following.length === 0 ||
-                (filteredGames.length === 1 &&
-                  gameEvents.length > 0 &&
-                  gameEvents[0].following.length === 0) ? (
+                (filteredEditions.length === 1 &&
+                  editionEvents.length > 0 &&
+                  editionEvents[0].following.length === 0) ? (
                 <DiscoverEmpty />
               ) : (
                 <div className="flex flex-col gap-y-4 pb-6">
-                  {filteredGames.map((item, index) => (
+                  {filteredEditions.map((item, index) => (
                     <GameRow
                       key={`${index}-${item.config.project}`}
-                      game={filteredGames.length > 1 ? item : undefined}
-                      events={gameEvents[index].following}
-                      covered={filteredGames.length > 1}
+                      edition={filteredEditions.length > 1 ? item : undefined}
+                      events={editionEvents[index].following}
+                      covered={filteredEditions.length > 1}
                     />
                   ))}
                 </div>
@@ -215,39 +215,47 @@ export function Discover({ game }: { game?: GameModel }) {
 }
 
 export function GameRow({
-  game,
+  edition,
   events,
   covered,
 }: {
-  game: GameModel | undefined;
+  edition: EditionModel | undefined;
   events: Event[];
   covered: boolean;
 }) {
+  const { games } = useArcade();
+  const game = useMemo(() => {
+    return games.find((game) => game.id === edition?.gameId);
+  }, [games, edition]);
+
   const navigate = useNavigate();
-  const gameData = useMemo(() => {
-    if (!game) return undefined;
+  const editionData = useMemo(() => {
+    if (!edition) return undefined;
     return {
       metadata: {
-        name: game.metadata.name,
-        logo: game.metadata.image,
-        cover: covered ? (game.metadata.banner ?? banner) : banner,
+        name: game?.name ? `${game.name} - ${edition.name}` : edition.name,
+        logo: edition.properties.icon,
+        cover: covered
+          ? game?.properties.banner || edition.properties.banner || banner
+          : banner,
       },
       socials: {},
       onClick: () => {
         const url = new URL(window.location.href);
-        url.searchParams.set("game", game.metadata.name);
+        if (game) url.searchParams.set("game", game.id.toString());
+        url.searchParams.set("edition", edition.id.toString());
         navigate(url.toString().replace(window.location.origin, ""));
       },
     };
-  }, [game, covered, navigate]);
+  }, [game, edition, covered, navigate]);
 
   if (events.length === 0) return null;
 
   return (
     <ArcadeDiscoveryGroup
-      game={gameData}
+      game={editionData}
       events={events}
-      color={game?.metadata.color}
+      color={edition?.color}
       rounded
     />
   );

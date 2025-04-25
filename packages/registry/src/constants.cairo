@@ -1,5 +1,9 @@
-// Points threshold for achievements
+/// Constants
 
-pub const MAX_GAME_KARMA: u16 = 1000;
-pub const MIN_ACHIEVEMENT_KARMA: u16 = 10;
-pub const MAX_ACHIEVEMENT_KARMA: u16 = 100;
+pub const COLLECTION_ID: felt252 = 'COLLECTION';
+pub fn COLLECTION_NAME() -> ByteArray {
+    "Arcade Game"
+}
+pub fn COLLECTION_SYMBOL() -> ByteArray {
+    "ARCADE"
+}

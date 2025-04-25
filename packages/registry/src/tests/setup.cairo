@@ -16,7 +16,7 @@ pub mod setup {
 
     use registry::models::{index as models};
     use registry::tests::mocks::register::{Register, IRegisterDispatcher};
-    use registry::tests::mocks::tracker::{Tracker, ITrackerDispatcher};
+    use registry::tests::mocks::collection::Collection;
 
     // Constant
 
@@ -31,7 +31,6 @@ pub mod setup {
     #[derive(Copy, Drop)]
     pub struct Systems {
         pub register: IRegisterDispatcher,
-        pub tracker: ITrackerDispatcher,
     }
 
     #[derive(Copy, Drop)]
@@ -55,10 +54,11 @@ pub mod setup {
             namespace: "namespace",
             resources: [
                 TestResource::Model(models::m_Access::TEST_CLASS_HASH),
-                TestResource::Model(models::m_Achievement::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Collection::TEST_CLASS_HASH),
                 TestResource::Model(models::m_Game::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Edition::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Unicity::TEST_CLASS_HASH),
                 TestResource::Contract(Register::TEST_CLASS_HASH),
-                TestResource::Contract(Tracker::TEST_CLASS_HASH),
             ]
                 .span(),
         }
@@ -68,10 +68,7 @@ pub mod setup {
         [
             ContractDefTrait::new(@"namespace", @"Register")
                 .with_writer_of([dojo::utils::bytearray_hash(@"namespace")].span())
-                .with_init_calldata(array![OWNER().into()].span()),
-            ContractDefTrait::new(@"namespace", @"Tracker")
-                .with_writer_of([dojo::utils::bytearray_hash(@"namespace")].span())
-                .with_init_calldata(array![OWNER().into()].span()),
+                .with_init_calldata(array![OWNER().into(), Collection::TEST_CLASS_HASH].span()),
         ]
             .span()
     }
@@ -85,10 +82,8 @@ pub mod setup {
         world.sync_perms_and_inits(setup_contracts());
         // [Setup] Systems
         let (register_address, _) = world.dns(@"Register").unwrap();
-        let (tracker_address, _) = world.dns(@"Tracker").unwrap();
         let systems = Systems {
             register: IRegisterDispatcher { contract_address: register_address },
-            tracker: ITrackerDispatcher { contract_address: tracker_address },
         };
 
         // [Setup] Context

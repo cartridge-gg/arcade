@@ -1,9 +1,0 @@
-[server]
-http_addr = "0.0.0.0"
-http_port = 5050
-http_cors_origins = ["*"]
-
-[dev]
-seed = "0"
-dev = true
-no_fee = true

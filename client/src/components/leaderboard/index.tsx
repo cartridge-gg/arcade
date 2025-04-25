@@ -6,7 +6,7 @@ import {
 } from "@cartridge/ui-next";
 import { useCallback, useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel } from "@bal7hazar/arcade-sdk";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import {
@@ -20,7 +20,7 @@ import AchievementLeaderboardRow from "../modules/leaderboard-row";
 import { useAccount } from "@starknet-react/core";
 import ArcadeSubTabs, { SubTabValue } from "../modules/sub-tabs";
 
-export function Leaderboard({ game }: { game?: GameModel }) {
+export function Leaderboard({ edition }: { edition?: EditionModel }) {
   const [searchParams] = useSearchParams();
   const { isConnected, address } = useAccount();
   const { achievements, globals, players, usernames, isLoading, isError } =
@@ -37,12 +37,12 @@ export function Leaderboard({ game }: { game?: GameModel }) {
   const navigate = useNavigate();
 
   const gamePlayers = useMemo(() => {
-    return players[game?.config.project || ""] || [];
-  }, [players, game]);
+    return players[edition?.config.project || ""] || [];
+  }, [players, edition]);
 
   const gameAchievements = useMemo(() => {
-    return achievements[game?.config.project || ""] || [];
-  }, [achievements, game]);
+    return achievements[edition?.config.project || ""] || [];
+  }, [achievements, edition]);
 
   const handleClick = useCallback(
     (address: string) => {
@@ -181,10 +181,10 @@ export function Leaderboard({ game }: { game?: GameModel }) {
   if (isLoading) return <LeaderboardLoading />;
 
   if (
-    (!!game && gameAchievements.length === 0) ||
+    (!!edition && gameAchievements.length === 0) ||
     Object.values(achievements).length === 0 ||
-    (!game && gamesData.all.length === 0) ||
-    (!!game && gameData.all.length === 0)
+    (!edition && gamesData.all.length === 0) ||
+    (!!edition && gameData.all.length === 0)
   ) {
     return <LeaderboardComingSoon />;
   }
@@ -210,7 +210,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
               value="all"
             >
               <AchievementLeaderboard className="h-full rounded">
-                {!game
+                {!edition
                   ? gamesData.all.map((item, index) => (
                       <AchievementLeaderboardRow
                         key={index}
@@ -244,7 +244,7 @@ export function Leaderboard({ game }: { game?: GameModel }) {
                 <LeaderboardEmpty />
               ) : (
                 <AchievementLeaderboard className="h-full rounded">
-                  {!game
+                  {!edition
                     ? gamesData.following.map((item, index) => (
                         <AchievementLeaderboardRow
                           key={index}

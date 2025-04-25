@@ -22,23 +22,30 @@ export interface ArcadeMenuButtonProps
   extends HTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof arcadeMenuButtonVariants> {
   active?: boolean;
+  simplified?: boolean;
   className?: string;
 }
 
 export const ArcadeMenuButton = React.forwardRef<
   HTMLButtonElement,
   ArcadeMenuButtonProps
->(({ active, variant, size, className, children, ...props }, ref) => {
-  return (
-    <SelectTrigger
-      data-active={active}
-      className={cn(arcadeMenuButtonVariants({ variant, size }), className)}
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </SelectTrigger>
-  );
-});
+>(
+  (
+    { active, variant, size, className, children, simplified, ...props },
+    ref,
+  ) => {
+    return (
+      <SelectTrigger
+        data-active={active}
+        simplified={simplified}
+        className={cn(arcadeMenuButtonVariants({ variant, size }), className)}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </SelectTrigger>
+    );
+  },
+);
 
 export default ArcadeMenuButton;

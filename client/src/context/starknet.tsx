@@ -10,7 +10,7 @@ import {
   ProviderOptions,
 } from "@cartridge/controller";
 import { getSocialPolicies, getRegistryPolicies } from "@bal7hazar/arcade-sdk";
-import { ERC20_ADDRESSES } from "@/constants";
+import { DEFAULT_PRESET, DEFAULT_PROJECT, ERC20_ADDRESSES } from "@/constants";
 
 const chainId = constants.StarknetChainId.SN_MAIN;
 
@@ -24,8 +24,8 @@ const keychain: KeychainOptions = {
 };
 
 const profile: ProfileOptions = {
-  preset: "cartridge",
-  slot: "arcade",
+  preset: DEFAULT_PRESET,
+  slot: DEFAULT_PROJECT,
   tokens: {
     erc20: ERC20_ADDRESSES,
   },

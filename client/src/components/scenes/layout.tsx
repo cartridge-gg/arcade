@@ -1,24 +1,15 @@
 import { Header } from "@/components/header";
 import { useEffect, useMemo, useState } from "react";
-import { useArcade } from "@/hooks/arcade";
-import { useProject } from "@/hooks/project";
-import { GameModel } from "@bal7hazar/arcade-sdk";
 import banner from "@/assets/banner.png";
+import { useTheme } from "@/hooks/context";
 
 export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
-  const { games } = useArcade();
-  const { project, namespace } = useProject();
+  const { cover } = useTheme();
   const [currentBanner, setCurrentBanner] = useState<string>(banner);
   const [transitioningOut, setTransitioningOut] = useState(false);
   const [transitioningIn, setTransitioningIn] = useState(false);
 
-  const game: GameModel | undefined = useMemo(() => {
-    return Object.values(games).find(
-      (game) => game.namespace === namespace && game.config.project === project,
-    );
-  }, [games, project, namespace]);
-
-  const targetBanner = useMemo(() => game?.metadata.banner ?? banner, [game]);
+  const targetBanner = useMemo(() => cover ?? banner, [cover]);
 
   useEffect(() => {
     if (targetBanner !== currentBanner) {

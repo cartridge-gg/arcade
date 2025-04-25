@@ -2,7 +2,7 @@
 name = "Cartridge World"
 description = "Cartridge World"
 website = "https://github.com/dojoengine/dojo-starter"
-seed = "Arcade-3"
+seed = "Arcade-10"
 
 [world.socials]
 x = "https://x.com/ohayo_dojo"
@@ -16,6 +16,7 @@ default = "ARCADE"
 [init_call_args]
 "ARCADE-Registry" = [
     "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b",
+    "0x061ad918e9b69991bbf1e01021d4ce1629e36eb58bd2d00eef04eeb3b98edba1",
 ]
 
 [writers]
@@ -24,8 +25,8 @@ default = "ARCADE"
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/mainnet"
 account_address = "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b"
-world_address = "0x065613bd4a3b58ebe84abed13a67ff9eaa1de29a640cb6598da54207a5551d87"
-world_block = 1287600
+world_address = "0x016a472932cf1e83ae09de48a9165f88b15da71f43c5252720fc53a7cafaecb7"
+# world_block = 1339026
 ipfs_config.url = "https://ipfs.infura.io:5001"
 ipfs_config.username = "2EBrzr7ZASQZKH32sl2xWauXPSA"
 ipfs_config.password = "12290b883db9138a8ae3363b6739d220"

@@ -7,8 +7,10 @@ use dojo::model::ModelStorage;
 // Models imports
 
 use registry::models::access::Access;
-use registry::models::achievement::Achievement;
-use registry::models::game::Game;
+use registry::models::collection::Collection;
+use registry::models::game::{Game, GameTrait};
+use registry::models::edition::{Edition, EditionTrait};
+use registry::models::unicity::{Unicity, UnicityTrait};
 
 // Structs
 
@@ -32,14 +34,22 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn get_achievement(
-        self: Store, world_address: felt252, namespace: felt252, id: felt252,
-    ) -> Achievement {
-        self.world.read_model((world_address, namespace, id))
+    fn get_collection(self: Store, id: felt252) -> Collection {
+        self.world.read_model(id)
     }
 
     #[inline]
-    fn get_game(self: Store, world_address: felt252, namespace: felt252) -> Game {
+    fn get_game(self: Store, game_id: felt252) -> Game {
+        self.world.read_model(game_id)
+    }
+
+    #[inline]
+    fn get_edition(self: Store, edition_id: felt252) -> Edition {
+        self.world.read_model(edition_id)
+    }
+
+    #[inline]
+    fn get_unicity(self: Store, world_address: felt252, namespace: felt252) -> Unicity {
         self.world.read_model((world_address, namespace))
     }
 
@@ -49,8 +59,8 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn set_achievement(ref self: Store, achievement: @Achievement) {
-        self.world.write_model(achievement);
+    fn set_collection(ref self: Store, collection: @Collection) {
+        self.world.write_model(collection);
     }
 
     #[inline]
@@ -59,12 +69,30 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn delete_achievement(ref self: Store, achievement: @Achievement) {
-        self.world.erase_model(achievement);
+    fn set_edition(ref self: Store, edition: @Edition) {
+        self.world.write_model(edition);
     }
 
     #[inline]
-    fn delete_game(ref self: Store, game: @Game) {
-        self.world.erase_model(game);
+    fn set_unicity(ref self: Store, unicity: @Unicity) {
+        self.world.write_model(unicity);
+    }
+
+    #[inline]
+    fn delete_game(ref self: Store, ref game: Game) {
+        game.nullify();
+        self.world.erase_model(@game);
+    }
+
+    #[inline]
+    fn delete_edition(ref self: Store, ref edition: Edition) {
+        edition.nullify();
+        self.world.erase_model(@edition);
+    }
+
+    #[inline]
+    fn delete_unicity(ref self: Store, ref unicity: Unicity) {
+        unicity.nullify();
+        self.world.erase_model(@unicity);
     }
 }

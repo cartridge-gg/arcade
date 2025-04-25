@@ -16,6 +16,7 @@ default = "ARCADE"
 [init_call_args]
 "ARCADE-Registry" = [
     "0x6677fe62ee39c7b07401f754138502bab7fac99d2d3c5d37df7d1c6fab10819",
+    "0x061ad918e9b69991bbf1e01021d4ce1629e36eb58bd2d00eef04eeb3b98edba1",
 ]
 
 [writers]

@@ -11,7 +11,7 @@ sierra-replace-ids = true
 dev = "sozo clean && sozo build --typescript && sozo migrate plan && sozo migrate apply"
 
 [dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.0" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.2" }
 achievement = { path = ".." }
 controller = { path = ".." }
 provider = { path = ".." }
@@ -20,7 +20,7 @@ social = { path = ".." }
 starknet = "2.9.4"
 
 [dev-dependencies]
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.0" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.2" }
 cairo_test = "2.9.4"
 
 [[target.starknet-contract]]
@@ -35,14 +35,14 @@ build-external-contracts = [
     "provider::models::index::m_Team",
     "provider::models::index::m_Teammate",
     "registry::models::index::m_Access",
-    "registry::models::index::m_Achievement",
+    "registry::models::index::m_Collection",
     "registry::models::index::m_Game",
+    "registry::models::index::m_Edition",
+    "registry::models::index::m_Unicity",
     "social::models::index::m_Alliance",
     "social::models::index::m_Guild",
     "social::models::index::m_Member",
     "social::events::index::e_Follow",
 ]
 
-[profile.slot]
-[profile.sepolia]
 [profile.mainnet]

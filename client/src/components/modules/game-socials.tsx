@@ -38,11 +38,12 @@ interface GameSocialsProps
   extends HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof gameSocialsVariants> {
   socials?: {
-    website: string;
-    discord: string;
-    telegram: string;
-    twitter: string;
-    github: string;
+    website?: string;
+    discord?: string;
+    telegram?: string;
+    twitter?: string;
+    github?: string;
+    youtube?: string;
   };
 }
 

@@ -1,15 +1,15 @@
 import { initSDK } from "..";
 import { constants } from "starknet";
 import { Game, GameModel } from "./game";
-import { Achievement, AchievementModel } from "./achievement";
+import { Edition, EditionModel } from "./edition";
 import { ClauseBuilder, ParsedEntity, SDK, StandardizedQueryResult, ToriiQueryBuilder } from "@dojoengine/sdk";
 import { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { RegistryOptions, DefaultRegistryOptions } from "./options";
 
 export * from "./policies";
-export { GameModel, AchievementModel, RegistryOptions };
-export type RegistryModel = GameModel | AchievementModel;
+export { GameModel, EditionModel, RegistryOptions };
+export type RegistryModel = GameModel | EditionModel;
 
 export const Registry = {
   sdk: undefined as SDK<SchemaType> | undefined,
@@ -20,13 +20,13 @@ export const Registry = {
   },
 
   isEntityQueryable(options: RegistryOptions) {
-    return options.game || options.achievement;
+    return options.game || options.edition;
   },
 
   getEntityQuery: (options: RegistryOptions = DefaultRegistryOptions) => {
     const keys: `${string}-${string}`[] = [];
     if (options.game) keys.push(`${NAMESPACE}-${Game.getModelName()}`);
-    if (options.achievement) keys.push(`${NAMESPACE}-${Achievement.getModelName()}`);
+    if (options.edition) keys.push(`${NAMESPACE}-${Edition.getModelName()}`);
     const clauses = new ClauseBuilder().keys(keys, []);
     return new ToriiQueryBuilder<SchemaType>().withClause(clauses.build()).includeHashedKeys();
   },
@@ -40,8 +40,8 @@ export const Registry = {
       if (!entities) return;
       const models: RegistryModel[] = [];
       (entities as ParsedEntity<SchemaType>[]).forEach((entity: ParsedEntity<SchemaType>) => {
-        if (entity.models[NAMESPACE][Achievement.getModelName()]) {
-          models.push(Achievement.parse(entity));
+        if (entity.models[NAMESPACE][Edition.getModelName()]) {
+          models.push(Edition.parse(entity));
         }
         if (entity.models[NAMESPACE][Game.getModelName()]) {
           models.push(Game.parse(entity));
@@ -74,9 +74,9 @@ export const Registry = {
       if (!data || data.length === 0 || BigInt((data[0] as ParsedEntity<SchemaType>).entityId) === 0n) return;
       const entity = (data as ParsedEntity<SchemaType>[])[0];
       const eraseable = !entity.models[NAMESPACE];
-      if (!!entity.models[NAMESPACE]?.[Achievement.getModelName()] || eraseable) {
-        const achievement = Achievement.parse(entity);
-        callback([achievement]);
+      if (!!entity.models[NAMESPACE]?.[Edition.getModelName()] || eraseable) {
+        const edition = Edition.parse(entity);
+        callback([edition]);
       }
       if (!!entity.models[NAMESPACE]?.[Game.getModelName()] || eraseable) {
         const game = Game.parse(entity);

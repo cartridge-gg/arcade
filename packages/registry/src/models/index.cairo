@@ -10,32 +10,68 @@ pub struct Access {
 
 #[derive(Clone, Drop, Serde)]
 #[dojo::model]
+pub struct Collection {
+    #[key]
+    pub id: felt252,
+    pub uuid: felt252,
+    pub contract_address: starknet::ContractAddress,
+}
+
+#[derive(Clone, Drop, Serde)]
+#[dojo::model]
 pub struct Game {
     #[key]
-    pub world_address: felt252,
+    pub id: felt252,
+    // Arcade registry
+    pub published: bool,
+    pub whitelisted: bool,
+    // OpenSea standard metadata
+    pub color: ByteArray,
+    pub image: ByteArray,
+    pub image_data: ByteArray,
+    pub external_url: ByteArray,
+    pub description: ByteArray,
+    pub name: ByteArray,
+    pub animation_url: ByteArray,
+    pub youtube_url: ByteArray,
+    pub attributes: ByteArray,
+    pub properties: ByteArray,
+    pub socials: ByteArray,
+}
+
+#[derive(Clone, Drop, Serde)]
+#[dojo::model]
+pub struct Edition {
     #[key]
+    pub id: felt252,
+    pub world_address: felt252,
     pub namespace: felt252,
-    pub active: bool,
+    // Arcade registry
     pub published: bool,
     pub whitelisted: bool,
     pub priority: u8,
-    pub points: u16,
+    pub game_id: felt252,
     pub config: ByteArray,
-    pub metadata: ByteArray,
+    // OpenSea standard metadata
+    pub color: ByteArray,
+    pub image: ByteArray,
+    pub image_data: ByteArray,
+    pub external_url: ByteArray,
+    pub description: ByteArray,
+    pub name: ByteArray,
+    pub animation_url: ByteArray,
+    pub youtube_url: ByteArray,
+    pub attributes: ByteArray,
+    pub properties: ByteArray,
     pub socials: ByteArray,
-    pub owner: felt252,
 }
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Clone, Drop, Serde)]
 #[dojo::model]
-pub struct Achievement {
+pub struct Unicity {
     #[key]
     pub world_address: felt252,
     #[key]
     pub namespace: felt252,
-    #[key]
-    pub id: felt252,
-    pub published: bool,
-    pub whitelisted: bool,
-    pub points: u16,
+    pub token_id: felt252,
 }

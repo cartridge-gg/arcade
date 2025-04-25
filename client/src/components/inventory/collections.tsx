@@ -2,7 +2,7 @@ import { CollectibleAsset } from "@cartridge/ui-next";
 import { useCollections } from "@/hooks/collections";
 import { useArcade } from "@/hooks/arcade";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel } from "@bal7hazar/arcade-sdk";
 import placeholder from "@/assets/placeholder.svg";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
@@ -10,7 +10,7 @@ import { Chain, mainnet } from "@starknet-react/chains";
 import { Collection } from "@/context/collection";
 
 export const Collections = () => {
-  const { games, chains } = useArcade();
+  const { editions, chains } = useArcade();
   const { collections, status } = useCollections();
 
   switch (status) {
@@ -25,7 +25,7 @@ export const Collections = () => {
             <Item
               key={collection.address}
               collection={collection}
-              games={games}
+              editions={editions}
               chains={chains}
             />
           ))}
@@ -37,33 +37,26 @@ export const Collections = () => {
 
 function Item({
   collection,
-  games,
+  editions,
   chains,
 }: {
   collection: Collection;
-  games: GameModel[];
+  editions: EditionModel[];
   chains: Chain[];
 }) {
   const { connector } = useAccount();
   const [username, setUsername] = useState<string>("");
 
-  const game = useMemo(() => {
-    return games.find((game) =>
-      collection.imageUrl.includes(game.config.project),
-    );
-  }, [games, collection]);
-
   const chain: Chain = useMemo(() => {
+    const edition = editions.find(
+      (edition) => edition.config.project === collection.project,
+    );
     return (
       chains.find(
-        (chain) => chain.rpcUrls.default.http[0] === game?.config.rpc,
+        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
       ) || mainnet
     );
-  }, [chains, game]);
-
-  const slot = useMemo(() => {
-    return game?.config.project;
-  }, [game]);
+  }, [chains]);
 
   useEffect(() => {
     async function fetch() {
@@ -79,13 +72,13 @@ function Item({
   }, [connector]);
 
   const handleClick = useCallback(async () => {
-    if (!username || !slot) return;
+    if (!username) return;
     const controller = (connector as ControllerConnector)?.controller;
     if (!controller) {
       console.error("Connector not initialized");
       return;
     }
-    const path = `account/${username}/slot/${slot}/inventory/collection/${collection.address}?ps=${slot}`;
+    const path = `account/${username}/slot/${collection.project}/inventory/collection/${collection.address}?ps=${collection.project}`;
     controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
     controller.openProfileAt(path);
   }, [collection.address, username, connector]);
@@ -94,7 +87,10 @@ function Item({
     <div className="w-full group select-none">
       <CollectibleAsset
         title={collection.name}
-        image={collection.imageUrl || placeholder}
+        image={
+          collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
+          placeholder
+        }
         count={collection.totalCount}
         onClick={handleClick}
       />

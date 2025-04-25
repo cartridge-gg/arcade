@@ -1,19 +1,22 @@
-import { createContext, useState, ReactNode, useMemo } from "react";
+import { createContext, useState, ReactNode, useEffect, useMemo } from "react";
+import { useArcade } from "@/hooks/arcade";
+import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { useSearchParams } from "react-router-dom";
 
 type ProjectContextType = {
-  isReady: boolean;
+  gameId: number;
   project: string;
   namespace: string;
-  indexerUrl: string;
+  setGameId: (gameId: number) => void;
   setProject: (project: string) => void;
   setNamespace: (namespace: string) => void;
 };
 
 const initialState: ProjectContextType = {
-  isReady: false,
-  project: "arcade",
+  gameId: 0,
+  project: "",
   namespace: "",
-  indexerUrl: "",
+  setGameId: () => {},
   setProject: () => {},
   setNamespace: () => {},
 };
@@ -21,25 +24,63 @@ const initialState: ProjectContextType = {
 export const ProjectContext = createContext<ProjectContextType>(initialState);
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
+  const [gameId, setGameId] = useState<number>(initialState.gameId);
   const [project, setProject] = useState<string>(initialState.project);
   const [namespace, setNamespace] = useState<string>(initialState.namespace);
 
-  const indexerUrl = useMemo(() => {
-    if (!project) return "";
-    return `https://api.cartridge.gg/x/${project}/torii`;
-  }, [project]);
+  const [searchParams] = useSearchParams();
+  const { games, editions } = useArcade();
 
-  const isReady = useMemo(() => {
-    return !!indexerUrl;
-  }, [indexerUrl]);
+  const {
+    game,
+    edition,
+  }: { game: GameModel | undefined; edition: EditionModel | undefined } =
+    useMemo(() => {
+      const newGame = games.find(
+        (game) => game.id.toString() === searchParams.get("game"),
+      );
+      if (!newGame) return { game: undefined, edition: undefined };
+      const newEdition = editions.find(
+        (edition) => edition.id.toString() === searchParams.get("edition"),
+      );
+      if (newEdition) return { game: newGame, edition: newEdition };
+      const gameEditions = editions.filter(
+        (edition) => edition.gameId === newGame.id,
+      );
+      if (gameEditions.length === 0)
+        return { game: newGame, edition: undefined };
+      const defaultEdition = gameEditions
+        .sort((a, b) => a.id - b.id)
+        .sort((a, b) => b.priority - a.priority)[0];
+      return { game: newGame, edition: defaultEdition };
+    }, [games, editions, searchParams]);
+
+  useEffect(() => {
+    if (game && edition) {
+      setGameId(game.id);
+      setProject(edition.config.project);
+      setNamespace(edition.namespace);
+      return;
+    }
+    if (game && !edition) {
+      setGameId(game.id);
+      setProject(initialState.project);
+      setNamespace(initialState.namespace);
+      return;
+    }
+    setGameId(initialState.gameId);
+    setProject(initialState.project);
+    setNamespace(initialState.namespace);
+    return;
+  }, [game, edition, setGameId, setProject, setNamespace]);
 
   return (
     <ProjectContext.Provider
       value={{
-        isReady,
+        gameId,
         project,
         namespace,
-        indexerUrl,
+        setGameId,
         setProject,
         setNamespace,
       }}

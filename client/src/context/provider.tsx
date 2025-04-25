@@ -25,8 +25,8 @@ export function Provider({ children }: PropsWithChildren) {
           <QueryClientProvider client={queryClient}>
             <ArcadeProvider>
               <StarknetProvider>
-                <ThemeProvider defaultScheme="system">
-                  <ProjectProvider>
+                <ProjectProvider>
+                  <ThemeProvider defaultScheme="dark">
                     <CollectionProvider>
                       <TokenProvider>
                         <ActivitiesProvider>
@@ -38,8 +38,8 @@ export function Provider({ children }: PropsWithChildren) {
                         </ActivitiesProvider>
                       </TokenProvider>
                     </CollectionProvider>
-                  </ProjectProvider>
-                </ThemeProvider>
+                  </ThemeProvider>
+                </ProjectProvider>
               </StarknetProvider>
             </ArcadeProvider>
           </QueryClientProvider>

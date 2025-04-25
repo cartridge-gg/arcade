@@ -1,9 +1,9 @@
 import { AchievementCard } from "@cartridge/ui-next";
 import { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { Socials } from "@bal7hazar/arcade-sdk";
 import { useArcade } from "@/hooks/arcade";
-import { constants, getChecksumAddress } from "starknet";
+import { constants } from "starknet";
 import { toast } from "sonner";
 import { useAccount } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
@@ -11,18 +11,16 @@ import ControllerConnector from "@cartridge/connector/controller";
 const HIDDEN_GROUP = "Hidden";
 
 export function Trophies({
-  address,
   achievements,
   softview,
   enabled,
-  game,
+  socials,
   pins,
 }: {
-  address: string;
   achievements: Item[];
   softview: boolean;
   enabled: boolean;
-  game: GameModel | undefined;
+  socials: Socials;
   pins: { [playerId: string]: string[] };
   earnings: number;
 }) {
@@ -52,25 +50,23 @@ export function Trophies({
         .map(([group, items]) => (
           <Group
             key={group}
-            address={address}
             group={group}
             items={items}
             softview={softview}
             enabled={enabled}
-            game={game}
+            socials={socials}
             pins={pins}
           />
         ))}
       <Group
         key={HIDDEN_GROUP}
-        address={address}
         group={HIDDEN_GROUP}
         items={(groups[HIDDEN_GROUP] || []).sort(
           (a, b) => a.earning - b.earning,
         )}
         softview={softview}
         enabled={enabled}
-        game={game}
+        socials={socials}
         pins={pins}
       />
     </div>
@@ -79,19 +75,17 @@ export function Trophies({
 
 function Group({
   group,
-  address,
   items,
   softview,
   enabled,
-  game,
+  socials,
   pins,
 }: {
   group: string;
-  address: string;
   items: Item[];
   softview: boolean;
   enabled: boolean;
-  game: GameModel | undefined;
+  socials: Socials;
   pins: { [playerId: string]: string[] };
 }) {
   const { account, connector } = useAccount();
@@ -133,8 +127,6 @@ function Group({
 
   const achievements = useMemo(() => {
     return items.map((item) => {
-      const pinned =
-        pins[getChecksumAddress(address)]?.includes(item.id) && item.completed;
       return {
         id: item.id,
         index: item.index,
@@ -149,24 +141,12 @@ function Group({
           tasks: item.tasks,
           timestamp: item.completed ? item.timestamp : undefined,
         },
-        pin:
-          softview || !item.completed
-            ? undefined
-            : {
-                pinned: pinned,
-                achievementId: item.id,
-                disabled: !pinned && !enabled,
-                onClick: handlePin,
-              },
         share:
-          softview ||
-          !item.completed ||
-          !game?.socials.website ||
-          !game?.socials.twitter
+          softview || !item.completed || !socials.website || !socials.twitter
             ? undefined
             : {
-                website: game?.socials.website,
-                twitter: game?.socials.twitter,
+                website: socials.website,
+                twitter: socials.twitter,
                 timestamp: item.timestamp,
                 points: item.earning,
                 difficulty: parseFloat(item.percentage),

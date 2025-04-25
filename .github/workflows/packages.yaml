@@ -5,7 +5,7 @@ on:
   pull_request:
 
 env:
-  DOJO_VERSION: v1.4.0
+  DOJO_VERSION: v1.4.2
   SCARB_VERSION: 2.9.4
   WORKING_DIRECTORY: ./packages
 

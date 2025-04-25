@@ -1,9 +1,10 @@
 export type RegistryOptions = {
   game?: boolean;
-  achievement?: boolean;
+  edition?: boolean;
+
 };
 
 export const DefaultRegistryOptions: RegistryOptions = {
   game: true,
-  achievement: true,
+  edition: true,
 };

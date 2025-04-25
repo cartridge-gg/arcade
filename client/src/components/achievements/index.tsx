@@ -2,7 +2,7 @@ import { LayoutContent, useMediaQuery } from "@cartridge/ui-next";
 import { useMemo } from "react";
 import { Trophies } from "./trophies";
 import { useArcade } from "@/hooks/arcade";
-import { GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel, GameModel, Socials } from "@bal7hazar/arcade-sdk";
 import { getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import { Item } from "@/helpers/achievements";
@@ -16,20 +16,26 @@ import AchievementSummary from "../modules/summary";
 import { useAddress } from "@/hooks/address";
 import { useNavigate } from "react-router-dom";
 
-export function Achievements({ game }: { game?: GameModel }) {
+export function Achievements({
+  game,
+  edition,
+}: {
+  game?: GameModel;
+  edition?: EditionModel;
+}) {
   const { address, isSelf } = useAddress();
   const { achievements, players, isLoading, isError } = useAchievements();
-  const { pins, games } = useArcade();
+  const { pins, editions } = useArcade();
 
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
   const gamePlayers = useMemo(() => {
-    return players[game?.config.project || ""] || [];
-  }, [players, game]);
+    return players[edition?.config.project || ""] || [];
+  }, [players, edition]);
 
   const gameAchievements = useMemo(() => {
-    return achievements[game?.config.project || ""] || [];
-  }, [achievements, game]);
+    return achievements[edition?.config.project || ""] || [];
+  }, [achievements, edition]);
 
   const { pinneds } = useMemo(() => {
     const ids = pins[getChecksumAddress(address)] || [];
@@ -50,16 +56,20 @@ export function Achievements({ game }: { game?: GameModel }) {
     return { points };
   }, [address, gamePlayers]);
 
-  const filteredGames = useMemo(() => {
-    return !game ? games : [game];
-  }, [games, game]);
+  const filteredEditions = useMemo(() => {
+    return !edition ? editions : [edition];
+  }, [editions, edition]);
+
+  const socials = useMemo(() => {
+    return Socials.merge(game?.socials, edition?.socials);
+  }, [game, edition]);
 
   if (isError) return <AchievementsError />;
 
   if (isLoading) return <AchievementsLoading />;
 
   if (
-    (!!game && gameAchievements.length === 0) ||
+    (!!edition && gameAchievements.length === 0) ||
     Object.values(achievements).length === 0
   ) {
     return <AchievementsComingSoon />;
@@ -74,27 +84,26 @@ export function Achievements({ game }: { game?: GameModel }) {
         >
           <div className="flex flex-col gap-3 lg:gap-4 py-3 lg:py-6">
             <div className="flex flex-col gap-y-3 lg:gap-y-4">
-              {filteredGames.map((item, index) => (
-                <GameRow
+              {filteredEditions.map((item, index) => (
+                <Row
                   key={index}
                   address={address}
-                  game={item}
+                  edition={item}
                   achievements={achievements}
                   pins={pins}
-                  background={filteredGames.length > 1}
-                  header={!game || isMobile}
-                  variant={!game ? "default" : "dark"}
+                  background={filteredEditions.length > 1}
+                  header={!edition || isMobile}
+                  variant={!edition ? "default" : "dark"}
                 />
               ))}
             </div>
 
-            {game && (
+            {edition && (
               <Trophies
-                address={address}
                 achievements={gameAchievements}
                 softview={!isSelf}
                 enabled={pinneds.length < 3}
-                game={game}
+                socials={socials}
                 pins={pins}
                 earnings={gamePoints}
               />
@@ -106,9 +115,9 @@ export function Achievements({ game }: { game?: GameModel }) {
   );
 }
 
-export function GameRow({
+export function Row({
   address,
-  game,
+  edition,
   achievements,
   pins,
   background,
@@ -116,16 +125,16 @@ export function GameRow({
   variant,
 }: {
   address: string;
-  game: GameModel;
-  achievements: { [game: string]: Item[] };
+  edition: EditionModel;
+  achievements: { [edition: string]: Item[] };
   pins: { [playerId: string]: string[] };
   background: boolean;
   header: boolean;
   variant: "default" | "dark";
 }) {
   const gameAchievements = useMemo(() => {
-    return achievements[game?.config.project || ""] || [];
-  }, [achievements, game]);
+    return achievements[edition?.config.project || ""] || [];
+  }, [achievements, edition]);
 
   const { pinneds } = useMemo(() => {
     const ids = pins[getChecksumAddress(address)] || [];
@@ -162,18 +171,18 @@ export function GameRow({
         };
       }),
       metadata: {
-        name: game?.metadata.name || "Game",
-        logo: game?.metadata.image,
-        cover: background ? game?.metadata.banner : banner,
+        name: edition?.name || "Game",
+        logo: edition?.properties.icon,
+        cover: background ? edition?.properties.banner : banner,
       },
-      socials: { ...game?.socials },
+      socials: { ...edition?.socials },
       onClick: () => {
         const url = new URL(window.location.href);
-        url.searchParams.set("game", game.metadata.name);
+        url.searchParams.set("edition", edition.id.toString());
         navigate(url.toString().replace(window.location.origin, ""));
       },
     };
-  }, [gameAchievements, game, pinneds, background, navigate]);
+  }, [gameAchievements, edition, pinneds, background, navigate]);
 
   return (
     <div className="rounded-lg overflow-hidden">
@@ -182,7 +191,7 @@ export function GameRow({
         variant={variant}
         active
         header={header}
-        color={game.metadata.color}
+        color={edition.color}
       />
     </div>
   );

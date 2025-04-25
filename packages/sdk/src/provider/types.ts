@@ -35,13 +35,14 @@ export enum TransactionType {
   WHITELIST_GAME = "whitelist_game",
   BLACKLIST_GAME = "blacklist_game",
   REMOVE_GAME = "remove_game",
-  REGISTER_ACHIEVEMENT = "register_achievement",
-  UPDATE_ACHIEVEMENT = "update_achievement",
-  PUBLISH_ACHIEVEMENT = "publish_achievement",
-  HIDE_ACHIEVEMENT = "hide_achievement",
-  WHITELIST_ACHIEVEMENT = "whitelist_achievement",
-  BLACKLIST_ACHIEVEMENT = "blacklist_achievement",
-  REMOVE_ACHIEVEMENT = "remove_achievement",
+  REGISTER_EDITION = "register_edition",
+  UPDATE_EDITION = "update_edition",
+  PRIORITIZE_EDITION = "prioritize_edition",
+  PUBLISH_EDITION = "publish_edition",
+  HIDE_EDITION = "hide_edition",
+  WHITELIST_EDITION = "whitelist_edition",
+  BLACKLIST_EDITION = "blacklist_edition",
+  REMOVE_EDITION = "remove_edition",
 
   // Slot transactions
   DEPLOY = "deploy",
@@ -142,87 +143,118 @@ export interface RegistryRegisterGameProps {
   project: ByteArray;
   rpc: ByteArray;
   policies: ByteArray;
-  metadata: ByteArray;
-  socials: ByteArray;
+  color: ByteArray;
+  game_image: ByteArray;
+  edition_image: ByteArray;
+  external_url: ByteArray;
+  description: ByteArray;
+  game_name: ByteArray;
+  edition_name: ByteArray;
+  game_attributes: ByteArray;
+  edition_attributes: ByteArray;
+  animation_url: ByteArray;
+  youtube_url: ByteArray;
+  properties: ByteArray;
+  game_socials: ByteArray;
+  edition_socials: ByteArray;
 }
 
 export interface RegistryUpdateGameProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  project: ByteArray;
-  rpc: ByteArray;
-  policies: ByteArray;
-  metadata: ByteArray;
+  gameId: BigNumberish;
+  color: ByteArray;
+  image: ByteArray;
+  image_data: ByteArray;
+  external_url: ByteArray;
+  description: ByteArray;
+  name: ByteArray;
+  attributes: ByteArray;
+  animation_url: ByteArray;
+  youtube_url: ByteArray;
+  properties: ByteArray;
   socials: ByteArray;
 }
 
 export interface RegistryPublishGameProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
+  gameId: BigNumberish;
 }
 
 export interface RegistryHideGameProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
+  gameId: BigNumberish;
 }
 
 export interface RegistryWhitelistGameProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
+  gameId: BigNumberish;
 }
 
 export interface RegistryBlacklistGameProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
+  gameId: BigNumberish;
 }
 
 export interface RegistryRemoveGameProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
+  gameId: BigNumberish;
 }
 
-export interface RegistryRegisterAchievementProps {
+export interface RegistryRegisterEditionProps {
   worldAddress: BigNumberish;
   namespace: BigNumberish;
-  identifier: BigNumberish;
-  points: BigNumberish;
+  gameId: BigNumberish;
+  project: ByteArray;
+  rpc: ByteArray;
+  policies: ByteArray;
+  color: ByteArray;
+  image: ByteArray;
+  image_data: ByteArray;
+  external_url: ByteArray;
+  description: ByteArray;
+  name: ByteArray;
+  attributes: ByteArray;
+  animation_url: ByteArray;
+  youtube_url: ByteArray;
+  properties: ByteArray;
+  socials: ByteArray;
 }
 
-export interface RegistryUpdateAchievementProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  identifier: BigNumberish;
-  points: BigNumberish;
+export interface RegistryUpdateEditionProps {
+  editionId: BigNumberish;
+  project: ByteArray;
+  rpc: ByteArray;
+  policies: ByteArray;
+  color: ByteArray;
+  image: ByteArray;
+  image_data: ByteArray;
+  external_url: ByteArray;
+  description: ByteArray;
+  name: ByteArray;
+  attributes: ByteArray;
+  animation_url: ByteArray;
+  youtube_url: ByteArray;
+  properties: ByteArray;
+  socials: ByteArray;
 }
 
-export interface RegistryPublishAchievementProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  identifier: BigNumberish;
+export interface RegistryPrioritizeEditionProps {
+  editionId: BigNumberish;
+  priority: BigNumberish;
 }
 
-export interface RegistryHideAchievementProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  identifier: BigNumberish;
+export interface RegistryPublishEditionProps {
+  editionId: BigNumberish;
 }
 
-export interface RegistryWhitelistAchievementProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  identifier: BigNumberish;
+export interface RegistryHideEditionProps {
+  editionId: BigNumberish;
 }
 
-export interface RegistryBlacklistAchievementProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  identifier: BigNumberish;
+export interface RegistryWhitelistEditionProps {
+  editionId: BigNumberish;
 }
 
-export interface RegistryRemoveAchievementProps {
-  worldAddress: BigNumberish;
-  namespace: BigNumberish;
-  identifier: BigNumberish;
+export interface RegistryBlacklistEditionProps {
+  editionId: BigNumberish;
+}
+
+export interface RegistryRemoveEditionProps {
+  editionId: BigNumberish;
 }
 
 export interface SlotDeployProps {

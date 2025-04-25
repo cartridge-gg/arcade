@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "packages/collection",
     "packages/controller",
     "packages/provider",
     "packages/registry",
@@ -15,8 +16,9 @@ version = "0.0.0"
 edition = "2024_07"
 
 [workspace.dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.0" }
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.0" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.2" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.4.2" }
+graffiti = { git = "https://github.com/rsodre/graffiti.git", rev = "url" }
 starknet = "2.9.4"
 cairo_test = "2.9.4"
 

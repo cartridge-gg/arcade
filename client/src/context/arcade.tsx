@@ -18,6 +18,7 @@ import {
   SocialOptions,
   RegistryOptions,
   FollowEvent,
+  EditionModel,
 } from "@bal7hazar/arcade-sdk";
 import {
   constants,
@@ -44,6 +45,7 @@ interface ArcadeContextType {
   pins: { [playerId: string]: string[] };
   follows: { [playerId: string]: string[] };
   games: GameModel[];
+  editions: EditionModel[];
   chains: Chain[];
   projects: ProjectProps[];
   setProjects: (projects: ProjectProps[]) => void;
@@ -65,6 +67,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const [pins, setPins] = useState<{ [playerId: string]: string[] }>({});
   const [follows, setFollows] = useState<{ [playerId: string]: string[] }>({});
   const [games, setGames] = useState<{ [gameId: string]: GameModel }>({});
+  const [editions, setEditions] = useState<{
+    [editionId: string]: EditionModel;
+  }>({});
   const [chains, setChains] = useState<Chain[]>([]);
   const [projects, setProjects] = useState<ProjectProps[]>([]);
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -72,16 +77,16 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     async function getChains() {
       const chains: Chain[] = await Promise.all(
-        Object.values(games).map(async (game) => {
-          const provider = new RpcProvider({ nodeUrl: game.config.rpc });
+        Object.values(editions).map(async (edition) => {
+          const provider = new RpcProvider({ nodeUrl: edition.config.rpc });
           const id = await provider.getChainId();
           return {
             id: BigInt(id),
             name: shortString.decodeShortString(id),
             network: id,
             rpcUrls: {
-              default: { http: [game.config.rpc] },
-              public: { http: [game.config.rpc] },
+              default: { http: [edition.config.rpc] },
+              public: { http: [edition.config.rpc] },
             },
             nativeCurrency: {
               address: "0x0",
@@ -99,7 +104,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       setChains(uniques);
     }
     getChains();
-  }, [games]);
+  }, [editions]);
 
   if (currentValue) {
     throw new Error("ArcadeProvider can only be used once");
@@ -173,26 +178,37 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [handlePinEvent, handleFollowEvent],
   );
 
-  const handleGameModels = useCallback((models: RegistryModel[]) => {
+  const handleRegistryModels = useCallback((models: RegistryModel[]) => {
     models.forEach(async (model: RegistryModel) => {
-      if (!GameModel.isType(model as GameModel)) return;
-      const game = model as GameModel;
-      const torii = `https://api.cartridge.gg/x/${game.config.project}/torii`;
-      const response = await fetch(torii);
-      const data = await response.json();
-      if (!data.success) return;
-      if (!game.exists()) {
-        setGames((prevGames) => {
-          const newGames = { ...prevGames };
-          delete newGames[game.identifier];
-          return newGames;
-        });
-        return;
+      if (GameModel.isType(model as GameModel)) {
+        const game = model as GameModel;
+        if (!game.exists()) {
+          setGames((prevGames) => {
+            const newGames = { ...prevGames };
+            delete newGames[game.identifier];
+            return newGames;
+          });
+          return;
+        }
+        setGames((prevGames) => ({
+          ...prevGames,
+          [game.identifier]: game,
+        }));
+      } else if (EditionModel.isType(model as EditionModel)) {
+        const edition = model as EditionModel;
+        if (!edition.exists()) {
+          setEditions((prevEditions) => {
+            const newEditions = { ...prevEditions };
+            delete newEditions[edition.identifier];
+            return newEditions;
+          });
+          return;
+        }
+        setEditions((prevEditions) => ({
+          ...prevEditions,
+          [edition.identifier]: edition,
+        }));
       }
-      setGames((prevGames) => ({
-        ...prevGames,
-        [game.identifier]: game,
-      }));
     });
   }, []);
 
@@ -218,19 +234,27 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!initialized) return;
-    const options: RegistryOptions = { game: true };
-    Registry.fetch(handleGameModels, options);
-    Registry.sub(handleGameModels, options);
+    const options: RegistryOptions = { game: true, edition: true };
+    Registry.fetch(handleRegistryModels, options);
+    Registry.sub(handleRegistryModels, options);
     return () => {
       Registry.unsub();
     };
-  }, [initialized, handleGameModels]);
+  }, [initialized, handleRegistryModels]);
 
   const sortedGames = useMemo(() => {
-    return Object.values(games).sort((a, b) =>
-      a.metadata.name.localeCompare(b.metadata.name),
-    );
+    return Object.values(games).sort((a, b) => a.name.localeCompare(b.name));
   }, [games]);
+
+  const sortedEditions = useMemo(() => {
+    return Object.values(editions)
+      .sort((a, b) => a.priority - b.priority)
+      .sort((a, b) => {
+        const gameA = sortedGames.find((game) => game.id === a.gameId);
+        const gameB = sortedGames.find((game) => game.id === b.gameId);
+        return gameA?.name.localeCompare(gameB?.name || "") || 0;
+      });
+  }, [editions, sortedGames]);
 
   return (
     <ArcadeContext.Provider
@@ -240,6 +264,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         pins,
         follows,
         games: sortedGames,
+        editions: sortedEditions,
         chains,
         projects,
         setProjects,

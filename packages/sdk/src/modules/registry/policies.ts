@@ -3,12 +3,12 @@ import { configs } from "../../configs";
 import { NAMESPACE } from "../../constants";
 import { getContractByName } from "../../provider/helpers";
 import { Game } from "./game";
-import { Achievement } from "./achievement";
+import { Edition } from "./edition";
 import { DefaultRegistryOptions, RegistryOptions } from "./options";
 
 const CONTRACT_NAME = "Registry";
 const CONTRACT_TAG = `${NAMESPACE}-${CONTRACT_NAME}`;
-const CONTRACT_DESCRIPTION = "Registry contract for games and achievements";
+const CONTRACT_DESCRIPTION = "Registry contract for games and editions";
 
 export const getRegistryPolicies = (
   chainId: constants.StarknetChainId,
@@ -21,7 +21,7 @@ export const getRegistryPolicies = (
       [address]: {
         name: CONTRACT_NAME,
         description: CONTRACT_DESCRIPTION,
-        methods: [...(options.game ? Game.getMethods() : []), ...(options.achievement ? Achievement.getMethods() : [])],
+        methods: [...(options.game ? Game.getMethods() : []), ...(options.edition ? Edition.getMethods() : [])],
       },
     },
   };

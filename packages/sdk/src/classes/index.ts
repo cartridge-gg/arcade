@@ -1,2 +1,4 @@
-export * from "./metadata";
+export * from "./config";
+export * from "./attributes";
+export * from "./properties";
 export * from "./socials";
