@@ -23,7 +23,7 @@ export const useOwnerships = () => {
     );
   }
 
-  const { collection, refetch, status } = context;
+  const { collection, status } = context;
 
   const ownerships: { [key: string]: boolean } = useMemo(() => {
     if (!collection) return {};
@@ -38,5 +38,5 @@ export const useOwnerships = () => {
     return ownerships;
   }, [collection, project]);
 
-  return { ownerships, status, refetch };
+  return { ownerships, status };
 };

@@ -41,6 +41,7 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
     {
       queryKey: ["collections", projects, offset, address],
       enabled: projects.length > 0 && !!address,
+      refetchOnWindowFocus: true,
       onSuccess: ({ collections }) => {
         const newCollections: { [key: string]: Collection } = {};
         collections?.edges.forEach((e) => {

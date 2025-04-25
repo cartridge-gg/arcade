@@ -15,7 +15,6 @@ export type Collection = {
 
 export type OwnershipContextType = {
   collection: Collection | undefined;
-  refetch: () => void;
   status: "success" | "error" | "idle" | "loading";
 };
 
@@ -28,7 +27,7 @@ export function OwnershipProvider({ children }: { children: ReactNode }) {
 
   const [collection, setCollection] = useState<Collection | undefined>();
 
-  const { status, refetch } = useCollectionsQuery(
+  const { status } = useCollectionsQuery(
     {
       accountAddress: address ?? "",
       projects: [DEFAULT_PROJECT],
@@ -36,6 +35,7 @@ export function OwnershipProvider({ children }: { children: ReactNode }) {
     {
       queryKey: ["collections", address],
       enabled: !!address,
+      refetchOnWindowFocus: true,
       onSuccess: ({ collections }) => {
         const newCollections: Collection[] = collections?.edges.map((e) => {
           const contractAddress = e.node.meta.contractAddress;
@@ -68,7 +68,6 @@ export function OwnershipProvider({ children }: { children: ReactNode }) {
     <OwnershipContext.Provider
       value={{
         collection,
-        refetch,
         status,
       }}
     >
