@@ -1,8 +1,7 @@
 import { useContext, useMemo } from "react";
-import { CollectionContext } from "../context/collection";
 import { useProject } from "./project";
 import { useArcade } from "./arcade";
-import { DEFAULT_PROJECT } from "@/constants";
+import { OwnershipContext } from "@/context/ownership";
 
 /**
  * Custom hook to access the Ownerships context and account information.
@@ -14,22 +13,19 @@ import { DEFAULT_PROJECT } from "@/constants";
  * @throws {Error} If used outside of a CollectionProvider context
  */
 export const useOwnerships = () => {
-  const context = useContext(CollectionContext);
+  const context = useContext(OwnershipContext);
   const { games, editions } = useArcade();
   const { project } = useProject();
 
   if (!context) {
     throw new Error(
-      "The `useOwnerships` hook must be used within a `CollectionProvider`",
+      "The `useOwnerships` hook must be used within a `OwnershipProvider`",
     );
   }
 
-  const { collections: allCollections, status } = context;
+  const { collection, refetch, status } = context;
 
   const ownerships: { [key: string]: boolean } = useMemo(() => {
-    const collection = allCollections.find((collection) =>
-      collection.imageUrl.includes(DEFAULT_PROJECT),
-    );
     if (!collection) return {};
     const tokenIds = collection.tokenIds.map((tokenId) => BigInt(tokenId));
     const editionIds = editions.map((edition) => BigInt(edition.id));
@@ -40,7 +36,7 @@ export const useOwnerships = () => {
       ownerships[id.toString()] = tokenIds.includes(id);
     });
     return ownerships;
-  }, [allCollections, project]);
+  }, [collection, project]);
 
-  return { ownerships, status };
+  return { ownerships, status, refetch };
 };

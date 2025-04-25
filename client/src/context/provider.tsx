@@ -12,6 +12,7 @@ import { CollectionProvider } from "./collection";
 import { TokenProvider } from "./token";
 import { ActivitiesProvider } from "./activities";
 import { MetricsProvider } from "./metrics";
+import { OwnershipProvider } from "./ownership";
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
@@ -27,17 +28,19 @@ export function Provider({ children }: PropsWithChildren) {
               <StarknetProvider>
                 <ProjectProvider>
                   <ThemeProvider defaultScheme="dark">
-                    <CollectionProvider>
-                      <TokenProvider>
-                        <ActivitiesProvider>
-                          <MetricsProvider>
-                            <AchievementProvider>
-                              {children}
-                            </AchievementProvider>
-                          </MetricsProvider>
-                        </ActivitiesProvider>
-                      </TokenProvider>
-                    </CollectionProvider>
+                    <OwnershipProvider>
+                      <CollectionProvider>
+                        <TokenProvider>
+                          <ActivitiesProvider>
+                            <MetricsProvider>
+                              <AchievementProvider>
+                                {children}
+                              </AchievementProvider>
+                            </MetricsProvider>
+                          </ActivitiesProvider>
+                        </TokenProvider>
+                      </CollectionProvider>
+                    </OwnershipProvider>
                   </ThemeProvider>
                 </ProjectProvider>
               </StarknetProvider>
