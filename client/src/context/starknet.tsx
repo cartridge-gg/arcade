@@ -29,6 +29,7 @@ const profile: ProfileOptions = {
   tokens: {
     erc20: ERC20_ADDRESSES,
   },
+  profileUrl: "http://localhost:3000"
 };
 
 export function StarknetProvider({ children }: PropsWithChildren) {
