@@ -31,8 +31,8 @@ dependencies = [
 
 [[package]]
 name = "dojo"
-version = "1.4.2"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.4.2#b5eabcf9dd0a552b6c871721cd08f8460f08aef1"
+version = "1.5.0"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.5.0#812f17c9c57fd057d0bf1e648a591ea0ca9ea718"
 dependencies = [
  "dojo_plugin",
 ]
@@ -40,15 +40,15 @@ dependencies = [
 [[package]]
 name = "dojo_cairo_test"
 version = "1.0.12"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.4.2#b5eabcf9dd0a552b6c871721cd08f8460f08aef1"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.5.0#812f17c9c57fd057d0bf1e648a591ea0ca9ea718"
 dependencies = [
  "dojo",
 ]
 
 [[package]]
 name = "dojo_plugin"
-version = "2.9.4"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.4.2#b5eabcf9dd0a552b6c871721cd08f8460f08aef1"
+version = "2.10.1"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.5.0#812f17c9c57fd057d0bf1e648a591ea0ca9ea718"
 
 [[package]]
 name = "graffiti"
