@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Empty,
   LayoutContent,
@@ -8,18 +8,18 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@bal7hazar/arcade-sdk";
-import { addAddressPadding, getChecksumAddress } from "starknet";
+import { getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import { Connect } from "../errors";
 import LeaderboardRow from "../modules/leaderboard-row";
 import { useAccount } from "@starknet-react/core";
-import ArcadeSubTabs, { SubTabValue } from "../modules/sub-tabs";
+import ArcadeSubTabs from "../modules/sub-tabs";
+import { joinPaths } from "@/helpers";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
 
 export function Leaderboard({ edition }: { edition?: EditionModel }) {
-  const [searchParams] = useSearchParams();
   const { isConnected, address } = useAccount();
   const { achievements, globals, players, usernames, isLoading, isError } =
     useAchievements();
@@ -44,32 +44,18 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     return achievements[edition?.config.project || ""] || [];
   }, [achievements, edition]);
 
+  const location = useLocation();
   const handleClick = useCallback(
-    (address: string) => {
+    (nameOrAddress: string) => {
       // On click, we update the url param address to the address of the player
-      const url = new URL(window.location.href);
-      url.searchParams.set("address", address);
-      url.searchParams.set("playerTab", "achievements");
-      navigate(url.toString().replace(window.location.origin, ""));
+      let pathname = location.pathname;
+      pathname = pathname.replace(/\/player\/[^/]+/, "");
+      pathname = pathname.replace(/\/tab\/[^/]+/, "");
+      const player = nameOrAddress.toLowerCase();
+      pathname = joinPaths(pathname, `/player/${player}/tab/achievements`);
+      navigate(pathname || "/");
     },
-    [searchParams, navigate],
-  );
-
-  const defaultValue = useMemo(() => {
-    // Default tab is ignored if there is no address,
-    // meanning the user is not connected and doesnt inspect another user
-    return searchParams.get("subTab") || "all";
-  }, [searchParams]);
-
-  const handleTabClick = useCallback(
-    (value: string) => {
-      // Clicking on a tab updates the url param tab to the value of the tab
-      // So the tab is persisted in the url and the user can update and share the url
-      const url = new URL(window.location.href);
-      url.searchParams.set("subTab", value);
-      navigate(url.toString().replace(window.location.origin, ""));
-    },
-    [navigate],
+    [location, navigate],
   );
 
   const gameData = useMemo(() => {
@@ -93,9 +79,9 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
           };
         });
       return {
-        address: player.address,
+        address: getChecksumAddress(player.address),
         name:
-          usernames[addAddressPadding(player.address)] ||
+          usernames[getChecksumAddress(player.address)] ||
           player.address.slice(0, 9),
         rank: index + 1,
         points: player.earnings,
@@ -132,9 +118,9 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     const data = globals.map((player, index) => {
       if (BigInt(player.address) === BigInt(address || "0x0")) rank = index + 1;
       return {
-        address: player.address,
+        address: getChecksumAddress(player.address),
         name:
-          usernames[addAddressPadding(player.address)] ||
+          usernames[getChecksumAddress(player.address)] ||
           player.address.slice(0, 9),
         rank: index + 1,
         points: player.earnings,
@@ -176,7 +162,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     const height = parent.clientHeight;
     const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
     if (newCap < cap) return;
-    setCap(newCap + 3);
+    setCap(newCap + 5);
   }, [parentRef, cap, setCap]);
 
   useEffect(() => {
@@ -189,7 +175,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
         parent.removeEventListener("scroll", handleScroll);
       }
     };
-  }, [cap, defaultValue, parentRef, handleScroll]);
+  }, [cap, parentRef, handleScroll]);
 
   useEffect(() => {
     // Reset scroll and cap on filter change
@@ -199,7 +185,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     const height = parent.clientHeight;
     const cap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
     setCap(cap);
-  }, [parentRef, edition, setCap, defaultValue]);
+  }, [parentRef, edition, setCap]);
 
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
@@ -207,12 +193,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
         className="p-0 pt-3 lg:pt-6 mt-0 h-full overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}
       >
-        <ArcadeSubTabs
-          tabs={["all", "following"]}
-          defaultValue={defaultValue as SubTabValue}
-          onTabClick={(tab: SubTabValue) => handleTabClick(tab)}
-          className="mb-3 lg:mb-4"
-        >
+        <ArcadeSubTabs tabs={["all", "following"]} className="mb-3 lg:mb-4">
           <div
             className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
             style={{ scrollbarWidth: "none" }}

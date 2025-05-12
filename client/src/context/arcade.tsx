@@ -47,8 +47,8 @@ interface ArcadeContextType {
   games: GameModel[];
   editions: EditionModel[];
   chains: Chain[];
-  projects: ProjectProps[];
-  setProjects: (projects: ProjectProps[]) => void;
+  player: string | undefined;
+  setPlayer: (address: string | undefined) => void;
 }
 
 /**
@@ -63,6 +63,7 @@ export const ArcadeContext = createContext<ArcadeContextType | null>(null);
  * @throws {Error} If ArcadeProvider is used more than once in the component tree
  */
 export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
+  const [player, setPlayer] = useState<string | undefined>();
   const currentValue = useContext(ArcadeContext);
   const [pins, setPins] = useState<{ [playerId: string]: string[] }>({});
   const [follows, setFollows] = useState<{ [playerId: string]: string[] }>({});
@@ -71,7 +72,6 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [editionId: string]: EditionModel;
   }>({});
   const [chains, setChains] = useState<Chain[]>([]);
-  const [projects, setProjects] = useState<ProjectProps[]>([]);
   const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
@@ -266,8 +266,8 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         games: sortedGames,
         editions: sortedEditions,
         chains,
-        projects,
-        setProjects,
+        player,
+        setPlayer,
       }}
     >
       {children}

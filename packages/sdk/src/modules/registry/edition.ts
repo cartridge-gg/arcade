@@ -1,5 +1,5 @@
 import { NAMESPACE } from "../../constants";
-import { shortString, addAddressPadding } from "starknet";
+import { shortString, getChecksumAddress } from "starknet";
 import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
 import { Config } from "../../classes/config";
@@ -57,7 +57,7 @@ export class EditionModel {
   static from(identifier: string, model: any) {
     if (!model) return EditionModel.default(identifier);
     const id = Number(model.id);
-    const worldAddress = addAddressPadding(model.world_address);
+    const worldAddress = getChecksumAddress(model.world_address);
     const namespace = shortString.decodeShortString(`0x${BigInt(model.namespace).toString(16)}`);
     const published = !!model.published;
     const whitelisted = !!model.whitelisted;

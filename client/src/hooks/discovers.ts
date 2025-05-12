@@ -13,7 +13,7 @@ import { DiscoversContext } from "@/context";
  */
 export const useDiscovers = () => {
   const context = useContext(DiscoversContext);
-  const { project } = useProject();
+  const { edition } = useProject();
 
   if (!context) {
     throw new Error(
@@ -24,10 +24,10 @@ export const useDiscovers = () => {
   const { discovers, aggregates, usernames, status } = context;
 
   const filteredDiscovers = useMemo(() => {
-    if (!project)
+    if (!edition)
       return Object.values(discovers).flatMap((activities) => activities);
-    return discovers[project];
-  }, [project, discovers]);
+    return discovers[edition.config.project];
+  }, [edition, discovers]);
 
   return {
     discovers: filteredDiscovers,

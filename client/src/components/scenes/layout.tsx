@@ -33,7 +33,7 @@ export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div
-      className="h-screen overflow-clip relative"
+      className="h-screen overflow-hidden relative"
       style={{
         scrollbarWidth: "none",
       }}
@@ -52,9 +52,10 @@ export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
         />
       </div>
       <div
-        className="relative flex flex-col items-center gap-y-px select-none h-full overflow-clip"
+        className="relative flex flex-col items-center gap-y-px select-none h-full overflow-hidden"
         style={{
           background: `linear-gradient(to top, var(--background-100) 50%, transparent 100%)`,
+          scrollbarWidth: "none",
         }}
       >
         <div className="w-full hidden lg:block">

@@ -1,5 +1,5 @@
 import { NAMESPACE } from "../../constants";
-import { addAddressPadding } from "starknet";
+import { getChecksumAddress } from "starknet";
 import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
 
@@ -22,8 +22,8 @@ export class FollowEvent {
 
   static from(identifier: string, model: any) {
     if (!model) return FollowEvent.default(identifier);
-    const follower = addAddressPadding(model.follower);
-    const followed = addAddressPadding(model.followed);
+    const follower = getChecksumAddress(model.follower);
+    const followed = getChecksumAddress(model.followed);
     const time = Number(model.time);
     return new FollowEvent(identifier, follower, followed, time);
   }

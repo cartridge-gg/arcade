@@ -5,7 +5,6 @@ import {
 } from "@cartridge/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
 import { constants, getChecksumAddress } from "starknet";
-import { useAddress } from "@/hooks/address";
 import { useAchievements } from "@/hooks/achievements";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/utils";
@@ -47,19 +46,17 @@ export const ActivitiesContext = createContext<ActivitiesContextType | null>(
 );
 
 export function ActivitiesProvider({ children }: { children: ReactNode }) {
-  const { games, editions } = useArcade();
-  const { address, isZero } = useAddress();
-  const { projects: slots } = useArcade();
+  const { games, editions, player: address } = useArcade();
 
   const projects = useMemo(() => {
-    return slots.map((slot) => {
+    return editions.map((edition) => {
       return {
-        project: slot.project,
-        address,
+        project: edition.config.project,
+        address: `0x${BigInt(address ?? "0x0").toString(16)}`,
         limit: 0,
       };
     });
-  }, [slots, address]);
+  }, [editions, address]);
 
   const { achievements } = useAchievements();
 
@@ -72,7 +69,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
     },
     {
       queryKey: ["transfers", address, projects],
-      enabled: !!address && !isZero && projects.length > 0,
+      enabled: !!address && projects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
@@ -83,13 +80,13 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
     },
     {
       queryKey: ["activities", address, projects],
-      enabled: !!address && !isZero && projects.length > 0,
+      enabled: !!address && projects.length > 0,
       refetchOnWindowFocus: false,
     },
   );
 
   const status = useMemo(() => {
-    return transfersStatus === "loading" && transactionsStatus === "loading"
+    return transfersStatus === "loading" || transactionsStatus === "loading"
       ? "loading"
       : transfersStatus === "error" || transactionsStatus === "error"
         ? "error"
@@ -100,7 +97,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
     const results: { [project: string]: CardProps[] } = {};
     transfers?.transfers?.items.forEach((item) => {
       item.transfers
-        .filter(({ tokenId }) => !tokenId)
+        .filter((transfer) => BigInt(transfer.tokenId) === 0n)
         .forEach((transfer) => {
           const value = `${(BigInt(transfer.amount) / BigInt(10 ** Number(transfer.decimals))).toString()} ${transfer.symbol}`;
           const timestamp = new Date(transfer.executedAt).getTime();
@@ -118,19 +115,19 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
             variant: "token",
             key: `${transfer.transactionHash}-${transfer.eventId}`,
             project: item.meta.project,
-            contractAddress: transfer.contractAddress,
-            transactionHash: transfer.transactionHash,
+            contractAddress: getChecksumAddress(transfer.contractAddress),
+            transactionHash: getChecksumAddress(transfer.transactionHash),
             amount: value,
             address:
-              BigInt(transfer.fromAddress) === BigInt(address)
-                ? transfer.toAddress
-                : transfer.fromAddress,
+              BigInt(transfer.fromAddress) === BigInt(address || "0x0")
+                ? getChecksumAddress(transfer.toAddress)
+                : getChecksumAddress(transfer.fromAddress),
             value: "$-",
             image: image || "",
             action:
               BigInt(transfer.fromAddress) === 0n
                 ? "mint"
-                : BigInt(transfer.fromAddress) === BigInt(address)
+                : BigInt(transfer.fromAddress) === BigInt(address || "0x0")
                   ? "send"
                   : "receive",
             timestamp: timestamp / 1000,
@@ -150,7 +147,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
     const results: { [project: string]: CardProps[] } = {};
     transfers?.transfers?.items.forEach((item) => {
       item.transfers
-        .filter(({ tokenId }) => !!tokenId)
+        .filter((transfer) => BigInt(transfer.tokenId) > 0n)
         .forEach((transfer) => {
           const timestamp = new Date(transfer.executedAt).getTime();
           const date = getDate(timestamp);
@@ -175,21 +172,21 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
             variant: "collectible",
             key: `${transfer.transactionHash}-${transfer.eventId}`,
             project: item.meta.project,
-            contractAddress: transfer.contractAddress,
-            transactionHash: transfer.transactionHash,
+            contractAddress: getChecksumAddress(transfer.contractAddress),
+            transactionHash: getChecksumAddress(transfer.transactionHash),
             name: name || "",
             collection: transfer.name,
             amount: "",
             address:
-              BigInt(transfer.fromAddress) === BigInt(address)
-                ? transfer.toAddress
-                : transfer.fromAddress,
+              BigInt(transfer.fromAddress) === BigInt(address || "0x0")
+                ? getChecksumAddress(transfer.toAddress)
+                : getChecksumAddress(transfer.fromAddress),
             value: "",
             image: metadata.image || "",
             action:
               BigInt(transfer.fromAddress) === 0n
                 ? "mint"
-                : BigInt(transfer.fromAddress) === BigInt(address)
+                : BigInt(transfer.fromAddress) === BigInt(address || "0x0")
                   ? "send"
                   : "receive",
             timestamp: timestamp / 1000,
@@ -222,9 +219,9 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
             variant: "game",
             key: `${transactionHash}-${entrypoint}`,
             project: item.meta.project,
-            contractAddress: contractAddress,
-            transactionHash: transactionHash,
-            title: entrypoint,
+            contractAddress: getChecksumAddress(contractAddress),
+            transactionHash: getChecksumAddress(transactionHash),
+            title: entrypoint.replace(/_/g, " "),
             image: game?.properties.icon || "",
             website: edition?.socials.website || "",
             certified: !!game,

@@ -9,7 +9,7 @@ import { useArcade } from "@/hooks/arcade";
 import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
 import { Register } from "./register";
 import { GameModel } from "@bal7hazar/arcade-sdk";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";
 import ArcadeGameSelect from "../modules/game-select";
@@ -18,20 +18,22 @@ import { cn } from "@cartridge/ui-next";
 import { Update } from "./update";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useAccount } from "@starknet-react/core";
+import { useProject } from "@/hooks/project";
+import { joinPaths } from "@/helpers";
 
 export const Games = () => {
   const { address } = useAccount();
   const [search, setSearch] = useState("");
   const { games } = useArcade();
+  const { game } = useProject();
   const { ownerships } = useOwnerships();
   const { isOpen, handleTouchStart, handleTouchMove } = useSidebar();
   const isMobile = useMediaQuery("(max-width: 1024px)");
   const isPWA = useMediaQuery("(display-mode: standalone)");
 
-  const [searchParams] = useSearchParams();
   const selected: number = useMemo(() => {
-    return Number(searchParams.get("game")) || 0;
-  }, [searchParams]);
+    return game?.id || 0;
+  }, [game]);
 
   const filteredGames = useMemo(() => {
     return games.filter((game) =>
@@ -158,18 +160,19 @@ export const Game = ({
   const { earnings: gameEarnings } = usePlayerGameStats(projects);
   const { close } = useSidebar();
 
+  const location = useLocation();
   const navigate = useNavigate();
   const handleClick = useCallback(() => {
     // Update the url params
-    const url = new URL(window.location.href);
-    // Update game id
-    url.searchParams.set("game", id.toString());
-    // Remove edition id
-    url.searchParams.delete("edition");
-    navigate(url.toString().replace(window.location.origin, ""));
+    let pathname = location.pathname;
+    const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || id}`;
+    pathname = pathname.replace(/\/game\/[^/]+/, "");
+    pathname = pathname.replace(/\/edition\/[^/]+/, "");
+    if (id !== 0) pathname = joinPaths(`/game/${gameName}`, pathname);
+    navigate(pathname || "/");
     // Close sidebar on mobile when a game is selected
     close();
-  }, [id, game, navigate, close]);
+  }, [game, location, navigate, close]);
 
   return (
     <div className="flex items-center gap-2">

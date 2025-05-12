@@ -44,8 +44,30 @@ const formSchema = z.object({
     .min(20)
     .max(66, { message: "World Address is required" }),
   namespace: z.string().min(2).max(31, { message: "Namespace is required" }),
-  project: z.string().min(2, { message: "Project is required" }),
-  rpc: z.string().min(2, { message: "RPC is required" }),
+  project: z
+    .string()
+    .min(2, { message: "Project is required" })
+    .refine(
+      async (val) => {
+        const response = await fetch(`https://api.cartridge.gg/x/${val}/torii`);
+        return !!response && response.status !== 404;
+      },
+      {
+        message: "Torii instance not found",
+      },
+    ),
+  rpc: z
+    .string()
+    .min(2, { message: "RPC is required" })
+    .refine(
+      async (val) => {
+        const response = await fetch(val);
+        return !!response && response.status !== 404;
+      },
+      {
+        message: "RPC cannot be reached",
+      },
+    ),
   policies: z.string().refine((val) => val.startsWith("{") || !val, {
     message: "Invalid Policies",
   }),
@@ -270,7 +292,7 @@ export function Register({
               <Topic label="Config" />
               <Field
                 name="project"
-                label="Project *"
+                label="Project (slot namespace) *"
                 placeholder="dojogame"
                 form={form}
               />

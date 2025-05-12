@@ -15,6 +15,7 @@ import { Token } from "@/context/token";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { EditionModel } from "@bal7hazar/arcade-sdk";
 import { useArcade } from "@/hooks/arcade";
+import { useProject } from "@/hooks/project";
 
 const DEFAULT_TOKENS_COUNT = 3;
 
@@ -26,10 +27,17 @@ interface TokensProps {
 
 export const Tokens = ({ tokens, credits }: TokensProps) => {
   const { editions, chains } = useArcade();
+  const { edition } = useProject();
   const [unfolded, setUnfolded] = useState(false);
 
+  useEffect(() => {
+    setUnfolded(false);
+  }, [edition]);
+
   const filteredTokens = useMemo(() => {
-    return tokens.filter((token) => token.balance.amount > 0);
+    return tokens
+      .filter((token) => token.balance.amount > 0)
+      .sort((a, b) => b.balance.value - a.balance.value);
   }, [tokens]);
 
   return (
@@ -127,16 +135,16 @@ function Item({
     const preset = edition?.properties.preset;
     let options = [];
     if (token.metadata.project && token.metadata.project !== "extra") {
-      options.push(`ps=${token.metadata.project}`);
+      options.push(`ps=${token.metadata.project}`, "closable=true");
     }
     if (preset) {
       options.push(`preset=${preset}`);
     } else {
       options.push(`preset=cartridge`);
     }
-    const path = `account/${username}/inventory/token/${token.metadata.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+    const path = `inventory/token/${token.metadata.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
     controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
-    controller.openProfileAt(path);
+    controller.openProfileTo(path);
   }, [token, username, connector, edition]);
 
   return (

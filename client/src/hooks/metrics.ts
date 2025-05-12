@@ -13,7 +13,7 @@ import { useProject } from "./project";
  */
 export const useMetrics = () => {
   const context = useContext(MetricsContext);
-  const { project } = useProject();
+  const { edition } = useProject();
 
   if (!context) {
     throw new Error(
@@ -24,9 +24,11 @@ export const useMetrics = () => {
   const { metrics: allMetrics, status } = context;
 
   const metrics = useMemo(() => {
-    if (!project) return allMetrics;
-    return allMetrics.filter((metric) => metric.project === project);
-  }, [project, allMetrics]);
+    if (!edition) return allMetrics;
+    return allMetrics.filter(
+      (metric) => metric.project === edition.config.project,
+    );
+  }, [edition, allMetrics]);
 
   return { metrics, status };
 };

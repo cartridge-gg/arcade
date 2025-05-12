@@ -1,17 +1,20 @@
 import {
   AchievementContentProps,
   AchievementPinProps,
-  CardTitle,
+  BranchIcon,
   cn,
   DojoIcon,
   Thumbnail,
+  VerifiedIcon,
 } from "@cartridge/ui-next";
 import { AchievementPinIcons } from "./achievement-pin-icons";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useMemo, useState } from "react";
 
 export interface Metadata {
-  name: string;
+  game: string;
+  edition: string;
+  certified: boolean;
   logo?: string;
   cover?: string;
 }
@@ -40,7 +43,7 @@ export interface ArcadeGameHeaderProps
 }
 
 export const arcadeGameHeaderVariants = cva(
-  "h-14 flex justify-between items-center p-3 gap-x-3 data-[clickable=true]:cursor-pointer",
+  "group h-14 flex justify-between items-center p-3 gap-x-3 data-[clickable=true]:cursor-pointer overflow-hidden",
   {
     variants: {
       variant: {
@@ -103,15 +106,27 @@ export const ArcadeGameHeader = ({
       }}
       {...props}
     >
-      <div className="flex items-center gap-3">
-        <Thumbnail
-          icon={metadata.logo ?? <DojoIcon className="w-full h-full" />}
-          variant={hover && clickable ? "lighter" : "light"}
-          size="md"
-        />
-        <CardTitle className="text-foreground-100 text-sm font-medium tracking-normal flex items-center whitespace-nowrap">
-          {metadata.name}
-        </CardTitle>
+      <div className="flex items-center gap-3 grow overflow-hidden">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <Thumbnail
+            icon={metadata.logo ?? <DojoIcon className="w-full h-full" />}
+            variant={hover && clickable ? "lighter" : "light"}
+            size="md"
+          />
+          <p className="text-foreground-100 text-sm font-medium whitespace-nowrap truncate">
+            {metadata.game}
+          </p>
+        </div>
+        <div className="text-foreground-300 border border-background-300 group-hover:border-background-400 rounded px-1.5 py-1 flex items-center ga-0.5">
+          {metadata.certified ? (
+            <VerifiedIcon size="xs" />
+          ) : (
+            <BranchIcon size="xs" />
+          )}
+          <p className="text-xs whitespace-nowrap px-0.5 truncate">
+            {metadata.edition}
+          </p>
+        </div>
       </div>
       {pins.length > 0 && (
         <AchievementPinIcons

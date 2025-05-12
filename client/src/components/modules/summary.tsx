@@ -4,13 +4,12 @@ import {
   AchievementProgress,
   Card,
   CardContent,
-  Metadata,
   Socials,
 } from "@cartridge/ui-next";
 import { AchievementPinIcons } from "./achievement-pin-icons";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useMemo } from "react";
-import ArcadeGameHeader from "./game-header";
+import ArcadeGameHeader, { Metadata } from "./game-header";
 import { cn } from "@/lib/utils";
 
 export interface AchievementSummaryProps

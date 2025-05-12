@@ -99,7 +99,7 @@ function Item({
     }
     if (!subpath) return;
     const preset = edition?.properties.preset;
-    let options = [`ps=${collection.project}`];
+    let options = [`ps=${collection.project}`, "closable=true"];
     if (preset) {
       options.push(`preset=${preset}`);
     } else {
@@ -120,7 +120,9 @@ function Item({
         }
         count={collection.totalCount}
         onClick={isSelf ? handleClick : undefined}
-        className="cursor-default"
+        className={
+          isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"
+        }
       />
     </div>
   );

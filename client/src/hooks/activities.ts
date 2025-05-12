@@ -13,7 +13,7 @@ import { ActivitiesContext } from "@/context";
  */
 export const useActivities = () => {
   const context = useContext(ActivitiesContext);
-  const { project } = useProject();
+  const { edition } = useProject();
 
   if (!context) {
     throw new Error(
@@ -24,7 +24,7 @@ export const useActivities = () => {
   const { erc20s, erc721s, actions, trophies, status } = context;
 
   const filteredActivities = useMemo(() => {
-    if (!project) {
+    if (!edition) {
       return [
         ...Object.values(erc20s).flatMap((activities) => activities),
         ...Object.values(erc721s).flatMap((activities) => activities),
@@ -33,12 +33,12 @@ export const useActivities = () => {
       ];
     }
     return [
-      ...(erc20s[project] || []),
-      ...(erc721s[project] || []),
-      ...(actions[project] || []),
-      ...(trophies[project] || []),
+      ...(erc20s[edition.config.project] || []),
+      ...(erc721s[edition.config.project] || []),
+      ...(actions[edition.config.project] || []),
+      ...(trophies[edition.config.project] || []),
     ];
-  }, [project, erc20s, erc721s, actions, trophies]);
+  }, [edition, erc20s, erc721s, actions, trophies]);
 
   const sortedActivities = useMemo(() => {
     return filteredActivities.sort((a, b) => b.timestamp - a.timestamp);

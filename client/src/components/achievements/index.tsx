@@ -14,7 +14,9 @@ import { Item } from "@/helpers/achievements";
 import banner from "@/assets/banner.png";
 import AchievementSummary from "../modules/summary";
 import { useAddress } from "@/hooks/address";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { joinPaths } from "@/helpers";
+import { useOwnerships } from "@/hooks/ownerships";
 
 export function Achievements({
   game,
@@ -26,6 +28,7 @@ export function Achievements({
   const { address, isSelf } = useAddress();
   const { achievements, players, isLoading, isError } = useAchievements();
   const { pins, games, editions } = useArcade();
+  const { ownerships } = useOwnerships();
 
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
@@ -64,6 +67,29 @@ export function Achievements({
     return Socials.merge(game?.socials, edition?.socials);
   }, [game, edition]);
 
+  const gameEditions = useMemo(() => {
+    if (!game) return [];
+    return editions.filter((edition) => edition.gameId === game.id);
+  }, [editions, game]);
+
+  const certifieds: { [key: string]: boolean } = useMemo(() => {
+    if (!game) return {};
+    const gameOwnership = ownerships.find(
+      (ownership) => ownership.tokenId === BigInt(game.id),
+    );
+    if (!gameOwnership) return {};
+    const values: { [key: string]: boolean } = {};
+    gameEditions.forEach((edition) => {
+      const ownership = ownerships.find(
+        (ownership) => ownership.tokenId === BigInt(edition.id),
+      );
+      if (!ownership) return;
+      values[edition.id] =
+        gameOwnership.accountAddress == ownership.accountAddress;
+    });
+    return values;
+  }, [gameEditions, game]);
+
   if (isError) return <EmptyState />;
 
   if (isLoading) return <LoadingState multi={filteredEditions.length > 1} />;
@@ -94,6 +120,7 @@ export function Achievements({
                   background={filteredEditions.length > 1}
                   header={!edition || isMobile}
                   game={game || games.find((game) => game.id === item.gameId)}
+                  certified={certifieds[item.id]}
                   variant={!edition ? "default" : "dark"}
                 />
               ))}
@@ -124,6 +151,7 @@ export function Row({
   background,
   header,
   game,
+  certified,
   variant,
 }: {
   address: string;
@@ -133,6 +161,7 @@ export function Row({
   background: boolean;
   header: boolean;
   game?: GameModel;
+  certified?: boolean;
   variant: "default" | "dark";
 }) {
   const gameAchievements = useMemo(() => {
@@ -151,6 +180,7 @@ export function Row({
     return { pinneds };
   }, [gameAchievements, pins, address, self]);
 
+  const location = useLocation();
   const navigate = useNavigate();
   const summaryProps = useMemo(() => {
     return {
@@ -174,19 +204,38 @@ export function Row({
         };
       }),
       metadata: {
-        name: game?.name ?? "Game",
+        game: game?.name || "Game",
+        edition: edition?.name || "Main",
         logo: edition?.properties.icon,
         cover: background ? edition?.properties.banner : banner,
+        certified: !!certified,
       },
       socials: { ...edition?.socials },
       onClick: () => {
-        const url = new URL(window.location.href);
-        url.searchParams.set("game", game?.id.toString() || "");
-        url.searchParams.set("edition", edition.id.toString());
-        navigate(url.toString().replace(window.location.origin, ""));
+        if (!game || !edition) return;
+        let pathname = location.pathname;
+        const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || game.id}`;
+        const editionName = `${edition?.name.toLowerCase().replace(/ /g, "-") || edition.id}`;
+        pathname = pathname.replace(/\/game\/[^/]+/, "");
+        pathname = pathname.replace(/\/edition\/[^/]+/, "");
+        if (game.id !== 0) {
+          pathname = joinPaths(
+            `/game/${gameName}/edition/${editionName}`,
+            pathname,
+          );
+        }
+        navigate(pathname || "/");
       },
     };
-  }, [gameAchievements, game, edition, pinneds, background, navigate]);
+  }, [
+    gameAchievements,
+    game,
+    edition,
+    pinneds,
+    background,
+    location,
+    navigate,
+  ]);
 
   return (
     <div className="rounded-lg overflow-hidden">

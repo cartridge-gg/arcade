@@ -1,7 +1,7 @@
 import { NAMESPACE } from "../../constants";
 import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
-import { addAddressPadding } from "starknet";
+import { getChecksumAddress } from "starknet";
 
 const MODEL_NAME = "Member";
 
@@ -24,7 +24,7 @@ export class MemberModel {
 
   static from(identifier: string, model: any) {
     if (!model) return MemberModel.default(identifier);
-    const id = addAddressPadding(model.id);
+    const id = getChecksumAddress(model.id);
     const role = Number(model.role);
     const guildId = Number(model.guild_id);
     const pendingGuildId = Number(model.pending_guild_id);

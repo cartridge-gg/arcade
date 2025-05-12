@@ -1,7 +1,7 @@
 import { formatAddress, FormatAddressOptions } from "@cartridge/utils";
 import { toast } from "sonner";
 import { useCallback } from "react";
-import { addAddressPadding } from "starknet";
+import { getChecksumAddress } from "starknet";
 import { cn, CopyIcon } from "@cartridge/ui-next";
 
 type AddressProps = {
@@ -23,7 +23,7 @@ export function CopyAddress({
   className,
 }: AddressProps) {
   const onCopy = useCallback(() => {
-    navigator.clipboard.writeText(addAddressPadding(address));
+    navigator.clipboard.writeText(getChecksumAddress(address));
     toast.success("Address copied");
   }, [address]);
 

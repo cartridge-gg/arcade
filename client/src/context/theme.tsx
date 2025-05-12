@@ -1,15 +1,7 @@
-import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
 import { defaultTheme, ControllerTheme } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui-next";
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { useSearchParams } from "react-router-dom";
+import { createContext, useCallback, useEffect, useState } from "react";
 
 type ColorScheme = "dark" | "light" | "system";
 
@@ -50,31 +42,11 @@ export function ThemeProvider({
   storageKey = "vite-ui-colorScheme",
   ...props
 }: ThemeProviderProps) {
-  const { gameId } = useProject();
-  const { games } = useArcade();
-
-  const [searchParams] = useSearchParams();
-  const colorSchemeParam =
-    (searchParams.get("colorMode") as ColorScheme) || null;
-  if (
-    colorSchemeParam &&
-    !["light", "dark", "system"].includes(colorSchemeParam)
-  ) {
-    throw new Error(
-      `Unknown colorScheme query param is provided: ${colorSchemeParam}`,
-    );
-  }
+  const { game } = useProject();
 
   const [colorScheme, setColorSchemeRaw] = useState<ColorScheme>(
-    () =>
-      colorSchemeParam ||
-      (localStorage.getItem(storageKey) as ColorScheme) ||
-      defaultScheme,
+    () => (localStorage.getItem(storageKey) as ColorScheme) || defaultScheme,
   );
-
-  const game = useMemo(() => {
-    return games.find((game) => game.id === gameId);
-  }, [gameId, games]);
 
   const setColorScheme = useCallback(
     (colorScheme: ColorScheme) => {

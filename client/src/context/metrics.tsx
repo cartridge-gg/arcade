@@ -22,14 +22,14 @@ export type MetricsContextType = {
 export const MetricsContext = createContext<MetricsContextType | null>(null);
 
 export function MetricsProvider({ children }: { children: ReactNode }) {
-  const { projects: slots } = useArcade();
+  const { editions } = useArcade();
   const [metrics, setMetrics] = useState<Metrics[]>([]);
 
   const projects: MetricsProject[] = useMemo(() => {
-    return slots.map((slot) => ({
-      project: slot.project,
+    return editions.map((edition) => ({
+      project: edition.config.project,
     }));
-  }, [slots]);
+  }, [editions]);
 
   const { status } = useMetricsQuery(
     {

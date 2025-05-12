@@ -52,3 +52,13 @@ export const getTime = (timestamp: number) => {
   };
   return state;
 };
+
+export const joinPaths = (...parts: string[]) => {
+  return (
+    "/" +
+    parts
+      .map((p) => p.replace(/^\/+|\/+$/g, "")) // trim leading/trailing slashes
+      .filter(Boolean)
+      .join("/")
+  );
+};

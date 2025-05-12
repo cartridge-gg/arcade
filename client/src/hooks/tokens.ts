@@ -15,9 +15,9 @@ import { useAddress } from "./address";
  * @throws {Error} If used outside of a TokenProvider context
  */
 export const useTokens = () => {
-  const { address } = useAddress();
   const context = useContext(TokenContext);
-  const { project } = useProject();
+  const { address } = useAddress();
+  const { edition } = useProject();
 
   if (!context) {
     throw new Error(
@@ -28,11 +28,13 @@ export const useTokens = () => {
   const { tokens: allTokens, status } = context;
 
   const tokens = useMemo(() => {
-    if (!project) return allTokens;
+    if (!edition) return allTokens;
     return allTokens.filter(
-      (token) => token.metadata.project === project || !token.metadata.project,
+      (token) =>
+        token.metadata.project === edition.config.project ||
+        !token.metadata.project,
     );
-  }, [allTokens, project]);
+  }, [allTokens, edition]);
 
   const { username } = useUsername({ address });
 

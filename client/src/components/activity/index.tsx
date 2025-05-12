@@ -21,7 +21,7 @@ import { useProject } from "@/hooks/project";
 const OFFSET = 20;
 
 export function Activity() {
-  const { project } = useProject();
+  const { edition } = useProject();
   const [cap, setCap] = useState(OFFSET);
   const { activities, status } = useActivities();
 
@@ -43,7 +43,7 @@ export function Activity() {
   useEffect(() => {
     // Reset cap when the game changes
     setCap(OFFSET);
-  }, [project]);
+  }, [edition]);
 
   if (status === "loading" && !events.length) return <LoadingState />;
   if (status === "error" || !events.length) return <EmptyState />;
@@ -57,12 +57,12 @@ export function Activity() {
             </p>
             {events
               .filter(({ date }) => date === current)
-              .map((props: CardProps, index: number) => {
+              .map((props: CardProps, index) => {
                 switch (props.variant) {
                   case "token":
                     return (
                       <Link
-                        key={index}
+                        key={`${props.key}-${index}`}
                         to={toExplorer(props.transactionHash, props.chainId)}
                         target="_blank"
                       >
@@ -78,7 +78,7 @@ export function Activity() {
                   case "collectible":
                     return (
                       <Link
-                        key={index}
+                        key={`${props.key}-${index}`}
                         to={toExplorer(props.transactionHash, props.chainId)}
                         target="_blank"
                       >
@@ -94,7 +94,7 @@ export function Activity() {
                   case "game":
                     return (
                       <Link
-                        key={index}
+                        key={`${props.key}-${index}`}
                         to={toExplorer(props.transactionHash, props.chainId)}
                         target="_blank"
                       >
@@ -109,7 +109,7 @@ export function Activity() {
                   case "achievement":
                     return (
                       <ActivityAchievementCard
-                        key={index}
+                        key={`${props.key}-${index}`}
                         title={"Achievement"}
                         image={props.image}
                         certified={props.certified}

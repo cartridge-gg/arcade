@@ -3,15 +3,29 @@ import { Button, GearIcon, SignOutIcon } from "@cartridge/ui-next";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { useCallback, useEffect, useState } from "react";
 import { UserAvatar } from "../user/avatar";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
+import { joinPaths } from "@/helpers";
 
 export function User() {
   const { account, connector, address } = useAccount();
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [name, setName] = useState<string>("");
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const handleClick = useCallback(() => {
+    if (!name && !address) return;
+    // Update the url params
+    let pathname = location.pathname;
+    const playerName = `${!name ? address?.toLowerCase() : name.toLowerCase()}`;
+    pathname = pathname.replace(/\/player\/[^/]+/, "");
+    pathname = pathname.replace(/\/tab\/[^/]+/, "");
+    pathname = joinPaths(pathname, `/player/${playerName}`);
+    navigate(pathname);
+  }, [name, address, navigate]);
 
   useEffect(() => {
     async function fetch() {
@@ -25,18 +39,6 @@ export function User() {
     }
     fetch();
   }, [connector]);
-
-  const navigate = useNavigate();
-  const handleClick = useCallback(
-    (address: string | undefined) => {
-      if (!address) return;
-      const url = new URL(window.location.href);
-      url.searchParams.set("address", address);
-      url.searchParams.set("playerTab", "inventory");
-      navigate(url.toString().replace(window.location.origin, ""));
-    },
-    [navigate],
-  );
 
   const handleSettings = useCallback(async () => {
     const controller = (connector as ControllerConnector)?.controller;
@@ -59,7 +61,7 @@ export function User() {
       <Button
         variant="secondary"
         className="bg-background-200 hover:bg-background-300 lg:bg-background-100 lg:hover:bg-background-200 px-3 py-2.5"
-        onClick={() => handleClick(address)}
+        onClick={() => handleClick()}
       >
         <div className="h-5 w-5 flex items-center justify-center">
           <UserAvatar username={name} size="lg" />

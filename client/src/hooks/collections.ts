@@ -13,7 +13,7 @@ import { useProject } from "./project";
  */
 export const useCollections = () => {
   const context = useContext(CollectionContext);
-  const { project } = useProject();
+  const { edition } = useProject();
 
   if (!context) {
     throw new Error(
@@ -24,11 +24,11 @@ export const useCollections = () => {
   const { collections: allCollections, status } = context;
 
   const collections = useMemo(() => {
-    if (!project) return allCollections;
+    if (!edition) return allCollections;
     return allCollections.filter(
-      (collection) => collection.project === project,
+      (collection) => collection.project === edition.config.project,
     );
-  }, [project, allCollections]);
+  }, [edition, allCollections]);
 
   return { collections, status };
 };

@@ -27,23 +27,23 @@ importers:
         specifier: workspace:*
         version: link:../packages/sdk
       '@cartridge/connector':
-        specifier: 0.7.13
-        version: 0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@starknet-react/core@3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+        specifier: 0.7.14-alpha.2
+        version: 0.7.14-alpha.2(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@starknet-react/core@3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@cartridge/controller':
-        specifier: 0.7.13
-        version: 0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+        specifier: 0.7.14-alpha.2
+        version: 0.7.14-alpha.2(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@cartridge/penpal':
         specifier: ^6.2.3
         version: 6.2.4
       '@cartridge/presets':
-        specifier: github:cartridge-gg/presets#2373780
-        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780
+        specifier: github:cartridge-gg/presets#049f073
+        version: https://codeload.github.com/cartridge-gg/presets/tar.gz/049f073
       '@cartridge/ui-next':
-        specifier: 0.7.13-alpha.3
-        version: 0.7.13-alpha.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.23.1)(tailwindcss@3.4.17)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(zod@3.24.4)
+        specifier: 0.7.14-alpha.2
+        version: 0.7.14-alpha.2(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.23.1)(tailwindcss@3.4.17)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(zod@3.24.4)
       '@cartridge/utils':
-        specifier: 0.7.13-alpha.3
-        version: 0.7.13-alpha.3(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+        specifier: 0.7.14-alpha.2
+        version: 0.7.14-alpha.2(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.56.2(react@18.3.1))
@@ -770,16 +770,16 @@ packages:
     resolution: {integrity: sha512-+EzkxvLNfiUeKMgy/3luqfsCWFRXLb7U6wNQTk60tovuckwB15B191tJWvpp4HjiQWdJkCxO3Wbvc6jlk3Xb2Q==}
     engines: {node: '>=6.9.0'}
 
-  '@cartridge/account-wasm@0.7.13':
-    resolution: {integrity: sha512-2/cFS96jN31N9piK2Hs/Egxz6cstJ9gV8pgBrqo5vSPckFv2yD9u/8euqDD26MJtLnDa59OYefNJBbKgsK9vHg==}
+  '@cartridge/account-wasm@0.7.14-alpha.2':
+    resolution: {integrity: sha512-gHEDSzGjbtIk4345IOpoKcMO3YRWfd8M/3P8roH5VBz8Yt6v4UnGpCDQqqoKzacwLKUkNWq4v5aPu6EtB4M40g==}
 
-  '@cartridge/connector@0.7.13':
-    resolution: {integrity: sha512-OSlWo5mXiO0WLvHUddnO7Uvx/PlVJcKfkttJgOM4kQz3iSar8B2QlYPXQQ6uqIBFzJ4Pep5E5E3tpUbGNA9BFQ==}
+  '@cartridge/connector@0.7.14-alpha.2':
+    resolution: {integrity: sha512-MlR+17sSivQIex13AFhRL7bvJml8qcrb0pnGTW+pwqCWvYvcLyaJWxY82CtZpItxdzBikyWTu5fuF1uFXP04Nw==}
     peerDependencies:
       '@starknet-react/core': ^3.7.3
 
-  '@cartridge/controller@0.7.13':
-    resolution: {integrity: sha512-LBor+FxYtAETgj8+m+23BDVhwXEZ+FqtwaLAVBEen6oz4//o3pU+wP2xBl8YAtcAL6mJ8gYcOhfqdHK/Ux5rwQ==}
+  '@cartridge/controller@0.7.14-alpha.2':
+    resolution: {integrity: sha512-tHX6si1uodNGprjf5emfZUmAco21gsoz2qUpRSw3NkbpT4/Mn5NsbLPG+dDAXcIdjEJu+bTkyY1Cz8yeMERfOQ==}
     peerDependencies:
       '@metamask/sdk': ^0.32.1
       '@solana/web3.js': ^1.98.0
@@ -790,12 +790,12 @@ packages:
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780}
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/049f073':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/049f073}
     version: 0.0.1
 
-  '@cartridge/ui-next@0.7.13-alpha.3':
-    resolution: {integrity: sha512-IDNb6q2hWLnPpwxhIBAk9jgji9/Otts76xOR4/zC+a4LebREvnLCAtCZ+fFxali5apRTX83cObFZG0tSmRZb/w==}
+  '@cartridge/ui-next@0.7.14-alpha.2':
+    resolution: {integrity: sha512-LFpj/yLGhprguGynnlzS5pcEhrXeN/lZC84czGg+VBdJcJFN6uRf532u1Ms/gsKmL3iaGpn7Z6dsiedjeHxBEA==}
     peerDependencies:
       react: ^18.2.0
       react-dom: ^18.2.0
@@ -803,11 +803,8 @@ packages:
       starknet: ^6.21.0
       viem: ^2.21.32
 
-  '@cartridge/utils@0.7.13':
-    resolution: {integrity: sha512-gNoDw9TCvBaOPh3swGyGY383Am4e/gBFR9mMFq0nkRyfqYOiMlnnxZkGGDYbFSz5LAqbyB80JizmgaTVtKsi4w==}
-
-  '@cartridge/utils@0.7.13-alpha.3':
-    resolution: {integrity: sha512-CuAJnmpj2F6xqfLr0w0G5QEdWFMX+hmoB7STtnSysJwB2Hjd6J7qPKkictCJAH4yzC3RVxZu3/oljqaO+cOptw==}
+  '@cartridge/utils@0.7.14-alpha.2':
+    resolution: {integrity: sha512-UmZCtAF91+K4MnCQiheMVAiHW9dliCB8kjbp+k2rPmp/P6KyMt0yxqQj7Pqegi+nSGf03BKKGslqp2cHVGjQCA==}
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
     resolution: {integrity: sha512-P7swiOAdF7aSi0H+tHtHtr6zrpF3aAq/W9FXx5HektRvLTM2O89xCyXF3pk7pLc7QpaY7AoaE8UowVf9QBdh3w==}
@@ -4667,6 +4664,13 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
+  qr-code-styling@1.9.2:
+    resolution: {integrity: sha512-RgJaZJ1/RrXJ6N0j7a+pdw3zMBmzZU4VN2dtAZf8ZggCfRB5stEQ3IoDNGaNhYY3nnZKYlYSLl5YkfWN5dPutg==}
+    engines: {node: '>=18.18.0'}
+
+  qrcode-generator@1.4.4:
+    resolution: {integrity: sha512-HM7yY8O2ilqhmULxGMpcHSF1EhJJ9yBj8gvDEuZ6M+KGJ0YY2hKpnXvRD+hZPLrDVck3ExIGhmPtSdcjC+guuw==}
+
   qrcode@1.5.3:
     resolution: {integrity: sha512-puyri6ApkEHYiVl4CFzo1tDkAZ+ATcnbJrJ6RiBM1Fhctdn/ix9MTE3hRph33omisEbC/2fcfemsseiKgBPKZg==}
     engines: {node: '>=10.13.0'}
@@ -6639,11 +6643,11 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@cartridge/account-wasm@0.7.13': {}
+  '@cartridge/account-wasm@0.7.14-alpha.2': {}
 
-  '@cartridge/connector@0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@starknet-react/core@3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@cartridge/connector@0.7.14-alpha.2(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@starknet-react/core@3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
-      '@cartridge/controller': 0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@cartridge/controller': 0.7.14-alpha.2(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@starknet-react/core': 3.7.4(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@18.3.1)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -6679,11 +6683,11 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller@0.7.13(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@cartridge/controller@0.7.14-alpha.2(@metamask/sdk@0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10))(@types/react@18.3.21)(bufferutil@4.0.9)(open@10.1.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(starknet@6.23.1)(starknetkit@2.10.4(bufferutil@4.0.9)(starknet@6.23.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
-      '@cartridge/account-wasm': 0.7.13
+      '@cartridge/account-wasm': 0.7.14-alpha.2
       '@cartridge/penpal': 6.2.4
-      '@cartridge/utils': 0.7.13(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@cartridge/utils': 0.7.14-alpha.2(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@metamask/sdk': 0.32.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@solana/web3.js': 1.98.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@starknet-io/types-js': 0.7.10
@@ -6727,13 +6731,13 @@ snapshots:
 
   '@cartridge/penpal@6.2.4': {}
 
-  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/2373780':
+  '@cartridge/presets@https://codeload.github.com/cartridge-gg/presets/tar.gz/049f073':
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
-  '@cartridge/ui-next@0.7.13-alpha.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.23.1)(tailwindcss@3.4.17)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(zod@3.24.4)':
+  '@cartridge/ui-next@0.7.14-alpha.2(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sonner@1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(starknet@6.23.1)(tailwindcss@3.4.17)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4))(zod@3.24.4)':
     dependencies:
-      '@cartridge/utils': 0.7.13-alpha.3(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
+      '@cartridge/utils': 0.7.14-alpha.2(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
       '@radix-ui/react-accordion': 1.2.10(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-alert-dialog': 1.1.13(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-aspect-ratio': 1.1.6(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -6759,6 +6763,7 @@ snapshots:
       class-variance-authority: 0.7.1
       clsx: 1.2.1
       cmdk: 1.1.1(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      qr-code-styling: 1.9.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       sonner: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -6778,24 +6783,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/utils@0.7.13(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
-    dependencies:
-      posthog-js-lite: 3.2.1
-      react: 18.3.1
-      react-query: 3.39.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      starknet: 6.23.1
-      swr: 2.3.3(react@18.3.1)
-      viem: 2.29.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - react-dom
-      - react-native
-      - typescript
-      - utf-8-validate
-      - zod
-
-  '@cartridge/utils@0.7.13-alpha.3(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
+  '@cartridge/utils@0.7.14-alpha.2(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.4)':
     dependencies:
       posthog-js-lite: 3.2.1
       react: 18.3.1
@@ -11492,6 +11480,12 @@ snapshots:
   punycode.js@2.3.1: {}
 
   punycode@2.3.1: {}
+
+  qr-code-styling@1.9.2:
+    dependencies:
+      qrcode-generator: 1.4.4
+
+  qrcode-generator@1.4.4: {}
 
   qrcode@1.5.3:
     dependencies:

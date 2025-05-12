@@ -2,11 +2,11 @@ import { createContext, useState, ReactNode, useMemo } from "react";
 import { useActivitiesQuery } from "@cartridge/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
 import { useUsernames } from "@/hooks/account";
-import { addAddressPadding } from "starknet";
+import { getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 
 const SESSION_MAX_BREAK = 3600 * 1000; // 1 hour
-const LIMIT = 2000;
+const LIMIT = 10000;
 
 export type Discover = {
   identifier: string;
@@ -37,7 +37,7 @@ export const DiscoversContext = createContext<DiscoversContextType | null>(
 );
 
 export function DiscoversProvider({ children }: { children: ReactNode }) {
-  const { projects: slots } = useArcade();
+  const { editions } = useArcade();
   const { events: achievements } = useAchievements();
   const [activities, setDiscovers] = useState<{ [key: string]: Discover[] }>(
     {},
@@ -55,7 +55,7 @@ export function DiscoversProvider({ children }: { children: ReactNode }) {
   const usernamesData = useMemo(() => {
     const data: { [key: string]: string | undefined } = {};
     addresses.forEach((address) => {
-      data[addAddressPadding(address)] = usernames.find(
+      data[getChecksumAddress(address)] = usernames.find(
         (username) => BigInt(username.address || "0x0") === BigInt(address),
       )?.username;
     });
@@ -63,14 +63,14 @@ export function DiscoversProvider({ children }: { children: ReactNode }) {
   }, [usernames, addresses]);
 
   const projects = useMemo(() => {
-    return slots.map((slot) => {
+    return editions.map((edition) => {
       return {
-        project: slot.project,
+        project: edition.config.project,
         address: "",
         limit: LIMIT,
       };
     });
-  }, [slots]);
+  }, [editions]);
 
   const { status } = useActivitiesQuery(
     {
@@ -83,11 +83,11 @@ export function DiscoversProvider({ children }: { children: ReactNode }) {
       refetchOnWindowFocus: false,
       onSuccess: ({ activities }) => {
         const newDiscovers: { [key: string]: Discover[] } = {};
-        activities?.items.forEach((item) => {
+        activities?.items.forEach((item, index) => {
           const project = item.meta.project;
           newDiscovers[project] = item.activities.map((activity) => {
             return {
-              identifier: activity.transactionHash,
+              identifier: `${activity.transactionHash}-${activity.entrypoint}-${index}`,
               project: project,
               callerAddress: activity.callerAddress,
               contractAddress: activity.contractAddress,
@@ -129,24 +129,21 @@ export function DiscoversProvider({ children }: { children: ReactNode }) {
             time: currentTime,
             index: aggregates.length,
           };
-          // Check previous activity if there are some achievements earned
-          if (last) {
-            aggregates[last.index].achievements = (achievements[project] || [])
-              .filter((item) => {
-                const isPlayer =
-                  BigInt(item.player) ===
-                  BigInt(aggregates[last.index].callerAddress);
-                const timestamp = new Date(item.timestamp * 1000).getTime();
-                const inSession =
-                  timestamp >= aggregates[last.index].start &&
-                  timestamp <= aggregates[last.index].end;
-                return isPlayer && inSession;
-              })
-              .map((item) => item.achievement);
-          }
-          // Push new activity
           aggregates.push({ ...activity });
         }
+      });
+      const projectAchievements = achievements[project] || [];
+      aggregates.forEach((session) => {
+        session.achievements = projectAchievements
+          .filter((item) => {
+            const isPlayer =
+              BigInt(item.player) === BigInt(session.callerAddress);
+            const timestamp = new Date(item.timestamp * 1000).getTime();
+            const inSession =
+              timestamp >= session.start && timestamp <= session.end;
+            return isPlayer && inSession;
+          })
+          .map((item) => item.achievement);
       });
       result[project] = aggregates;
     });

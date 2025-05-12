@@ -3,7 +3,6 @@ export { AchievementContext } from "./achievement";
 export { ActivitiesContext } from "./activities";
 export { DiscoversContext } from "./discovers";
 export { MetricsContext } from "./metrics";
-export { ProjectContext } from "./project";
 export { CollectionContext } from "./collection";
 export { TokenContext } from "./token";
 export { OwnershipContext } from "./ownerships";

@@ -30,8 +30,8 @@ export const useArcade = () => {
     games,
     editions,
     chains,
-    projects,
-    setProjects,
+    player,
+    setPlayer,
   } = context;
 
   return {
@@ -42,7 +42,7 @@ export const useArcade = () => {
     games,
     editions,
     chains,
-    projects,
-    setProjects,
+    player,
+    setPlayer,
   };
 };

@@ -1,6 +1,6 @@
 import { InventoryScene } from "../scenes/inventory";
 import { AchievementScene } from "../scenes/achievement";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAchievements } from "@/hooks/achievements";
 import {
   Button,
@@ -13,8 +13,7 @@ import {
 } from "@cartridge/ui-next";
 import { ActivityScene } from "../scenes/activity";
 import { ArcadeTabs } from "../modules";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { EditionModel } from "@bal7hazar/arcade-sdk";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername, useUsernames } from "@/hooks/account";
 import { useAddress } from "@/hooks/address";
 import AchievementPlayerHeader from "../modules/player-header";
@@ -24,38 +23,42 @@ import { useArcade } from "@/hooks/arcade";
 import ControllerConnector from "@cartridge/connector/controller";
 import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
+import { useProject } from "@/hooks/project";
+import { joinPaths } from "@/helpers";
 
-export function PlayerPage({ edition }: { edition: EditionModel | undefined }) {
-  const [searchParams] = useSearchParams();
+const TABS_ORDER = ["inventory", "achievements", "activity"] as TabValue[];
+
+export function PlayerPage() {
   const { address, isSelf, self } = useAddress();
   const { usernames, globals, players } = useAchievements();
   const [loading, setLoading] = useState(false);
   const { account, connector, isConnected } = useAccount();
   const { provider, follows } = useArcade();
-
-  const navigate = useNavigate();
+  const { edition, tab } = useProject();
 
   const defaultValue = useMemo(() => {
-    return searchParams.get("playerTab") || "inventory";
-  }, [searchParams, address]);
+    if (!TABS_ORDER.includes(tab as TabValue)) return "inventory";
+    return tab;
+  }, [tab]);
 
+  const location = useLocation();
+  const navigate = useNavigate();
   const handleClick = useCallback(
     (value: string) => {
-      // Clicking on a tab updates the url param tab to the value of the tab
-      // So the tab is persisted in the url and the user can update and share the url
-      const url = new URL(window.location.href);
-      url.searchParams.set("playerTab", value);
-      navigate(url.toString().replace(window.location.origin, ""));
+      let pathname = location.pathname;
+      pathname = pathname.replace(/\/tab\/[^/]+/, "");
+      pathname = joinPaths(pathname, `/tab/${value}`);
+      navigate(pathname || "/");
     },
-    [navigate],
+    [location, navigate],
   );
 
   const handleClose = useCallback(() => {
-    // On close, remove address from url
-    const url = new URL(window.location.href);
-    url.searchParams.delete("address");
-    navigate(url.toString().replace(window.location.origin, ""));
-  }, [navigate]);
+    let pathname = location.pathname;
+    pathname = pathname.replace(/\/player\/[^/]+/, "");
+    pathname = pathname.replace(/\/tab\/[^/]+/, "");
+    navigate(pathname || "/");
+  }, [location, navigate]);
 
   const { rank, points } = useMemo(() => {
     if (edition) {
@@ -114,7 +117,11 @@ export function PlayerPage({ edition }: { edition: EditionModel | undefined }) {
 
   const { username } = useUsername({ address });
   const name = useMemo(() => {
-    return usernames[address] || username;
+    return (
+      usernames[address] ||
+      username ||
+      `0x${BigInt(address).toString(16)}`.slice(0, 9)
+    );
   }, [usernames, address, username]);
 
   const Icon = useMemo(() => {
@@ -171,6 +178,16 @@ export function PlayerPage({ edition }: { edition: EditionModel | undefined }) {
     [account, connector, setLoading],
   );
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && handleClose) {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleClose]);
+
   return (
     <>
       <AchievementPlayerHeader
@@ -207,7 +224,7 @@ export function PlayerPage({ edition }: { edition: EditionModel | undefined }) {
         <CloseButton handleClose={handleClose} />
       </div>
       <ArcadeTabs
-        order={["inventory", "achievements", "activity"]}
+        order={TABS_ORDER}
         defaultValue={defaultValue as TabValue}
         onTabClick={(tab: TabValue) => handleClick(tab)}
         variant="light"

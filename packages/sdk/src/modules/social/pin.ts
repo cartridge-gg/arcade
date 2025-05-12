@@ -1,5 +1,5 @@
 import { NAMESPACE } from "../../constants";
-import { addAddressPadding } from "starknet";
+import { getChecksumAddress } from "starknet";
 import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
 
@@ -22,7 +22,7 @@ export class PinEvent {
 
   static from(identifier: string, model: any) {
     if (!model) return PinEvent.default(identifier);
-    const playerId = addAddressPadding(model.player_id);
+    const playerId = getChecksumAddress(model.player_id);
     const achievementId = `0x${BigInt(String(model.achievement_id)).toString(16)}`;
     const time = Number(model.time);
     return new PinEvent(identifier, playerId, achievementId, time);

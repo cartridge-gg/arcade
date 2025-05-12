@@ -1,31 +1,20 @@
 import { useCallback, useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Register } from "./register";
-import { EditionModel, GameModel } from "@bal7hazar/arcade-sdk";
+import { EditionModel } from "@bal7hazar/arcade-sdk";
 import EditionActions from "../modules/edition-actions";
 import EditionAction from "../modules/edition-item";
 import { useProject } from "@/hooks/project";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useAccount } from "@starknet-react/core";
+import { joinPaths } from "@/helpers";
 
 export const Editions = () => {
   const { address } = useAccount();
-  const { games, editions } = useArcade();
-  const { gameId, namespace, project } = useProject();
+  const { editions } = useArcade();
+  const { game, edition } = useProject();
   const { ownerships } = useOwnerships();
-
-  const game: GameModel | undefined = useMemo(() => {
-    return games.find((game) => game.id === gameId);
-  }, [games, gameId]);
-
-  const edition: EditionModel | undefined = useMemo(() => {
-    if (editions.length === 0) return undefined;
-    return editions.find(
-      (edition) =>
-        edition.namespace === namespace && edition.config.project === project,
-    );
-  }, [editions, namespace, project]);
 
   const owner = useMemo(() => {
     if (!edition) return false;
@@ -59,15 +48,20 @@ export const Editions = () => {
     return values;
   }, [gameEditions, game]);
 
+  const location = useLocation();
   const navigate = useNavigate();
   const onClick = useCallback(
-    (id: number) => {
-      // Update the url params
-      const url = new URL(window.location.href);
-      url.searchParams.set("edition", id.toString());
-      navigate(url.toString().replace(window.location.origin, ""));
+    (edition: EditionModel) => {
+      if (!game) return;
+      let pathname = location.pathname;
+      const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || game.id}`;
+      const editionName = `${edition?.name.toLowerCase().replace(/ /g, "-") || edition.id}`;
+      pathname = pathname.replace(/\/game\/[^/]+/, "");
+      pathname = pathname.replace(/\/edition\/[^/]+/, "");
+      pathname = joinPaths(`game/${gameName}/edition/${editionName}`, pathname);
+      navigate(pathname || "/");
     },
-    [navigate],
+    [location, navigate, game],
   );
 
   if (!game) return null;
@@ -85,7 +79,7 @@ export const Editions = () => {
             active={item.id === edition?.id}
             label={item.name}
             certified={certifieds[BigInt(item.id).toString()]}
-            onClick={() => onClick(item.id)}
+            onClick={() => onClick(item)}
           />
         ))}
       </EditionActions>

@@ -3,7 +3,6 @@ import {
   useCollectiblesQuery,
   useCollectionsQuery,
 } from "@cartridge/utils/api/cartridge";
-import { useAddress } from "@/hooks/address";
 import { useArcade } from "@/hooks/arcade";
 
 const LIMIT = 10000;
@@ -32,14 +31,16 @@ export const CollectionContext = createContext<CollectionContextType | null>(
 );
 
 export function CollectionProvider({ children }: { children: ReactNode }) {
-  const { address } = useAddress();
-  const { projects: slots } = useArcade();
+  const { editions, player: address } = useArcade();
 
   const [offset, setOffset] = useState(0);
   const [erc721s, setErc721s] = useState<Collection[]>([]);
   const [erc1155s, setErc1155s] = useState<Collection[]>([]);
 
-  const projects = useMemo(() => slots.map((slot) => slot.project), [slots]);
+  const projects = useMemo(
+    () => editions.map((edition) => edition.config.project),
+    [editions],
+  );
 
   const { status: collectionStatus } = useCollectionsQuery(
     {
