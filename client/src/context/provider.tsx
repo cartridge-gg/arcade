@@ -14,41 +14,44 @@ import { ActivitiesProvider } from "./activities";
 import { DiscoversProvider } from "./discovers";
 import { MetricsProvider } from "./metrics";
 import { OwnershipsProvider } from "./ownerships";
+import { PostHogProvider } from "./posthog";
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
 
   return (
     <BrowserRouter>
-      <CartridgeAPIProvider
-        url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
-      >
-        <IndexerAPIProvider credentials="omit">
-          <QueryClientProvider client={queryClient}>
-            <ArcadeProvider>
-              <StarknetProvider>
-                <ProjectProvider>
-                  <ThemeProvider defaultScheme="dark">
-                    <OwnershipsProvider>
-                      <CollectionProvider>
-                        <TokenProvider>
-                          <AchievementProvider>
-                            <DiscoversProvider>
-                              <ActivitiesProvider>
-                                <MetricsProvider>{children}</MetricsProvider>
-                              </ActivitiesProvider>
-                            </DiscoversProvider>
-                          </AchievementProvider>
-                        </TokenProvider>
-                      </CollectionProvider>
-                    </OwnershipsProvider>
-                  </ThemeProvider>
-                </ProjectProvider>
-              </StarknetProvider>
-            </ArcadeProvider>
-          </QueryClientProvider>
-        </IndexerAPIProvider>
-      </CartridgeAPIProvider>
+      <PostHogProvider>
+        <CartridgeAPIProvider
+          url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
+        >
+          <IndexerAPIProvider credentials="omit">
+            <QueryClientProvider client={queryClient}>
+              <ArcadeProvider>
+                <StarknetProvider>
+                  <ProjectProvider>
+                    <ThemeProvider defaultScheme="dark">
+                      <OwnershipsProvider>
+                        <CollectionProvider>
+                          <TokenProvider>
+                            <AchievementProvider>
+                              <DiscoversProvider>
+                                <ActivitiesProvider>
+                                  <MetricsProvider>{children}</MetricsProvider>
+                                </ActivitiesProvider>
+                              </DiscoversProvider>
+                            </AchievementProvider>
+                          </TokenProvider>
+                        </CollectionProvider>
+                      </OwnershipsProvider>
+                    </ThemeProvider>
+                  </ProjectProvider>
+                </StarknetProvider>
+              </ArcadeProvider>
+            </QueryClientProvider>
+          </IndexerAPIProvider>
+        </CartridgeAPIProvider>
+      </PostHogProvider>
     </BrowserRouter>
   );
 }
