@@ -100,6 +100,9 @@ export function Metrics() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Variable to track the most recent date with data
+    let mostRecentDateWithData: number | null = null;
+
     // Process all data points
     allMetrics.forEach((metrics) => {
       metrics.data.forEach(({ date, transactionCount, callerCount }) => {
@@ -123,16 +126,32 @@ export function Metrics() {
           const dayData = dailyData.get(dayKey);
           dayData.transactionCount += transactionCount;
           dayData.callerCount += callerCount;
+
+          // Update the most recent date that has data
+          if (
+            mostRecentDateWithData === null ||
+            dayDiff < mostRecentDateWithData
+          ) {
+            mostRecentDateWithData = dayDiff;
+          }
         }
       });
     });
+
+    // If we didn't find any data, set a default (show last 30 days)
+    if (mostRecentDateWithData === null) {
+      mostRecentDateWithData = 0;
+    }
 
     // Convert to arrays for chart
     const dayLabels = [];
     const counts = [];
 
-    // Process days in reverse order (most recent first)
-    for (let i = 0; i < 49; i++) {
+    // Get the furthest we want to go back (up to 49 days)
+    const oldestDayToInclude = 49;
+
+    // Process days in reverse order (oldest to newest)
+    for (let i = oldestDayToInclude; i >= mostRecentDateWithData; i--) {
       if (dailyData.has(i)) {
         const dayData = dailyData.get(i);
         const date = dayData.date;
@@ -140,19 +159,19 @@ export function Metrics() {
         // Format date as "M/D" (e.g., "2/20")
         const month = date.getMonth() + 1; // JavaScript months are 0-indexed
         const day = date.getDate();
-        dayLabels.unshift(`${month}/${day}`);
+        dayLabels.push(`${month}/${day}`);
 
-        counts.unshift(
+        counts.push(
           activeTab === "txs" ? dayData.transactionCount : dayData.callerCount,
         );
       } else {
-        // If no data for a day, use placeholder
+        // If no data for a day, use placeholder with 0 value
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         const month = date.getMonth() + 1;
         const day = date.getDate();
-        dayLabels.unshift(`${month}/${day}`);
-        counts.unshift(0);
+        dayLabels.push(`${month}/${day}`);
+        counts.push(0);
       }
     }
 
@@ -175,7 +194,7 @@ export function Metrics() {
         tension: 0.4,
       },
     ] satisfies ChartDataset<"line", unknown>[];
-    return { labels: dayLabels, datasets };
+    return { labels: dayLabels, datasets, mostRecentDateWithData };
   }, [theme, allMetrics, activeTab]);
 
   const options = useMemo(() => {
@@ -241,15 +260,20 @@ export function Metrics() {
             autoSkip: true,
             maxTicksLimit: 7, // Show only 7 labels on the x-axis
           },
-          min: chartData.labels.length - 6, // Start showing from the last 6 points
-          max: chartData.labels.length - 1, // Show up to the latest point
+          // Only show the last 6 points or fewer if there's less data
+          min: Math.max(0, chartData.labels.length - 6),
+          // Only show up to the last data point we have
+          max: chartData.labels.length - 1,
         },
         y: {
           border: {
             display: false,
           },
           ticks: {
-            stepSize: activeTab === "txs" ? 200 : 20,
+            // Calculate step size based on max data value
+            callback: function (value) {
+              return Math.round(Number(value));
+            },
           },
           grid: {
             display: true,
@@ -259,7 +283,7 @@ export function Metrics() {
         },
       },
     } satisfies ChartOptions<"line">;
-  }, [theme, activeTab, chartData]);
+  }, [theme, chartData]);
 
   if (allMetrics.length === 0) return null;
 
