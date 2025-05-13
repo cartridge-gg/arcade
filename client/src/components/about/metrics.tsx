@@ -291,7 +291,7 @@ export function Metrics() {
         },
       },
     } satisfies ChartOptions<"line">;
-  }, [theme, chartData, isMobile]);
+  }, [theme, chartData]);
 
   if (allMetrics.length === 0) return null;
 
@@ -302,7 +302,7 @@ export function Metrics() {
           Metrics
         </p>
       </div>
-      <div className="flex flex-col gap-3 lg:gap-4 w-full">
+      <div className="flex flex-col gap-4 w-full">
         <div className="flex gap-3 lg:gap-4 w-full">
           <Tab
             label="Daily Transactions"
