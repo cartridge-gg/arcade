@@ -175,6 +175,9 @@ export function Metrics() {
         counts.push(0);
       }
     }
+    const pointBorderWidth = isMobile ? 1 : 2;
+    const pointRadius = isMobile ? 2 : 4;
+    const pointHoverRadius = isMobile ? 3 : 6;
 
     const datasets = [
       {
@@ -190,9 +193,9 @@ export function Metrics() {
           return `${theme?.colors?.primary}` || "#fbcb4a";
         },
         pointBackgroundColor: "#242824",
-        pointBorderWidth: isMobile ? 1 : 2,
-        pointRadius: isMobile ? 2 : 4,
-        pointHoverRadius: isMobile ? 3 : 6,
+        pointBorderWidth,
+        pointRadius,
+        pointHoverRadius,
         tension: 0.4,
       },
     ] satisfies ChartDataset<"line", unknown>[];
@@ -201,6 +204,7 @@ export function Metrics() {
 
   const options = useMemo(() => {
     return {
+      clip: false,
       responsive: true,
       interaction: {
         intersect: false,
@@ -287,7 +291,7 @@ export function Metrics() {
         },
       },
     } satisfies ChartOptions<"line">;
-  }, [theme, chartData]);
+  }, [theme, chartData, isMobile]);
 
   if (allMetrics.length === 0) return null;
 
@@ -333,7 +337,7 @@ export function Metrics() {
             </p>
           </div>
         )}
-        <div className="bg-background-200 rounded p-4">
+        <div className="bg-background-200 rounded p-1 sm:p-4">
           <Line ref={chartRef} data={chartData} options={options} />
         </div>
       </div>
