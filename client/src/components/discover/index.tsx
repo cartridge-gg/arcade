@@ -195,7 +195,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
       <div
-        className="p-0 my-3 lg:my-6 mt-0 h-full overflow-hidden rounded"
+        className="p-0 pt-3 lg:pt-0 my-3 lg:my-6 mt-0 h-full overflow-hidden rounded"
         style={{ scrollbarWidth: "none" }}
       >
         <ArcadeSubTabs tabs={["all", "following"]} className="mb-3 lg:mb-4">

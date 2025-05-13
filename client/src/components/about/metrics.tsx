@@ -204,6 +204,7 @@ export function Metrics() {
 
   const options = useMemo(() => {
     return {
+      clip: false,
       responsive: true,
       clip: 5,
       interaction: {
