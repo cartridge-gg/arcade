@@ -193,6 +193,7 @@ export function Metrics() {
           return `${theme?.colors?.primary}` || "#fbcb4a";
         },
         pointBackgroundColor: "#242824",
+        pointHoverBackgroundColor: `${theme?.colors?.primary}` || "#fbcb4a",
         pointBorderWidth,
         pointRadius,
         pointHoverRadius,
@@ -203,9 +204,11 @@ export function Metrics() {
   }, [theme, allMetrics, activeTab, isMobile]);
 
   const options = useMemo(() => {
+    const clipSize = isMobile ? 5 : 8;
+
     return {
       responsive: true,
-      clip: 5,
+      clip: clipSize,
       interaction: {
         intersect: false,
         mode: "index",
