@@ -204,7 +204,6 @@ export function Metrics() {
 
   const options = useMemo(() => {
     return {
-      clip: false,
       responsive: true,
       clip: 5,
       interaction: {
@@ -239,21 +238,6 @@ export function Metrics() {
           xAlign: "center",
           yAlign: "bottom",
           caretPadding: 12,
-        },
-        zoom: {
-          limits: {
-            x: { min: "original", max: "original", minRange: 6 },
-          },
-          // zoom: {
-          //   enabled: false, // Completely disable zoom
-          // },
-          pan: {
-            enabled: true,
-            mode: "x",
-            scaleMode: "x",
-            threshold: 5, // Distance in pixels for mouse movement to be considered panning
-            modifierKey: "shift",
-          },
         },
       },
       scales: {
