@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { cn } from "@cartridge/ui-next";
+import { cn, useMediaQuery } from "@cartridge/ui-next";
 import { useMetrics } from "@/hooks/metrics";
 import { useTheme } from "@/hooks/context";
 import {
@@ -36,6 +36,7 @@ export function Metrics() {
   const { theme } = useTheme();
   const { metrics: allMetrics, status } = useMetrics();
   const chartRef = useRef<ChartJS<"line">>(null);
+  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
 
@@ -189,13 +190,14 @@ export function Metrics() {
           return `${theme?.colors?.primary}` || "#fbcb4a";
         },
         pointBackgroundColor: "#242824",
-        pointBorderWidth: 1,
-        pointRadius: 2,
+        pointBorderWidth: isMobile ? 1 : 2,
+        pointRadius: isMobile ? 2 : 4,
+        pointHoverRadius: isMobile ? 3 : 6,
         tension: 0.4,
       },
     ] satisfies ChartDataset<"line", unknown>[];
     return { labels: dayLabels, datasets, mostRecentDateWithData };
-  }, [theme, allMetrics, activeTab]);
+  }, [theme, allMetrics, activeTab, isMobile]);
 
   const options = useMemo(() => {
     return {
