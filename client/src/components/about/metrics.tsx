@@ -38,7 +38,6 @@ export function Metrics() {
   const chartRef = useRef<ChartJS<"line">>(null);
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
-  const [isZoomed, setIsZoomed] = useState(false);
 
   const avgDailyTxs = useMemo(() => {
     let totalTxs = 0;
@@ -216,21 +215,18 @@ export function Metrics() {
           caretPadding: 12,
         },
         zoom: {
-          zoom: {
-            drag: {
-              enabled: true,
-            },
-            // wheel: {
-            //   enabled: true,
-            //   speed: 0.1,
-            // },
-            // pinch: {
-            //   enabled: true
-            // },
+          limits: {
+            x: { min: "original", max: "original", minRange: 6 },
+          },
+          // zoom: {
+          //   enabled: false, // Completely disable zoom
+          // },
+          pan: {
+            enabled: true,
             mode: "x",
-            onZoomComplete: () => {
-              setIsZoomed(true);
-            },
+            scaleMode: "x",
+            threshold: 5, // Distance in pixels for mouse movement to be considered panning
+            modifierKey: "shift",
           },
         },
       },
@@ -245,6 +241,8 @@ export function Metrics() {
             autoSkip: true,
             maxTicksLimit: 7, // Show only 7 labels on the x-axis
           },
+          min: chartData.labels.length - 6, // Start showing from the last 6 points
+          max: chartData.labels.length - 1, // Show up to the latest point
         },
         y: {
           border: {
@@ -261,14 +259,7 @@ export function Metrics() {
         },
       },
     } satisfies ChartOptions<"line">;
-  }, [theme, activeTab]);
-
-  const resetZoom = () => {
-    if (chartRef.current) {
-      chartRef.current.resetZoom();
-      setIsZoomed(false);
-    }
-  };
+  }, [theme, activeTab, chartData]);
 
   if (allMetrics.length === 0) return null;
 
@@ -278,14 +269,6 @@ export function Metrics() {
         <p className="text-xs tracking-wider font-semibold text-foreground-400">
           Metrics
         </p>
-        {isZoomed && (
-          <button
-            onClick={resetZoom}
-            className="px-3 py-1 text-xs bg-background-200 hover:bg-background-300 rounded transition-colors duration-200"
-          >
-            Reset Zoom
-          </button>
-        )}
       </div>
       <div className="flex flex-col gap-3 lg:gap-4 w-full">
         <div className="flex gap-3 lg:gap-4 w-full">
