@@ -269,6 +269,8 @@ export function Metrics() {
           border: {
             display: false,
           },
+          // Explicitly set the minimum to 0
+          min: 0,
           ticks: {
             // Calculate step size based on max data value
             callback: function (value) {
