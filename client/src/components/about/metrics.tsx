@@ -262,8 +262,8 @@ export function Metrics() {
     // Find the maximum value in the visible data
     const maxValue = visibleData.length > 0 ? Math.max(...visibleData) : 0;
 
-    // Round up to a nice number for the max (ensure it's at least 1 to avoid division by zero)
-    const roundedMax = Math.ceil(maxValue) || 1;
+    // If max value is less than 10, set rounded max to 10, otherwise round up
+    const roundedMax = maxValue < 10 ? 10 : Math.ceil(maxValue);
 
     // Calculate the step size to have just 2 grid steps
     const stepSize = roundedMax / 2;
@@ -332,6 +332,7 @@ export function Metrics() {
           },
           // Explicitly set the minimum to 0
           min: 0,
+          max: roundedMax,
           ticks: {
             stepSize,
           },
