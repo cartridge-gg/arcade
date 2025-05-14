@@ -225,8 +225,13 @@ export function Metrics() {
     // Calculate the step size to have just 2 grid steps
     const stepSize = roundedMax / 2;
 
+    // Set different aspect ratio based on screen size
+    const aspectRatio = isMobile ? 1.5 : 2.5;
+
     return {
       responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio,
       clip: clipSize,
       interaction: {
         intersect: false,
@@ -341,7 +346,7 @@ export function Metrics() {
             </p>
           </div>
         )}
-        <div className="bg-background-200 rounded p-1 sm:p-4">
+        <div className="bg-background-200 rounded p-1 sm:p-4 h-[240px] sm:h-auto">
           <Line ref={chartRef} data={chartData} options={options} />
         </div>
       </div>
