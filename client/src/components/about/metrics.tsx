@@ -206,6 +206,25 @@ export function Metrics() {
   const options = useMemo(() => {
     const clipSize = isMobile ? 5 : 8;
 
+    // Calculate visible range based on the x-axis min and max
+    const visibleMin = Math.max(0, chartData.labels.length - 6);
+    const visibleMax = chartData.labels.length - 1;
+
+    // Extract only the visible data points
+    const visibleData = (chartData.datasets[0].data as number[]).slice(
+      visibleMin,
+      visibleMax + 1,
+    );
+
+    // Find the maximum value in the visible data
+    const maxValue = visibleData.length > 0 ? Math.max(...visibleData) : 0;
+
+    // Round up to a nice number for the max (ensure it's at least 1 to avoid division by zero)
+    const roundedMax = Math.ceil(maxValue) || 1;
+
+    // Calculate the step size to have just 2 grid steps
+    const stepSize = roundedMax / 2;
+
     return {
       responsive: true,
       clip: clipSize,
@@ -266,10 +285,7 @@ export function Metrics() {
           // Explicitly set the minimum to 0
           min: 0,
           ticks: {
-            // Calculate step size based on max data value
-            callback: function (value) {
-              return Math.round(Number(value));
-            },
+            stepSize,
           },
           grid: {
             display: true,
@@ -279,7 +295,7 @@ export function Metrics() {
         },
       },
     } satisfies ChartOptions<"line">;
-  }, [theme, chartData]);
+  }, [theme, chartData, isMobile]);
 
   if (allMetrics.length === 0) return null;
 
