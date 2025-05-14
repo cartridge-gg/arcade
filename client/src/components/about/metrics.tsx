@@ -16,6 +16,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import zoomPlugin from "chartjs-plugin-zoom";
+import { useSidebar } from "@/hooks/sidebar";
 
 ChartJS.register(
   CategoryScale,
@@ -38,6 +39,7 @@ export function Metrics() {
   const chartRef = useRef<ChartJS<"line">>(null);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery("(max-width: 1024px)");
+  const { setDisableSwipe } = useSidebar();
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
   const [isPanning, setIsPanning] = useState(false);
@@ -101,16 +103,25 @@ export function Metrics() {
       longPressTimer = setTimeout(() => {
         setIsPanning(true);
       }, longPressDuration);
+
+      // Disable sidebar swipe while interacting with chart
+      setDisableSwipe(true);
     };
 
     const handleMouseUp = () => {
       clearTimeout(longPressTimer);
       setIsPanning(false);
+
+      // Re-enable sidebar swipe after interaction
+      setDisableSwipe(false);
     };
 
     const handleMouseLeave = () => {
       clearTimeout(longPressTimer);
       setIsPanning(false);
+
+      // Re-enable sidebar swipe after interaction
+      setDisableSwipe(false);
     };
 
     // Add event listeners

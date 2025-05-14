@@ -11,6 +11,8 @@ export type SidebarProviderContextType = {
   close: () => void;
   handleTouchStart: (e: React.TouchEvent) => void;
   handleTouchMove: (e: React.TouchEvent) => void;
+  disableSwipe: boolean;
+  setDisableSwipe: (disabled: boolean) => void;
 };
 
 export const initialState: SidebarProviderContextType = {
@@ -20,6 +22,8 @@ export const initialState: SidebarProviderContextType = {
   close: () => null,
   handleTouchStart: () => null,
   handleTouchMove: () => null,
+  disableSwipe: false,
+  setDisableSwipe: () => null,
 };
 
 export const SidebarContext =
@@ -27,6 +31,7 @@ export const SidebarContext =
 
 export function SidebarProvider({ children, ...props }: SidebarProviderProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [disableSwipe, setDisableSwipe] = useState<boolean>(false);
   const touchStartX = useRef<number | null>(null);
 
   const toggle = useCallback(() => {
@@ -50,6 +55,9 @@ export function SidebarProvider({ children, ...props }: SidebarProviderProps) {
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
+      // Skip processing if swipe is disabled
+      if (disableSwipe) return;
+
       if (touchStartX.current === null) return;
       const touchEndX = e.touches[0].clientX;
       const deltaX = touchEndX - touchStartX.current;
@@ -66,7 +74,7 @@ export function SidebarProvider({ children, ...props }: SidebarProviderProps) {
         touchStartX.current = null;
       }
     },
-    [touchStartX, isOpen, open, close],
+    [touchStartX, isOpen, open, close, disableSwipe],
   );
 
   const value = {
@@ -76,6 +84,8 @@ export function SidebarProvider({ children, ...props }: SidebarProviderProps) {
     close,
     handleTouchStart,
     handleTouchMove,
+    disableSwipe,
+    setDisableSwipe,
   };
 
   return (
