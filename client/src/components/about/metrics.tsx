@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { cn, useMediaQuery } from "@cartridge/ui-next";
 import { useMetrics } from "@/hooks/metrics";
 import { useTheme } from "@/hooks/context";
@@ -36,9 +36,52 @@ export function Metrics() {
   const { theme } = useTheme();
   const { metrics: allMetrics, status } = useMetrics();
   const chartRef = useRef<ChartJS<"line">>(null);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
+
+  // Add useEffect to handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (chartRef.current) {
+        // Force the chart to resize
+        chartRef.current.resize();
+      }
+    };
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Set up a resize observer for more reliable detection
+    let resizeObserver: ResizeObserver | null = null;
+    if (chartContainerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        if (chartRef.current) {
+          // Properly resize the chart when container changes size
+          setTimeout(() => {
+            chartRef.current?.resize();
+          }, 0);
+        }
+      });
+      resizeObserver.observe(chartContainerRef.current);
+    }
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, []);
+
+  // Also add dependency to re-initialize chart when relevant states change
+  useEffect(() => {
+    if (chartRef.current) {
+      chartRef.current.update();
+    }
+  }, [activeTab, isMobile, allMetrics, theme]);
 
   const avgDailyTxs = useMemo(() => {
     let totalTxs = 0;
@@ -346,7 +389,10 @@ export function Metrics() {
             </p>
           </div>
         )}
-        <div className="bg-background-200 rounded p-1 sm:p-4 h-[240px] sm:h-auto">
+        <div
+          ref={chartContainerRef}
+          className="bg-background-200 rounded p-1 sm:p-4 h-[240px] sm:h-auto"
+        >
           <Line ref={chartRef} data={chartData} options={options} />
         </div>
       </div>
