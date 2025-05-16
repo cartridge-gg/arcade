@@ -7,11 +7,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
 import { joinPaths } from "@/helpers";
+import { useTheme } from "@/hooks/context";
 
 export function User() {
   const { account, connector, address } = useAccount();
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
+  const { theme } = useTheme();
   const [name, setName] = useState<string>("");
 
   const location = useLocation();
@@ -56,12 +58,17 @@ export function User() {
 
   if (!isConnected || !account || !name) return null;
 
+  const glowStyle = {
+    boxShadow: `0 0 8px ${theme.colors?.primary || "#fbcb4a"}80`,
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Button
         variant="secondary"
         className="bg-background-200 hover:bg-background-300 lg:bg-background-100 lg:hover:bg-background-200 px-3 py-2.5"
         onClick={() => handleClick()}
+        style={glowStyle}
       >
         <div className="h-5 w-5 flex items-center justify-center">
           <UserAvatar username={name} size="lg" />
