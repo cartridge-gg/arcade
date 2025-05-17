@@ -62,6 +62,9 @@ export const Games = () => {
       <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
         <Search search={search} setSearch={setSearch} />
         <div className="flex flex-col gap-1 grow overflow-hidden">
+          <p className="font-semibold text-xs tracking-wider text-foreground-400 px-2 py-3">
+            Arcade
+          </p>
           <Game
             id={0}
             name="Arcade"

@@ -7,6 +7,7 @@ import { cn } from "@cartridge/ui/utils";
 
 type AddressProps = {
   address: string;
+  placeholder?: string;
   className?: string;
   copyable?: boolean;
   monospace?: boolean;
@@ -18,6 +19,7 @@ type AddressProps = {
  */
 export function CopyAddress({
   address,
+  placeholder,
   size,
   first,
   last,
@@ -38,7 +40,9 @@ export function CopyAddress({
       )}
       onClick={onCopy}
     >
-      <p className="text-sm font-mono font-normal px-0.5">{formattedAddress}</p>
+      <p className="text-sm font-mono font-normal px-0.5">
+        {placeholder ?? formattedAddress}
+      </p>
       <CopyIcon size="sm" />
     </div>
   );
