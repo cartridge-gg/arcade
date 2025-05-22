@@ -44,7 +44,7 @@ export const ArcadeSubTab = React.forwardRef<
       <TabsTrigger
         value={value}
         className={cn(
-          "p-0 flex flex-col items-center cursor-pointer select-none transition-colors w-full",
+          "p-0 flex flex-col items-center cursor-pointer select-none transition-colors w-full data-[state=active]:shadow-none",
           className,
         )}
         onClick={onClick}
