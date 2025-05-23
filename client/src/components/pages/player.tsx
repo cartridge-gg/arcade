@@ -240,7 +240,7 @@ export function PlayerPage() {
             <InventoryScene />
           </TabsContent>
           <TabsContent
-            className="p-0 px-3 lg:px-6 mt-0 grow w-full"
+            className="p-0 px-4 lg:px-6 mt-0 grow w-full"
             value="achievements"
           >
             <AchievementScene />
