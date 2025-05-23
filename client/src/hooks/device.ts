@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@cartridge/ui";
 import { useEffect, useState } from "react";
 
 enum DeviceType {
@@ -16,6 +17,8 @@ export function useDevice() {
   const [device, setDevice] = useState<DeviceType>(
     isMobileDevice() ? DeviceType.MOBILE : DeviceType.DESKTOP,
   );
+
+  const isPWA = useMediaQuery("(display-mode: standalone)");
 
   useEffect(() => {
     const handleResize = () => {
@@ -37,5 +40,6 @@ export function useDevice() {
   return {
     isMobile: device === DeviceType.MOBILE,
     isDesktop: device === DeviceType.DESKTOP,
+    isPWA,
   };
 }
