@@ -58,7 +58,7 @@ export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
           scrollbarWidth: "none",
         }}
       >
-        <div className="w-full hidden lg:block">
+        <div className="w-full hidden lg:block lg:px-6 lg:py-5">
           <Header />
         </div>
         {children}

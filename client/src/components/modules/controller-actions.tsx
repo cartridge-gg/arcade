@@ -43,7 +43,7 @@ const ControllerActions = ({
           <ArcadeMenuButton
             active={false}
             className={cn(
-              "bg-background-200 hover:bg-background-300 lg:bg-background-100 lg:hover:bg-background-200 text-foreground-100 hover:text-foreground-100 w-10 h-10",
+              "bg-spacer-100 text-foreground-100 hover:text-foreground-100 w-10 h-10",
             )}
           >
             <DotsIcon size="default" />

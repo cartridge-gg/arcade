@@ -15,7 +15,7 @@ export function SidebarToggle({ className }: SidebarToggleProps) {
       variant="secondary"
       size="icon"
       onClick={toggle}
-      className={cn("h-10 w-10", className)}
+      className={cn("h-10 w-10 bg-spacer-100", className)}
       aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
     >
       <HamburgerIcon className="size-6" />

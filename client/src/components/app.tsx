@@ -31,7 +31,7 @@ export function App() {
         >
           <div
             className={cn(
-              "lg:w-[1112px] lg:pt-8 lg:pb-6 gap-3 lg:gap-8 flex items-stretch m-auto h-full overflow-clip",
+              "lg:w-[1112px] lg:pb-6 gap-3 lg:gap-8 flex items-stretch m-auto h-full overflow-clip",
               "transition-all duration-300 ease-in-out",
             )}
           >
@@ -57,7 +57,7 @@ export function App() {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             >
-              <div className="lg:hidden w-full">
+              <div className="lg:hidden w-full p-3">
                 <Header />
               </div>
               <div

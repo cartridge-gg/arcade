@@ -63,10 +63,10 @@ export function User() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <Button
         variant="secondary"
-        className="bg-background-200 hover:bg-background-300 lg:bg-background-100 lg:hover:bg-background-200 px-3 py-2.5"
+        className="bg-spacer-100 px-3 py-2.5"
         onClick={() => handleClick()}
         style={glowStyle}
       >
