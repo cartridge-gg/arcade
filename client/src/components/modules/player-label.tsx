@@ -88,6 +88,8 @@ export const AchievementPlayerLabel = ({
         </div>
         <div className="bg-background-150 w-fit">
           <CopyAddress
+            first={2}
+            last={4}
             address={address}
             size="xs"
             className="text-sm h-7 px-1.5 py-1"
