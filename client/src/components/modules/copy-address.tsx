@@ -35,7 +35,7 @@ export function CopyAddress({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-200",
+        "flex items-center gap-1 cursor-pointer text-foreground-300 hover:text-foreground-100 bg-background-150 hover:bg-background-200 py-1 px-1.5 rounded border border-solid border-background-200",
         className,
       )}
       onClick={onCopy}
