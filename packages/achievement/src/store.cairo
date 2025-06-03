@@ -53,7 +53,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn progress(mut self: Store, player_id: felt252, task_id: felt252, count: u32, time: u64) {
+    fn progress(mut self: Store, player_id: felt252, task_id: felt252, count: u128, time: u64) {
         let event: TrophyProgression = ProgressTrait::new(player_id, task_id, count, time);
         self.world.emit_event(@event);
     }

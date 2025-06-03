@@ -99,7 +99,7 @@ mod tests {
     const GROUP: felt252 = 'GROUP';
     const HIDDEN: bool = false;
     const POINTS: u16 = 100;
-    const TOTAL: u32 = 100;
+    const TOTAL: u128 = 100;
     const TITLE: felt252 = 'TITLE';
     const ICON: felt252 = 'ICON';
     const TASK_ID: felt252 = 'TASK';

@@ -15,7 +15,7 @@ pub mod errors {
 #[generate_trait]
 pub impl TaskImpl of TaskTrait {
     #[inline]
-    fn new(id: felt252, total: u32, description: ByteArray) -> Task {
+    fn new(id: felt252, total: u128, description: ByteArray) -> Task {
         // [Check] Inputs
         TaskAssert::assert_valid_id(id);
         TaskAssert::assert_valid_total(total);
@@ -33,7 +33,7 @@ pub impl TaskAssert of AssertTrait {
     }
 
     #[inline]
-    fn assert_valid_total(total: u32) {
+    fn assert_valid_total(total: u128) {
         assert(total > 0, errors::TASK_INVALID_TOTAL);
     }
 
@@ -52,7 +52,7 @@ mod tests {
     // Constants
 
     const ID: felt252 = 'TASK';
-    const TOTAL: u32 = 100;
+    const TOTAL: u128 = 100;
 
     #[test]
     fn test_task_creation_new() {

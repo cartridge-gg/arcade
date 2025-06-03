@@ -97,7 +97,7 @@ pub mod AchievableComponent {
             world: WorldStorage,
             player_id: felt252,
             task_id: felt252,
-            count: u32,
+            count: u128,
         ) {
             // [Setup] Store
             let store: Store = StoreTrait::new(world);

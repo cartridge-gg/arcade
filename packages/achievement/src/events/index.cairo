@@ -29,7 +29,7 @@ pub struct TrophyProgression {
     pub player_id: felt252,
     #[key]
     pub task_id: felt252,
-    pub count: u32,
+    pub count: u128,
     pub time: u64,
 }
 
