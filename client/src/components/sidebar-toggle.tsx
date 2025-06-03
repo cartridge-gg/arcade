@@ -18,7 +18,7 @@ export function SidebarToggle({ className }: SidebarToggleProps) {
       className={cn(
         "h-10 w-10 transition-colors hover:bg-background-100",
         isOpen
-          ? "bg-background-150 text-white"
+          ? "bg-background-150 text-foreground-100"
           : "bg-background-100 hover:bg-background-150",
         className,
       )}
