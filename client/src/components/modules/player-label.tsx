@@ -90,7 +90,7 @@ export const AchievementPlayerLabel = ({
           <CopyAddress
             first={2}
             last={4}
-            address={address}
+            address={`0x${BigInt(address).toString(16)}`}
             size="xs"
             className="text-sm h-7 px-1.5 py-1"
           />
