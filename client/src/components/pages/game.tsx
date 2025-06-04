@@ -15,10 +15,12 @@ import arcade from "@/assets/arcade-logo.png";
 import { GameSocialWebsite } from "../modules/game-social";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
+import { useDevice } from "@/hooks/device";
 
 export function GamePage() {
   const { game, edition } = useProject();
   const { tab } = useProject();
+  const { isMobile } = useDevice();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,11 +48,23 @@ export function GamePage() {
     return Socials.merge(edition?.socials, game?.socials);
   }, [edition, game]);
 
+  const isDashboard = !(edition && game);
+
   return (
     <>
-      <div className="lg:h-[88px] w-full flex flex-col p-4 gap-4 lg:p-6 lg:pb-0 border-b border-background-200 lg:border-none">
+      <div
+        className={cn(
+          "lg:h-[88px] w-full flex flex-col gap-4 lg:p-6 lg:pb-0 border-b border-background-200 lg:border-none",
+          isDashboard ? "p-0" : "p-4",
+        )}
+      >
         <div className="flex items-start justify-between">
-          <div className="flex gap-3 items-center overflow-hidden">
+          <div
+            className={cn(
+              "flex gap-4 items-center overflow-hidden",
+              isDashboard && isMobile && "hidden",
+            )}
+          >
             <Thumbnail
               icon={edition?.properties.icon || game?.properties.icon || arcade}
               size="xl"
@@ -58,7 +72,7 @@ export function GamePage() {
             />
             <div className="flex flex-col gap-2 overflow-hidden">
               <p className="font-semibold text-xl/[24px] text-foreground-100 truncate">
-                {game?.name ?? "Arcade Dashboard"}
+                {game?.name || "Dashboard"}
               </p>
               <Editions />
             </div>

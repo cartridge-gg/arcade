@@ -169,9 +169,8 @@ export function Register({
       <SheetTrigger asChild>
         {!edition ? (
           <Button
-            variant="secondary"
             size="icon"
-            className="w-8 h-8 bg-background-150 hover:bg-background-200 text-foreground-300 hover:text-foreground-100 border border-background-200"
+            className="w-8 h-8 bg-background-150 hover:bg-background-200 text-foreground-300 hover:text-foreground-100"
             disabled={!account}
           >
             <PlusIcon size="sm" variant="solid" />

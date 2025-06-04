@@ -3,20 +3,20 @@ import { SceneLayout } from "@/components/scenes/layout";
 import { GamePage } from "./pages/game";
 import { useEffect } from "react";
 import { PlayerPage } from "./pages/player";
-import { useMediaQuery } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
 import { Header } from "./header";
 import { useProject } from "@/hooks/project";
 import { ThemeProvider } from "@/context/theme";
 import { useArcade } from "@/hooks/arcade";
+import { useDevice } from "@/hooks/device";
 
 export function App() {
   const { isOpen, toggle, handleTouchMove, handleTouchStart } = useSidebar();
   const { setPlayer } = useArcade();
   const { player } = useProject();
 
-  const isPWA = useMediaQuery("(display-mode: standalone)");
+  const isPWA = useDevice();
 
   useEffect(() => {
     setPlayer(player);
@@ -62,7 +62,7 @@ export function App() {
               </div>
               <div
                 className={cn(
-                  "relative grow h-full flex flex-col rounded-xl lg:gap-2 overflow-hidden border border-background-200 bg-background-100",
+                  "relative grow h-full flex flex-col rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100",
                   player &&
                     "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}
