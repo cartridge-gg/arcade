@@ -11,7 +11,7 @@ import {
 } from "./game-social";
 import ArcadeMenuButton from "./menu-button";
 
-const gameSocialsVariants = cva("flex gap-2", {
+const gameSocialsVariants = cva("flex gap-3", {
   variants: {
     variant: {
       darkest: "",

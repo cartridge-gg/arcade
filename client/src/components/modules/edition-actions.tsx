@@ -56,9 +56,7 @@ const EditionActions = ({
             data-disabled={disabled}
             active={false}
             simplified={true}
-            className={cn(
-              "bg-background-150 hover:bg-background-200 data-[disabled=true]:hover:bg-background-150 text-foreground-300 hover:text-foreground-200 data-[disabled=true]:hover:text-foreground-300 data-[disabled=true]:cursor-default border border-background-200 h-8 w-full flex items-center justify-start gap-1 px-1",
-            )}
+            className="bg-background-150 hover:bg-background-200 data-[disabled=true]:hover:bg-background-150 text-foreground-300 hover:text-foreground-200 data-[disabled=true]:hover:text-foreground-300 data-[disabled=true]:cursor-default h-8 w-full flex items-center justify-start gap-1 px-1"
           >
             {certified && whitelisted ? (
               <VerifiedIcon size="sm" />

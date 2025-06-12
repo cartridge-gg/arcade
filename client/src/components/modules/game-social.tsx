@@ -25,7 +25,7 @@ export const GameSocialWebsite = ({
       href={website}
       label={label ? "Play" : undefined}
       variant={variant}
-      className="text-primary justify-center text-base/[20px] tracking-wide px-2 py-2.5 h-10"
+      className="text-spacer-100 bg-primary hover:bg-primary hover:opacity-80 justify-center text-base/[20px] lg:px-4 py-2.5"
     />
   );
 };
