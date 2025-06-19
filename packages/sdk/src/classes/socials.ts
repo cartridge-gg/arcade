@@ -67,7 +67,7 @@ export class Socials {
       images: lhs?.images || rhs?.images,
     });
   }
- 
+
   compile(): ByteArray {
     const json: Record<string, string | string[]> = {};
     if (this.discord) json.discord = this.discord;
