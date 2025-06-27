@@ -8,19 +8,18 @@ import {
   ProfileOptions,
   ProviderOptions,
 } from "@cartridge/controller";
-// import { getSocialPolicies, getRegistryPolicies } from "@cartridge/arcade";
+import { getMarketplacePolicies } from "@cartridge/marketplace";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { ArcadeContext } from "./arcade";
 
 const chainId = constants.StarknetChainId.SN_MAIN;
 
 const keychain: KeychainOptions = {
-  // policies: {
-  //   contracts: {
-  //     ...getSocialPolicies(chainId).contracts,
-  //     ...getRegistryPolicies(chainId).contracts,
-  //   },
-  // },
+  policies: {
+    contracts: {
+      ...getMarketplacePolicies(chainId).contracts,
+    },
+  },
 };
 
 const profile: ProfileOptions = {

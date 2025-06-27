@@ -1,4 +1,4 @@
-import { CollectibleAsset, Skeleton } from "@cartridge/ui";
+import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useArcade } from "@/hooks/arcade";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditionModel } from "@cartridge/arcade";
@@ -8,6 +8,9 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { Collection, CollectionType } from "@/context/collection";
 import { useAddress } from "@/hooks/address";
+import { getChecksumAddress } from "starknet";
+import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { useMarketplace } from "@/hooks/marketplace";
 
 interface CollectionsProps {
   collections: Collection[];
@@ -50,6 +53,7 @@ function Item({
   const { isSelf } = useAddress();
   const { connector } = useAccount();
   const [username, setUsername] = useState<string>("");
+  const { orders } = useMarketplace();
 
   const edition = useMemo(() => {
     return editions.find(
@@ -64,6 +68,22 @@ function Item({
       ) || mainnet
     );
   }, [chains, edition]);
+
+  const listingCount = useMemo(() => {
+    const collectionOrders = orders[getChecksumAddress(collection.address)];
+    if (!collectionOrders) return 0;
+    const tokenOrders = Object.entries(collectionOrders).reduce(
+      (acc, [token, orders]) => {
+        if (Object.values(orders).length === 0) return acc;
+        acc[token] = Object.values(orders).filter(
+          (order) => !!order && order.status.value === StatusType.Placed,
+        );
+        return acc;
+      },
+      {} as { [token: string]: OrderModel[] },
+    );
+    return Object.values(tokenOrders).length;
+  }, [orders]);
 
   useEffect(() => {
     async function fetch() {
@@ -112,13 +132,14 @@ function Item({
 
   return (
     <div className="w-full group select-none">
-      <CollectibleAsset
+      <CollectibleCard
         title={collection.name}
         image={
           collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
           placeholder
         }
-        count={collection.totalCount}
+        totalCount={collection.totalCount}
+        listingCount={listingCount}
         onClick={isSelf ? handleClick : undefined}
         className={
           isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"

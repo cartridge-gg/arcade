@@ -4,6 +4,7 @@ export { ActivitiesContext } from "./activities";
 export { DiscoversContext } from "./discovers";
 export { MetricsContext } from "./metrics";
 export { CollectionContext } from "./collection";
+export { MarketCollectionContext } from "./market-collection";
 export { TokenContext } from "./token";
 export { OwnershipContext } from "./ownerships";
 export { ThemeContext } from "./theme";

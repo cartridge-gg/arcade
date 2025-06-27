@@ -24,11 +24,13 @@ export const useProject = () => {
     game: gameParam,
     edition: editionParam,
     player: playerParam,
+    collection: collectionParam,
     tab,
   } = useParams<{
     game: string;
     edition: string;
     player: string;
+    collection: string;
     tab: string;
   }>();
 
@@ -50,6 +52,11 @@ export const useProject = () => {
         game.name.toLowerCase().replace(/ /g, "-") === gameParam.toLowerCase(),
     );
   }, [gameParam, games]);
+
+  const collection = useMemo(() => {
+    if (!collectionParam) return;
+    return getChecksumAddress(collectionParam);
+  }, [collectionParam]);
 
   const edition = useMemo(() => {
     if (!game || editions.length === 0) return;
@@ -85,6 +92,7 @@ export const useProject = () => {
     game,
     edition,
     player,
+    collection,
     tab,
   };
 };
