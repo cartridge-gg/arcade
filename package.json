@@ -21,5 +21,17 @@
 	},
 	"bin": {
 		"gen": "./scripts/genAchievements.ts"
+	},
+	"pnpm": {
+		"overrides": {
+			"@cartridge/marketplace-sdk": "link:../marketplace/packages/sdk",
+			"marketplace": "link:../../marketplace",
+			"@cartridge/marketplace": "link:../marketplace/packages/sdk"
+		}
+	},
+	"dependencies": {
+		"@cartridge/marketplace": "link:../marketplace/packages/sdk",
+		"@cartridge/marketplace-sdk": "link:../marketplace/packages/sdk",
+		"marketplace": "link:../../marketplace"
 	}
 }

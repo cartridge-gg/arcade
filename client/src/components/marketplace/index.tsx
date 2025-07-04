@@ -1,23 +1,39 @@
 import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAddress } from "@/hooks/address";
-import { getChecksumAddress } from "starknet";
-import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { OrderModel, StatusType, useCollection } from "@cartridge/marketplace";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useMarketCollections } from "@/hooks/market-collections";
 import { Token } from "@dojoengine/torii-wasm";
 import { useProject } from "@/hooks/project";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { joinPaths } from "@/helpers";
 import { MetadataHelper } from "@/helpers/metadata";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import placeholder from "@/assets/placeholder.svg";
+import { getChecksumAddress } from "starknet";
 
 export const Marketplace = () => {
   const { collections } = useMarketCollections();
   const { editions, games } = useArcade();
   const { edition } = useProject();
+  const params = useParams();
+
+  const [filteredTokenIds, _setFilteredTokenIds] = useState<string[]>([]);
+
+  const {
+    collection,
+    // getPrevPage,
+    // getNextPage,
+    // hasPrev,
+    // hasNext,
+    // isLoading,
+    // currentPage,
+    // nextCursor,
+    // prevCursor,
+  } = useCollection(params.collection ?? "", filteredTokenIds, 50, undefined);
+  console.log(collection);
 
   const fileteredCollections: (Token & { count: number; project: string })[] =
     useMemo(() => {

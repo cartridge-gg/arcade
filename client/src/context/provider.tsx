@@ -15,6 +15,8 @@ import { PostHogProvider } from "./posthog";
 import { SidebarProvider } from "./sidebar";
 import { MarketplaceProvider } from "./marketplace";
 import { MarketCollectionProvider } from "./market-collection";
+import { ArcadeProvider as MarketplaceArcadeProvider } from "@cartridge/marketplace";
+import { MetadataFilterProvider } from "./filter";
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
@@ -37,7 +39,11 @@ export function Provider({ children }: PropsWithChildren) {
                             <DiscoversProvider>
                               <ActivitiesProvider>
                                 <MetricsProvider>
-                                  <SidebarProvider>{children}</SidebarProvider>
+                                  <MarketplaceArcadeProvider>
+                                    <MetadataFilterProvider>
+                                      <SidebarProvider>{children}</SidebarProvider>
+                                    </MetadataFilterProvider>
+                                  </MarketplaceArcadeProvider>
                                 </MetricsProvider>
                               </ActivitiesProvider>
                             </DiscoversProvider>

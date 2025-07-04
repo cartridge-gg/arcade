@@ -135,7 +135,7 @@ export function Items() {
       }
       const project = edition?.config.project;
       const preset = edition?.properties.preset;
-      let options = [`ps=${project}`, "closable=true"];
+      const options = [`ps=${project}`, "closable=true"];
       if (preset) {
         options.push(`preset=${preset}`);
       } else {

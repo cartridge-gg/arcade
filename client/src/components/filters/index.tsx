@@ -2,41 +2,35 @@ import {
   MarketplaceFilters,
   MarketplaceHeader,
   MarketplaceHeaderReset,
-  MarketplacePropertyEmpty,
   MarketplacePropertyFilter,
   MarketplacePropertyHeader,
   MarketplaceRadialItem,
   MarketplaceSearchEngine,
 } from "@cartridge/ui";
-import { useCallback, useMemo, useState } from "react";
+import { useMetadataFilters } from "@cartridge/marketplace";
+import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useFilters } from "@/context/filter";
 
-const ATTRIBUTES = [
-  "Name",
-  "XP",
-  "Level",
-  "Health",
-  "Gold",
-  "Strength",
-  "Dexterity",
-  "Intelligence",
-  "Vitality",
-  "Wisdom",
-];
-const PROPERTIES = [1, 2, 3, 4, 5];
 
 export const Filters = () => {
   const [active, setActive] = useState<number>(0);
   const [search, setSearch] = useState<{ [key: string]: string }>({});
-  const [selected, setSelected] = useState<{ [key: string]: boolean }>({});
+  const [selected, _setSelected] = useState<{ [key: string]: boolean }>({});
+  const params = useParams();
+
+  const { onFilterChange } = useFilters();
+
+  const {
+    statistics,
+    toggleTrait,
+    clearFilters,
+    isTraitSelected,
+  } = useMetadataFilters(params.collection ?? "", import.meta.env.VITE_IDENTITY, onFilterChange);
 
   const reset = useMemo(() => {
     return Object.values(selected).filter((value) => !!value).length > 0;
   }, [selected]);
-
-  const clear = useCallback(() => {
-    setSelected({});
-    setSearch({});
-  }, []);
 
   return (
     <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]">
@@ -54,41 +48,34 @@ export const Filters = () => {
         />
       </div>
       <MarketplaceHeader label="Properties">
-        {reset && <MarketplaceHeaderReset onClick={clear} />}
+        {reset && <MarketplaceHeaderReset onClick={clearFilters} />}
       </MarketplaceHeader>
-      {ATTRIBUTES.map((label, index) => (
-        <MarketplacePropertyHeader key={index} label={label} count={17}>
-          <MarketplaceSearchEngine
-            variant="darkest"
-            search={search[label] || ""}
-            setSearch={(value: string) =>
-              setSearch((prev) => ({ ...prev, [label]: value }))
-            }
-          />
-          <div className="flex flex-col gap-px">
-            {PROPERTIES.filter((i) =>
-              `Property ${label} ${i}`
-                .toLowerCase()
-                .includes((search[label] || "").toLowerCase()),
-            ).map((i) => (
-              <MarketplacePropertyFilter
-                key={i}
-                label={`Property ${label} ${i}`}
-                count={100}
-                value={selected[label + i] || false}
-                setValue={(value: boolean) =>
-                  setSelected((prev) => ({ ...prev, [label + i]: value }))
-                }
-              />
-            ))}
-            {PROPERTIES.filter((i) =>
-              `Property ${label} ${i}`
-                .toLowerCase()
-                .includes((search[label] || "").toLowerCase()),
-            ).length === 0 && <MarketplacePropertyEmpty />}
-          </div>
-        </MarketplacePropertyHeader>
-      ))}
+      {statistics.map(({ traitType, values }) => {
+        return (
+          <MarketplacePropertyHeader key={traitType} label={traitType} count={values.length}>
+            <MarketplaceSearchEngine
+              variant="darkest"
+              search={search[traitType] || ""}
+              setSearch={(value: string) =>
+                setSearch((prev) => ({ ...prev, [traitType]: value }))
+              }
+            />
+            <div className="flex flex-col gap-px">
+              {values.map(({ value, count }) => (
+                <MarketplacePropertyFilter
+                  key={`${value}-${count}`}
+                  label={value}
+                  count={count}
+                  value={isTraitSelected(traitType, value) || false}
+                  setValue={() =>
+                    toggleTrait(traitType, value)
+                  }
+                />
+              ))}
+            </div>
+          </MarketplacePropertyHeader>
+        )
+      })}
     </MarketplaceFilters>
   );
 };

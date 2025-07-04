@@ -70,6 +70,7 @@ export default defineConfig({
 
         defaultHandler(warning);
       },
+      external: ["react", "react-dom", "react-router-dom", "react/jsx-runtime"],
     },
   },
   publicDir: "public",
