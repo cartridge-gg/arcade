@@ -5,7 +5,7 @@ on:
   pull_request:
 
 env:
-  DOJO_VERSION: v1.6.0-alpha.1
+  DOJO_VERSION: v1.6.0-alpha.2
   SCARB_VERSION: 2.10.1
   WORKING_DIRECTORY: ./contracts
 

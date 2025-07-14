@@ -16,8 +16,8 @@ version = "0.0.0"
 edition = "2024_07"
 
 [workspace.dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.0-alpha.1" }
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.0-alpha.1" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.0-alpha.2" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.0-alpha.2" }
 graffiti = { git = "https://github.com/rsodre/graffiti.git", rev = "url" }
 starknet = "2.10.1"
 cairo_test = "2.10.1"
