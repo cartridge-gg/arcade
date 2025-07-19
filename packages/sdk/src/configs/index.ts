@@ -6,7 +6,7 @@ import { constants } from "starknet";
 
 const MAINNET_RPC_URL = "https://api.cartridge.gg/x/starknet/mainnet";
 const SEPOLIA_RPC_URL = "https://api.cartridge.gg/x/starknet/sepolia";
-const TORII_URL = "https://api.cartridge.gg/x/arcade-mainnet/torii";
+const TORII_URL = "https://api.cartridge.gg/x/arcade-mainnet-2/torii";
 
 export const configs = {
   [constants.StarknetChainId.SN_SEPOLIA]: createDojoConfig({

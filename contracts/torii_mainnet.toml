@@ -1,16 +1,14 @@
 # db_dir = "./torii-db"
 rpc = "https://api.cartridge.gg/x/starknet/mainnet"
-world_address = "0x016a472932cf1e83ae09de48a9165f88b15da71f43c5252720fc53a7cafaecb7"
+world_address = "0x054f7f579d72c4c48fa99396ea88fdcef0a6569d8c1eda754a6d740a506a204b"
 
 [indexing]
-events_chunk_size = 1024
-blocks_chunk_size = 1024
 pending = true
 polling_interval = 500
 max_concurrent_tasks = 100
-world_block = 1340703
+world_block = 1612497
 contracts = [
-    "ERC721:0x5c9e7a9b257856753255ea0dd340690ec328b4fc0a0b4e4b664bb0e76d1b18a",
+    "ERC721:0x055161714bb9e0083766a21f49253f3096babf049a5ecb23a6576c872c071163",
 ]
 
 [sql]

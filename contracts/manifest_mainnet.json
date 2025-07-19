@@ -1,8 +1,8 @@
 {
   "world": {
-    "class_hash": "0x4c60dc46a8ca8bb47675b7b914053cef769afbf0e340523187336b72bd71d1f",
-    "address": "0x16a472932cf1e83ae09de48a9165f88b15da71f43c5252720fc53a7cafaecb7",
-    "seed": "Arcade-10",
+    "class_hash": "0x685ed02eefa98fe7e208aa295042e9bbad8029b0d3d6f0ba2b32546efe0a1f9",
+    "address": "0x54f7f579d72c4c48fa99396ea88fdcef0a6569d8c1eda754a6d740a506a204b",
+    "seed": "Arcade-11",
     "name": "Cartridge World",
     "entrypoints": [
       "uuid",
@@ -1328,7 +1328,7 @@
   },
   "contracts": [
     {
-      "address": "0x1df0247ca7ab848ce0a66cd81ad910305e6be89a1cab9190417655f7dcd0bb7",
+      "address": "0x4f1ac5e32f2a25b56a4c7d63fdf7521138d957d193194de6a711e4ba71d9702",
       "class_hash": "0x5f4a21a85cefe28bc420096058aae5ceb2bd97718456b9a6abaca5510a731fa",
       "abi": [
         {
@@ -2036,7 +2036,7 @@
       ]
     },
     {
-      "address": "0x71387860bf8c3dae8c787060d12b763ec0507e8b8c9c71fa362fd9148cf81a7",
+      "address": "0x783236ca83a43256fc57fde04d0711f9551423ba4ebf9a908b8d8f74923469c",
       "class_hash": "0x3b8b2970065d0db25dcb82524117dca2467641129b247e004938dbcec81f6b2",
       "abi": [
         {
@@ -2322,7 +2322,7 @@
       ]
     },
     {
-      "address": "0x270562dd0e4fd973c7606567f80be50a1e09cea45996e3c84131369b9b5c147",
+      "address": "0xa5e14529d57e7113b134ac4d95686cbae9c783e3d70b5b09db99ac4f13485f",
       "class_hash": "0x583caf3d7c35fe6831125cc9bb5d786fe94ef3d071b3cb6a6bb1678d189180d",
       "abi": [
         {
@@ -2857,7 +2857,7 @@
       ]
     },
     {
-      "address": "0x1dee92c4d0d093d6df2ca6a90d87d1a0c0b3044c9782a9b52661f8c7c9c1b54",
+      "address": "0x7d18a5ebcb8faa6285c486021ddd0793230e52c4c0d5c1a33d28ea95e278044",
       "class_hash": "0x3dfdff1289a71c0ee6b9c1396c6e0dfa35db3829ad4db395c38d5433e1fa362",
       "abi": [
         {

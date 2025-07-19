@@ -2,7 +2,7 @@
 name = "Cartridge World"
 description = "Cartridge World"
 website = "https://github.com/dojoengine/dojo-starter"
-seed = "Arcade-10"
+seed = "Arcade-11"
 
 [world.socials]
 x = "https://x.com/ohayo_dojo"
@@ -25,7 +25,7 @@ default = "ARCADE"
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/mainnet"
 account_address = "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b"
-world_address = "0x016a472932cf1e83ae09de48a9165f88b15da71f43c5252720fc53a7cafaecb7"
+world_address = "0x059251150906c41e57f6bf02460bb3fcd3678f4fdd8e34b9d2f30452a057d1d8"
 # world_block = 1339026
 ipfs_config.url = "https://ipfs.infura.io:5001"
 ipfs_config.username = "2EBrzr7ZASQZKH32sl2xWauXPSA"
