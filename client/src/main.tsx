@@ -17,17 +17,24 @@ createRoot(document.getElementById("root")!).render(
         </Route>
         <Route path="game/:game" element={<App />}>
           <Route path="tab/:tab" element={<App />} />
+          <Route path="collection/:collection" element={<App />}>
+            <Route path="tab/:tab" element={<App />} />
+          </Route>
           <Route path="player/:player" element={<App />}>
             <Route path="tab/:tab" element={<App />} />
           </Route>
           <Route path="edition/:edition" element={<App />}>
             <Route path="tab/:tab" element={<App />} />
-            <Route path="player/:player" element={<App />}>
+            <Route path="collection/:collection" element={<App />}>
               <Route path="tab/:tab" element={<App />} />
             </Route>
+            <Route path="tab/:tab" element={<App />} />
           </Route>
         </Route>
         <Route path="tab/:tab" element={<App />} />
+        <Route path="collection/:collection" element={<App />}>
+          <Route path="tab/:tab" element={<App />} />
+        </Route>
         <Route path="*" element={<App />} />
       </Routes>
       <SonnerToaster position="top-center" />

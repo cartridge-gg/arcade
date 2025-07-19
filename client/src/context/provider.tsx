@@ -13,6 +13,9 @@ import { MetricsProvider } from "./metrics";
 import { OwnershipsProvider } from "./ownerships";
 import { PostHogProvider } from "./posthog";
 import { SidebarProvider } from "./sidebar";
+import { MarketplaceProvider } from "./marketplace";
+import { MarketCollectionProvider } from "./market-collection";
+import { MarketFiltersProvider } from "./market-filters";
 
 export function Provider({ children }: PropsWithChildren) {
   const queryClient = new QueryClient();
@@ -24,25 +27,33 @@ export function Provider({ children }: PropsWithChildren) {
       >
         <IndexerAPIProvider credentials="omit">
           <QueryClientProvider client={queryClient}>
-            <ArcadeProvider>
-              <StarknetProvider>
-                <OwnershipsProvider>
-                  <CollectionProvider>
-                    <TokenProvider>
-                      <AchievementProvider>
-                        <DiscoversProvider>
-                          <ActivitiesProvider>
-                            <MetricsProvider>
-                              <SidebarProvider>{children}</SidebarProvider>
-                            </MetricsProvider>
-                          </ActivitiesProvider>
-                        </DiscoversProvider>
-                      </AchievementProvider>
-                    </TokenProvider>
-                  </CollectionProvider>
-                </OwnershipsProvider>
-              </StarknetProvider>
-            </ArcadeProvider>
+            <MarketplaceProvider>
+              <ArcadeProvider>
+                <MarketCollectionProvider>
+                  <StarknetProvider>
+                    <OwnershipsProvider>
+                      <CollectionProvider>
+                        <TokenProvider>
+                          <AchievementProvider>
+                            <DiscoversProvider>
+                              <ActivitiesProvider>
+                                <MetricsProvider>
+                                  <MarketFiltersProvider>
+                                    <SidebarProvider>
+                                      {children}
+                                    </SidebarProvider>
+                                  </MarketFiltersProvider>
+                                </MetricsProvider>
+                              </ActivitiesProvider>
+                            </DiscoversProvider>
+                          </AchievementProvider>
+                        </TokenProvider>
+                      </CollectionProvider>
+                    </OwnershipsProvider>
+                  </StarknetProvider>
+                </MarketCollectionProvider>
+              </ArcadeProvider>
+            </MarketplaceProvider>
           </QueryClientProvider>
         </IndexerAPIProvider>
       </CartridgeAPIProvider>

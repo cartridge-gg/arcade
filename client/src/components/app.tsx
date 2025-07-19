@@ -10,11 +10,13 @@ import { useProject } from "@/hooks/project";
 import { ThemeProvider } from "@/context/theme";
 import { useArcade } from "@/hooks/arcade";
 import { useDevice } from "@/hooks/device";
+import { MarketPage } from "./pages/market";
+import { Filters } from "./filters";
 
 export function App() {
   const { isOpen, toggle, handleTouchMove, handleTouchStart } = useSidebar();
   const { setPlayer } = useArcade();
-  const { player } = useProject();
+  const { player, collection } = useProject();
 
   const isPWA = useDevice();
 
@@ -44,7 +46,7 @@ export function App() {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             />
-            <Games />
+            {!collection ? <Games /> : <Filters />}
             <div
               className={cn(
                 "fixed lg:relative h-full w-full flex flex-col overflow-hidden px-3 lg:px-0 lg:pb-0",
@@ -67,7 +69,15 @@ export function App() {
                     "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}
               >
-                {!player ? <GamePage /> : <PlayerPage />}
+                {!player ? (
+                  !collection ? (
+                    <GamePage />
+                  ) : (
+                    <MarketPage />
+                  )
+                ) : (
+                  <PlayerPage />
+                )}
               </div>
             </div>
           </div>
