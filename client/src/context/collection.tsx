@@ -71,7 +71,7 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
             console.warn(error, { data: first?.metadata });
           }
           const project = e.node.meta.project;
-          newCollections[`${project}-${contractAddress}`] = {
+          newCollections[`${contractAddress}`] = {
             address: contractAddress,
             imageUrl: imagePath ?? metadata?.image,
             name: name ? name : "---",
@@ -116,7 +116,7 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
             console.warn(error, { data: first?.metadata });
           }
           const project = e.node.meta.project;
-          newCollections[`${project}-${contractAddress}`] = {
+          newCollections[`${contractAddress}`] = {
             address: contractAddress,
             imageUrl: imagePath ?? metadata?.image,
             name: name ? name : "---",
