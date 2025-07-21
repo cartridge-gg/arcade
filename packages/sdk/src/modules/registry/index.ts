@@ -3,7 +3,15 @@ import { constants } from "starknet";
 import { Access, AccessModel } from "./access";
 import { Game, GameModel } from "./game";
 import { Edition, EditionModel } from "./edition";
-import { ClauseBuilder, ParsedEntity, SDK, StandardizedQueryResult, SubscriptionCallbackArgs, ToriiQueryBuilder, ToriiResponse } from "@dojoengine/sdk";
+import {
+  ClauseBuilder,
+  ParsedEntity,
+  SDK,
+  StandardizedQueryResult,
+  SubscriptionCallbackArgs,
+  ToriiQueryBuilder,
+  ToriiResponse,
+} from "@dojoengine/sdk";
 import { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { RegistryOptions, DefaultRegistryOptions } from "./options";
@@ -37,26 +45,26 @@ export const Registry = {
   fetchEntities: async (callback: (models: RegistryModel[]) => void, options: RegistryOptions) => {
     if (!Registry.sdk) return;
 
-    const wrappedCallback = async (
-      entities?: ToriiResponse<SchemaType>,
-    ) => {
+    const wrappedCallback = async (entities?: ToriiResponse<SchemaType>) => {
       if (!entities) return;
       const models: RegistryModel[] = [];
       const items = entities?.getItems();
-      await Promise.all(items.map(async (entity: ParsedEntity<SchemaType>) => {
-        if (entity.models[NAMESPACE][Access.getModelName()]) {
-          models.push(Access.parse(entity));
-        }
-        if (entity.models[NAMESPACE][Game.getModelName()]) {
-          const game = Game.parse(entity);
-          game.image = await Helpers.getImage(game.image, game.properties.preset);
-          models.push(game);
-        }
-        if (entity.models[NAMESPACE][Edition.getModelName()]) {
-          models.push(Edition.parse(entity));
-        }
-        return entity;
-      }));
+      await Promise.all(
+        items.map(async (entity: ParsedEntity<SchemaType>) => {
+          if (entity.models[NAMESPACE][Access.getModelName()]) {
+            models.push(Access.parse(entity));
+          }
+          if (entity.models[NAMESPACE][Game.getModelName()]) {
+            const game = Game.parse(entity);
+            game.image = await Helpers.getImage(game.image, game.properties.preset);
+            models.push(game);
+          }
+          if (entity.models[NAMESPACE][Edition.getModelName()]) {
+            models.push(Edition.parse(entity));
+          }
+          return entity;
+        }),
+      );
       callback(models);
     };
     const query = Registry.getEntityQuery(options);
@@ -70,10 +78,7 @@ export const Registry = {
 
   subEntities: async (callback: (models: RegistryModel[]) => void, options: RegistryOptions) => {
     if (!Registry.sdk) return;
-    const wrappedCallback = ({
-      data,
-      error,
-    }: SubscriptionCallbackArgs<StandardizedQueryResult<SchemaType>, Error>) => {
+    const wrappedCallback = ({ data, error }: SubscriptionCallbackArgs<StandardizedQueryResult<SchemaType>, Error>) => {
       if (error) {
         console.error("Error subscribing to entities:", error);
         return;

@@ -19,24 +19,90 @@ export class Registry {
   }
 
   public register_game(props: SystemProps.RegistryRegisterGameProps): AllowArray<Call> {
-    const { worldAddress, namespace, project, rpc, policies, color, game_image, edition_image, external_url, description, game_name, edition_name, game_attributes, edition_attributes, animation_url, youtube_url, properties, game_socials, edition_socials } = props;
+    const {
+      worldAddress,
+      namespace,
+      project,
+      rpc,
+      policies,
+      color,
+      game_image,
+      edition_image,
+      external_url,
+      description,
+      game_name,
+      edition_name,
+      game_attributes,
+      edition_attributes,
+      animation_url,
+      youtube_url,
+      properties,
+      game_socials,
+      edition_socials,
+    } = props;
     const entrypoint = "register_game";
 
     return {
       contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
-      calldata: [worldAddress, namespace, project, rpc, policies, color, game_image, edition_image, external_url, description, game_name, edition_name, game_attributes, edition_attributes, animation_url, youtube_url, properties, game_socials, edition_socials],
+      calldata: [
+        worldAddress,
+        namespace,
+        project,
+        rpc,
+        policies,
+        color,
+        game_image,
+        edition_image,
+        external_url,
+        description,
+        game_name,
+        edition_name,
+        game_attributes,
+        edition_attributes,
+        animation_url,
+        youtube_url,
+        properties,
+        game_socials,
+        edition_socials,
+      ],
     };
   }
 
   public update_game(props: SystemProps.RegistryUpdateGameProps): AllowArray<Call> {
-    const { gameId, color, image, image_data, external_url, description, name, attributes, animation_url, youtube_url, properties, socials } = props;
+    const {
+      gameId,
+      color,
+      image,
+      image_data,
+      external_url,
+      description,
+      name,
+      attributes,
+      animation_url,
+      youtube_url,
+      properties,
+      socials,
+    } = props;
     const entrypoint = "update_game";
 
     return {
       contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
-      calldata: [gameId, color, image, image_data, external_url, description, name, attributes, animation_url, youtube_url, properties, socials],
+      calldata: [
+        gameId,
+        color,
+        image,
+        image_data,
+        external_url,
+        description,
+        name,
+        attributes,
+        animation_url,
+        youtube_url,
+        properties,
+        socials,
+      ],
     };
   }
 
@@ -96,24 +162,92 @@ export class Registry {
   }
 
   public register_edition(props: SystemProps.RegistryRegisterEditionProps): AllowArray<Call> {
-    const { worldAddress, namespace, gameId, project, rpc, policies, color, image, image_data, external_url, description, name, attributes, animation_url, youtube_url, properties, socials } = props;
+    const {
+      worldAddress,
+      namespace,
+      gameId,
+      project,
+      rpc,
+      policies,
+      color,
+      image,
+      image_data,
+      external_url,
+      description,
+      name,
+      attributes,
+      animation_url,
+      youtube_url,
+      properties,
+      socials,
+    } = props;
     const entrypoint = "register_edition";
 
     return {
       contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
-      calldata: [worldAddress, namespace, gameId, project, rpc, policies, color, image, image_data, external_url, description, name, attributes, animation_url, youtube_url, properties, socials],
+      calldata: [
+        worldAddress,
+        namespace,
+        gameId,
+        project,
+        rpc,
+        policies,
+        color,
+        image,
+        image_data,
+        external_url,
+        description,
+        name,
+        attributes,
+        animation_url,
+        youtube_url,
+        properties,
+        socials,
+      ],
     };
   }
 
   public update_edition(props: SystemProps.RegistryUpdateEditionProps): AllowArray<Call> {
-    const { editionId, project, rpc, policies, color, image, image_data, external_url, description, name, attributes, animation_url, youtube_url, properties, socials } = props;
+    const {
+      editionId,
+      project,
+      rpc,
+      policies,
+      color,
+      image,
+      image_data,
+      external_url,
+      description,
+      name,
+      attributes,
+      animation_url,
+      youtube_url,
+      properties,
+      socials,
+    } = props;
     const entrypoint = "update_edition";
 
     return {
       contractAddress: getContractByName(this.manifest, this.name),
       entrypoint,
-      calldata: [editionId, project, rpc, policies, color, image, image_data, external_url, description, name, attributes, animation_url, youtube_url, properties, socials],
+      calldata: [
+        editionId,
+        project,
+        rpc,
+        policies,
+        color,
+        image,
+        image_data,
+        external_url,
+        description,
+        name,
+        attributes,
+        animation_url,
+        youtube_url,
+        properties,
+        socials,
+      ],
     };
   }
 

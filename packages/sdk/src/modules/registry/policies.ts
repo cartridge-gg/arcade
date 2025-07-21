@@ -22,7 +22,11 @@ export const getRegistryPolicies = (
       [address]: {
         name: CONTRACT_NAME,
         description: CONTRACT_DESCRIPTION,
-        methods: [...(options.access ? Access.getMethods() : []), ...(options.game ? Game.getMethods() : []), ...(options.edition ? Edition.getMethods() : []),],
+        methods: [
+          ...(options.access ? Access.getMethods() : []),
+          ...(options.game ? Game.getMethods() : []),
+          ...(options.edition ? Edition.getMethods() : []),
+        ],
       },
     },
   };

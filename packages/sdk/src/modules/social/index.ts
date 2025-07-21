@@ -5,7 +5,14 @@ import { Follow, FollowEvent } from "./follow";
 import { Guild, GuildModel } from "./guild";
 import { Alliance, AllianceModel } from "./alliance";
 import { Member, MemberModel } from "./member";
-import { ClauseBuilder, ParsedEntity, SDK, StandardizedQueryResult, ToriiQueryBuilder, ToriiResponse } from "@dojoengine/sdk";
+import {
+  ClauseBuilder,
+  ParsedEntity,
+  SDK,
+  StandardizedQueryResult,
+  ToriiQueryBuilder,
+  ToriiResponse,
+} from "@dojoengine/sdk";
 import { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { SocialOptions, DefaultSocialOptions } from "./options";

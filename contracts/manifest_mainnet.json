@@ -1329,7 +1329,7 @@
   "contracts": [
     {
       "address": "0x4f1ac5e32f2a25b56a4c7d63fdf7521138d957d193194de6a711e4ba71d9702",
-      "class_hash": "0x5f4a21a85cefe28bc420096058aae5ceb2bd97718456b9a6abaca5510a731fa",
+      "class_hash": "0x1fcd2b428c5cc9c6bcd9d38ff3a5ca0f4ed6fc3dd41866b899f027de9aceb59",
       "abi": [
         {
           "type": "impl",
@@ -1454,7 +1454,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -1470,7 +1470,7 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "view"
+              "state_mutability": "external"
             },
             {
               "type": "function",
@@ -2032,6 +2032,8 @@
       "selector": "0x54d3bcd441104e039ceaec4a413e72de393b65f79d1df74dc3346dc7f861173",
       "systems": [
         "dojo_init",
+        "grant",
+        "revoke",
         "upgrade"
       ]
     },

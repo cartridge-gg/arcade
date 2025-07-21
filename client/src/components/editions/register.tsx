@@ -171,7 +171,7 @@ export function Register({
           <Button
             size="icon"
             className="w-8 h-8 bg-background-150 hover:bg-background-200 text-foreground-300 hover:text-foreground-100"
-            disabled={!account}
+            disabled // Remove locally to register
           >
             <PlusIcon size="sm" variant="solid" />
           </Button>
@@ -296,7 +296,11 @@ export function Register({
             </div>
             <div className="flex gap-2 mt-4">
               {edition && (
-                <Button variant="secondary" size="icon" onClick={onDelete}>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={() => onDelete()}
+                >
                   <TrashIcon size="xs" />
                 </Button>
               )}

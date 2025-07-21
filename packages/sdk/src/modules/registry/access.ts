@@ -23,19 +23,11 @@ export class AccessModel {
     if (!model) return AccessModel.default(identifier);
     const address = getChecksumAddress(model.address);
     const role = Role.from(model.role);
-    return new AccessModel(
-      identifier,
-      address,
-      role,
-    );
+    return new AccessModel(identifier, address, role);
   }
 
   static default(identifier: string) {
-    return new AccessModel(
-      identifier,
-      "0x0",
-      new Role(RoleType.None),
-    );
+    return new AccessModel(identifier, "0x0", new Role(RoleType.None));
   }
 
   static isType(model: AccessModel) {
@@ -47,11 +39,7 @@ export class AccessModel {
   }
 
   clone(): AccessModel {
-    return new AccessModel(
-      this.identifier,
-      this.address,
-      this.role,
-    );
+    return new AccessModel(this.identifier, this.address, this.role);
   }
 }
 

@@ -154,9 +154,10 @@ export function Register() {
     <Sheet open={close} onOpenChange={setClose}>
       <SheetTrigger asChild>
         <Button
-          className="normal-case text-sm font-medium text-foreground-300 tracking-normal font-sans grow"
+          data-disabled
+          className="normal-case text-sm font-medium text-foreground-300 tracking-normal font-sans grow data-[disabled]:opacity-50"
           variant="secondary"
-          disabled={!account}
+          disabled
         >
           <PlusIcon size="xs" variant="solid" />
           Register Game
