@@ -103,7 +103,7 @@ export function Achievements({
           className="p-0 mt-0 overflow-y-scroll"
           style={{ scrollbarWidth: "none" }}
         >
-          <div className="flex flex-col gap-3 lg:gap-4 py-3 lg:py-6">
+          <div className="flex flex-col gap-4 lg:gap-4">
             <div className="flex flex-col gap-y-3 lg:gap-y-4">
               {filteredEditions.map((item, index) => (
                 <Row
