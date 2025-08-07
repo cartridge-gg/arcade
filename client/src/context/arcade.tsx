@@ -28,8 +28,18 @@ import {
   shortString,
 } from "starknet";
 import { Chain } from "@starknet-react/chains";
+import * as torii from "@dojoengine/torii-wasm";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
+const IGNORES = [
+  "populariumdemo-game",
+  "dragark-mainnet-v11-6",
+  "evolute-duel-arcade",
+  "zkube-budo-mainnet",
+  "budokan-mainnet-2",
+  "ponziland-tourney-2-2",
+  "jokersofneon",
+];
 
 export interface ProjectProps {
   namespace: string;
@@ -50,6 +60,7 @@ interface ArcadeContextType {
   editions: EditionModel[];
   chains: Chain[];
   player: string | undefined;
+  clients: { [key: string]: torii.ToriiClient };
   setPlayer: (address: string | undefined) => void;
 }
 
@@ -77,6 +88,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [editionId: string]: EditionModel;
   }>({});
   const [chains, setChains] = useState<Chain[]>([]);
+  const [clients, setClients] = useState<{ [key: string]: torii.ToriiClient }>(
+    {},
+  );
   const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
@@ -106,9 +120,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
             },
             paymasterRpcUrls: {
               avnu: {
-                http: ['http://localhost:5050'],
-              }
-            }
+                http: ["http://localhost:5050"],
+              },
+            },
           };
         }),
       );
@@ -277,6 +291,36 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [initialized, handleRegistryModels]);
 
+  useEffect(() => {
+    const getClients = async () => {
+      const clients: { [key: string]: torii.ToriiClient } = {};
+      await Promise.all(
+        Object.values(editions).map(async (edition) => {
+          // FIXME: some old torii version not compatible with the dojo.js version
+          if (IGNORES.includes(edition.config.project)) return;
+          // Fetch the torii client to ensure it exists
+          const url = `https://api.cartridge.gg/x/${edition.config.project}/torii`;
+          try {
+            const response = await fetch(url);
+            if (!!response && response.status !== 404) {
+              const client: torii.ToriiClient =
+                await provider.getToriiClient(url);
+              clients[edition.config.project] = client;
+            }
+          } catch (error) {
+            console.log("Error fetching Torii instance:", error);
+            return;
+          }
+        }),
+      );
+      const arcade = "https://api.cartridge.gg/x/arcade-mainnet/torii";
+      const client: torii.ToriiClient = await provider.getToriiClient(arcade);
+      clients["arcade-mainnet"] = client;
+      setClients(clients);
+    };
+    getClients();
+  }, [provider, editions]);
+
   const sortedAccesses = useMemo(() => {
     return Object.values(accesses).sort((a, b) =>
       a.identifier.localeCompare(b.identifier),
@@ -304,6 +348,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         games: sortedGames,
         editions: sortedEditions,
         chains,
+        clients,
         player,
         setPlayer,
       }}

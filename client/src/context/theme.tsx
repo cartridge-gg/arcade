@@ -65,7 +65,7 @@ export function ThemeProvider({
       ? theme
       : {
           ...defaultTheme,
-          colors: { ...defaultTheme.colors, primary: "#fbcb4a" },
+          colors: { primary: "#fbcb4a" },
         },
     assetUrl: import.meta.env.VITE_KEYCHAIN_URL,
   });
@@ -79,7 +79,7 @@ export function ThemeProvider({
     if (game.color) {
       setTheme({
         ...defaultTheme,
-        colors: { ...defaultTheme.colors, primary: game.color },
+        colors: { primary: game.color || "#fbcb4a" },
       });
     }
     if (game.properties.cover) {

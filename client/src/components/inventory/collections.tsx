@@ -1,6 +1,6 @@
-import { CollectibleAsset, Skeleton } from "@cartridge/ui";
+import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useArcade } from "@/hooks/arcade";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { EditionModel } from "@cartridge/arcade";
 import placeholder from "@/assets/placeholder.svg";
 import { useAccount } from "@starknet-react/core";
@@ -8,6 +8,12 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { Collection, CollectionType } from "@/context/collection";
 import { useAddress } from "@/hooks/address";
+import { getChecksumAddress } from "starknet";
+import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { useMarketplace } from "@/hooks/marketplace";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useUsername } from "@/hooks/account";
+import { joinPaths } from "@/helpers";
 
 interface CollectionsProps {
   collections: Collection[];
@@ -47,9 +53,9 @@ function Item({
   editions: EditionModel[];
   chains: Chain[];
 }) {
-  const { isSelf } = useAddress();
+  const { isSelf, address } = useAddress();
   const { connector } = useAccount();
-  const [username, setUsername] = useState<string>("");
+  const { orders } = useMarketplace();
 
   const edition = useMemo(() => {
     return editions.find(
@@ -65,21 +71,45 @@ function Item({
     );
   }, [chains, edition]);
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const name = await (connector as ControllerConnector)?.username();
-        if (!name) return;
-        setUsername(name);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    fetch();
-  }, [connector]);
+  const listingCount = useMemo(() => {
+    const collectionOrders = orders[getChecksumAddress(collection.address)];
+    if (!collectionOrders) return 0;
+    const tokenOrders = Object.entries(collectionOrders).reduce(
+      (acc, [token, orders]) => {
+        const filteredOrders = Object.values(orders).filter(
+          (order) =>
+            !!order &&
+            order.status.value === StatusType.Placed &&
+            BigInt(order.owner) === BigInt(address),
+        );
+        if (filteredOrders.length) {
+          acc[token] = filteredOrders;
+        }
+        return acc;
+      },
+      {} as { [token: string]: OrderModel[] },
+    );
+    return Object.values(tokenOrders).length;
+  }, [orders, address]);
 
+  const { username } = useUsername({ address });
+
+  const navigate = useNavigate();
+  const location = useLocation();
   const handleClick = useCallback(async () => {
-    if (!username) return;
+    // If the user is not logged in, or not the current user then we navigate to the marketplace
+    if (!isSelf) {
+      const player = username.toLowerCase();
+      let pathname = location.pathname;
+      pathname = pathname.replace(/\/player\/[^/]+/, "");
+      pathname = pathname.replace(/\/tab\/[^/]+/, "");
+      pathname = joinPaths(
+        pathname,
+        `/collection/${collection.address}/tab/items?filter=${player}`,
+      );
+      navigate(pathname || "/");
+      return;
+    }
     const controller = (connector as ControllerConnector)?.controller;
     if (!controller) {
       console.error("Connector not initialized");
@@ -105,24 +135,30 @@ function Item({
     } else {
       options.push("preset=cartridge");
     }
-    const path = `account/${username}/slot/${collection.project}/inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+    const path = `inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
     controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
-    controller.openProfileAt(path);
-  }, [collection.address, username, connector, collection.type, edition]);
+    controller.openProfileTo(path);
+  }, [
+    collection.address,
+    connector,
+    collection.type,
+    edition,
+    location,
+    navigate,
+    isSelf,
+  ]);
 
   return (
     <div className="w-full group select-none">
-      <CollectibleAsset
+      <CollectibleCard
         title={collection.name}
         image={
           collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
           placeholder
         }
-        count={collection.totalCount}
-        onClick={isSelf ? handleClick : undefined}
-        className={
-          isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"
-        }
+        totalCount={collection.totalCount}
+        listingCount={listingCount}
+        onClick={handleClick}
       />
     </div>
   );

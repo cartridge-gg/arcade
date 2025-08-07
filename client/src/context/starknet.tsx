@@ -3,10 +3,7 @@ import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
 import { PropsWithChildren, useContext, useMemo, useRef } from "react";
 import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import {
-  KeychainOptions,
-  ProviderOptions,
-} from "@cartridge/controller";
+import { KeychainOptions, ProviderOptions } from "@cartridge/controller";
 import { getSocialPolicies, getRegistryPolicies } from "@cartridge/arcade";
 import { ArcadeContext } from "./arcade";
 

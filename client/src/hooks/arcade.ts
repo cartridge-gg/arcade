@@ -34,6 +34,7 @@ export const useArcade = () => {
     games,
     editions,
     chains,
+    clients,
     player,
     setPlayer,
   } = context;
@@ -111,6 +112,7 @@ export const useArcade = () => {
     games: fileteredGames,
     editions: filteredEditions,
     chains,
+    clients,
     player,
     setPlayer,
   };

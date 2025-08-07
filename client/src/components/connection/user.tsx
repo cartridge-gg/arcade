@@ -21,6 +21,7 @@ export function User() {
     // Update the url params
     let pathname = location.pathname;
     const playerName = `${!name ? address?.toLowerCase() : name.toLowerCase()}`;
+    pathname = pathname.replace(/\/collection\/[^/]+/, "");
     pathname = pathname.replace(/\/player\/[^/]+/, "");
     pathname = pathname.replace(/\/tab\/[^/]+/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
