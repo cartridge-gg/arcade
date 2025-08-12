@@ -284,8 +284,12 @@ export function Items() {
       </div>
       <Separator className="w-full h-px bg-background-200" />
       <div className="w-full flex justify-end items-center p-4">
-        <Button variant="primary" onClick={() => handlePurchase(selection)}>
-          {selection.length > 0 ? `Buy (${selection.length})` : "Buy Floor"}
+        <Button
+          variant="primary"
+          onClick={() => handlePurchase(selection)}
+          disabled={selection.length === 0}
+        >
+          {`Buy (${selection.length})`}
         </Button>
       </div>
     </div>
