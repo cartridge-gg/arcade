@@ -11,7 +11,7 @@ import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useUsername } from "@/hooks/account";
 import { joinPaths } from "@/helpers";
 
@@ -95,7 +95,8 @@ function Item({
   const { username } = useUsername({ address });
 
   const navigate = useNavigate();
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = { pathname: routerState.location.pathname };
   const handleClick = useCallback(async () => {
     // If the user is not logged in, or not the current user then we navigate to the marketplace
     if (!isSelf) {
@@ -107,7 +108,7 @@ function Item({
         pathname,
         `/collection/${collection.address}/tab/items?filter=${player}`,
       );
-      navigate(pathname || "/");
+      navigate({ to: pathname || "/" });
       return;
     }
     const controller = (connector as ControllerConnector)?.controller;

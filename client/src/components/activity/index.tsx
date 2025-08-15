@@ -12,7 +12,7 @@ import {
 } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ActivityAchievementCard from "../modules/activity-achievement-card";
-import { Link } from "react-router-dom";
+import { Link } from "@tanstack/react-router";
 import { VoyagerUrl } from "@cartridge/ui/utils";
 import { constants } from "starknet";
 import { CardProps } from "@/context/activities";

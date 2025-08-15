@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Register } from "./register";
 import { EditionModel } from "@cartridge/arcade";
 import EditionActions from "../modules/edition-actions";
@@ -46,7 +46,8 @@ export const Editions = () => {
     return editions.filter((edition) => edition.gameId === game.id);
   }, [editions, game]);
 
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = { pathname: routerState.location.pathname };
   const navigate = useNavigate();
   const onClick = useCallback(
     (edition: EditionModel) => {
@@ -57,7 +58,7 @@ export const Editions = () => {
       pathname = pathname.replace(/\/game\/[^/]+/, "");
       pathname = pathname.replace(/\/edition\/[^/]+/, "");
       pathname = joinPaths(`game/${gameName}/edition/${editionName}`, pathname);
-      navigate(pathname || "/");
+      navigate({ to: pathname || "/" });
     },
     [location, navigate, game],
   );

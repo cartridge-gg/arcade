@@ -5,7 +5,7 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
 import { getChecksumAddress } from "starknet";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
@@ -67,7 +67,8 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     return !edition ? editions : [edition];
   }, [editions, edition]);
 
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = { pathname: routerState.location.pathname };
   const navigate = useNavigate();
   const handleClick = useCallback(
     (game: GameModel, edition: EditionModel, nameOrAddress: string) => {
@@ -84,7 +85,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             pathname,
           );
         }
-        navigate(pathname || "/");
+        navigate({ to: pathname || "/" });
         return;
       }
       // Otherwise it links to the player
@@ -92,7 +93,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
       pathname = pathname.replace(/\/tab\/[^/]+/, "");
       const player = nameOrAddress.toLowerCase();
       pathname = joinPaths(pathname, `/player/${player}/tab/activity`);
-      navigate(pathname || "/");
+      navigate({ to: pathname || "/" });
     },
     [navigate, filteredEditions],
   );

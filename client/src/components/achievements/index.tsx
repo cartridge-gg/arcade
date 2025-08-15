@@ -9,7 +9,7 @@ import { Item } from "@/helpers/achievements";
 import banner from "@/assets/banner.png";
 import AchievementSummary from "../modules/summary";
 import { useAddress } from "@/hooks/address";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/helpers";
 import { useOwnerships } from "@/hooks/ownerships";
 
@@ -175,7 +175,8 @@ export function Row({
     return { pinneds };
   }, [gameAchievements, pins, address, self]);
 
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = { pathname: routerState.location.pathname };
   const navigate = useNavigate();
   const summaryProps = useMemo(() => {
     return {
@@ -219,7 +220,7 @@ export function Row({
             pathname,
           );
         }
-        navigate(pathname || "/");
+        navigate({ to: pathname || "/" });
       },
     };
   }, [

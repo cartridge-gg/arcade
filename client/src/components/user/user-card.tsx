@@ -1,15 +1,12 @@
 import { useAddress } from "@/hooks/address";
 import { cn } from "@/lib/utils";
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { UserAvatar } from "./avatar";
 import { useUsername } from "@/hooks/account";
 import { AchievementPlayerBadge, SparklesIcon } from "@cartridge/ui";
 import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
 import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useSidebar } from "@/hooks/sidebar";
 
 export const UserCard = React.forwardRef<
   HTMLButtonElement,
@@ -19,9 +16,7 @@ export const UserCard = React.forwardRef<
   const { username } = useUsername({ address });
   const { editions } = useArcade();
   const { game } = useProject();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { close } = useSidebar();
+  // const { close } = useSidebar();
 
   const projects = useMemo(() => {
     return editions
@@ -36,20 +31,20 @@ export const UserCard = React.forwardRef<
   const { earnings: totalEarnings } = usePlayerStats();
   const { earnings: gameEarnings } = usePlayerGameStats(projects);
 
-  const handleClick = useCallback(() => {
-    if (!username && !address) return;
-    // Update the url params
-    let pathname = location.pathname;
-    const playerName = `${!username ? address?.toLowerCase() : username.toLowerCase()}`;
-    pathname = pathname.replace(/\/collection\/[^/]+/, "");
-    pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
-    pathname = joinPaths(pathname, `/player/${playerName}`);
-    navigate(pathname);
-
-    // Close sidebar on mobile
-    close();
-  }, [address, navigate, username, location, close]);
+  // const handleClick = useCallback(() => {
+  //   if (!username && !address) return;
+  //   // Update the url params
+  //   let pathname = location.pathname;
+  //   const playerName = `${!username ? address?.toLowerCase() : username.toLowerCase()}`;
+  //   pathname = pathname.replace(/\/collection\/[^/]+/, "");
+  //   pathname = pathname.replace(/\/player\/[^/]+/, "");
+  //   pathname = pathname.replace(/\/tab\/[^/]+/, "");
+  //   pathname = joinPaths(pathname, `/player/${playerName}`);
+  //   navigate(pathname);
+  //
+  //   // Close sidebar on mobile
+  //   close();
+  // }, [address, navigate, username, location, close]);
 
   if (!username) return null;
 
@@ -62,7 +57,7 @@ export const UserCard = React.forwardRef<
         "flex flex-col items-start p-4 gap-2 self-stretch w-full bg-background-100 lg:hover:bg-background-150 border-spacer-100 border-b border-spacer-100 lg:border lg:border-background-200 lg:hover:border-background-300 lg:rounded-xl",
         className,
       )}
-      onClick={handleClick}
+      // onClick={handleClick}
       {...props}
     >
       <div

@@ -1,44 +1,26 @@
 import { createRoot } from "react-dom/client";
-import { SonnerToaster } from "@cartridge/ui";
-import { App } from "@/components/app";
-import { Provider } from "@/context";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+// Import the generated route tree
+import { routeTree } from "./routeTree.gen";
+import { Provider } from "./context";
 
 registerSW();
 
+// Create a new router instance
+const router = createRouter({ routeTree });
+
+// Register the router instance for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
 createRoot(document.getElementById("root")!).render(
   <Provider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="player/:player" element={<App />}>
-          <Route path="tab/:tab" element={<App />} />
-        </Route>
-        <Route path="game/:game" element={<App />}>
-          <Route path="tab/:tab" element={<App />} />
-          <Route path="collection/:collection" element={<App />}>
-            <Route path="tab/:tab" element={<App />} />
-          </Route>
-          <Route path="player/:player" element={<App />}>
-            <Route path="tab/:tab" element={<App />} />
-          </Route>
-          <Route path="edition/:edition" element={<App />}>
-            <Route path="tab/:tab" element={<App />} />
-            <Route path="collection/:collection" element={<App />}>
-              <Route path="tab/:tab" element={<App />} />
-            </Route>
-            <Route path="tab/:tab" element={<App />} />
-          </Route>
-        </Route>
-        <Route path="tab/:tab" element={<App />} />
-        <Route path="collection/:collection" element={<App />}>
-          <Route path="tab/:tab" element={<App />} />
-        </Route>
-        <Route path="*" element={<App />} />
-      </Routes>
-      <SonnerToaster position="top-center" />
-    </BrowserRouter>
-    ,
-  </Provider>,
+    <RouterProvider router={router} />,
+  </Provider>
 );
