@@ -11,6 +11,10 @@ import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
 import { useDiscovers } from "@/hooks/discovers";
 import { joinPaths } from "@/helpers";
+// New TanStack Query imports
+import { usePlaythroughsQuery } from "@/queries/discovery";
+import { useAccountNamesQuery } from "@/queries/users";
+import { useFollowsQuery } from "@/queries/games";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
@@ -49,12 +53,40 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const { isConnected, address } = useAccount();
+  // TODO: Replace with new TanStack Query implementation below
   const {
     playthroughs,
     usernames: activitiesUsernames,
     status: activitiesStatus,
   } = useDiscovers();
   const { games, editions, follows } = useArcade();
+  
+  // New TanStack Query usage example (uncomment to use):
+  /*
+  const projects = useMemo(() => 
+    editions.map(e => e.config.project), [editions]);
+  
+  const { data: playthroughsData, isLoading } = usePlaythroughsQuery(projects, 1000);
+  
+  // Get unique player addresses from playthroughs
+  const playerAddresses = useMemo(() => {
+    const addresses = new Set<string>();
+    playthroughsData?.playthroughs?.items?.forEach(item => {
+      item.sessions.forEach(session => {
+        addresses.add(session.playerAddress);
+      });
+    });
+    return Array.from(addresses);
+  }, [playthroughsData]);
+  
+  const { data: usernamesData } = useAccountNamesQuery(playerAddresses);
+  const { data: followsData } = useFollowsQuery(address || '');
+  
+  // Transform data to match expected format
+  const playthroughs = playthroughsData?.playthroughs || { items: [] };
+  const usernames = usernamesData || {};
+  const status = isLoading ? "loading" : "success";
+  */
 
   const following = useMemo(() => {
     if (!address) return [];

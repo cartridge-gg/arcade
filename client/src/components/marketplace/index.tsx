@@ -14,11 +14,39 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import placeholder from "@/assets/placeholder.svg";
 import makeBlockie from "ethereum-blockies-base64";
+// New TanStack Query imports
+import { useOrdersQuery, useSalesQuery, useMarketplaceSubscription } from "@/queries/marketplace";
 
 export const Marketplace = () => {
+  // TODO: Replace with new TanStack Query implementation below
   const { collections } = useMarketCollections();
   const { editions, games } = useArcade();
   const { edition } = useProject();
+
+  // New TanStack Query usage example (uncomment to use):
+  /*
+  // Get orders for specific collections
+  const collectionIds = useMemo(() => 
+    Object.keys(collections || {}), [collections]);
+  
+  // Query orders for each collection
+  const ordersQueries = collectionIds.map(collectionId => 
+    useOrdersQuery(collectionId));
+  
+  // Setup real-time subscriptions
+  useMarketplaceSubscription({
+    collection: edition?.config.collection,
+    onOrder: (order) => {
+      // Handle new orders
+    },
+    onSale: (sale) => {
+      // Handle new sales
+    }
+  });
+  
+  // Get sales history
+  const { data: salesData } = useSalesQuery(edition?.config.collection || '', 50);
+  */
 
   const fileteredCollections: (Token & { count: number; project: string })[] =
     useMemo(() => {
@@ -79,7 +107,14 @@ function Item({
 }) {
   const { isSelf } = useAddress();
   const { orders, sales } = useMarketplace();
+  // TODO: Replace with new TanStack Query implementation below
   const [image, setImage] = useState<string>(placeholder);
+
+  // New TanStack Query usage example (uncomment to use):
+  /*
+  const { data: ordersData, isLoading } = useOrdersQuery(collection.contract_address);
+  const orders = ordersData?.orders || {};
+  */
 
 
   const listingCount = useMemo(() => {

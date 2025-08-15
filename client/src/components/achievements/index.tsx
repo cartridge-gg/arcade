@@ -12,6 +12,8 @@ import { useAddress } from "@/hooks/address";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/helpers";
 import { useOwnerships } from "@/hooks/ownerships";
+// New TanStack Query imports
+import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
 
 export function Achievements({
   game,
@@ -21,9 +23,38 @@ export function Achievements({
   edition?: EditionModel;
 }) {
   const { address, isSelf } = useAddress();
+  // TODO: Replace with new TanStack Query implementation below
   const { achievements, players, isLoading, isError } = useAchievements();
   const { pins, games, editions } = useArcade();
   const { ownerships } = useOwnerships();
+  
+  // New TanStack Query usage example (uncomment to use):
+  /*
+  const projects = useMemo(() => 
+    editions.map(e => ({
+      model: e.model,
+      namespace: e.namespace,
+      project: e.config.project
+    })), [editions]);
+  
+  const { data: trophiesData, isLoading: trophiesLoading } = useTrophiesQuery(projects);
+  const { data: progressionsData, isLoading: progressionsLoading } = useProgressionsQuery(projects, address);
+  
+  // Combine loading states
+  const isLoading = trophiesLoading || progressionsLoading;
+  const isError = !trophiesData && !trophiesLoading;
+  
+  // Transform query data to match existing shape
+  const achievements = useMemo(() => {
+    // TODO: Transform trophiesData to achievements format
+    return {};
+  }, [trophiesData]);
+  
+  const players = useMemo(() => {
+    // TODO: Transform progressionsData to players format
+    return {};
+  }, [progressionsData]);
+  */
 
   const isMobile = useMediaQuery("(max-width: 1024px)");
 

@@ -7,12 +7,24 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
 import { joinPaths } from "@/helpers";
+// New TanStack Query imports
+import { useAccountNameQuery, useUserProfileQuery } from "@/queries/users";
 
 export function User() {
   const { account, connector, address } = useAccount();
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [name, setName] = useState<string>("");
+  
+  // New TanStack Query usage example (uncomment to use):
+  /*
+  // Query username from API instead of connector
+  const { data: username } = useAccountNameQuery(address || '');
+  const { data: userProfile } = useUserProfileQuery(address || '');
+  
+  // Use query data as fallback or primary source
+  const displayName = name || username || userProfile?.username || '';
+  */
 
   const routerState = useRouterState();
   const location = { pathname: routerState.location.pathname };

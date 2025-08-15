@@ -17,13 +17,39 @@ import { VoyagerUrl } from "@cartridge/ui/utils";
 import { constants } from "starknet";
 import { CardProps } from "@/context/activities";
 import { useProject } from "@/hooks/project";
+// New TanStack Query imports
+import { useTransfersQuery, useActivitiesQuery as useTransactionsQuery } from "@/queries/activities";
 
 const OFFSET = 20;
 
 export function Activity() {
   const { edition } = useProject();
   const [cap, setCap] = useState(OFFSET);
+  // TODO: Replace with new TanStack Query implementation below
   const { activities, status } = useActivities();
+  
+  // New TanStack Query usage example (uncomment to use):
+  /*
+  const address = "0x..."; // Get from user context
+  const projects = useMemo(() => 
+    edition ? [{
+      project: edition.config.project,
+      address,
+      limit: 100
+    }] : [], [edition, address]);
+  
+  const { data: transfersData, isLoading: transfersLoading } = useTransfersQuery(address, projects);
+  const { data: transactionsData, isLoading: transactionsLoading } = useTransactionsQuery(address, projects, 100);
+  
+  // Combine and transform data
+  const activities = useMemo(() => {
+    // TODO: Combine transfers and transactions into unified activity feed
+    // Transform to CardProps format
+    return [];
+  }, [transfersData, transactionsData]);
+  
+  const status = (transfersLoading || transactionsLoading) ? "loading" : "success";
+  */
 
   const toExplorer = useCallback(
     (transactionHash: string, chainId: constants.StarknetChainId) => {

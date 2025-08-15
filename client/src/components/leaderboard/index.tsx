@@ -10,15 +10,54 @@ import LeaderboardRow from "../modules/leaderboard-row";
 import { useAccount } from "@starknet-react/core";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { joinPaths } from "@/helpers";
+// New TanStack Query imports
+import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
+import { useAccountNamesQuery } from "@/queries/users";
+import { usePinsQuery, useFollowsQuery } from "@/queries/games";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
 
 export function Leaderboard({ edition }: { edition?: EditionModel }) {
   const { isConnected, address } = useAccount();
+  // TODO: Replace with new TanStack Query implementation below
   const { achievements, globals, players, usernames, isLoading, isError } =
     useAchievements();
   const { pins, follows } = useArcade();
+  
+  // New TanStack Query usage example (uncomment to use):
+  /*
+  const projects = useMemo(() => 
+    edition ? [{
+      model: edition.model,
+      namespace: edition.namespace,
+      project: edition.config.project
+    }] : [], [edition]);
+  
+  const { data: trophiesData, isLoading: trophiesLoading } = useTrophiesQuery(projects);
+  const { data: progressionsData, isLoading: progressionsLoading } = useProgressionsQuery(projects, address);
+  
+  // Get player addresses for username resolution
+  const playerAddresses = useMemo(() => 
+    progressionsData?.items?.flatMap(item => 
+      item.achievements.map(a => a.playerAddress)
+    ) || [], [progressionsData]);
+  
+  const { data: usernamesData } = useAccountNamesQuery(playerAddresses);
+  const { data: pinsData } = usePinsQuery(address || '');
+  const { data: followsData } = useFollowsQuery(address || '');
+  
+  // Transform data to match expected format
+  const achievements = {}; // Transform trophiesData
+  const players = {}; // Transform progressionsData
+  const usernames = usernamesData || {};
+  const pins = {}; // Transform pinsData
+  const follows = {}; // Transform followsData
+  const globals = []; // Compute from data
+  
+  const isLoading = trophiesLoading || progressionsLoading;
+  const isError = false;
+  */
   const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
 
