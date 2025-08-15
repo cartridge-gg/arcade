@@ -61,7 +61,6 @@ export function PlayerPage() {
   const pathname = routerState.location.pathname;
   const navigate = useNavigate();
   const { player, game } = useProject();
-
   const handleClick = useCallback(
     (value: string) => {
       if (game && player) {
@@ -77,7 +76,6 @@ export function PlayerPage() {
   const handleClose = useCallback(() => {
     let newPath = pathname;
     newPath = newPath.replace(/\/player\/[^/]+.*$/, "");
-
     // If we're in a game context, go back to the game
     if (newPath.includes("/game/")) {
       navigate({ to: newPath || "/inventory" as any });
