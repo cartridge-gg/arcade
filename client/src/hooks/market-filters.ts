@@ -8,7 +8,7 @@ import { useMarketplace } from "./marketplace";
 import { useUsernames } from "./account";
 import { getChecksumAddress } from "starknet";
 import { MetadataHelper } from "@/helpers/metadata";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 
 export type Asset = Token & { orders: OrderModel[]; owner: string };
 
@@ -139,20 +139,29 @@ export const useMarketFilters = () => {
     setSelection([]);
   }, [setSelection]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const search = useSearch({ strict: false });
+
   const handleSetSelected = useCallback(
     (selected: SearchResult | undefined) => {
+      const newSearch = { ...search };
+
       if (!selected) {
         // Remove the filter from the url
-        searchParams.delete("filter");
-        setSearchParams(searchParams);
+        delete newSearch.filter;
       } else {
-        searchParams.set("filter", selected.label);
-        setSearchParams(searchParams);
+        newSearch.filter = selected.label;
       }
+
+      (navigate as any)({
+        search: {
+          tab: (newSearch as any).tab || undefined,
+          filter: newSearch.filter || undefined,
+        },
+      });
       setSelected(selected);
     },
-    [setSelected, searchParams, setSearchParams],
+    [setSelected, search, navigate],
   );
 
   useEffect(() => {

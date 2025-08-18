@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
@@ -39,7 +39,8 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     return achievements[edition?.config.project || ""] || [];
   }, [achievements, edition]);
 
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = { pathname: routerState.location.pathname };
   const handleClick = useCallback(
     (nameOrAddress: string) => {
       // On click, we update the url param address to the address of the player
@@ -48,7 +49,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
       pathname = pathname.replace(/\/tab\/[^/]+/, "");
       const player = nameOrAddress.toLowerCase();
       pathname = joinPaths(pathname, `/player/${player}/tab/achievements`);
-      navigate(pathname || "/");
+      navigate({ to: pathname || "/" });
     },
     [location, navigate],
   );
