@@ -23,3 +23,6 @@ credentials.txt
 *.njsproj
 *.sln
 *.sw?
+
+tsconfig.*.tsbuildinfo
+

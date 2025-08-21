@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DiscoverScene } from "@/components/scenes/discover";
+import { DiscoverLoading } from "@/components/errors";
 
 export const Route = createFileRoute("/activity")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -8,4 +9,5 @@ export const Route = createFileRoute("/activity")({
     };
   },
   component: DiscoverScene,
+  pendingComponent: DiscoverLoading,
 });
