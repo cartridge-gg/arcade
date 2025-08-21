@@ -5,113 +5,114 @@ export const queryKeys = {
   achievements: {
     all: ['achievements'] as const,
     trophies: (projects: any[]) => [...queryKeys.achievements.all, 'trophies', projects] as const,
-    progressions: (projects: any[], address?: string) => 
+    progressions: (projects: any[], address?: string) =>
       [...queryKeys.achievements.all, 'progressions', projects, address] as const,
-    stats: (projects: any[], address?: string) => 
+    stats: (projects: any[], address?: string) =>
       [...queryKeys.achievements.all, 'stats', projects, address] as const,
   },
-  
+
   // Activities domain
   activities: {
     all: ['activities'] as const,
-    transfers: (address: string, projects: any[]) => 
+    transfers: (address: string, projects: any[]) =>
       [...queryKeys.activities.all, 'transfers', address, projects] as const,
-    transactions: (address: string, projects: any[], limit?: number) => 
+    transactions: (address: string, projects: any[], limit?: number) =>
       [...queryKeys.activities.all, 'transactions', address, projects, limit] as const,
-    combined: (address: string, projects: any[]) => 
+    combined: (address: string, projects: any[]) =>
       [...queryKeys.activities.all, 'combined', address, projects] as const,
   },
-  
+
   // Marketplace domain
   marketplace: {
     all: ['marketplace'] as const,
-    orders: (collectionId: string, tokenId?: string) => 
+    orders: (collectionId: string, tokenId?: string) =>
       [...queryKeys.marketplace.all, 'orders', collectionId, tokenId] as const,
-    sales: (collectionId: string, limit?: number) => 
+    sales: (collectionId: string, limit?: number) =>
       [...queryKeys.marketplace.all, 'sales', collectionId, limit] as const,
-    listings: (collectionId: string, limit?: number) => 
+    listings: (collectionId: string, limit?: number) =>
       [...queryKeys.marketplace.all, 'listings', collectionId, limit] as const,
-    stats: (collectionId: string) => 
+    stats: (collectionId: string) =>
       [...queryKeys.marketplace.all, 'stats', collectionId] as const,
   },
-  
+
   // Inventory domain
   inventory: {
     all: ['inventory'] as const,
-    collections: (address: string, projects: any[], offset?: number) => 
+    collections: (address: string, projects: any[], offset?: number) =>
       [...queryKeys.inventory.all, 'collections', address, projects, offset] as const,
-    collectibles: (address: string, projects: any[], offset?: number) => 
+    collectibles: (address: string, projects: any[], offset?: number) =>
       [...queryKeys.inventory.all, 'collectibles', address, projects, offset] as const,
-    ownerships: (address: string, projects: any[]) => 
+    ownerships: (address: string, projects: any[]) =>
       [...queryKeys.inventory.all, 'ownerships', address, projects] as const,
-    tokens: (collectionId: string, tokenId: string, address: string) => 
+    tokens: (collectionId: string, tokenId: string, address: string) =>
       [...queryKeys.inventory.all, 'tokens', collectionId, tokenId, address] as const,
   },
-  
+
   // Tokens domain
   tokens: {
     all: ['tokens'] as const,
-    balances: (address: string, projects?: any[], offset?: number) => 
+    balances: (address: string, projects?: any[], offset?: number) =>
       [...queryKeys.tokens.all, 'balances', address, projects, offset] as const,
-    erc20: (address: string, tokenAddress: string) => 
+    erc20: (address: string, tokenAddress: string) =>
       [...queryKeys.tokens.all, 'erc20', address, tokenAddress] as const,
-    prices: (tokens: string[]) => 
+    prices: (tokens: string[]) =>
       [...queryKeys.tokens.all, 'prices', tokens] as const,
-    credits: (address: string) => 
+    credits: (address: string) =>
       [...queryKeys.tokens.all, 'credits', address] as const,
   },
-  
+
   // Users domain
   users: {
     all: ['users'] as const,
-    account: (address: string) => 
+    account: (address: string) =>
       [...queryKeys.users.all, 'account', address] as const,
-    accounts: (addresses: string[]) => 
+    accounts: (addresses: string[]) =>
       [...queryKeys.users.all, 'accounts', addresses] as const,
-    profile: (address: string) => 
+    profile: (address: string) =>
       [...queryKeys.users.all, 'profile', address] as const,
   },
-  
+
   // Discovery domain
   discovery: {
     all: ['discovery'] as const,
-    playthroughs: (projects: any[], limit?: number) => 
+    playthroughs: (projects: any[], limit?: number) =>
       [...queryKeys.discovery.all, 'playthroughs', projects, limit] as const,
-    metrics: (projects: any[]) => 
+    metrics: (projects: any[]) =>
       [...queryKeys.discovery.all, 'metrics', projects] as const,
-    analytics: (projectId: string, timeRange?: string) => 
+    analytics: (projectId: string, timeRange?: string) =>
       [...queryKeys.discovery.all, 'analytics', projectId, timeRange] as const,
   },
-  
+
   // Games domain
   games: {
     all: ['games'] as const,
-    registry: (chainId: string) => 
+    registry: (chainId: string) =>
       [...queryKeys.games.all, 'registry', chainId] as const,
-    game: (gameId: string) => 
+    game: (gameId: string) =>
       [...queryKeys.games.all, 'game', gameId] as const,
-    edition: (gameId: string, editionId: string) => 
+    edition: (gameId: string, editionId: string) =>
       [...queryKeys.games.all, 'edition', gameId, editionId] as const,
+    editions: ['games', 'editions'] as const,
     social: {
-      pins: (address: string) => 
+      pins: (address: string) =>
         [...queryKeys.games.all, 'social', 'pins', address] as const,
-      follows: (address: string) => 
+      follows: (address: string) =>
         [...queryKeys.games.all, 'social', 'follows', address] as const,
-      guilds: (guildId?: string) => 
+      guilds: (guildId?: string) =>
         [...queryKeys.games.all, 'social', 'guilds', guildId] as const,
-      alliances: (allianceId?: string) => 
+      alliances: (allianceId?: string) =>
         [...queryKeys.games.all, 'social', 'alliances', allianceId] as const,
     },
   },
-  
+
   // Torii domain
   torii: {
     all: ['torii'] as const,
-    client: (projectId: string) => 
+    client: (projectId: string) =>
       [...queryKeys.torii.all, 'client', projectId] as const,
-    entities: (projectId: string, model: string) => 
+    entities: (projectId: string, model: string) =>
       [...queryKeys.torii.all, 'entities', projectId, model] as const,
-    subscription: (projectId: string, models: string[]) => 
+    subscription: (projectId: string, models: string[]) =>
       [...queryKeys.torii.all, 'subscription', projectId, models] as const,
   },
 } as const;

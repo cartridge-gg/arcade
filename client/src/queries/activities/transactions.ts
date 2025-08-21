@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
+import { useActivitiesQuery as useCartridgeActivitiesQuery } from '@cartridge/ui/utils/api/cartridge';
 
 export interface ActivityProject {
   project: string;
@@ -26,31 +26,20 @@ export interface ActivitiesResponse {
   };
 }
 
-async function fetchActivities(projects: ActivityProject[]): Promise<ActivitiesResponse> {
-  // TODO: Replace with actual Cartridge API call
-  // This should use @cartridge/ui/utils/api/cartridge useActivitiesQuery
-  throw new Error('TODO: implement me at activities/transactions.ts - Need to integrate Cartridge API for fetching game activities');
-}
-
 export function useActivitiesQuery(address: string, projects: ActivityProject[], limit?: number) {
-  return useQuery({
-    queryKey: queryKeys.activities.transactions(address, projects, limit),
-    queryFn: () => fetchActivities(projects),
-    enabled: !!address && projects.length > 0,
-    ...queryConfigs.activities,
-  });
-}
+  // Use the Cartridge API hook directly
+  const result = useCartridgeActivitiesQuery(
+    { projects },
+    {
+      queryKey: queryKeys.activities.transactions(address, projects, limit),
+      enabled: !!address && projects.length > 0,
+      ...queryConfigs.activities,
+    }
+  );
 
-// Combined activities query (transfers + transactions)
-export function useCombinedActivitiesQuery(address: string, projects: any[]) {
-  return useQuery({
-    queryKey: queryKeys.activities.combined(address, projects),
-    queryFn: async () => {
-      // This would combine transfers and activities into a unified feed
-      // Sorted by timestamp and formatted for display
-      throw new Error('TODO: implement me at activities/transactions.ts - Need to combine transfers and activities into unified feed');
-    },
-    enabled: !!address && projects.length > 0,
-    ...queryConfigs.activities,
-  });
+  // Return with proper typing
+  return {
+    ...result,
+    data: result.data as ActivitiesResponse | undefined,
+  };
 }

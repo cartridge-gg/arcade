@@ -1,6 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { Progress, RawProgress } from '@/models';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
+import { useProgressionsQuery as useCartridgeProgressionsQuery } from '@cartridge/ui/utils/api/cartridge';
+import { AchievementModelParserCallback } from '.';
+import { Progressions } from '@/helpers/achievements';
 
 export interface ProgressionProject {
   model: string;
@@ -11,36 +14,40 @@ export interface ProgressionProject {
 export interface ProgressionResponse {
   items: {
     meta: { project: string };
-    achievements: any[]; // Raw progress data
+    achievements: RawProgress[]; // Raw progress data
   }[];
 }
 
-async function fetchProgressions(projects: ProgressionProject[], address?: string): Promise<ProgressionResponse> {
-  // TODO: Replace with actual Cartridge API call
-  // This should use @cartridge/ui/utils/api/cartridge useProgressionsQuery
-  // May need to filter by player address if provided
-  throw new Error('TODO: implement me at achievements/progressions.ts - Need to integrate Cartridge API for fetching player progressions');
+export function useProgressionsQuery(projects: ProgressionProject[], parser: AchievementModelParserCallback<RawProgress, Progress>) {
+  // Use the Cartridge API hook directly
+  const result = useCartridgeProgressionsQuery(
+    { projects },
+    {
+      queryKey: queryKeys.achievements.progressions(projects),
+      enabled: projects.length > 0,
+      ...queryConfigs.achievements,
+    }
+  );
+
+  // Transform the data to match our interface
+  return {
+    ...result,
+    data: transformData(result.data?.playerAchievements as ProgressionResponse, parser),
+  };
 }
 
-export function useProgressionsQuery(projects: ProgressionProject[], address?: string) {
-  return useQuery({
-    queryKey: queryKeys.achievements.progressions(projects, address),
-    queryFn: () => fetchProgressions(projects, address),
-    enabled: projects.length > 0,
-    ...queryConfigs.achievements,
+function transformData(playerAchievements: ProgressionResponse, parser: AchievementModelParserCallback<RawProgress, Progress>): Progressions {
+  if (!playerAchievements?.items) return {};
+  const progressions: { [key: string]: { [key: string]: Progress } } = {};
+  playerAchievements.items.forEach((item) => {
+    const project = item.meta.project;
+    const achievements = item.achievements
+      .map(parser)
+      .reduce((acc: { [key: string]: Progress }, achievement: Progress) => {
+        acc[achievement.key] = achievement;
+        return acc;
+      }, {});
+    progressions[project] = achievements;
   });
-}
-
-// Combined achievements stats query
-export function useAchievementStatsQuery(projects: ProgressionProject[], address?: string) {
-  return useQuery({
-    queryKey: queryKeys.achievements.stats(projects, address),
-    queryFn: async () => {
-      // This would combine trophies and progressions to compute stats
-      // Including rankings, completion rates, etc.
-      throw new Error('TODO: implement me at achievements/progressions.ts - Need to compute achievement stats from trophies and progressions');
-    },
-    enabled: projects.length > 0 && !!address,
-    ...queryConfigs.achievements,
-  });
+  return progressions
 }

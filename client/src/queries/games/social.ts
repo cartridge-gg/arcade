@@ -1,6 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
+import { Social } from '@/../../packages/sdk/src';
+import { constants } from 'starknet';
 
 export interface Pin {
   id: string;
@@ -36,22 +38,61 @@ export interface Alliance {
   metadata?: any;
 }
 
-async function fetchPins(address: string): Promise<Pin[]> {
-  // TODO: Replace with actual SDK call
-  // This should use packages/sdk Social.fetch() for pins
-  throw new Error('TODO: implement me at games/social.ts - Need to integrate SDK Social module for fetching pins');
+async function fetchPins(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Pin[]> {
+  // Initialize the Social SDK
+  await Social.init(chainId as constants.StarknetChainId);
+  
+  const pins: Pin[] = [];
+  
+  await Social.fetch((models: any[]) => {
+    models.forEach((model: any) => {
+      if (model.constructor.name === 'PinEvent') {
+        pins.push(model as Pin);
+      }
+    });
+  }, {
+    pin: true,
+  });
+  
+  return pins.filter(pin => pin.playerAddress === address);
 }
 
-async function fetchFollows(address: string): Promise<Follow[]> {
-  // TODO: Replace with actual SDK call
-  // This should use packages/sdk Social.fetch() for follows
-  throw new Error('TODO: implement me at games/social.ts - Need to integrate SDK Social module for fetching follows');
+async function fetchFollows(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Follow[]> {
+  // Initialize the Social SDK
+  await Social.init(chainId as constants.StarknetChainId);
+  
+  const follows: Follow[] = [];
+  
+  await Social.fetch((models: any[]) => {
+    models.forEach((model: any) => {
+      if (model.constructor.name === 'FollowEvent') {
+        follows.push(model as Follow);
+      }
+    });
+  }, {
+    follow: true,
+  });
+  
+  return follows.filter(follow => follow.followerAddress === address);
 }
 
-async function fetchGuilds(guildId?: string): Promise<Guild[]> {
-  // TODO: Replace with actual SDK call
-  // This should use packages/sdk Social.fetch() for guilds
-  throw new Error('TODO: implement me at games/social.ts - Need to integrate SDK Social module for fetching guilds');
+async function fetchGuilds(chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Guild[]> {
+  // Initialize the Social SDK
+  await Social.init(chainId as constants.StarknetChainId);
+  
+  const guilds: Guild[] = [];
+  
+  await Social.fetch((models: any[]) => {
+    models.forEach((model: any) => {
+      if (model.constructor.name === 'GuildModel') {
+        guilds.push(model as Guild);
+      }
+    });
+  }, {
+    guild: true,
+  });
+  
+  return guilds;
 }
 
 export function usePinsQuery(address: string) {
@@ -75,67 +116,9 @@ export function useFollowsQuery(address: string) {
 export function useGuildsQuery(guildId?: string) {
   return useQuery({
     queryKey: queryKeys.games.social.guilds(guildId),
-    queryFn: () => fetchGuilds(guildId),
+    queryFn: () => fetchGuilds(),
     ...queryConfigs.games,
   });
 }
 
-export function useAlliancesQuery(allianceId?: string) {
-  return useQuery({
-    queryKey: queryKeys.games.social.alliances(allianceId),
-    queryFn: async () => {
-      // TODO: Fetch alliances via SDK
-      throw new Error('TODO: implement me at games/social.ts - Need to fetch alliances');
-    },
-    ...queryConfigs.games,
-  });
-}
 
-// Mutations for social actions
-export function usePinMutation() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ achievementId, gameId }: { achievementId: string; gameId: string }) => {
-      // TODO: Implement via SDK Social.pin()
-      throw new Error('TODO: implement me at games/social.ts - Need to implement achievement pinning');
-    },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.games.social.pins,
-      });
-    },
-  });
-}
-
-export function useFollowMutation() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (followeeAddress: string) => {
-      // TODO: Implement via SDK Social.follow()
-      throw new Error('TODO: implement me at games/social.ts - Need to implement follow action');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.games.social.follows,
-      });
-    },
-  });
-}
-
-export function useCreateGuildMutation() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (guild: Partial<Guild>) => {
-      // TODO: Implement via SDK Social.create_guild()
-      throw new Error('TODO: implement me at games/social.ts - Need to implement guild creation');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.games.social.guilds,
-      });
-    },
-  });
-}

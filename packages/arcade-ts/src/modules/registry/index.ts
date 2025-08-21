@@ -14,7 +14,7 @@ import {
 } from "@dojoengine/sdk";
 import { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
-import { RegistryOptions, DefaultRegistryOptions } from "./options";
+import { type RegistryOptions, DefaultRegistryOptions } from "./options";
 import { Helpers } from "../../helpers";
 
 export * from "./policies";

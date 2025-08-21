@@ -16,6 +16,8 @@ import placeholder from "@/assets/placeholder.svg";
 import makeBlockie from "ethereum-blockies-base64";
 // New TanStack Query imports
 import { useOrdersQuery, useSalesQuery, useMarketplaceSubscription } from "@/queries/marketplace";
+// New TanStack Query imports (commented out until fully integrated)
+// import { useOrdersQuery, useSalesQuery, useMarketplaceSubscription } from "@/queries/marketplace";
 
 export const Marketplace = () => {
   // TODO: Replace with new TanStack Query implementation below

@@ -10,10 +10,10 @@ import LeaderboardRow from "../modules/leaderboard-row";
 import { useAccount } from "@starknet-react/core";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { joinPaths } from "@/helpers";
-// New TanStack Query imports
-import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
-import { useAccountNamesQuery } from "@/queries/users";
-import { usePinsQuery, useFollowsQuery } from "@/queries/games";
+// New TanStack Query imports (commented out until fully integrated)
+// import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
+// import { useAccountNamesQuery } from "@/queries/users";
+// import { usePinsQuery, useFollowsQuery } from "@/queries/games";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;

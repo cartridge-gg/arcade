@@ -7,8 +7,8 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
 import { joinPaths } from "@/helpers";
-// New TanStack Query imports
-import { useAccountNameQuery, useUserProfileQuery } from "@/queries/users";
+// New TanStack Query imports (commented out until fully integrated)
+// import { useAccountNameQuery, useUserProfileQuery } from "@/queries/users";
 
 export function User() {
   const { account, connector, address } = useAccount();

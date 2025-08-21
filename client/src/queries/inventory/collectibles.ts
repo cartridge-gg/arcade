@@ -1,6 +1,6 @@
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
+import { useCollectiblesQuery as useCartridgeCollectiblesQuery } from '@cartridge/ui/utils/api/cartridge';
 
 export interface Collectible {
   address: string;
@@ -37,47 +37,28 @@ export interface CollectiblesResponse {
   };
 }
 
-async function fetchCollectibles(
-  address: string,
-  projects: string[],
-  offset: number = 0
-): Promise<CollectiblesResponse> {
-  // TODO: Replace with actual Cartridge API call
-  // This should use @cartridge/ui/utils/api/cartridge useCollectiblesQuery
-  throw new Error('TODO: implement me at inventory/collectibles.ts - Need to integrate Cartridge API for fetching ERC1155 collectibles');
-}
-
 export function useCollectiblesQuery(
   address: string,
   projects: string[],
   offset: number = 0
 ) {
-  return useQuery({
-    queryKey: queryKeys.inventory.collectibles(address, projects, offset),
-    queryFn: () => fetchCollectibles(address, projects, offset),
-    enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
-    ...queryConfigs.inventory,
-  });
+  // Use the Cartridge API hook directly
+  const result = useCartridgeCollectiblesQuery(
+    {
+      accountAddress: address,
+      projects: projects,
+    },
+    {
+      queryKey: queryKeys.inventory.collectibles(address, projects, offset),
+      enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
+      ...queryConfigs.inventory,
+    }
+  );
+
+  // Return with proper typing
+  return {
+    ...result,
+    data: result.data as CollectiblesResponse | undefined,
+  };
 }
 
-// Infinite query for pagination
-export function useInfiniteCollectiblesQuery(
-  address: string,
-  projects: string[],
-  limit: number = 100
-) {
-  return useInfiniteQuery({
-    queryKey: queryKeys.inventory.collectibles(address, projects),
-    queryFn: ({ pageParam = 0 }) => 
-      fetchCollectibles(address, projects, pageParam),
-    getNextPageParam: (lastPage, pages) => {
-      const currentOffset = pages.length * limit;
-      if (lastPage.collectibles?.edges.length === limit) {
-        return currentOffset;
-      }
-      return undefined;
-    },
-    enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
-    ...queryConfigs.inventory,
-  });
-}

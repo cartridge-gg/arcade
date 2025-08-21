@@ -12,8 +12,8 @@ import { useAddress } from "@/hooks/address";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/helpers";
 import { useOwnerships } from "@/hooks/ownerships";
-// New TanStack Query imports
-import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
+// New TanStack Query imports (commented out until fully integrated)
+// import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
 
 export function Achievements({
   game,

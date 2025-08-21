@@ -16,47 +16,51 @@ import { SidebarProvider } from "./sidebar";
 import { MarketplaceProvider } from "./marketplace";
 import { MarketCollectionProvider } from "./market-collection";
 import { MarketFiltersProvider } from "./market-filters";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { queryClient, persister } from "../queries"
 
 export function Provider({ children }: PropsWithChildren) {
-  const queryClient = new QueryClient();
+  const qc = new QueryClient();
 
   return (
-    <PostHogProvider>
-      <CartridgeAPIProvider
-        url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
-      >
-        <IndexerAPIProvider credentials="omit">
-          <QueryClientProvider client={queryClient}>
-            <MarketplaceProvider>
-              <ArcadeProvider>
-                <MarketCollectionProvider>
-                  <StarknetProvider>
-                    <OwnershipsProvider>
-                      <CollectionProvider>
-                        <TokenProvider>
-                          <AchievementProvider>
-                            <DiscoversProvider>
-                              <ActivitiesProvider>
-                                <MetricsProvider>
-                                  <MarketFiltersProvider>
-                                    <SidebarProvider>
-                                      {children}
-                                    </SidebarProvider>
-                                  </MarketFiltersProvider>
-                                </MetricsProvider>
-                              </ActivitiesProvider>
-                            </DiscoversProvider>
-                          </AchievementProvider>
-                        </TokenProvider>
-                      </CollectionProvider>
-                    </OwnershipsProvider>
-                  </StarknetProvider>
-                </MarketCollectionProvider>
-              </ArcadeProvider>
-            </MarketplaceProvider>
-          </QueryClientProvider>
-        </IndexerAPIProvider>
-      </CartridgeAPIProvider>
-    </PostHogProvider>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+      <PostHogProvider>
+        <CartridgeAPIProvider
+          url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
+        >
+          <IndexerAPIProvider credentials="omit">
+            <QueryClientProvider client={qc}>
+              <MarketplaceProvider>
+                <ArcadeProvider>
+                  <MarketCollectionProvider>
+                    <StarknetProvider>
+                      <OwnershipsProvider>
+                        <CollectionProvider>
+                          <TokenProvider>
+                            <AchievementProvider>
+                              <DiscoversProvider>
+                                <ActivitiesProvider>
+                                  <MetricsProvider>
+                                    <MarketFiltersProvider>
+                                      <SidebarProvider>
+                                        {children}
+                                      </SidebarProvider>
+                                    </MarketFiltersProvider>
+                                  </MetricsProvider>
+                                </ActivitiesProvider>
+                              </DiscoversProvider>
+                            </AchievementProvider>
+                          </TokenProvider>
+                        </CollectionProvider>
+                      </OwnershipsProvider>
+                    </StarknetProvider>
+                  </MarketCollectionProvider>
+                </ArcadeProvider>
+              </MarketplaceProvider>
+            </QueryClientProvider>
+          </IndexerAPIProvider>
+        </CartridgeAPIProvider>
+      </PostHogProvider>
+    </PersistQueryClientProvider>
   );
 }

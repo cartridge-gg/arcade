@@ -26,13 +26,16 @@ import ArcadeMenuButton from "../modules/menu-button";
 import { Publish } from "./publish";
 import { Whitelist } from "./whitelist";
 import { UserCard } from "../user/user-card";
+import { useGamesQuery } from "@/queries";
+import { constants } from "starknet";
 
 export const Games = () => {
   const { address } = useAccount();
   const [search, setSearch] = useState("");
-  const { games } = useArcade();
+  // const { games: oldGames } = useArcade();
   const { game } = useProject();
   const { ownerships } = useOwnerships();
+  const { data: games } = useGamesQuery(constants.StarknetChainId.SN_MAIN);
   const { isOpen, handleTouchStart, handleTouchMove } = useSidebar();
   const isMobile = useMediaQuery("(max-width: 1024px)");
   const isPWA = useMediaQuery("(display-mode: standalone)");
@@ -42,9 +45,9 @@ export const Games = () => {
   }, [game]);
 
   const filteredGames = useMemo(() => {
-    return games.filter((game) =>
+    return games?.filter((game) =>
       game.name.toLowerCase().includes(search.toLowerCase()),
-    );
+    ) ?? [];
   }, [games, search]);
 
   return (
@@ -222,10 +225,15 @@ export const Game = ({
     }
     setGame(original.clone());
   }, [original]);
+  const navigationLink = useMemo(() => {
+    if (0 === id) {
+      return '/';
+    }
+    return `/game/${gameName}`
+  }, [gameName, id]);
 
   if (!!game && !whitelisted && !owner && !admin) return null;
 
-  const navigationLink = `/game/${gameName}`;
 
   return (
     <div className="flex items-center gap-2">

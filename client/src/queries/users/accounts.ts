@@ -1,6 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
+import {
+  useAccountNameQuery as useCartridgeAccountNameQuery,
+  useAccountNamesQuery as useCartridgeAccountNamesQuery
+} from '@cartridge/ui/utils/api/cartridge';
 
 export interface Account {
   address: string;
@@ -9,49 +12,42 @@ export interface Account {
   createdAt?: string;
 }
 
-async function fetchAccountName(address: string): Promise<string | undefined> {
-  // TODO: Replace with actual Cartridge API call
-  // This should use @cartridge/ui/utils/api/cartridge useAccountNameQuery
-  throw new Error('TODO: implement me at users/accounts.ts - Need to integrate Cartridge API for fetching username');
-}
-
-async function fetchAccountNames(addresses: string[]): Promise<Record<string, string>> {
-  // TODO: Replace with actual Cartridge API call
-  // This should use @cartridge/ui/utils/api/cartridge useAccountNamesQuery
-  throw new Error('TODO: implement me at users/accounts.ts - Need to integrate Cartridge API for fetching multiple usernames');
-}
-
 export function useAccountNameQuery(address: string) {
-  return useQuery({
-    queryKey: queryKeys.users.account(address),
-    queryFn: () => fetchAccountName(address),
-    enabled: !!address,
-    ...queryConfigs.users,
-  });
+  // Use the Cartridge API hook directly
+  const result = useCartridgeAccountNameQuery(
+    { address },
+    {
+      queryKey: queryKeys.users.account(address),
+      enabled: !!address,
+      ...queryConfigs.users,
+    }
+  );
+
+  // Return with proper typing
+  return {
+    ...result,
+    data: result.data?.username as string | undefined,
+  };
 }
 
 export function useAccountNamesQuery(addresses: string[]) {
-  return useQuery({
-    queryKey: queryKeys.users.accounts(addresses),
-    queryFn: () => fetchAccountNames(addresses),
-    enabled: addresses.length > 0,
-    ...queryConfigs.users,
-  });
+  // Use the Cartridge API hook directly
+  const result = useCartridgeAccountNamesQuery(
+    { addresses },
+    {
+      queryKey: queryKeys.users.accounts(addresses),
+      enabled: addresses.length > 0,
+      ...queryConfigs.users,
+    }
+  );
+
+  // Return with proper typing
+  return {
+    usernames:
+      result.data?.accounts?.edges?.map((edge) => ({
+        username: edge?.node?.username,
+        address: edge?.node?.controllers?.edges?.[0]?.node?.address,
+      })) ?? [],
+  };
 }
 
-// Query for batch username resolution with caching
-export function useBatchUsernamesQuery(addresses: string[]) {
-  return useQuery({
-    queryKey: queryKeys.users.accounts(addresses),
-    queryFn: async () => {
-      const usernames = await fetchAccountNames(addresses);
-      // Transform to array format if needed
-      return addresses.map(addr => ({
-        address: addr,
-        username: usernames[addr] || undefined,
-      }));
-    },
-    enabled: addresses.length > 0,
-    ...queryConfigs.users,
-  });
-}

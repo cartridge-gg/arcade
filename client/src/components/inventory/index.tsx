@@ -2,9 +2,9 @@ import { useCollections } from "@/hooks/collections";
 import { Collections } from "./collections";
 import { Tokens } from "./tokens";
 import { useTokens } from "@/hooks/tokens";
-// New TanStack Query imports
-import { useBalancesQuery, useCreditsQuery } from "@/queries/tokens";
-import { useCollectionsQuery, useCollectiblesQuery } from "@/queries/inventory";
+// New TanStack Query imports (commented out until fully integrated)
+// import { useBalancesQuery, useCreditsQuery } from "@/queries/tokens";
+// import { useCollectionsQuery, useCollectiblesQuery } from "@/queries/inventory";
 
 export const Inventory = () => {
   // TODO: Replace with new TanStack Query implementation below

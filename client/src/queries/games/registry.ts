@@ -1,6 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
+import { constants } from 'starknet';
+import { EditionModel, GameModel, Registry, RegistryModel } from '@cartridge/arcade';
 
 export interface Game {
   id: string;
@@ -30,77 +32,107 @@ export interface RegistryResponse {
   editions: Edition[];
   access?: any[];
 }
+export type GamesResponse = GameModel[];
+export type EditionsResponse = EditionModel[];
 
 async function fetchRegistry(chainId: string): Promise<RegistryResponse> {
-  // TODO: Replace with actual SDK call
-  // This should use packages/sdk Registry.fetch() or Registry.sub()
-  throw new Error('TODO: implement me at games/registry.ts - Need to integrate SDK Registry module for fetching games and editions');
+  // Initialize the Registry SDK
+  await Registry.init(chainId as constants.StarknetChainId);
+
+  // Fetch all registry data
+  const response: RegistryResponse = {
+    games: [],
+    editions: [],
+    access: [],
+  };
+
+  await Registry.fetch((models: any[]) => {
+    models.forEach((model: any) => {
+      if (model.constructor.name === 'GameModel') {
+        response.games.push(model as Game);
+      } else if (model.constructor.name === 'EditionModel') {
+        response.editions.push(model as Edition);
+      } else if (model.constructor.name === 'AccessModel') {
+        response.access?.push(model);
+      }
+    });
+  }, {
+    game: true,
+    edition: true,
+    access: true,
+  });
+
+  return response;
+}
+
+async function fetchGames(chainId: string): Promise<GameModel[]> {
+  // Initialize the Registry SDK
+  await Registry.init(chainId as constants.StarknetChainId);
+
+  // Fetch all registry data
+  const response: GamesResponse = [];
+
+  await Registry.fetch((models: RegistryModel[]) => {
+    models.forEach((model) => {
+      if (model.type === 'Game') {
+        response.push(model as GameModel);
+      }
+    });
+  }, {
+    game: true,
+    edition: false,
+    access: false,
+  });
+
+  return Object.values(response).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+async function fetchEditions(chainId: string): Promise<EditionModel[]> {
+  // Initialize the Registry SDK
+  await Registry.init(chainId as constants.StarknetChainId);
+
+  // Fetch all registry data
+  const response: EditionsResponse = [];
+
+  await Registry.fetch((models: RegistryModel[]) => {
+    models.forEach((model) => {
+      if (model.type === 'Edition') {
+        response.push(model as EditionModel);
+      }
+    });
+  }, {
+    game: false,
+    edition: true,
+    access: false,
+  });
+
+  return Object.values(response)
+    .sort((a, b) => a.id - b.id)
+    .sort((a, b) => b.priority - a.priority);
 }
 
 export function useRegistryQuery(chainId: string) {
   return useQuery({
     queryKey: queryKeys.games.registry(chainId),
     queryFn: () => fetchRegistry(chainId),
-    enabled: !!chainId,
     ...queryConfigs.games,
   });
 }
 
-// Query for specific game
-export function useGameQuery(gameId: string) {
+export function useGamesQuery(chainId: string) {
   return useQuery({
-    queryKey: queryKeys.games.game(gameId),
-    queryFn: async () => {
-      // TODO: Fetch specific game details
-      throw new Error('TODO: implement me at games/registry.ts - Need to fetch specific game details');
-    },
-    enabled: !!gameId,
+    queryKey: queryKeys.games.all,
+    queryFn: () => fetchGames(chainId),
     ...queryConfigs.games,
   });
 }
 
-// Query for specific edition
-export function useEditionQuery(gameId: string, editionId: string) {
+export function useEditionsQuery(chainId: string) {
   return useQuery({
-    queryKey: queryKeys.games.edition(gameId, editionId),
-    queryFn: async () => {
-      // TODO: Fetch specific edition details
-      throw new Error('TODO: implement me at games/registry.ts - Need to fetch specific edition details');
-    },
-    enabled: !!gameId && !!editionId,
+    queryKey: queryKeys.games.editions,
+    queryFn: () => fetchEditions(chainId),
     ...queryConfigs.games,
   });
 }
 
-// Mutations for game management
-export function useRegisterGameMutation() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (game: Partial<Game>) => {
-      // TODO: Implement via SDK Registry.register_game()
-      throw new Error('TODO: implement me at games/registry.ts - Need to implement game registration');
-    },
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.games.all,
-      });
-    },
-  });
-}
 
-export function usePublishGameMutation() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (gameId: string) => {
-      // TODO: Implement via SDK Registry.publish_game()
-      throw new Error('TODO: implement me at games/registry.ts - Need to implement game publishing');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.games.all,
-      });
-    },
-  });
-}

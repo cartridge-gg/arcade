@@ -1,92 +1,51 @@
 import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
-import { getChecksumAddress } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
-import { useDiscovers } from "@/hooks/discovers";
 import { joinPaths } from "@/helpers";
-// New TanStack Query imports
 import { usePlaythroughsQuery } from "@/queries/discovery";
-import { useAccountNamesQuery } from "@/queries/users";
-import { useFollowsQuery } from "@/queries/games";
+import { useEditionsQuery, useFollowsQuery, useGamesQuery } from "@/queries/games";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
 
-type Event = {
-  identifier: string;
-  name: string;
-  address: string;
-  Icon: React.ReactNode;
-  duration: number;
-  count: number;
-  actions: string[];
-  achievements: {
-    title: string;
-    icon: string;
-    points: number;
-  }[];
-  timestamp: number;
-  logo: string | undefined;
-  color: string;
-  onClick: () => void;
-};
-
-type Events = {
-  all: Event[];
-  following: Event[];
-};
-
 export function Discover({ edition }: { edition?: EditionModel }) {
-  const [events, setEvents] = useState<Events>({
-    all: [],
-    following: [],
-  });
 
   const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const { isConnected, address } = useAccount();
-  // TODO: Replace with new TanStack Query implementation below
-  const {
-    playthroughs,
-    usernames: activitiesUsernames,
-    status: activitiesStatus,
-  } = useDiscovers();
-  const { games, editions, follows } = useArcade();
-  
-  // New TanStack Query usage example (uncomment to use):
-  /*
-  const projects = useMemo(() => 
-    editions.map(e => e.config.project), [editions]);
-  
-  const { data: playthroughsData, isLoading } = usePlaythroughsQuery(projects, 1000);
-  
+
+  const { data: gamesRaw = [] } = useGamesQuery(constants.StarknetChainId.SN_MAIN);
+  // Ordering games for a faster access
+  const games = useMemo(() => {
+    return new Map(gamesRaw.map(g => [g.id, g]));
+  }, [gamesRaw])
+  const { data: editions = [] } = useEditionsQuery(constants.StarknetChainId.SN_MAIN);
+  const projects = useMemo(() =>
+    editions.map(e => ({ project: e.config.project, limit: 1000 })), [editions]);
+
+  const { data: playthroughs, usernames: activitiesUsernames, status: activitiesStatus } = usePlaythroughsQuery(projects, 1000);
+
   // Get unique player addresses from playthroughs
-  const playerAddresses = useMemo(() => {
-    const addresses = new Set<string>();
-    playthroughsData?.playthroughs?.items?.forEach(item => {
-      item.sessions.forEach(session => {
-        addresses.add(session.playerAddress);
-      });
-    });
-    return Array.from(addresses);
-  }, [playthroughsData]);
-  
-  const { data: usernamesData } = useAccountNamesQuery(playerAddresses);
-  const { data: followsData } = useFollowsQuery(address || '');
-  
-  // Transform data to match expected format
-  const playthroughs = playthroughsData?.playthroughs || { items: [] };
-  const usernames = usernamesData || {};
-  const status = isLoading ? "loading" : "success";
-  */
+  // const playerAddresses = useMemo(() => {
+  //   const addresses = new Set<string>();
+  //   playthroughs?.items?.forEach(item => {
+  //     item.playthroughs.forEach(session => {
+  //       addresses.add(session.callerAddress);
+  //     });
+  //   });
+  //   return Array.from(addresses);
+  // }, [playthroughs]);
+
+  // const { data: usernames } = useAccountNamesQuery(playerAddresses);
+  const { data: follows = [] } = useFollowsQuery(address || '');
 
   const following = useMemo(() => {
     if (!address) return [];
@@ -130,18 +89,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     [navigate, filteredEditions],
   );
 
-  useEffect(() => {
-    // Reset the events if the edition changes, meaning the user has clicked on a new game edition
-    setEvents({
-      all: [],
-      following: [],
-    });
-  }, [edition]);
-
-  useEffect(() => {
-    if (!filteredEditions) return;
-    if (!Object.entries(playthroughs)) return;
-    if (!Object.entries(activitiesUsernames)) return;
+  const events = useMemo(() => {
     const data = filteredEditions
       .flatMap((edition) => {
         return (
@@ -149,14 +97,13 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             ?.map((activity) => {
               const username =
                 activitiesUsernames[getChecksumAddress(activity.callerAddress)];
-              if (!username) return null;
-              const game = games.find((game) => game.id === edition.gameId);
+              const game = games.get(edition.gameId);
               if (!game) return null;
               return {
                 identifier: activity.identifier,
                 name: username,
                 address: getChecksumAddress(activity.callerAddress),
-                Icon: <UserAvatar username={username} size="sm" />,
+                Icon: <UserAvatar username={username ?? activity.callerAddress} size="sm" />,
                 duration: activity.end - activity.start,
                 count: activity.count,
                 actions: activity.actions,
@@ -179,20 +126,11 @@ export function Discover({ edition }: { edition?: EditionModel }) {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .sort((a, b) => b.timestamp - a.timestamp);
-    if (!data) return;
-    const newEvents: Events = {
-      all: data,
-      following: data.filter((event) => following.includes(event.address)),
+    return {
+      all: data ?? [],
+      following: data?.filter((event) => following.includes(event.address)) ?? [],
     };
-    if (newEvents.all.length === 0) return;
-    setEvents(newEvents);
-  }, [
-    playthroughs,
-    filteredEditions,
-    activitiesUsernames,
-    following,
-    handleClick,
-  ]);
+  }, [activitiesUsernames, filteredEditions, following, games, handleClick, playthroughs])
 
   const handleScroll = useCallback(() => {
     const parent = parentRef.current;
@@ -295,6 +233,6 @@ const LoadingState = () => {
 
 const EmptyState = () => {
   return (
-    <Empty title="It's feel lonely here" icon="discover" className="h-full" />
+    <Empty title="It feels lonely in here" icon="discover" className="h-full" />
   );
 };

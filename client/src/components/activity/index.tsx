@@ -17,8 +17,8 @@ import { VoyagerUrl } from "@cartridge/ui/utils";
 import { constants } from "starknet";
 import { CardProps } from "@/context/activities";
 import { useProject } from "@/hooks/project";
-// New TanStack Query imports
-import { useTransfersQuery, useActivitiesQuery as useTransactionsQuery } from "@/queries/activities";
+// New TanStack Query imports (commented out until fully integrated)
+// import { useTransfersQuery, useActivitiesQuery as useTransactionsQuery } from "@/queries/activities";
 
 const OFFSET = 20;
 

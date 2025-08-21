@@ -15,7 +15,7 @@ import {
 } from "@dojoengine/sdk";
 import { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
-import { SocialOptions, DefaultSocialOptions } from "./options";
+import { type SocialOptions, DefaultSocialOptions } from "./options";
 
 export * from "./policies";
 export { PinEvent, FollowEvent, GuildModel, AllianceModel, MemberModel, SocialOptions };

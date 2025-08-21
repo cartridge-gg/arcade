@@ -68,14 +68,17 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
     parser: Trophy.parse,
   });
 
-  const {
-    progressions,
-    isLoading: progressionsLoading,
-    isError: progressionsError,
-  } = useProgressions({
-    props: progressProps,
-    parser: Progress.parse,
-  });
+  // const {
+  //   progressions,
+  //   isLoading: progressionsLoading,
+  //   isError: progressionsError,
+  // } = useProgressions({
+  //   props: progressProps,
+  //   parser: Progress.parse,
+  // });
+  const progressions = {}
+  const progressionsLoading = true;
+  const progressionsError = false;
 
   // Compute achievements and players
   useEffect(() => {

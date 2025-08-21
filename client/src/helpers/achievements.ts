@@ -87,6 +87,7 @@ export const AchievementHelper = {
   extract(progressions: Progressions, trophies: Trophies): AchievementData {
     // Compute players and achievement stats
     const data: AchievementData = {};
+
     Object.keys(progressions).forEach((game) => {
       data[game] = {};
       Object.values(progressions[game]).forEach((progress: Progress) => {
