@@ -222,6 +222,20 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     setCap(cap + 5);
   }, [parentRef, edition, setCap]);
 
+  // Show loading state immediately if data is not ready
+  if (isLoading && !gamePlayers.length && !globals.length) {
+    return (
+      <LayoutContent className="select-none h-full overflow-clip p-0">
+        <div
+          className="p-0 pt-3 lg:pt-6 mt-0 h-full overflow-y-scroll"
+          style={{ scrollbarWidth: "none" }}
+        >
+          <LoadingState />
+        </div>
+      </LayoutContent>
+    );
+  }
+
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
       <div
@@ -237,9 +251,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
               className="p-0 mt-0 pb-3 lg:pb-6 grow w-full"
               value="all"
             >
-              {isLoading && filteredData.all.length === 0 ? (
-                <LoadingState />
-              ) : isError || filteredData.all.length === 0 ? (
+              {isError || filteredData.all.length === 0 ? (
                 <EmptyState />
               ) : (
                 <div
@@ -268,8 +280,6 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
             >
               {!isConnected ? (
                 <Connect />
-              ) : isLoading && gamesData.following.length === 0 ? (
-                <LoadingState />
               ) : isError || filteredData.following.length === 0 ? (
                 <EmptyState />
               ) : (

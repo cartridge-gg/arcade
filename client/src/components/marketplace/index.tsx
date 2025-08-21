@@ -9,20 +9,25 @@ import { Token } from "@dojoengine/torii-wasm";
 import { useProject } from "@/hooks/project";
 import { Link } from "@tanstack/react-router";
 import { MetadataHelper } from "@/helpers/metadata";
-import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import placeholder from "@/assets/placeholder.svg";
 import makeBlockie from "ethereum-blockies-base64";
 // New TanStack Query imports
 import { useOrdersQuery, useSalesQuery, useMarketplaceSubscription } from "@/queries/marketplace";
+import { useSuspenseGamesQuery, useSuspenseEditionsQuery } from "@/queries/games";
+import { constants } from "starknet";
 // New TanStack Query imports (commented out until fully integrated)
 // import { useOrdersQuery, useSalesQuery, useMarketplaceSubscription } from "@/queries/marketplace";
 
 export const Marketplace = () => {
   // TODO: Replace with new TanStack Query implementation below
+  // Use suspense queries for games and editions - data is guaranteed
+  const { data: games } = useSuspenseGamesQuery(constants.StarknetChainId.SN_MAIN);
+  const { data: editions } = useSuspenseEditionsQuery(constants.StarknetChainId.SN_MAIN);
+
+  // Keep collections from context (depends on Torii clients)
   const { collections } = useMarketCollections();
-  const { editions, games } = useArcade();
   const { edition } = useProject();
 
   // New TanStack Query usage example (uncomment to use):
@@ -70,28 +75,27 @@ export const Marketplace = () => {
       );
     }, [collections, edition]);
 
-  if (!collections) {
-    return <LoadingState />;
-  }
-
-  if (!!collections && fileteredCollections.length === 0) {
-    return <EmptyState />;
-  }
-
+  // Render immediately with loading state if needed
   return (
     <div
       className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
       style={{ scrollbarWidth: "none" }}
     >
-      {fileteredCollections.map((collection) => (
-        <Item
-          key={`${collection.project}-${collection.contract_address}`}
-          project={collection.project}
-          collection={collection}
-          editions={editions}
-          games={games}
-        />
-      ))}
+      {!collections ? (
+        <LoadingState />
+      ) : fileteredCollections.length === 0 ? (
+        <EmptyState />
+      ) : (
+        fileteredCollections.map((collection) => (
+          <Item
+            key={`${collection.project}-${collection.contract_address}`}
+            project={collection.project}
+            collection={collection}
+            editions={editions}
+            games={games}
+          />
+        ))
+      )}
     </div>
   );
 };
@@ -174,7 +178,7 @@ function Item({
     if (!edition) return { game: null, edition: null };
     const game = games.find((game) => game.id === edition.gameId);
     return { game, edition };
-  }, [collection, editions]);
+  }, [project, editions, games]);
 
   useEffect(() => {
     const fetchImage = async () => {

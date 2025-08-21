@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
 import { constants } from 'starknet';
@@ -65,7 +65,7 @@ async function fetchRegistry(chainId: string): Promise<RegistryResponse> {
   return response;
 }
 
-async function fetchGames(chainId: string): Promise<GameModel[]> {
+export async function fetchGames(chainId: string): Promise<GameModel[]> {
   // Initialize the Registry SDK
   await Registry.init(chainId as constants.StarknetChainId);
 
@@ -87,7 +87,7 @@ async function fetchGames(chainId: string): Promise<GameModel[]> {
   return Object.values(response).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function fetchEditions(chainId: string): Promise<EditionModel[]> {
+export async function fetchEditions(chainId: string): Promise<EditionModel[]> {
   // Initialize the Registry SDK
   await Registry.init(chainId as constants.StarknetChainId);
 
@@ -129,6 +129,23 @@ export function useGamesQuery(chainId: string) {
 
 export function useEditionsQuery(chainId: string) {
   return useQuery({
+    queryKey: queryKeys.games.editions,
+    queryFn: () => fetchEditions(chainId),
+    ...queryConfigs.games,
+  });
+}
+
+// Suspense versions for route loaders
+export function useSuspenseGamesQuery(chainId: string) {
+  return useSuspenseQuery({
+    queryKey: queryKeys.games.all,
+    queryFn: () => fetchGames(chainId),
+    ...queryConfigs.games,
+  });
+}
+
+export function useSuspenseEditionsQuery(chainId: string) {
+  return useSuspenseQuery({
     queryKey: queryKeys.games.editions,
     queryFn: () => fetchEditions(chainId),
     ...queryConfigs.games,

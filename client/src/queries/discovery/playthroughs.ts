@@ -89,7 +89,7 @@ export function usePlaythroughsQuery(projects: PlaythroughProject[], limit: numb
   return {
     ...result,
     data: playthroughs ?? {},
-    usernames: usernames ?? [],
+    usernames: usernames ?? {},
     follows: following ?? [],
   };
 }

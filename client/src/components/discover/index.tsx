@@ -10,7 +10,8 @@ import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
 import { joinPaths } from "@/helpers";
 import { usePlaythroughsQuery } from "@/queries/discovery";
-import { useEditionsQuery, useFollowsQuery, useGamesQuery } from "@/queries/games";
+import { useSuspenseEditionsQuery, useFollowsQuery, useSuspenseGamesQuery } from "@/queries/games";
+import { filter } from "lodash";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
@@ -22,16 +23,17 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 
   const { isConnected, address } = useAccount();
 
-  const { data: gamesRaw = [] } = useGamesQuery(constants.StarknetChainId.SN_MAIN);
+  // Using suspense queries - data is guaranteed to be available
+  const { data: gamesRaw } = useSuspenseGamesQuery(constants.StarknetChainId.SN_MAIN);
   // Ordering games for a faster access
   const games = useMemo(() => {
     return new Map(gamesRaw.map(g => [g.id, g]));
   }, [gamesRaw])
-  const { data: editions = [] } = useEditionsQuery(constants.StarknetChainId.SN_MAIN);
+  const { data: editions } = useSuspenseEditionsQuery(constants.StarknetChainId.SN_MAIN);
   const projects = useMemo(() =>
     editions.map(e => ({ project: e.config.project, limit: 1000 })), [editions]);
 
-  const { data: playthroughs, usernames: activitiesUsernames, status: activitiesStatus } = usePlaythroughsQuery(projects, 1000);
+  const { data: playthroughs = {}, usernames: activitiesUsernames = {}, status: activitiesStatus } = usePlaythroughsQuery(projects, 1000);
 
   // Get unique player addresses from playthroughs
   // const playerAddresses = useMemo(() => {
@@ -45,7 +47,21 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   // }, [playthroughs]);
 
   // const { data: usernames } = useAccountNamesQuery(playerAddresses);
-  const { data: follows = [] } = useFollowsQuery(address || '');
+  const { data: followsData = [], isLoading: followsLoading } = useFollowsQuery(address || '');
+
+  // Transform Follow[] to { [playerId: string]: string[] }
+  const follows = useMemo(() => {
+    const followsMap: { [playerId: string]: string[] } = {};
+    followsData.forEach((follow: any) => {
+      const follower = getChecksumAddress(follow.followerAddress || follow.follower);
+      const followed = getChecksumAddress(follow.followeeAddress || follow.followed);
+      if (!followsMap[follower]) {
+        followsMap[follower] = [];
+      }
+      followsMap[follower].push(followed);
+    });
+    return followsMap;
+  }, [followsData]);
 
   const following = useMemo(() => {
     if (!address) return [];
@@ -126,6 +142,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .sort((a, b) => b.timestamp - a.timestamp);
+    console.log(data.length);
     return {
       all: data ?? [],
       following: data?.filter((event) => following.includes(event.address)) ?? [],
@@ -195,13 +212,13 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             <TabsContent className="p-0 mt-0 grow w-full" value="following">
               {!isConnected ? (
                 <Connect />
+              ) : (activitiesStatus === "loading" || followsLoading) &&
+                events.following.length === 0 ? (
+                <LoadingState />
               ) : activitiesStatus === "error" ||
                 following.length === 0 ||
                 events.following.length === 0 ? (
                 <EmptyState />
-              ) : activitiesStatus === "loading" &&
-                events.following.length === 0 ? (
-                <LoadingState />
               ) : (
                 <ArcadeDiscoveryGroup
                   events={events.following.slice(0, cap)}

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { queryKeys } from '../keys';
 import { queryConfigs } from '../queryClient';
 import { Social } from '@/../../packages/sdk/src';
@@ -38,7 +38,7 @@ export interface Alliance {
   metadata?: any;
 }
 
-async function fetchPins(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Pin[]> {
+export async function fetchPins(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Pin[]> {
   // Initialize the Social SDK
   await Social.init(chainId as constants.StarknetChainId);
   
@@ -57,7 +57,7 @@ async function fetchPins(address: string, chainId: string = constants.StarknetCh
   return pins.filter(pin => pin.playerAddress === address);
 }
 
-async function fetchFollows(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Follow[]> {
+export async function fetchFollows(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Follow[]> {
   // Initialize the Social SDK
   await Social.init(chainId as constants.StarknetChainId);
   
@@ -76,7 +76,7 @@ async function fetchFollows(address: string, chainId: string = constants.Starkne
   return follows.filter(follow => follow.followerAddress === address);
 }
 
-async function fetchGuilds(chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Guild[]> {
+export async function fetchGuilds(chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Guild[]> {
   // Initialize the Social SDK
   await Social.init(chainId as constants.StarknetChainId);
   
@@ -115,6 +115,31 @@ export function useFollowsQuery(address: string) {
 
 export function useGuildsQuery(guildId?: string) {
   return useQuery({
+    queryKey: queryKeys.games.social.guilds(guildId),
+    queryFn: () => fetchGuilds(),
+    ...queryConfigs.games,
+  });
+}
+
+// Suspense versions for route loaders
+export function useSuspensePinsQuery(address: string) {
+  return useSuspenseQuery({
+    queryKey: queryKeys.games.social.pins(address),
+    queryFn: () => fetchPins(address),
+    ...queryConfigs.games,
+  });
+}
+
+export function useSuspenseFollowsQuery(address: string) {
+  return useSuspenseQuery({
+    queryKey: queryKeys.games.social.follows(address),
+    queryFn: () => fetchFollows(address),
+    ...queryConfigs.games,
+  });
+}
+
+export function useSuspenseGuildsQuery(guildId?: string) {
+  return useSuspenseQuery({
     queryKey: queryKeys.games.social.guilds(guildId),
     queryFn: () => fetchGuilds(),
     ...queryConfigs.games,
