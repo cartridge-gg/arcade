@@ -13,9 +13,8 @@ export const Route = createFileRoute("/activity")({
     };
   },
   loader: async () => {
-    console.log('Activity route loader starting...');
     const chainId = constants.StarknetChainId.SN_MAIN;
-    
+
     // Prefetch all required data
     const promises = [
       queryClient.prefetchQuery({
@@ -27,10 +26,9 @@ export const Route = createFileRoute("/activity")({
         queryFn: () => fetchEditions(chainId),
       }),
     ];
-    
+
     // Wait for data to be ready
     await Promise.all(promises);
-    console.log('Activity route loader completed');
     return {};
   },
   pendingMs: 0, // Show pending component immediately

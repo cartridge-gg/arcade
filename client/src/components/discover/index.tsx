@@ -10,8 +10,7 @@ import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
 import { joinPaths } from "@/helpers";
 import { usePlaythroughsQuery } from "@/queries/discovery";
-import { useSuspenseEditionsQuery, useFollowsQuery, useSuspenseGamesQuery } from "@/queries/games";
-import { filter } from "lodash";
+import { useEditionsQuery, useFollowsQuery, useGamesQuery } from "@/queries/games";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
@@ -24,12 +23,12 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   const { isConnected, address } = useAccount();
 
   // Using suspense queries - data is guaranteed to be available
-  const { data: gamesRaw } = useSuspenseGamesQuery(constants.StarknetChainId.SN_MAIN);
+  const { data: gamesRaw = [] } = useGamesQuery(constants.StarknetChainId.SN_MAIN);
   // Ordering games for a faster access
   const games = useMemo(() => {
     return new Map(gamesRaw.map(g => [g.id, g]));
   }, [gamesRaw])
-  const { data: editions } = useSuspenseEditionsQuery(constants.StarknetChainId.SN_MAIN);
+  const { data: editions = [] } = useEditionsQuery(constants.StarknetChainId.SN_MAIN);
   const projects = useMemo(() =>
     editions.map(e => ({ project: e.config.project, limit: 1000 })), [editions]);
 
@@ -63,12 +62,18 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     return followsMap;
   }, [followsData]);
 
-  const following = useMemo(() => {
-    if (!address) return [];
-    const addresses = follows[getChecksumAddress(address)] || [];
-    if (addresses.length === 0) return [];
-    return [...addresses, getChecksumAddress(address)];
-  }, [follows, address]);
+  // Memoize checksum computation
+  const checksumAddress = useMemo(() => {
+    return address ? getChecksumAddress(address) : null;
+  }, [address]);
+
+  // Convert following to Set for O(1) lookups
+  const followingSet = useMemo(() => {
+    if (!checksumAddress) return new Set<string>();
+    const addresses = follows[checksumAddress] || [];
+    if (addresses.length === 0) return new Set<string>();
+    return new Set([...addresses, checksumAddress]);
+  }, [follows, checksumAddress]);
 
   const filteredEditions = useMemo(() => {
     return !edition ? editions : [edition];
@@ -105,6 +110,67 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     [navigate, filteredEditions],
   );
 
+  // Cache checksum addresses to avoid repeated computation
+  const addressChecksumCache = useMemo(() => {
+    const cache = new Map<string, string>();
+    // Pre-compute checksums for all known addresses
+    Object.values(playthroughs).forEach(activities => {
+      activities?.forEach(activity => {
+        if (!cache.has(activity.callerAddress)) {
+          cache.set(activity.callerAddress, getChecksumAddress(activity.callerAddress));
+        }
+      });
+    });
+    return cache;
+  }, [playthroughs]);
+
+  // Compute raw events without sorting first
+  const rawEvents = useMemo(() => {
+    const events: any[] = [];
+
+    for (const edition of filteredEditions) {
+      const activities = playthroughs[edition?.config.project];
+      if (!activities) continue;
+
+      const game = games.get(edition.gameId);
+      if (!game) continue;
+
+      for (const activity of activities) {
+        const checksumAddr = addressChecksumCache.get(activity.callerAddress) ||
+          getChecksumAddress(activity.callerAddress);
+        const username = activitiesUsernames[checksumAddr];
+
+        events.push({
+          identifier: activity.identifier,
+          name: username,
+          address: checksumAddr,
+          Icon: <UserAvatar username={username ?? activity.callerAddress} size="sm" />,
+          duration: activity.end - activity.start,
+          count: activity.count,
+          actions: activity.actions,
+          achievements: [...activity.achievements],
+          timestamp: Math.floor(activity.end / 1000),
+          logo: edition.properties.icon,
+          color: edition.color,
+          onClick: () =>
+            handleClick(
+              game,
+              edition,
+              username || checksumAddr,
+            ),
+        });
+      }
+    }
+
+    return events;
+  }, [activitiesUsernames, addressChecksumCache, filteredEditions, games, handleClick, playthroughs]);
+
+  // Sort events separately
+  const sortedEvents = useMemo(() => {
+    return [...rawEvents].sort((a, b) => b.timestamp - a.timestamp);
+  }, [rawEvents]);
+
+  // Filter following events using Set for O(1) lookups
   const events = useMemo(() => {
     const data = filteredEditions
       .flatMap((edition) => {
@@ -142,12 +208,15 @@ export function Discover({ edition }: { edition?: EditionModel }) {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .sort((a, b) => b.timestamp - a.timestamp);
-    console.log(data.length);
+    const followingEvents = followingSet.size > 0
+      ? sortedEvents.filter(event => followingSet.has(event.address))
+      : [];
+
     return {
-      all: data ?? [],
-      following: data?.filter((event) => following.includes(event.address)) ?? [],
+      all: sortedEvents,
+      following: followingEvents,
     };
-  }, [activitiesUsernames, filteredEditions, following, games, handleClick, playthroughs])
+  }, [sortedEvents, followingSet])
 
   const handleScroll = useCallback(() => {
     const parent = parentRef.current;
@@ -216,7 +285,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 events.following.length === 0 ? (
                 <LoadingState />
               ) : activitiesStatus === "error" ||
-                following.length === 0 ||
+                followingSet.size === 0 ||
                 events.following.length === 0 ? (
                 <EmptyState />
               ) : (

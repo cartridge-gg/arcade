@@ -292,6 +292,8 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   }, [initialized, handleRegistryModels]);
 
   useEffect(() => {
+    let currentClients: { [key: string]: torii.ToriiClient } = {};
+    
     const getClients = async () => {
       const clients: { [key: string]: torii.ToriiClient } = {};
       await Promise.all(
@@ -316,9 +318,19 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       const arcade = "https://api.cartridge.gg/x/arcade-mainnet/torii";
       const client: torii.ToriiClient = await provider.getToriiClient(arcade);
       clients["arcade-mainnet"] = client;
+      currentClients = clients;
       setClients(clients);
     };
     getClients();
+    
+    return () => {
+      // Cleanup Torii clients on unmount or when dependencies change
+      Object.values(currentClients).forEach((client) => {
+        if (client && typeof client.close === 'function') {
+          client.close();
+        }
+      });
+    };
   }, [provider, editions]);
 
   const sortedAccesses = useMemo(() => {

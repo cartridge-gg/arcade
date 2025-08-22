@@ -16,6 +16,7 @@ import makeBlockie from "ethereum-blockies-base64";
 // New TanStack Query imports
 import { useOrdersQuery, useSalesQuery, useMarketplaceSubscription } from "@/queries/marketplace";
 import { useSuspenseGamesQuery, useSuspenseEditionsQuery } from "@/queries/games";
+import { useGamesQuery, useEditionsQuery } from "@/queries/games";
 import { constants } from "starknet";
 // New TanStack Query imports (commented out until fully integrated)
 // import { useOrdersQuery, useSalesQuery, useMarketplaceSubscription } from "@/queries/marketplace";
@@ -23,8 +24,8 @@ import { constants } from "starknet";
 export const Marketplace = () => {
   // TODO: Replace with new TanStack Query implementation below
   // Use suspense queries for games and editions - data is guaranteed
-  const { data: games } = useSuspenseGamesQuery(constants.StarknetChainId.SN_MAIN);
-  const { data: editions } = useSuspenseEditionsQuery(constants.StarknetChainId.SN_MAIN);
+  const { data: games = [] } = useGamesQuery(constants.StarknetChainId.SN_MAIN);
+  const { data: editions = [] } = useEditionsQuery(constants.StarknetChainId.SN_MAIN);
 
   // Keep collections from context (depends on Torii clients)
   const { collections } = useMarketCollections();

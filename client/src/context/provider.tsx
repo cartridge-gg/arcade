@@ -38,17 +38,15 @@ export function Provider({ children }: PropsWithChildren) {
                         <CollectionProvider>
                           <TokenProvider>
                             <AchievementProvider>
-                              <DiscoversProvider>
-                                <ActivitiesProvider>
-                                  <MetricsProvider>
-                                    <MarketFiltersProvider>
-                                      <SidebarProvider>
-                                        {children}
-                                      </SidebarProvider>
-                                    </MarketFiltersProvider>
-                                  </MetricsProvider>
-                                </ActivitiesProvider>
-                              </DiscoversProvider>
+                              <ActivitiesProvider>
+                                <MetricsProvider>
+                                  <MarketFiltersProvider>
+                                    <SidebarProvider>
+                                      {children}
+                                    </SidebarProvider>
+                                  </MarketFiltersProvider>
+                                </MetricsProvider>
+                              </ActivitiesProvider>
                             </AchievementProvider>
                           </TokenProvider>
                         </CollectionProvider>

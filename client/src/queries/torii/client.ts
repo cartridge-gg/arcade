@@ -78,7 +78,14 @@ export function useToriiSubscription(
     return () => {
       // Cleanup subscription on unmount
       if (subscriptionRef.current) {
-        // TODO: Unsubscribe from Torii updates
+        // Unsubscribe from Torii updates
+        if (typeof subscriptionRef.current.unsubscribe === 'function') {
+          subscriptionRef.current.unsubscribe();
+        }
+        if (typeof subscriptionRef.current.close === 'function') {
+          subscriptionRef.current.close();
+        }
+        subscriptionRef.current = null;
       }
     };
   }, [projectId, models, queryClient]);

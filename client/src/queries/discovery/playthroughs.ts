@@ -41,22 +41,24 @@ export function usePlaythroughsQuery(projects: PlaythroughProject[], limit: numb
       queryKey: queryKeys.discovery.playthroughs(projects, limit),
       enabled: projects.length > 0,
       ...queryConfigs.discovery,
-      staleTime: 0,
     }
   );
 
   const playthroughs = useMemo(() => {
+    if (!result.data?.playthroughs?.items) return {};
+
     const newDiscovers: { [key: string]: Discover[] } = {};
-    result.data?.playthroughs?.items.forEach((item) => {
+    result.data.playthroughs.items.forEach((item) => {
       const project = item.meta.project;
+      const projectAchievements = achievements[project] || [];
+
       newDiscovers[project] = item.playthroughs.map((playthrough) => {
         const start = new Date(playthrough.sessionStart).getTime();
         const end = new Date(playthrough.sessionEnd).getTime();
         const player = playthrough.callerAddress;
-        const playerAchievements = (achievements[project] || [])
+        const playerAchievements = projectAchievements
           .filter((item) => {
-            const isPlayer = BigInt(item.player) === BigInt(player);
-            // const isPlayer = false
+            const isPlayer = item.player === player;
             const timestamp = new Date(item.timestamp * 1000).getTime();
             const inSession = timestamp >= start && timestamp <= end;
             return isPlayer && inSession;
@@ -75,22 +77,25 @@ export function usePlaythroughsQuery(projects: PlaythroughProject[], limit: numb
       });
     });
     return newDiscovers;
-  }, [result, achievements])
+  }, [result.data, achievements])
 
+  // Only query follows when address exists (useFollowsQuery already has enabled: !!address)
   const { data: follows = [] } = useFollowsQuery(address || '');
 
   const following = useMemo(() => {
     if (!address) return [];
-    const addresses = follows[getChecksumAddress(address)] || [];
+    const checksumAddress = getChecksumAddress(address);
+    const addresses = follows[checksumAddress] || [];
     if (addresses.length === 0) return [];
-    return [...addresses, getChecksumAddress(address)];
+    return [...addresses, checksumAddress];
   }, [follows, address]);
 
-  return {
+  // Memoize the final return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     ...result,
-    data: playthroughs ?? {},
+    data: playthroughs,
     usernames: usernames ?? {},
-    follows: following ?? [],
-  };
+    follows: following,
+  }), [result, playthroughs, usernames, following]);
 }
 

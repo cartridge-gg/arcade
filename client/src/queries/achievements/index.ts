@@ -24,27 +24,40 @@ export type AchievementModelParserCallback<I, O> = (input: I) => O
 
 export function useAchievementsQuery(projects: EditionModel[]) {
 
-  const { data: trophies } = useTrophiesQuery(convertedProjects(projects, TROPHY), Trophy.parse);
-  const { data: progressions } = useProgressionsQuery(convertedProjects(projects, PROGRESS), Progress.parse);
+  const trophyProjects = useMemo(
+    () => convertedProjects(projects, TROPHY),
+    [projects]
+  );
+
+  const progressProjects = useMemo(
+    () => convertedProjects(projects, PROGRESS),
+    [projects]
+  );
+
+  const { data: trophies } = useTrophiesQuery(trophyProjects, Trophy.parse);
+  const { data: progressions } = useProgressionsQuery(progressProjects, Progress.parse);
   const { address } = useAddress();
 
-
-  // Compute players and achievement stats
-  const data: AchievementData = AchievementHelper.extract(
-    progressions,
-    trophies,
+  const data: AchievementData = useMemo(
+    () => AchievementHelper.extract(progressions, trophies),
+    [progressions, trophies]
   );
 
-  const { stats, players, events, globals } =
-    AchievementHelper.computePlayers(data, trophies);
-  // console.log(stats, players, events, globals);
-  const achievements = AchievementHelper.computeAchievements(
-    data,
-    trophies,
-    players,
-    stats,
-    address,
+  const { stats, players, events, globals } = useMemo(
+    () => AchievementHelper.computePlayers(data, trophies),
+    [data, trophies]
   );
+
+  const achievements = useMemo(
+    () => AchievementHelper.computeAchievements(
+      data,
+      trophies,
+      players,
+      stats,
+      address,
+    ),
+    [data, trophies, players, stats, address]
+  )
 
   const addresses = useMemo(() => {
     const addresses = Object.values(players).flatMap((gamePlayers) =>
@@ -59,27 +72,29 @@ export function useAchievementsQuery(projects: EditionModel[]) {
     const data: { [key: string]: string | undefined } = {};
     addresses.forEach((address) => {
       data[getChecksumAddress(address)] = usernames.find(
-        (username) => BigInt(username.address || "0x0") === BigInt(address),
+        (username) => (username.address || "0x0") === address,
       )?.username;
     });
     return data;
   }, [usernames, addresses]);
 
-  if (
-    !Object.values(trophies).length ||
-    !Object.values(progressions).length ||
-    !address ||
-    address === "0x0"
-  )
-    return { events: {} };
+  return useMemo(() => {
+    if (
+      !Object.values(trophies).length ||
+      !Object.values(progressions).length ||
+      !address ||
+      address === "0x0"
+    )
+      return { events: {} };
 
-  return {
-    events,
-    achievements,
-    players,
-    usernames: usernamesData ?? [],
-    globals,
-  };
+    return {
+      events,
+      achievements,
+      players,
+      usernames: usernamesData ?? [],
+      globals,
+    };
+  }, [trophies, progressions, address, events, achievements, players, usernamesData, globals]);
 }
 
 // Re-export common types

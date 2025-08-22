@@ -13,9 +13,8 @@ export const Route = createFileRoute("/marketplace")({
     };
   },
   loader: async () => {
-    console.log('Marketplace route loader starting...');
     const chainId = constants.StarknetChainId.SN_MAIN;
-    
+
     // Prefetch all required data
     const promises = [
       queryClient.prefetchQuery({
@@ -29,10 +28,9 @@ export const Route = createFileRoute("/marketplace")({
       // Note: Market collections depend on clients from context
       // Will be fetched in component after mount
     ];
-    
+
     // Wait for data to be ready
     await Promise.all(promises);
-    console.log('Marketplace route loader completed');
     return {};
   },
   pendingMs: 0, // Show pending component immediately
