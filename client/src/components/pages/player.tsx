@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 
-const TABS_ORDER = ["inventory", "achievements", "activity"] as TabValue[];
+const TABS_ORDER = ["inventory", "achievements"] as TabValue[];
 
 export function PlayerPage() {
   const { address, isSelf, self } = useAddress();
@@ -245,12 +245,13 @@ export function PlayerPage() {
           >
             <AchievementScene />
           </TabsContent>
+          {/* Temporarily hidden Feed/Activity tab
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full h-full"
             value="activity"
           >
             <ActivityScene />
-          </TabsContent>
+          </TabsContent> */}
         </div>
       </ArcadeTabs>
     </>

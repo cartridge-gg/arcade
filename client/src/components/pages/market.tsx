@@ -18,7 +18,7 @@ import { joinPaths } from "@/helpers";
 import arcade from "@/assets/arcade-logo.png";
 import { useCollection } from "@/hooks/market-collections";
 
-const TABS_ORDER = ["activity", "items", "holders"] as TabValue[];
+const TABS_ORDER = ["items", "holders"] as TabValue[];
 
 export function MarketPage() {
   const { game, edition, tab, collection: collectionAddress } = useProject();
@@ -103,12 +103,13 @@ export function MarketPage() {
           className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
           style={{ scrollbarWidth: "none" }}
         >
+          {/* Temporarily hidden Feed/Activity tab
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"
             value="activity"
           >
             <TraceabilityScene />
-          </TabsContent>
+          </TabsContent> */}
           <TabsContent className="p-0 mt-0 grow w-full" value="items">
             <ItemsScene />
           </TabsContent>

@@ -36,12 +36,12 @@ export function GamePage() {
   );
 
   const order: TabValue[] = useMemo(() => {
-    if (!game) return ["activity", "leaderboard", "marketplace"];
-    return ["activity", "leaderboard", "marketplace", "guilds", "about"];
+    if (!game) return ["leaderboard", "marketplace"];
+    return ["leaderboard", "marketplace", "guilds", "about"];
   }, [game]);
 
   const defaultValue = useMemo(() => {
-    if (!order.includes(tab as TabValue)) return "activity";
+    if (!order.includes(tab as TabValue)) return "leaderboard";
     return tab;
   }, [tab, order]);
 
@@ -96,12 +96,13 @@ export function GamePage() {
           className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
           style={{ scrollbarWidth: "none" }}
         >
+          {/* Temporarily hidden Feed/Activity tab
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"
             value="activity"
           >
             <DiscoverScene />
-          </TabsContent>
+          </TabsContent> */}
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"
             value="leaderboard"

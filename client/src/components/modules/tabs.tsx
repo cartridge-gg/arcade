@@ -65,9 +65,8 @@ export interface ArcadeTabsProps
 }
 
 export const ArcadeTabs = ({
-  defaultValue = "activity",
+  defaultValue = "leaderboard",
   order = [
-    "activity",
     "leaderboard",
     "about",
     "metrics",
