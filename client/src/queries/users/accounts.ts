@@ -1,9 +1,9 @@
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
 import {
   useAccountNameQuery as useCartridgeAccountNameQuery,
-  useAccountNamesQuery as useCartridgeAccountNamesQuery
-} from '@cartridge/ui/utils/api/cartridge';
+  useAccountNamesQuery as useCartridgeAccountNamesQuery,
+} from "@cartridge/ui/utils/api/cartridge";
 
 export interface Account {
   address: string;
@@ -20,7 +20,7 @@ export function useAccountNameQuery(address: string) {
       queryKey: queryKeys.users.account(address),
       enabled: !!address,
       ...queryConfigs.users,
-    }
+    },
   );
 
   // Return with proper typing
@@ -38,7 +38,7 @@ export function useAccountNamesQuery(addresses: string[]) {
       queryKey: queryKeys.users.accounts(addresses),
       enabled: addresses.length > 0,
       ...queryConfigs.users,
-    }
+    },
   );
 
   // Return with proper typing
@@ -50,4 +50,3 @@ export function useAccountNamesQuery(addresses: string[]) {
       })) ?? [],
   };
 }
-

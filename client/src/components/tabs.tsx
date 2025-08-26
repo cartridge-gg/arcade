@@ -49,12 +49,16 @@ export function Tabs() {
   const getNavPath = useCallback(
     (value: string) => {
       if (edition) {
-        const gameName = game?.name.toLowerCase().replace(/ /g, "-") || game?.id.toString();
-        const editionName = edition.name.toLowerCase().replace(/ /g, "-") || edition.id.toString();
+        const gameName =
+          game?.name.toLowerCase().replace(/ /g, "-") || game?.id.toString();
+        const editionName =
+          edition.name.toLowerCase().replace(/ /g, "-") ||
+          edition.id.toString();
         return `/game/${gameName}/edition/${editionName}/${value}`;
       }
       if (game) {
-        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        const gameName =
+          game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
         return `/game/${gameName}/${value}`;
       }
       return `/${value}`;
@@ -67,8 +71,7 @@ export function Tabs() {
       return collection[0]?.name || "";
     }
     return game?.name || "Dashboard";
-
-  }, [collection, game, collectionAddress])
+  }, [collection, game, collectionAddress]);
 
   const navItems: NavItem[] = useMemo(() => {
     let baseItems: NavItem[] = [
@@ -80,7 +83,7 @@ export function Tabs() {
     if (game) {
       baseItems.push(
         { value: "guilds", label: "Guilds", Icon: SwordsIcon },
-        { value: "about", label: "About", Icon: ListIcon }
+        { value: "about", label: "About", Icon: ListIcon },
       );
     }
     if (collectionAddress) {
@@ -88,7 +91,6 @@ export function Tabs() {
         { value: "activity", label: "Activity", Icon: PulseIcon },
         { value: "items", label: "Items", Icon: ScrollIcon },
         { value: "holders", label: "Holders", Icon: UsersIcon },
-
       ];
     }
 
@@ -96,8 +98,7 @@ export function Tabs() {
   }, [game, collectionAddress]);
 
   const isActive = useCallback(
-    (value: string) => pathname.endsWith(`/${value}`)
-    ,
+    (value: string) => pathname.endsWith(`/${value}`),
     [pathname],
   );
 
@@ -153,19 +154,14 @@ export function Tabs() {
             className={cn(
               "flex justify-center items-center text-foreground-300 hover:text-foreground-200 transition-colors p-2 pt-[10px] gap-1 text-sm cursor-pointer select-none border-b-2 border-transparent",
               isActive(item.value) && "text-primary",
-              isActive(item.value) && "border-b-2 border-primary hover:text-primary hover:border-primary",
+              isActive(item.value) &&
+              "border-b-2 border-primary hover:text-primary hover:border-primary",
             )}
           >
             <div className="flex gap-1 items-center">
               <item.Icon variant="solid" size="sm" />
               <p className="font-normal">{item.label}</p>
             </div>
-            <div
-              className={cn(
-                "absolute bottom-0 left-0 right-0 rounded-full bg-primary h-0.5 w-full translate-y-[1px]",
-                isActive(item.value) ? "opacity-100" : "opacity-0",
-              )}
-            />
           </Link>
         ))}
       </nav>

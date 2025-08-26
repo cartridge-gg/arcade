@@ -1,16 +1,16 @@
-import { PROGRESS, TROPHY } from '@/constants';
-import { useProgressionsQuery } from './progressions';
-import { useTrophiesQuery } from './trophies';
-import { EditionModel } from '@cartridge/arcade';
-import { AchievementData, AchievementHelper } from '@/helpers/achievements';
-import { useAddress } from '@/hooks/address';
-import { getSelectorFromTag, Progress, Trophy } from '@/models';
-import { useMemo } from 'react';
-import { getChecksumAddress } from 'starknet';
-import { useAccountNamesQuery } from '../users';
+import { PROGRESS, TROPHY } from "@/constants";
+import { useProgressionsQuery } from "./progressions";
+import { useTrophiesQuery } from "./trophies";
+import { EditionModel } from "@cartridge/arcade";
+import { AchievementData, AchievementHelper } from "@/helpers/achievements";
+import { useAddress } from "@/hooks/address";
+import { getSelectorFromTag, Progress, Trophy } from "@/models";
+import { useMemo } from "react";
+import { getChecksumAddress } from "starknet";
+import { useAccountNamesQuery } from "../users";
 
-export * from './trophies';
-export * from './progressions';
+export * from "./trophies";
+export * from "./progressions";
 
 function convertedProjects(projects: EditionModel[], model: string) {
   return projects.map((p) => ({
@@ -20,44 +20,47 @@ function convertedProjects(projects: EditionModel[], model: string) {
   }));
 }
 
-export type AchievementModelParserCallback<I, O> = (input: I) => O
+export type AchievementModelParserCallback<I, O> = (input: I) => O;
 
 export function useAchievementsQuery(projects: EditionModel[]) {
-
   const trophyProjects = useMemo(
     () => convertedProjects(projects, TROPHY),
-    [projects]
+    [projects],
   );
 
   const progressProjects = useMemo(
     () => convertedProjects(projects, PROGRESS),
-    [projects]
+    [projects],
   );
 
   const { data: trophies } = useTrophiesQuery(trophyProjects, Trophy.parse);
-  const { data: progressions } = useProgressionsQuery(progressProjects, Progress.parse);
+  const { data: progressions } = useProgressionsQuery(
+    progressProjects,
+    Progress.parse,
+  );
   const { address } = useAddress();
 
   const data: AchievementData = useMemo(
     () => AchievementHelper.extract(progressions, trophies),
-    [progressions, trophies]
+    [progressions, trophies],
   );
 
   const { stats, players, events, globals } = useMemo(
     () => AchievementHelper.computePlayers(data, trophies),
-    [data, trophies]
+    [data, trophies],
   );
 
   const achievements = useMemo(
-    () => AchievementHelper.computeAchievements(
-      data,
-      trophies,
-      players,
-      stats,
-      address,
-    ),
-    [data, trophies, players, stats, address]
-  )
+    () =>
+      AchievementHelper.computeAchievements(
+        data,
+        trophies,
+        players,
+        stats,
+        address,
+      ),
+    [data, trophies, players, stats, address],
+  );
 
   const addresses = useMemo(() => {
     const addresses = Object.values(players).flatMap((gamePlayers) =>
@@ -69,11 +72,16 @@ export function useAchievementsQuery(projects: EditionModel[]) {
 
   const { usernames } = useAccountNamesQuery(addresses);
   const usernamesData = useMemo(() => {
+    const usernamesMap = new Map<string, string>();
+    usernames.forEach((user) => {
+      if (user.address) {
+        usernamesMap.set(user.address, user.username);
+      }
+    });
+
     const data: { [key: string]: string | undefined } = {};
     addresses.forEach((address) => {
-      data[getChecksumAddress(address)] = usernames.find(
-        (username) => (username.address || "0x0") === address,
-      )?.username;
+      data[getChecksumAddress(address)] = usernamesMap.get(address);
     });
     return data;
   }, [usernames, addresses]);
@@ -85,18 +93,37 @@ export function useAchievementsQuery(projects: EditionModel[]) {
       !address ||
       address === "0x0"
     )
-      return { events: {} };
+      return {
+        events: {},
+        achievements: [],
+        players: [],
+        usernames: [],
+        globals: [],
+        isLoading: true,
+        isError: false,
+      };
 
     return {
-      events,
-      achievements,
-      players,
+      events: events ?? {},
+      achievements: achievements ?? [],
+      players: players ?? [],
       usernames: usernamesData ?? [],
       globals,
+      isLoading: false,
+      isError: false,
     };
-  }, [trophies, progressions, address, events, achievements, players, usernamesData, globals]);
+  }, [
+    trophies,
+    progressions,
+    address,
+    events,
+    achievements,
+    players,
+    usernamesData,
+    globals,
+  ]);
 }
 
 // Re-export common types
-export type { TrophyProject, TrophyResponse } from './trophies';
-export type { ProgressionProject, ProgressionResponse } from './progressions';
+export type { TrophyProject, TrophyResponse } from "./trophies";
+export type { ProgressionProject, ProgressionResponse } from "./progressions";

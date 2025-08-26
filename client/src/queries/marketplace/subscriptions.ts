@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../keys';
-import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../keys";
+import { useEffect, useRef } from "react";
 
 export interface MarketplaceSubscription {
   collection?: string;
@@ -24,13 +24,15 @@ export function useMarketplaceSubscription({
   useEffect(() => {
     // TODO: Setup WebSocket subscription via @cartridge/marketplace
     // This should use Marketplace.sub() for real-time updates
-    
+
     const setupSubscription = async () => {
       try {
         // TODO: Initialize marketplace provider and subscribe
-        throw new Error('TODO: implement me at marketplace/subscriptions.ts - Need to setup WebSocket subscription for real-time marketplace data');
+        throw new Error(
+          "TODO: implement me at marketplace/subscriptions.ts - Need to setup WebSocket subscription for real-time marketplace data",
+        );
       } catch (error) {
-        console.error('Failed to setup marketplace subscription:', error);
+        console.error("Failed to setup marketplace subscription:", error);
       }
     };
 
@@ -40,10 +42,10 @@ export function useMarketplaceSubscription({
       // Cleanup subscription on unmount
       if (subscriptionRef.current) {
         // Unsubscribe from marketplace updates
-        if (typeof subscriptionRef.current.unsubscribe === 'function') {
+        if (typeof subscriptionRef.current.unsubscribe === "function") {
           subscriptionRef.current.unsubscribe();
         }
-        if (typeof subscriptionRef.current.close === 'function') {
+        if (typeof subscriptionRef.current.close === "function") {
           subscriptionRef.current.close();
         }
         subscriptionRef.current = null;
@@ -60,7 +62,9 @@ export function useListingsQuery(collectionId: string, limit: number = 50) {
     queryKey: queryKeys.marketplace.listings(collectionId, limit),
     queryFn: async () => {
       // TODO: Fetch active listings from marketplace
-      throw new Error('TODO: implement me at marketplace/subscriptions.ts - Need to fetch active listings');
+      throw new Error(
+        "TODO: implement me at marketplace/subscriptions.ts - Need to fetch active listings",
+      );
     },
     enabled: !!collectionId,
     staleTime: 0, // Always fresh for real-time data

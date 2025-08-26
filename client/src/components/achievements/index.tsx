@@ -27,7 +27,7 @@ export function Achievements({
   const { achievements, players, isLoading, isError } = useAchievements();
   const { pins, games, editions } = useArcade();
   const { ownerships } = useOwnerships();
-  
+
   // New TanStack Query usage example (uncomment to use):
   /*
   const projects = useMemo(() => 

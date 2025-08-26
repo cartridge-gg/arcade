@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useAchievementsQuery as useCartridgeAchievementsQuery } from '@cartridge/ui/utils/api/cartridge';
-import { RawTrophy, Trophy } from '@/models';
-import { AchievementModelParserCallback } from '.';
-import { Trophies } from '@/helpers/achievements';
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useAchievementsQuery as useCartridgeAchievementsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { RawTrophy, Trophy } from "@/models";
+import { AchievementModelParserCallback } from ".";
+import { Trophies } from "@/helpers/achievements";
 
 export interface TrophyProject {
   model: string;
@@ -19,7 +19,10 @@ export interface TrophyResponse {
   }[];
 }
 
-export function useTrophiesQuery(projects: TrophyProject[], parser: AchievementModelParserCallback<RawTrophy, Trophy>) {
+export function useTrophiesQuery(
+  projects: TrophyProject[],
+  parser: AchievementModelParserCallback<RawTrophy, Trophy>,
+) {
   // Use the Cartridge API hook directly
   const result = useCartridgeAchievementsQuery(
     { projects },
@@ -27,7 +30,7 @@ export function useTrophiesQuery(projects: TrophyProject[], parser: AchievementM
       queryKey: queryKeys.achievements.trophies(projects),
       enabled: projects.length > 0,
       ...queryConfigs.achievements,
-    }
+    },
   );
   // Transform the data to match our interface
   return {
@@ -36,7 +39,10 @@ export function useTrophiesQuery(projects: TrophyProject[], parser: AchievementM
   };
 }
 
-function transformData(achievements: TrophyResponse, parser: AchievementModelParserCallback<RawTrophy, Trophy>): Trophies {
+function transformData(
+  achievements: TrophyResponse,
+  parser: AchievementModelParserCallback<RawTrophy, Trophy>,
+): Trophies {
   if (!achievements?.items) return {};
   const raws: { [key: string]: { [key: string]: Trophy } } = {};
   achievements.items.forEach((item) => {
@@ -55,9 +61,7 @@ function transformData(achievements: TrophyResponse, parser: AchievementModelPar
     Object.values(raws[game]).forEach((trophy) => {
       if (Object.keys(trophies[game] || {}).includes(trophy.id)) {
         trophy.tasks.forEach((task) => {
-          if (
-            !trophies[game][trophy.id].tasks.find((t) => t.id === task.id)
-          ) {
+          if (!trophies[game][trophy.id].tasks.find((t) => t.id === task.id)) {
             trophies[game][trophy.id].tasks.push(task);
           }
         });

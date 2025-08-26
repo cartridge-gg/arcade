@@ -3,72 +3,46 @@ import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
-import { getChecksumAddress } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import { Connect } from "../errors";
 import LeaderboardRow from "../modules/leaderboard-row";
 import { useAccount } from "@starknet-react/core";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { joinPaths } from "@/helpers";
-// New TanStack Query imports (commented out until fully integrated)
-// import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
-// import { useAccountNamesQuery } from "@/queries/users";
-// import { usePinsQuery, useFollowsQuery } from "@/queries/games";
+import { useAchievementsQuery } from "@/queries/achievements";
+import {
+  usePinsQuery,
+  useFollowsQuery,
+  useEditionsQuery,
+} from "@/queries/games";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
+const SCROLL_THROTTLE_MS = 100;
 
 export function Leaderboard({ edition }: { edition?: EditionModel }) {
-  const { isConnected, address } = useAccount();
-  // TODO: Replace with new TanStack Query implementation below
+  const { isConnected, address: address = "" } = useAccount();
+
+  const { data: editions = [] } = useEditionsQuery(
+    constants.StarknetChainId.SN_MAIN,
+  );
   const { achievements, globals, players, usernames, isLoading, isError } =
-    useAchievements();
-  const { pins, follows } = useArcade();
-  
-  // New TanStack Query usage example (uncomment to use):
-  /*
-  const projects = useMemo(() => 
-    edition ? [{
-      model: edition.model,
-      namespace: edition.namespace,
-      project: edition.config.project
-    }] : [], [edition]);
-  
-  const { data: trophiesData, isLoading: trophiesLoading } = useTrophiesQuery(projects);
-  const { data: progressionsData, isLoading: progressionsLoading } = useProgressionsQuery(projects, address);
-  
-  // Get player addresses for username resolution
-  const playerAddresses = useMemo(() => 
-    progressionsData?.items?.flatMap(item => 
-      item.achievements.map(a => a.playerAddress)
-    ) || [], [progressionsData]);
-  
-  const { data: usernamesData } = useAccountNamesQuery(playerAddresses);
-  const { data: pinsData } = usePinsQuery(address || '');
-  const { data: followsData } = useFollowsQuery(address || '');
-  
-  // Transform data to match expected format
-  const achievements = {}; // Transform trophiesData
-  const players = {}; // Transform progressionsData
-  const usernames = usernamesData || {};
-  const pins = {}; // Transform pinsData
-  const follows = {}; // Transform followsData
-  const globals = []; // Compute from data
-  
-  const isLoading = trophiesLoading || progressionsLoading;
-  const isError = false;
-  */
+    useAchievementsQuery(editions);
+  const { data: following = [] } = useFollowsQuery(address);
+  const { data: pins = [] } = usePinsQuery(address);
+
   const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
-
-  const following = useMemo(() => {
-    if (!address) return [];
-    const addresses = follows[getChecksumAddress(address)] || [];
-    if (addresses.length === 0) return [];
-    return [...addresses, getChecksumAddress(address)];
-  }, [follows, address]);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
   const navigate = useNavigate();
+
+  // Cache address conversions
+  const addressBigInt = useMemo(() => BigInt(address || "0x0"), [address]);
+
+  // Cache following set for O(1) lookups
+  const followingSet = useMemo(() => new Set(following), [following]);
 
   const gamePlayers = useMemo(() => {
     return players[edition?.config.project || ""] || [];
@@ -78,11 +52,19 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     return achievements[edition?.config.project || ""] || [];
   }, [achievements, edition]);
 
+  // Cache checksum addresses for all players
+  const playerChecksums = useMemo(() => {
+    const checksums = new Map();
+    [...gamePlayers, ...globals].forEach((player) => {
+      checksums.set(player.address, getChecksumAddress(player.address));
+    });
+    return checksums;
+  }, [gamePlayers, globals]);
+
   const routerState = useRouterState();
   const location = { pathname: routerState.location.pathname };
   const handleClick = useCallback(
     (nameOrAddress: string) => {
-      // On click, we update the url param address to the address of the player
       let pathname = location.pathname;
       pathname = pathname.replace(/\/player\/[^/]+/, "");
       pathname = pathname.replace(/\/tab\/[^/]+/, "");
@@ -93,112 +75,133 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     [location, navigate],
   );
 
-  const gameData = useMemo(() => {
-    let rank = 0;
-    const data = gamePlayers.map((player, index) => {
-      if (BigInt(player.address) === BigInt(address || "0x0")) rank = index + 1;
-      const ids = pins[getChecksumAddress(player.address)] || [];
-      const pinneds: { id: string; icon: string }[] = gameAchievements
-        .filter(
-          (item) =>
-            player.completeds.includes(item.id) &&
-            (ids.length === 0 || ids.includes(item.id)),
-        )
-        .sort((a, b) => a.id.localeCompare(b.id))
-        .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
-        .slice(0, 3)
-        .map((item) => {
-          return {
-            id: item.id,
-            icon: item.icon,
-          };
-        });
+  // Helper function to process player data
+  const processPlayerData = useCallback(
+    (players: any[], includeAchievements: boolean = false) => {
+      let selfRank = -1;
+      let selfIndex = -1;
+
+      const data = players.map((player, index) => {
+        const playerBigInt = BigInt(player.address);
+        const isCurrentUser = playerBigInt === addressBigInt;
+        if (isCurrentUser) {
+          selfRank = index + 1;
+          selfIndex = index;
+        }
+
+        const checksumAddress =
+          playerChecksums.get(player.address) ||
+          getChecksumAddress(player.address);
+        const playerPins = pins[checksumAddress] || [];
+
+        let pinnedAchievements = [];
+        if (includeAchievements && gameAchievements.length > 0) {
+          const completedAchievements = gameAchievements.filter(
+            (item) =>
+              player.completeds?.includes(item.id) &&
+              (playerPins.length === 0 || playerPins.includes(item.id)),
+          );
+
+          pinnedAchievements = completedAchievements
+            .sort((a, b) => {
+              const percentageDiff =
+                parseFloat(a.percentage) - parseFloat(b.percentage);
+              return percentageDiff !== 0
+                ? percentageDiff
+                : a.id.localeCompare(b.id);
+            })
+            .slice(0, 3)
+            .map((item) => ({ id: item.id, icon: item.icon }));
+        }
+
+        return {
+          address: checksumAddress,
+          name: usernames[checksumAddress] || player.address.slice(0, 9),
+          rank: index + 1,
+          points: player.earnings,
+          highlight: isCurrentUser,
+          pins: pinnedAchievements,
+          following: followingSet.has(checksumAddress),
+        };
+      });
+
+      const selfData = selfIndex >= 0 ? data[selfIndex] : null;
+      const followingData = data.filter((player) => player.following);
+      const followingPosition = followingData.findIndex(
+        (player) => player.highlight,
+      );
+
       return {
-        address: getChecksumAddress(player.address),
-        name:
-          usernames[getChecksumAddress(player.address)] ||
-          player.address.slice(0, 9),
-        rank: index + 1,
-        points: player.earnings,
-        highlight: BigInt(player.address) === BigInt(address || "0x0"),
-        pins: pinneds,
-        following: following.includes(getChecksumAddress(player.address)),
+        data,
+        selfData,
+        selfRank,
+        followingData,
+        followingPosition,
       };
-    });
-    const selfData = data.find(
-      (player) => BigInt(player.address) === BigInt(address || "0x0"),
-    );
-    const newAll =
-      rank < cap || !selfData
+    },
+    [
+      addressBigInt,
+      playerChecksums,
+      pins,
+      gameAchievements,
+      usernames,
+      followingSet,
+    ],
+  );
+
+  const gameData = useMemo(() => {
+    const { data, selfData, selfRank, followingData, followingPosition } =
+      processPlayerData(gamePlayers, true);
+
+    const all =
+      selfRank < cap || !selfData
         ? data.slice(0, cap)
         : [...data.slice(0, cap - 1), selfData];
-    const filtereds = data.filter((player) =>
-      following.includes(getChecksumAddress(player.address)),
-    );
-    const position = filtereds.findIndex(
-      (player) => BigInt(player.address) === BigInt(address || "0x0"),
-    );
-    const newFollowings =
-      position < cap || !selfData
-        ? filtereds.slice(0, cap)
-        : [...filtereds.slice(0, cap - 1), selfData];
-    return {
-      all: newAll,
-      following: newFollowings,
-    };
-  }, [gamePlayers, gameAchievements, address, pins, usernames, following, cap]);
+
+    const following =
+      followingPosition < cap || !selfData
+        ? followingData.slice(0, cap)
+        : [...followingData.slice(0, cap - 1), selfData];
+
+    return { all, following };
+  }, [gamePlayers, processPlayerData, cap]);
 
   const gamesData = useMemo(() => {
-    let rank = 0;
-    const data = globals.map((player, index) => {
-      if (BigInt(player.address) === BigInt(address || "0x0")) rank = index + 1;
-      return {
-        address: getChecksumAddress(player.address),
-        name:
-          usernames[getChecksumAddress(player.address)] ||
-          player.address.slice(0, 9),
-        rank: index + 1,
-        points: player.earnings,
-        highlight: BigInt(player.address) === BigInt(address || "0x0"),
-        following: following.includes(getChecksumAddress(player.address)),
-      };
-    });
-    const selfData = data.find(
-      (player) => BigInt(player.address) === BigInt(address || "0x0"),
-    );
-    const newAll =
-      rank < cap || !selfData
+    const { data, selfData, selfRank, followingData, followingPosition } =
+      processPlayerData(globals, false);
+
+    const all =
+      selfRank < cap || !selfData
         ? data.slice(0, cap)
         : [...data.slice(0, cap - 1), selfData];
-    const filtereds = data.filter((player) =>
-      following.includes(getChecksumAddress(player.address)),
-    );
-    const position = filtereds.findIndex(
-      (player) => BigInt(player.address) === BigInt(address || "0x0"),
-    );
-    const newFollowings =
-      position < cap || !selfData
-        ? filtereds.slice(0, cap)
-        : [...filtereds.slice(0, cap - 1), selfData];
-    return {
-      all: newAll,
-      following: newFollowings,
-    };
-  }, [globals, address, usernames, following, cap]);
+
+    const following =
+      followingPosition < cap || !selfData
+        ? followingData.slice(0, cap)
+        : [...followingData.slice(0, cap - 1), selfData];
+
+    return { all, following };
+  }, [globals, processPlayerData, cap]);
 
   const filteredData = useMemo(() => {
-    if (!edition) return gamesData;
-    return gameData;
+    return edition ? gameData : gamesData;
   }, [edition, gamesData, gameData]);
 
   const handleScroll = useCallback(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-    const height = parent.clientHeight;
-    const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-    if (newCap < cap) return;
-    setCap(newCap + 5);
-  }, [parentRef, cap, setCap]);
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      const parent = parentRef.current;
+      if (!parent) return;
+      const height = parent.clientHeight;
+      const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
+      if (newCap > cap) {
+        setCap(newCap + 5);
+      }
+    }, SCROLL_THROTTLE_MS);
+  }, [cap]);
 
   useEffect(() => {
     const parent = parentRef.current;
@@ -209,20 +212,21 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
       if (parent) {
         parent.removeEventListener("scroll", handleScroll);
       }
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
     };
-  }, [cap, parentRef, handleScroll]);
+  }, [handleScroll]);
 
   useEffect(() => {
-    // Reset scroll and cap on filter change
     const parent = parentRef.current;
     if (!parent) return;
     parent.scrollTop = 0;
     const height = parent.clientHeight;
-    const cap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-    setCap(cap + 5);
-  }, [parentRef, edition, setCap]);
+    const newCap = Math.ceil(height / ROW_HEIGHT) + 5;
+    setCap(newCap);
+  }, [edition]);
 
-  // Show loading state immediately if data is not ready
   if (isLoading && !gamePlayers.length && !globals.length) {
     return (
       <LayoutContent className="select-none h-full overflow-clip p-0">

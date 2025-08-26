@@ -1,7 +1,7 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useEffect, useRef } from "react";
 
 export interface ToriiClient {
   projectId: string;
@@ -17,10 +17,15 @@ export interface Entity {
   metadata?: any;
 }
 
-async function initializeToriiClient(projectId: string, url: string): Promise<ToriiClient> {
+async function initializeToriiClient(
+  projectId: string,
+  url: string,
+): Promise<ToriiClient> {
   // TODO: Replace with actual Torii client initialization
   // This should use SDK provider.getToriiClient(url)
-  throw new Error('TODO: implement me at torii/client.ts - Need to initialize Torii client from SDK');
+  throw new Error(
+    "TODO: implement me at torii/client.ts - Need to initialize Torii client from SDK",
+  );
 }
 
 export function useToriiClientQuery(projectId: string, url: string) {
@@ -37,14 +42,16 @@ export function useToriiClientQuery(projectId: string, url: string) {
 export function useToriiEntitiesQuery(
   projectId: string,
   model: string,
-  filter?: any
+  filter?: any,
 ) {
   return useQuery({
     queryKey: queryKeys.torii.entities(projectId, model),
     queryFn: async () => {
       // TODO: Fetch entities from Torii client
       // This would use the Torii client to query specific models
-      throw new Error('TODO: implement me at torii/client.ts - Need to fetch entities from Torii');
+      throw new Error(
+        "TODO: implement me at torii/client.ts - Need to fetch entities from Torii",
+      );
     },
     enabled: !!projectId && !!model,
     ...queryConfigs.torii,
@@ -55,7 +62,7 @@ export function useToriiEntitiesQuery(
 export function useToriiSubscription(
   projectId: string,
   models: string[],
-  onUpdate?: (entities: Entity[]) => void
+  onUpdate?: (entities: Entity[]) => void,
 ) {
   const queryClient = useQueryClient();
   const subscriptionRef = useRef<any>(null);
@@ -67,9 +74,11 @@ export function useToriiSubscription(
       try {
         // TODO: Setup Torii subscription
         // This would use the Torii client to subscribe to model updates
-        throw new Error('TODO: implement me at torii/client.ts - Need to setup Torii subscription');
+        throw new Error(
+          "TODO: implement me at torii/client.ts - Need to setup Torii subscription",
+        );
       } catch (error) {
-        console.error('Failed to setup Torii subscription:', error);
+        console.error("Failed to setup Torii subscription:", error);
       }
     };
 
@@ -79,10 +88,10 @@ export function useToriiSubscription(
       // Cleanup subscription on unmount
       if (subscriptionRef.current) {
         // Unsubscribe from Torii updates
-        if (typeof subscriptionRef.current.unsubscribe === 'function') {
+        if (typeof subscriptionRef.current.unsubscribe === "function") {
           subscriptionRef.current.unsubscribe();
         }
-        if (typeof subscriptionRef.current.close === 'function') {
+        if (typeof subscriptionRef.current.close === "function") {
           subscriptionRef.current.close();
         }
         subscriptionRef.current = null;
@@ -94,15 +103,14 @@ export function useToriiSubscription(
 }
 
 // Query for batch fetching multiple models
-export function useToriiModelsQuery(
-  projectId: string,
-  models: string[]
-) {
+export function useToriiModelsQuery(projectId: string, models: string[]) {
   return useQuery({
     queryKey: queryKeys.torii.subscription(projectId, models),
     queryFn: async () => {
       // TODO: Fetch multiple models in parallel
-      throw new Error('TODO: implement me at torii/client.ts - Need to fetch multiple models from Torii');
+      throw new Error(
+        "TODO: implement me at torii/client.ts - Need to fetch multiple models from Torii",
+      );
     },
     enabled: !!projectId && models.length > 0,
     ...queryConfigs.torii,

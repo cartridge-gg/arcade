@@ -32,20 +32,26 @@ export const useProject = () => {
   // Extract tab from the route path
   const tab = useMemo(() => {
     const pathname = routerState.location.pathname;
-    const segments = pathname.split('/').filter(Boolean);
-    
+    const segments = pathname.split("/").filter(Boolean);
+
     // The tab is the last segment if it's one of the known tab names
     const lastSegment = segments[segments.length - 1];
     const knownTabs = [
-      'inventory', 'achievements', 'activity',
-      'leaderboard', 'marketplace', 'guilds', 'about',
-      'items', 'holders'
+      "inventory",
+      "achievements",
+      "activity",
+      "leaderboard",
+      "marketplace",
+      "guilds",
+      "about",
+      "items",
+      "holders",
     ];
-    
+
     if (knownTabs.includes(lastSegment)) {
       return lastSegment;
     }
-    
+
     return undefined;
   }, [routerState.location.pathname]);
 

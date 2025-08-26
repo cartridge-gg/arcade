@@ -1,8 +1,9 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { Social } from '@/../../packages/sdk/src';
-import { constants } from 'starknet';
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { Social } from "@/../../packages/sdk/src";
+import { constants, getChecksumAddress } from "starknet";
+import { useMemo } from "react";
 
 export interface Pin {
   id: string;
@@ -38,60 +39,77 @@ export interface Alliance {
   metadata?: any;
 }
 
-export async function fetchPins(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Pin[]> {
+export async function fetchPins(
+  address: string,
+  chainId: string = constants.StarknetChainId.SN_MAIN,
+): Promise<Pin[]> {
   // Initialize the Social SDK
   await Social.init(chainId as constants.StarknetChainId);
-  
+
   const pins: Pin[] = [];
-  
-  await Social.fetch((models: any[]) => {
-    models.forEach((model: any) => {
-      if (model.constructor.name === 'PinEvent') {
-        pins.push(model as Pin);
-      }
-    });
-  }, {
-    pin: true,
-  });
-  
-  return pins.filter(pin => pin.playerAddress === address);
+
+  await Social.fetch(
+    (models: any[]) => {
+      models.forEach((model: any) => {
+        if (model.constructor.name === "PinEvent") {
+          pins.push(model as Pin);
+        }
+      });
+    },
+    {
+      pin: true,
+    },
+  );
+
+  return pins.filter((pin) => pin.playerAddress === address);
 }
 
-export async function fetchFollows(address: string, chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Follow[]> {
+export async function fetchFollows(
+  address: string,
+  chainId: string = constants.StarknetChainId.SN_MAIN,
+): Promise<Follow[]> {
   // Initialize the Social SDK
   await Social.init(chainId as constants.StarknetChainId);
-  
+
   const follows: Follow[] = [];
-  
-  await Social.fetch((models: any[]) => {
-    models.forEach((model: any) => {
-      if (model.constructor.name === 'FollowEvent') {
-        follows.push(model as Follow);
-      }
-    });
-  }, {
-    follow: true,
-  });
-  
-  return follows.filter(follow => follow.followerAddress === address);
+
+  await Social.fetch(
+    (models: any[]) => {
+      models.forEach((model: any) => {
+        if (model.constructor.name === "FollowEvent") {
+          follows.push(model as Follow);
+        }
+      });
+    },
+    {
+      follow: true,
+    },
+  );
+
+  return follows.filter((follow) => follow.followerAddress === address);
 }
 
-export async function fetchGuilds(chainId: string = constants.StarknetChainId.SN_MAIN): Promise<Guild[]> {
+export async function fetchGuilds(
+  chainId: string = constants.StarknetChainId.SN_MAIN,
+): Promise<Guild[]> {
   // Initialize the Social SDK
   await Social.init(chainId as constants.StarknetChainId);
-  
+
   const guilds: Guild[] = [];
-  
-  await Social.fetch((models: any[]) => {
-    models.forEach((model: any) => {
-      if (model.constructor.name === 'GuildModel') {
-        guilds.push(model as Guild);
-      }
-    });
-  }, {
-    guild: true,
-  });
-  
+
+  await Social.fetch(
+    (models: any[]) => {
+      models.forEach((model: any) => {
+        if (model.constructor.name === "GuildModel") {
+          guilds.push(model as Guild);
+        }
+      });
+    },
+    {
+      guild: true,
+    },
+  );
+
   return guilds;
 }
 
@@ -105,12 +123,20 @@ export function usePinsQuery(address: string) {
 }
 
 export function useFollowsQuery(address: string) {
-  return useQuery({
+  const { data: follows = [], ...res } = useQuery({
     queryKey: queryKeys.games.social.follows(address),
     queryFn: () => fetchFollows(address),
     enabled: !!address,
     ...queryConfigs.games,
   });
+
+  return useMemo(() => {
+    if (!address) return { ...res, data: [] };
+    const checksumAddress = getChecksumAddress(address);
+    const addresses = follows[checksumAddress] || [];
+    if (addresses.length === 0) return { ...res, data: [] };
+    return { ...res, data: [...addresses, checksumAddress] };
+  }, [follows, address, res]);
 }
 
 export function useGuildsQuery(guildId?: string) {
@@ -145,5 +171,3 @@ export function useSuspenseGuildsQuery(guildId?: string) {
     ...queryConfigs.games,
   });
 }
-
-

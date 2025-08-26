@@ -154,7 +154,7 @@ export function MarketplaceComingSoon() {
 }
 
 export function MarketplaceLoading() {
-  console.log('MarketplaceLoading pending component rendering!');
+  console.log("MarketplaceLoading pending component rendering!");
   return (
     <Error
       title="Loading..."
@@ -369,7 +369,7 @@ export function DiscoverError() {
 }
 
 export function DiscoverLoading() {
-  console.log('DiscoverLoading pending component rendering!');
+  console.log("DiscoverLoading pending component rendering!");
   return (
     <Error
       title="Loading..."

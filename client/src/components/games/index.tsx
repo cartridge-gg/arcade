@@ -45,9 +45,11 @@ export const Games = () => {
   }, [game]);
 
   const filteredGames = useMemo(() => {
-    return games?.filter((game) =>
-      game.name.toLowerCase().includes(search.toLowerCase()),
-    ) ?? [];
+    return (
+      games?.filter((game) =>
+        game.name.toLowerCase().includes(search.toLowerCase()),
+      ) ?? []
+    );
   }, [games, search]);
 
   return (
@@ -196,7 +198,10 @@ export const Game = ({
   const { earnings: totalEarnings } = usePlayerStats();
   const { earnings: gameEarnings } = usePlayerGameStats(projects);
 
-  const gameName = useMemo(() => `${game?.name.toLowerCase().replace(/ /g, "-") || id}`, [game, id]);
+  const gameName = useMemo(
+    () => `${game?.name.toLowerCase().replace(/ /g, "-") || id}`,
+    [game, id],
+  );
 
   const setWhitelisted = useCallback(
     (status: boolean) => {
@@ -227,13 +232,12 @@ export const Game = ({
   }, [original]);
   const navigationLink = useMemo(() => {
     if (0 === id) {
-      return '/';
+      return "/";
     }
-    return `/game/${gameName}`
+    return `/game/${gameName}`;
   }, [gameName, id]);
 
   if (!!game && !whitelisted && !owner && !admin) return null;
-
 
   return (
     <div className="flex items-center gap-2">
@@ -257,39 +261,37 @@ export const Game = ({
           />
         </Link>
       </div>
-      {
-        game && (admin || owner) && (
-          <Select>
-            <div className="flex justify-end items-center self-center">
-              <ArcadeMenuButton
-                active={false}
-                className="bg-background-150 border border-background-200 hover:text-foreground-100"
-              >
-                <DotsIcon size="sm" />
-              </ArcadeMenuButton>
-            </div>
-            <SelectContent className="bg-background-100">
-              {game && owner && <Update key={game.id} game={game} />}
-              {game && owner && (
-                <Publish
-                  key={game.published ? "hide" : "publish"}
-                  game={game}
-                  action={game.published ? "hide" : "publish"}
-                  setPublished={setPublished}
-                />
-              )}
-              {game && admin && (
-                <Whitelist
-                  key={game.whitelisted ? "blacklist" : "whitelist"}
-                  game={game}
-                  action={game.whitelisted ? "blacklist" : "whitelist"}
-                  setWhitelisted={setWhitelisted}
-                />
-              )}
-            </SelectContent>
-          </Select>
-        )
-      }
-    </div >
+      {game && (admin || owner) && (
+        <Select>
+          <div className="flex justify-end items-center self-center">
+            <ArcadeMenuButton
+              active={false}
+              className="bg-background-150 border border-background-200 hover:text-foreground-100"
+            >
+              <DotsIcon size="sm" />
+            </ArcadeMenuButton>
+          </div>
+          <SelectContent className="bg-background-100">
+            {game && owner && <Update key={game.id} game={game} />}
+            {game && owner && (
+              <Publish
+                key={game.published ? "hide" : "publish"}
+                game={game}
+                action={game.published ? "hide" : "publish"}
+                setPublished={setPublished}
+              />
+            )}
+            {game && admin && (
+              <Whitelist
+                key={game.whitelisted ? "blacklist" : "whitelist"}
+                game={game}
+                action={game.whitelisted ? "blacklist" : "whitelist"}
+                setWhitelisted={setWhitelisted}
+              />
+            )}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
   );
 };

@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
 
 export interface UserProfile {
   address: string;
@@ -24,7 +24,9 @@ export interface UserProfile {
 async function fetchUserProfile(address: string): Promise<UserProfile> {
   // TODO: Replace with actual API call
   // This would fetch comprehensive user profile data
-  throw new Error('TODO: implement me at users/profiles.ts - Need to integrate API for fetching user profile');
+  throw new Error(
+    "TODO: implement me at users/profiles.ts - Need to integrate API for fetching user profile",
+  );
 }
 
 export function useUserProfileQuery(address: string) {
@@ -39,11 +41,11 @@ export function useUserProfileQuery(address: string) {
 // Query for multiple user profiles
 export function useUserProfilesQuery(addresses: string[]) {
   return useQuery({
-    queryKey: [...queryKeys.users.all, 'profiles', addresses],
+    queryKey: [...queryKeys.users.all, "profiles", addresses],
     queryFn: async () => {
       // Fetch multiple profiles in parallel
       const profiles = await Promise.all(
-        addresses.map(addr => fetchUserProfile(addr))
+        addresses.map((addr) => fetchUserProfile(addr)),
       );
       return profiles;
     },

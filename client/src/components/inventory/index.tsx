@@ -10,7 +10,7 @@ export const Inventory = () => {
   // TODO: Replace with new TanStack Query implementation below
   const { tokens, credits, status: tokensStatus } = useTokens();
   const { collections, status: collectionsStatus } = useCollections();
-  
+
   // New TanStack Query usage example (uncomment to use):
   /*
   const address = "0x..."; // Get from user context

@@ -1,4 +1,4 @@
-export * from './client';
+export * from "./client";
 
 // Re-export common types
-export type { ToriiClient, Entity } from './client';
+export type { ToriiClient, Entity } from "./client";

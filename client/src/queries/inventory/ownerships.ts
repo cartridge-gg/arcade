@@ -1,6 +1,6 @@
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useOwnershipsQuery as useCartridgeOwnershipsQuery } from '@cartridge/ui/utils/api/cartridge';
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useOwnershipsQuery as useCartridgeOwnershipsQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export interface Ownership {
   ownerAddress: string;
@@ -22,7 +22,7 @@ export function useOwnershipsQuery(address: string, projects: string[]) {
   // Use the Cartridge API hook if available
   const result = useCartridgeOwnershipsQuery(
     {
-      project: projects[0] || '', // Default project
+      project: projects[0] || "", // Default project
       contractAddresses: [],
       tokenIds: [],
     },
@@ -30,7 +30,7 @@ export function useOwnershipsQuery(address: string, projects: string[]) {
       queryKey: queryKeys.inventory.ownerships(address, projects),
       enabled: !!address && projects.length > 0,
       ...queryConfigs.inventory,
-    }
+    },
   );
 
   // Return with proper typing

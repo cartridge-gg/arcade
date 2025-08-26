@@ -27,11 +27,17 @@ export function GamePage() {
   const handleClick = useCallback(
     (value: string) => {
       if (edition) {
-        const gameName = game?.name.toLowerCase().replace(/ /g, "-") || game?.id.toString();
-        const editionName = edition.name.toLowerCase().replace(/ /g, "-") || edition.id.toString();
-        navigate({ to: `/game/${gameName}/edition/${editionName}/${value}` as any });
+        const gameName =
+          game?.name.toLowerCase().replace(/ /g, "-") || game?.id.toString();
+        const editionName =
+          edition.name.toLowerCase().replace(/ /g, "-") ||
+          edition.id.toString();
+        navigate({
+          to: `/game/${gameName}/edition/${editionName}/${value}` as any,
+        });
       } else if (game) {
-        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        const gameName =
+          game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
         navigate({ to: `/game/${gameName}/${value}` as any });
       } else {
         navigate({ to: `/${value}` as any });

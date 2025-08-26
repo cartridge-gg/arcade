@@ -293,7 +293,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let currentClients: { [key: string]: torii.ToriiClient } = {};
-    
+
     const getClients = async () => {
       const clients: { [key: string]: torii.ToriiClient } = {};
       await Promise.all(
@@ -322,11 +322,11 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       setClients(clients);
     };
     getClients();
-    
+
     return () => {
       // Cleanup Torii clients on unmount or when dependencies change
       Object.values(currentClients).forEach((client) => {
-        if (client && typeof client.close === 'function') {
+        if (client && typeof client.close === "function") {
           client.close();
         }
       });

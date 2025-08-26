@@ -27,7 +27,7 @@ export function Activity() {
   const [cap, setCap] = useState(OFFSET);
   // TODO: Replace with new TanStack Query implementation below
   const { activities, status } = useActivities();
-  
+
   // New TanStack Query usage example (uncomment to use):
   /*
   const address = "0x..."; // Get from user context

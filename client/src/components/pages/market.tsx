@@ -41,12 +41,20 @@ export function MarketPage() {
   const handleClick = useCallback(
     (value: string) => {
       if (edition && game && collectionAddress) {
-        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
-        const editionName = edition.name.toLowerCase().replace(/ /g, "-") || edition.id.toString();
-        navigate({ to: `/game/${gameName}/edition/${editionName}/collection/${collectionAddress}/${value}` as any });
+        const gameName =
+          game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        const editionName =
+          edition.name.toLowerCase().replace(/ /g, "-") ||
+          edition.id.toString();
+        navigate({
+          to: `/game/${gameName}/edition/${editionName}/collection/${collectionAddress}/${value}` as any,
+        });
       } else if (game && collectionAddress) {
-        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
-        navigate({ to: `/game/${gameName}/collection/${collectionAddress}/${value}` as any });
+        const gameName =
+          game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        navigate({
+          to: `/game/${gameName}/collection/${collectionAddress}/${value}` as any,
+        });
       } else if (collectionAddress) {
         navigate({ to: `/collection/${collectionAddress}/${value}` as any });
       }

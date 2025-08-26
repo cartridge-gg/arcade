@@ -1,6 +1,6 @@
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useCollectiblesQuery as useCartridgeCollectiblesQuery } from '@cartridge/ui/utils/api/cartridge';
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useCollectiblesQuery as useCartridgeCollectiblesQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export interface Collectible {
   address: string;
@@ -40,7 +40,7 @@ export interface CollectiblesResponse {
 export function useCollectiblesQuery(
   address: string,
   projects: string[],
-  offset: number = 0
+  offset: number = 0,
 ) {
   // Use the Cartridge API hook directly
   const result = useCartridgeCollectiblesQuery(
@@ -52,7 +52,7 @@ export function useCollectiblesQuery(
       queryKey: queryKeys.inventory.collectibles(address, projects, offset),
       enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
       ...queryConfigs.inventory,
-    }
+    },
   );
 
   // Return with proper typing
@@ -61,4 +61,3 @@ export function useCollectiblesQuery(
     data: result.data as CollectiblesResponse | undefined,
   };
 }
-

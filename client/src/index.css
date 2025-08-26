@@ -7,13 +7,12 @@
 @tailwind utilities;
 
 #root {
-  overflow: hidden;
   height: 100vh;
 }
 
 html,
 body {
-  overflow: hidden;
+  height: 100%;
 }
 
 @layer base {

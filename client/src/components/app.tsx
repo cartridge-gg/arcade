@@ -8,15 +8,7 @@ export function App() {
 
   return (
     <>
-      {!player ? (
-        !collection ? (
-          <GamePage />
-        ) : (
-          <MarketPage />
-        )
-      ) : (
-        <PlayerPage />
-      )}
+      {!player ? !collection ? <GamePage /> : <MarketPage /> : <PlayerPage />}
     </>
   );
 }

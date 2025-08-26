@@ -1,8 +1,13 @@
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { constants } from 'starknet';
-import { EditionModel, GameModel, Registry, RegistryModel } from '@cartridge/arcade';
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { constants } from "starknet";
+import {
+  EditionModel,
+  GameModel,
+  Registry,
+  RegistryModel,
+} from "@cartridge/arcade";
 
 export interface Game {
   id: string;
@@ -46,21 +51,24 @@ async function fetchRegistry(chainId: string): Promise<RegistryResponse> {
     access: [],
   };
 
-  await Registry.fetch((models: any[]) => {
-    models.forEach((model: any) => {
-      if (model.constructor.name === 'GameModel') {
-        response.games.push(model as Game);
-      } else if (model.constructor.name === 'EditionModel') {
-        response.editions.push(model as Edition);
-      } else if (model.constructor.name === 'AccessModel') {
-        response.access?.push(model);
-      }
-    });
-  }, {
-    game: true,
-    edition: true,
-    access: true,
-  });
+  await Registry.fetch(
+    (models: any[]) => {
+      models.forEach((model: any) => {
+        if (model.constructor.name === "GameModel") {
+          response.games.push(model as Game);
+        } else if (model.constructor.name === "EditionModel") {
+          response.editions.push(model as Edition);
+        } else if (model.constructor.name === "AccessModel") {
+          response.access?.push(model);
+        }
+      });
+    },
+    {
+      game: true,
+      edition: true,
+      access: true,
+    },
+  );
 
   return response;
 }
@@ -72,17 +80,20 @@ export async function fetchGames(chainId: string): Promise<GameModel[]> {
   // Fetch all registry data
   const response: GamesResponse = [];
 
-  await Registry.fetch((models: RegistryModel[]) => {
-    models.forEach((model) => {
-      if (model.type === 'Game') {
-        response.push(model as GameModel);
-      }
-    });
-  }, {
-    game: true,
-    edition: false,
-    access: false,
-  });
+  await Registry.fetch(
+    (models: RegistryModel[]) => {
+      models.forEach((model) => {
+        if (model.type === "Game") {
+          response.push(model as GameModel);
+        }
+      });
+    },
+    {
+      game: true,
+      edition: false,
+      access: false,
+    },
+  );
 
   return Object.values(response).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -94,17 +105,20 @@ export async function fetchEditions(chainId: string): Promise<EditionModel[]> {
   // Fetch all registry data
   const response: EditionsResponse = [];
 
-  await Registry.fetch((models: RegistryModel[]) => {
-    models.forEach((model) => {
-      if (model.type === 'Edition') {
-        response.push(model as EditionModel);
-      }
-    });
-  }, {
-    game: false,
-    edition: true,
-    access: false,
-  });
+  await Registry.fetch(
+    (models: RegistryModel[]) => {
+      models.forEach((model) => {
+        if (model.type === "Edition") {
+          response.push(model as EditionModel);
+        }
+      });
+    },
+    {
+      game: false,
+      edition: true,
+      access: false,
+    },
+  );
 
   return Object.values(response)
     .sort((a, b) => a.id - b.id)
@@ -151,5 +165,3 @@ export function useSuspenseEditionsQuery(chainId: string) {
     ...queryConfigs.games,
   });
 }
-
-

@@ -1,9 +1,9 @@
-import { Progress, RawProgress } from '@/models';
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useProgressionsQuery as useCartridgeProgressionsQuery } from '@cartridge/ui/utils/api/cartridge';
-import { AchievementModelParserCallback } from '.';
-import { Progressions } from '@/helpers/achievements';
+import { Progress, RawProgress } from "@/models";
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useProgressionsQuery as useCartridgeProgressionsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { AchievementModelParserCallback } from ".";
+import { Progressions } from "@/helpers/achievements";
 
 export interface ProgressionProject {
   model: string;
@@ -18,7 +18,10 @@ export interface ProgressionResponse {
   }[];
 }
 
-export function useProgressionsQuery(projects: ProgressionProject[], parser: AchievementModelParserCallback<RawProgress, Progress>) {
+export function useProgressionsQuery(
+  projects: ProgressionProject[],
+  parser: AchievementModelParserCallback<RawProgress, Progress>,
+) {
   // Use the Cartridge API hook directly
   const result = useCartridgeProgressionsQuery(
     { projects },
@@ -26,17 +29,23 @@ export function useProgressionsQuery(projects: ProgressionProject[], parser: Ach
       queryKey: queryKeys.achievements.progressions(projects),
       enabled: projects.length > 0,
       ...queryConfigs.achievements,
-    }
+    },
   );
 
   // Transform the data to match our interface
   return {
     ...result,
-    data: transformData(result.data?.playerAchievements as ProgressionResponse, parser),
+    data: transformData(
+      result.data?.playerAchievements as ProgressionResponse,
+      parser,
+    ),
   };
 }
 
-function transformData(playerAchievements: ProgressionResponse, parser: AchievementModelParserCallback<RawProgress, Progress>): Progressions {
+function transformData(
+  playerAchievements: ProgressionResponse,
+  parser: AchievementModelParserCallback<RawProgress, Progress>,
+): Progressions {
   if (!playerAchievements?.items) return {};
   const progressions: { [key: string]: { [key: string]: Progress } } = {};
   playerAchievements.items.forEach((item) => {
@@ -49,5 +58,5 @@ function transformData(playerAchievements: ProgressionResponse, parser: Achievem
       }, {});
     progressions[project] = achievements;
   });
-  return progressions
+  return progressions;
 }

@@ -1,6 +1,6 @@
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useBalancesQuery as useCartridgeBalancesQuery } from '@cartridge/ui/utils/api/cartridge';
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useBalancesQuery as useCartridgeBalancesQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export interface TokenBalance {
   contractAddress: string;
@@ -27,7 +27,7 @@ export interface BalancesResponse {
 export function useBalancesQuery(
   address: string,
   projects?: string[],
-  offset: number = 0
+  offset: number = 0,
 ) {
   // Use the Cartridge API hook directly
   const result = useCartridgeBalancesQuery(
@@ -41,7 +41,7 @@ export function useBalancesQuery(
       queryKey: queryKeys.tokens.balances(address, projects, offset),
       enabled: !!address && BigInt(address) !== 0n,
       ...queryConfigs.tokens,
-    }
+    },
   );
 
   // Return with proper typing
@@ -50,4 +50,3 @@ export function useBalancesQuery(
     data: result.data as BalancesResponse | undefined,
   };
 }
-

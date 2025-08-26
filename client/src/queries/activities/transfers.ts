@@ -1,6 +1,6 @@
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useTransfersQuery as useCartridgeTransfersQuery } from '@cartridge/ui/utils/api/cartridge';
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useTransfersQuery as useCartridgeTransfersQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export interface TransferProject {
   project: string;
@@ -33,7 +33,10 @@ export interface TransfersResponse {
   };
 }
 
-export function useTransfersQuery(address: string, projects: TransferProject[]) {
+export function useTransfersQuery(
+  address: string,
+  projects: TransferProject[],
+) {
   // Use the Cartridge API hook directly
   const result = useCartridgeTransfersQuery(
     { projects },
@@ -41,7 +44,7 @@ export function useTransfersQuery(address: string, projects: TransferProject[]) 
       queryKey: queryKeys.activities.transfers(address, projects),
       enabled: !!address && projects.length > 0,
       ...queryConfigs.activities,
-    }
+    },
   );
 
   // Return with proper typing
@@ -50,4 +53,3 @@ export function useTransfersQuery(address: string, projects: TransferProject[]) 
     data: result.data as TransfersResponse | undefined,
   };
 }
-

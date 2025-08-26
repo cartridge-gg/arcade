@@ -17,13 +17,16 @@ import { MarketplaceProvider } from "./marketplace";
 import { MarketCollectionProvider } from "./market-collection";
 import { MarketFiltersProvider } from "./market-filters";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { queryClient, persister } from "../queries"
+import { queryClient, persister } from "../queries";
 
 export function Provider({ children }: PropsWithChildren) {
   const qc = new QueryClient();
 
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister }}
+    >
       <PostHogProvider>
         <CartridgeAPIProvider
           url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}

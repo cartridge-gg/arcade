@@ -1,6 +1,6 @@
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useCollectionsQuery as useCartridgeCollectionsQuery } from '@cartridge/ui/utils/api/cartridge';
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useCollectionsQuery as useCartridgeCollectionsQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export enum CollectionType {
   ERC721 = "ERC-721",
@@ -43,7 +43,7 @@ export interface CollectionsResponse {
 export function useCollectionsQuery(
   address: string,
   projects: string[],
-  offset: number = 0
+  offset: number = 0,
 ) {
   // Use the Cartridge API hook directly
   const result = useCartridgeCollectionsQuery(
@@ -55,7 +55,7 @@ export function useCollectionsQuery(
       queryKey: queryKeys.inventory.collections(address, projects, offset),
       enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
       ...queryConfigs.inventory,
-    }
+    },
   );
 
   // Return with proper typing
@@ -64,4 +64,3 @@ export function useCollectionsQuery(
     data: result.data as CollectionsResponse | undefined,
   };
 }
-

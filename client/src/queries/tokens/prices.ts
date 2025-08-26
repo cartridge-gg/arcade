@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
 
 export interface TokenPrice {
   token: string;
@@ -18,7 +18,9 @@ export interface PricesResponse {
 async function fetchPrices(tokens: string[]): Promise<PricesResponse> {
   // TODO: Replace with actual price API call
   // This could use CoinGecko, DeFiLlama, or another price oracle
-  throw new Error('TODO: implement me at tokens/prices.ts - Need to integrate price oracle API for USD values');
+  throw new Error(
+    "TODO: implement me at tokens/prices.ts - Need to integrate price oracle API for USD values",
+  );
 }
 
 export function usePricesQuery(tokens: string[]) {

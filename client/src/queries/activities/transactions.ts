@@ -1,6 +1,6 @@
-import { queryKeys } from '../keys';
-import { queryConfigs } from '../queryClient';
-import { useActivitiesQuery as useCartridgeActivitiesQuery } from '@cartridge/ui/utils/api/cartridge';
+import { queryKeys } from "../keys";
+import { queryConfigs } from "../queryClient";
+import { useActivitiesQuery as useCartridgeActivitiesQuery } from "@cartridge/ui/utils/api/cartridge";
 
 export interface ActivityProject {
   project: string;
@@ -26,7 +26,11 @@ export interface ActivitiesResponse {
   };
 }
 
-export function useActivitiesQuery(address: string, projects: ActivityProject[], limit?: number) {
+export function useActivitiesQuery(
+  address: string,
+  projects: ActivityProject[],
+  limit?: number,
+) {
   // Use the Cartridge API hook directly
   const result = useCartridgeActivitiesQuery(
     { projects },
@@ -34,7 +38,7 @@ export function useActivitiesQuery(address: string, projects: ActivityProject[],
       queryKey: queryKeys.activities.transactions(address, projects, limit),
       enabled: !!address && projects.length > 0,
       ...queryConfigs.activities,
-    }
+    },
   );
 
   // Return with proper typing

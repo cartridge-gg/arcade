@@ -76,7 +76,7 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
   //   props: progressProps,
   //   parser: Progress.parse,
   // });
-  const progressions = {}
+  const progressions = {};
   const progressionsLoading = true;
   const progressionsError = false;
 

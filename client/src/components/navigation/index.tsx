@@ -34,8 +34,10 @@ function Item({
 
   const isActive = useMemo(() => {
     // Check if the current route ends with the variant
-    return pathname.endsWith(`/${variant}`) || 
-           (variant === "inventory" && pathname === "/inventory");
+    return (
+      pathname.endsWith(`/${variant}`) ||
+      (variant === "inventory" && pathname === "/inventory")
+    );
   }, [pathname, variant]);
 
   if (disabled) {
@@ -52,9 +54,14 @@ function Item({
     );
   }
 
-  const linkTo = variant === "inventory" ? "/inventory" : 
-                 variant === "achievements" ? "/achievements" : 
-                 variant === "activity" ? "/activity" : "/";
+  const linkTo =
+    variant === "inventory"
+      ? "/inventory"
+      : variant === "achievements"
+        ? "/achievements"
+        : variant === "activity"
+          ? "/activity"
+          : "/";
 
   return (
     <Link

@@ -15,7 +15,7 @@ export function User() {
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [name, setName] = useState<string>("");
-  
+
   // New TanStack Query usage example (uncomment to use):
   /*
   // Query username from API instead of connector
