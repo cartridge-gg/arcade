@@ -1,7 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useMediaQuery } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { useMetrics } from "@/hooks/metrics";
 import { useTheme } from "@/hooks/context";
 import {
   Chart as ChartJS,
@@ -18,6 +17,8 @@ import {
 import { Line } from "react-chartjs-2";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { useSidebar } from "@/hooks/sidebar";
+import { useMetricsQuery } from "@/queries";
+import { useParams } from "@tanstack/react-router";
 
 ChartJS.register(
   CategoryScale,
@@ -35,8 +36,11 @@ export interface MetricsProps {
 }
 
 export function Metrics() {
+  const { game } = useParams({ strict: true });
   const { theme } = useTheme();
-  const { metrics: allMetrics, status } = useMetrics();
+  const { data: metrics, status } = useMetricsQuery(game);
+  const allMetrics = Object.values(metrics);
+
   const chartRef = useRef<ChartJS<"line">>(null);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery("(max-width: 1024px)");
@@ -195,115 +199,95 @@ export function Metrics() {
     return mostRecentPlayerCount;
   }, [allMetrics]);
 
-  const chartData = useMemo(() => {
-    // Create a map to store daily data
+  const processedMetrics = useMemo(() => {
     const dailyData = new Map();
-
-    // Get today's date
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const todayTime = today.getTime();
+    const msPerDay = 24 * 60 * 60 * 1000;
 
-    // Variable to track the most recent date with data
     let mostRecentDateWithData: number | null = null;
 
-    // Process all data points
     allMetrics.forEach((metrics) => {
       metrics.data.forEach(({ date, transactionCount, callerCount }) => {
-        // Calculate days difference
-        const dayDiff = Math.floor(
-          (today.getTime() - date.getTime()) / (24 * 60 * 60 * 1000),
-        );
+        const dayDiff = Math.floor((todayTime - date.getTime()) / msPerDay);
 
-        // Only include data from the last 49 days (7 weeks)
         if (dayDiff >= 0 && dayDiff < 49) {
-          const dayKey = dayDiff;
-
-          if (!dailyData.has(dayKey)) {
-            dailyData.set(dayKey, {
+          if (!dailyData.has(dayDiff)) {
+            dailyData.set(dayDiff, {
               transactionCount: 0,
               callerCount: 0,
               date: date,
             });
           }
 
-          const dayData = dailyData.get(dayKey);
+          const dayData = dailyData.get(dayDiff);
           dayData.transactionCount += transactionCount;
           dayData.callerCount += callerCount;
 
-          // Update the most recent date that has data
-          if (
-            mostRecentDateWithData === null ||
-            dayDiff < mostRecentDateWithData
-          ) {
+          if (mostRecentDateWithData === null || dayDiff < mostRecentDateWithData) {
             mostRecentDateWithData = dayDiff;
           }
         }
       });
     });
 
-    // If we didn't find any data, set a default (show last 30 days)
-    if (mostRecentDateWithData === null) {
-      mostRecentDateWithData = 0;
-    }
+    return {
+      dailyData,
+      mostRecentDateWithData: mostRecentDateWithData ?? 0,
+      today
+    };
+  }, [allMetrics]);
 
-    // Convert to arrays for chart
+  const chartData = useMemo(() => {
+    const { dailyData, mostRecentDateWithData, today } = processedMetrics;
+
     const dayLabels = [];
     const counts = [];
-
-    // Get the furthest we want to go back (up to 49 days)
     const oldestDayToInclude = 49;
 
-    // Process days in reverse order (oldest to newest)
     for (let i = oldestDayToInclude; i >= mostRecentDateWithData; i--) {
       if (dailyData.has(i)) {
         const dayData = dailyData.get(i);
         const date = dayData.date;
-
-        // Format date as "M/D" (e.g., "2/20")
-        const month = date.getMonth() + 1; // JavaScript months are 0-indexed
-        const day = date.getDate();
-        dayLabels.push(`${month}/${day}`);
-
+        dayLabels.push(`${date.getMonth() + 1}/${date.getDate()}`);
         counts.push(
-          activeTab === "txs" ? dayData.transactionCount : dayData.callerCount,
+          activeTab === "txs" ? dayData.transactionCount : dayData.callerCount
         );
       } else {
-        // If no data for a day, use placeholder with 0 value
         const date = new Date(today);
         date.setDate(date.getDate() - i);
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        dayLabels.push(`${month}/${day}`);
+        dayLabels.push(`${date.getMonth() + 1}/${date.getDate()}`);
         counts.push(0);
       }
     }
+
     const pointBorderWidth = isMobile ? 1 : 2;
     const pointRadius = isMobile ? 2 : 4;
     const pointHoverRadius = isMobile ? 3 : 6;
+    const primaryColor = theme?.colors?.primary || "#fbcb4a";
 
     const datasets = [
       {
         fill: true,
-        label:
-          activeTab === "txs" ? "Daily Transactions" : "Daily Active Players",
+        label: activeTab === "txs" ? "Daily Transactions" : "Daily Active Players",
         data: counts,
         borderColor: "#2A2F2A",
         backgroundColor: "#212621",
         borderDash: [5, 5],
         borderWidth: 1,
-        pointBorderColor: function () {
-          return `${theme?.colors?.primary}` || "#fbcb4a";
-        },
+        pointBorderColor: primaryColor,
         pointBackgroundColor: "#242824",
-        pointHoverBackgroundColor: `${theme?.colors?.primary}` || "#fbcb4a",
+        pointHoverBackgroundColor: primaryColor,
         pointBorderWidth,
         pointRadius,
         pointHoverRadius,
         tension: 0.4,
       },
     ] satisfies ChartDataset<"line", unknown>[];
+
     return { labels: dayLabels, datasets, mostRecentDateWithData };
-  }, [theme, allMetrics, activeTab, isMobile]);
+  }, [processedMetrics, theme, activeTab, isMobile]);
 
   const options = useMemo(() => {
     const clipSize = isMobile ? 5 : 8;
@@ -345,8 +329,8 @@ export function Metrics() {
       animation: isPanning
         ? false
         : {
-            duration: 300,
-          },
+          duration: 300,
+        },
       events: isPanning
         ? []
         : ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
