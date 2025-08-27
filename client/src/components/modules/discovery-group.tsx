@@ -9,7 +9,7 @@ import { HTMLAttributes, useEffect, useRef, useState } from "react";
 
 interface ArcadeDiscoveryGroupProps
   extends HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof arcadeDiscoveryGroupVariants> {
+  VariantProps<typeof arcadeDiscoveryGroupVariants> {
   events: ArcadeDiscoveryEventProps[];
   loading?: boolean;
   rounded?: boolean;

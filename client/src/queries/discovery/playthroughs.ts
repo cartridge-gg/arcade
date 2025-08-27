@@ -7,7 +7,7 @@ import {
 } from "@cartridge/ui/utils/api/cartridge";
 import { useAchievementsQuery } from "../achievements";
 import { useEditionsQuery, useFollowsQuery } from "../games";
-import { constants, getChecksumAddress } from "starknet";
+import { constants } from "starknet";
 import { Discover } from "@/context/discovers";
 import { useAccount } from "@starknet-react/core";
 

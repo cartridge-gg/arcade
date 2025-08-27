@@ -177,7 +177,7 @@ export const ArcadeTabs = ({
       defaultValue={defaultValue}
       value={active}
       onValueChange={(value: string) => setActive(value as TabValue)}
-      className="h-full flex flex-col overflow-hidden"
+      className="h-full flex flex-col"
     >
       {isMobile ? (
         <LayoutBottomTabs

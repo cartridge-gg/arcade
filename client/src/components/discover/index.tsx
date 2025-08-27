@@ -4,6 +4,7 @@ import { EditionModel, GameModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
 import { constants, getChecksumAddress } from "starknet";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
+import { ArcadeDiscoveryEventProps } from "../modules/discovery-event";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
@@ -16,20 +17,15 @@ import {
   useGamesQuery,
 } from "@/queries/games";
 
-const DEFAULT_CAP = 30;
-const ROW_HEIGHT = 44;
 
 export function Discover({ edition }: { edition?: EditionModel }) {
-  const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const { isConnected, address } = useAccount();
 
-  // Using suspense queries - data is guaranteed to be available
   const { data: gamesRaw = [] } = useGamesQuery(
     constants.StarknetChainId.SN_MAIN,
   );
-  // Ordering games for a faster access
   const games = useMemo(() => {
     return new Map(gamesRaw.map((g) => [g.id, g]));
   }, [gamesRaw]);
@@ -56,7 +52,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   // Transform Follow[] to { [playerId: string]: string[] }
   const follows = useMemo(() => {
     const followsMap: { [playerId: string]: string[] } = {};
-    followsData.forEach((follow: any) => {
+    followsData.forEach((follow) => {
       const follower = getChecksumAddress(
         follow.followerAddress || follow.follower,
       );
@@ -138,7 +134,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 
   // Compute raw events without sorting first
   const rawEvents = useMemo(() => {
-    const events: any[] = [];
+    const events: ArcadeDiscoveryEventProps[] = [];
 
     for (const edition of filteredEditions) {
       const activities = playthroughs[edition?.config.project];
@@ -203,48 +199,17 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     };
   }, [sortedEvents, followingSet]);
 
-  const handleScroll = useCallback(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-    const height = parent.clientHeight;
-    const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-    if (newCap < cap) return;
-    setCap(newCap + 5);
-  }, [parentRef, cap, setCap]);
-
-  useEffect(() => {
-    const parent = parentRef.current;
-    if (parent) {
-      parent.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (parent) {
-        parent.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [cap, parentRef, handleScroll]);
-
-  useEffect(() => {
-    // Reset scroll and cap on filter change
-    const parent = parentRef.current;
-    if (!parent) return;
-    parent.scrollTop = 0;
-    const height = parent.clientHeight;
-    const cap = Math.ceil(height / ROW_HEIGHT);
-    setCap(cap + 5);
-  }, [parentRef, edition, setCap]);
-
   return (
-    <LayoutContent className="select-none h-full overflow-clip p-0">
+    <LayoutContent className="h-full overflow-clip select-none p-0">
       <div
-        className="p-0 pt-3 lg:pt-0 my-3 lg:my-6 mt-0 h-full overflow-hidden rounded"
+        className="p-0 pt-3 lg:pt-0 my-3 lg:my-6 mt-0 rounded h-full overflow-y-scroll"
+
         style={{ scrollbarWidth: "none" }}
       >
         <ArcadeSubTabs tabs={["all", "following"]} className="mb-3 lg:mb-4">
           <div
             ref={parentRef}
-            className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
-            style={{ scrollbarWidth: "none" }}
+            className="flex justify-center gap-8 w-full overflow-y-scroll"
           >
             <TabsContent className="p-0 mt-0 grow w-full" value="all">
               {activitiesStatus === "loading" && events.all.length === 0 ? (
@@ -253,7 +218,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 <EmptyState />
               ) : (
                 <ArcadeDiscoveryGroup
-                  events={events.all.slice(0, cap)}
+                  events={events.all.slice(0, 50)}
                   rounded
                   identifier={
                     filteredEditions.length === 1

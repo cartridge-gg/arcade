@@ -26,7 +26,7 @@ export function Template({ children }: { children: React.ReactNode }) {
     <ThemeProvider defaultScheme="dark">
       <SceneLayout>
         <div
-          className={cn("h-full w-full overflow-y-scroll lg:px-0")}
+          className={cn("h-full overflow-hidden w-full lg:px-0")}
           style={{ scrollbarWidth: "none" }}
         >
           <div
@@ -47,7 +47,7 @@ export function Template({ children }: { children: React.ReactNode }) {
             {!collection ? <Games /> : <Filters />}
             <div
               className={cn(
-                "fixed lg:relative h-full w-full flex flex-col overflow-hidden px-3 lg:px-0 lg:pb-0",
+                "fixed lg:relative h-full w-full flex flex-col overflow-clip px-3 lg:px-0 lg:pb-0",
                 "transition-transform duration-300 ease-in-out",
                 isPWA ? "pb-[90px]" : "pb-[84px]",
                 isOpen
@@ -64,11 +64,14 @@ export function Template({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "relative grow h-full flex flex-col rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100",
                   player &&
-                    "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
+                  "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}
               >
                 <Tabs />
-                <div className="p-0 px-3 lg:px-6 mt-0 grow w-full">
+                <div
+                  className="p-0 px-3 lg:px-6 mt-0 grow w-full overflow-y-scroll"
+                  style={{ scrollbarWidth: "none" }}
+                >
                   {children}
                 </div>
               </div>

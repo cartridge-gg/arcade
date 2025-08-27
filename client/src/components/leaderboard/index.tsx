@@ -18,8 +18,6 @@ import {
 } from "@/queries/games";
 
 const DEFAULT_CAP = 30;
-const ROW_HEIGHT = 44;
-const SCROLL_THROTTLE_MS = 100;
 
 export function Leaderboard({ edition }: { edition?: EditionModel }) {
   const { isConnected, address: address = "" } = useAccount();
@@ -187,45 +185,6 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     return edition ? gameData : gamesData;
   }, [edition, gamesData, gameData]);
 
-  const handleScroll = useCallback(() => {
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-
-    scrollTimeoutRef.current = setTimeout(() => {
-      const parent = parentRef.current;
-      if (!parent) return;
-      const height = parent.clientHeight;
-      const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-      if (newCap > cap) {
-        setCap(newCap + 5);
-      }
-    }, SCROLL_THROTTLE_MS);
-  }, [cap]);
-
-  useEffect(() => {
-    const parent = parentRef.current;
-    if (parent) {
-      parent.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (parent) {
-        parent.removeEventListener("scroll", handleScroll);
-      }
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [handleScroll]);
-
-  useEffect(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-    parent.scrollTop = 0;
-    const height = parent.clientHeight;
-    const newCap = Math.ceil(height / ROW_HEIGHT) + 5;
-    setCap(newCap);
-  }, [edition]);
 
   if (isLoading && !gamePlayers.length && !globals.length) {
     return (
