@@ -29,7 +29,7 @@ export function Wrapper({
 
 export function Connect() {
   return (
-    <Wrapper className="">
+    <Wrapper className="py-6">
       <div className="flex flex-col justify-center items-center gap-8 h-full">
         <div className="flex flex-col justify-center items-center gap-3 w-[210px] lg:w-auto">
           <p className="text-foreground-200 text-lg/[22px] font-semibold text-center">

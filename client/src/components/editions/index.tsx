@@ -6,7 +6,6 @@ import { EditionModel } from "@cartridge/arcade";
 import EditionActions from "../modules/edition-actions";
 import EditionAction from "../modules/edition-item";
 import { useProject } from "@/hooks/project";
-import { useOwnerships } from "@/hooks/ownerships";
 import { useAccount } from "@starknet-react/core";
 import { joinPaths } from "@/helpers";
 import { Publish } from "./publish";
@@ -14,12 +13,13 @@ import { Whitelist } from "./whitelist";
 import { Prioritize } from "./prioritize";
 import { Select, SelectContent, DotsIcon } from "@cartridge/ui";
 import ArcadeMenuButton from "../modules/menu-button";
+import { useOwnershipsQuery } from "@/queries";
 
 export const Editions = () => {
   const { address } = useAccount();
   const { editions } = useArcade();
   const { game, edition: original } = useProject();
-  const { ownerships } = useOwnerships();
+  const { data: ownerships } = useOwnershipsQuery();
   const [edition, setEdition] = useState<EditionModel | null>(null);
 
   const editionOwner = useMemo(() => {

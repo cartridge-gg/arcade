@@ -1,11 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router"
 import { InventoryScene } from "@/components/scenes/inventory";
+import { createSimpleRoute } from "@/lib/router";
 
-export const Route = createFileRoute("/inventory")({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      filter: search.filter as string | undefined,
-    };
-  },
+export const Route = createSimpleRoute("/inventory")({
   component: InventoryScene,
 });

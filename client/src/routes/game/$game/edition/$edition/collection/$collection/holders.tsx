@@ -1,13 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router"
 import { HoldersScene } from "@/components/scenes/holders";
+import { InventoryLoading } from "@/components/errors";
+import { createOptimizedRoute } from "@/lib/router";
 
-export const Route = createFileRoute(
+export const Route = createOptimizedRoute(
   "/game/$game/edition/$edition/collection/$collection/holders",
 )({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      filter: search.filter as string | undefined,
-    };
-  },
   component: HoldersScene,
+  pendingComponent: InventoryLoading,
 });

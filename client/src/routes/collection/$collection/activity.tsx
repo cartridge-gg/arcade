@@ -1,11 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router"
 import { TraceabilityScene } from "@/components/scenes/traceability";
+import { ActivityLoading } from "@/components/errors";
+import { createOptimizedRoute } from "@/lib/router";
 
-export const Route = createFileRoute("/collection/$collection/activity")({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      filter: search.filter as string | undefined,
-    };
-  },
+export const Route = createOptimizedRoute("/collection/$collection/activity")({
   component: TraceabilityScene,
+  pendingComponent: ActivityLoading,
 });

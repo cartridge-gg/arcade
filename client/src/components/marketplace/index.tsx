@@ -2,12 +2,12 @@ import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
 import { useEffect, useMemo, useState } from "react";
 import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
-import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { OrderModel, StatusType, useCollection } from "@cartridge/marketplace";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useMarketCollections } from "@/hooks/market-collections";
 import { Token } from "@dojoengine/torii-wasm";
 import { useProject } from "@/hooks/project";
-import { Link } from "@tanstack/react-router";
+import { Link, Route, useParams } from "@tanstack/react-router";
 import { MetadataHelper } from "@/helpers/metadata";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
@@ -30,8 +30,12 @@ export const Marketplace = () => {
   );
 
   // Keep collections from context (depends on Torii clients)
-  const { collections } = useMarketCollections();
+  // const { collections } = useMarketCollections();
+  const { collection: collectionParam = '' } = useParams({ strict: true })
+  const collections = [];
+  const filteredTokenIds = [];
   const { edition } = useProject();
+  const { collection } = useCollection(collectionParam, filteredTokenIds, 50, undefined);
 
   // New TanStack Query usage example (uncomment to use):
   /*

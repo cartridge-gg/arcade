@@ -1,8 +1,9 @@
 import { useContext, useMemo } from "react";
 import { AchievementContext } from "@/context";
-import { getChecksumAddress } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { useArcade } from "./arcade";
 import { useAddress } from "./address";
+import { useAchievementsQuery, useEditionsQuery, usePinsQuery } from "@/queries";
 
 export interface Item {
   id: string;
@@ -74,7 +75,11 @@ export const useAchievements = () => {
 
 export function usePlayerStats() {
   const { address } = useAddress();
-  const { achievements, globals } = useAchievements();
+
+  const { data: editions = [] } = useEditionsQuery(
+    constants.StarknetChainId.SN_MAIN,
+  );
+  const { achievements, globals } = useAchievementsQuery(editions);
 
   const { completed, total } = useMemo(() => {
     let completed = 0;
@@ -101,9 +106,12 @@ export function usePlayerStats() {
 }
 
 export function usePlayerGameStats(projects: string[]) {
-  const { pins } = useArcade();
+  const { data: pins = [] } = usePinsQuery();
   const { address } = useAddress();
-  const { achievements, players } = useAchievements();
+  const { data: editions = [] } = useEditionsQuery(
+    constants.StarknetChainId.SN_MAIN,
+  );
+  const { achievements, players } = useAchievementsQuery(editions);
 
   const gameAchievements = useMemo(() => {
     return projects.map((project) => achievements[project || ""] || []).flat();

@@ -19,22 +19,20 @@ import ArcadeGameSelect from "../modules/game-select";
 import { useSidebar } from "@/hooks/sidebar";
 import { cn } from "@cartridge/ui/utils";
 import { Update } from "./update";
-import { useOwnerships } from "@/hooks/ownerships";
 import { useAccount } from "@starknet-react/core";
 import { useProject } from "@/hooks/project";
 import ArcadeMenuButton from "../modules/menu-button";
 import { Publish } from "./publish";
 import { Whitelist } from "./whitelist";
 import { UserCard } from "../user/user-card";
-import { useGamesQuery } from "@/queries";
+import { useGamesQuery, useOwnershipsQuery } from "@/queries";
 import { constants } from "starknet";
 
 export const Games = () => {
   const { address } = useAccount();
   const [search, setSearch] = useState("");
-  // const { games: oldGames } = useArcade();
   const { game } = useProject();
-  const { ownerships } = useOwnerships();
+  const { data: ownerships = [] } = useOwnershipsQuery();
   const { data: games } = useGamesQuery(constants.StarknetChainId.SN_MAIN);
   const { isOpen, handleTouchStart, handleTouchMove } = useSidebar();
   const isMobile = useMediaQuery("(max-width: 1024px)");

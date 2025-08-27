@@ -1,11 +1,9 @@
+import { createFileRoute } from "@tanstack/react-router"
 import { ItemsScene } from "@/components/scenes/items";
-import { createFileRoute } from "@tanstack/react-router";
+import { InventoryLoading } from "@/components/errors";
+import { createOptimizedRoute } from "@/lib/router";
 
-export const Route = createFileRoute("/collection/$collection")({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      filter: search.filter as string | undefined,
-    };
-  },
+export const Route = createOptimizedRoute("/collection/$collection")({
   component: ItemsScene,
+  pendingComponent: InventoryLoading,
 });

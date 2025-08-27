@@ -11,7 +11,7 @@ import AchievementSummary from "../modules/summary";
 import { useAddress } from "@/hooks/address";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/helpers";
-import { useOwnerships } from "@/hooks/ownerships";
+import { useOwnershipsQuery } from "@/queries";
 // New TanStack Query imports (commented out until fully integrated)
 // import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
 
@@ -26,7 +26,7 @@ export function Achievements({
   // TODO: Replace with new TanStack Query implementation below
   const { achievements, players, isLoading, isError } = useAchievements();
   const { pins, games, editions } = useArcade();
-  const { ownerships } = useOwnerships();
+  const { data: ownerships } = useOwnershipsQuery();
 
   // New TanStack Query usage example (uncomment to use):
   /*

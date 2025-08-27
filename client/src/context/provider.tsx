@@ -33,31 +33,15 @@ export function Provider({ children }: PropsWithChildren) {
         >
           <IndexerAPIProvider credentials="omit">
             <QueryClientProvider client={qc}>
-              <MarketplaceProvider>
-                <ArcadeProvider>
-                  <MarketCollectionProvider>
-                    <StarknetProvider>
-                      <OwnershipsProvider>
-                        <CollectionProvider>
-                          <TokenProvider>
-                            <AchievementProvider>
-                              <ActivitiesProvider>
-                                <MetricsProvider>
-                                  <MarketFiltersProvider>
-                                    <SidebarProvider>
-                                      {children}
-                                    </SidebarProvider>
-                                  </MarketFiltersProvider>
-                                </MetricsProvider>
-                              </ActivitiesProvider>
-                            </AchievementProvider>
-                          </TokenProvider>
-                        </CollectionProvider>
-                      </OwnershipsProvider>
-                    </StarknetProvider>
-                  </MarketCollectionProvider>
-                </ArcadeProvider>
-              </MarketplaceProvider>
+              <ArcadeProvider>
+                <StarknetProvider>
+                  <MarketFiltersProvider>
+                    <SidebarProvider>
+                      {children}
+                    </SidebarProvider>
+                  </MarketFiltersProvider>
+                </StarknetProvider>
+              </ArcadeProvider>
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>

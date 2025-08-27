@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 import { ArcadeContext } from "../context/arcade";
 import { useAccount } from "@starknet-react/core";
 import { RoleType } from "@cartridge/arcade";
-import { useOwnerships } from "./ownerships";
+import { useOwnershipsQuery } from "@/queries";
 
 /**
  * Custom hook to access the Arcade context and account information.
@@ -38,8 +38,9 @@ export const useArcade = () => {
     player,
     setPlayer,
   } = context;
-  const { address } = useAccount();
-  const { ownerships } = useOwnerships();
+  const { address: address = '' } = useAccount();
+
+  const { data: ownerships } = useOwnershipsQuery();
 
   const access = useMemo(() => {
     return accesses.find(

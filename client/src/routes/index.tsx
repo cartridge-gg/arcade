@@ -1,11 +1,7 @@
+import { createFileRoute } from "@tanstack/react-router"
 import { DiscoverScene } from "@/components/scenes/discover";
-import { createFileRoute } from "@tanstack/react-router";
+import { createSimpleRoute } from "@/lib/router";
 
-export const Route = createFileRoute("/")({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      filter: search.filter as string | undefined,
-    };
-  },
+export const Route = createSimpleRoute("/")({
   component: DiscoverScene,
 });

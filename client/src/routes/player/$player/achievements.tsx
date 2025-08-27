@@ -1,11 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { App } from "@/components/app";
+import { createFileRoute } from "@tanstack/react-router"
+import { AchievementScene } from "@/components/scenes/achievement";
+import { AchievementsLoading } from "@/components/errors";
+import { createOptimizedRoute } from "@/lib/router";
 
-export const Route = createFileRoute("/player/$player/achievements")({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      filter: search.filter as string | undefined,
-    };
-  },
-  component: App,
+export const Route = createOptimizedRoute("/player/$player/achievements")({
+  component: AchievementScene,
+  pendingComponent: AchievementsLoading,
 });

@@ -6,3 +6,9 @@ export const DEFAULT_PRESET: string = "arcade";
 // Constants required to query the achievement events
 export const TROPHY: string = "TrophyCreation";
 export const PROGRESS: string = "TrophyProgression";
+export const DEFAULT_PROJECT_QUERY = {
+  project: DEFAULT_PROJECT,
+  contractAddresses: [],
+  tokenIds: [],
+  limit: 0,
+};

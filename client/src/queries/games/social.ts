@@ -4,6 +4,7 @@ import { queryConfigs } from "../queryClient";
 import { Social } from "@/../../packages/sdk/src";
 import { constants, getChecksumAddress } from "starknet";
 import { useMemo } from "react";
+import { useAccount } from "@starknet-react/core";
 
 export interface Pin {
   id: string;
@@ -113,7 +114,8 @@ export async function fetchGuilds(
   return guilds;
 }
 
-export function usePinsQuery(address: string) {
+export function usePinsQuery() {
+  const { address = '' } = useAccount();
   return useQuery({
     queryKey: queryKeys.games.social.pins(address),
     queryFn: () => fetchPins(address),
