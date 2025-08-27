@@ -25,8 +25,7 @@ import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
-
-const TABS_ORDER = ["inventory", "achievements", "activity"] as TabValue[];
+import { PositionsScene } from "../scenes/positions";
 
 export function PlayerPage() {
   const { address, isSelf, self } = useAddress();
@@ -36,10 +35,27 @@ export function PlayerPage() {
   const { provider, follows } = useArcade();
   const { edition, tab } = useProject();
 
+  const order: TabValue[] = useMemo(() => {
+    const order = [
+      "inventory",
+      "achievements",
+      "activity",
+      "positions",
+    ] as TabValue[];
+
+    if (process.env.NODE_ENV !== "development") {
+      // Remove predict tab in production for now
+      const predictIndex = order.indexOf("positions");
+      order.splice(predictIndex, 1);
+    }
+
+    return order;
+  }, []);
+
   const defaultValue = useMemo(() => {
-    if (!TABS_ORDER.includes(tab as TabValue)) return "inventory";
+    if (!order.includes(tab as TabValue)) return "inventory";
     return tab;
-  }, [tab]);
+  }, [tab, order]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -224,7 +240,7 @@ export function PlayerPage() {
         <CloseButton handleClose={handleClose} />
       </div>
       <ArcadeTabs
-        order={TABS_ORDER}
+        order={order}
         defaultValue={defaultValue as TabValue}
         onTabClick={(tab: TabValue) => handleClick(tab)}
         variant="light"
@@ -250,6 +266,12 @@ export function PlayerPage() {
             value="activity"
           >
             <ActivityScene />
+          </TabsContent>
+          <TabsContent
+            className="p-0 px-3 lg:px-6 mt-0 grow w-full h-full"
+            value="positions"
+          >
+            <PositionsScene />
           </TabsContent>
         </div>
       </ArcadeTabs>
