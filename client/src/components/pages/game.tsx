@@ -15,7 +15,11 @@ import arcade from "@/assets/arcade-logo.png";
 import { GameSocialWebsite } from "../modules/game-social";
 import { useProject } from "@/hooks/project";
 import { useDevice } from "@/hooks/device";
+<<<<<<< HEAD
 import { PredictScene } from "../scenes/predict";
+=======
+import { usePathBuilder } from "@/hooks/path-builder";
+>>>>>>> 88bb0e2 (feat: user navigation)
 
 export function GamePage() {
   const { game, edition } = useProject();
@@ -24,26 +28,24 @@ export function GamePage() {
   const [showMarketplace, setShowMarketplace] = useState(false);
 
   const navigate = useNavigate();
+  const { buildGamePath } = usePathBuilder();
+  
   const handleClick = useCallback(
     (value: string) => {
-      if (edition) {
-        const gameName =
-          game?.name.toLowerCase().replace(/ /g, "-") || game?.id.toString();
-        const editionName =
-          edition.name.toLowerCase().replace(/ /g, "-") ||
-          edition.id.toString();
-        navigate({
-          to: `/game/${gameName}/edition/${editionName}/${value}` as any,
-        });
+      if (edition && game) {
+        const gameName = game.name || game.id.toString();
+        const editionName = edition.name || edition.id.toString();
+        const path = buildGamePath(gameName, editionName);
+        navigate({ to: `${path}/${value}` });
       } else if (game) {
-        const gameName =
-          game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
-        navigate({ to: `/game/${gameName}/${value}` as any });
+        const gameName = game.name || game.id.toString();
+        const path = buildGamePath(gameName);
+        navigate({ to: `${path}/${value}` });
       } else {
-        navigate({ to: `/${value}` as any });
+        navigate({ to: `/${value}` });
       }
     },
-    [navigate, game, edition],
+    [navigate, game, edition, buildGamePath],
   );
 
   const order: TabValue[] = useMemo(() => {

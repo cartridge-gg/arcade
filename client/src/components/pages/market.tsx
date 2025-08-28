@@ -12,9 +12,10 @@ import {
   VerifiedIcon,
 } from "@cartridge/ui";
 import { ArcadeTabs } from "../modules";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
 import arcade from "@/assets/arcade-logo.png";
+import { usePathBuilder } from "@/hooks/path-builder";
 import { useCollection } from "@/hooks/market-collections";
 
 const TABS_ORDER = ["activity", "items", "holders"] as TabValue[];
@@ -34,32 +35,20 @@ export function MarketPage() {
     return tab;
   }, [tab]);
 
-  const routerState = useRouterState();
-  const pathname = routerState.location.pathname;
+  const { pathname, buildCollectionPath } = usePathBuilder();
   const navigate = useNavigate();
 
   const handleClick = useCallback(
     (value: string) => {
-      if (edition && game && collectionAddress) {
-        const gameName =
-          game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
-        const editionName =
-          edition.name.toLowerCase().replace(/ /g, "-") ||
-          edition.id.toString();
-        navigate({
-          to: `/game/${gameName}/edition/${editionName}/collection/${collectionAddress}/${value}` as any,
-        });
-      } else if (game && collectionAddress) {
-        const gameName =
-          game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
-        navigate({
-          to: `/game/${gameName}/collection/${collectionAddress}/${value}` as any,
-        });
-      } else if (collectionAddress) {
-        navigate({ to: `/collection/${collectionAddress}/${value}` as any });
-      }
+      const path = buildCollectionPath(
+        collectionAddress || "",
+        value,
+        game?.name || game?.id.toString(),
+        edition?.name || edition?.id.toString()
+      );
+      navigate({ to: path });
     },
-    [navigate, pathname, game, edition, collectionAddress],
+    [navigate, buildCollectionPath, game, edition, collectionAddress],
   );
 
   const handleClose = useCallback(() => {

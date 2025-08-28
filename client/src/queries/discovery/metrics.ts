@@ -1,6 +1,5 @@
 import { constants } from "starknet";
 import { queryKeys } from "../keys";
-import { queryConfigs } from "../queryClient";
 import { MetricsProject, useMetricsQuery as useCartridgeMetricsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useEditionsQuery } from "../games";
 import { useMemo } from "react";

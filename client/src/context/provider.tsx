@@ -35,11 +35,15 @@ export function Provider({ children }: PropsWithChildren) {
             <QueryClientProvider client={qc}>
               <ArcadeProvider>
                 <StarknetProvider>
-                  <MarketFiltersProvider>
-                    <SidebarProvider>
-                      {children}
-                    </SidebarProvider>
-                  </MarketFiltersProvider>
+                  <CollectionProvider>
+                    <TokenProvider>
+                      <MarketFiltersProvider>
+                        <SidebarProvider>
+                          {children}
+                        </SidebarProvider>
+                      </MarketFiltersProvider>
+                    </TokenProvider>
+                  </CollectionProvider>
                 </StarknetProvider>
               </ArcadeProvider>
             </QueryClientProvider>

@@ -1,12 +1,12 @@
 import ControllerConnector from "@cartridge/connector/controller";
 import { Button, GearIcon, SignOutIcon } from "@cartridge/ui";
 import { useAccount, useDisconnect } from "@starknet-react/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { UserAvatar } from "../user/avatar";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
-import { joinPaths } from "@/helpers";
+import { usePathBuilder } from "@/hooks/path-builder";
 // New TanStack Query imports (commented out until fully integrated)
 // import { useAccountNameQuery, useUserProfileQuery } from "@/queries/users";
 
@@ -26,9 +26,8 @@ export function User() {
   const displayName = name || username || userProfile?.username || '';
   */
 
-  const routerState = useRouterState();
-  const location = { pathname: routerState.location.pathname };
   const navigate = useNavigate();
+<<<<<<< HEAD
   const handleClick = useCallback(() => {
     if (!name && !address) return;
     // Update the url params
@@ -41,6 +40,15 @@ export function User() {
     pathname = joinPaths(pathname, `/player/${playerName}`);
     navigate({ to: pathname });
   }, [name, address, navigate]);
+=======
+  const { buildPlayerPath } = usePathBuilder();
+  
+  const playerPath = useMemo(() => {
+    if (!name && !address) return null;
+    const playerName = !name ? address?.toLowerCase() : name.toLowerCase();
+    return buildPlayerPath(playerName || "");
+  }, [name, address, buildPlayerPath]);
+>>>>>>> 88bb0e2 (feat: user navigation)
 
   useEffect(() => {
     async function fetch() {
@@ -73,16 +81,30 @@ export function User() {
 
   return (
     <div className="flex items-center gap-3">
-      <Button
-        variant="secondary"
-        className="bg-background-100 hover:bg-background-150 px-3 py-2.5 select-none"
-        onClick={() => handleClick()}
-      >
-        <div className="size-5 flex items-center justify-center">
-          <UserAvatar username={name} size="sm" />
-        </div>
-        <p className="text-sm font-medium normal-case">{name}</p>
-      </Button>
+      {playerPath ? (
+        <Link to={playerPath}>
+          <Button
+            variant="secondary"
+            className="bg-background-100 hover:bg-background-150 px-3 py-2.5 select-none"
+          >
+            <div className="size-5 flex items-center justify-center">
+              <UserAvatar username={name} size="sm" />
+            </div>
+            <p className="text-sm font-medium normal-case">{name}</p>
+          </Button>
+        </Link>
+      ) : (
+        <Button
+          variant="secondary"
+          className="bg-background-100 hover:bg-background-150 px-3 py-2.5 select-none"
+          disabled
+        >
+          <div className="size-5 flex items-center justify-center">
+            <UserAvatar username={name} size="sm" />
+          </div>
+          <p className="text-sm font-medium normal-case">{name}</p>
+        </Button>
+      )}
       <ControllerActions>
         <ControllerAction
           label="Settings"

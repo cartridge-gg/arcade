@@ -1,15 +1,14 @@
 import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { EditionModel, GameModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
 import { constants, getChecksumAddress } from "starknet";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
 import { ArcadeDiscoveryEventProps } from "../modules/discovery-event";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
-import { joinPaths } from "@/helpers";
+import { usePathBuilder } from "@/hooks/path-builder";
 import { usePlaythroughsQuery } from "@/queries/discovery";
 import {
   useEditionsQuery,
@@ -84,36 +83,23 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     return !edition ? editions : [edition];
   }, [editions, edition]);
 
-  const routerState = useRouterState();
-  const location = { pathname: routerState.location.pathname };
-  const navigate = useNavigate();
-  const handleClick = useCallback(
-    (game: GameModel, edition: EditionModel, nameOrAddress: string) => {
-      // If there are several games displayed, then clicking a card link to the game
-      let pathname = location.pathname;
+  const { buildPlayerPath, buildGamePath } = usePathBuilder();
+
+  const createEventLink = useMemo(() => {
+    return (game: GameModel, edition: EditionModel, nameOrAddress: string) => {
+      // If there are several games displayed, then clicking a card links to the game
       if (filteredEditions.length > 1) {
-        pathname = pathname.replace(/\/game\/[^/]+/, "");
-        pathname = pathname.replace(/\/edition\/[^/]+/, "");
-        const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || game.id}`;
-        const editionName = `${edition?.name.toLowerCase().replace(/ /g, "-") || edition.id}`;
+        const gameName = game?.name || game.id.toString();
+        const editionName = edition?.name || edition.id.toString();
         if (game.id !== 0) {
-          pathname = joinPaths(
-            `/game/${gameName}/edition/${editionName}`,
-            pathname,
-          );
+          return buildGamePath(gameName, editionName);
         }
-        navigate({ to: pathname || "/" });
-        return;
+        return "/";
       }
       // Otherwise it links to the player
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      const player = nameOrAddress.toLowerCase();
-      pathname = joinPaths(pathname, `/player/${player}/tab/activity`);
-      navigate({ to: pathname || "/" });
-    },
-    [navigate, filteredEditions],
-  );
+      return buildPlayerPath(nameOrAddress, "activity");
+    };
+  }, [filteredEditions, buildPlayerPath, buildGamePath]);
 
   // Cache checksum addresses to avoid repeated computation
   const addressChecksumCache = useMemo(() => {
@@ -166,7 +152,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
           timestamp: Math.floor(activity.end / 1000),
           logo: edition.properties.icon,
           color: edition.color,
-          onClick: () => handleClick(game, edition, username || checksumAddr),
+          link: createEventLink(game, edition, username || checksumAddr),
         });
       }
     }
@@ -177,7 +163,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     addressChecksumCache,
     filteredEditions,
     games,
-    handleClick,
+    createEventLink,
     playthroughs,
   ]);
 

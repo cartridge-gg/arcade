@@ -11,9 +11,9 @@ import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useUsername } from "@/hooks/account";
-import { joinPaths } from "@/helpers";
+import { usePathBuilder } from "@/hooks/path-builder";
 
 interface CollectionsProps {
   collections: Collection[];
@@ -93,24 +93,20 @@ function Item({
   }, [orders, address]);
 
   const { username } = useUsername({ address });
-
-  const navigate = useNavigate();
-  const routerState = useRouterState();
-  const location = { pathname: routerState.location.pathname };
-  const handleClick = useCallback(async () => {
-    // If the user is not logged in, or not the current user then we navigate to the marketplace
+  const { pathname, stripPathSegments } = usePathBuilder();
+  
+  const navigationPath = useMemo(() => {
     if (!isSelf) {
       const player = username.toLowerCase();
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(
-        pathname,
-        `/collection/${collection.address}/tab/items?filter=${player}`,
-      );
-      navigate({ to: pathname || "/" });
-      return;
+      let newPath = stripPathSegments(["player", "tab"]);
+      return `${newPath}/collection/${collection.address}/tab/items?filter=${player}`;
     }
+    return null;
+  }, [isSelf, username, collection.address, stripPathSegments]);
+
+  const handleClick = useCallback(async () => {
+    // Only handle controller actions when isSelf is true
+    if (!isSelf) return;
     const controller = (connector as ControllerConnector)?.controller;
     if (!controller) {
       console.error("Connector not initialized");
@@ -144,23 +140,37 @@ function Item({
     connector,
     collection.type,
     edition,
-    location,
-    navigate,
+    collection.project,
+    chain,
     isSelf,
   ]);
 
   return (
     <div className="w-full group select-none">
-      <CollectibleCard
-        title={collection.name}
-        image={
-          collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
-          placeholder
-        }
-        totalCount={collection.totalCount}
-        listingCount={listingCount}
-        onClick={handleClick}
-      />
+      {navigationPath ? (
+        <Link to={navigationPath}>
+          <CollectibleCard
+            title={collection.name}
+            image={
+              collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
+              placeholder
+            }
+            totalCount={collection.totalCount}
+            listingCount={listingCount}
+          />
+        </Link>
+      ) : (
+        <CollectibleCard
+          title={collection.name}
+          image={
+            collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
+            placeholder
+          }
+          totalCount={collection.totalCount}
+          listingCount={listingCount}
+          onClick={handleClick}
+        />
+      )}
     </div>
   );
 }

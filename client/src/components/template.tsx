@@ -10,11 +10,14 @@ import { useArcade } from "@/hooks/arcade";
 import { useDevice } from "@/hooks/device";
 import { Filters } from "./filters";
 import { Tabs } from "./tabs";
+import { useParams } from "@tanstack/react-router";
+import { PlayerHeader } from "./player-header";
 
 export function Template({ children }: { children: React.ReactNode }) {
   const { isOpen, toggle, handleTouchMove, handleTouchStart } = useSidebar();
   const { setPlayer } = useArcade();
   const { player, collection } = useProject();
+  const { player: playerParam } = useParams({ strict: true });
 
   const isPWA = useDevice();
 
@@ -67,7 +70,8 @@ export function Template({ children }: { children: React.ReactNode }) {
                   "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}
               >
-                <Tabs />
+                {!playerParam ? <Tabs /> : <PlayerHeader address={playerParam} />}
+
                 <div
                   className="p-0 px-3 lg:px-6 mt-0 grow w-full overflow-y-scroll"
                   style={{ scrollbarWidth: "none" }}

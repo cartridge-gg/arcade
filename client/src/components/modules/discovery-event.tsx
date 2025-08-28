@@ -2,6 +2,7 @@ import { getTime } from "@/helpers";
 import { CardTitle, cn, Thumbnail } from "@cartridge/ui";
 import { cva, VariantProps } from "class-variance-authority";
 import { useMemo, HTMLAttributes, useState, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
 
 export interface ArcadeDiscoveryEventProps
   extends HTMLAttributes<HTMLDivElement>,
@@ -21,6 +22,8 @@ export interface ArcadeDiscoveryEventProps
   loading?: boolean;
   color?: string;
   logo?: string;
+  address?: string;
+  link?: string;
 }
 
 export const arcadeDiscoveryEventVariants = cva(
@@ -56,6 +59,7 @@ export const ArcadeDiscoveryEvent = ({
   color,
   variant,
   className,
+  link,
   ...props
 }: ArcadeDiscoveryEventProps) => {
   const colorMix = useMemo(
@@ -71,7 +75,7 @@ export const ArcadeDiscoveryEvent = ({
     return { points };
   }, [achievements]);
 
-  return (
+  const content = (
     <div
       className={cn(arcadeDiscoveryEventVariants({ variant }), className)}
       style={{
@@ -99,6 +103,8 @@ export const ArcadeDiscoveryEvent = ({
       </div>
     </div>
   );
+
+  return link ? <Link to={link}>{content}</Link> : content;
 };
 
 const DiscoveryEvent = ({

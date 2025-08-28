@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Trophies } from "./trophies";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel, Socials } from "@cartridge/arcade";
-import { getChecksumAddress } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import { Item } from "@/helpers/achievements";
 import banner from "@/assets/banner.png";
@@ -11,7 +11,7 @@ import AchievementSummary from "../modules/summary";
 import { useAddress } from "@/hooks/address";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/helpers";
-import { useOwnershipsQuery } from "@/queries";
+import { useAchievementsQuery, useEditionsQuery, useOwnershipsQuery, usePinsQuery } from "@/queries";
 // New TanStack Query imports (commented out until fully integrated)
 // import { useTrophiesQuery, useProgressionsQuery } from "@/queries/achievements";
 
@@ -24,37 +24,15 @@ export function Achievements({
 }) {
   const { address, isSelf } = useAddress();
   // TODO: Replace with new TanStack Query implementation below
-  const { achievements, players, isLoading, isError } = useAchievements();
-  const { pins, games, editions } = useArcade();
+
+  const { data: editions = [] } = useEditionsQuery(
+    constants.StarknetChainId.SN_MAIN,
+  );
+  const { achievements, players, isLoading, isError } =
+    useAchievementsQuery(editions);
+  const { data: pins = [] } = usePinsQuery();
   const { data: ownerships } = useOwnershipsQuery();
 
-  // New TanStack Query usage example (uncomment to use):
-  /*
-  const projects = useMemo(() => 
-    editions.map(e => ({
-      model: e.model,
-      namespace: e.namespace,
-      project: e.config.project
-    })), [editions]);
-  
-  const { data: trophiesData, isLoading: trophiesLoading } = useTrophiesQuery(projects);
-  const { data: progressionsData, isLoading: progressionsLoading } = useProgressionsQuery(projects, address);
-  
-  // Combine loading states
-  const isLoading = trophiesLoading || progressionsLoading;
-  const isError = !trophiesData && !trophiesLoading;
-  
-  // Transform query data to match existing shape
-  const achievements = useMemo(() => {
-    // TODO: Transform trophiesData to achievements format
-    return {};
-  }, [trophiesData]);
-  
-  const players = useMemo(() => {
-    // TODO: Transform progressionsData to players format
-    return {};
-  }, [progressionsData]);
-  */
 
   const isMobile = useMediaQuery("(max-width: 1024px)");
 

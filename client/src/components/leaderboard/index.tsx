@@ -1,15 +1,13 @@
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useArcade } from "@/hooks/arcade";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { EditionModel } from "@cartridge/arcade";
 import { constants, getChecksumAddress } from "starknet";
-import { useAchievements } from "@/hooks/achievements";
 import { Connect } from "../errors";
 import LeaderboardRow from "../modules/leaderboard-row";
 import { useAccount } from "@starknet-react/core";
 import ArcadeSubTabs from "../modules/sub-tabs";
-import { joinPaths } from "@/helpers";
+import { usePathBuilder } from "@/hooks/path-builder";
 import { useAchievementsQuery } from "@/queries/achievements";
 import {
   usePinsQuery,
@@ -28,13 +26,13 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
   const { achievements, globals, players, usernames, isLoading, isError } =
     useAchievementsQuery(editions);
   const { data: following = [] } = useFollowsQuery(address);
-  const { data: pins = [] } = usePinsQuery(address);
+  const { data: pins = [] } = usePinsQuery();
 
   const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const navigate = useNavigate();
+  const { buildPlayerPath } = usePathBuilder();
 
   // Cache address conversions
   const addressBigInt = useMemo(() => BigInt(address || "0x0"), [address]);
@@ -59,19 +57,6 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     return checksums;
   }, [gamePlayers, globals]);
 
-  const routerState = useRouterState();
-  const location = { pathname: routerState.location.pathname };
-  const handleClick = useCallback(
-    (nameOrAddress: string) => {
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      const player = nameOrAddress.toLowerCase();
-      pathname = joinPaths(pathname, `/player/${player}/tab/achievements`);
-      navigate({ to: pathname || "/" });
-    },
-    [location, navigate],
-  );
 
   // Helper function to process player data
   const processPlayerData = useCallback(
@@ -222,18 +207,22 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
                   className="relative flex flex-col gap-y-px h-full rounded overflow-y-scroll"
                   style={{ scrollbarWidth: "none" }}
                 >
-                  {filteredData.all.map((item, index) => (
-                    <LeaderboardRow
-                      key={index}
-                      pins={[]}
-                      rank={item.rank}
-                      name={item.name}
-                      points={item.points}
-                      highlight={item.highlight}
-                      following={item.following}
-                      onClick={() => handleClick(item.address)}
-                    />
-                  ))}
+                  {filteredData.all.map((item, index) => {
+                    const playerPath = buildPlayerPath(item.address, "achievements");
+                    console.log(playerPath);
+                    return (
+                      <Link key={index} to={playerPath}>
+                        <LeaderboardRow
+                          pins={[]}
+                          rank={item.rank}
+                          name={item.name}
+                          points={item.points}
+                          highlight={item.highlight}
+                          following={item.following}
+                        />
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
@@ -251,17 +240,20 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
                   className="relative flex flex-col gap-y-px h-full rounded overflow-y-scroll"
                   style={{ scrollbarWidth: "none" }}
                 >
-                  {filteredData.following.map((item, index) => (
-                    <LeaderboardRow
-                      key={index}
-                      pins={[]}
-                      rank={item.rank}
-                      name={item.name}
-                      points={item.points}
-                      highlight={item.highlight}
-                      onClick={() => handleClick(item.address)}
-                    />
-                  ))}
+                  {filteredData.following.map((item, index) => {
+                    const playerPath = buildPlayerPath(item.address, "achievements");
+                    return (
+                      <Link key={index} to={playerPath}>
+                        <LeaderboardRow
+                          pins={[]}
+                          rank={item.rank}
+                          name={item.name}
+                          points={item.points}
+                          highlight={item.highlight}
+                        />
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>

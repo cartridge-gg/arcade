@@ -1,12 +1,12 @@
 import { useUsernames } from "@/hooks/account";
 import { useProject } from "@/hooks/project";
 import { Empty } from "@cartridge/ui";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { UserAvatar } from "../user/avatar";
 import { getChecksumAddress } from "starknet";
 import { useMarketFilters } from "@/hooks/market-filters";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { joinPaths } from "@/helpers";
+import { Link } from "@tanstack/react-router";
+import { usePathBuilder } from "@/hooks/path-builder";
 
 export const Holders = () => {
   const { collection: collectionAddress } = useProject();
@@ -54,22 +54,7 @@ export const Holders = () => {
       .sort((a, b) => b.balance - a.balance);
   }, [balances, usernames, total]);
 
-  const navigate = useNavigate();
-  const routerState = useRouterState();
-  const location = { pathname: routerState.location.pathname };
-  const handleClick = useCallback(
-    (nameOrAddress: string) => {
-      // On click, we update the url param address to the address of the player
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = pathname.replace(/\/collection\/[^/]+/, "");
-      const player = nameOrAddress.toLowerCase();
-      pathname = joinPaths(pathname, `/player/${player}`);
-      navigate({ to: pathname || "/" });
-    },
-    [location, navigate],
-  );
+  const { buildPlayerPath } = usePathBuilder();
 
   if (!balances) return <EmptyState />;
 
@@ -87,27 +72,31 @@ export const Holders = () => {
       </div>
       <div className="rounded overflow-hidden w-full mb-6">
         <div className="flex flex-col gap-px overflow-y-auto">
-          {data.map((holder, index) => (
-            <div
-              key={`${holder.username}-${holder.address}-${index}`}
-              className="flex items-center gap-3 bg-background-200 hover:bg-background-300 cursor-pointer text-foreground-100 font-medium text-sm h-10 w-full"
-              onClick={() => handleClick(holder.address)}
-            >
-              <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-                <p className="w-8 text-foreground-400 font-normal">
-                  {index + 1}.
-                </p>
-                <div className="flex items-center gap-1">
-                  <UserAvatar username={holder.username} size="sm" />
-                  <p>{holder.username}</p>
+          {data.map((holder, index) => {
+            const playerPath = buildPlayerPath(holder.address);
+            return (
+              <Link
+                key={`${holder.username}-${holder.address}-${index}`}
+                to={playerPath}
+              >
+                <div className="flex items-center gap-3 bg-background-200 hover:bg-background-300 cursor-pointer text-foreground-100 font-medium text-sm h-10 w-full">
+                  <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+                    <p className="w-8 text-foreground-400 font-normal">
+                      {index + 1}.
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <UserAvatar username={holder.username} size="sm" />
+                      <p>{holder.username}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+                    <p className="w-1/2 text-right">{holder.balance}</p>
+                    <p className="w-1/2 text-right">{holder.ratio}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-                <p className="w-1/2 text-right">{holder.balance}</p>
-                <p className="w-1/2 text-right">{holder.ratio}</p>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>

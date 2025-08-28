@@ -1,106 +1,51 @@
-import { InventoryScene } from "../scenes/inventory";
-import { AchievementScene } from "../scenes/achievement";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Button,
-  cn,
-  TabsContent,
-  TabValue,
-  TimesIcon,
-  UserAddIcon,
-  UserCheckIcon,
-} from "@cartridge/ui";
-import { ArcadeTabs } from "../modules";
-import { ActivityScene } from "../scenes/activity";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useUsername, useUsernames } from "@/hooks/account";
-import { useAddress } from "@/hooks/address";
-import { usePathBuilder } from "@/hooks/path-builder";
-import AchievementPlayerHeader from "../modules/player-header";
-import { UserAvatar } from "../user/avatar";
-import { useAccount } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector/controller";
-import { constants, getChecksumAddress } from "starknet";
-import { toast } from "sonner";
-import { useProject } from "@/hooks/project";
-<<<<<<< HEAD
-import { PositionsScene } from "../scenes/positions";
-=======
 import { useAchievementsQuery, useEditionsQuery, useFollowsQuery } from "@/queries";
->>>>>>> 88bb0e2 (feat: user navigation)
+import { AchievementPlayerHeader, Button, cn, TimesIcon, UserAddIcon, UserCheckIcon } from "@cartridge/ui";
+import { useCallback, useMemo, useState } from "react";
+import { UserAvatar } from "./user/avatar";
+import { useAddress } from "@/hooks/address";
+import { constants, getChecksumAddress } from "starknet";
+import { usePathBuilder } from "@/hooks/path-builder";
+import { useProject } from "@/hooks/project";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useAccount } from "@starknet-react/core";
 
-
-export function PlayerPage() {
-  const { address, isSelf, self } = useAddress();
-
-  const { data: editions = [] } = useEditionsQuery(
-    constants.StarknetChainId.SN_MAIN,
-  );
-  const { usernames, globals, players, } =
-    useAchievementsQuery(editions);
-
-  const { data: follows = [] } = useFollowsQuery(address);
-
+export function PlayerHeader({ address }) {
   const [loading, setLoading] = useState(false);
-  const { account, connector, isConnected } = useAccount();
-  // const { provider, follows } = useArcade();
-  const { edition, tab } = useProject();
 
-  const order: TabValue[] = useMemo(() => {
-    const order = [
-      "inventory",
-      "achievements",
-      "activity",
-      "positions",
-    ] as TabValue[];
-
-    if (process.env.NODE_ENV !== "development") {
-      // Remove predict tab in production for now
-      const predictIndex = order.indexOf("positions");
-      order.splice(predictIndex, 1);
-    }
-
-    return order;
-  }, []);
-
-  const defaultValue = useMemo(() => {
-    if (!order.includes(tab as TabValue)) return "inventory";
-    return tab;
-  }, [tab, order]);
+  const { buildGamePath, buildPlayerPath } = usePathBuilder();
 
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
   const navigate = useNavigate();
-  const { player, game } = useProject();
-<<<<<<< HEAD
-=======
-  const { buildPlayerPath, buildGamePath } = usePathBuilder();
 
->>>>>>> 88bb0e2 (feat: user navigation)
-  const handleClick = useCallback(
-    (value: string) => {
-      if (game && player) {
-        const gameName = game.name || game.id.toString();
-        const gamePath = buildGamePath(gameName);
-        navigate({ to: `${gamePath}/player/${player}/${value}` });
-      } else if (player) {
-        const path = buildPlayerPath(player, value);
-        navigate({ to: path });
-      }
-    },
-    [navigate, player, game, buildPlayerPath, buildGamePath],
+  const { isSelf, self } = useAddress();
+
+  const { data: editions = [] } = useEditionsQuery(
+    constants.StarknetChainId.SN_MAIN,
   );
+  const { usernames, players, globals } =
+    useAchievementsQuery(editions);
 
-  const handleClose = useCallback(() => {
-    let newPath = pathname;
-    newPath = newPath.replace(/\/player\/[^/]+.*$/, "");
-    // If we're in a game context, go back to the game
-    if (newPath.includes("/game/")) {
-      navigate({ to: newPath || ("/inventory" as any) });
-    } else {
-      navigate({ to: "/inventory" as any });
-    }
-  }, [pathname, navigate]);
+  const { data: follows = [] } = useFollowsQuery(address);
+
+  const { username } = useUsername({ address });
+  const { account, connector, isConnected } = useAccount();
+
+  const { player, game, edition } = useProject();
+
+  const name = useMemo(() => {
+    return (
+      usernames[address] ||
+      username ||
+      `0x${BigInt(address).toString(16)}`.slice(0, 9)
+    );
+  }, [usernames, address, username]);
+
+  const Icon = useMemo(() => {
+    return <UserAvatar username={name} className="h-full w-full" />;
+  }, [name]);
+
 
   const { rank, points } = useMemo(() => {
     if (edition) {
@@ -123,11 +68,6 @@ export function PlayerPage() {
       ) + 1;
     return { rank, points };
   }, [globals, address, edition]);
-
-  // const following = useMemo(() => {
-  //   const followeds = follows[getChecksumAddress(self || "0x0")] || [];
-  //   return followeds.includes(getChecksumAddress(address));
-  // }, [follows, address, self]);
 
   const { follower, followerCount, followingCount, intersection } =
     useMemo(() => {
@@ -157,18 +97,30 @@ export function PlayerPage() {
       .filter((name) => !!name) as string[];
   }, [followerUsernames]);
 
-  const { username } = useUsername({ address });
-  const name = useMemo(() => {
-    return (
-      usernames[address] ||
-      username ||
-      `0x${BigInt(address).toString(16)}`.slice(0, 9)
-    );
-  }, [usernames, address, username]);
+  const handleClick = useCallback(
+    (value: string) => {
+      if (game && player) {
+        const gameName = game.name || game.id.toString();
+        const gamePath = buildGamePath(gameName);
+        navigate({ to: `${gamePath}/player/${player}/${value}` });
+      } else if (player) {
+        const path = buildPlayerPath(player, value);
+        navigate({ to: path });
+      }
+    },
+    [navigate, player, game, buildPlayerPath, buildGamePath],
+  );
 
-  const Icon = useMemo(() => {
-    return <UserAvatar username={name} className="h-full w-full" />;
-  }, [name]);
+  const closeNavigationLink = useMemo(() => {
+    let newPath = pathname;
+    newPath = newPath.replace(/\/player\/[^/]+.*$/, "");
+
+    // If we're in a game context, go back to the game
+    if (newPath.includes("/game/")) {
+      return newPath || ("/inventory" as any);
+    }
+    return "/inventory";
+  }, [pathname]);
 
   const handleFollowers = useCallback(() => {
     if (!isSelf) return;
@@ -220,16 +172,6 @@ export function PlayerPage() {
     [account, connector, setLoading],
   );
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && handleClose) {
-        handleClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose]);
-
   return (
     <>
       <AchievementPlayerHeader
@@ -263,58 +205,24 @@ export function PlayerPage() {
             handleFollow={() => handleFollow(following, address)}
           />
         )}
-        <CloseButton handleClose={handleClose} />
+        <CloseButton navigationLink={closeNavigationLink} />
       </div>
-      <ArcadeTabs
-        order={order}
-        defaultValue={defaultValue as TabValue}
-        onTabClick={(tab: TabValue) => handleClick(tab)}
-        variant="light"
-      >
-        <div
-          className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
-          style={{ scrollbarWidth: "none" }}
-        >
-          <TabsContent
-            className="p-0 px-3 lg:px-6 mt-0 grow w-full"
-            value="inventory"
-          >
-            <InventoryScene />
-          </TabsContent>
-          <TabsContent
-            className="p-0 px-3 lg:px-6 mt-0 grow w-full"
-            value="achievements"
-          >
-            <AchievementScene />
-          </TabsContent>
-          <TabsContent
-            className="p-0 px-3 lg:px-6 mt-0 grow w-full h-full"
-            value="activity"
-          >
-            <ActivityScene />
-          </TabsContent>
-          <TabsContent
-            className="p-0 px-3 lg:px-6 mt-0 grow w-full h-full"
-            value="positions"
-          >
-            <PositionsScene />
-          </TabsContent>
-        </div>
-      </ArcadeTabs>
     </>
+
   );
 }
 
-function CloseButton({ handleClose }: { handleClose: () => void }) {
+function CloseButton({ navigationLink }: { navigationLink: string }) {
   return (
-    <Button
-      variant="secondary"
-      size="icon"
-      onClick={handleClose}
-      className="bg-background-200 hover:bg-background-300 h-9 w-9 rounded-full"
-    >
-      <TimesIcon size="sm" />
-    </Button>
+    <Link to={navigationLink}>
+      <Button
+        variant="secondary"
+        size="icon"
+        className="bg-background-200 hover:bg-background-300 h-9 w-9 rounded-full"
+      >
+        <TimesIcon size="sm" />
+      </Button>
+    </Link >
   );
 }
 
