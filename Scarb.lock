@@ -7,6 +7,7 @@ version = "0.0.0"
 dependencies = [
  "dojo",
  "dojo_cairo_test",
+ "dojo_macros",
 ]
 
 [[package]]
@@ -27,28 +28,29 @@ version = "0.0.0"
 dependencies = [
  "dojo",
  "dojo_cairo_test",
+ "dojo_macros",
 ]
 
 [[package]]
 name = "dojo"
-version = "1.6.1"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.6.1#a4f9445cf925e999d97038f596806ec307981a9b"
+version = "1.6.0-alpha.1"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.7.0-alpha.1#67aeb9f49c6b8c30b1850badd065c9192617c3b2"
 dependencies = [
- "dojo_plugin",
+ "dojo_macros",
 ]
 
 [[package]]
 name = "dojo_cairo_test"
-version = "1.6.1"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.6.1#a4f9445cf925e999d97038f596806ec307981a9b"
+version = "1.6.0-alpha.1"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.7.0-alpha.1#67aeb9f49c6b8c30b1850badd065c9192617c3b2"
 dependencies = [
  "dojo",
 ]
 
 [[package]]
-name = "dojo_plugin"
-version = "2.10.1"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.6.1#a4f9445cf925e999d97038f596806ec307981a9b"
+name = "dojo_macros"
+version = "1.6.0-alpha.1"
+source = "git+https://github.com/dojoengine/dojo?tag=v1.7.0-alpha.1#67aeb9f49c6b8c30b1850badd065c9192617c3b2"
 
 [[package]]
 name = "graffiti"
@@ -111,6 +113,7 @@ version = "0.0.0"
 dependencies = [
  "dojo",
  "dojo_cairo_test",
+ "dojo_macros",
 ]
 
 [[package]]
@@ -120,6 +123,7 @@ dependencies = [
  "collection",
  "dojo",
  "dojo_cairo_test",
+ "dojo_macros",
  "graffiti",
  "openzeppelin_access",
  "openzeppelin_introspection",
@@ -133,5 +137,6 @@ version = "0.0.0"
 dependencies = [
  "dojo",
  "dojo_cairo_test",
+ "dojo_macros",
  "registry",
 ]

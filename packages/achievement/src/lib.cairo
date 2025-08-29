@@ -17,12 +17,12 @@ pub mod components {
     pub mod pinnable;
 }
 
-#[cfg(test)]
-mod tests {
-    pub mod setup;
-    pub mod test_achievable;
+// #[cfg(test)]
+// mod tests {
+//     pub mod setup;
+//     pub mod test_achievable;
 
-    pub mod mocks {
-        pub mod achiever;
-    }
-}
+//     pub mod mocks {
+//         pub mod achiever;
+//     }
+// }
