@@ -1,6 +1,6 @@
 #[starknet::component]
 pub mod ERC7572Component {
-    use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
+    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     use openzeppelin_introspection::src5::{
         SRC5Component, SRC5Component::InternalImpl as SRC5InternalImpl,
     };
