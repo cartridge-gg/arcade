@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { useCollectionsQuery as useCartridgeCollectionsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 
 export enum CollectionType {
   ERC721 = "ERC-721",
@@ -40,23 +41,52 @@ export interface CollectionsResponse {
   };
 }
 
+const COLLECTIONS_QUERY = `
+  query GetCollections($accountAddress: String!, $projects: [String!]!) {
+    collections(accountAddress: $accountAddress, projects: $projects) {
+      edges {
+        node {
+          meta {
+            contractAddress
+            imagePath
+            name
+            assetCount
+            project
+          }
+          assets {
+            metadata
+            tokenId
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
 export function useCollectionsQuery(
   address: string,
   projects: string[],
   offset: number = 0,
 ) {
-  // Use the Cartridge API hook directly
-  const result = useCartridgeCollectionsQuery(
-    {
-      accountAddress: address,
-      projects: projects,
+  const result = useQuery({
+    queryKey: queryKeys.inventory.collections(address, projects, offset),
+    queryFn: async () => {
+      const data = await graphqlClient<CollectionsResponse>(
+        COLLECTIONS_QUERY,
+        {
+          accountAddress: address,
+          projects: projects,
+        }
+      );
+      return data;
     },
-    {
-      queryKey: queryKeys.inventory.collections(address, projects, offset),
-      enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
-      ...queryConfigs.inventory,
-    },
-  );
+    enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
+    ...queryConfigs.inventory,
+  });
 
   // Return with proper typing
   return {

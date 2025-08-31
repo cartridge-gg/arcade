@@ -1,10 +1,10 @@
 import { useMemo } from "react";
+import { useQuery, UseBaseQueryResult } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { useOwnershipsQuery as useCartridgeOwnershipsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 import { useAccount } from "@starknet-react/core";
 import { DEFAULT_PROJECT_QUERY } from "@/constants";
-import { UseBaseQueryResult } from "@tanstack/react-query";
 
 export interface Ownership {
   ownerAddress: string;
@@ -22,20 +22,37 @@ export interface OwnershipsResponse {
   };
 }
 
+const OWNERSHIPS_QUERY = `
+  query GetOwnerships($projects: [String!]!) {
+    ownerships(projects: $projects) {
+      items {
+        ownerships {
+          contractAddress
+          accountAddress
+          tokenId
+          balance
+        }
+      }
+    }
+  }
+`;
+
 export function useOwnershipsQuery(): UseBaseQueryResult<Ownership[]> {
   const { address = '' } = useAccount();
   const projects = [DEFAULT_PROJECT_QUERY];
-  // Use the Cartridge API hook if available
-  const result = useCartridgeOwnershipsQuery(
-    {
-      projects,
+  
+  const result = useQuery({
+    queryKey: queryKeys.inventory.ownerships(address, projects),
+    queryFn: async () => {
+      const data = await graphqlClient<{ ownerships: { items: any[] } }>(
+        OWNERSHIPS_QUERY,
+        { projects }
+      );
+      return data;
     },
-    {
-      queryKey: queryKeys.inventory.ownerships(address, projects),
-      enabled: !!address && projects.length > 0,
-      ...queryConfigs.inventory,
-    },
-  );
+    enabled: !!address && projects.length > 0,
+    ...queryConfigs.inventory,
+  });
 
   const ownerships = useMemo(() => {
     if (!result.data) return [];

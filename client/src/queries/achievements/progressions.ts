@@ -1,7 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { Progress, RawProgress } from "@/models";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { useProgressionsQuery as useCartridgeProgressionsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 import { AchievementModelParserCallback } from ".";
 import { Progressions } from "@/helpers/achievements";
 
@@ -18,19 +19,45 @@ export interface ProgressionResponse {
   }[];
 }
 
+interface GraphQLProgressionsResponse {
+  playerAchievements: ProgressionResponse;
+}
+
+const PROGRESSIONS_QUERY = `
+  query GetProgressions($projects: [ProgressionProject!]!) {
+    playerAchievements(projects: $projects) {
+      items {
+        meta {
+          project
+        }
+        achievements {
+          id
+          key
+          value
+          completedAt
+          updatedAt
+        }
+      }
+    }
+  }
+`;
+
 export function useProgressionsQuery(
   projects: ProgressionProject[],
   parser: AchievementModelParserCallback<RawProgress, Progress>,
 ) {
-  // Use the Cartridge API hook directly
-  const result = useCartridgeProgressionsQuery(
-    { projects },
-    {
-      queryKey: queryKeys.achievements.progressions(projects),
-      enabled: projects.length > 0,
-      ...queryConfigs.achievements,
+  const result = useQuery({
+    queryKey: queryKeys.achievements.progressions(projects),
+    queryFn: async () => {
+      const data = await graphqlClient<GraphQLProgressionsResponse>(
+        PROGRESSIONS_QUERY,
+        { projects }
+      );
+      return data;
     },
-  );
+    enabled: projects.length > 0,
+    ...queryConfigs.achievements,
+  });
 
   // Transform the data to match our interface
   return {

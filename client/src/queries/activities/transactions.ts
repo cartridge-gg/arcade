@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { useActivitiesQuery as useCartridgeActivitiesQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 
 export interface ActivityProject {
   project: string;
@@ -26,20 +27,43 @@ export interface ActivitiesResponse {
   };
 }
 
+const ACTIVITIES_QUERY = `
+  query GetActivities($projects: [ActivityProject!]!) {
+    activities(projects: $projects) {
+      items {
+        meta {
+          project
+        }
+        activities {
+          transactionHash
+          executedAt
+          eventId
+          type
+          data
+          metadata
+        }
+      }
+    }
+  }
+`;
+
 export function useActivitiesQuery(
   address: string,
   projects: ActivityProject[],
   limit?: number,
 ) {
-  // Use the Cartridge API hook directly
-  const result = useCartridgeActivitiesQuery(
-    { projects },
-    {
-      queryKey: queryKeys.activities.transactions(address, projects, limit),
-      enabled: !!address && projects.length > 0,
-      ...queryConfigs.activities,
+  const result = useQuery({
+    queryKey: queryKeys.activities.transactions(address, projects, limit),
+    queryFn: async () => {
+      const data = await graphqlClient<ActivitiesResponse>(
+        ACTIVITIES_QUERY,
+        { projects }
+      );
+      return data;
     },
-  );
+    enabled: !!address && projects.length > 0,
+    ...queryConfigs.activities,
+  });
 
   // Return with proper typing
   return {

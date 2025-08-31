@@ -1,6 +1,6 @@
 import { useContext, useMemo } from "react";
 import { Token, TokenContext } from "../../context/token";
-import { useCreditBalance } from "@cartridge/ui/utils";
+import { useCreditBalance } from "./credits";
 import { useAccountNameQuery } from "../users/accounts";
 
 export * from "./balances";

@@ -1,9 +1,14 @@
 import { constants } from "starknet";
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
-import { MetricsProject, useMetricsQuery as useCartridgeMetricsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 import { useEditionsQuery } from "../games";
 import { useMemo } from "react";
 import { Metrics } from "@/context/metrics";
+
+export interface MetricsProject {
+  project: string;
+}
 
 export interface Metric {
   date: string;
@@ -42,15 +47,39 @@ export function useMetricsQuery(game: string | undefined) {
     return Array.from(uniqueProjects);
   }, [editions, game]);
 
-  const result = useCartridgeMetricsQuery(
-    { projects },
-    {
-      queryKey: queryKeys.discovery.metrics(projects),
-      enabled: projects.length > 0,
-      staleTime: 1000 * 60 * 5, // 5 minutes for metrics
-      refetchInterval: 1000 * 60 * 5, // Refresh every 5 minutes
+  const METRICS_QUERY = `
+    query GetMetrics($projects: [MetricsProject!]!) {
+      metrics(projects: $projects) {
+        items {
+          meta {
+            project
+          }
+          metrics {
+            date
+            transactionDate
+            transactionCount
+            uniqueCallers
+            callerCount
+            volume
+          }
+        }
+      }
+    }
+  `;
+
+  const result = useQuery({
+    queryKey: queryKeys.discovery.metrics(projects),
+    queryFn: async () => {
+      const data = await graphqlClient<MetricsResponse>(
+        METRICS_QUERY,
+        { projects }
+      );
+      return data;
     },
-  );
+    enabled: projects.length > 0,
+    staleTime: 1000 * 60 * 5, // 5 minutes for metrics
+    refetchInterval: 1000 * 60 * 5, // Refresh every 5 minutes
+  });
 
   const metrics = useMemo(() => {
     const items = result.data?.metrics.items;

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { useAchievementsQuery as useCartridgeAchievementsQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 import { RawTrophy, Trophy } from "@/models";
 import { AchievementModelParserCallback } from ".";
 import { Trophies } from "@/helpers/achievements";
@@ -19,19 +19,48 @@ export interface TrophyResponse {
   }[];
 }
 
+interface GraphQLAchievementsResponse {
+  achievements: TrophyResponse;
+}
+
+const ACHIEVEMENTS_QUERY = `
+  query GetAchievements($projects: [TrophyProject!]!) {
+    achievements(projects: $projects) {
+      items {
+        meta {
+          project
+        }
+        achievements {
+          id
+          key
+          name
+          description
+          points
+          hidden
+          metadata
+        }
+      }
+    }
+  }
+`;
+
 export function useTrophiesQuery(
   projects: TrophyProject[],
   parser: AchievementModelParserCallback<RawTrophy, Trophy>,
 ) {
-  // Use the Cartridge API hook directly
-  const result = useCartridgeAchievementsQuery(
-    { projects },
-    {
-      queryKey: queryKeys.achievements.trophies(projects),
-      enabled: projects.length > 0,
-      ...queryConfigs.achievements,
+  const result = useQuery({
+    queryKey: queryKeys.achievements.trophies(projects),
+    queryFn: async () => {
+      const data = await graphqlClient<GraphQLAchievementsResponse>(
+        ACHIEVEMENTS_QUERY,
+        { projects }
+      );
+      return data;
     },
-  );
+    enabled: projects.length > 0,
+    ...queryConfigs.achievements,
+  });
+
   // Transform the data to match our interface
   return {
     ...result,

@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { useCollectiblesQuery as useCartridgeCollectiblesQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 
 export interface Collectible {
   address: string;
@@ -37,23 +38,53 @@ export interface CollectiblesResponse {
   };
 }
 
+const COLLECTIBLES_QUERY = `
+  query GetCollectibles($accountAddress: String!, $projects: [String!]!) {
+    collectibles(accountAddress: $accountAddress, projects: $projects) {
+      edges {
+        node {
+          meta {
+            contractAddress
+            imagePath
+            name
+            assetCount
+            project
+          }
+          assets {
+            tokenId
+            amount
+            metadata
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
 export function useCollectiblesQuery(
   address: string,
   projects: string[],
   offset: number = 0,
 ) {
-  // Use the Cartridge API hook directly
-  const result = useCartridgeCollectiblesQuery(
-    {
-      accountAddress: address,
-      projects: projects,
+  const result = useQuery({
+    queryKey: queryKeys.inventory.collectibles(address, projects, offset),
+    queryFn: async () => {
+      const data = await graphqlClient<CollectiblesResponse>(
+        COLLECTIBLES_QUERY,
+        {
+          accountAddress: address,
+          projects: projects,
+        }
+      );
+      return data;
     },
-    {
-      queryKey: queryKeys.inventory.collectibles(address, projects, offset),
-      enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
-      ...queryConfigs.inventory,
-    },
-  );
+    enabled: !!address && projects.length > 0 && BigInt(address) !== 0n,
+    ...queryConfigs.inventory,
+  });
 
   // Return with proper typing
   return {

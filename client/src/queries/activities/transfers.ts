@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { useTransfersQuery as useCartridgeTransfersQuery } from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 
 export interface TransferProject {
   project: string;
@@ -33,19 +34,48 @@ export interface TransfersResponse {
   };
 }
 
+const TRANSFERS_QUERY = `
+  query GetTransfers($projects: [TransferProject!]!) {
+    transfers(projects: $projects) {
+      items {
+        meta {
+          project
+        }
+        transfers {
+          tokenId
+          amount
+          decimals
+          symbol
+          contractAddress
+          transactionHash
+          eventId
+          fromAddress
+          toAddress
+          executedAt
+          name
+          metadata
+        }
+      }
+    }
+  }
+`;
+
 export function useTransfersQuery(
   address: string,
   projects: TransferProject[],
 ) {
-  // Use the Cartridge API hook directly
-  const result = useCartridgeTransfersQuery(
-    { projects },
-    {
-      queryKey: queryKeys.activities.transfers(address, projects),
-      enabled: !!address && projects.length > 0,
-      ...queryConfigs.activities,
+  const result = useQuery({
+    queryKey: queryKeys.activities.transfers(address, projects),
+    queryFn: async () => {
+      const data = await graphqlClient<TransfersResponse>(
+        TRANSFERS_QUERY,
+        { projects }
+      );
+      return data;
     },
-  );
+    enabled: !!address && projects.length > 0,
+    ...queryConfigs.activities,
+  });
 
   // Return with proper typing
   return {

@@ -1,15 +1,19 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import {
-  PlaythroughProject,
-  usePlaythroughsQuery as useCartridgePlaythroughsQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { graphqlClient } from "../graphql-client";
 import { useAchievementsQuery } from "../achievements";
 import { useEditionsQuery, useFollowsQuery } from "../games";
 import { constants } from "starknet";
 import { Discover } from "@/context/discovers";
 import { useAccount } from "@starknet-react/core";
+
+export interface PlaythroughProject {
+  project: string;
+  address?: string;
+  limit?: number;
+}
 
 export interface Playthrough {
   id: string;
@@ -43,14 +47,37 @@ export function usePlaythroughsQuery(
   );
   const { events: achievements, usernames } = useAchievementsQuery(editions);
   const { address } = useAccount();
-  const result = useCartridgePlaythroughsQuery(
-    { projects },
-    {
-      queryKey: queryKeys.discovery.playthroughs(projects, limit),
-      enabled: projects.length > 0,
-      ...queryConfigs.discovery,
+  const PLAYTHROUGHS_QUERY = `
+    query GetPlaythroughs($projects: [PlaythroughProject!]!) {
+      playthroughs(projects: $projects) {
+        items {
+          meta {
+            project
+          }
+          playthroughs {
+            sessionStart
+            sessionEnd
+            callerAddress
+            actionCount
+            entrypoints
+          }
+        }
+      }
+    }
+  `;
+
+  const result = useQuery({
+    queryKey: queryKeys.discovery.playthroughs(projects, limit),
+    queryFn: async () => {
+      const data = await graphqlClient<PlaythroughsResponse>(
+        PLAYTHROUGHS_QUERY,
+        { projects }
+      );
+      return data;
     },
-  );
+    enabled: projects.length > 0,
+    ...queryConfigs.discovery,
+  });
 
   const playthroughs = useMemo(() => {
     if (!result.data?.playthroughs?.items) return {};
