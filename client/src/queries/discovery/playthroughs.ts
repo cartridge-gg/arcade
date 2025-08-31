@@ -5,9 +5,10 @@ import { queryConfigs } from "../queryClient";
 import { graphqlClient } from "../graphql-client";
 import { useAchievementsQuery } from "../achievements";
 import { useEditionsQuery, useFollowsQuery } from "../games";
-import { constants } from "starknet";
+import { constants, getChecksumAddress } from "starknet";
 import { Discover } from "@/context/discovers";
 import { useAccount } from "@starknet-react/core";
+import { useAccountNamesQuery } from "../users/accounts";
 
 export interface PlaythroughProject {
   project: string;
@@ -45,7 +46,7 @@ export function usePlaythroughsQuery(
   const { data: editions = [] } = useEditionsQuery(
     constants.StarknetChainId.SN_MAIN,
   );
-  const { events: achievements, usernames } = useAchievementsQuery(editions);
+  const { events: achievements, usernames: achievementUsernames } = useAchievementsQuery(editions);
   const { address } = useAccount();
   const PLAYTHROUGHS_QUERY = `
     query GetPlaythroughs($projects: [PlaythroughProject!]!) {
@@ -137,6 +138,41 @@ export function usePlaythroughsQuery(
     return newDiscovers;
   }, [result.data, achievements]);
 
+  // Extract all unique addresses from playthroughs (converted to checksum format once)
+  const playthroughAddresses = useMemo(() => {
+    const addresses = new Set<string>();
+    Object.values(playthroughs).forEach((projectPlaythroughs) => {
+      projectPlaythroughs?.forEach((playthrough) => {
+        if (playthrough.callerAddress) {
+          addresses.add(playthrough.callerAddress);
+        }
+      });
+    });
+    return Array.from(addresses);
+  }, [playthroughs]);
+
+  // Fetch usernames for all playthrough addresses
+  const { usernames: playthroughUsernamesArray } = useAccountNamesQuery(playthroughAddresses);
+
+  // Convert playthrough usernames array to a map (addresses already in checksum format)
+  const playthroughUsernames = useMemo(() => {
+    const usernamesMap: { [key: string]: string | undefined } = {};
+    playthroughUsernamesArray?.forEach((user) => {
+      if (user.address) {
+        usernamesMap[getChecksumAddress(user.address)] = user.username;
+      }
+    });
+    return usernamesMap;
+  }, [playthroughUsernamesArray]);
+
+  // Merge achievement usernames with playthrough usernames
+  const mergedUsernames = useMemo(() => {
+    return {
+      ...playthroughUsernames,
+      ...achievementUsernames, // Achievement usernames take precedence if there's overlap
+    };
+  }, [playthroughUsernames, achievementUsernames]);
+
   // Only query follows when address exists (useFollowsQuery already has enabled: !!address)
   const { data: following } = useFollowsQuery(address || "");
 
@@ -145,9 +181,9 @@ export function usePlaythroughsQuery(
     () => ({
       ...result,
       data: playthroughs,
-      usernames: usernames ?? {},
+      usernames: mergedUsernames ?? {},
       follows: following,
     }),
-    [result, playthroughs, usernames, following],
+    [result, playthroughs, mergedUsernames, following],
   );
 }

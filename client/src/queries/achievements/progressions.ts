@@ -6,7 +6,7 @@ import { graphqlClient } from "../graphql-client";
 import { AchievementModelParserCallback } from ".";
 import { Progressions } from "@/helpers/achievements";
 
-export interface ProgressionProject {
+export interface Project {
   model: string;
   namespace: string;
   project: string;
@@ -24,18 +24,20 @@ interface GraphQLProgressionsResponse {
 }
 
 const PROGRESSIONS_QUERY = `
-  query GetProgressions($projects: [ProgressionProject!]!) {
+  query GetProgressions($projects: [Project!]!) {
     playerAchievements(projects: $projects) {
       items {
         meta {
           project
         }
         achievements {
-          id
-          key
-          value
-          completedAt
-          updatedAt
+          achievementId
+          playerId
+          points
+          taskId
+          taskTotal
+          total
+          completionTime
         }
       }
     }
@@ -43,7 +45,7 @@ const PROGRESSIONS_QUERY = `
 `;
 
 export function useProgressionsQuery(
-  projects: ProgressionProject[],
+  projects: Project[],
   parser: AchievementModelParserCallback<RawProgress, Progress>,
 ) {
   const result = useQuery({

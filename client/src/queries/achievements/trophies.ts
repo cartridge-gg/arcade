@@ -6,7 +6,7 @@ import { RawTrophy, Trophy } from "@/models";
 import { AchievementModelParserCallback } from ".";
 import { Trophies } from "@/helpers/achievements";
 
-export interface TrophyProject {
+export interface Project {
   model: string;
   namespace: string;
   project: string;
@@ -24,7 +24,7 @@ interface GraphQLAchievementsResponse {
 }
 
 const ACHIEVEMENTS_QUERY = `
-  query GetAchievements($projects: [TrophyProject!]!) {
+  query GetAchievements($projects: [Project!]!) {
     achievements(projects: $projects) {
       items {
         meta {
@@ -32,12 +32,19 @@ const ACHIEVEMENTS_QUERY = `
         }
         achievements {
           id
-          key
-          name
+          achievementGroup
+          title
           description
           points
           hidden
-          metadata
+          page
+          start
+          end
+          icon
+          taskId
+          taskTotal
+          taskDescription
+          data
         }
       }
     }
@@ -45,7 +52,7 @@ const ACHIEVEMENTS_QUERY = `
 `;
 
 export function useTrophiesQuery(
-  projects: TrophyProject[],
+  projects: Project[],
   parser: AchievementModelParserCallback<RawTrophy, Trophy>,
 ) {
   const result = useQuery({

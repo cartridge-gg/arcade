@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
 import { graphqlClient } from "../graphql-client";
+import { getChecksumAddress } from "starknet";
+import { useMemo } from "react";
 
 export interface Account {
   address: string;
@@ -34,7 +36,7 @@ interface AccountNamesResponse {
 }
 
 const ACCOUNT_NAME_QUERY = `
-  query GetAccountName($address: String!) {
+  query GetController($address: String!) {
     account(address: $address) {
       username
     }
@@ -42,22 +44,22 @@ const ACCOUNT_NAME_QUERY = `
 `;
 
 const ACCOUNT_NAMES_QUERY = `
-  query GetAccountNames($addresses: [String!]!) {
-    accounts(addresses: $addresses) {
-      edges {
-        node {
-          username
-          controllers {
-            edges {
-              node {
-                address
-              }
+    query GetControllers($addresses: [String!]!) {
+  accounts(where: {hasControllersWith: {addressIn: $addresses}}) {
+    edges {
+      node {
+        username
+        controllers {
+          edges {
+            node {
+              address
             }
           }
         }
       }
     }
   }
+}
 `;
 
 export function useAccountNameQuery(address: string) {
@@ -95,13 +97,17 @@ export function useAccountNamesQuery(addresses: string[]) {
     ...queryConfigs.users,
   });
 
-  // Return with proper typing
+  const usernames = useMemo(() => result.data?.accounts?.edges?.map((edge) => {
+    const rawAddress = edge?.node?.controllers?.edges?.[0]?.node?.address;
+    return {
+      username: edge?.node?.username,
+      address: rawAddress ? getChecksumAddress(rawAddress) : rawAddress,
+    };
+  }) ?? [], [result.data])
+
+  // Return with proper typing (addresses converted to checksum format)
   return {
     ...result,
-    usernames:
-      result.data?.accounts?.edges?.map((edge) => ({
-        username: edge?.node?.username,
-        address: edge?.node?.controllers?.edges?.[0]?.node?.address,
-      })) ?? [],
+    usernames,
   };
 }

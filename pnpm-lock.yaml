@@ -131,9 +131,15 @@ importers:
       '@tanstack/query-async-storage-persister':
         specifier: ^5.85.3
         version: 5.85.3
+      '@tanstack/query-db-collection':
+        specifier: ^0.2.8
+        version: 0.2.14(@tanstack/query-core@5.85.3)(typescript@5.9.2)
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.85.3
         version: 5.85.3
+      '@tanstack/react-db':
+        specifier: ^0.1.9
+        version: 0.1.15(react@18.3.1)(typescript@5.9.2)
       '@tanstack/react-query':
         specifier: ^5.85.3
         version: 5.85.3(react@18.3.1)
@@ -2715,6 +2721,16 @@ packages:
   '@swc/wasm@1.13.3':
     resolution: {integrity: sha512-ZhQfKxqFvrifksN8znSzes/oyfr8Q4mpKP0T8tYS/AaUzm/7v5OK22VlcTHR1gXHEtp16dlR8w+vYTFDCaUmnw==}
 
+  '@tanstack/db-ivm@0.1.4':
+    resolution: {integrity: sha512-4ItrJ5qxLTK+LjhpyuLkQvpD7EfUYDDtv5oY3RiUCXSFR8MinUxq0NV5Q+W/UhIC5sdl3BXKYy4IS9XPZPAEQg==}
+    peerDependencies:
+      typescript: '>=4.7'
+
+  '@tanstack/db@0.2.2':
+    resolution: {integrity: sha512-kNp85JaBd9JiNmrcABeFppTRYsuq3ATy0e/PQGPI8FEUKN05KhPV4oKt6OQpizIoQDA2a3PuHsRa6wfpUkPlVQ==}
+    peerDependencies:
+      typescript: '>=4.7'
+
   '@tanstack/history@1.131.2':
     resolution: {integrity: sha512-cs1WKawpXIe+vSTeiZUuSBy8JFjEuDgdMKZFRLKwQysKo8y2q6Q1HvS74Yw+m5IhOW1nTZooa6rlgdfXcgFAaw==}
     engines: {node: '>=12'}
@@ -2725,11 +2741,22 @@ packages:
   '@tanstack/query-core@5.85.3':
     resolution: {integrity: sha512-9Ne4USX83nHmRuEYs78LW+3lFEEO2hBDHu7mrdIgAFx5Zcrs7ker3n/i8p4kf6OgKExmaDN5oR0efRD7i2J0DQ==}
 
+  '@tanstack/query-db-collection@0.2.14':
+    resolution: {integrity: sha512-ei4bqMDeb8XSrTIFxcHh2fp8zbdZaG0NKXBLNRZO9JtOJToABXf5QmchV9A6nSWlCgISi4YfW6Prd3ym0p4YwQ==}
+    peerDependencies:
+      '@tanstack/query-core': ^5.0.0
+      typescript: '>=4.7'
+
   '@tanstack/query-persist-client-core@5.85.3':
     resolution: {integrity: sha512-b6PfSvBbxr1ZGk1bt6aysJr3RcQBkWDzj8HtZUFHDSvSBzWipRtPYPpvJBPwmWKkVPjIKUo40lBsEA0drRgvvA==}
 
   '@tanstack/query-sync-storage-persister@5.85.3':
     resolution: {integrity: sha512-fa9tVJBhM01vAKnWloaBINwDQwfuHPD7M6N55VF30GfyM2BrVacVI68bO958cl5VrlLMw5YeHRM/PrX96+bkBA==}
+
+  '@tanstack/react-db@0.1.15':
+    resolution: {integrity: sha512-AjsmzUV4hSblZFKteAqWbFbYIQSoK+ONHhzo5X7lu/XNTddgeEqnmXeferocvO1cxLyzvy33i9KtiT5U7ZWGzA==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   '@tanstack/react-query-persist-client@5.85.3':
     resolution: {integrity: sha512-FiQ2zHGwtWMeBt3elkINcxKxiO3FM/U3Q6fZXEIWiZGuoS9DK8WV1uEwOgb66ZyzI8z2OyJzLkePSD82fGD5Rw==}
@@ -4060,6 +4087,10 @@ packages:
 
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
+
+  fractional-indexing@3.2.0:
+    resolution: {integrity: sha512-PcOxmqwYCW7O2ovKRU8OoQQj2yqTfEB/yeTYk4gPid6dN5ODRfU1hXd9tTVZzax/0NkO7AxpHykvZnT1aYp/BQ==}
+    engines: {node: ^14.13.1 || >=16.0.0}
 
   framer-motion@12.23.12:
     resolution: {integrity: sha512-6e78rdVtnBvlEVgu6eFEAgG9v3wLnYEboM8I5O5EXvfKC8gxGQB8wXJdhkMy10iVcn05jl6CNw7/HTsTCfwcWg==}
@@ -5420,6 +5451,9 @@ packages:
       react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
       react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
+  sorted-btree@1.8.1:
+    resolution: {integrity: sha512-395+XIP+wqNn3USkFSrNz7G3Ss/MXlZEqesxvzCRFwL14h6e8LukDHdLBePn5pwbm5OQ9vGu8mDyz2lLDIqamQ==}
+
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
@@ -6604,7 +6638,7 @@ snapshots:
       '@babel/core': 7.28.4
       '@babel/helper-annotate-as-pure': 7.27.3
       '@babel/helper-wrap-function': 7.27.1
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6642,8 +6676,8 @@ snapshots:
   '@babel/helper-wrap-function@7.27.1':
     dependencies:
       '@babel/template': 7.27.2
-      '@babel/traverse': 7.28.0
-      '@babel/types': 7.28.2
+      '@babel/traverse': 7.28.4
+      '@babel/types': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6669,7 +6703,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.4
       '@babel/helper-plugin-utils': 7.27.1
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6696,7 +6730,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.4
       '@babel/helper-plugin-utils': 7.27.1
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6745,7 +6779,7 @@ snapshots:
       '@babel/core': 7.28.4
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/helper-remap-async-to-generator': 7.27.1(@babel/core@7.28.4)
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6792,7 +6826,7 @@ snapshots:
       '@babel/helper-globals': 7.28.0
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/helper-replace-supers': 7.27.1(@babel/core@7.28.4)
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6806,7 +6840,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.4
       '@babel/helper-plugin-utils': 7.27.1
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6863,7 +6897,7 @@ snapshots:
       '@babel/core': 7.28.4
       '@babel/helper-compilation-targets': 7.27.2
       '@babel/helper-plugin-utils': 7.27.1
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -6890,7 +6924,7 @@ snapshots:
   '@babel/plugin-transform-modules-amd@7.27.1(@babel/core@7.28.4)':
     dependencies:
       '@babel/core': 7.28.4
-      '@babel/helper-module-transforms': 7.27.3(@babel/core@7.28.4)
+      '@babel/helper-module-transforms': 7.28.3(@babel/core@7.28.4)
       '@babel/helper-plugin-utils': 7.27.1
     transitivePeerDependencies:
       - supports-color
@@ -6914,17 +6948,17 @@ snapshots:
   '@babel/plugin-transform-modules-systemjs@7.27.1(@babel/core@7.28.4)':
     dependencies:
       '@babel/core': 7.28.4
-      '@babel/helper-module-transforms': 7.27.3(@babel/core@7.28.4)
+      '@babel/helper-module-transforms': 7.28.3(@babel/core@7.28.4)
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
   '@babel/plugin-transform-modules-umd@7.27.1(@babel/core@7.28.4)':
     dependencies:
       '@babel/core': 7.28.4
-      '@babel/helper-module-transforms': 7.27.3(@babel/core@7.28.4)
+      '@babel/helper-module-transforms': 7.28.3(@babel/core@7.28.4)
       '@babel/helper-plugin-utils': 7.27.1
     transitivePeerDependencies:
       - supports-color
@@ -6957,7 +6991,7 @@ snapshots:
       '@babel/helper-plugin-utils': 7.27.1
       '@babel/plugin-transform-destructuring': 7.28.0(@babel/core@7.28.4)
       '@babel/plugin-transform-parameters': 7.27.7(@babel/core@7.28.4)
-      '@babel/traverse': 7.28.0
+      '@babel/traverse': 7.28.4
     transitivePeerDependencies:
       - supports-color
 
@@ -7188,7 +7222,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.4
       '@babel/helper-plugin-utils': 7.27.1
-      '@babel/types': 7.28.2
+      '@babel/types': 7.28.4
       esutils: 2.0.3
 
   '@babel/preset-typescript@7.27.1(@babel/core@7.28.0)':
@@ -9521,6 +9555,18 @@ snapshots:
 
   '@swc/wasm@1.13.3': {}
 
+  '@tanstack/db-ivm@0.1.4(typescript@5.9.2)':
+    dependencies:
+      fractional-indexing: 3.2.0
+      sorted-btree: 1.8.1
+      typescript: 5.9.2
+
+  '@tanstack/db@0.2.2(typescript@5.9.2)':
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      '@tanstack/db-ivm': 0.1.4(typescript@5.9.2)
+      typescript: 5.9.2
+
   '@tanstack/history@1.131.2': {}
 
   '@tanstack/query-async-storage-persister@5.85.3':
@@ -9528,6 +9574,13 @@ snapshots:
       '@tanstack/query-persist-client-core': 5.85.3
 
   '@tanstack/query-core@5.85.3': {}
+
+  '@tanstack/query-db-collection@0.2.14(@tanstack/query-core@5.85.3)(typescript@5.9.2)':
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      '@tanstack/db': 0.2.2(typescript@5.9.2)
+      '@tanstack/query-core': 5.85.3
+      typescript: 5.9.2
 
   '@tanstack/query-persist-client-core@5.85.3':
     dependencies:
@@ -9537,6 +9590,14 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.85.3
       '@tanstack/query-persist-client-core': 5.85.3
+
+  '@tanstack/react-db@0.1.15(react@18.3.1)(typescript@5.9.2)':
+    dependencies:
+      '@tanstack/db': 0.2.2(typescript@5.9.2)
+      react: 18.3.1
+      use-sync-external-store: 1.5.0(react@18.3.1)
+    transitivePeerDependencies:
+      - typescript
 
   '@tanstack/react-query-persist-client@5.85.3(@tanstack/react-query@5.85.3(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -11566,6 +11627,8 @@ snapshots:
 
   fraction.js@4.3.7: {}
 
+  fractional-indexing@3.2.0: {}
+
   framer-motion@12.23.12(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       motion-dom: 12.23.12
@@ -12978,6 +13041,8 @@ snapshots:
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  sorted-btree@1.8.1: {}
 
   source-map-js@1.2.1: {}
 

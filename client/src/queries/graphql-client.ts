@@ -27,7 +27,7 @@ export async function graphqlClient<T = any>(
   query: string,
   variables?: Record<string, any>
 ): Promise<T> {
-  const response = await fetch(`${API_URL}/graphql`, {
+  const response = await fetch(`${API_URL}/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

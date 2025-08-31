@@ -81,7 +81,8 @@ export function useAchievementsQuery(projects: EditionModel[]) {
 
     const data: { [key: string]: string | undefined } = {};
     addresses.forEach((address) => {
-      data[getChecksumAddress(address)] = usernamesMap.get(address);
+      const addr = getChecksumAddress(address);
+      data[addr] = usernamesMap.get(addr);
     });
     return data;
   }, [usernames, addresses]);
@@ -125,5 +126,5 @@ export function useAchievementsQuery(projects: EditionModel[]) {
 }
 
 // Re-export common types
-export type { TrophyProject, TrophyResponse } from "./trophies";
-export type { ProgressionProject, ProgressionResponse } from "./progressions";
+export type { Project as TrophyProject, TrophyResponse } from "./trophies";
+export type { Project as ProgressionProject, ProgressionResponse } from "./progressions";
