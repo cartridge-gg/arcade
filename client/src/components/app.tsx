@@ -48,9 +48,11 @@ export function App() {
               onTouchMove={handleTouchMove}
             />
 
-            <div className="lg:space-y-4">
+            <div className="lg:space-y-4 h-full flex flex-col">
               {!isMobile && <UserCard />}
-              {!collection ? <Games /> : <Filters />}
+              <div className="flex-1 overflow-hidden">
+                {!collection ? <Games /> : <Filters />}
+              </div>
             </div>
 
             <div
