@@ -43,7 +43,7 @@ export const UserCard = React.forwardRef<
     const playerName = `${!username ? address?.toLowerCase() : username.toLowerCase()}`;
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
     pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
+    pathname = pathname.replace(/\/tab\/.*$/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
     navigate(pathname);
 

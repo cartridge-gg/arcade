@@ -23,7 +23,7 @@ export function User() {
     const playerName = `${!name ? address?.toLowerCase() : name.toLowerCase()}`;
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
     pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
+    pathname = pathname.replace(/\/tab\/.*$/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
     navigate(pathname);
   }, [name, address, navigate]);

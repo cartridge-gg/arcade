@@ -203,6 +203,7 @@ export const Game = ({
     const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || id}`;
     pathname = pathname.replace(/\/game\/[^/]+/, "");
     pathname = pathname.replace(/\/edition\/[^/]+/, "");
+    pathname = pathname.replace(/\/prediction$/, "");
     if (id !== 0) pathname = joinPaths(`/game/${gameName}`, pathname);
     navigate(pathname || "/");
     // Close sidebar on mobile when a game is selected

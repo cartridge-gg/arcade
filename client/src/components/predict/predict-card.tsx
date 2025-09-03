@@ -8,6 +8,8 @@ import {
   Thumbnail,
 } from "@cartridge/ui";
 import { UserAvatar } from "../user/avatar";
+import { useNavigate } from "react-router-dom";
+import { useProject } from "@/hooks/project";
 
 export interface PredictCardProps {
   image: string;
@@ -42,9 +44,21 @@ export const PredictCard = React.forwardRef<
     },
     ref,
   ) => {
+    const navigate = useNavigate();
+    const { game } = useProject();
+
+    const handleClick = () => {
+      if (!game) return navigate("/");
+
+      const gameName = game.name.toLowerCase().replace(/ /g, "-");
+      const predictionPath = `/game/${gameName}/prediction/tab/prediction-activity`;
+      navigate(predictionPath);
+    };
+
     return (
       <Card
         className={cn("w-60 rounded bg-background-200", className)}
+        onClick={handleClick}
         ref={ref}
         {...props}
       >
