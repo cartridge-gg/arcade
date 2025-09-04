@@ -6,7 +6,7 @@ on:
 
 env:
   DOJO_VERSION: v1.7.0-alpha.1
-  SCARB_VERSION: 2.10.1
+  SCARB_VERSION: 2.12.0
   WORKING_DIRECTORY: ./packages
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Build
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: sozo build
+        run: scarb build
         shell: bash
 
   test:
@@ -47,5 +47,5 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Test
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: sozo test
+        run: scarb test
         shell: bash
