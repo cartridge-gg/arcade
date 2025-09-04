@@ -41,7 +41,7 @@ pub impl FollowAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{FollowTrait};
+    use super::FollowTrait;
 
     // Constants
 

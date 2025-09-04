@@ -3,17 +3,17 @@ pub mod DeployableComponent {
     // Dojo imports
 
     use dojo::world::WorldStorage;
+    use provider::models::deployment::{DeploymentAssert, DeploymentTrait};
+    use provider::models::factory::{FactoryAssert, FactoryTrait};
+    use provider::models::team::{TeamAssert, TeamTrait};
+    use provider::models::teammate::{TeammateAssert, TeammateTrait};
 
     // Internal imports
 
     use provider::store::{Store, StoreTrait};
-    use provider::models::deployment::{DeploymentTrait, DeploymentAssert};
-    use provider::models::factory::{FactoryTrait, FactoryAssert};
-    use provider::types::service::{Service, ServiceTrait, SERVICE_COUNT};
-    use provider::models::team::{TeamTrait, TeamAssert};
-    use provider::models::teammate::{TeammateTrait, TeammateAssert};
-    use provider::types::tier::Tier;
     use provider::types::role::Role;
+    use provider::types::service::{SERVICE_COUNT, Service, ServiceTrait};
+    use provider::types::tier::Tier;
 
     // Storage
 

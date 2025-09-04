@@ -9,15 +9,15 @@ pub trait IWallet<TContractState> {}
 pub mod Wallet {
     // Dojo imports
 
-    use dojo::world::WorldStorage;
-
-    // Component imports
-
-    use controller::components::controllable::ControllableComponent;
 
     // Internal imports
 
     use arcade::constants::NAMESPACE;
+
+    // Component imports
+
+    use controller::components::controllable::ControllableComponent;
+    use dojo::world::WorldStorage;
 
     // Local imports
 

@@ -2,11 +2,11 @@
 pub mod PinnableComponent {
     // Dojo imports
 
-    use dojo::world::WorldStorage;
 
     // Internal imports
 
     use achievement::store::{Store, StoreTrait};
+    use dojo::world::WorldStorage;
 
     // Errors
 

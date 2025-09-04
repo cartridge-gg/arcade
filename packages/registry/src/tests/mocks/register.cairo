@@ -89,8 +89,6 @@ pub trait IRegister<TContractState> {
 pub mod Register {
     // Starknet imports
 
-    use starknet::{ContractAddress, ClassHash};
-    use starknet::get_caller_address;
 
     // Dojo imports
 
@@ -100,6 +98,7 @@ pub mod Register {
 
     use registry::components::initializable::InitializableComponent;
     use registry::components::registerable::RegisterableComponent;
+    use starknet::{ClassHash, ContractAddress, get_caller_address};
 
     // Local imports
 

@@ -1,34 +1,34 @@
 pub mod setup {
     // Starknet imports
 
-    use starknet::ContractAddress;
-    use starknet::testing::set_contract_address;
-
-    // Dojo imports
-
-    use dojo::world::{WorldStorage, WorldStorageTrait};
-    use dojo_cairo_test::{
-        spawn_test_world, NamespaceDef, ContractDef, TestResource, ContractDefTrait,
-        WorldStorageTestTrait,
-    };
-
-    // External imports
-
-    use controller::models::{index as controller_models};
-    use provider::models::{index as provider_models};
-    use registry::models::{index as registry_models};
-    use social::models::{index as social_models};
-    use social::events::{index as social_events};
-    use achievement::events::{index as achievement_events};
+    use achievement::events::index as achievement_events;
     // use collection::collection::Collection;
 
     // Internal imports
 
     use arcade::constants::NAMESPACE;
-    use arcade::systems::registry::{Registry, IRegistryDispatcher};
-    use arcade::systems::slot::{Slot, ISlotDispatcher};
-    use arcade::systems::social::{Social, ISocialDispatcher};
-    use arcade::systems::wallet::{Wallet, IWalletDispatcher};
+    use arcade::systems::registry::{IRegistryDispatcher, Registry};
+    use arcade::systems::slot::{ISlotDispatcher, Slot};
+    use arcade::systems::social::{ISocialDispatcher, Social};
+    use arcade::systems::wallet::{IWalletDispatcher, Wallet};
+
+    // External imports
+
+    use controller::models::{index as controller_models};
+
+    // Dojo imports
+
+    use dojo::world::{WorldStorage, WorldStorageTrait};
+    use dojo_cairo_test::{
+        ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
+        spawn_test_world,
+    };
+    use provider::models::index as provider_models;
+    use registry::models::index as registry_models;
+    use social::events::index as social_events;
+    use social::models::index as social_models;
+    use starknet::ContractAddress;
+    use starknet::testing::set_contract_address;
 
     // Constant
 

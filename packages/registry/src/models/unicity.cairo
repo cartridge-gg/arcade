@@ -1,7 +1,7 @@
 // Internal imports
 
-pub use registry::models::index::Unicity;
 use registry::helpers::seeder::Seeder;
+pub use registry::models::index::Unicity;
 
 // Errors
 
@@ -63,7 +63,7 @@ pub impl UnicityAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{Unicity, UnicityTrait, UnicityAssert};
+    use super::{Unicity, UnicityAssert, UnicityTrait};
 
     // Constants
 

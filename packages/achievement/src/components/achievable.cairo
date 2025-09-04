@@ -2,12 +2,12 @@
 pub mod AchievableComponent {
     // Dojo imports
 
-    use dojo::world::WorldStorage;
+    use achievement::store::{Store, StoreTrait};
 
     // Internal imports
 
     use achievement::types::task::Task;
-    use achievement::store::{Store, StoreTrait};
+    use dojo::world::WorldStorage;
 
     // Errors
 
