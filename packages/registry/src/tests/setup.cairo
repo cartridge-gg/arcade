@@ -21,11 +21,11 @@ pub mod setup {
     // Constant
 
     pub fn OWNER() -> ContractAddress {
-        starknet::contract_address_const::<'OWNER'>()
+        'OWNER'.try_into().unwrap()
     }
 
     pub fn PLAYER() -> ContractAddress {
-        starknet::contract_address_const::<'PLAYER'>()
+        'PLAYER'.try_into().unwrap()
     }
 
     #[derive(Copy, Drop)]
@@ -53,12 +53,12 @@ pub mod setup {
         NamespaceDef {
             namespace: "namespace",
             resources: [
-                TestResource::Model(models::m_Access::TEST_CLASS_HASH),
-                TestResource::Model(models::m_Collection::TEST_CLASS_HASH),
-                TestResource::Model(models::m_Game::TEST_CLASS_HASH),
-                TestResource::Model(models::m_Edition::TEST_CLASS_HASH),
-                TestResource::Model(models::m_Unicity::TEST_CLASS_HASH),
-                TestResource::Contract(Register::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Access::TEST_CLASS_HASH.into()),
+                TestResource::Model(models::m_Collection::TEST_CLASS_HASH.into()),
+                TestResource::Model(models::m_Game::TEST_CLASS_HASH.into()),
+                TestResource::Model(models::m_Edition::TEST_CLASS_HASH.into()),
+                TestResource::Model(models::m_Unicity::TEST_CLASS_HASH.into()),
+                TestResource::Contract(Register::TEST_CLASS_HASH.into()),
             ]
                 .span(),
         }
@@ -68,7 +68,7 @@ pub mod setup {
         [
             ContractDefTrait::new(@"namespace", @"Register")
                 .with_writer_of([dojo::utils::bytearray_hash(@"namespace")].span())
-                .with_init_calldata(array![OWNER().into(), Collection::TEST_CLASS_HASH].span()),
+                .with_init_calldata(array![OWNER().into(), Collection::TEST_CLASS_HASH.into()].span()),
         ]
             .span()
     }

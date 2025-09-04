@@ -9,8 +9,8 @@ dojo_macros.workspace = true
 starknet.workspace = true
 
 [dev-dependencies]
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.7.0-alpha.1" }
-cairo_test = "2.11.4"
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", rev = "87faab06dfa081c391f3e42c3ab18f42301efe1c" }
+cairo_test = "2.12.0"
 
 # dojo_cairo_test.workspace = true
 # cairo_test.workspace = true

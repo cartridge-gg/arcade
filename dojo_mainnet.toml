@@ -2,7 +2,7 @@
 name = "Cartridge World"
 description = "Cartridge World"
 website = "https://github.com/dojoengine/dojo-starter"
-seed = "Arcade-11"
+seed = "Arcade-glihm1"
 
 [world.socials]
 x = "https://x.com/ohayo_dojo"
@@ -24,8 +24,9 @@ default = "ARCADE"
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/mainnet"
-account_address = "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b"
-world_address = "0x54f7f579d72c4c48fa99396ea88fdcef0a6569d8c1eda754a6d740a506a204b"
+account_address = "0x1024e16519da35d35b0637c32d0611cc36b724f69cdea25e8007cd6a7cffa51"
+keystore_path = "/Users/glihm/.snaccounts/dev-mainnet.key"
+world_address = "0x32a5d1ac8e2ced508eb840dd9fbfc1b9ebb6c7a61268ad5d26e82712160d97f"
 # world_block = 1339026
 ipfs_config.url = "https://ipfs.infura.io:5001"
 ipfs_config.username = "2EBrzr7ZASQZKH32sl2xWauXPSA"

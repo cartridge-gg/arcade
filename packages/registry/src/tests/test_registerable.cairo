@@ -14,7 +14,7 @@ use registry::tests::setup::setup::{spawn, Systems, PLAYER};
 const NAMEPSACE: felt252 = 'NAMESPACE';
 
 pub fn WORLD_ADDRESS() -> ContractAddress {
-    starknet::contract_address_const::<'WORLD'>()
+    'WORLD'.try_into().unwrap()
 }
 
 // Helpers
