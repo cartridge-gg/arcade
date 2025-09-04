@@ -34,7 +34,6 @@ pub trait ISocial<TContractState> {
 pub mod Social {
     // Dojo imports
 
-
     // Component imports
 
     use achievement::components::pinnable::PinnableComponent;

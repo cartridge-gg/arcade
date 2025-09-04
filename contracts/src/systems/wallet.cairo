@@ -9,7 +9,6 @@ pub trait IWallet<TContractState> {}
 pub mod Wallet {
     // Dojo imports
 
-
     // Internal imports
 
     use arcade::constants::NAMESPACE;

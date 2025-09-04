@@ -2,7 +2,6 @@
 
 // Dojo imports
 
-
 // Events imports
 
 use achievement::events::creation::{CreationTrait, TrophyCreation};

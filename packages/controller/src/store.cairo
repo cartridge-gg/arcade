@@ -2,7 +2,6 @@
 
 // Dojo imports
 
-
 // Models imports
 
 use controller::models::account::Account;

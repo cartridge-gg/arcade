@@ -1,7 +1,6 @@
 pub mod setup {
     // Starknet imports
 
-
     // Dojo imports
 
     use dojo::world::{WorldStorage, WorldStorageTrait};

@@ -2,7 +2,6 @@
 pub mod PinnableComponent {
     // Dojo imports
 
-
     // Internal imports
 
     use achievement::store::{Store, StoreTrait};

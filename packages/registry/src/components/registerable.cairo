@@ -2,7 +2,6 @@
 pub mod RegisterableComponent {
     // Starknet imports
 
-
     // External imports
 
     use collection::interface::{CollectionTraitDispatcher, CollectionTraitDispatcherTrait};

@@ -108,7 +108,6 @@ pub trait IRegistry<TContractState> {
 pub mod Registry {
     // Starknet imports
 
-
     // Internal imports
 
     use arcade::constants::NAMESPACE;

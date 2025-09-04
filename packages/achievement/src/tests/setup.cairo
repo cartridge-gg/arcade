@@ -1,10 +1,9 @@
 pub mod setup {
     // Starknet imports
 
-
     // Internal imports
 
-    use achievement::events::{index as events};
+    use achievement::events::index as events;
     use achievement::tests::mocks::achiever::{Achiever, IAchieverDispatcher};
 
     // Dojo imports

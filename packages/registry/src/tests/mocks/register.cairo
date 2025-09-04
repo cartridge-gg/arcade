@@ -89,7 +89,6 @@ pub trait IRegister<TContractState> {
 pub mod Register {
     // Starknet imports
 
-
     // Dojo imports
 
     use dojo::world::WorldStorage;

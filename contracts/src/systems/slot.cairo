@@ -14,7 +14,6 @@ pub trait ISlot<TContractState> {
 pub mod Slot {
     // Dojo imports
 
-
     // Internal imports
 
     use arcade::constants::NAMESPACE;

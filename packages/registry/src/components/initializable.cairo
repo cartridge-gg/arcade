@@ -2,7 +2,6 @@
 pub mod InitializableComponent {
     // Starknet imports
 
-
     // Dojo imports
 
     use dojo::world::WorldStorage;
