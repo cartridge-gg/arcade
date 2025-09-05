@@ -57,9 +57,9 @@ export function App() {
 
             <div
               className={cn(
-                "fixed lg:relative h-full w-full flex flex-col overflow-hidden px-3 lg:px-0 lg:pb-0",
+                "fixed lg:relative h-full w-full flex flex-col overflow-hidden px-0 lg:pb-0",
                 "transition-transform duration-300 ease-in-out",
-                isPWA ? "pb-[90px]" : "pb-[84px]",
+                isPWA ? "pb-[77px]" : "pb-[71px]",
                 isOpen
                   ? "translate-x-[min(calc(100vw-64px),360px)]"
                   : "translate-x-0",
@@ -72,7 +72,7 @@ export function App() {
               </div>
               <div
                 className={cn(
-                  "relative grow h-full flex flex-col rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 lg:w-[800px]",
+                  "relative grow h-full flex flex-col rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 lg:w-[800px]",
                   player &&
                     "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}
