@@ -6,12 +6,11 @@ export const queryKeys = {
     all: ["achievements"] as const,
     trophies: (projects: any[]) =>
       [...queryKeys.achievements.all, "trophies", projects] as const,
-    progressions: (projects: any[], address?: string) =>
+    progressions: (projects: any[]) =>
       [
         ...queryKeys.achievements.all,
         "progressions",
         projects,
-        address,
       ] as const,
     stats: (projects: any[], address?: string) =>
       [...queryKeys.achievements.all, "stats", projects, address] as const,

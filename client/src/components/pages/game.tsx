@@ -15,11 +15,8 @@ import arcade from "@/assets/arcade-logo.png";
 import { GameSocialWebsite } from "../modules/game-social";
 import { useProject } from "@/hooks/project";
 import { useDevice } from "@/hooks/device";
-<<<<<<< HEAD
 import { PredictScene } from "../scenes/predict";
-=======
 import { usePathBuilder } from "@/hooks/path-builder";
->>>>>>> 88bb0e2 (feat: user navigation)
 
 export function GamePage() {
   const { game, edition } = useProject();
@@ -29,7 +26,7 @@ export function GamePage() {
 
   const navigate = useNavigate();
   const { buildGamePath } = usePathBuilder();
-  
+
   const handleClick = useCallback(
     (value: string) => {
       if (edition && game) {

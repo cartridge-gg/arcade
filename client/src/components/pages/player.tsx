@@ -23,11 +23,8 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/project";
-<<<<<<< HEAD
 import { PositionsScene } from "../scenes/positions";
-=======
 import { useAchievementsQuery, useEditionsQuery, useFollowsQuery } from "@/queries";
->>>>>>> 88bb0e2 (feat: user navigation)
 
 
 export function PlayerPage() {
@@ -72,11 +69,8 @@ export function PlayerPage() {
   const pathname = routerState.location.pathname;
   const navigate = useNavigate();
   const { player, game } = useProject();
-<<<<<<< HEAD
-=======
   const { buildPlayerPath, buildGamePath } = usePathBuilder();
 
->>>>>>> 88bb0e2 (feat: user navigation)
   const handleClick = useCallback(
     (value: string) => {
       if (game && player) {

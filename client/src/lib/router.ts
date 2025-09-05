@@ -34,21 +34,21 @@ export const createOptimizedRoute = (path: string) => {
     return createFileRoute(path)({
       validateSearch,
       loader: async () => {
-        const chainId = constants.StarknetChainId.SN_MAIN;
-
-        const promises = [
-          queryClient.prefetchQuery({
-            queryKey: queryKeys.games.all,
-            queryFn: () => fetchGames(chainId),
-          }),
-          queryClient.prefetchQuery({
-            queryKey: queryKeys.games.editions,
-            queryFn: () => fetchEditions(chainId),
-          }),
-          ...(config.additionalPrefetches || []),
-        ];
-
-        await Promise.all(promises);
+        // const chainId = constants.StarknetChainId.SN_MAIN;
+        //
+        // const promises = [
+        //   queryClient.prefetchQuery({
+        //     queryKey: queryKeys.games.all,
+        //     queryFn: () => fetchGames(chainId),
+        //   }),
+        //   queryClient.prefetchQuery({
+        //     queryKey: queryKeys.games.editions,
+        //     queryFn: () => fetchEditions(chainId),
+        //   }),
+        //   ...(config.additionalPrefetches || []),
+        // ];
+        //
+        // await Promise.all(promises);
         return {};
       },
       pendingMs: 0,

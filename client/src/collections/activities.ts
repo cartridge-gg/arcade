@@ -3,6 +3,7 @@ import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { QueryClient } from "@tanstack/react-query";
 import { graphqlClient } from "@/queries/graphql-client";
 import { queryKeys } from "@/queries/keys";
+import { queryClient } from "@/queries";
 
 export interface ActivityProject {
   project: string;
@@ -98,7 +99,7 @@ const TRANSFERS_QUERY = `
 
 export const transactionsCollection = createCollection(
   queryCollectionOptions({
-    queryKey: (projects: ActivityProject[]) => 
+    queryKey: (projects: ActivityProject[]) =>
       queryKeys.activities.transactions(projects),
     queryFn: async ({ queryKey }) => {
       const projects = queryKey[queryKey.length - 1] as ActivityProject[];
@@ -106,7 +107,7 @@ export const transactionsCollection = createCollection(
         ACTIVITIES_QUERY,
         { projects }
       );
-      
+
       const activities: Activity[] = [];
       data.activities?.items?.forEach((item) => {
         item.activities?.forEach((activity) => {
@@ -116,18 +117,18 @@ export const transactionsCollection = createCollection(
           });
         });
       });
-      
+
       return activities;
     },
-    queryClient: new QueryClient(),
+    queryClient,
     getKey: (item: Activity) => `${item.project}-${item.transactionHash}-${item.eventId}`,
     schema: {
       validate: (item: unknown): item is Activity => {
         const a = item as Activity;
-        return typeof a.transactionHash === 'string' && 
-               typeof a.executedAt === 'string' &&
-               typeof a.eventId === 'string' &&
-               typeof a.type === 'string';
+        return typeof a.transactionHash === 'string' &&
+          typeof a.executedAt === 'string' &&
+          typeof a.eventId === 'string' &&
+          typeof a.type === 'string';
       }
     }
   })
@@ -135,7 +136,7 @@ export const transactionsCollection = createCollection(
 
 export const transfersCollection = createCollection(
   queryCollectionOptions({
-    queryKey: (address: string, projects?: string[], offset: number = 0) => 
+    queryKey: (address: string, projects?: string[], offset: number = 0) =>
       queryKeys.activities.transfers(address, projects, offset),
     queryFn: async ({ queryKey }) => {
       const [, , address, projects, offset] = queryKey as [unknown, unknown, string, string[], number];
@@ -148,23 +149,23 @@ export const transfersCollection = createCollection(
           offset: offset || 0,
         }
       );
-      
+
       const transfers: Transfer[] = data.transfers?.edges?.map(edge => ({
         ...edge.node,
         project: projects?.[0] || 'default',
       })) || [];
-      
+
       return transfers;
     },
-    queryClient: new QueryClient(),
+    queryClient,
     getKey: (item: Transfer) => item.id || `${item.transactionHash}-${item.tokenAddress}-${item.timestamp}`,
     schema: {
       validate: (item: unknown): item is Transfer => {
         const t = item as Transfer;
-        return typeof t.from === 'string' && 
-               typeof t.to === 'string' &&
-               typeof t.amount === 'string' &&
-               typeof t.tokenAddress === 'string';
+        return typeof t.from === 'string' &&
+          typeof t.to === 'string' &&
+          typeof t.amount === 'string' &&
+          typeof t.tokenAddress === 'string';
       }
     }
   })

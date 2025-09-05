@@ -1,7 +1,7 @@
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { queryKeys } from "../keys";
 import { queryConfigs } from "../queryClient";
-import { Social } from "@/../../packages/sdk/src";
+import { Social } from "@cartridge/arcade";
 import { constants, getChecksumAddress } from "starknet";
 import { useMemo } from "react";
 import { useAccount } from "@starknet-react/core";

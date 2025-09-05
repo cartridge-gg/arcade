@@ -6,6 +6,8 @@ import "./index.css";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 import { Provider } from "./context";
+import { arcadeRegistryCollection, editionsQuery, gamesQuery } from "./collections/arcade";
+import { accountsCollection, achievementsCollection, allEventsCollection, completedAchievements, playthroughsCollection, progressionsCollection, trophiesCollection } from "./collections";
 
 // Create a new router instance
 const router = createRouter({
@@ -22,10 +24,26 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Provider>
-      <RouterProvider router={router} />
-    </Provider>
-  </StrictMode>,
-);
+async function main() {
+  accountsCollection.preload();
+  await arcadeRegistryCollection.preload();
+  await gamesQuery.preload();
+  await editionsQuery.preload();
+  progressionsCollection.preload();
+  trophiesCollection.preload();
+  achievementsCollection.preload();
+  completedAchievements.preload();
+  playthroughsCollection.preload();
+  allEventsCollection.preload();
+  // allEventsCollection.sta
+
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <Provider>
+        <RouterProvider router={router} />
+      </Provider>
+    </StrictMode>,
+  );
+}
+
+main()

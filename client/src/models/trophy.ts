@@ -15,6 +15,7 @@ export interface RawTrophy {
   taskTotal: number;
   taskDescription: string;
   data: string;
+  edition: string;
 }
 
 export interface Task {
@@ -37,6 +38,7 @@ export class Trophy {
   description: string;
   tasks: Task[];
   data: string;
+  edition: string;
 
   constructor(
     key: string,
@@ -52,6 +54,7 @@ export class Trophy {
     description: string,
     tasks: Task[],
     data: string,
+    edition: string,
   ) {
     this.key = key;
     this.id = id;
@@ -66,6 +69,7 @@ export class Trophy {
     this.description = description;
     this.tasks = tasks;
     this.data = data;
+    this.edition = edition;
   }
 
   static from(node: RawTrophy): Trophy {
@@ -93,6 +97,7 @@ export class Trophy {
         },
       ],
       data: node.data,
+      edition: node.edition,
     };
   }
 }

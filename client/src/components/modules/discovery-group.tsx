@@ -6,6 +6,8 @@ import {
 } from "./discovery-event";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useEffect, useRef, useState } from "react";
+import { UserIcon } from "@cartridge/ui";
+import { UserAvatar } from "../user/avatar";
 
 interface ArcadeDiscoveryGroupProps
   extends HTMLAttributes<HTMLDivElement>,
@@ -80,6 +82,7 @@ export const ArcadeDiscoveryGroup = ({
     };
   }, [ref, identifier]);
 
+  // console.log(events);
   return (
     <div
       data-rounded={rounded}
@@ -101,6 +104,7 @@ export const ArcadeDiscoveryGroup = ({
                 className={className}
                 variant={variant}
                 onClick={onClick}
+                Icon={<UserAvatar username={event.name} size="sm" />}
                 {...event}
               />
             </motion.div>
@@ -114,6 +118,7 @@ export const ArcadeDiscoveryGroup = ({
               className={className}
               variant={variant}
               onClick={onClick}
+              Icon={<UserAvatar username={event.name} size="sm" />}
               {...event}
             />
           </div>

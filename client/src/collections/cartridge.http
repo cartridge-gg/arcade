@@ -1,0 +1,18 @@
+### 
+
+# curl 'https://api.cartridge.gg/query' -X POST -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0' -H 'Accept: */*' -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'Referer: https://localhost:3003/' -H 'Content-Type: application/json' -H 'Origin: https://localhost:3003' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: cross-site' --data-raw '{"query":"\n query GetTrophies {\n achievements {\n items {\n meta {\n project\n }\n achievements {\n id\n achievementGroup\n title\n description\n points\n hidden\n page\n start\n end\n icon\n taskId\n taskTotal\n taskDescription\n data\n }\n }\n }\n }\n"}'
+
+POST https://api.cartridge.gg/query HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.5
+Connection: keep-alive
+Content-Type: application/json
+Origin: https://localhost:3003
+Referer: https://localhost:3003/
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:144.0) Gecko/20100101 Firefox/144.0
+
+{"query":"query GetTrophies {achievements { items { meta { project } achievements { id achievementGroup title description points hidden page start end icon taskId taskTotal taskDescription data } } } }"}

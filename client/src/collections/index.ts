@@ -2,6 +2,7 @@ export * from './achievements';
 export * from './activities';
 export * from './discovery';
 export * from './inventory';
+export * from './leaderboard';
 export * from './tokens';
 export * from './users';
 

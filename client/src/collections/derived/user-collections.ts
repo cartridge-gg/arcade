@@ -6,7 +6,6 @@ import {
 } from "../inventory";
 import {
   balancesCollection,
-  creditsCollection,
 } from "../tokens";
 import {
   transactionsCollection,
@@ -63,14 +62,14 @@ export const userActivitiesCollection = (userAddress: string, project?: string) 
   createLiveQueryCollection({
     query: (q) =>
       q
-        .from({ 
+        .from({
           transaction: transactionsCollection,
-          transfer: transfersCollection 
+          transfer: transfersCollection
         })
         .where(({ transaction, transfer }) => {
           if (project) {
-            return (transaction?.project === project) || 
-                   (transfer?.project === project);
+            return (transaction?.project === project) ||
+              (transfer?.project === project);
           }
           return true;
         })
@@ -84,14 +83,14 @@ export const userProgressCollection = (userAddress: string, project?: string) =>
   createLiveQueryCollection({
     query: (q) =>
       q
-        .from({ 
+        .from({
           progression: progressionsCollection,
-          trophy: trophiesCollection 
+          trophy: trophiesCollection
         })
         .where(({ progression, trophy }) => {
           if (project) {
-            return (progression?.project === project) || 
-                   (trophy?.project === project);
+            return (progression?.project === project) ||
+              (trophy?.project === project);
           }
           return true;
         })
@@ -109,8 +108,8 @@ export const userOwnershipsCollection = (
     query: (q) =>
       q
         .from({ ownership: ownershipsCollection })
-        .where(({ ownership }) => 
-          ownership.owner === userAddress && 
+        .where(({ ownership }) =>
+          ownership.owner === userAddress &&
           ownership.contractAddress === contractAddress
         )
         .select(({ ownership }) => ownership),

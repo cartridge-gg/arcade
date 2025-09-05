@@ -6,6 +6,7 @@ export interface RawProgress {
   taskTotal: number;
   total: number;
   completionTime: number;
+  edition: string;
 }
 
 export class Progress {
@@ -17,6 +18,7 @@ export class Progress {
   taskTotal: number;
   total: number;
   timestamp: number;
+  edition: string;
 
   constructor(
     key: string,
@@ -27,6 +29,7 @@ export class Progress {
     taskTotal: number,
     total: number,
     timestamp: number,
+    edition: string,
   ) {
     this.key = key;
     this.achievementId = achievementId;
@@ -36,6 +39,7 @@ export class Progress {
     this.taskTotal = taskTotal;
     this.total = total;
     this.timestamp = timestamp;
+    this.edition = edition
   }
 
   static from(node: RawProgress): Progress {
@@ -52,6 +56,7 @@ export class Progress {
       taskTotal: node.taskTotal,
       total: node.total,
       timestamp: new Date(node.completionTime).getTime() / 1000,
+      edition: node.edition,
     };
   }
 }

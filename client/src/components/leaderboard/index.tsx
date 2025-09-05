@@ -8,25 +8,23 @@ import LeaderboardRow from "../modules/leaderboard-row";
 import { useAccount } from "@starknet-react/core";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { usePathBuilder } from "@/hooks/path-builder";
-import { useAchievementsQuery } from "@/queries/achievements";
-import {
-  usePinsQuery,
-  useFollowsQuery,
-  useEditionsQuery,
-} from "@/queries/games";
+import { useLeaderboard } from "@/collections";
+import { useFollowsQuery } from "@/queries/games";
 
 const DEFAULT_CAP = 30;
 
 export function Leaderboard({ edition }: { edition?: EditionModel }) {
   const { isConnected, address: address = "" } = useAccount();
 
-  const { data: editions = [] } = useEditionsQuery(
-    constants.StarknetChainId.SN_MAIN,
-  );
-  const { achievements, globals, players, usernames, isLoading, isError } =
-    useAchievementsQuery(editions);
-  const { data: following = [] } = useFollowsQuery(address);
-  const { data: pins = [] } = usePinsQuery();
+  const { data: followsData = [] } = useFollowsQuery(address);
+
+  // Convert follows to array of addresses
+  const following = useMemo(() => {
+    return followsData.map(f => getChecksumAddress(f.followeeAddress || f.followed));
+  }, [followsData]);
+
+  const { global, game } = useLeaderboard(edition?.config.project, following);
+  console.log(global, game)
 
   const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -40,138 +38,62 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
   // Cache following set for O(1) lookups
   const followingSet = useMemo(() => new Set(following), [following]);
 
-  const gamePlayers = useMemo(() => {
-    return players[edition?.config.project || ""] || [];
-  }, [players, edition]);
-
-  const gameAchievements = useMemo(() => {
-    return achievements[edition?.config.project || ""] || [];
-  }, [achievements, edition]);
-
-  // Cache checksum addresses for all players
-  const playerChecksums = useMemo(() => {
-    const checksums = new Map();
-    [...gamePlayers, ...globals].forEach((player) => {
-      checksums.set(player.address, getChecksumAddress(player.address));
-    });
-    return checksums;
-  }, [gamePlayers, globals]);
-
-
-  // Helper function to process player data
-  const processPlayerData = useCallback(
-    (players: any[], includeAchievements: boolean = false) => {
-      let selfRank = -1;
-      let selfIndex = -1;
-
-      const data = players.map((player, index) => {
-        const playerBigInt = BigInt(player.address);
-        const isCurrentUser = playerBigInt === addressBigInt;
-        if (isCurrentUser) {
-          selfRank = index + 1;
-          selfIndex = index;
-        }
-
-        const checksumAddress =
-          playerChecksums.get(player.address) ||
-          getChecksumAddress(player.address);
-        const playerPins = pins[checksumAddress] || [];
-
-        let pinnedAchievements = [];
-        if (includeAchievements && gameAchievements.length > 0) {
-          const completedAchievements = gameAchievements.filter(
-            (item) =>
-              player.completeds?.includes(item.id) &&
-              (playerPins.length === 0 || playerPins.includes(item.id)),
-          );
-
-          pinnedAchievements = completedAchievements
-            .sort((a, b) => {
-              const percentageDiff =
-                parseFloat(a.percentage) - parseFloat(b.percentage);
-              return percentageDiff !== 0
-                ? percentageDiff
-                : a.id.localeCompare(b.id);
-            })
-            .slice(0, 3)
-            .map((item) => ({ id: item.id, icon: item.icon }));
-        }
-
-        return {
-          address: checksumAddress,
-          name: usernames[checksumAddress] || player.address.slice(0, 9),
-          rank: index + 1,
-          points: player.earnings,
-          highlight: isCurrentUser,
-          pins: pinnedAchievements,
-          following: followingSet.has(checksumAddress),
-        };
-      });
-
-      const selfData = selfIndex >= 0 ? data[selfIndex] : null;
-      const followingData = data.filter((player) => player.following);
-      const followingPosition = followingData.findIndex(
-        (player) => player.highlight,
-      );
-
-      return {
-        data,
-        selfData,
-        selfRank,
-        followingData,
-        followingPosition,
-      };
-    },
-    [
-      addressBigInt,
-      playerChecksums,
-      pins,
-      gameAchievements,
-      usernames,
-      followingSet,
-    ],
-  );
-
-  const gameData = useMemo(() => {
-    const { data, selfData, selfRank, followingData, followingPosition } =
-      processPlayerData(gamePlayers, true);
-
-    const all =
-      selfRank < cap || !selfData
-        ? data.slice(0, cap)
-        : [...data.slice(0, cap - 1), selfData];
-
-    const following =
-      followingPosition < cap || !selfData
-        ? followingData.slice(0, cap)
-        : [...followingData.slice(0, cap - 1), selfData];
-
-    return { all, following };
-  }, [gamePlayers, processPlayerData, cap]);
-
-  const gamesData = useMemo(() => {
-    const { data, selfData, selfRank, followingData, followingPosition } =
-      processPlayerData(globals, false);
-
-    const all =
-      selfRank < cap || !selfData
-        ? data.slice(0, cap)
-        : [...data.slice(0, cap - 1), selfData];
-
-    const following =
-      followingPosition < cap || !selfData
-        ? followingData.slice(0, cap)
-        : [...followingData.slice(0, cap - 1), selfData];
-
-    return { all, following };
-  }, [globals, processPlayerData, cap]);
+  // Determine which data to use
+  const leaderboardData = useMemo(() => {
+    return edition ? game : global;
+  }, [edition, game, global]);
 
   const filteredData = useMemo(() => {
-    return edition ? gameData : gamesData;
-  }, [edition, gamesData, gameData]);
+    const allPlayers = leaderboardData.all.map((player) => {
+      const isCurrentUser = BigInt(player.address) === addressBigInt;
+      return {
+        address: player.address,
+        name: player.username || player.address.slice(0, 9),
+        rank: player.rank || 0,
+        points: player.earnings,
+        highlight: isCurrentUser,
+        pins: [],
+        following: followingSet.has(player.address),
+      };
+    });
+
+    const followingPlayers = leaderboardData.following.map((player) => {
+      const isCurrentUser = BigInt(player.address) === addressBigInt;
+      return {
+        address: player.address,
+        name: player.username || player.address.slice(0, 9),
+        rank: player.rank || 0,
+        points: player.earnings,
+        highlight: isCurrentUser,
+        pins: [],
+        following: true,
+      };
+    });
+
+    // Find self in all players
+    const selfIndex = allPlayers.findIndex(p => p.highlight);
+    const selfData = selfIndex >= 0 ? allPlayers[selfIndex] : null;
+
+    // Apply cap with self always visible
+    const allCapped = selfIndex < cap || !selfData
+      ? allPlayers.slice(0, cap)
+      : [...allPlayers.slice(0, cap - 1), selfData];
+
+    const followingCapped = followingPlayers.length <= cap
+      ? followingPlayers
+      : followingPlayers.slice(0, cap);
+
+    return {
+      all: allCapped,
+      following: followingCapped,
+    };
+  }, [leaderboardData, addressBigInt, followingSet, cap]);
 
 
-  if (isLoading && !gamePlayers.length && !globals.length) {
+  const isLoading = leaderboardData.status === 'loading' || leaderboardData.status === 'initialCommit';
+  const isError = leaderboardData.status === 'error';
+
+  if (isLoading && leaderboardData.all.length === 0) {
     return (
       <LayoutContent className="select-none h-full overflow-clip p-0">
         <div
@@ -209,7 +131,6 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
                 >
                   {filteredData.all.map((item, index) => {
                     const playerPath = buildPlayerPath(item.address, "achievements");
-                    console.log(playerPath);
                     return (
                       <Link key={index} to={playerPath}>
                         <LeaderboardRow

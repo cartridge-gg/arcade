@@ -1,12 +1,10 @@
 import { Games } from "@/components/games";
 import { SceneLayout } from "@/components/scenes/layout";
-import { useEffect } from "react";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
 import { Header } from "./header";
 import { useProject } from "@/hooks/project";
 import { ThemeProvider } from "@/context/theme";
-import { useArcade } from "@/hooks/arcade";
 import { useDevice } from "@/hooks/device";
 import { Filters } from "./filters";
 import { Tabs } from "./tabs";
@@ -15,15 +13,14 @@ import { PlayerHeader } from "./player-header";
 
 export function Template({ children }: { children: React.ReactNode }) {
   const { isOpen, toggle, handleTouchMove, handleTouchStart } = useSidebar();
-  const { setPlayer } = useArcade();
   const { player, collection } = useProject();
   const { player: playerParam } = useParams({ strict: true });
 
   const isPWA = useDevice();
 
-  useEffect(() => {
-    setPlayer(player);
-  }, [player, setPlayer]);
+  // useEffect(() => {
+  //   setPlayer(player);
+  // }, [player, setPlayer]);
 
   return (
     <ThemeProvider defaultScheme="dark">

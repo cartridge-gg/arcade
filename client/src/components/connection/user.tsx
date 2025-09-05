@@ -24,31 +24,16 @@ export function User() {
   
   // Use query data as fallback or primary source
   const displayName = name || username || userProfile?.username || '';
-  */
+*/
 
   const navigate = useNavigate();
-<<<<<<< HEAD
-  const handleClick = useCallback(() => {
-    if (!name && !address) return;
-    // Update the url params
-    let pathname = location.pathname;
-    const playerName = `${!name ? address?.toLowerCase() : name.toLowerCase()}`;
-    pathname = pathname.replace(/\/collection\/[^/]+/, "");
-    pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
-    pathname = pathname.replace(/\/edition\/[^/]+/, "");
-    pathname = joinPaths(pathname, `/player/${playerName}`);
-    navigate({ to: pathname });
-  }, [name, address, navigate]);
-=======
   const { buildPlayerPath } = usePathBuilder();
-  
+
   const playerPath = useMemo(() => {
     if (!name && !address) return null;
     const playerName = !name ? address?.toLowerCase() : name.toLowerCase();
     return buildPlayerPath(playerName || "");
   }, [name, address, buildPlayerPath]);
->>>>>>> 88bb0e2 (feat: user navigation)
 
   useEffect(() => {
     async function fetch() {
