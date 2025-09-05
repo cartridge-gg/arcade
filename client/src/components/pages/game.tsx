@@ -38,7 +38,7 @@ export function GamePage() {
 
   const order: TabValue[] = useMemo(() => {
     const tabs: TabValue[] = game
-      ? ["activity", "leaderboard", "marketplace", "guilds", "predict", "about"]
+      ? ["activity", "leaderboard", "marketplace", "predict", "about"]
       : ["activity", "leaderboard", "marketplace", "predict"];
 
     if (process.env.NODE_ENV !== "development") {
