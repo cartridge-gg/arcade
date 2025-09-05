@@ -49,7 +49,7 @@ dependencies = [
 [[package]]
 name = "dojo"
 version = "1.7.0-alpha.2"
-source = "git+https://github.com/dojoengine/dojo?rev=6a841ea8aa20f845baa2e250e17c841ef42f6e74#6a841ea8aa20f845baa2e250e17c841ef42f6e74"
+source = "git+https://github.com/dojoengine/dojo?rev=2d82d6efb28558e726df7eac7b16a4a95999a52c#2d82d6efb28558e726df7eac7b16a4a95999a52c"
 dependencies = [
  "dojo_macros",
 ]
@@ -57,7 +57,7 @@ dependencies = [
 [[package]]
 name = "dojo_cairo_test"
 version = "1.7.0-alpha.2"
-source = "git+https://github.com/dojoengine/dojo?rev=6a841ea8aa20f845baa2e250e17c841ef42f6e74#6a841ea8aa20f845baa2e250e17c841ef42f6e74"
+source = "git+https://github.com/dojoengine/dojo?rev=2d82d6efb28558e726df7eac7b16a4a95999a52c#2d82d6efb28558e726df7eac7b16a4a95999a52c"
 dependencies = [
  "dojo",
 ]
@@ -65,7 +65,7 @@ dependencies = [
 [[package]]
 name = "dojo_macros"
 version = "1.7.0-alpha.2"
-source = "git+https://github.com/dojoengine/dojo?rev=6a841ea8aa20f845baa2e250e17c841ef42f6e74#6a841ea8aa20f845baa2e250e17c841ef42f6e74"
+source = "git+https://github.com/dojoengine/dojo?rev=2d82d6efb28558e726df7eac7b16a4a95999a52c#2d82d6efb28558e726df7eac7b16a4a95999a52c"
 
 [[package]]
 name = "graffiti"
