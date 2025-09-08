@@ -30,11 +30,11 @@
     "build:esm": "tsup --clean false --format esm --platform node",
     "build:iife": "tsup --clean false --format iife --platform browser --external node:*,tough-cookie,*.wasm",
     "build:dts": "tsup --clean false --dts-only",
-    "pretest": "npm run lint && npm run ts:check",
-    "test": "jest -i",
-    "test:coverage": "jest -i --coverage",
+    "pretest": "npm run format:check && npm run ts:check",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "posttest": "npm run format -- --log-level warn",
-    "test:watch": "jest --watch",
+    "test:watch": "vitest",
     "docs": "cd www && npm run start",
     "docs:build": "cd www && GIT_REVISION_OVERRIDE=${npm_config_git_revision_override} npm run build",
     "docs:build:version": "v=$(npm run info:version -s) && npm run docs:build --git-revision-override=${npm_config_git_revision_override=v$v}",
@@ -59,13 +59,14 @@
   "devDependencies": {
     "@types/node": "^20.11.10",
     "@types/react": "^19.0.3",
+    "@vitest/ui": "^3.2.4",
     "husky": "^9.1.7",
     "prettier": "^3.4.2",
     "tsup": "catalog:",
     "typedoc": "^0.27.0",
     "typedoc-plugin-markdown": "^4.4.1",
     "typescript": "catalog:",
-    "vitest": "^2.0.5"
+    "vitest": "^3.2.4"
   },
   "importSort": {
     ".js, .jsx, .ts, .tsx": {

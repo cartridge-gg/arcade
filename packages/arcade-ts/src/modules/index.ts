@@ -1,5 +1,6 @@
 export * from "./registry";
 export * from "./social";
+export * from "./torii-fetcher";
 import { init } from "@dojoengine/sdk";
 import { configs } from "../configs";
 import { SchemaType } from "../bindings/models.gen";
