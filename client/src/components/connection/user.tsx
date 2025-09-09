@@ -24,6 +24,7 @@ export function User() {
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
     pathname = pathname.replace(/\/player\/[^/]+/, "");
     pathname = pathname.replace(/\/tab\/[^/]+/, "");
+    pathname = pathname.replace(/\/edition\/[^/]+/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
     navigate(pathname);
   }, [name, address, navigate]);
