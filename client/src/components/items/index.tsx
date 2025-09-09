@@ -160,7 +160,7 @@ export function Items() {
 
       const project = edition?.config.project;
       const preset = edition?.properties.preset;
-      let options = [`ps=${project}`, "purchaseView=true"];
+      const options = [`ps=${project}`, "purchaseView=true"];
       if (preset) {
         options.push(`preset=${preset}`);
       } else {
@@ -268,7 +268,7 @@ export function Items() {
       </div>
       <div
         ref={parentRef}
-        className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 select-none overflow-y-scroll h-full"
+        className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 select-none overflow-y-scroll h-full auto-rows-max"
         style={{ scrollbarWidth: "none" }}
       >
         {filteredTokens.slice(0, cap * 3).map((token) => (
