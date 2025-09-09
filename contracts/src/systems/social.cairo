@@ -34,18 +34,17 @@ pub trait ISocial<TContractState> {
 pub mod Social {
     // Dojo imports
 
-    use dojo::world::WorldStorage;
-
     // Component imports
 
     use achievement::components::pinnable::PinnableComponent;
-    use social::components::allianceable::AllianceableComponent;
-    use social::components::followable::FollowableComponent;
-    use social::components::guildable::GuildableComponent;
 
     // Internal imports
 
     use arcade::constants::NAMESPACE;
+    use dojo::world::WorldStorage;
+    use social::components::allianceable::AllianceableComponent;
+    use social::components::followable::FollowableComponent;
+    use social::components::guildable::GuildableComponent;
 
     // Local imports
 

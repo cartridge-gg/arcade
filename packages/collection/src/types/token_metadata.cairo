@@ -1,5 +1,5 @@
-use graffiti::json::{JsonImpl};
 use collection::types::attribute::{Attribute, AttributeTrait};
+use graffiti::json::JsonImpl;
 
 #[derive(Drop, Serde)]
 pub struct TokenMetadata {
@@ -27,7 +27,7 @@ pub impl TokenMetadataImpl of TokenMetadataTrait {
                 let mut items: Array<ByteArray> = array![];
                 while let Option::Some(item) = attributes.pop_front() {
                     items.append(item.jsonify());
-                };
+                }
                 Option::Some(items.span())
             },
             Option::None => Option::None,
@@ -38,7 +38,7 @@ pub impl TokenMetadataImpl of TokenMetadataTrait {
                 let mut items: Array<ByteArray> = array![];
                 while let Option::Some(item) = properties.pop_front() {
                     items.append(item.jsonify());
-                };
+                }
                 Option::Some(items.span())
             },
             Option::None => Option::None,
@@ -49,7 +49,7 @@ pub impl TokenMetadataImpl of TokenMetadataTrait {
                 let mut items: Array<ByteArray> = array![];
                 while let Option::Some(item) = socials.pop_front() {
                     items.append(item.jsonify());
-                };
+                }
                 Option::Some(items.span())
             },
             Option::None => Option::None,

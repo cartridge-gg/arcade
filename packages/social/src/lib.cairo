@@ -6,19 +6,19 @@ pub mod types {
 }
 
 pub mod events {
-    pub mod index;
     pub mod follow;
+    pub mod index;
 }
 
 pub mod models {
+    pub mod alliance;
+    pub mod guild;
     pub mod index;
     pub mod member;
-    pub mod guild;
-    pub mod alliance;
 }
 
 pub mod components {
+    pub mod allianceable;
     pub mod followable;
     pub mod guildable;
-    pub mod allianceable;
 }

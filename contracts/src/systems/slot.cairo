@@ -14,16 +14,15 @@ pub trait ISlot<TContractState> {
 pub mod Slot {
     // Dojo imports
 
+    // Internal imports
+
+    use arcade::constants::NAMESPACE;
     use dojo::world::WorldStorage;
 
     // External imports
 
     use provider::components::deployable::DeployableComponent;
     use provider::components::groupable::GroupableComponent;
-
-    // Internal imports
-
-    use arcade::constants::NAMESPACE;
 
     // Local imports
 

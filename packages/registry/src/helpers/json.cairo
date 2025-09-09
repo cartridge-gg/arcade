@@ -35,7 +35,7 @@ pub impl JsonifiableArray<T, +JsonifiableTrait<T>, +Drop<T>> of JsonifiableArray
             }
             string += item.jsonify();
             index += 1;
-        };
+        }
         JsonifiableSimple::jsonify(name, string + "]")
     }
 }
@@ -45,7 +45,7 @@ mod tests {
     // Local imports
 
     use super::{
-        Jsonifiable, JsonifiableSimple, JsonifiableString, JsonifiableArray, JsonifiableTrait,
+        Jsonifiable, JsonifiableArray, JsonifiableSimple, JsonifiableString, JsonifiableTrait,
     };
 
     #[derive(Drop)]

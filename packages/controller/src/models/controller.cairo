@@ -85,7 +85,7 @@ pub impl ControllerAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{ControllerTrait, ControllerAssert};
+    use super::{ControllerAssert, ControllerTrait};
 
     // Constants
 

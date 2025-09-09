@@ -1,7 +1,7 @@
 // Core imports
 
-use core::poseidon::{PoseidonTrait, HashState};
 use core::hash::HashStateTrait;
+use core::poseidon::{HashState, PoseidonTrait};
 
 #[generate_trait]
 pub impl Seeder of SeederTrait {

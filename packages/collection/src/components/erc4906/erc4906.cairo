@@ -1,9 +1,8 @@
 #[starknet::component]
 pub mod ERC4906Component {
-    use openzeppelin_introspection::src5::{
-        SRC5Component, SRC5Component::InternalImpl as SRC5InternalImpl,
-    };
     use collection::components::erc4906::interface::IERC4906_ID;
+    use openzeppelin_introspection::src5::SRC5Component;
+    use openzeppelin_introspection::src5::SRC5Component::InternalImpl as SRC5InternalImpl;
 
     #[storage]
     pub struct Storage {}

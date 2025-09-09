@@ -101,7 +101,7 @@ pub impl AllianceAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{AllianceTrait, AllianceAssert};
+    use super::{AllianceAssert, AllianceTrait};
 
     // Constants
 

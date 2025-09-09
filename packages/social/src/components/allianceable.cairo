@@ -2,15 +2,14 @@
 pub mod AllianceableComponent {
     // Dojo imports
 
-    use dojo::world::WorldStorage;
-    use dojo::world::IWorldDispatcherTrait;
+    use dojo::world::{IWorldDispatcherTrait, WorldStorage};
+    use social::models::alliance::{AllianceAssert, AllianceTrait};
+    use social::models::guild::{GuildAssert, GuildTrait};
+    use social::models::member::MemberAssert;
 
     // Internal imports
 
     use social::store::StoreTrait;
-    use social::models::alliance::{AllianceTrait, AllianceAssert};
-    use social::models::guild::{GuildTrait, GuildAssert};
-    use social::models::member::MemberAssert;
     use social::types::role::Role;
 
     // Storage
@@ -235,7 +234,7 @@ pub mod AllianceableComponent {
                 // [Effect] Alliance hires a guild
                 alliance.hire();
                 store.set_alliance(@alliance);
-            };
+            }
 
             // [Effect] Store entities
             store.set_guild(@guild);

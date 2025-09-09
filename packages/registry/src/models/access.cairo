@@ -80,7 +80,7 @@ pub impl AccessAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{Access, AccessTrait, AccessAssert, Role};
+    use super::{Access, AccessAssert, AccessTrait, Role};
 
     // Constants
 
