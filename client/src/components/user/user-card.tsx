@@ -34,7 +34,7 @@ const UserCardInner = (
     return <UserAvatar username={username} className="h-full w-full" />;
   }, [username]);
 
-  const { earnings: totalEarnings } = usePlayerStats();
+  const { earnings: totalEarnings } = usePlayerStats(address);
 
   const handleClick = useCallback(() => {
     if (!username && !address) return;
