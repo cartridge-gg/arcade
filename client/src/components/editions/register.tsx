@@ -128,8 +128,8 @@ export function Register({
           const args = {
             worldAddress: `0x${BigInt(values.worldAddress).toString(16)}`,
             namespace: values.namespace,
-            gameId: BigInt(game.id),
-            editionId: BigInt(edition?.id || 0),
+            gameId: `0x${BigInt(game.id).toString(16)}`,
+            editionId: `0x${BigInt(edition?.id || 0).toString(16)}`,
             project: byteArray.byteArrayFromString(values.project),
             rpc: byteArray.byteArrayFromString(values.rpc),
             policies: byteArray.byteArrayFromString(values.policies),
