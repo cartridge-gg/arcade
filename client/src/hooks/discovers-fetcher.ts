@@ -50,60 +50,63 @@ interface UseDiscoversFetcherParams {
   refetchInterval?: number;
 }
 
-const PLAYTHROUGH_SQL = (limit: number = 10000, offset: number = 0) => `
-				WITH ordered_actions AS (
+// Optimized query with configurable lookback period
+const PLAYTHROUGH_SQL = (limit: number = 10000, offset: number = 0, daysBack: number = 30) => `
+				WITH recent_actions AS (
 					SELECT
-						transaction_calls.caller_address,
-						transactions.executed_at,
-						transaction_calls.entrypoint,
-						transaction_calls.transaction_hash,
-						LAG(transactions.executed_at) OVER (
-							PARTITION BY transaction_calls.caller_address
-							ORDER BY transactions.executed_at
+						tc.caller_address,
+						t.executed_at,
+						tc.entrypoint,
+						LAG(t.executed_at) OVER (
+							PARTITION BY tc.caller_address
+							ORDER BY t.executed_at
 						) AS prev_executed_at
-					FROM contracts
-					JOIN transaction_contract
-						ON transaction_contract.contract_address = contracts.contract_address
-					JOIN transaction_calls
-						ON transaction_calls.transaction_hash = transaction_contract.transaction_hash
-					JOIN transactions
-						ON transactions.transaction_hash = transaction_calls.transaction_hash
-					WHERE contracts.contract_type = 'WORLD'
-					AND entrypoint NOT IN (
+					FROM transactions t
+					INNER JOIN transaction_calls tc
+						ON tc.transaction_hash = t.transaction_hash
+					INNER JOIN transaction_contract tco
+						ON tco.transaction_hash = t.transaction_hash
+					INNER JOIN contracts c
+						ON c.contract_address = tco.contract_address
+					WHERE c.contract_type = 'WORLD'
+					AND tc.entrypoint NOT IN (
 						'execute_from_outside_v3', 'request_random', 'submit_random',
 						'assert_consumed', 'deployContract', 'set_name', 'register_model',
 						'entities', 'init_contract', 'upgrade_model', 'emit_events',
 						'emit_event', 'set_metadata'
 					)
+					-- Filter to recent data only (configurable days back, default 30)
+					AND t.executed_at >= datetime('now', '-${daysBack} days')
 				),
-				marked_sessions AS (
-					SELECT *,
-						CASE
-							WHEN prev_executed_at IS NULL THEN 1
-							WHEN strftime('%%s', executed_at) - strftime('%%s', prev_executed_at) > 3600 THEN 1
-							ELSE 0
-						END AS new_session_flag
-					FROM ordered_actions
-				),
-				session_ids AS (
-					SELECT *,
-						SUM(new_session_flag) OVER (
+				sessions_with_ids AS (
+					SELECT
+						caller_address,
+						executed_at,
+						entrypoint,
+						SUM(
+							CASE
+								WHEN prev_executed_at IS NULL THEN 1
+								-- Use julianday for better SQLite performance
+								WHEN (julianday(executed_at) - julianday(prev_executed_at)) * 86400 > 3600 THEN 1
+								ELSE 0
+							END
+						) OVER (
 							PARTITION BY caller_address
 							ORDER BY executed_at
-							ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+							ROWS UNBOUNDED PRECEDING
 						) AS session_id
-					FROM marked_sessions
+					FROM recent_actions
 				)
 				SELECT
-					-- '[' || GROUP_CONCAT(entrypoint, ',') || ']' AS entrypoints,
-					'[' || entrypoint || ']' AS entrypoints,
+					'[' || GROUP_CONCAT(entrypoint, ',') || ']' AS entrypoints,
 					caller_address AS callerAddress,
 					MIN(executed_at) AS sessionStart,
 					MAX(executed_at) AS sessionEnd,
 					COUNT(*) AS actionCount
-				FROM session_ids
+				FROM sessions_with_ids
 				GROUP BY caller_address, session_id
-				ORDER BY sessionEnd DESC
+				HAVING COUNT(*) > 0
+				ORDER BY MAX(executed_at) DESC
 				LIMIT ${limit} OFFSET ${offset};
 `;
 
@@ -168,14 +171,16 @@ export function useDiscoversFetcher({
 
     try {
       const response = await fetchToriis(projects.map(p => p.project), {
-        sql: PLAYTHROUGH_SQL(10, 0),
+        sql: PLAYTHROUGH_SQL(100, 0, 30),
       });
-      // console.log(response); debugger;
 
-      if (response?.items) {
-        const processed = processPlaythroughs({
-          items: response.items
-        });
+      if (response) {
+        // The response structure depends on fetchToriis implementation
+        const responseData = Array.isArray(response)
+          ? { items: response }
+          : response;
+
+        const processed = processPlaythroughs(responseData as PlaythroughResponse);
         setPlaythroughs(processed);
         setStatus("success");
       }
