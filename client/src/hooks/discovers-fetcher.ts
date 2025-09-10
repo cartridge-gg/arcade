@@ -1,4 +1,4 @@
-import { fetchToriis } from "@cartridge/arcade";
+import { fetchToriis, fetchToriisStream } from "@cartridge/arcade";
 import { useState, useEffect, useCallback } from "react";
 
 export type Discover = {
@@ -121,6 +121,10 @@ export function useDiscoversFetcher({
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState<{
+    completed: number;
+    total: number;
+  }>({ completed: 0, total: 0 });
 
 
   const processPlaythroughs = useCallback(
@@ -150,7 +154,9 @@ export function useDiscoversFetcher({
             start: start,
             end: end,
             count: playthrough.actionCount,
-            actions: playthrough.entrypoints.slice(1, -1).split(","),
+            actions: typeof playthrough.entrypoints === 'string'
+              ? playthrough.entrypoints.slice(1, -1).split(",")
+              : [],
             achievements: playerAchievements,
           };
         });
@@ -163,26 +169,63 @@ export function useDiscoversFetcher({
 
   const fetchData = useCallback(async () => {
     if (projects.length === 0) return;
-    console.time('fetching torii sql');
 
     setIsLoading(true);
     setStatus("loading");
     setIsError(false);
+    setLoadingProgress({ completed: 0, total: projects.length });
+
+    // Initialize empty playthroughs to show progressive loading
+    const accumulatedData: { [key: string]: Discover[] } = {};
+    let hasError = false;
 
     try {
-      const response = await fetchToriis(projects.map(p => p.project), {
-        sql: PLAYTHROUGH_SQL(100, 0, 30),
+      // Use the streaming generator function
+      const stream = fetchToriisStream(projects.map(p => p.project), {
+        sql: PLAYTHROUGH_SQL(100000, 0, 30),
       });
 
-      if (response) {
-        // The response structure depends on fetchToriis implementation
-        const responseData = Array.isArray(response)
-          ? { items: response }
-          : response;
+      // Consume the stream and update state incrementally
+      for await (const result of stream) {
+        // Update progress
+        setLoadingProgress({
+          completed: result.metadata.completed,
+          total: result.metadata.total
+        });
 
-        const processed = processPlaythroughs(responseData as PlaythroughResponse);
-        setPlaythroughs(processed);
-        setStatus("success");
+        if (result.error) {
+          console.error(`Error fetching from ${result.endpoint}:`, result.error);
+          hasError = true;
+        } else if (result.data) {
+          // The result.data contains the SQL query response for a single endpoint
+          // It should have { endpoint, data } structure where data is the array of playthroughs
+          const endpoint = result.data.endpoint || result.endpoint;
+          const playthroughsData = result.data.data || result.data;
+
+          // Create a response structure compatible with processPlaythroughs
+          const singleResponseData: PlaythroughResponse = {
+            items: [{
+              meta: { project: endpoint },
+              playthroughs: Array.isArray(playthroughsData) ? playthroughsData : []
+            }]
+          };
+
+          const processed = processPlaythroughs(singleResponseData);
+
+          // Merge with accumulated data
+          Object.entries(processed).forEach(([project, discovers]) => {
+            accumulatedData[project] = discovers;
+          });
+
+          // Update state with accumulated results so far
+          setPlaythroughs({ ...accumulatedData });
+        }
+
+        // If this is the last result, update status
+        if (result.metadata.isLast) {
+          setStatus(hasError ? "error" : "success");
+          setIsError(hasError);
+        }
       }
     } catch (error) {
       console.error("Error fetching playthroughs:", error);
@@ -190,7 +233,6 @@ export function useDiscoversFetcher({
       setStatus("error");
     } finally {
       setIsLoading(false);
-      console.timeEnd('fetching torii sql');
     }
   }, [projects, processPlaythroughs]);
 
@@ -209,6 +251,7 @@ export function useDiscoversFetcher({
     status,
     isLoading,
     isError,
+    loadingProgress,
     refetch: fetchData,
   };
 }

@@ -37,6 +37,17 @@ export interface FetchToriiResult {
   };
 }
 
+export interface FetchToriiStreamResult {
+  endpoint: string;
+  data?: any;
+  error?: Error;
+  metadata: {
+    completed: number;
+    total: number;
+    isLast: boolean;
+  };
+}
+
 function getToriiUrl(project: string): string {
   return `https://api.cartridge.gg/x/${project}/torii`;
 }
@@ -129,4 +140,75 @@ export async function fetchToriis(endpoints: string[], options: FetchToriiOption
       failedEndpoints: failCount,
     },
   };
+}
+
+export async function* fetchToriisStream(
+  endpoints: string[], 
+  options: FetchToriiOptions
+): AsyncGenerator<FetchToriiStreamResult, void, unknown> {
+  const abortController = new AbortController();
+  const signal = abortController.signal;
+  const totalEndpoints = endpoints.length;
+  
+  if (totalEndpoints === 0) {
+    return;
+  }
+
+  // Create promises with their indices
+  const pendingPromises = endpoints.map(async (endpoint, index) => {
+    const toriiUrl = getToriiUrl(endpoint);
+    
+    try {
+      const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
+      return { index, success: true as const, data: result, endpoint };
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
+      return { index, success: false as const, error: err, endpoint };
+    }
+  });
+
+  let completed = 0;
+  const remainingIndices = new Set(Array.from({ length: totalEndpoints }, (_, i) => i));
+
+  // Process promises as they complete using Promise.race
+  while (remainingIndices.size > 0) {
+    // Create a map of active promises
+    const activePromises = Array.from(remainingIndices).map(index => 
+      pendingPromises[index].then(result => ({ ...result, promiseIndex: index }))
+    );
+
+    try {
+      // Wait for the first promise to complete
+      const result = await Promise.race(activePromises);
+      
+      // Remove completed promise from remaining set
+      remainingIndices.delete(result.promiseIndex);
+      completed++;
+      
+      // Yield the result
+      yield {
+        endpoint: result.endpoint,
+        data: result.success ? result.data : undefined,
+        error: result.success ? undefined : result.error,
+        metadata: {
+          completed,
+          total: totalEndpoints,
+          isLast: completed === totalEndpoints
+        }
+      };
+    } catch (error) {
+      // Handle unexpected errors
+      completed++;
+      yield {
+        endpoint: 'unknown',
+        error: error instanceof Error ? error : new Error(String(error)),
+        metadata: {
+          completed,
+          total: totalEndpoints,
+          isLast: completed === totalEndpoints
+        }
+      };
+      break;
+    }
+  }
 }
