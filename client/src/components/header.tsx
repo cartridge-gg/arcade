@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Connection } from "./connection";
 import ArcadeHeader from "./modules/arcade-header";
 
@@ -8,7 +8,7 @@ export const Header = ({}: HeaderProps) => {
   const navigate = useNavigate();
 
   return (
-    <ArcadeHeader onClick={() => navigate("/")}>
+    <ArcadeHeader onClick={() => navigate({ to: "/inventory", search: { filter: undefined } })}>
       <Connection />
     </ArcadeHeader>
   );

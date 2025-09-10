@@ -3,7 +3,7 @@ import { Button, GearIcon, SignOutIcon } from "@cartridge/ui";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { useCallback, useEffect, useState } from "react";
 import { UserAvatar } from "../user/avatar";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
 import { joinPaths } from "@/helpers";
@@ -14,7 +14,8 @@ export function User() {
   const { disconnect } = useDisconnect();
   const [name, setName] = useState<string>("");
 
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = { pathname: routerState.location.pathname };
   const navigate = useNavigate();
   const handleClick = useCallback(() => {
     if (!name && !address) return;
@@ -26,7 +27,7 @@ export function User() {
     pathname = pathname.replace(/\/tab\/[^/]+/, "");
     pathname = pathname.replace(/\/edition\/[^/]+/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
-    navigate(pathname);
+    navigate({ to: pathname });
   }, [name, address, navigate]);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function User() {
 
   const handleDisconnect = useCallback(() => {
     disconnect();
-    navigate("/");
+    navigate({ to: "/", search: { filter: undefined } });
   }, [disconnect, navigate]);
 
   if (!isConnected || !account || !name) return null;

@@ -5,10 +5,12 @@ import topLevelAwait from "vite-plugin-top-level-await";
 import process from "node:process";
 import mkcert from "vite-plugin-mkcert";
 import { VitePWA } from "vite-plugin-pwa";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    tanstackRouter({ target: "react" }),
     react(),
     wasm(),
     topLevelAwait(),

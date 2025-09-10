@@ -12,9 +12,8 @@ import {
   VerifiedIcon,
 } from "@cartridge/ui";
 import { ArcadeTabs } from "../modules";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
 import arcade from "@/assets/arcade-logo.png";
 import { useCollection } from "@/hooks/market-collections";
 
@@ -35,28 +34,40 @@ export function MarketPage() {
     return tab;
   }, [tab]);
 
-  const location = useLocation();
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
   const navigate = useNavigate();
+
   const handleClick = useCallback(
     (value: string) => {
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(pathname, `/tab/${value}`);
-      navigate(pathname || "/");
+      if (edition && game && collectionAddress) {
+        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        const editionName = edition.name.toLowerCase().replace(/ /g, "-") || edition.id.toString();
+        navigate({ to: `/game/${gameName}/edition/${editionName}/collection/${collectionAddress}/${value}` as any });
+      } else if (game && collectionAddress) {
+        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        navigate({ to: `/game/${gameName}/collection/${collectionAddress}/${value}` as any });
+      } else if (collectionAddress) {
+        navigate({ to: `/collection/${collectionAddress}/${value}` as any });
+      }
     },
-    [location, navigate],
+    [navigate, pathname, game, edition, collectionAddress],
   );
 
   const handleClose = useCallback(() => {
-    let pathname = location.pathname;
-    pathname = pathname.replace(/\/collection\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "/tab/marketplace");
-    if (!pathname.includes('/tab/')) {
-      pathname = `${pathname}/tab/marketplace`;
-    }
+    let newPath = location.pathname;
+    newPath = newPath.replace(/\/collection\/[^/]+.*$/, "");
+    newPath = newPath.replace(/\/tab\/[^/]+/, "/tab/marketplace");
+    if (!newPath.includes('/tab/')) {
+      newPath = `${newPath}/tab/marketplace`;
 
-    navigate(pathname || "/");
-  }, [location, navigate]);
+    }
+    if (newPath) {
+      navigate({ to: newPath as any });
+    } else {
+      navigate({ to: "/inventory" as any });
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

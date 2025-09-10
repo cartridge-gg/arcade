@@ -3,7 +3,7 @@ import { TabsContent, Thumbnail, Empty, TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Socials } from "@cartridge/arcade";
 import { ArcadeTabs } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
@@ -14,7 +14,6 @@ import { Editions } from "../editions";
 import arcade from "@/assets/arcade-logo.png";
 import { GameSocialWebsite } from "../modules/game-social";
 import { useProject } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
 import { useDevice } from "@/hooks/device";
 import { PredictScene } from "../scenes/predict";
 
@@ -24,16 +23,21 @@ export function GamePage() {
   const { isMobile } = useDevice();
   const [showMarketplace, setShowMarketplace] = useState(false);
 
-  const location = useLocation();
   const navigate = useNavigate();
   const handleClick = useCallback(
     (value: string) => {
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(pathname, `/tab/${value}`);
-      navigate(pathname || "/");
+      if (edition) {
+        const gameName = game?.name.toLowerCase().replace(/ /g, "-") || game?.id.toString();
+        const editionName = edition.name.toLowerCase().replace(/ /g, "-") || edition.id.toString();
+        navigate({ to: `/game/${gameName}/edition/${editionName}/${value}` as any });
+      } else if (game) {
+        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        navigate({ to: `/game/${gameName}/${value}` as any });
+      } else {
+        navigate({ to: `/${value}` as any });
+      }
     },
-    [location, navigate],
+    [navigate, game, edition],
   );
 
   const order: TabValue[] = useMemo(() => {

@@ -1,6 +1,5 @@
 import { useCallback, useContext, useMemo, useState } from "react";
 import { MarketplaceContext } from "@/context/marketplace";
-import { useParams } from "react-router-dom";
 import { getChecksumAddress } from "starknet";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
 
@@ -23,7 +22,9 @@ export const useMarketplace = () => {
     );
   }
 
-  const { address: contractAddress, tokenId } = useParams();
+  // These params are not used in current routing structure
+  const contractAddress = undefined as string | undefined;
+  const tokenId = undefined as string | undefined;
   const {
     chainId,
     provider,

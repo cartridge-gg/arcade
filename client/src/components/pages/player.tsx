@@ -13,7 +13,7 @@ import {
 } from "@cartridge/ui";
 import { ActivityScene } from "../scenes/activity";
 import { ArcadeTabs } from "../modules";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useUsername, useUsernames } from "@/hooks/account";
 import { useAddress } from "@/hooks/address";
 import AchievementPlayerHeader from "../modules/player-header";
@@ -24,8 +24,8 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
 import { PositionsScene } from "../scenes/positions";
+
 
 export function PlayerPage() {
   const { address, isSelf, self } = useAddress();
@@ -57,24 +57,34 @@ export function PlayerPage() {
     return tab;
   }, [tab, order]);
 
-  const location = useLocation();
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
   const navigate = useNavigate();
+  const { player, game } = useProject();
+
   const handleClick = useCallback(
     (value: string) => {
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(pathname, `/tab/${value}`);
-      navigate(pathname || "/");
+      if (game && player) {
+        const gameName = game.name.toLowerCase().replace(/ /g, "-") || game.id.toString();
+        navigate({ to: `/game/${gameName}/player/${player}/${value}` as any });
+      } else if (player) {
+        navigate({ to: `/player/${player}/${value}` as any });
+      }
     },
-    [location, navigate],
+    [navigate, player, game],
   );
 
   const handleClose = useCallback(() => {
-    let pathname = location.pathname;
-    pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
-    navigate(pathname || "/");
-  }, [location, navigate]);
+    let newPath = pathname;
+    newPath = newPath.replace(/\/player\/[^/]+.*$/, "");
+
+    // If we're in a game context, go back to the game
+    if (newPath.includes("/game/")) {
+      navigate({ to: newPath || "/inventory" as any });
+    } else {
+      navigate({ to: "/inventory" as any });
+    }
+  }, [pathname, navigate]);
 
   const { rank, points } = useMemo(() => {
     if (edition) {

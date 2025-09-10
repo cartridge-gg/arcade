@@ -1,5 +1,5 @@
 import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
@@ -7,8 +7,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 import { useMarketCollections } from "@/hooks/market-collections";
 import { Token } from "@dojoengine/torii-wasm";
 import { useProject } from "@/hooks/project";
-import { useLocation, useNavigate } from "react-router-dom";
-import { joinPaths } from "@/helpers";
+import { Link } from "@tanstack/react-router";
 import { MetadataHelper } from "@/helpers/metadata";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
@@ -82,8 +81,6 @@ function Item({
   const { orders, sales } = useMarketplace();
   const [image, setImage] = useState<string>(placeholder);
 
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const listingCount = useMemo(() => {
     const collectionOrders = orders[collection.contract_address];
@@ -161,47 +158,36 @@ function Item({
     fetchImage();
   }, [collection, project]);
 
-  const handleClick = useCallback(() => {
-    let pathname = location.pathname;
-    pathname = pathname.replace(/\/game\/[^/]+/, "");
-    pathname = pathname.replace(/\/edition\/[^/]+/, "");
-    pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
-    pathname = pathname.replace(/\/collection\/[^/]+/, "");
+  const navigationLink = useMemo(() => {
+    const gameName = game?.name.replace(/ /g, "-").toLowerCase();
+    const editionName = edition?.name.replace(/ /g, "-").toLowerCase();
     const collectionAddress = collection.contract_address.toLowerCase();
     if (game && edition) {
-      const gameName = game.name.replace(/ /g, "-").toLowerCase();
-      const editionName = edition.name.replace(/ /g, "-").toLowerCase();
-      pathname = joinPaths(
-        pathname,
-        `/game/${gameName}/edition/${editionName}/collection/${collectionAddress}`,
-      );
-    } else if (game) {
-      const gameName = game.name.replace(/ /g, "-").toLowerCase();
-      pathname = joinPaths(
-        pathname,
-        `/game/${gameName}/collection/${collectionAddress}`,
-      );
-    } else {
-      pathname = joinPaths(pathname, `/collection/${collectionAddress}`);
+      return `/game/${gameName}/edition/${editionName}/collection/${collectionAddress}`;
     }
-    navigate(pathname || "/");
-  }, [collection, location, navigate, game, edition]);
+    if (game) {
+      return `/game/${gameName}/collection/${collectionAddress}`;
+    }
+    return `/collection/${collectionAddress}`;
+
+  }, [edition, game, collection])
 
   return (
     <div className="w-full group select-none">
-      <CollectibleCard
-        title={collection.name}
-        image={image}
-        totalCount={collection.count}
-        listingCount={listingCount}
-        onClick={isSelf ? handleClick : undefined}
-        lastSale={lastSale ?? null}
-        price={price ?? null}
-        className={
-          isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"
-        }
-      />
+      <Link to={navigationLink}>
+        <CollectibleCard
+          title={collection.name}
+          image={image}
+          totalCount={collection.count}
+          listingCount={listingCount}
+          onClick={undefined}
+          lastSale={lastSale ?? null}
+          price={price ?? null}
+          className={
+            isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"
+          }
+        />
+      </Link>
     </div>
   );
 }

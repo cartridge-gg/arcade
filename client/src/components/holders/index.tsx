@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import { UserAvatar } from "../user/avatar";
 import { getChecksumAddress } from "starknet";
 import { useMarketFilters } from "@/hooks/market-filters";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/helpers";
 
 export const Holders = () => {
@@ -55,7 +55,8 @@ export const Holders = () => {
   }, [balances, usernames, total]);
 
   const navigate = useNavigate();
-  const location = useLocation();
+  const routerState = useRouterState();
+  const location = { pathname: routerState.location.pathname };
   const handleClick = useCallback(
     (nameOrAddress: string) => {
       // On click, we update the url param address to the address of the player
@@ -65,7 +66,7 @@ export const Holders = () => {
       pathname = pathname.replace(/\/collection\/[^/]+/, "");
       const player = nameOrAddress.toLowerCase();
       pathname = joinPaths(pathname, `/player/${player}`);
-      navigate(pathname || "/");
+      navigate({ to: pathname || "/" });
     },
     [location, navigate],
   );

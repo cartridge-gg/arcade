@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useArcade } from "./arcade";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearch, useRouterState } from "@tanstack/react-router";
 import { useAddressByUsernameQuery } from "@cartridge/ui/utils/api/cartridge";
 import { getChecksumAddress } from "starknet";
 
@@ -20,25 +20,36 @@ import { getChecksumAddress } from "starknet";
 export const useProject = () => {
   const { games, editions } = useArcade();
 
-  const {
-    game: gameParam,
-    edition: editionParam,
-    player: playerParam,
-    collection: collectionParam,
-    tab,
-  } = useParams<{
-    game: string;
-    edition: string;
-    player: string;
-    collection: string;
-    tab: string;
-  }>();
+  const params = useParams({ strict: false });
+  const search = useSearch({ strict: false });
+  const routerState = useRouterState();
 
-  const [searchParams, _] = useSearchParams();
+  const gameParam = params.game as string | undefined;
+  const editionParam = params.edition as string | undefined;
+  const playerParam = params.player as string | undefined;
+  const collectionParam = params.collection as string | undefined;
 
-  const filter = useMemo(() => {
-    return searchParams.get("filter");
-  }, [searchParams]);
+  // Extract tab from the route path
+  const tab = useMemo(() => {
+    const pathname = routerState.location.pathname;
+    const segments = pathname.split('/').filter(Boolean);
+    
+    // The tab is the last segment if it's one of the known tab names
+    const lastSegment = segments[segments.length - 1];
+    const knownTabs = [
+      'inventory', 'achievements', 'activity',
+      'leaderboard', 'marketplace', 'guilds', 'about',
+      'items', 'holders'
+    ];
+    
+    if (knownTabs.includes(lastSegment)) {
+      return lastSegment;
+    }
+    
+    return undefined;
+  }, [routerState.location.pathname]);
+
+  const filter = search.filter as string | undefined;
 
   const { data: playerData } = useAddressByUsernameQuery(
     {
