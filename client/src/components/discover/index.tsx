@@ -52,7 +52,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 
   const { isConnected, address } = useAccount();
   const {
-    playthroughs,
+    // playthroughs,
     usernames: activitiesUsernames,
     status: activitiesStatus,
   } = useDiscovers();
@@ -68,8 +68,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     });
   }, [editions]);
   const { events: achievements } = useAchievements();
-  const { playthroughs: pp } = useDiscoversFetcher({ projects, achievements })
-  console.log('in discover.tsx', pp)
+  const { playthroughs } = useDiscoversFetcher({ projects, achievements })
 
   const following = useMemo(() => {
     if (!address) return [];
