@@ -196,8 +196,8 @@ function Item({
         totalCount={collection.count}
         listingCount={listingCount}
         onClick={isSelf ? handleClick : undefined}
-        lastSale={lastSale ?? "---"}
-        price={price ?? "---"}
+        lastSale={lastSale ?? null}
+        price={price ?? null}
         className={
           isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"
         }
