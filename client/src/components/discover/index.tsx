@@ -11,6 +11,8 @@ import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
 import { useDiscovers } from "@/hooks/discovers";
 import { joinPaths } from "@/helpers";
+import { useDiscoversFetcher } from "@/hooks/discovers-fetcher";
+import { useAchievements } from "@/hooks/achievements";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
@@ -54,7 +56,20 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     usernames: activitiesUsernames,
     status: activitiesStatus,
   } = useDiscovers();
+
   const { games, editions, follows } = useArcade();
+
+  const projects = useMemo(() => {
+    return editions.map((edition) => {
+      return {
+        project: edition.config.project,
+        limit: 10000,
+      };
+    });
+  }, [editions]);
+  const { events: achievements } = useAchievements();
+  const { playthroughs: pp } = useDiscoversFetcher({ projects, achievements })
+  console.log('in discover.tsx', pp)
 
   const following = useMemo(() => {
     if (!address) return [];

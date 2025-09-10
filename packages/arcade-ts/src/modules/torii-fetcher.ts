@@ -41,7 +41,7 @@ function getToriiUrl(project: string): string {
   return `https://api.cartridge.gg/x/${project}/torii`;
 }
 
-async function fetchFromEndpoint(toriiUrl: string, options: FetchToriiOptions, signal: AbortSignal): Promise<any> {
+async function fetchFromEndpoint(endpoint: string, toriiUrl: string, options: FetchToriiOptions, signal: AbortSignal): Promise<any> {
   if ("client" in options && options.client) {
     const client = await new ToriiClient({
       toriiUrl,
@@ -59,25 +59,21 @@ async function fetchFromEndpoint(toriiUrl: string, options: FetchToriiOptions, s
   }
 
   if ("sql" in options && options.sql) {
-    const response = await fetch(toriiUrl, {
+    const response = await fetch(`${toriiUrl}/sql`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        sql: options.sql,
-        limit: options.pagination?.limit,
-        cursor: options.pagination?.cursor,
-      }),
+      body: options.sql,
       signal,
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}`);
+      throw new Error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}, endpoint: ${endpoint}`);
     }
 
     const data = await response.json();
-    return data;
+    return { endpoint, data };
   }
 
   throw new Error("Either 'client' or 'sql' must be provided in options");
@@ -94,7 +90,7 @@ export async function fetchToriis(endpoints: string[], options: FetchToriiOption
     const toriiUrl = getToriiUrl(endpoint);
 
     try {
-      const result = await fetchFromEndpoint(toriiUrl, options, signal);
+      const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
       return { success: true as const, data: result, endpoint };
     } catch (error) {
       const err = error instanceof Error ? error : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
