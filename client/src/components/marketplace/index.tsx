@@ -205,6 +205,7 @@ function Item({
         title={collection.name}
         image={image}
         totalCount={collection.count}
+        selectable={false}
         listingCount={listingCount}
         onClick={isSelf ? handleClick : undefined}
         lastSale={lastSale ?? null}
