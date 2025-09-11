@@ -96,7 +96,7 @@ export const useMarketFilters = () => {
             orders: Object.values(tokenOrders)
               .map((order) => order)
               .slice(0, 1),
-            owner: order.owner,
+            owner: balance?.account_address || order.owner,
           };
         })
         .sort((a, b) => b.orders.length - a.orders.length);
