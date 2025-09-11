@@ -131,7 +131,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     if (!filteredEditions) return;
     if (!Object.entries(playthroughs)) return;
     if (!Object.entries(activitiesUsernames)) return;
-    
+
     // Process only new events that haven't been seen before
     const newData = filteredEditions
       .flatMap((edition) => {
@@ -146,6 +146,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
               if (!game) return null;
               return {
                 identifier: activity.identifier,
+                project: activity.project,
                 name: username,
                 address: getChecksumAddress(activity.callerAddress),
                 Icon: <UserAvatar username={username} size="sm" />,
@@ -170,22 +171,22 @@ export function Discover({ edition }: { edition?: EditionModel }) {
         );
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
-    
+
     if (newData.length === 0) return;
-    
+
     // Update processed identifiers
     const newIdentifiers = new Set(processedIdentifiers);
     newData.forEach(event => newIdentifiers.add(event.identifier));
     setProcessedIdentifiers(newIdentifiers);
-    
+
     // Merge new events with existing ones and sort
     setEvents(prevEvents => {
       const mergedAll = [...prevEvents.all, ...newData]
         .sort((a, b) => b.timestamp - a.timestamp);
-      const mergedFollowing = mergedAll.filter((event) => 
+      const mergedFollowing = mergedAll.filter((event) =>
         following.includes(event.address)
       );
-      
+
       return {
         all: mergedAll,
         following: mergedFollowing,
