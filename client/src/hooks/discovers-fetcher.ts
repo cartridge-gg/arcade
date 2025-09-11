@@ -1,4 +1,4 @@
-import { fetchToriis, fetchToriisStream } from "@cartridge/arcade";
+import { fetchToriisStream } from "@cartridge/arcade";
 import { useState, useEffect, useCallback } from "react";
 
 export type Discover = {
@@ -240,6 +240,7 @@ export function useDiscoversFetcher({
     fetchData();
 
     const interval = setInterval(() => {
+      console.log('refetching data');
       fetchData();
     }, refetchInterval);
 
