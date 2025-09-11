@@ -101,7 +101,6 @@ export function MarketPage() {
         order={TABS_ORDER}
         defaultValue={defaultValue as TabValue}
         onTabClick={(tab: TabValue) => handleClick(tab)}
-        variant="light"
       >
         <div
           className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
