@@ -167,7 +167,7 @@ export function Items() {
       options.push("purchaseView=true");
       const path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
-      controller.openProfileTo(path);
+      controller.openProfileAt(path);
     },
     [connector, edition, chain],
   );

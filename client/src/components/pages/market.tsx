@@ -51,7 +51,7 @@ export function MarketPage() {
     let pathname = location.pathname;
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
     pathname = pathname.replace(/\/tab\/[^/]+/, "/tab/marketplace");
-    if (!pathname.includes('/tab/')) {
+    if (!pathname.includes("/tab/")) {
       pathname = `${pathname}/tab/marketplace`;
     }
 
