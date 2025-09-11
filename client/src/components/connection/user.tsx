@@ -17,13 +17,12 @@ export function User() {
   const { data: name, isLoading } = useQuery({
     queryKey: ["controller-username", account?.address],
     queryFn: async () => {
-      try {
-        const name = await (connector as ControllerConnector)?.username();
-        return name || "";
-      } catch (error) {
-        console.error(error);
-        return "";
-      }
+      const name = await (connector as ControllerConnector)?.username();
+      return name || "";
+    },
+    onError: (error) => {
+      console.error("Error fetching username:", error);
+      return "";
     },
     enabled: !!connector,
   });
