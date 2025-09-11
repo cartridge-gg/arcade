@@ -14,8 +14,8 @@ import { joinPaths } from "@/helpers";
 import { useDevice } from "@/hooks/device";
 import { useDiscoversFetcher } from "@/hooks/discovers-fetcher";
 import { useAchievements } from "@/hooks/achievements";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
-const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
 
 type Event = {
@@ -47,11 +47,13 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     all: [],
     following: [],
   });
+  const [processedIdentifiers, setProcessedIdentifiers] = useState<Set<string>>(
+    new Set()
+  );
 
-  const { isMobile } = useDevice();
-
-  const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
+  const allTabRef = useRef<HTMLDivElement>(null);
+  const followingTabRef = useRef<HTMLDivElement>(null);
 
   const { isConnected, address } = useAccount();
   const {
@@ -122,16 +124,20 @@ export function Discover({ edition }: { edition?: EditionModel }) {
       all: [],
       following: [],
     });
+    setProcessedIdentifiers(new Set());
   }, [edition]);
 
   useEffect(() => {
     if (!filteredEditions) return;
     if (!Object.entries(playthroughs)) return;
     if (!Object.entries(activitiesUsernames)) return;
-    const data = filteredEditions
+    
+    // Process only new events that haven't been seen before
+    const newData = filteredEditions
       .flatMap((edition) => {
         return (
           playthroughs[edition?.config.project]
+            ?.filter((activity) => !processedIdentifiers.has(activity.identifier))
             ?.map((activity) => {
               const username =
                 activitiesUsernames[getChecksumAddress(activity.callerAddress)];
@@ -163,15 +169,28 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             ) || []
         );
       })
-      .filter((item): item is NonNullable<typeof item> => item !== null)
-      .sort((a, b) => b.timestamp - a.timestamp);
-    if (!data) return;
-    const newEvents: Events = {
-      all: data,
-      following: data.filter((event) => following.includes(event.address)),
-    };
-    if (newEvents.all.length === 0) return;
-    setEvents(newEvents);
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+    
+    if (newData.length === 0) return;
+    
+    // Update processed identifiers
+    const newIdentifiers = new Set(processedIdentifiers);
+    newData.forEach(event => newIdentifiers.add(event.identifier));
+    setProcessedIdentifiers(newIdentifiers);
+    
+    // Merge new events with existing ones and sort
+    setEvents(prevEvents => {
+      const mergedAll = [...prevEvents.all, ...newData]
+        .sort((a, b) => b.timestamp - a.timestamp);
+      const mergedFollowing = mergedAll.filter((event) => 
+        following.includes(event.address)
+      );
+      
+      return {
+        all: mergedAll,
+        following: mergedFollowing,
+      };
+    });
   }, [
     playthroughs,
     filteredEditions,
@@ -180,36 +199,31 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     handleClick,
   ]);
 
-  const handleScroll = useCallback(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-    const height = parent.clientHeight;
-    const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-    if (newCap < cap) return;
-    setCap(newCap + 5);
-  }, [parentRef, cap, setCap]);
+  // Virtual scrolling for all events
+  const allVirtualizer = useVirtualizer({
+    count: events.all.length,
+    getScrollElement: () => allTabRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
+
+  // Virtual scrolling for following events
+  const followingVirtualizer = useVirtualizer({
+    count: events.following.length,
+    getScrollElement: () => followingTabRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
 
   useEffect(() => {
-    const parent = parentRef.current;
-    if (parent) {
-      parent.addEventListener("scroll", handleScroll);
+    // Reset scroll on filter change
+    if (allTabRef.current) {
+      allTabRef.current.scrollTop = 0;
     }
-    return () => {
-      if (parent) {
-        parent.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [cap, parentRef, handleScroll]);
-
-  useEffect(() => {
-    // Reset scroll and cap on filter change
-    const parent = parentRef.current;
-    if (!parent) return;
-    parent.scrollTop = 0;
-    const height = parent.clientHeight;
-    const cap = Math.ceil(height / ROW_HEIGHT);
-    setCap(cap + 5);
-  }, [parentRef, edition, setCap]);
+    if (followingTabRef.current) {
+      followingTabRef.current.scrollTop = 0;
+    }
+  }, [edition]);
 
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
@@ -220,27 +234,53 @@ export function Discover({ edition }: { edition?: EditionModel }) {
         <ArcadeSubTabs tabs={["all", "following"]} className="mb-3 lg:mb-4">
           <div
             ref={parentRef}
-            className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
-            style={{ scrollbarWidth: "none" }}
+            className="flex justify-center gap-8 w-full h-full"
           >
-            <TabsContent className="p-0 mt-0 grow w-full" value="all">
+            <TabsContent className="p-0 mt-0 grow w-full h-full" value="all">
               {activitiesStatus === "loading" && events.all.length === 0 ? (
                 <LoadingState />
               ) : activitiesStatus === "error" || events.all.length === 0 ? (
                 <EmptyState className={cn(isMobile && "pb-3")} />
               ) : (
-                <ArcadeDiscoveryGroup
-                  events={events.all.slice(0, cap)}
-                  rounded
-                  identifier={
-                    filteredEditions.length === 1
-                      ? filteredEditions[0].id
-                      : undefined
-                  }
-                />
+                <div
+                  ref={allTabRef}
+                  className="h-full overflow-y-auto"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  <div
+                    style={{
+                      height: `${allVirtualizer.getTotalSize()}px`,
+                      position: "relative",
+                    }}
+                  >
+                    {allVirtualizer.getVirtualItems().map((virtualItem) => (
+                      <div
+                        key={virtualItem.key}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: `${virtualItem.size}px`,
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                      >
+                        <ArcadeDiscoveryGroup
+                          events={[events.all[virtualItem.index]]}
+                          rounded
+                          identifier={
+                            filteredEditions.length === 1
+                              ? filteredEditions[0].id
+                              : undefined
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </TabsContent>
-            <TabsContent className="p-0 mt-0 grow w-full" value="following">
+            <TabsContent className="p-0 mt-0 grow w-full h-full" value="following">
               {!isConnected ? (
                 <Connect className={cn(isMobile && "pb-3")} />
               ) : activitiesStatus === "error" ||
@@ -251,15 +291,42 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 events.following.length === 0 ? (
                 <LoadingState />
               ) : (
-                <ArcadeDiscoveryGroup
-                  events={events.following.slice(0, cap)}
-                  rounded
-                  identifier={
-                    filteredEditions.length === 1
-                      ? filteredEditions[0].id
-                      : undefined
-                  }
-                />
+                <div
+                  ref={followingTabRef}
+                  className="h-full overflow-y-auto"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  <div
+                    style={{
+                      height: `${followingVirtualizer.getTotalSize()}px`,
+                      position: "relative",
+                    }}
+                  >
+                    {followingVirtualizer.getVirtualItems().map((virtualItem) => (
+                      <div
+                        key={virtualItem.key}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: `${virtualItem.size}px`,
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                      >
+                        <ArcadeDiscoveryGroup
+                          events={[events.following[virtualItem.index]]}
+                          rounded
+                          identifier={
+                            filteredEditions.length === 1
+                              ? filteredEditions[0].id
+                              : undefined
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </TabsContent>
           </div>
