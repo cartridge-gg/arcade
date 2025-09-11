@@ -71,6 +71,11 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     });
   }, [editions]);
   const { events: achievements } = useAchievements();
+
+  const filteredEditions = useMemo(() => {
+    return !edition ? editions : [edition];
+  }, [editions, edition]);
+
   const { playthroughs } = useDiscoversFetcher({ projects, achievements })
 
   const following = useMemo(() => {
@@ -80,9 +85,6 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     return [...addresses, getChecksumAddress(address)];
   }, [follows, address]);
 
-  const filteredEditions = useMemo(() => {
-    return !edition ? editions : [edition];
-  }, [editions, edition]);
 
   const location = useLocation();
   const navigate = useNavigate();
