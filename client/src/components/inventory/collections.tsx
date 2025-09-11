@@ -135,7 +135,7 @@ function Item({
     } else {
       options.push("preset=cartridge");
     }
-    const path = `inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+    const path = `account/${username}/inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
     controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
     controller.openProfileAt(path);
   }, [

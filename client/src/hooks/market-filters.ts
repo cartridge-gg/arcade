@@ -90,13 +90,21 @@ export const useMarketFilters = () => {
               orders: [],
               owner: balance?.account_address || "0x0",
             };
-          const order = Object.values(tokenOrders)[0];
+          const fileteredOrders = Object.values(tokenOrders).filter(
+            (order) =>
+              BigInt(order.owner) === BigInt(balance?.account_address || "0x0"),
+          );
+          if (!fileteredOrders || fileteredOrders.length === 0)
+            return {
+              ...token,
+              orders: [],
+              owner: balance?.account_address || "0x0",
+            };
+          const order = fileteredOrders[0];
           return {
             ...token,
-            orders: Object.values(tokenOrders)
-              .map((order) => order)
-              .slice(0, 1),
-            owner: order.owner,
+            orders: fileteredOrders.map((order) => order).slice(0, 1),
+            owner: balance?.account_address || order.owner,
           };
         })
         .sort((a, b) => b.orders.length - a.orders.length);
