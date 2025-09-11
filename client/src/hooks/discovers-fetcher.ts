@@ -240,7 +240,6 @@ export function useDiscoversFetcher({
     fetchData();
 
     const interval = setInterval(() => {
-      console.log('refetching data');
       fetchData();
     }, refetchInterval);
 

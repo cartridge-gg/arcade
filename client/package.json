@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@cartridge/arcade": "workspace:*",
-    "@cartridge/marketplace": "catalog:",
     "@cartridge/connector": "catalog:",
     "@cartridge/controller": "catalog:",
+    "@cartridge/marketplace": "catalog:",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/presets": "catalog:",
     "@cartridge/ui": "catalog:",
@@ -29,6 +29,7 @@
     "@starknet-io/types-js": "^0.8.4",
     "@starknet-react/chains": "catalog:",
     "@starknet-react/core": "catalog:",
+    "@tanstack/react-virtual": "^3.13.12",
     "chart.js": "^4.4.8",
     "chartjs-plugin-zoom": "^2.2.0",
     "class-variance-authority": "^0.7.1",
