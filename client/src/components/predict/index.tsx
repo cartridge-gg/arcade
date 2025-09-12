@@ -16,7 +16,9 @@ export const Predict = () => {
   return (
     <div className="py-3 lg:py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from(
-        [1, 2, 3, 4].map((i) => <PredictCard key={i} {...demoPredict} />),
+        [1, 2, 3, 4].map((i) => (
+          <PredictCard key={i} id={i.toString()} {...demoPredict} />
+        )),
       )}
     </div>
   );
