@@ -45,7 +45,7 @@ export const useTokens = () => {
   const credits: Token = useMemo(() => {
     return {
       balance: {
-        amount: Number(creditBalance.balance.value),
+        amount: Number(creditBalance.balance.formatted),
         value: 0,
         change: 0,
       },
