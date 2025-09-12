@@ -13,7 +13,7 @@ import { useAchievements } from "@/hooks/achievements";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { getChecksumAddress } from "starknet";
 
-const ROW_HEIGHT = 44;
+const ROW_HEIGHT = 45;
 
 export function Discover({ edition }: { edition?: EditionModel }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -22,9 +22,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 
   const { address, isConnected } = useAccount();
   const {
-    // playthroughs,
     usernames: activitiesUsernames,
-    status: activitiesStatus,
   } = useDiscovers();
 
   const { editions, follows } = useArcade();
@@ -59,6 +57,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 
   const {
     events: { all, following },
+    status: activitiesStatus,
   } = useDiscoversFetcher({
     projects,
     achievements,
@@ -109,7 +108,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             <TabsContent className="p-0 mt-0 grow w-full h-full" value="all">
               {activitiesStatus === "loading" && all.length === 0 ? (
                 <LoadingState />
-              ) : activitiesStatus === "error" || all.length === 0 ? (
+              ) : ((all.length === 0 && activitiesStatus === 'error') || all.length === 0) ? (
                 <EmptyState />
               ) : (
                 <div
