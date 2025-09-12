@@ -10,6 +10,7 @@ import {
 import { AchievementPinIcons } from "./achievement-pin-icons";
 import { cva, VariantProps } from "class-variance-authority";
 import { HTMLAttributes, useMemo, useState } from "react";
+import { useDevice } from "@/hooks/device";
 
 export interface Metadata {
   game: string;
@@ -43,7 +44,7 @@ export interface ArcadeGameHeaderProps
 }
 
 export const arcadeGameHeaderVariants = cva(
-  "group h-14 flex justify-between items-center p-3 gap-x-3 data-[clickable=true]:cursor-pointer overflow-hidden",
+  "group flex justify-between items-center gap-x-3 data-[clickable=true]:cursor-pointer overflow-hidden",
   {
     variants: {
       variant: {
@@ -51,7 +52,7 @@ export const arcadeGameHeaderVariants = cva(
         darker: "bg-background-100",
         dark: "bg-background-125",
         default:
-          "bg-background-200 hover:bg-background-300 bg-top bg-cover bg-no-repeat select-none",
+          "bg-background-200 p-3 hover:bg-background-300 bg-top bg-cover bg-no-repeat select-none",
         light: "bg-background-200",
         lighter: "bg-background-200",
         lightest: "bg-background-200",
@@ -76,6 +77,7 @@ export const ArcadeGameHeader = ({
 }: ArcadeGameHeaderProps) => {
   const [hover, setHover] = useState(false);
   const clickable = useMemo(() => !!onClick, [onClick]);
+  const { isMobile } = useDevice();
 
   const pins = useMemo(() => {
     if (!achievements) return [];
@@ -110,25 +112,27 @@ export const ArcadeGameHeader = ({
       {...props}
     >
       <div className="flex items-center gap-3 grow overflow-hidden">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <Thumbnail
-            icon={metadata.logo ?? <DojoIcon className="w-full h-full" />}
-            variant={hover && clickable ? "lighter" : "light"}
-            size="md"
-          />
+        <Thumbnail
+          icon={metadata.logo ?? <DojoIcon className="w-full h-full" />}
+          variant={
+            isMobile ? "lighter" : hover && clickable ? "lighter" : "light"
+          }
+          size={isMobile ? "lg" : "md"}
+        />
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-0.5 lg:gap-3 overflow-hidden">
           <p className="text-foreground-100 text-sm font-medium whitespace-nowrap truncate">
             {metadata.game}
           </p>
-        </div>
-        <div className="text-foreground-300 border border-background-300 group-hover:border-background-400 rounded px-1.5 py-1 flex items-center ga-0.5">
-          {metadata.certified ? (
-            <VerifiedIcon size="xs" />
-          ) : (
-            <BranchIcon size="xs" />
-          )}
-          <p className="text-xs whitespace-nowrap px-0.5 truncate">
-            {metadata.edition}
-          </p>
+          <div className="text-foreground-300 border-0 lg:border border-background-300 group-hover:border-background-400 rounded lg:px-1.5 lg:py-1 flex items-center gap-0.5">
+            {metadata.certified ? (
+              <VerifiedIcon size="xs" />
+            ) : (
+              <BranchIcon size="xs" />
+            )}
+            <p className="text-xs whitespace-nowrap px-0.5 truncate">
+              {metadata.edition}
+            </p>
+          </div>
         </div>
       </div>
       {pins.length > 0 && (
@@ -136,7 +140,7 @@ export const ArcadeGameHeader = ({
           theme={active}
           pins={pins}
           variant={variant}
-          className={className}
+          className={cn("h-8", className)}
           color={color}
         />
       )}
