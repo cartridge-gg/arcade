@@ -79,6 +79,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   }, [editions, edition]);
 
   const { playthroughs } = useDiscoversFetcher({ projects, achievements })
+  console.log(playthroughs);
 
   const following = useMemo(() => {
     if (!address) return [];
