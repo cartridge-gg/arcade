@@ -70,7 +70,9 @@ function extractUniqueIdentifiers(tokenBalances: TokenBalance[]): {
 
   const tokenIds = [
     ...new Set(
-      tokenBalances.map((item: TokenBalance) => item.token_id ?? "").filter(Boolean),
+      tokenBalances
+        .map((item: TokenBalance) => item.token_id ?? "")
+        .filter(Boolean),
     ),
   ];
 
@@ -354,7 +356,11 @@ export type UseCollectiblesResult = {
  * @returns True if the token is an NFT
  */
 function isNFT(token: TokenBalance | TokenWithMetadata): boolean {
-  return token.token_id !== null && token.token_id !== undefined && BigInt(token.balance) > 0;
+  return (
+    token.token_id !== null &&
+    token.token_id !== undefined &&
+    BigInt(token.balance) > 0
+  );
 }
 
 /**
@@ -399,7 +405,7 @@ function processNFTCollections(
     let innerMeta = undefined;
     try {
       innerMeta = JSON.parse(metadata?.metadata as string);
-    } catch (err) { }
+    } catch (err) {}
 
     // Determine collection type (could be enhanced with actual logic)
     // For now, default to ERC721
@@ -418,10 +424,18 @@ function processNFTCollections(
   return collections;
 }
 
-function getAssetImage(project: string, metadata: TokenMetadata | undefined, inner: CollectibleMetadata, firstNFT: TokenWithMetadata): string {
+function getAssetImage(
+  project: string,
+  metadata: TokenMetadata | undefined,
+  inner: CollectibleMetadata,
+  firstNFT: TokenWithMetadata,
+): string {
   const image = inner?.image;
-  image?.replace('ipfs://', 'https://gateway.pinata.cloud/ipfs/')
-  return image ?? `https://api.cartridge.gg/x/${project}/torii/static/${metadata?.contract_address}/${firstNFT.token_id}/image`
+  image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+  return (
+    image ??
+    `https://api.cartridge.gg/x/${project}/torii/static/${metadata?.contract_address}/${firstNFT.token_id}/image`
+  );
 }
 
 /**

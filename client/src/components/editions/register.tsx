@@ -171,7 +171,6 @@ export function Register({
           <Button
             size="icon"
             className="w-8 h-8 bg-background-150 hover:bg-background-200 text-foreground-300 hover:text-foreground-100"
-            disabled // Remove locally to register
           >
             <PlusIcon size="sm" variant="solid" />
           </Button>

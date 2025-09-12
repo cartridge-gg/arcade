@@ -92,7 +92,6 @@ function Item({
 }) {
   const { isSelf } = useAddress();
   const { connector } = useAccount();
-  const [username, setUsername] = useState<string>("");
 
   const edition = useMemo(() => {
     return editions.find(
@@ -108,23 +107,11 @@ function Item({
     );
   }, [chains, edition]);
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const name = await (connector as ControllerConnector)?.username();
-        if (!name) return;
-        setUsername(name);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    fetch();
-  }, [connector]);
-
   const handleClick = useCallback(async () => {
-    if (!username || !token.metadata.address) return;
+    if (!token.metadata.address) return;
     const controller = (connector as ControllerConnector)?.controller;
-    if (!controller) {
+    const username = await controller?.username();
+    if (!controller || !username) {
       console.error("Connector not initialized");
       return;
     }
@@ -141,10 +128,10 @@ function Item({
     } else {
       options.push(`preset=cartridge`);
     }
-    const path = `inventory/token/${token.metadata.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+    const path = `account/${username}/inventory/token/${token.metadata.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
     controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
-    controller.openProfileTo(path);
-  }, [token, username, connector, edition]);
+    controller.openProfileAt(path);
+  }, [token, connector, edition]);
 
   return (
     <TokenCard

@@ -3,7 +3,6 @@ import { useArcade } from "@/hooks/arcade";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useCollectibles } from "@/hooks/token-fetcher";
 
-
 export enum CollectionType {
   ERC721 = "ERC-721",
   ERC1155 = "ERC-1155",
@@ -37,8 +36,10 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
     ],
     [editions],
   );
-  const { collections: collectibles, status: ercStatus } = useCollectibles(projects, address)
-
+  const { collections: collectibles, status: ercStatus } = useCollectibles(
+    projects,
+    address,
+  );
 
   return (
     <CollectionContext.Provider

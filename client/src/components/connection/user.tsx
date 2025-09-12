@@ -1,18 +1,31 @@
 import ControllerConnector from "@cartridge/connector/controller";
-import { Button, GearIcon, SignOutIcon } from "@cartridge/ui";
+import { Button, GearIcon, SignOutIcon, Skeleton } from "@cartridge/ui";
 import { useAccount, useDisconnect } from "@starknet-react/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { UserAvatar } from "../user/avatar";
 import { useLocation, useNavigate } from "react-router-dom";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
 import { joinPaths } from "@/helpers";
+import { useQuery } from "react-query";
 
 export function User() {
   const { account, connector, address } = useAccount();
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const [name, setName] = useState<string>("");
+
+  const { data: name, isLoading } = useQuery({
+    queryKey: ["controller-username", account?.address],
+    queryFn: async () => {
+      const name = await (connector as ControllerConnector)?.username();
+      return name || "";
+    },
+    onError: (error) => {
+      console.error("Error fetching username:", error);
+      return "";
+    },
+    enabled: !!connector,
+  });
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,20 +40,7 @@ export function User() {
     pathname = pathname.replace(/\/edition\/[^/]+/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
     navigate(pathname);
-  }, [name, address, navigate]);
-
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const name = await (connector as ControllerConnector)?.username();
-        if (!name) return;
-        setName(name);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    fetch();
-  }, [connector]);
+  }, [address, navigate]);
 
   const handleSettings = useCallback(async () => {
     const controller = (connector as ControllerConnector)?.controller;
@@ -55,6 +55,27 @@ export function User() {
     disconnect();
     navigate("/");
   }, [disconnect, navigate]);
+
+  useEffect(() => {
+    if (isLoading) {
+      console.log("rendering isLoading");
+    }
+
+    if (!isConnected || !account || !name) {
+      console.log("not connected or no account or no name");
+    }
+
+    console.log("rendering user component");
+  }, [isLoading, isConnected, account, name]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-10 w-20 rounded-md" />
+        <Skeleton className="h-10 w-10 rounded-md" />
+      </div>
+    );
+  }
 
   if (!isConnected || !account || !name) return null;
 
