@@ -266,7 +266,7 @@ const LoadingState = () => {
 const EmptyState = ({ className }: { className?: string }) => {
   return (
     <Empty
-      title="It's feel lonely here"
+      title="It feels lonely in here"
       icon="discover"
       className={cn("h-full", className)}
     />

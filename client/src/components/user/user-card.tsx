@@ -44,6 +44,7 @@ export const UserCard = React.forwardRef<
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
     pathname = pathname.replace(/\/player\/[^/]+/, "");
     pathname = pathname.replace(/\/tab\/[^/]+/, "");
+    pathname = pathname.replace(/\/edition\/[^/]+/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
     navigate(pathname);
 
@@ -59,7 +60,7 @@ export const UserCard = React.forwardRef<
       type="button"
       ref={ref}
       className={cn(
-        "flex flex-col items-start p-4 gap-2 self-stretch w-full bg-background-100 lg:hover:bg-background-150 border-spacer-100 border-b border-spacer-100 lg:border lg:border-background-200 lg:hover:border-background-300 lg:rounded-xl",
+        "flex flex-col items-start p-4 gap-2 self-stretch w-full bg-background-100 lg:hover:bg-background-150 border-b border-spacer-100 lg:border lg:border-background-200 lg:hover:border-background-300 lg:rounded-xl",
         className,
       )}
       onClick={handleClick}

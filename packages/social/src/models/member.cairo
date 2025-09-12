@@ -182,7 +182,7 @@ pub impl MemberAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{MemberTrait, MemberAssert, Role};
+    use super::{MemberAssert, MemberTrait, Role};
 
     // Constants
 

@@ -122,7 +122,7 @@ export function Update({ game }: { game: GameModel }) {
             images: values.images.split("\n"),
           });
           const args = {
-            gameId: BigInt(game.id),
+            gameId: `0x${BigInt(game.id).toString(16)}`,
             color: byteArray.byteArrayFromString(values.color),
             image: byteArray.byteArrayFromString(image),
             image_data: byteArray.byteArrayFromString(""),

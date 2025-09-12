@@ -1,43 +1,43 @@
 pub mod setup {
     // Starknet imports
 
-    use starknet::ContractAddress;
-    use starknet::testing::set_contract_address;
-
-    // Dojo imports
-
-    use dojo::world::{WorldStorage, WorldStorageTrait};
-    use dojo_cairo_test::{
-        spawn_test_world, NamespaceDef, ContractDef, TestResource, ContractDefTrait,
-        WorldStorageTestTrait,
-    };
-
-    // External imports
-
-    use controller::models::{index as controller_models};
-    use provider::models::{index as provider_models};
-    use registry::models::{index as registry_models};
-    use social::models::{index as social_models};
-    use social::events::{index as social_events};
-    use achievement::events::{index as achievement_events};
+    use achievement::events::index as achievement_events;
     // use collection::collection::Collection;
 
     // Internal imports
 
     use arcade::constants::NAMESPACE;
-    use arcade::systems::registry::{Registry, IRegistryDispatcher};
-    use arcade::systems::slot::{Slot, ISlotDispatcher};
-    use arcade::systems::social::{Social, ISocialDispatcher};
-    use arcade::systems::wallet::{Wallet, IWalletDispatcher};
+    use arcade::systems::registry::{IRegistryDispatcher, Registry};
+    use arcade::systems::slot::{ISlotDispatcher, Slot};
+    use arcade::systems::social::{ISocialDispatcher, Social};
+    use arcade::systems::wallet::{IWalletDispatcher, Wallet};
+
+    // External imports
+
+    use controller::models::{index as controller_models};
+
+    // Dojo imports
+
+    use dojo::world::{WorldStorage, WorldStorageTrait};
+    use dojo_cairo_test::{
+        ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
+        spawn_test_world,
+    };
+    use provider::models::index as provider_models;
+    use registry::models::index as registry_models;
+    use social::events::index as social_events;
+    use social::models::index as social_models;
+    use starknet::ContractAddress;
+    use starknet::testing::set_contract_address;
 
     // Constant
 
     fn OWNER() -> ContractAddress {
-        starknet::contract_address_const::<'OWNER'>()
+        'OWNER'.try_into().unwrap()
     }
 
     fn PLAYER() -> ContractAddress {
-        starknet::contract_address_const::<'PLAYER'>()
+        'PLAYER'.try_into().unwrap()
     }
 
     #[derive(Copy, Drop)]
@@ -58,27 +58,27 @@ pub mod setup {
         NamespaceDef {
             namespace: NAMESPACE(),
             resources: [
-                TestResource::Model(controller_models::m_Account::TEST_CLASS_HASH),
-                TestResource::Model(controller_models::m_Controller::TEST_CLASS_HASH),
-                TestResource::Model(controller_models::m_Signer::TEST_CLASS_HASH),
-                TestResource::Model(provider_models::m_Deployment::TEST_CLASS_HASH),
-                TestResource::Model(provider_models::m_Factory::TEST_CLASS_HASH),
-                TestResource::Model(provider_models::m_Team::TEST_CLASS_HASH),
-                TestResource::Model(provider_models::m_Teammate::TEST_CLASS_HASH),
-                TestResource::Model(registry_models::m_Access::TEST_CLASS_HASH),
-                TestResource::Model(registry_models::m_Collection::TEST_CLASS_HASH),
-                TestResource::Model(registry_models::m_Game::TEST_CLASS_HASH),
-                TestResource::Model(registry_models::m_Edition::TEST_CLASS_HASH),
-                TestResource::Model(registry_models::m_Unicity::TEST_CLASS_HASH),
-                TestResource::Model(social_models::m_Alliance::TEST_CLASS_HASH),
-                TestResource::Model(social_models::m_Guild::TEST_CLASS_HASH),
-                TestResource::Model(social_models::m_Member::TEST_CLASS_HASH),
-                TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH),
-                TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH),
-                TestResource::Contract(Registry::TEST_CLASS_HASH),
-                TestResource::Contract(Slot::TEST_CLASS_HASH),
-                TestResource::Contract(Social::TEST_CLASS_HASH),
-                TestResource::Contract(Wallet::TEST_CLASS_HASH),
+                TestResource::Model(controller_models::m_Account::TEST_CLASS_HASH.into()),
+                TestResource::Model(controller_models::m_Controller::TEST_CLASS_HASH.into()),
+                TestResource::Model(controller_models::m_Signer::TEST_CLASS_HASH.into()),
+                TestResource::Model(provider_models::m_Deployment::TEST_CLASS_HASH.into()),
+                TestResource::Model(provider_models::m_Factory::TEST_CLASS_HASH.into()),
+                TestResource::Model(provider_models::m_Team::TEST_CLASS_HASH.into()),
+                TestResource::Model(provider_models::m_Teammate::TEST_CLASS_HASH.into()),
+                TestResource::Model(registry_models::m_Access::TEST_CLASS_HASH.into()),
+                TestResource::Model(registry_models::m_Collection::TEST_CLASS_HASH.into()),
+                TestResource::Model(registry_models::m_Game::TEST_CLASS_HASH.into()),
+                TestResource::Model(registry_models::m_Edition::TEST_CLASS_HASH.into()),
+                TestResource::Model(registry_models::m_Unicity::TEST_CLASS_HASH.into()),
+                TestResource::Model(social_models::m_Alliance::TEST_CLASS_HASH.into()),
+                TestResource::Model(social_models::m_Guild::TEST_CLASS_HASH.into()),
+                TestResource::Model(social_models::m_Member::TEST_CLASS_HASH.into()),
+                TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH.into()),
+                TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH.into()),
+                TestResource::Contract(Registry::TEST_CLASS_HASH.into()),
+                TestResource::Contract(Slot::TEST_CLASS_HASH.into()),
+                TestResource::Contract(Social::TEST_CLASS_HASH.into()),
+                TestResource::Contract(Wallet::TEST_CLASS_HASH.into()),
             ]
                 .span(),
         }

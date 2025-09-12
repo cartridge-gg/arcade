@@ -7,6 +7,7 @@ import {
   MarketplaceSearch,
   SearchResult,
   Separator,
+  Skeleton,
 } from "@cartridge/ui";
 import { useProject } from "@/hooks/project";
 import { useBalances, useCollection } from "@/hooks/market-collections";
@@ -137,16 +138,13 @@ export function Items() {
     setSelection([]);
   }, [setSelection]);
 
-  const handlePurchase = useCallback(
-    async (tokens: (Token & { orders: OrderModel[]; owner: string })[]) => {
-      const orders = tokens.map((token) => token.orders).flat();
-      const contractAddresses = new Set(
-        tokens.map((token) => token.contract_address),
-      );
-      if (!edition || contractAddresses.size !== 1) return;
-      const contractAddress = `0x${BigInt(Array.from(contractAddresses)[0]).toString(16)}`;
+  const handleInspect = useCallback(
+    async (token: Token & { owner: string }) => {
+      if (!edition) return;
+      const contractAddress = token.contract_address;
       const controller = (connector as ControllerConnector)?.controller;
-      if (!controller) {
+      const username = await controller?.username();
+      if (!controller || !username) {
         console.error("Connector not initialized");
         return;
       }
@@ -160,7 +158,46 @@ export function Items() {
 
       const project = edition?.config.project;
       const preset = edition?.properties.preset;
-      let options = [`ps=${project}`, "purchaseView=true"];
+      const options = [`ps=${project}`];
+      if (preset) {
+        options.push(`preset=${preset}`);
+      } else {
+        options.push("preset=cartridge");
+      }
+      options.push(`address=${getChecksumAddress(token.owner)}`);
+      options.push("purchaseView=true");
+      const path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+      controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
+      controller.openProfileAt(path);
+    },
+    [connector, edition, chain],
+  );
+
+  const handlePurchase = useCallback(
+    async (tokens: (Token & { orders: OrderModel[]; owner: string })[]) => {
+      const orders = tokens.map((token) => token.orders).flat();
+      const contractAddresses = new Set(
+        tokens.map((token) => token.contract_address),
+      );
+      if (!edition || contractAddresses.size !== 1) return;
+      const contractAddress = `0x${BigInt(Array.from(contractAddresses)[0]).toString(16)}`;
+      const controller = (connector as ControllerConnector)?.controller;
+      const username = await controller?.username();
+      if (!controller || !username) {
+        console.error("Connector not initialized");
+        return;
+      }
+
+      const entrypoints = await getEntrypoints(
+        provider.provider,
+        contractAddress,
+      );
+      const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
+      const subpath = isERC1155 ? "collectible" : "collection";
+
+      const project = edition?.config.project;
+      const preset = edition?.properties.preset;
+      const options = [`ps=${project}`];
       if (preset) {
         options.push(`preset=${preset}`);
       } else {
@@ -169,15 +206,16 @@ export function Items() {
       let path;
       if (orders.length > 1) {
         options.push(`orders=${orders.map((order) => order.id).join(",")}`);
-        path = `inventory/${subpath}/${contractAddress}/purchase${options.length > 0 ? `?${options.join("&")}` : ""}`;
+        path = `account/${username}/inventory/${subpath}/${contractAddress}/purchase${options.length > 0 ? `?${options.join("&")}` : ""}`;
       } else {
         const token = tokens[0];
         options.push(`address=${getChecksumAddress(token.owner)}`);
+        options.push("purchaseView=true");
         options.push(`tokenIds=${[token.token_id].join(",")}`);
-        path = `inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+        path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
       }
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
-      controller.openProfileTo(path);
+      controller.openProfileAt(path);
     },
     [connector, edition, chain],
   );
@@ -231,6 +269,11 @@ export function Items() {
 
   if (!collection) return <EmptyState />;
 
+  if (!tokens || tokens.length === 0) return <LoadingState />;
+
+  if (!filteredTokens || filteredTokens.length === 0)
+    return <EmptySelectionState />;
+
   return (
     <div className="p-6 flex flex-col gap-4 h-full w-full overflow-hidden">
       <div className="min-h-10 w-full flex justify-between items-center relative">
@@ -268,7 +311,7 @@ export function Items() {
       </div>
       <div
         ref={parentRef}
-        className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 select-none overflow-y-scroll h-full"
+        className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 select-none overflow-y-scroll h-full auto-rows-max"
         style={{ scrollbarWidth: "none" }}
       >
         {filteredTokens.slice(0, cap * 3).map((token) => (
@@ -279,6 +322,7 @@ export function Items() {
             selection={selection}
             setSelection={setSelection}
             handlePurchase={() => handlePurchase([token])}
+            handleInspect={() => handleInspect(token)}
           />
         ))}
       </div>
@@ -302,6 +346,7 @@ function Item({
   selection,
   setSelection,
   handlePurchase,
+  handleInspect,
 }: {
   token: Asset;
   sales: {
@@ -312,6 +357,7 @@ function Item({
   selection: Asset[];
   setSelection: (selection: Asset[]) => void;
   handlePurchase: (tokens: Asset[]) => void;
+  handleInspect: (token: Token) => void;
 }) {
   const { edition } = useProject();
   const [image, setImage] = useState<string>(placeholder);
@@ -321,12 +367,20 @@ function Item({
   }, [selection, token]);
 
   const selectable = useMemo(() => {
-    if (selection.length === 0 || selection[0].orders.length === 0)
+    if (
+      selection.length === 0 ||
+      selection[0].orders.length === 0 ||
+      !token.orders.length
+    )
       return token.orders.length > 0;
     const tokenCurrency = token.orders[0].currency;
     const selectionCurrency = selection[0].orders[0].currency;
     return tokenCurrency === selectionCurrency;
   }, [token.orders, selection]);
+
+  const openable = useMemo(() => {
+    return selection.length === 0;
+  }, [selection]);
 
   const price = useMemo(() => {
     if (!token.orders.length || token.orders.length > 1) return null;
@@ -407,14 +461,20 @@ function Item({
         image={image}
         listingCount={token.orders.length}
         onClick={
-          selectable && selection.length === 0
+          selectable && openable
             ? () => handlePurchase([token])
-            : undefined
+            : openable
+              ? () => handleInspect(token)
+              : undefined
+        }
+        className={
+          selectable || openable
+            ? "cursor-pointer"
+            : "cursor-default pointer-events-none"
         }
         onSelect={selectable ? handleSelect : undefined}
         price={price}
         lastSale={lastSale}
-        className={selectable ? "cursor-pointer" : "cursor-default"}
         selectable={selectable}
         selected={selected}
       />
@@ -422,12 +482,38 @@ function Item({
   );
 }
 
+const LoadingState = () => {
+  return (
+    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full p-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="min-h-10 w-1/5" />
+        <Skeleton className="min-h-10 w-1/3" />
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-hidden h-full">
+        {Array.from({ length: 20 }).map((_, index) => (
+          <Skeleton key={index} className="min-h-[218px] w-full" />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const EmptyState = () => {
   return (
     <Empty
       title="No related collections"
       icon="inventory"
-      className="h-full py-3 lg:py-6"
+      className="h-full p-6"
+    />
+  );
+};
+
+const EmptySelectionState = () => {
+  return (
+    <Empty
+      title="No results meet this criteria"
+      icon="inventory"
+      className="h-full p-6"
     />
   );
 };

@@ -16,5 +16,5 @@
   },
   "include": ["src/**/*.ts", "src/**/*.json", "../../contracts/manifest_*.json"],
   "skipLibCheck": true,
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist"]
 }

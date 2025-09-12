@@ -5,6 +5,8 @@ edition.workspace = true
 
 [dependencies]
 dojo.workspace = true
+dojo_macros.workspace = true
+starknet.workspace = true
 
 [dev-dependencies]
 dojo_cairo_test.workspace = true

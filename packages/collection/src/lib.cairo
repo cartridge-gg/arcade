@@ -8,8 +8,8 @@ pub mod components {
         pub mod interface;
     }
     pub mod mintable {
-        pub mod mintable;
         pub mod interface;
+        pub mod mintable;
     }
 }
 
@@ -18,6 +18,6 @@ pub mod types {
     pub mod contract_metadata;
     pub mod token_metadata;
 }
+pub mod collection;
 
 pub mod interface;
-pub mod collection;

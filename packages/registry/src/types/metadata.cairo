@@ -5,8 +5,8 @@ use graffiti::json::JsonImpl;
 // Internal imports
 
 use registry::helpers::base64::{
-    Base64Encoder, Base64Decoder, Base64UrlEncoder, Base64UrlDecoder, ByteArrayIntoArrayU8,
-    ArrayU8IntoByteArray,
+    ArrayU8IntoByteArray, Base64Decoder, Base64Encoder, Base64UrlDecoder, Base64UrlEncoder,
+    ByteArrayIntoArrayU8,
 };
 
 #[generate_trait]

@@ -2,15 +2,14 @@
 
 // Dojo imports
 
-use dojo::world::WorldStorage;
 use dojo::model::ModelStorage;
+use dojo::world::WorldStorage;
 
 // Models imports
 
 use provider::models::deployment::Deployment;
 use provider::models::factory::Factory;
-use provider::models::index::Team;
-use provider::models::index::Teammate;
+use provider::models::index::{Team, Teammate};
 
 // Structs
 

@@ -1,5 +1,5 @@
-use starknet::ContractAddress;
 use collection::types::contract_metadata::ContractMetadata;
+use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait CollectionTrait<TContractState> {

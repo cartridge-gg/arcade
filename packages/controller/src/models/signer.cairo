@@ -68,7 +68,7 @@ pub impl SignerAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{SignerTrait, SignerAssert, Method};
+    use super::{Method, SignerAssert, SignerTrait};
 
     // Constants
 

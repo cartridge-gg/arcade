@@ -128,8 +128,8 @@ export function Register({
           const args = {
             worldAddress: `0x${BigInt(values.worldAddress).toString(16)}`,
             namespace: values.namespace,
-            gameId: BigInt(game.id),
-            editionId: BigInt(edition?.id || 0),
+            gameId: `0x${BigInt(game.id).toString(16)}`,
+            editionId: `0x${BigInt(edition?.id || 0).toString(16)}`,
             project: byteArray.byteArrayFromString(values.project),
             rpc: byteArray.byteArrayFromString(values.rpc),
             policies: byteArray.byteArrayFromString(values.policies),
@@ -171,7 +171,6 @@ export function Register({
           <Button
             size="icon"
             className="w-8 h-8 bg-background-150 hover:bg-background-200 text-foreground-300 hover:text-foreground-100"
-            disabled // Remove locally to register
           >
             <PlusIcon size="sm" variant="solid" />
           </Button>
