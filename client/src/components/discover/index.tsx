@@ -1,196 +1,99 @@
 import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { EditionModel, GameModel } from "@cartridge/arcade";
+import { EditionModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
-import { getChecksumAddress } from "starknet";
+import { UserAvatar } from "../user/avatar";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
-import { useNavigate, useLocation } from "react-router-dom";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
-import { UserAvatar } from "../user/avatar";
 import { useDiscovers } from "@/hooks/discovers";
-import { joinPaths } from "@/helpers";
+import { useDiscoversFetcher } from "@/hooks/discovers-fetcher";
+import { useAchievements } from "@/hooks/achievements";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { getChecksumAddress } from "starknet";
 
-const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
 
-type Event = {
-  identifier: string;
-  name: string;
-  address: string;
-  Icon: React.ReactNode;
-  duration: number;
-  count: number;
-  actions: string[];
-  achievements: {
-    title: string;
-    icon: string;
-    points: number;
-  }[];
-  timestamp: number;
-  logo: string | undefined;
-  color: string;
-  onClick: () => void;
-};
-
-type Events = {
-  all: Event[];
-  following: Event[];
-};
-
 export function Discover({ edition }: { edition?: EditionModel }) {
-  const [events, setEvents] = useState<Events>({
-    all: [],
-    following: [],
-  });
-
-  const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
+  const allTabRef = useRef<HTMLDivElement>(null);
+  const followingTabRef = useRef<HTMLDivElement>(null);
 
-  const { isConnected, address } = useAccount();
+  const { address, isConnected } = useAccount();
   const {
-    playthroughs,
+    // playthroughs,
     usernames: activitiesUsernames,
     status: activitiesStatus,
   } = useDiscovers();
-  const { games, editions, follows } = useArcade();
 
-  const following = useMemo(() => {
-    if (!address) return [];
-    const addresses = follows[getChecksumAddress(address)] || [];
-    if (addresses.length === 0) return [];
-    return [...addresses, getChecksumAddress(address)];
-  }, [follows, address]);
+  const { editions, follows } = useArcade();
+  const editionMap = useMemo(() => {
+    const map = new Map();
+    editions.forEach((e) => map.set(e.config.project, e));
+    return map;
+  }, [editions]);
+
+  const activitiesUsernamesMap = useMemo(() => {
+    const map = new Map();
+    if (!activitiesUsernames) return map;
+    for (const [u, v] of Object.entries(activitiesUsernames)) {
+      map.set(u, v);
+    }
+    return map;
+  }, [activitiesUsernames]);
+
+  const projects = useMemo(() => {
+    return editions.map((edition) => {
+      return {
+        project: edition.config.project,
+        limit: 10000,
+      };
+    });
+  }, [editions]);
+  const { events: achievements } = useAchievements();
 
   const filteredEditions = useMemo(() => {
     return !edition ? editions : [edition];
   }, [editions, edition]);
 
-  const location = useLocation();
-  const navigate = useNavigate();
-  const handleClick = useCallback(
-    (game: GameModel, edition: EditionModel, nameOrAddress: string) => {
-      // If there are several games displayed, then clicking a card link to the game
-      let pathname = location.pathname;
-      if (filteredEditions.length > 1) {
-        pathname = pathname.replace(/\/game\/[^/]+/, "");
-        pathname = pathname.replace(/\/edition\/[^/]+/, "");
-        const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || game.id}`;
-        const editionName = `${edition?.name.toLowerCase().replace(/ /g, "-") || edition.id}`;
-        if (game.id !== 0) {
-          pathname = joinPaths(
-            `/game/${gameName}/edition/${editionName}`,
-            pathname,
-          );
-        }
-        navigate(pathname || "/");
-        return;
-      }
-      // Otherwise it links to the player
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      const player = nameOrAddress.toLowerCase();
-      pathname = joinPaths(pathname, `/player/${player}/tab/activity`);
-      navigate(pathname || "/");
-    },
-    [navigate, filteredEditions],
-  );
+  const {
+    events: { all, following },
+  } = useDiscoversFetcher({
+    projects,
+    achievements,
+    editions: editionMap,
+    activitiesUsernames: activitiesUsernamesMap,
+    editionFilter: filteredEditions.map((e) => e.config.project),
+    follows: follows[getChecksumAddress(address ?? "0x0")] || []
+  });
+
+
+  // Virtual scrolling for all events
+  const allVirtualizer = useVirtualizer({
+    count: all.length,
+    getScrollElement: () => allTabRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
+
+  // Virtual scrolling for following events
+  const followingVirtualizer = useVirtualizer({
+    count: following.length,
+    getScrollElement: () => followingTabRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
 
   useEffect(() => {
-    // Reset the events if the edition changes, meaning the user has clicked on a new game edition
-    setEvents({
-      all: [],
-      following: [],
-    });
-  }, [edition]);
-
-  useEffect(() => {
-    if (!filteredEditions) return;
-    if (!Object.entries(playthroughs)) return;
-    if (!Object.entries(activitiesUsernames)) return;
-    const data = filteredEditions
-      .flatMap((edition) => {
-        return (
-          playthroughs[edition?.config.project]
-            ?.map((activity) => {
-              const username =
-                activitiesUsernames[getChecksumAddress(activity.callerAddress)];
-              if (!username) return null;
-              const game = games.find((game) => game.id === edition.gameId);
-              if (!game) return null;
-              return {
-                identifier: activity.identifier,
-                name: username,
-                address: getChecksumAddress(activity.callerAddress),
-                Icon: <UserAvatar username={username} size="sm" />,
-                duration: activity.end - activity.start,
-                count: activity.count,
-                actions: activity.actions,
-                achievements: [...activity.achievements],
-                timestamp: Math.floor(activity.end / 1000),
-                logo: edition.properties.icon,
-                color: edition.color,
-                onClick: () =>
-                  handleClick(
-                    game,
-                    edition,
-                    username || getChecksumAddress(activity.callerAddress),
-                  ),
-              };
-            })
-            .filter(
-              (item): item is NonNullable<typeof item> => item !== null,
-            ) || []
-        );
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null)
-      .sort((a, b) => b.timestamp - a.timestamp);
-    if (!data) return;
-    const newEvents: Events = {
-      all: data,
-      following: data.filter((event) => following.includes(event.address)),
-    };
-    if (newEvents.all.length === 0) return;
-    setEvents(newEvents);
-  }, [
-    playthroughs,
-    filteredEditions,
-    activitiesUsernames,
-    following,
-    handleClick,
-  ]);
-
-  const handleScroll = useCallback(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-    const height = parent.clientHeight;
-    const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-    if (newCap < cap) return;
-    setCap(newCap + 5);
-  }, [parentRef, cap, setCap]);
-
-  useEffect(() => {
-    const parent = parentRef.current;
-    if (parent) {
-      parent.addEventListener("scroll", handleScroll);
+    // Reset scroll on filter change
+    if (allTabRef.current) {
+      allTabRef.current.scrollTop = 0;
     }
-    return () => {
-      if (parent) {
-        parent.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [cap, parentRef, handleScroll]);
-
-  useEffect(() => {
-    // Reset scroll and cap on filter change
-    const parent = parentRef.current;
-    if (!parent) return;
-    parent.scrollTop = 0;
-    const height = parent.clientHeight;
-    const cap = Math.ceil(height / ROW_HEIGHT);
-    setCap(cap + 5);
-  }, [parentRef, edition, setCap]);
+    if (followingTabRef.current) {
+      followingTabRef.current.scrollTop = 0;
+    }
+  }, [edition]);
 
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
@@ -201,46 +104,123 @@ export function Discover({ edition }: { edition?: EditionModel }) {
         <ArcadeSubTabs tabs={["all", "following"]} className="mb-3 lg:mb-4">
           <div
             ref={parentRef}
-            className="flex justify-center gap-8 w-full h-full overflow-y-scroll"
-            style={{ scrollbarWidth: "none" }}
+            className="flex justify-center gap-8 w-full h-full"
           >
-            <TabsContent className="p-0 mt-0 grow w-full" value="all">
-              {activitiesStatus === "loading" && events.all.length === 0 ? (
+            <TabsContent className="p-0 mt-0 grow w-full h-full" value="all">
+              {activitiesStatus === "loading" && all.length === 0 ? (
                 <LoadingState />
-              ) : activitiesStatus === "error" || events.all.length === 0 ? (
+              ) : activitiesStatus === "error" || all.length === 0 ? (
                 <EmptyState />
               ) : (
-                <ArcadeDiscoveryGroup
-                  events={events.all.slice(0, cap)}
-                  rounded
-                  identifier={
-                    filteredEditions.length === 1
-                      ? filteredEditions[0].id
-                      : undefined
-                  }
-                />
+                <div
+                  ref={allTabRef}
+                  className="h-full overflow-y-auto"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  <div
+                    style={{
+                      height: `${allVirtualizer.getTotalSize()}px`,
+                      position: "relative",
+                    }}
+                  >
+                    {allVirtualizer.getVirtualItems().map((virtualItem) => (
+                      <div
+                        key={virtualItem.key}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: `${virtualItem.size}px`,
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                      >
+                        <ArcadeDiscoveryGroup
+                          events={[
+                            {
+                              ...all[virtualItem.index],
+                              Icon: (
+                                <UserAvatar
+                                  username={all[virtualItem.index].name}
+                                  size="sm"
+                                />
+                              ),
+                            },
+                          ]}
+                          rounded
+                          identifier={
+                            filteredEditions.length === 1
+                              ? filteredEditions[0].id
+                              : undefined
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </TabsContent>
-            <TabsContent className="p-0 mt-0 grow w-full" value="following">
+            <TabsContent
+              className="p-0 mt-0 grow w-full h-full"
+              value="following"
+            >
               {!isConnected ? (
                 <Connect />
               ) : activitiesStatus === "error" ||
                 following.length === 0 ||
-                events.following.length === 0 ? (
+                following.length === 0 ? (
                 <EmptyState />
-              ) : activitiesStatus === "loading" &&
-                events.following.length === 0 ? (
+              ) : activitiesStatus === "loading" && following.length === 0 ? (
                 <LoadingState />
               ) : (
-                <ArcadeDiscoveryGroup
-                  events={events.following.slice(0, cap)}
-                  rounded
-                  identifier={
-                    filteredEditions.length === 1
-                      ? filteredEditions[0].id
-                      : undefined
-                  }
-                />
+                <div
+                  ref={followingTabRef}
+                  className="h-full overflow-y-auto"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  <div
+                    style={{
+                      height: `${followingVirtualizer.getTotalSize()}px`,
+                      position: "relative",
+                    }}
+                  >
+                    {followingVirtualizer
+                      .getVirtualItems()
+                      .map((virtualItem) => (
+                        <div
+                          key={virtualItem.key}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: `${virtualItem.size}px`,
+                            transform: `translateY(${virtualItem.start}px)`,
+                          }}
+                        >
+                          <ArcadeDiscoveryGroup
+                            events={[
+                              {
+                                ...following[virtualItem.index],
+                                Icon: (
+                                  <UserAvatar
+                                    username={following[virtualItem.index].name}
+                                    size="sm"
+                                  />
+                                ),
+                              },
+                            ]}
+                            rounded
+                            identifier={
+                              filteredEditions.length === 1
+                                ? filteredEditions[0].id
+                                : undefined
+                            }
+                          />
+                        </div>
+                      ))}
+                  </div>
+                </div>
               )}
             </TabsContent>
           </div>
