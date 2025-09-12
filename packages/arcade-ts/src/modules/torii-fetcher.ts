@@ -52,7 +52,12 @@ function getToriiUrl(project: string): string {
   return `https://api.cartridge.gg/x/${project}/torii`;
 }
 
-async function fetchFromEndpoint(endpoint: string, toriiUrl: string, options: FetchToriiOptions, signal: AbortSignal): Promise<any> {
+async function fetchFromEndpoint(
+  endpoint: string,
+  toriiUrl: string,
+  options: FetchToriiOptions,
+  signal: AbortSignal,
+): Promise<any> {
   if ("client" in options && options.client) {
     const client = await new ToriiClient({
       toriiUrl,
@@ -80,7 +85,9 @@ async function fetchFromEndpoint(endpoint: string, toriiUrl: string, options: Fe
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}, statusText: ${response.statusText}, endpoint: ${endpoint}`);
+      throw new Error(
+        `HTTP error! status: ${response.status}, statusText: ${response.statusText}, endpoint: ${endpoint}`,
+      );
     }
 
     const data = await response.json();
@@ -143,13 +150,13 @@ export async function fetchToriis(endpoints: string[], options: FetchToriiOption
 }
 
 export async function* fetchToriisStream(
-  endpoints: string[], 
-  options: FetchToriiOptions
+  endpoints: string[],
+  options: FetchToriiOptions,
 ): AsyncGenerator<FetchToriiStreamResult, void, unknown> {
   const abortController = new AbortController();
   const signal = abortController.signal;
   const totalEndpoints = endpoints.length;
-  
+
   if (totalEndpoints === 0) {
     return;
   }
@@ -157,7 +164,7 @@ export async function* fetchToriisStream(
   // Create promises with their indices
   const pendingPromises = endpoints.map(async (endpoint, index) => {
     const toriiUrl = getToriiUrl(endpoint);
-    
+
     try {
       const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
       return { index, success: true as const, data: result, endpoint };
@@ -173,18 +180,18 @@ export async function* fetchToriisStream(
   // Process promises as they complete using Promise.race
   while (remainingIndices.size > 0) {
     // Create a map of active promises
-    const activePromises = Array.from(remainingIndices).map(index => 
-      pendingPromises[index].then(result => ({ ...result, promiseIndex: index }))
+    const activePromises = Array.from(remainingIndices).map((index) =>
+      pendingPromises[index].then((result) => ({ ...result, promiseIndex: index })),
     );
 
     try {
       // Wait for the first promise to complete
       const result = await Promise.race(activePromises);
-      
+
       // Remove completed promise from remaining set
       remainingIndices.delete(result.promiseIndex);
       completed++;
-      
+
       // Yield the result
       yield {
         endpoint: result.endpoint,
@@ -193,20 +200,20 @@ export async function* fetchToriisStream(
         metadata: {
           completed,
           total: totalEndpoints,
-          isLast: completed === totalEndpoints
-        }
+          isLast: completed === totalEndpoints,
+        },
       };
     } catch (error) {
       // Handle unexpected errors
       completed++;
       yield {
-        endpoint: 'unknown',
+        endpoint: "unknown",
         error: error instanceof Error ? error : new Error(String(error)),
         metadata: {
           completed,
           total: totalEndpoints,
-          isLast: completed === totalEndpoints
-        }
+          isLast: completed === totalEndpoints,
+        },
       };
       break;
     }

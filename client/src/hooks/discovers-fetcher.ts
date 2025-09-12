@@ -57,12 +57,17 @@ interface UseDiscoversFetcherParams {
   achievements: { [key: string]: AchievementEvent[] };
   editions: Map<string, EditionModel>;
   activitiesUsernames: Map<string, string | undefined>;
-  editionFilter: string[],
+  editionFilter: string[];
+  follows: string[];
   refetchInterval?: number;
 }
 
 // Optimized query with configurable lookback period
-const PLAYTHROUGH_SQL = (limit: number = 10000, offset: number = 0, daysBack: number = 30) => `
+const PLAYTHROUGH_SQL = (
+  limit: number = 10000,
+  offset: number = 0,
+  daysBack: number = 30,
+) => `
 				WITH recent_actions AS (
 					SELECT
 						tc.caller_address,
@@ -127,9 +132,13 @@ export function useDiscoversFetcher({
   editions,
   activitiesUsernames,
   editionFilter,
+  follows,
   refetchInterval = 30000,
 }: UseDiscoversFetcherParams) {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState<{
@@ -137,10 +146,9 @@ export function useDiscoversFetcher({
     total: number;
   }>({ completed: 0, total: 0 });
 
-  const all = useEventStore(s => s.getAllEvents);
-  const following = useEventStore(s => s.getFollowingEvents);
-  const setEvents = useEventStore(s => s.addEvents);
-
+  const all = useEventStore((s) => s.getAllEvents);
+  const following = useEventStore((s) => s.getFollowingEvents);
+  const setEvents = useEventStore((s) => s.addEvents);
 
   const processPlaythroughs = useCallback(
     (response: PlaythroughResponse) => {
@@ -171,9 +179,10 @@ export function useDiscoversFetcher({
             start: start,
             end: end,
             count: playthrough.actionCount,
-            actions: typeof playthrough.entrypoints === 'string'
-              ? playthrough.entrypoints.slice(1, -1).split(",")
-              : [],
+            actions:
+              typeof playthrough.entrypoints === "string"
+                ? playthrough.entrypoints.slice(1, -1).split(",")
+                : [],
             achievements: playerAchievements,
             name: username || "",
             address: player,
@@ -187,75 +196,92 @@ export function useDiscoversFetcher({
 
       return newDiscovers;
     },
-    [achievements]
+    [achievements],
   );
 
-  const fetchData = useCallback(async () => {
-    if (projects.length === 0) return;
+  const fetchData = useCallback(
+    async (daysBack: number) => {
+      if (projects.length === 0) return;
 
-    setIsLoading(true);
-    setStatus("loading");
-    setIsError(false);
-    setLoadingProgress({ completed: 0, total: projects.length });
+      setIsLoading(true);
+      setStatus("loading");
+      setIsError(false);
+      setLoadingProgress({ completed: 0, total: projects.length });
 
-    let hasError = false;
+      let hasError = false;
 
-    try {
-      // Use the streaming generator function
-      const stream = fetchToriisStream(projects.map(p => p.project), {
-        sql: PLAYTHROUGH_SQL(100000, 0, 30),
-      });
+      try {
+        // Use the streaming generator function
+        const stream = fetchToriisStream(
+          projects.map((p) => p.project),
+          {
+            sql: PLAYTHROUGH_SQL(100000, 0, daysBack),
+          },
+        );
 
-      // Consume the stream and update state incrementally
-      for await (const result of stream) {
-        // Update progress
-        setLoadingProgress({
-          completed: result.metadata.completed,
-          total: result.metadata.total
-        });
+        // Consume the stream and update state incrementally
+        for await (const result of stream) {
+          // Update progress
+          setLoadingProgress({
+            completed: result.metadata.completed,
+            total: result.metadata.total,
+          });
 
-        if (result.error) {
-          console.error(`Error fetching from ${result.endpoint}:`, result.error);
-          hasError = true;
-        } else if (result.data) {
-          // The result.data contains the SQL query response for a single endpoint
-          // It should have { endpoint, data } structure where data is the array of playthroughs
-          const endpoint = result.data.endpoint || result.endpoint;
-          const playthroughsData = result.data.data || result.data;
+          if (result.error) {
+            console.error(
+              `Error fetching from ${result.endpoint}:`,
+              result.error,
+            );
+            hasError = true;
+          } else if (result.data) {
+            // The result.data contains the SQL query response for a single endpoint
+            // It should have { endpoint, data } structure where data is the array of playthroughs
+            const endpoint = result.data.endpoint || result.endpoint;
+            const playthroughsData = result.data.data || result.data;
 
-          // Create a response structure compatible with processPlaythroughs
-          const singleResponseData: PlaythroughResponse = {
-            items: [{
-              meta: { project: endpoint },
-              playthroughs: Array.isArray(playthroughsData) ? playthroughsData : []
-            }]
-          };
+            // Create a response structure compatible with processPlaythroughs
+            const singleResponseData: PlaythroughResponse = {
+              items: [
+                {
+                  meta: { project: endpoint },
+                  playthroughs: Array.isArray(playthroughsData)
+                    ? playthroughsData
+                    : [],
+                },
+              ],
+            };
 
-          // Update state with accumulated results so far
-          // setPlaythroughs({ ...accumulatedData });
-          setEvents({ ...processPlaythroughs(singleResponseData) })
+            // Update state with accumulated results so far
+            // setPlaythroughs({ ...accumulatedData });
+            setEvents({ ...processPlaythroughs(singleResponseData) });
+          }
+
+          // If this is the last result, update status
+          if (result.metadata.isLast) {
+            setStatus(hasError ? "error" : "success");
+            setIsError(hasError);
+          }
         }
-
-        // If this is the last result, update status
-        if (result.metadata.isLast) {
-          setStatus(hasError ? "error" : "success");
-          setIsError(hasError);
-        }
+      } catch (error) {
+        console.error("Error fetching playthroughs:", error);
+        setIsError(true);
+        setStatus("error");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching playthroughs:", error);
-      setIsError(true);
-      setStatus("error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [projects, processPlaythroughs, setEvents]);
+    },
+    [projects, processPlaythroughs, setEvents],
+  );
 
   useEffect(() => {
-    fetchData();
+    // Quick load: 1 day of data for immediate display
+    fetchData(1);
+    // Background load: Full 30 days of historical data
+    fetchData(30);
+
 
     const interval = setInterval(() => {
-      fetchData();
+      fetchData(1);
     }, refetchInterval);
 
     return () => clearInterval(interval);
@@ -264,7 +290,7 @@ export function useDiscoversFetcher({
   return {
     events: {
       all: all(editionFilter),
-      following: following(editionFilter, ['']),
+      following: following(editionFilter, follows),
     },
     status,
     isLoading,
