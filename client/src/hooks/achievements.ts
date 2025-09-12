@@ -72,9 +72,12 @@ export const useAchievements = () => {
   };
 };
 
-export function usePlayerStats() {
-  const { address } = useAddress();
+export function usePlayerStats(address?: string) {
+  // show address for current opened player
+  const { address: userAddress } = useAddress();
   const { achievements, globals } = useAchievements();
+
+  const _address = address || userAddress;
 
   const { completed, total } = useMemo(() => {
     let completed = 0;
@@ -89,13 +92,13 @@ export function usePlayerStats() {
   const { rank, earnings } = useMemo(() => {
     const rank =
       globals.findIndex(
-        (player) => BigInt(player.address || 0) === BigInt(address),
+        (player) => BigInt(player.address || 0) === BigInt(_address),
       ) + 1;
     const earnings =
-      globals.find((player) => BigInt(player.address || 0) === BigInt(address))
+      globals.find((player) => BigInt(player.address || 0) === BigInt(_address))
         ?.earnings || 0;
     return { rank, earnings };
-  }, [address, globals]);
+  }, [_address, globals]);
 
   return { completed, total, rank, earnings };
 }

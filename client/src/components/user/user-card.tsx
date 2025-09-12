@@ -1,40 +1,40 @@
-import { useAddress } from "@/hooks/address";
 import { cn } from "@/lib/utils";
 import React, { useCallback, useMemo } from "react";
 import { UserAvatar } from "./avatar";
 import { useUsername } from "@/hooks/account";
 import { AchievementPlayerBadge, SparklesIcon } from "@cartridge/ui";
-import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
-import { useArcade } from "@/hooks/arcade";
-import { useProject } from "@/hooks/project";
+import { usePlayerStats } from "@/hooks/achievements";
 import { joinPaths } from "@/helpers";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSidebar } from "@/hooks/sidebar";
+import { useAccount } from "@starknet-react/core";
 
 export const UserCard = React.forwardRef<
   HTMLButtonElement,
   React.HTMLAttributes<HTMLButtonElement>
->(({ className, ...props }, ref) => {
-  const { address } = useAddress();
+>((props, ref) => {
+  const { account } = useAccount();
+
+  if (!account) return null;
+
+  return <UserCardInner ref={ref} {...props} address={account.address} />;
+});
+
+const UserCardInner = (
+  props: React.ComponentPropsWithRef<typeof UserCard> & { address: string },
+) => {
+  const { className, address, ref, ...rest } = props;
+
   const { username } = useUsername({ address });
-  const { editions } = useArcade();
-  const { game } = useProject();
   const location = useLocation();
   const navigate = useNavigate();
   const { close } = useSidebar();
-
-  const projects = useMemo(() => {
-    return editions
-      .filter((edition) => edition.gameId === game?.id)
-      .map((edition) => edition.config.project);
-  }, [editions, game]);
 
   const Icon = useMemo(() => {
     return <UserAvatar username={username} className="h-full w-full" />;
   }, [username]);
 
-  const { earnings: totalEarnings } = usePlayerStats();
-  const { earnings: gameEarnings } = usePlayerGameStats(projects);
+  const { earnings: totalEarnings } = usePlayerStats(address);
 
   const handleClick = useCallback(() => {
     if (!username && !address) return;
@@ -52,8 +52,6 @@ export const UserCard = React.forwardRef<
     close();
   }, [address, navigate, username, location, close]);
 
-  if (!username) return null;
-
   return (
     <button
       id="user-card"
@@ -64,7 +62,7 @@ export const UserCard = React.forwardRef<
         className,
       )}
       onClick={handleClick}
-      {...props}
+      {...rest}
     >
       <div
         id="player-label"
@@ -84,7 +82,7 @@ export const UserCard = React.forwardRef<
           <div className="flex items-center gap-0.5">
             <SparklesIcon variant="solid" size="xs" />
             <p className="text-xs font-medium text-foreground-100">
-              {game ? gameEarnings : totalEarnings}
+              {totalEarnings}
             </p>
           </div>
           <p className="text-xs font-normal text-foreground-200">Points</p>
@@ -92,6 +90,6 @@ export const UserCard = React.forwardRef<
       </div>
     </button>
   );
-});
+};
 
 UserCard.displayName = "UserCard";
