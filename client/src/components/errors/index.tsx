@@ -27,9 +27,9 @@ export function Wrapper({
   );
 }
 
-export function Connect() {
+export function Connect({ className }: { className?: string }) {
   return (
-    <Wrapper className="">
+    <Wrapper className={cn(className)}>
       <div className="flex flex-col justify-center items-center gap-8 h-full">
         <div className="flex flex-col justify-center items-center gap-3 w-[210px] lg:w-auto">
           <p className="text-foreground-200 text-lg/[22px] font-semibold text-center">
