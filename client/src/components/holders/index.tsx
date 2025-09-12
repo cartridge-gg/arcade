@@ -24,7 +24,8 @@ export const Holders = () => {
       (acc, balance) => acc + parseInt(balance.balance, 16),
       0,
     );
-    return { accounts: Array.from(new Set(owners)), total };
+    const test = 9;
+    return { accounts: Array.from(new Set(owners)), total, test };
   }, [balances, collectionAddress]);
 
   const { usernames } = useUsernames({ addresses: accounts });

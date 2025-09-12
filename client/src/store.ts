@@ -6,6 +6,8 @@ type State = {
 }
 type Actions = {
   addEvents: (events: { [project: string]: Discover[] }) => void
+  getAllEvents: (editions: string[]) => Discover[];
+  getFollowingEvents: (editions: string[], addr: string[]) => Discover[];
 }
 
 export const useEventStore = create<State & Actions>((set, get) => ({
@@ -18,5 +20,13 @@ export const useEventStore = create<State & Actions>((set, get) => ({
     return {
       events,
     }
-  })
+  }),
+  getAllEvents: (editions: string[]) => {
+    const events = get().events;
+    return Object.values(events).flatMap(e => e).filter(e => e.name !== undefined && editions.includes(e.project)).sort((a, b) => b.timestamp - a.timestamp);
+  },
+  getFollowingEvents: (editions: string[], addr: string[]) => {
+    const events = get().getAllEvents(editions);
+    return events.filter(e => addr.includes(e.address));
+  }
 }))

@@ -1,6 +1,7 @@
 import { useEventStore } from "@/store";
-import { fetchToriisStream } from "@cartridge/arcade";
+import { EditionModel, fetchToriisStream } from "@cartridge/arcade";
 import { useState, useEffect, useCallback } from "react";
+import { getChecksumAddress } from "starknet";
 
 export type Discover = {
   identifier: string;
@@ -15,6 +16,12 @@ export type Discover = {
     icon: string;
     points: number;
   }[];
+  name: string;
+  address: string;
+  duration: number;
+  timestamp: number;
+  logo?: string;
+  color?: string;
 };
 
 interface Project {
@@ -48,6 +55,9 @@ interface AchievementEvent {
 interface UseDiscoversFetcherParams {
   projects: Project[];
   achievements: { [key: string]: AchievementEvent[] };
+  editions: Map<string, EditionModel>;
+  activitiesUsernames: Map<string, string | undefined>;
+  editionFilter: string[],
   refetchInterval?: number;
 }
 
@@ -114,6 +124,9 @@ const PLAYTHROUGH_SQL = (limit: number = 10000, offset: number = 0, daysBack: nu
 export function useDiscoversFetcher({
   projects,
   achievements,
+  editions,
+  activitiesUsernames,
+  editionFilter,
   refetchInterval = 30000,
 }: UseDiscoversFetcherParams) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -124,7 +137,8 @@ export function useDiscoversFetcher({
     total: number;
   }>({ completed: 0, total: 0 });
 
-  const events = useEventStore(s => s.events);
+  const all = useEventStore(s => s.getAllEvents);
+  const following = useEventStore(s => s.getFollowingEvents);
   const setEvents = useEventStore(s => s.addEvents);
 
 
@@ -137,7 +151,7 @@ export function useDiscoversFetcher({
         newDiscovers[project] = item.playthroughs.map((playthrough) => {
           const start = new Date(playthrough.sessionStart).getTime();
           const end = new Date(playthrough.sessionEnd).getTime();
-          const player = playthrough.callerAddress;
+          const player = getChecksumAddress(playthrough.callerAddress);
 
           const playerAchievements = (achievements[project] || [])
             .filter((item) => {
@@ -147,11 +161,13 @@ export function useDiscoversFetcher({
               return isPlayer && inSession;
             })
             .map((item) => item.achievement);
+          const edition = editions.get(project);
+          const username = activitiesUsernames.get(player);
 
           return {
             identifier: `${project}-${playthrough.callerAddress}-${playthrough.sessionStart}`,
             project: project,
-            callerAddress: playthrough.callerAddress,
+            callerAddress: player,
             start: start,
             end: end,
             count: playthrough.actionCount,
@@ -159,6 +175,12 @@ export function useDiscoversFetcher({
               ? playthrough.entrypoints.slice(1, -1).split(",")
               : [],
             achievements: playerAchievements,
+            name: username || "",
+            address: player,
+            duration: end - start,
+            timestamp: Math.floor(end / 1000),
+            logo: edition?.properties.icon,
+            color: edition?.color || "#000000",
           };
         });
       });
@@ -176,8 +198,6 @@ export function useDiscoversFetcher({
     setIsError(false);
     setLoadingProgress({ completed: 0, total: projects.length });
 
-    // Initialize empty playthroughs to show progressive loading
-    const accumulatedData: { [key: string]: Discover[] } = {};
     let hasError = false;
 
     try {
@@ -242,7 +262,10 @@ export function useDiscoversFetcher({
   }, [fetchData, refetchInterval]);
 
   return {
-    playthroughs: events,
+    events: {
+      all: all(editionFilter),
+      following: following(editionFilter, ['']),
+    },
     status,
     isLoading,
     isError,

@@ -1,68 +1,50 @@
 import { cn, Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
+import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { EditionModel, GameModel } from "@cartridge/arcade";
+import { EditionModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
-import { getChecksumAddress } from "starknet";
+import { UserAvatar } from "../user/avatar";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
-import { useNavigate, useLocation } from "react-router-dom";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
-import { UserAvatar } from "../user/avatar";
 import { useDiscovers } from "@/hooks/discovers";
-import { joinPaths } from "@/helpers";
-import { useDevice } from "@/hooks/device";
 import { useDiscoversFetcher } from "@/hooks/discovers-fetcher";
 import { useAchievements } from "@/hooks/achievements";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 const ROW_HEIGHT = 44;
 
-type Event = {
-  identifier: string;
-  name: string;
-  address: string;
-  Icon: React.ReactNode;
-  duration: number;
-  count: number;
-  actions: string[];
-  achievements: {
-    title: string;
-    icon: string;
-    points: number;
-  }[];
-  timestamp: number;
-  logo: string | undefined;
-  color: string;
-  onClick: () => void;
-};
-
-type Events = {
-  all: Event[];
-  following: Event[];
-};
 
 export function Discover({ edition }: { edition?: EditionModel }) {
-  const [events, setEvents] = useState<Events>({
-    all: [],
-    following: [],
-  });
-  const [processedIdentifiers, setProcessedIdentifiers] = useState<Set<string>>(
-    new Set()
-  );
 
   const parentRef = useRef<HTMLDivElement>(null);
   const allTabRef = useRef<HTMLDivElement>(null);
   const followingTabRef = useRef<HTMLDivElement>(null);
 
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
   const {
     // playthroughs,
     usernames: activitiesUsernames,
     status: activitiesStatus,
   } = useDiscovers();
 
-  const { games, editions, follows } = useArcade();
+  const { editions } = useArcade();
+  const editionMap = useMemo(() => {
+    const map = new Map();
+    editions.forEach(e => map.set(e.config.project, e));
+    return map;
+  }, [editions]);
+
+  const activitiesUsernamesMap = useMemo(() => {
+    const map = new Map();
+    if (!activitiesUsernames) return map;
+    for (const [u, v] of Object.entries(activitiesUsernames)) {
+      map.set(u, v)
+    }
+    return map;
+  }, [activitiesUsernames])
 
   const projects = useMemo(() => {
     return editions.map((edition) => {
@@ -78,132 +60,102 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     return !edition ? editions : [edition];
   }, [editions, edition]);
 
-  const { playthroughs } = useDiscoversFetcher({ projects, achievements })
-  console.log(playthroughs);
+  const { events: { all, following } } = useDiscoversFetcher({ projects, achievements, editions: editionMap, activitiesUsernames: activitiesUsernamesMap, editionFilter: filteredEditions.map(e => e.config.project) })
 
-  const following = useMemo(() => {
-    if (!address) return [];
-    const addresses = follows[getChecksumAddress(address)] || [];
-    if (addresses.length === 0) return [];
-    return [...addresses, getChecksumAddress(address)];
-  }, [follows, address]);
+  // const following = useMemo(() => {
+  //   if (!address) return [];
+  //   const addresses = follows[getChecksumAddress(address)] || [];
+  //   if (addresses.length === 0) return [];
+  //   return [...addresses, getChecksumAddress(address)];
+  // }, [follows, address]);
 
 
-  const location = useLocation();
-  const navigate = useNavigate();
-  const handleClick = useCallback(
-    (game: GameModel, edition: EditionModel, nameOrAddress: string) => {
-      // If there are several games displayed, then clicking a card link to the game
-      let pathname = location.pathname;
-      if (filteredEditions.length > 1) {
-        pathname = pathname.replace(/\/game\/[^/]+/, "");
-        pathname = pathname.replace(/\/edition\/[^/]+/, "");
-        const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || game.id}`;
-        const editionName = `${edition?.name.toLowerCase().replace(/ /g, "-") || edition.id}`;
-        if (game.id !== 0) {
-          pathname = joinPaths(
-            `/game/${gameName}/edition/${editionName}`,
-            pathname,
-          );
-        }
-        navigate(pathname || "/");
-        return;
-      }
-      // Otherwise it links to the player
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      const player = nameOrAddress.toLowerCase();
-      pathname = joinPaths(pathname, `/player/${player}/tab/activity`);
-      navigate(pathname || "/");
-    },
-    [navigate, filteredEditions],
-  );
 
-  useEffect(() => {
-    // Reset the events if the edition changes, meaning the user has clicked on a new game edition
-    setEvents({
-      all: [],
-      following: [],
-    });
-    setProcessedIdentifiers(new Set());
-  }, [edition]);
+  // useEffect(() => {
+  //   // Reset the events if the edition changes, meaning the user has clicked on a new game edition
+  //   setEvents({
+  //     all: [],
+  //     following: [],
+  //   });
+  //   setProcessedIdentifiers(new Set());
+  // }, [edition]);
 
-  useEffect(() => {
-    if (!filteredEditions) return;
-    if (!Object.entries(playthroughs)) return;
-    if (!Object.entries(activitiesUsernames)) return;
-
-    // Process only new events that haven't been seen before
-    const newData = filteredEditions
-      .flatMap((edition) => {
-        return (
-          playthroughs[edition?.config.project]
-            ?.filter((activity) => !processedIdentifiers.has(activity.identifier))
-            ?.map((activity) => {
-              const username =
-                activitiesUsernames[getChecksumAddress(activity.callerAddress)];
-              if (!username) return null;
-              const game = games.find((game) => game.id === edition.gameId);
-              if (!game) return null;
-              return {
-                identifier: activity.identifier,
-                project: activity.project,
-                name: username,
-                address: getChecksumAddress(activity.callerAddress),
-                Icon: <UserAvatar username={username} size="sm" />,
-                duration: activity.end - activity.start,
-                count: activity.count,
-                actions: activity.actions,
-                achievements: [...activity.achievements],
-                timestamp: Math.floor(activity.end / 1000),
-                logo: edition.properties.icon,
-                color: edition.color,
-                onClick: () =>
-                  handleClick(
-                    game,
-                    edition,
-                    username || getChecksumAddress(activity.callerAddress),
-                  ),
-              };
-            })
-            .filter(
-              (item): item is NonNullable<typeof item> => item !== null,
-            ) || []
-        );
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null);
-
-    if (newData.length === 0) return;
-
-    // Update processed identifiers
-    const newIdentifiers = new Set(processedIdentifiers);
-    newData.forEach(event => newIdentifiers.add(event.identifier));
-    setProcessedIdentifiers(newIdentifiers);
-
-    // Merge new events with existing ones and sort
-    setEvents(prevEvents => {
-      const mergedAll = [...prevEvents.all, ...newData]
-        .sort((a, b) => b.timestamp - a.timestamp);
-      const mergedFollowing = mergedAll.filter((event) =>
-        following.includes(event.address)
-      );
-
-      return {
-        all: mergedAll,
-        following: mergedFollowing,
-      };
-    });
-  }, [
-    playthroughs,
-    filteredEditions,
-    activitiesUsernames,
-    following,
-    handleClick,
-  ]);
+  // useEffect(() => {
+  //   if (!filteredEditions) return;
+  //   if (!Object.entries(playthroughs)) return;
+  //   if (!Object.entries(activitiesUsernames)) return;
+  //
+  //   // Process only new events that haven't been seen before
+  //   const newData = filteredEditions
+  //     .flatMap((edition) => {
+  //       return (
+  //         playthroughs[edition?.config.project]
+  //           ?.filter((activity) => !processedIdentifiers.has(activity.identifier))
+  //           ?.map((activity) => {
+  //             const username =
+  //               activitiesUsernames[getChecksumAddress(activity.callerAddress)];
+  //             if (!username) return null;
+  //             const game = games.find((game) => game.id === edition.gameId);
+  //             if (!game) return null;
+  //             return {
+  //               identifier: activity.identifier,
+  //               project: activity.project,
+  //               name: username,
+  //               address: getChecksumAddress(activity.callerAddress),
+  //               Icon: <UserAvatar username={username} size="sm" />,
+  //               duration: activity.end - activity.start,
+  //               count: activity.count,
+  //               actions: activity.actions,
+  //               achievements: [...activity.achievements],
+  //               timestamp: Math.floor(activity.end / 1000),
+  //               logo: edition.properties.icon,
+  //               color: edition.color,
+  //               onClick: () =>
+  //                 handleClick(
+  //                   game,
+  //                   edition,
+  //                   username || getChecksumAddress(activity.callerAddress),
+  //                 ),
+  //             };
+  //           })
+  //           .filter(
+  //             (item): item is NonNullable<typeof item> => item !== null,
+  //           ) || []
+  //       );
+  //     })
+  //     .filter((item): item is NonNullable<typeof item> => item !== null);
+  //
+  //   if (newData.length === 0) return;
+  //
+  //   // Update processed identifiers
+  //   const newIdentifiers = new Set(processedIdentifiers);
+  //   newData.forEach(event => newIdentifiers.add(event.identifier));
+  //   setProcessedIdentifiers(newIdentifiers);
+  //
+  //   // Merge new events with existing ones and sort
+  //   setEvents(prevEvents => {
+  //     const mergedAll = [...prevEvents.all, ...newData]
+  //       .sort((a, b) => b.timestamp - a.timestamp);
+  //     const mergedFollowing = mergedAll.filter((event) =>
+  //       following.includes(event.address)
+  //     );
+  //
+  //     return {
+  //       all: mergedAll,
+  //       following: mergedFollowing,
+  //     };
+  //   });
+  // }, [
+  //   playthroughs,
+  //   filteredEditions,
+  //   activitiesUsernames,
+  //   following,
+  //   handleClick,
+  // ]);
 
   // Virtual scrolling for all events
   const allVirtualizer = useVirtualizer({
-    count: events.all.length,
+    count: all.length,
     getScrollElement: () => allTabRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 5,
@@ -211,7 +163,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 
   // Virtual scrolling for following events
   const followingVirtualizer = useVirtualizer({
-    count: events.following.length,
+    count: following.length,
     getScrollElement: () => followingTabRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 5,
@@ -239,10 +191,12 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             className="flex justify-center gap-8 w-full h-full"
           >
             <TabsContent className="p-0 mt-0 grow w-full h-full" value="all">
-              {activitiesStatus === "loading" && events.all.length === 0 ? (
+              {activitiesStatus === "loading" && all.length === 0 ? (
                 <LoadingState />
               ) : activitiesStatus === "error" || events.all.length === 0 ? (
                 <EmptyState className={cn(isMobile && "pb-3")} />
+              ) : activitiesStatus === "error" || events.all.length === 0 ? (
+                <EmptyState />
               ) : (
                 <div
                   ref={allTabRef}
@@ -268,7 +222,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                         }}
                       >
                         <ArcadeDiscoveryGroup
-                          events={[events.all[virtualItem.index]]}
+                          events={[{
+                            ...all[virtualItem.index],
+                            Icon: <UserAvatar username={all[virtualItem.index].name} size="sm" />
+                          }]}
                           rounded
                           identifier={
                             filteredEditions.length === 1
@@ -289,8 +246,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 following.length === 0 ||
                 events.following.length === 0 ? (
                 <EmptyState className={cn(isMobile && "pb-3")} />
-              ) : activitiesStatus === "loading" &&
                 events.following.length === 0 ? (
+                <EmptyState />
+              ) : activitiesStatus === "loading" &&
+                following.length === 0 ? (
                 <LoadingState />
               ) : (
                 <div
@@ -317,7 +276,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                         }}
                       >
                         <ArcadeDiscoveryGroup
-                          events={[events.following[virtualItem.index]]}
+                          events={[{
+                            ...following[virtualItem.index],
+                            Icon: <UserAvatar username={following[virtualItem.index].name} size="sm" />
+                          }]}
                           rounded
                           identifier={
                             filteredEditions.length === 1
