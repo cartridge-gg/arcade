@@ -1,3 +1,4 @@
+import { useEventStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
 import { useState, useEffect, useCallback } from "react";
 
@@ -115,9 +116,6 @@ export function useDiscoversFetcher({
   achievements,
   refetchInterval = 30000,
 }: UseDiscoversFetcherParams) {
-  const [playthroughs, setPlaythroughs] = useState<{
-    [key: string]: Discover[];
-  }>({});
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -125,6 +123,9 @@ export function useDiscoversFetcher({
     completed: number;
     total: number;
   }>({ completed: 0, total: 0 });
+
+  const events = useEventStore(s => s.events);
+  const setEvents = useEventStore(s => s.addEvents);
 
 
   const processPlaythroughs = useCallback(
@@ -210,15 +211,9 @@ export function useDiscoversFetcher({
             }]
           };
 
-          const processed = processPlaythroughs(singleResponseData);
-
-          // Merge with accumulated data
-          Object.entries(processed).forEach(([project, discovers]) => {
-            accumulatedData[project] = discovers;
-          });
-
           // Update state with accumulated results so far
-          setPlaythroughs({ ...accumulatedData });
+          // setPlaythroughs({ ...accumulatedData });
+          setEvents({ ...processPlaythroughs(singleResponseData) })
         }
 
         // If this is the last result, update status
@@ -234,7 +229,7 @@ export function useDiscoversFetcher({
     } finally {
       setIsLoading(false);
     }
-  }, [projects, processPlaythroughs]);
+  }, [projects, processPlaythroughs, setEvents]);
 
   useEffect(() => {
     fetchData();
@@ -247,7 +242,7 @@ export function useDiscoversFetcher({
   }, [fetchData, refetchInterval]);
 
   return {
-    playthroughs,
+    playthroughs: events,
     status,
     isLoading,
     isError,
