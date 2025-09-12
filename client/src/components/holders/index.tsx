@@ -1,6 +1,6 @@
 import { useUsernames } from "@/hooks/account";
 import { useProject } from "@/hooks/project";
-import { Empty } from "@cartridge/ui";
+import { Empty, Skeleton } from "@cartridge/ui";
 import { useCallback, useMemo } from "react";
 import { UserAvatar } from "../user/avatar";
 import { getChecksumAddress } from "starknet";
@@ -70,20 +70,13 @@ export const Holders = () => {
     [location, navigate],
   );
 
-  if (!balances) return <EmptyState />;
+  if (usernames.length === 0) return <LoadingState />;
+
+  if (data.length === 0) return <EmptyState />;
 
   return (
     <div className="flex flex-col pt-6 gap-4">
-      <div className="flex items-center gap-3 text-foreground-300 font-medium text-xs w-full">
-        <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-          <p className="w-8">#</p>
-          <p className="grow">Owner</p>
-        </div>
-        <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-          <p className="w-1/2 text-right"># Held</p>
-          <p className="w-1/2 text-right">% Held</p>
-        </div>
-      </div>
+      <Header />
       <div className="rounded overflow-hidden w-full mb-6">
         <div className="flex flex-col gap-px overflow-y-auto">
           {data.map((holder, index) => (
@@ -113,8 +106,36 @@ export const Holders = () => {
   );
 };
 
+const Header = () => {
+  return (
+    <div className="flex items-center gap-3 text-foreground-300 font-medium text-xs w-full">
+      <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+        <p className="w-8">#</p>
+        <p className="grow">Owner</p>
+      </div>
+      <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+        <p className="w-1/2 text-right"># Held</p>
+        <p className="w-1/2 text-right">% Held</p>
+      </div>
+    </div>
+  );
+};
+
 const EmptyState = () => {
   return (
     <Empty title="No holders" icon="guild" className="h-full py-3 lg:py-6" />
+  );
+};
+
+const LoadingState = () => {
+  return (
+    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full py-6">
+      <Header />
+      <div className="flex flex-col gap-px h-full rounded overflow-hidden">
+        {Array.from({ length: 20 }).map((_, index) => (
+          <Skeleton key={index} className="min-h-10 w-full rounded-none" />
+        ))}
+      </div>
+    </div>
   );
 };

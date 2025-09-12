@@ -131,7 +131,8 @@ export const useMarketFilters = () => {
       return (
         (token.orders.length > 0 || active === 1) &&
         (empty || isSelected(attributes)) &&
-        (!account || tokenIds.includes(token.token_id))
+        (!account || tokenIds.includes(token.token_id)) &&
+        token.owner !== "0x0"
       );
     });
   }, [tokens, active, isSelected, empty, selected, balances]);

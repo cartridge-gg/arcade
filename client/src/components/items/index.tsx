@@ -7,6 +7,7 @@ import {
   MarketplaceSearch,
   SearchResult,
   Separator,
+  Skeleton,
 } from "@cartridge/ui";
 import { useProject } from "@/hooks/project";
 import { useBalances, useCollection } from "@/hooks/market-collections";
@@ -268,6 +269,11 @@ export function Items() {
 
   if (!collection) return <EmptyState />;
 
+  if (!tokens || tokens.length === 0) return <LoadingState />;
+
+  if (!filteredTokens || filteredTokens.length === 0)
+    return <EmptySelectionState />;
+
   return (
     <div className="p-6 flex flex-col gap-4 h-full w-full overflow-hidden">
       <div className="min-h-10 w-full flex justify-between items-center relative">
@@ -476,12 +482,38 @@ function Item({
   );
 }
 
+const LoadingState = () => {
+  return (
+    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full p-6">
+      <div className="flex justify-between items-center">
+        <Skeleton className="min-h-10 w-1/5" />
+        <Skeleton className="min-h-10 w-1/3" />
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-hidden h-full">
+        {Array.from({ length: 20 }).map((_, index) => (
+          <Skeleton key={index} className="min-h-[218px] w-full" />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const EmptyState = () => {
   return (
     <Empty
       title="No related collections"
       icon="inventory"
-      className="h-full py-3 lg:py-6"
+      className="h-full p-6"
+    />
+  );
+};
+
+const EmptySelectionState = () => {
+  return (
+    <Empty
+      title="No results meet this criteria"
+      icon="inventory"
+      className="h-full p-6"
     />
   );
 };
