@@ -1,5 +1,6 @@
+import { useAccounts, useEditionsMap } from "@/collections";
 import { useEventStore } from "@/store";
-import { EditionModel, fetchToriisStream } from "@cartridge/arcade";
+import { fetchToriisStream } from "@cartridge/arcade";
 import { useState, useEffect, useCallback } from "react";
 import { getChecksumAddress } from "starknet";
 
@@ -55,8 +56,6 @@ interface AchievementEvent {
 interface UseDiscoversFetcherParams {
   projects: Project[];
   achievements: { [key: string]: AchievementEvent[] };
-  editions: Map<string, EditionModel>;
-  activitiesUsernames: Map<string, string | undefined>;
   editionFilter: string[];
   follows: string[];
   refetchInterval?: number;
@@ -129,8 +128,6 @@ const PLAYTHROUGH_SQL = (
 export function useDiscoversFetcher({
   projects,
   achievements,
-  editions,
-  activitiesUsernames,
   editionFilter,
   follows,
   refetchInterval = 30000,
@@ -149,6 +146,8 @@ export function useDiscoversFetcher({
   const all = useEventStore((s) => s.getAllEvents);
   const following = useEventStore((s) => s.getFollowingEvents);
   const setEvents = useEventStore((s) => s.addEvents);
+  const { data: activitiesUsernames } = useAccounts();
+  const editions = useEditionsMap();
 
   const processPlaythroughs = useCallback(
     (response: PlaythroughResponse) => {

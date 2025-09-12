@@ -1,49 +1,30 @@
 import { cn, Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
-import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
-import { UserAvatar } from "../user/avatar";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
-import { useDiscovers } from "@/hooks/discovers";
+import { UserAvatar } from "../user/avatar";
 import { useDiscoversFetcher } from "@/hooks/discovers-fetcher";
 import { useAchievements } from "@/hooks/achievements";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { getChecksumAddress } from "starknet";
+import { useDevice } from "@/hooks/device";
 
-const ROW_HEIGHT = 44;
+const ROW_HEIGHT = 45;
 
 export function Discover({ edition }: { edition?: EditionModel }) {
+
   const parentRef = useRef<HTMLDivElement>(null);
   const allTabRef = useRef<HTMLDivElement>(null);
   const followingTabRef = useRef<HTMLDivElement>(null);
 
   const { address, isConnected } = useAccount();
-  const {
-    // playthroughs,
-    usernames: activitiesUsernames,
-    status: activitiesStatus,
-  } = useDiscovers();
+  const isMobile = useDevice();
 
   const { editions, follows } = useArcade();
-  const editionMap = useMemo(() => {
-    const map = new Map();
-    editions.forEach((e) => map.set(e.config.project, e));
-    return map;
-  }, [editions]);
-
-  const activitiesUsernamesMap = useMemo(() => {
-    const map = new Map();
-    if (!activitiesUsernames) return map;
-    for (const [u, v] of Object.entries(activitiesUsernames)) {
-      map.set(u, v);
-    }
-    return map;
-  }, [activitiesUsernames]);
 
   const projects = useMemo(() => {
     return editions.map((edition) => {
@@ -61,11 +42,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 
   const {
     events: { all, following },
+    status: activitiesStatus,
   } = useDiscoversFetcher({
     projects,
     achievements,
-    editions: editionMap,
-    activitiesUsernames: activitiesUsernamesMap,
     editionFilter: filteredEditions.map((e) => e.config.project),
     follows: follows[getChecksumAddress(address ?? "0x0")] || []
   });
@@ -111,10 +91,8 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             <TabsContent className="p-0 mt-0 grow w-full h-full" value="all">
               {activitiesStatus === "loading" && all.length === 0 ? (
                 <LoadingState />
-              ) : activitiesStatus === "error" || events.all.length === 0 ? (
+              ) : activitiesStatus === "error" || all.length === 0 ? (
                 <EmptyState className={cn(isMobile && "pb-3")} />
-              ) : activitiesStatus === "error" || events.all.length === 0 ? (
-                <EmptyState />
               ) : (
                 <div
                   ref={allTabRef}
@@ -162,22 +140,19 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                     ))}
                   </div>
                 </div>
-              )}
-            </TabsContent>
+              )
+              }
+            </TabsContent >
             <TabsContent
               className="p-0 mt-0 grow w-full h-full"
               value="following"
             >
               {!isConnected ? (
                 <Connect className={cn(isMobile && "pb-3")} />
-              ) : activitiesStatus === "error" ||
-                following.length === 0 ||
-                events.following.length === 0 ? (
-                <EmptyState className={cn(isMobile && "pb-3")} />
-                events.following.length === 0 ? (
-                <EmptyState />
               ) : activitiesStatus === "loading" && following.length === 0 ? (
                 <LoadingState />
+              ) : activitiesStatus === "error" || following.length === 0 ? (
+                <EmptyState className={cn(isMobile && "pb-3")} />
               ) : (
                 <div
                   ref={followingTabRef}
@@ -229,10 +204,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 </div>
               )}
             </TabsContent>
-          </div>
-        </ArcadeSubTabs>
-      </div>
-    </LayoutContent>
+          </div >
+        </ArcadeSubTabs >
+      </div >
+    </LayoutContent >
   );
 }
 
