@@ -1,20 +1,20 @@
 // Starknet imports
 
-use starknet::{ContractAddress, testing};
+use registry::models::game::Game;
 
 // Internal imports
 
 use registry::store::StoreTrait;
-use registry::models::game::Game;
 use registry::tests::mocks::register::IRegisterDispatcherTrait;
-use registry::tests::setup::setup::{spawn, Systems, PLAYER};
+use registry::tests::setup::setup::{PLAYER, Systems, spawn};
+use starknet::{ContractAddress, testing};
 
 // Constants
 
 const NAMEPSACE: felt252 = 'NAMESPACE';
 
 pub fn WORLD_ADDRESS() -> ContractAddress {
-    starknet::contract_address_const::<'WORLD'>()
+    'WORLD'.try_into().unwrap()
 }
 
 // Helpers

@@ -5,7 +5,7 @@ on:
     types: [release]
 
 env:
-  WORKING_DIRECTORY: ./packages/sdk
+  WORKING_DIRECTORY: ./packages/arcade-ts
 
 jobs:
   release:
@@ -39,18 +39,18 @@ jobs:
       - name: Prepare NPM Package
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
-          npm pkg set name=@cartridge/arcade
-          npm pkg set version=${{ github.event.client_payload.version }}
-          npm pkg set files='["*.js", "*.wasm", "*.d.ts"]'
-          npm pkg set main=arcade.js
-          npm pkg set types=arcade.d.ts
-          npm pkg set repository=https://github.com/cartridge-gg/arcade
-          npm pkg set license=MIT
+          pnpm pkg set name=@cartridge/arcade
+          pnpm pkg set version=${{ github.event.client_payload.version }}
+          pnpm pkg set files='["*.js", "*.wasm", "*.d.ts"]'
+          pnpm pkg set main=arcade.js
+          pnpm pkg set types=arcade.d.ts
+          pnpm pkg set repository=https://github.com/cartridge-gg/arcade
+          pnpm pkg set license=MIT
 
       - name: Publish to NPM
         if: ${{ !github.event.client_payload.dry_run }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: npm publish --access public --tag ${{ github.event.client_payload.tag }}
+        run: pnpm publish --no-git-checks --access public --tag ${{ github.event.client_payload.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

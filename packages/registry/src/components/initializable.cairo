@@ -2,10 +2,6 @@
 pub mod InitializableComponent {
     // Starknet imports
 
-    use starknet::syscalls::deploy_syscall;
-    use starknet::{ContractAddress, ClassHash, SyscallResultTrait};
-    use starknet::{get_tx_info, get_contract_address};
-
     // Dojo imports
 
     use dojo::world::WorldStorage;
@@ -13,10 +9,14 @@ pub mod InitializableComponent {
     // Internal imports
 
     use registry::constants::{COLLECTION_ID, COLLECTION_NAME, COLLECTION_SYMBOL};
-    use registry::store::{StoreTrait};
     use registry::models::access::AccessTrait;
     use registry::models::collection::CollectionTrait;
+    use registry::store::StoreTrait;
     use registry::types::role::Role;
+    use starknet::syscalls::deploy_syscall;
+    use starknet::{
+        ClassHash, ContractAddress, SyscallResultTrait, get_contract_address, get_tx_info,
+    };
 
     // Storage
 

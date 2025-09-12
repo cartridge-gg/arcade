@@ -8,17 +8,17 @@ pub mod helpers {
 }
 
 pub mod types {
-    pub mod role;
     pub mod config;
     pub mod metadata;
+    pub mod role;
 }
 
 pub mod models {
-    pub mod index;
     pub mod access;
     pub mod collection;
-    pub mod game;
     pub mod edition;
+    pub mod game;
+    pub mod index;
     pub mod unicity;
 }
 
@@ -33,7 +33,7 @@ mod tests {
     mod test_registerable;
 
     mod mocks {
-        pub mod register;
         pub mod collection;
+        pub mod register;
     }
 }

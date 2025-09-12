@@ -1,28 +1,26 @@
 [package]
-cairo-version = "2.10.1"
-edition = "2024_07"
+cairo-version.workspace = true
+edition.workspace = true
 name = "arcade"
 version = "0.0.0"
 
 [cairo]
 sierra-replace-ids = true
 
-[scripts]
-dev = "sozo clean && sozo build --typescript && sozo migrate plan && sozo migrate apply"
-
 [dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.1" }
+dojo.workspace = true
+dojo_macros.workspace = true
+starknet.workspace = true
 achievement = { path = ".." }
 controller = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
 social = { path = ".." }
 collection = { path = ".." }
-starknet = "2.10.1"
 
 [dev-dependencies]
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.6.1" }
-cairo_test = "2.10.1"
+dojo_cairo_test.workspace = true
+cairo_test.workspace = true
 
 [[target.starknet-contract]]
 build-external-contracts = [
@@ -45,5 +43,3 @@ build-external-contracts = [
     "social::models::index::m_Member",
     "social::events::index::e_Follow",
 ]
-
-[profile.mainnet]

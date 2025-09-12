@@ -89,8 +89,7 @@ mod tests {
     // Local imports
 
     use achievement::types::task::{Task, TaskTrait};
-    use super::CreationTrait;
-    use super::MAX_POINTS;
+    use super::{CreationTrait, MAX_POINTS};
 
     // Constants
 

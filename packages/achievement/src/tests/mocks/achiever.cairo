@@ -26,12 +26,12 @@ pub trait IAchiever<TContractState> {
 pub mod Achiever {
     // Dojo imports
 
-    use dojo::world::WorldStorage;
+    use achievement::components::achievable::AchievableComponent;
 
     // Internal imports
 
     use achievement::types::task::Task;
-    use achievement::components::achievable::AchievableComponent;
+    use dojo::world::WorldStorage;
 
     // Local imports
 

@@ -2,16 +2,16 @@
 
 // Dojo imports
 
-use dojo::world::WorldStorage;
-use dojo::model::ModelStorage;
 use dojo::event::EventStorage;
+use dojo::model::ModelStorage;
+use dojo::world::WorldStorage;
+use social::events::follow::FollowTrait;
 
 // Models imports
 
 use social::models::alliance::Alliance;
 use social::models::guild::Guild;
 use social::models::member::Member;
-use social::events::follow::FollowTrait;
 
 // Structs
 

@@ -12,7 +12,9 @@ import { joinPaths } from "@/helpers";
 import { MetadataHelper } from "@/helpers/metadata";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
+import { erc20Metadata } from "@cartridge/presets";
 import placeholder from "@/assets/placeholder.svg";
+import makeBlockie from "ethereum-blockies-base64";
 
 export const Marketplace = () => {
   const { collections } = useMarketCollections();
@@ -77,7 +79,7 @@ function Item({
   games: GameModel[];
 }) {
   const { isSelf } = useAddress();
-  const { orders } = useMarketplace();
+  const { orders, sales } = useMarketplace();
   const [image, setImage] = useState<string>(placeholder);
 
   const location = useLocation();
@@ -98,6 +100,48 @@ function Item({
     );
     return Object.values(tokenOrders).length;
   }, [collection, orders]);
+
+  const lastSale = useMemo(() => {
+    if (!sales[collection.contract_address]) return undefined;
+    const orderedSales = Object.values(
+      sales[collection.contract_address],
+    ).flatMap((i) => Object.values(i).sort((a, b) => b.time - a.time));
+    const ls = orderedSales[orderedSales.length - 1];
+
+    const erc20Data = erc20Metadata.find(
+      (m) =>
+        getChecksumAddress(m.l2_token_address) ===
+        getChecksumAddress(ls.order.currency),
+    );
+    const image =
+      erc20Metadata.find(
+        (m) => getChecksumAddress(m.l2_token_address) === ls.order.currency,
+      )?.logo_url || makeBlockie(ls.order.currency);
+    const decimals = erc20Data?.decimals || 0;
+    const price = ls.order.price / 10 ** decimals;
+    return { value: price.toString(), image };
+  }, [sales, collection.contract_address]);
+
+  const price = useMemo(() => {
+    if (!orders[collection.contract_address]) return undefined;
+    const listings = Object.values(orders[collection.contract_address]).flatMap(
+      (i) => Object.values(i).sort((a, b) => a.price - b.price),
+    );
+    const cheapest = listings[listings.length - 1];
+
+    const erc20Data = erc20Metadata.find(
+      (m) =>
+        getChecksumAddress(m.l2_token_address) ===
+        getChecksumAddress(cheapest.currency),
+    );
+    const image =
+      erc20Metadata.find(
+        (m) => getChecksumAddress(m.l2_token_address) === cheapest.currency,
+      )?.logo_url || makeBlockie(cheapest.currency);
+    const decimals = erc20Data?.decimals || 0;
+    const price = cheapest.price / 10 ** decimals;
+    return { value: price.toString(), image };
+  }, [orders, collection.contract_address]);
 
   const { game, edition } = useMemo(() => {
     if (!project) return { game: null, edition: null };
@@ -161,9 +205,11 @@ function Item({
         title={collection.name}
         image={image}
         totalCount={collection.count}
+        selectable={false}
         listingCount={listingCount}
         onClick={isSelf ? handleClick : undefined}
-        lastSale="--"
+        lastSale={lastSale ?? null}
+        price={price ?? null}
         className={
           isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"
         }

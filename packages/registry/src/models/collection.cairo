@@ -1,8 +1,8 @@
 // Internal imports
 
 use core::num::traits::Zero;
-use starknet::ContractAddress;
 pub use registry::models::index::Collection;
+use starknet::ContractAddress;
 
 // Errors
 
@@ -84,7 +84,7 @@ pub impl CollectionAssert of AssertTrait {
 #[cfg(test)]
 mod tests {
     use starknet::ContractAddress;
-    use super::{CollectionTrait, CollectionAssert};
+    use super::{CollectionAssert, CollectionTrait};
 
     // Constants
 

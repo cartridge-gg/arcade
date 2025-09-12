@@ -162,7 +162,7 @@ pub impl GameAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{Game, GameTrait, GameAssert};
+    use super::{Game, GameAssert, GameTrait};
 
     // Constants
 

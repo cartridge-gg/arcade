@@ -59,7 +59,7 @@ pub impl AccountAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{AccountTrait, AccountAssert};
+    use super::{AccountAssert, AccountTrait};
 
     // Constants
 

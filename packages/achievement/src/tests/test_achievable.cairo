@@ -1,12 +1,12 @@
 // Dojo imports
 
-use dojo::world::world::Event;
+use achievement::tests::mocks::achiever::IAchieverDispatcherTrait;
+use achievement::tests::setup::setup::{clear_events, spawn_game};
 
 // Internal imports
 
 use achievement::types::task::TaskTrait;
-use achievement::tests::mocks::achiever::IAchieverDispatcherTrait;
-use achievement::tests::setup::setup::{spawn_game, clear_events};
+use dojo::world::world::Event;
 
 // Constants
 

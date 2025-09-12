@@ -2,17 +2,16 @@
 
 // Dojo imports
 
-use dojo::world::WorldStorage;
-use dojo::event::EventStorage;
-
 // Events imports
 
-use achievement::events::creation::{TrophyCreation, CreationTrait};
-use achievement::events::progress::{TrophyProgression, ProgressTrait};
-use achievement::events::pinning::{TrophyPinning, PinningTrait};
+use achievement::events::creation::{CreationTrait, TrophyCreation};
+use achievement::events::pinning::{PinningTrait, TrophyPinning};
+use achievement::events::progress::{ProgressTrait, TrophyProgression};
 // Internal imports
 
 use achievement::types::task::Task;
+use dojo::event::EventStorage;
+use dojo::world::WorldStorage;
 
 // Structs
 

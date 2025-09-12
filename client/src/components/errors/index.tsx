@@ -97,7 +97,7 @@ export function ActivityLoading() {
 export function ActivityEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
     />
   );
@@ -136,7 +136,7 @@ export function GuildsError() {
 export function GuildsEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateGuildIcon className="h-full w-full" />}
       className="py-3 lg:py-6"
     />
@@ -176,7 +176,7 @@ export function MarketplaceError() {
 export function MarketplaceEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
       className="py-3 lg:py-6"
     />
@@ -216,7 +216,7 @@ export function AboutError() {
 export function AboutEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
       className="py-3 lg:py-6"
     />
@@ -258,7 +258,7 @@ export function AchievementsLoading() {
 export function AchievementsEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
       className="py-3 lg:py-6"
     />
@@ -300,7 +300,7 @@ export function LeaderboardLoading() {
 export function LeaderboardEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateAchievementIcon className="h-full w-full" />}
       className="py-3 lg:py-6"
     />
@@ -340,7 +340,7 @@ export function InventoryLoading() {
 export function InventoryEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateInventoryIcon className="h-full w-full" />}
       className="py-3 lg:py-6"
     />
@@ -380,7 +380,7 @@ export function DiscoverLoading() {
 export function DiscoverEmpty() {
   return (
     <Error
-      title="It's lonely in here..."
+      title="It feels lonely in here..."
       Icon={<EmptyStateActivityIcon className="h-full w-full" />}
       className="pb-3 lg:pb-6"
     />

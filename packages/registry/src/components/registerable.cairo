@@ -2,28 +2,27 @@
 pub mod RegisterableComponent {
     // Starknet imports
 
-    use starknet::ContractAddress;
+    // External imports
+
+    use collection::interface::{CollectionTraitDispatcher, CollectionTraitDispatcherTrait};
 
     // Dojo imports
 
     use dojo::world::WorldStorage;
 
-    // External imports
-
-    use collection::interface::{CollectionTraitDispatcher, CollectionTraitDispatcherTrait};
-
     // Internal imports
 
     use registry::constants::COLLECTION_ID;
-    use registry::store::{Store, StoreTrait};
     use registry::models::access::{AccessAssert, AccessTrait};
-    use registry::models::game::{GameTrait, GameAssert};
-    use registry::models::edition::{EditionTrait, EditionAssert};
-    use registry::models::collection::{CollectionTrait, CollectionAssert};
-    use registry::models::unicity::{UnicityTrait, UnicityAssert};
-    use registry::types::config::{ConfigTrait};
-    use registry::types::role::Role;
+    use registry::models::collection::{CollectionAssert, CollectionTrait};
+    use registry::models::edition::{EditionAssert, EditionTrait};
+    use registry::models::game::{GameAssert, GameTrait};
+    use registry::models::unicity::{UnicityAssert, UnicityTrait};
+    use registry::store::{Store, StoreTrait};
+    use registry::types::config::ConfigTrait;
     use registry::types::metadata::Metadata;
+    use registry::types::role::Role;
+    use starknet::ContractAddress;
     // Storage
 
     #[storage]

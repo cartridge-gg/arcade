@@ -6,9 +6,9 @@ pub mod types {
 }
 
 pub mod models {
-    pub mod index;
     pub mod account;
     pub mod controller;
+    pub mod index;
     pub mod signer;
 }
 
