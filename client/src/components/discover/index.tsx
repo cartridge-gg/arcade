@@ -13,27 +13,26 @@ import { useDiscovers } from "@/hooks/discovers";
 import { useDiscoversFetcher } from "@/hooks/discovers-fetcher";
 import { useAchievements } from "@/hooks/achievements";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { getChecksumAddress } from "starknet";
 
 const ROW_HEIGHT = 44;
 
-
 export function Discover({ edition }: { edition?: EditionModel }) {
-
   const parentRef = useRef<HTMLDivElement>(null);
   const allTabRef = useRef<HTMLDivElement>(null);
   const followingTabRef = useRef<HTMLDivElement>(null);
 
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const {
     // playthroughs,
     usernames: activitiesUsernames,
     status: activitiesStatus,
   } = useDiscovers();
 
-  const { editions } = useArcade();
+  const { editions, follows } = useArcade();
   const editionMap = useMemo(() => {
     const map = new Map();
-    editions.forEach(e => map.set(e.config.project, e));
+    editions.forEach((e) => map.set(e.config.project, e));
     return map;
   }, [editions]);
 
@@ -41,10 +40,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     const map = new Map();
     if (!activitiesUsernames) return map;
     for (const [u, v] of Object.entries(activitiesUsernames)) {
-      map.set(u, v)
+      map.set(u, v);
     }
     return map;
-  }, [activitiesUsernames])
+  }, [activitiesUsernames]);
 
   const projects = useMemo(() => {
     return editions.map((edition) => {
@@ -60,98 +59,17 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     return !edition ? editions : [edition];
   }, [editions, edition]);
 
-  const { events: { all, following } } = useDiscoversFetcher({ projects, achievements, editions: editionMap, activitiesUsernames: activitiesUsernamesMap, editionFilter: filteredEditions.map(e => e.config.project) })
+  const {
+    events: { all, following },
+  } = useDiscoversFetcher({
+    projects,
+    achievements,
+    editions: editionMap,
+    activitiesUsernames: activitiesUsernamesMap,
+    editionFilter: filteredEditions.map((e) => e.config.project),
+    follows: follows[getChecksumAddress(address ?? "0x0")] || []
+  });
 
-  // const following = useMemo(() => {
-  //   if (!address) return [];
-  //   const addresses = follows[getChecksumAddress(address)] || [];
-  //   if (addresses.length === 0) return [];
-  //   return [...addresses, getChecksumAddress(address)];
-  // }, [follows, address]);
-
-
-
-  // useEffect(() => {
-  //   // Reset the events if the edition changes, meaning the user has clicked on a new game edition
-  //   setEvents({
-  //     all: [],
-  //     following: [],
-  //   });
-  //   setProcessedIdentifiers(new Set());
-  // }, [edition]);
-
-  // useEffect(() => {
-  //   if (!filteredEditions) return;
-  //   if (!Object.entries(playthroughs)) return;
-  //   if (!Object.entries(activitiesUsernames)) return;
-  //
-  //   // Process only new events that haven't been seen before
-  //   const newData = filteredEditions
-  //     .flatMap((edition) => {
-  //       return (
-  //         playthroughs[edition?.config.project]
-  //           ?.filter((activity) => !processedIdentifiers.has(activity.identifier))
-  //           ?.map((activity) => {
-  //             const username =
-  //               activitiesUsernames[getChecksumAddress(activity.callerAddress)];
-  //             if (!username) return null;
-  //             const game = games.find((game) => game.id === edition.gameId);
-  //             if (!game) return null;
-  //             return {
-  //               identifier: activity.identifier,
-  //               project: activity.project,
-  //               name: username,
-  //               address: getChecksumAddress(activity.callerAddress),
-  //               Icon: <UserAvatar username={username} size="sm" />,
-  //               duration: activity.end - activity.start,
-  //               count: activity.count,
-  //               actions: activity.actions,
-  //               achievements: [...activity.achievements],
-  //               timestamp: Math.floor(activity.end / 1000),
-  //               logo: edition.properties.icon,
-  //               color: edition.color,
-  //               onClick: () =>
-  //                 handleClick(
-  //                   game,
-  //                   edition,
-  //                   username || getChecksumAddress(activity.callerAddress),
-  //                 ),
-  //             };
-  //           })
-  //           .filter(
-  //             (item): item is NonNullable<typeof item> => item !== null,
-  //           ) || []
-  //       );
-  //     })
-  //     .filter((item): item is NonNullable<typeof item> => item !== null);
-  //
-  //   if (newData.length === 0) return;
-  //
-  //   // Update processed identifiers
-  //   const newIdentifiers = new Set(processedIdentifiers);
-  //   newData.forEach(event => newIdentifiers.add(event.identifier));
-  //   setProcessedIdentifiers(newIdentifiers);
-  //
-  //   // Merge new events with existing ones and sort
-  //   setEvents(prevEvents => {
-  //     const mergedAll = [...prevEvents.all, ...newData]
-  //       .sort((a, b) => b.timestamp - a.timestamp);
-  //     const mergedFollowing = mergedAll.filter((event) =>
-  //       following.includes(event.address)
-  //     );
-  //
-  //     return {
-  //       all: mergedAll,
-  //       following: mergedFollowing,
-  //     };
-  //   });
-  // }, [
-  //   playthroughs,
-  //   filteredEditions,
-  //   activitiesUsernames,
-  //   following,
-  //   handleClick,
-  // ]);
 
   // Virtual scrolling for all events
   const allVirtualizer = useVirtualizer({
@@ -222,10 +140,17 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                         }}
                       >
                         <ArcadeDiscoveryGroup
-                          events={[{
-                            ...all[virtualItem.index],
-                            Icon: <UserAvatar username={all[virtualItem.index].name} size="sm" />
-                          }]}
+                          events={[
+                            {
+                              ...all[virtualItem.index],
+                              Icon: (
+                                <UserAvatar
+                                  username={all[virtualItem.index].name}
+                                  size="sm"
+                                />
+                              ),
+                            },
+                          ]}
                           rounded
                           identifier={
                             filteredEditions.length === 1
@@ -239,7 +164,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 </div>
               )}
             </TabsContent>
-            <TabsContent className="p-0 mt-0 grow w-full h-full" value="following">
+            <TabsContent
+              className="p-0 mt-0 grow w-full h-full"
+              value="following"
+            >
               {!isConnected ? (
                 <Connect className={cn(isMobile && "pb-3")} />
               ) : activitiesStatus === "error" ||
@@ -248,8 +176,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 <EmptyState className={cn(isMobile && "pb-3")} />
                 events.following.length === 0 ? (
                 <EmptyState />
-              ) : activitiesStatus === "loading" &&
-                following.length === 0 ? (
+              ) : activitiesStatus === "loading" && following.length === 0 ? (
                 <LoadingState />
               ) : (
                 <div
@@ -263,32 +190,41 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                       position: "relative",
                     }}
                   >
-                    {followingVirtualizer.getVirtualItems().map((virtualItem) => (
-                      <div
-                        key={virtualItem.key}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: `${virtualItem.size}px`,
-                          transform: `translateY(${virtualItem.start}px)`,
-                        }}
-                      >
-                        <ArcadeDiscoveryGroup
-                          events={[{
-                            ...following[virtualItem.index],
-                            Icon: <UserAvatar username={following[virtualItem.index].name} size="sm" />
-                          }]}
-                          rounded
-                          identifier={
-                            filteredEditions.length === 1
-                              ? filteredEditions[0].id
-                              : undefined
-                          }
-                        />
-                      </div>
-                    ))}
+                    {followingVirtualizer
+                      .getVirtualItems()
+                      .map((virtualItem) => (
+                        <div
+                          key={virtualItem.key}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: `${virtualItem.size}px`,
+                            transform: `translateY(${virtualItem.start}px)`,
+                          }}
+                        >
+                          <ArcadeDiscoveryGroup
+                            events={[
+                              {
+                                ...following[virtualItem.index],
+                                Icon: (
+                                  <UserAvatar
+                                    username={following[virtualItem.index].name}
+                                    size="sm"
+                                  />
+                                ),
+                              },
+                            ]}
+                            rounded
+                            identifier={
+                              filteredEditions.length === 1
+                                ? filteredEditions[0].id
+                                : undefined
+                            }
+                          />
+                        </div>
+                      ))}
                   </div>
                 </div>
               )}
