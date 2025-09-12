@@ -36,7 +36,7 @@ export const Filters = () => {
         const props = Array.from(new Set(values))
           .sort()
           .filter((value) =>
-            value
+            `${value}`
               .toLowerCase()
               .includes(search[attribute]?.toLowerCase() || ""),
           );

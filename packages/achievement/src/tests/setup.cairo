@@ -1,21 +1,20 @@
 pub mod setup {
     // Starknet imports
 
-    use starknet::ContractAddress;
-    use starknet::testing::set_contract_address;
+    // Internal imports
+
+    use achievement::events::index as events;
+    use achievement::tests::mocks::achiever::{Achiever, IAchieverDispatcher};
 
     // Dojo imports
 
     use dojo::world::{WorldStorage, WorldStorageTrait};
     use dojo_cairo_test::{
-        spawn_test_world, NamespaceDef, ContractDef, TestResource, ContractDefTrait,
-        WorldStorageTestTrait,
+        ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
+        spawn_test_world,
     };
-
-    // Internal imports
-
-    use achievement::events::{index as events};
-    use achievement::tests::mocks::achiever::{Achiever, IAchieverDispatcher};
+    use starknet::ContractAddress;
+    use starknet::testing::set_contract_address;
 
     // Constant
 

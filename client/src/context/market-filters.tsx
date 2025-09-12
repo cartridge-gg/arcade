@@ -54,7 +54,7 @@ export const MarketFiltersProvider = ({
     throw new Error("MarketFiltersProvider can only be used once");
   }
 
-  const [active, setActive] = useState<number>(0);
+  const [active, setActive] = useState<number>(1);
   const [allMetadata, setAllMetadata] = useState<MetadataAttribute[]>([]);
   const [filteredMetadata, setFilteredMetadata] = useState<MetadataAttribute[]>(
     [],

@@ -2,14 +2,13 @@
 
 // Dojo imports
 
-use dojo::world::WorldStorage;
-use dojo::model::ModelStorage;
-
 // Models imports
 
 use controller::models::account::Account;
 use controller::models::controller::Controller;
 use controller::models::signer::Signer;
+use dojo::model::ModelStorage;
+use dojo::world::WorldStorage;
 
 
 // Structs

@@ -1,5 +1,5 @@
-use graffiti::json::JsonImpl;
 use collection::types::attribute::{Attribute, AttributeTrait};
+use graffiti::json::JsonImpl;
 
 #[derive(Drop, Serde)]
 pub struct ContractMetadata {
@@ -26,7 +26,7 @@ pub impl ContractMetadataImpl of ContractMetadataTrait {
                 let mut items: Array<ByteArray> = array![];
                 while let Option::Some(item) = properties.pop_front() {
                     items.append(item.jsonify());
-                };
+                }
                 Option::Some(items.span())
             },
             Option::None => Option::None,
@@ -37,7 +37,7 @@ pub impl ContractMetadataImpl of ContractMetadataTrait {
                 let mut items: Array<ByteArray> = array![];
                 while let Option::Some(item) = socials.pop_front() {
                     items.append(item.jsonify());
-                };
+                }
                 Option::Some(items.span())
             },
             Option::None => Option::None,

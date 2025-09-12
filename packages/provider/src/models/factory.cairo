@@ -53,7 +53,7 @@ pub impl FactoryAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{FactoryTrait, FactoryAssert, Service};
+    use super::{FactoryAssert, FactoryTrait, Service};
 
     // Constants
 

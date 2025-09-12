@@ -90,13 +90,21 @@ export const useMarketFilters = () => {
               orders: [],
               owner: balance?.account_address || "0x0",
             };
-          const order = Object.values(tokenOrders)[0];
+          const fileteredOrders = Object.values(tokenOrders).filter(
+            (order) =>
+              BigInt(order.owner) === BigInt(balance?.account_address || "0x0"),
+          );
+          if (!fileteredOrders || fileteredOrders.length === 0)
+            return {
+              ...token,
+              orders: [],
+              owner: balance?.account_address || "0x0",
+            };
+          const order = fileteredOrders[0];
           return {
             ...token,
-            orders: Object.values(tokenOrders)
-              .map((order) => order)
-              .slice(0, 1),
-            owner: order.owner,
+            orders: fileteredOrders.map((order) => order).slice(0, 1),
+            owner: balance?.account_address || order.owner,
           };
         })
         .sort((a, b) => b.orders.length - a.orders.length);
@@ -123,7 +131,8 @@ export const useMarketFilters = () => {
       return (
         (token.orders.length > 0 || active === 1) &&
         (empty || isSelected(attributes)) &&
-        (!account || tokenIds.includes(token.token_id))
+        (!account || tokenIds.includes(token.token_id)) &&
+        token.owner !== "0x0"
       );
     });
   }, [tokens, active, isSelected, empty, selected, balances]);

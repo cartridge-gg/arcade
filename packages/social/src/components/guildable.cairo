@@ -2,14 +2,13 @@
 pub mod GuildableComponent {
     // Dojo imports
 
-    use dojo::world::WorldStorage;
-    use dojo::world::IWorldDispatcherTrait;
+    use dojo::world::{IWorldDispatcherTrait, WorldStorage};
+    use social::models::guild::{GuildAssert, GuildTrait};
+    use social::models::member::{MemberAssert, MemberTrait};
 
     // Internal imports
 
     use social::store::StoreTrait;
-    use social::models::guild::{GuildTrait, GuildAssert};
-    use social::models::member::{MemberTrait, MemberAssert};
     use social::types::role::Role;
 
     // Storage
@@ -254,7 +253,7 @@ pub mod GuildableComponent {
                 // [Effect] Guild hires a member
                 guild.hire();
                 store.set_guild(@guild);
-            };
+            }
 
             // [Effect] Store entities
             store.set_member(@member);

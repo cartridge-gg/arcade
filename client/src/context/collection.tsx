@@ -1,12 +1,7 @@
-import { createContext, useState, ReactNode, useMemo } from "react";
-import {
-  useCollectiblesQuery,
-  useCollectionsQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { createContext, ReactNode, useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { DEFAULT_PROJECT } from "@/constants";
-
-const LIMIT = 10000;
+import { useCollectibles } from "@/hooks/token-fetcher";
 
 export enum CollectionType {
   ERC721 = "ERC-721",
@@ -34,10 +29,6 @@ export const CollectionContext = createContext<CollectionContextType | null>(
 export function CollectionProvider({ children }: { children: ReactNode }) {
   const { editions, player: address } = useArcade();
 
-  const [offset, setOffset] = useState(0);
-  const [erc721s, setErc721s] = useState<Collection[]>([]);
-  const [erc1155s, setErc1155s] = useState<Collection[]>([]);
-
   const projects = useMemo(
     () => [
       DEFAULT_PROJECT,
@@ -45,121 +36,16 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
     ],
     [editions],
   );
-
-  const { status: collectionStatus } = useCollectionsQuery(
-    {
-      accountAddress: address ?? "",
-      projects: projects,
-    },
-    {
-      queryKey: ["collections", projects, offset, address],
-      enabled: projects.length > 0 && !!address && BigInt(address) !== 0n,
-      refetchOnWindowFocus: false,
-      onSuccess: ({ collections }) => {
-        const newCollections: { [key: string]: Collection } = {};
-        collections?.edges.forEach((e) => {
-          const contractAddress = e.node.meta.contractAddress;
-          const imagePath = e.node.meta.imagePath;
-          const name = e.node.meta.name;
-          const count = e.node.meta.assetCount;
-          const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
-          let metadata: { image?: string } = {};
-
-          try {
-            metadata = JSON.parse(!first?.metadata ? "{}" : first?.metadata);
-          } catch (error) {
-            console.warn(error, { data: first?.metadata });
-          }
-          const project = e.node.meta.project;
-          newCollections[`${contractAddress}`] = {
-            address: contractAddress,
-            imageUrl: imagePath ?? metadata?.image,
-            name: name ? name : "---",
-            totalCount: count,
-            type: CollectionType.ERC721,
-            project: project,
-          };
-        });
-        if (collections?.edges.length === LIMIT) {
-          setOffset(offset + LIMIT);
-        }
-        setErc721s(
-          Object.values(newCollections).sort((a, b) =>
-            a.name.localeCompare(b.name),
-          ),
-        );
-      },
-    },
-  );
-
-  const { status: collectibleStatus } = useCollectiblesQuery(
-    {
-      accountAddress: address ?? "",
-      projects: projects,
-    },
-    {
-      queryKey: ["collectibles", projects, offset, address],
-      enabled: projects.length > 0 && !!address && BigInt(address) !== 0n,
-      refetchOnWindowFocus: false,
-      onSuccess: ({ collectibles }) => {
-        const newCollections: { [key: string]: Collection } = {};
-        collectibles?.edges.forEach((e) => {
-          const contractAddress = e.node.meta.contractAddress;
-          const imagePath = e.node.meta.imagePath;
-          const name = e.node.meta.name;
-          const count = e.node.meta.assetCount;
-          const first = e.node.assets.length > 0 ? e.node.assets[0] : undefined;
-          let metadata: { image?: string } = {};
-          try {
-            metadata = JSON.parse(!first?.metadata ? "{}" : first?.metadata);
-          } catch (error) {
-            console.warn(error, { data: first?.metadata });
-          }
-          const project = e.node.meta.project;
-          newCollections[`${contractAddress}`] = {
-            address: contractAddress,
-            imageUrl: imagePath ?? metadata?.image,
-            name: name ? name : "---",
-            totalCount: count,
-            type: CollectionType.ERC1155,
-            project: project,
-          };
-        });
-        if (collectibles?.edges.length === LIMIT) {
-          setOffset(offset + LIMIT);
-        }
-        setErc1155s(
-          Object.values(newCollections).sort((a, b) =>
-            a.name.localeCompare(b.name),
-          ),
-        );
-      },
-    },
-  );
-
-  const status = useMemo(() => {
-    if (collectionStatus === "error" || collectibleStatus === "error") {
-      return "error";
-    }
-    if (collectionStatus === "loading" && collectibleStatus === "loading") {
-      return "loading";
-    }
-    if (collectionStatus === "idle" && collectibleStatus === "idle") {
-      return "idle";
-    }
-    return "success";
-  }, [collectionStatus, collectibleStatus]);
-
-  const collections = useMemo(
-    () => [...erc721s, ...erc1155s],
-    [erc721s, erc1155s],
+  const { collections: collectibles, status: ercStatus } = useCollectibles(
+    projects,
+    address,
   );
 
   return (
     <CollectionContext.Provider
       value={{
-        collections,
-        status,
+        collections: collectibles,
+        status: ercStatus,
       }}
     >
       {children}

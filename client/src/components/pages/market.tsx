@@ -49,7 +49,11 @@ export function MarketPage() {
   const handleClose = useCallback(() => {
     let pathname = location.pathname;
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/.*$/, "");
+    pathname = pathname.replace(/\/tab\/[^/]+/, "/tab/marketplace");
+    if (!pathname.includes("/tab/")) {
+      pathname = `${pathname}/tab/marketplace`;
+    }
+
     navigate(pathname || "/");
   }, [location, navigate]);
 
@@ -96,7 +100,6 @@ export function MarketPage() {
         order={TABS_ORDER}
         defaultValue={defaultValue as TabValue}
         onTabClick={(tab: TabValue) => handleClick(tab)}
-        variant="light"
       >
         <div
           className="flex justify-center gap-8 w-full h-full overflow-y-scroll"

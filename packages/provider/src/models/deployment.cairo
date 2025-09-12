@@ -77,7 +77,7 @@ pub impl DeploymentAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{DeploymentTrait, DeploymentAssert, Service, Tier};
+    use super::{DeploymentAssert, DeploymentTrait, Service, Tier};
 
     // Constants
 

@@ -78,7 +78,7 @@ pub impl TeamAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{TeamTrait, TeamAssert};
+    use super::{TeamAssert, TeamTrait};
 
     // Constants
 

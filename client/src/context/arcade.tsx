@@ -328,7 +328,11 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   }, [accesses]);
 
   const sortedGames = useMemo(() => {
-    return Object.values(games).sort((a, b) => a.name.localeCompare(b.name));
+    return Object.values(games).sort((a, b) => {
+      if (a.name === "Loot Survivor") return -1;
+      if (b.name === "Loot Survivor") return 1;
+      return a.name.localeCompare(b.name);
+    });
   }, [games]);
 
   const sortedEditions = useMemo(() => {

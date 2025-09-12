@@ -108,8 +108,9 @@ pub trait IRegistry<TContractState> {
 pub mod Registry {
     // Starknet imports
 
-    use starknet::{ContractAddress, ClassHash};
-    use starknet::get_caller_address;
+    // Internal imports
+
+    use arcade::constants::NAMESPACE;
 
     // Dojo imports
 
@@ -119,10 +120,7 @@ pub mod Registry {
 
     use registry::components::initializable::InitializableComponent;
     use registry::components::registerable::RegisterableComponent;
-
-    // Internal imports
-
-    use arcade::constants::NAMESPACE;
+    use starknet::{ClassHash, ContractAddress, get_caller_address};
 
     // Local imports
 

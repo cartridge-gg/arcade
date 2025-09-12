@@ -111,7 +111,7 @@ function Item({
       return;
     }
     const controller = (connector as ControllerConnector)?.controller;
-    if (!controller) {
+    if (!controller || !username) {
       console.error("Connector not initialized");
       return;
     }
@@ -135,12 +135,13 @@ function Item({
     } else {
       options.push("preset=cartridge");
     }
-    const path = `inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+    const path = `account/${username}/inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
     controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
-    controller.openProfileTo(path);
+    controller.openProfileAt(path);
   }, [
     collection.address,
     connector,
+    username,
     collection.type,
     edition,
     location,

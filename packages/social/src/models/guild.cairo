@@ -216,7 +216,7 @@ pub impl GuildAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{GuildTrait, GuildAssert, Role};
+    use super::{GuildAssert, GuildTrait, Role};
 
     // Constants
 

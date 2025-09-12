@@ -82,7 +82,7 @@ pub impl TeammateAssert of AssertTrait {
 mod tests {
     // Local imports
 
-    use super::{TeammateTrait, TeammateAssert, Role};
+    use super::{Role, TeammateAssert, TeammateTrait};
 
     // Constants
 

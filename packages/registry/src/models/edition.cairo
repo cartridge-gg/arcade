@@ -1,9 +1,9 @@
 // Internal imports
 
-pub use registry::models::index::Edition;
-use registry::types::config::Config;
 use registry::helpers::json::JsonifiableTrait;
 use registry::helpers::seeder::Seeder;
+pub use registry::models::index::Edition;
+use registry::types::config::Config;
 
 // Errors
 
@@ -198,11 +198,11 @@ pub impl EditionAssert of AssertTrait {
 mod tests {
     // Internal imports
 
-    use registry::types::config::{Config, ConfigTrait, ConfigJsonifiable};
+    use registry::types::config::{Config, ConfigJsonifiable, ConfigTrait};
 
     // Local imports
 
-    use super::{Edition, EditionTrait, EditionAssert};
+    use super::{Edition, EditionAssert, EditionTrait};
 
     // Constants
 

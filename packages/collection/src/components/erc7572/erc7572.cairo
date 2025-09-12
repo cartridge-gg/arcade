@@ -1,11 +1,10 @@
 #[starknet::component]
 pub mod ERC7572Component {
-    use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-    use openzeppelin_introspection::src5::{
-        SRC5Component, SRC5Component::InternalImpl as SRC5InternalImpl,
-    };
-    use collection::components::erc7572::interface::{IERC7572_ID, IERC7572Metadata};
+    use collection::components::erc7572::interface::{IERC7572Metadata, IERC7572_ID};
     use collection::types::contract_metadata::{ContractMetadata, ContractMetadataTrait};
+    use openzeppelin_introspection::src5::SRC5Component;
+    use openzeppelin_introspection::src5::SRC5Component::InternalImpl as SRC5InternalImpl;
+    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
 
     #[storage]
     pub struct Storage {

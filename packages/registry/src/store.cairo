@@ -2,14 +2,14 @@
 
 // Dojo imports
 
-use dojo::world::WorldStorage;
 use dojo::model::ModelStorage;
+use dojo::world::WorldStorage;
 // Models imports
 
 use registry::models::access::Access;
 use registry::models::collection::Collection;
-use registry::models::game::{Game, GameTrait};
 use registry::models::edition::{Edition, EditionTrait};
+use registry::models::game::{Game, GameTrait};
 use registry::models::unicity::{Unicity, UnicityTrait};
 
 // Structs

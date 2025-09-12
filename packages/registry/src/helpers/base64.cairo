@@ -14,7 +14,7 @@ pub impl ByteArrayIntoArrayU8 of Into<ByteArray, Array<u8>> {
         while let Option::Some(char) = self.at(i) {
             res.append(char);
             i += 1;
-        };
+        }
 
         res
     }
@@ -25,7 +25,7 @@ pub impl ArrayU8IntoByteArray of Into<Array<u8>, ByteArray> {
         let mut ba = "";
         while let Option::Some(char) = self.pop_front() {
             ba.append_byte(char);
-        };
+        }
         ba
     }
 }
@@ -111,7 +111,7 @@ pub fn encode_u8_array(mut bytes: Array<u8>, base64_chars: Span<u8>) -> Array<u8
             result.append(*base64_chars[e4]);
         }
         i += 3;
-    };
+    }
     result
 }
 
@@ -146,16 +146,16 @@ pub fn encode_felt(self: felt252, base64_chars: Span<u8>) -> Array<u8> {
         result.append(*base64_chars[r3]);
         result.append(*base64_chars[r4]);
         num = quotient;
-    };
+    }
     while (result.len() < 43) {
         result.append('A');
-    };
+    }
     // Reverse the result
     let mut reversed = array![];
     let mut result_span = result.span();
     while let Option::Some(char) = result_span.pop_back() {
         reversed.append(*char);
-    };
+    }
     reversed.append('=');
     reversed
 }
@@ -225,7 +225,7 @@ fn inner_decode(data: Array<u8>) -> Array<u8> {
         result.append(b3);
 
         i += 4;
-    };
+    }
 
     result
 }
@@ -258,68 +258,10 @@ fn get_base64_value(x: u8) -> u8 {
 
 fn get_base64_char_set() -> Array<u8> {
     let mut result = array![
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-        'O',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'U',
-        'V',
-        'W',
-        'X',
-        'Y',
-        'Z',
-        'a',
-        'b',
-        'c',
-        'd',
-        'e',
-        'f',
-        'g',
-        'h',
-        'i',
-        'j',
-        'k',
-        'l',
-        'm',
-        'n',
-        'o',
-        'p',
-        'q',
-        'r',
-        's',
-        't',
-        'u',
-        'v',
-        'w',
-        'x',
-        'y',
-        'z',
-        '0',
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+        'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1',
+        '2', '3', '4', '5', '6', '7', '8', '9',
     ];
     result
 }

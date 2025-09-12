@@ -3,12 +3,12 @@ pub mod GroupableComponent {
     // Dojo imports
 
     use dojo::world::WorldStorage;
+    use provider::models::team::TeamAssert;
+    use provider::models::teammate::{TeammateAssert, TeammateTrait};
 
     // Internal imports
 
     use provider::store::{Store, StoreTrait};
-    use provider::models::team::TeamAssert;
-    use provider::models::teammate::{TeammateTrait, TeammateAssert};
     use provider::types::role::Role;
 
     // Storage
