@@ -1,4 +1,4 @@
-import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
+import { cn, Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel, GameModel } from "@cartridge/arcade";
@@ -11,6 +11,7 @@ import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "../user/avatar";
 import { useDiscovers } from "@/hooks/discovers";
 import { joinPaths } from "@/helpers";
+import { useDevice } from "@/hooks/device";
 
 const DEFAULT_CAP = 30;
 const ROW_HEIGHT = 44;
@@ -44,6 +45,8 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     all: [],
     following: [],
   });
+
+  const { isMobile } = useDevice();
 
   const [cap, setCap] = useState(DEFAULT_CAP);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -195,7 +198,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
       <div
-        className="p-0 pt-3 lg:pt-0 my-3 lg:my-6 mt-0 h-full overflow-hidden rounded"
+        className="p-0 pt-3 lg:pt-0 my-0 lg:my-6 mt-0 h-full overflow-hidden rounded"
         style={{ scrollbarWidth: "none" }}
       >
         <ArcadeSubTabs tabs={["all", "following"]} className="mb-3 lg:mb-4">
@@ -208,7 +211,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
               {activitiesStatus === "loading" && events.all.length === 0 ? (
                 <LoadingState />
               ) : activitiesStatus === "error" || events.all.length === 0 ? (
-                <EmptyState />
+                <EmptyState className={cn(isMobile && "pb-3")} />
               ) : (
                 <ArcadeDiscoveryGroup
                   events={events.all.slice(0, cap)}
@@ -223,11 +226,11 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             </TabsContent>
             <TabsContent className="p-0 mt-0 grow w-full" value="following">
               {!isConnected ? (
-                <Connect />
+                <Connect className={cn(isMobile && "pb-3")} />
               ) : activitiesStatus === "error" ||
                 following.length === 0 ||
                 events.following.length === 0 ? (
-                <EmptyState />
+                <EmptyState className={cn(isMobile && "pb-3")} />
               ) : activitiesStatus === "loading" &&
                 events.following.length === 0 ? (
                 <LoadingState />
@@ -260,8 +263,12 @@ const LoadingState = () => {
   );
 };
 
-const EmptyState = () => {
+const EmptyState = ({ className }: { className?: string }) => {
   return (
-    <Empty title="It feels lonely in here" icon="discover" className="h-full" />
+    <Empty
+      title="It feels lonely in here"
+      icon="discover"
+      className={cn("h-full", className)}
+    />
   );
 };

@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
+import { cn, Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { EditionModel } from "@cartridge/arcade";
@@ -194,13 +194,20 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
             style={{ scrollbarWidth: "none" }}
           >
             <TabsContent
-              className="p-0 mt-0 pb-3 lg:pb-6 grow w-full"
+              className={cn(
+                "p-0 mt-0 lg:pb-6 grow w-full",
+                filteredData.all.some((d) => d.highlight) ? "pb-3" : "pb-0",
+              )}
               value="all"
             >
               {isLoading && filteredData.all.length === 0 ? (
                 <LoadingState />
               ) : isError || filteredData.all.length === 0 ? (
-                <EmptyState />
+                <EmptyState
+                  className={cn(
+                    filteredData.all.some((d) => d.highlight) ? "pb-0" : "pb-3",
+                  )}
+                />
               ) : (
                 <div
                   ref={parentRef}
@@ -223,15 +230,28 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
               )}
             </TabsContent>
             <TabsContent
-              className="p-0 mt-0 pb-3 lg:pb-6 grow w-full"
+              className={cn(
+                "p-0 mt-0 lg:pb-6 grow w-full",
+                filteredData.following.some((d) => d.highlight)
+                  ? "pb-3"
+                  : "pb-0",
+              )}
               value="following"
             >
               {!isConnected ? (
-                <Connect />
+                <Connect
+                  className={cn(
+                    filteredData.all.some((d) => d.highlight) ? "pb-0" : "pb-3",
+                  )}
+                />
               ) : isLoading && gamesData.following.length === 0 ? (
                 <LoadingState />
               ) : isError || filteredData.following.length === 0 ? (
-                <EmptyState />
+                <EmptyState
+                  className={cn(
+                    filteredData.all.some((d) => d.highlight) ? "pb-0" : "pb-3",
+                  )}
+                />
               ) : (
                 <div
                   ref={parentRef}
@@ -269,12 +289,12 @@ const LoadingState = () => {
   );
 };
 
-const EmptyState = () => {
+const EmptyState = ({ className }: { className?: string }) => {
   return (
     <Empty
       title="No leaderboard available for this game."
       icon="leaderboard"
-      className="h-full"
+      className={cn("h-full", className)}
     />
   );
 };
