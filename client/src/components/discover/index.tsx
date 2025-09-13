@@ -7,7 +7,6 @@ import { UserAvatar } from "../user/avatar";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";
 import ArcadeSubTabs from "../modules/sub-tabs";
 import { useAccount } from "@starknet-react/core";
-import { useDiscovers } from "@/hooks/discovers";
 import { useDiscoversFetcher } from "@/hooks/discovers-fetcher";
 import { useAchievements } from "@/hooks/achievements";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -21,25 +20,8 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   const followingTabRef = useRef<HTMLDivElement>(null);
 
   const { address, isConnected } = useAccount();
-  const {
-    usernames: activitiesUsernames,
-  } = useDiscovers();
 
   const { editions, follows } = useArcade();
-  const editionMap = useMemo(() => {
-    const map = new Map();
-    editions.forEach((e) => map.set(e.config.project, e));
-    return map;
-  }, [editions]);
-
-  const activitiesUsernamesMap = useMemo(() => {
-    const map = new Map();
-    if (!activitiesUsernames) return map;
-    for (const [u, v] of Object.entries(activitiesUsernames)) {
-      map.set(u, v);
-    }
-    return map;
-  }, [activitiesUsernames]);
 
   const projects = useMemo(() => {
     return editions.map((edition) => {
@@ -61,8 +43,6 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   } = useDiscoversFetcher({
     projects,
     achievements,
-    editions: editionMap,
-    activitiesUsernames: activitiesUsernamesMap,
     editionFilter: filteredEditions.map((e) => e.config.project),
     follows: follows[getChecksumAddress(address ?? "0x0")] || []
   });

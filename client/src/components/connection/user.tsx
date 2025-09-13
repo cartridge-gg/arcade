@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ControllerActions from "../modules/controller-actions";
 import ControllerAction from "../modules/controller-action";
 import { joinPaths } from "@/helpers";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export function User() {
   const { account, connector, address } = useAccount();
@@ -17,12 +17,13 @@ export function User() {
   const { data: name, isLoading } = useQuery({
     queryKey: ["controller-username", account?.address],
     queryFn: async () => {
-      const name = await (connector as ControllerConnector)?.username();
-      return name || "";
-    },
-    onError: (error) => {
-      console.error("Error fetching username:", error);
-      return "";
+      try {
+        const name = await (connector as ControllerConnector)?.username();
+        return name || "";
+      } catch (error) {
+        console.error("Error fetching username:", error);
+        return "";
+      }
     },
     enabled: !!connector,
   });
