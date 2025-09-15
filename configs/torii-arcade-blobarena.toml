@@ -3,15 +3,11 @@ rpc = "https://api.cartridge.gg/x/starknet/mainnet"
 
 [indexing]
 allowed_origins = ["*"]
-events_chunk_size = 1024
-blocks_chunk_size = 1024
 polling_interval = 500
 world_block = 1460162
 pending = true
 transactions = true
-contracts = [
-    # "ERC721:0x444834e7b71749832f0db8c64f17ed1c3af8462c1682c10dcd6068b1c57494b",
-]
+contracts = []
 
 [sql]
 historical = ["achievements-TrophyProgression"]
