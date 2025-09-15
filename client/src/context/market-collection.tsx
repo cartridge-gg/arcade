@@ -10,6 +10,8 @@ import { ArcadeContext } from "./arcade";
 import { Token } from "@dojoengine/torii-wasm";
 import { getChecksumAddress } from "starknet";
 
+const LIMIT = 1000;
+
 export type Collection = Record<string, Token>;
 export type Collections = Record<string, Collection>;
 type WithCount<T> = T & { count: number };
@@ -93,7 +95,7 @@ export const MarketCollectionProvider = ({
               token_ids: [],
               pagination: {
                 cursor: undefined,
-                limit: 5000,
+                limit: LIMIT,
                 order_by: [],
                 direction: "Forward",
               },
@@ -104,7 +106,7 @@ export const MarketCollectionProvider = ({
                 contract_addresses: [],
                 token_ids: [],
                 pagination: {
-                  limit: 5000,
+                  limit: LIMIT,
                   cursor: tokens.next_cursor,
                   order_by: [],
                   direction: "Forward",

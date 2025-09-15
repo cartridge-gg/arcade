@@ -71,8 +71,8 @@ export function Items() {
   const { connector } = useAccount();
   const { collection: collectionAddress, filter } = useProject();
   const { sales } = useMarketplace();
-  const { collection } = useCollection(collectionAddress || "", 10000);
-  const { balances } = useBalances(collectionAddress || "", 10000);
+  const { collection } = useCollection(collectionAddress || "", 1000);
+  const { balances } = useBalances(collectionAddress || "", 1000);
   const [search, setSearch] = useState<string>("");
   const [cap, setCap] = useState(DEFAULT_ROW_CAP);
   const [selection, setSelection] = useState<Asset[]>([]);
