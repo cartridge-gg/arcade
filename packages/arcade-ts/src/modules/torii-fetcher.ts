@@ -1,3 +1,4 @@
+import { ToriiGrpcClient } from "@dojoengine/grpc";
 import { ToriiClient } from "@dojoengine/torii-client";
 
 export interface PaginationOptions {
@@ -6,8 +7,8 @@ export interface PaginationOptions {
   direction?: "Forward" | "Backward";
 }
 
-export interface ClientCallbackParams {
-  client: ToriiClient;
+export interface ClientCallbackParams<TNative extends boolean = false> {
+  client: TNative extends true ? ToriiGrpcClient : ToriiClient;
   signal: AbortSignal;
 }
 
@@ -15,17 +16,19 @@ export interface FetchToriiOptionsBase {
   pagination?: PaginationOptions;
 }
 
-export interface FetchToriiOptionsWithClient extends FetchToriiOptionsBase {
-  client: (params: ClientCallbackParams) => Promise<any> | void;
+export interface FetchToriiOptionsWithClient<TNative extends boolean = false> extends FetchToriiOptionsBase {
+  client: (params: ClientCallbackParams<TNative>) => Promise<any> | void;
+  native?: TNative;
   sql?: never;
 }
 
 export interface FetchToriiOptionsWithSQL extends FetchToriiOptionsBase {
   sql: string;
+  native?: never;
   client?: never;
 }
 
-export type FetchToriiOptions = FetchToriiOptionsWithClient | FetchToriiOptionsWithSQL;
+export type FetchToriiOptions = FetchToriiOptionsWithClient<boolean> | FetchToriiOptionsWithSQL;
 
 export interface FetchToriiResult {
   data: any[];
@@ -59,10 +62,12 @@ async function fetchFromEndpoint(
   signal: AbortSignal,
 ): Promise<any> {
   if ("client" in options && options.client) {
-    const client = await new ToriiClient({
+
+    const cfg = {
       toriiUrl,
       worldAddress: "0x0",
-    });
+    }
+    const client = options.native ? new ToriiGrpcClient(cfg) : await new ToriiClient(cfg);
 
     try {
       return await options.client({
@@ -70,7 +75,9 @@ async function fetchFromEndpoint(
         signal,
       });
     } finally {
-      client.free();
+      if ('free' in client && typeof client.free === 'function') {
+        client.free();
+      }
     }
   }
 

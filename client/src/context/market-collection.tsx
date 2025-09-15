@@ -144,59 +144,6 @@ export const MarketCollectionProvider = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (!clients || Object.keys(clients).length === 0) return;
-
-    const fetchCollections = async () => {
-      // Only load collections for the current project/edition
-      if (
-        currentEdition?.config.project &&
-        clients[currentEdition.config.project]
-      ) {
-        const currentProject = currentEdition.config.project;
-
-        // Skip if already loaded for this project
-        if (loadedProjectsRef.current.has(currentProject)) return;
-
-        const collection = await fetchProjectTokens(
-          currentProject,
-          clients[currentProject],
-        );
-        if (collection && isMountedRef.current) {
-          setCollections({
-            [currentProject]: collection,
-          });
-          loadedProjectsRef.current.add(currentProject);
-        }
-      } else if (!currentEdition) {
-        // If no specific edition, load all collections (marketplace view)
-        const allCollections: Collections = {};
-
-        for (const project of Object.keys(clients)) {
-          if (!isMountedRef.current) break;
-          if (loadedProjectsRef.current.has(project)) continue;
-
-          const collection = await fetchProjectTokens(
-            project,
-            clients[project],
-          );
-          if (collection && isMountedRef.current) {
-            allCollections[project] = collection;
-            loadedProjectsRef.current.add(project);
-          }
-        }
-
-        if (isMountedRef.current && Object.keys(allCollections).length > 0) {
-          setCollections(allCollections);
-        }
-      }
-    };
-
-    // Clear loaded projects when edition changes
-    loadedProjectsRef.current.clear();
-
-    fetchCollections();
-  }, [clients, currentEdition?.config.project]);
 
   return (
     <MarketCollectionContext.Provider

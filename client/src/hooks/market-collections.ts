@@ -26,9 +26,9 @@ export const useMarketCollections = () => {
     );
   }
 
-  const { collections } = context;
+  const { collections, status, isLoading, isError, loadingProgress, refetch } = context;
 
-  return { collections };
+  return { collections, status, isLoading, isError, loadingProgress, refetch };
 };
 
 async function fetchCollectionFromClient(

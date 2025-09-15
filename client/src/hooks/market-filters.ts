@@ -56,6 +56,7 @@ export const useMarketFilters = () => {
   const { balances } = useBalances(collectionAddress || "", 1000);
   const [selected, setSelected] = useState<SearchResult | undefined>();
   const [selection, setSelection] = useState<Asset[]>([]);
+  console.log('collection', collection)
 
   const accounts = useMemo(() => {
     if (!balances || balances.length === 0) return [];
