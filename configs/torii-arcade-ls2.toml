@@ -9,7 +9,7 @@ pending = true
 transactions = true
 namespaces = ["ls_0_0_8"]
 contracts = [
-    "ERC721:0x036017E69D21D6D8c13E266EaBB73ef1f1D02722D86BDcAbe5f168f8e549d3cD", # denshokan
-    "ERC721:0x0280ace0b2171106eaebef91ca9b097a566108e9452c45b94a7924a9f794ae80", # Beasts
+    "ERC721:0x036017E69D21D6D8c13E266EaBB73ef1f1D02722D86BDcAbe5f168f8e549d3cD", # Games
+    "ERC721:0x046da8955829adf2bda310099a0063451923f02e648cf25a1203aac6335cf0e4", # Beasts
     "ERC721:0x027838dea749f41c6f8a44fcfa791788e6101080c1b3cd646a361f653ad10e2d", # Golden token
 ]
