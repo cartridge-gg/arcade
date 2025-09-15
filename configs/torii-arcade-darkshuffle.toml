@@ -1,0 +1,16 @@
+world_address = "0x5c6d0020a9927edca9ddc984b97305439c0b32a1ec8d3f0eaf6291074cc9799"
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+
+[indexing]
+allowed_origins = ["*"]
+polling_interval = 500
+world_block = 1197343
+pending = true
+transactions = true
+namespaces = ["ds_v1_2_0"]
+contracts = [
+    "ERC721:0x1e1c477f2ef896fd638b50caa31e3aa8f504d5c6cb3c09c99cd0b72523f07f7",
+]
+
+[sql]
+historical = ["ds_v1_2_0-TrophyProgression"]
