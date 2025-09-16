@@ -147,30 +147,37 @@ export function useCollection(
         }
       }
 
-      // Fallback: Search other clients only if current edition doesn't have the collection
+      // Fallback: Search other clients in parallel if current edition doesn't have the collection
       const otherProjects = Object.keys(clients).filter(
         project => project !== edition?.config.project
       );
       
-      // Try each client sequentially instead of parallel to reduce load
-      for (const project of otherProjects) {
-        try {
-          const result = await fetchCollectionFromClient(
-            clients,
-            project,
-            address,
-            count,
-            cursor,
-          );
-          if (result.items.length > 0) {
-            return result;
+      const collections = await Promise.all(
+        otherProjects.map(async (project) => {
+          try {
+            return await fetchCollectionFromClient(
+              clients,
+              project,
+              address,
+              count,
+              cursor,
+            );
+          } catch (err) {
+            console.error(`Error fetching from ${project}:`, err);
+            return { items: [], cursor: undefined, client: undefined };
           }
-        } catch (err) {
-          console.error(`Error fetching from ${project}:`, err);
-        }
-      }
+        }),
+      );
+      
+      const filteredCollections = collections.filter(
+        (c) => c && c.items && c.items.length > 0,
+      );
 
-      return { items: [], cursor: undefined, client: undefined };
+      if (filteredCollections.length === 0) {
+        return { items: [], cursor: undefined, client: undefined };
+      }
+      
+      return filteredCollections[0];
     },
     [clients, client, edition],
   );
@@ -307,30 +314,37 @@ export const useBalances = (
         }
       }
 
-      // Fallback: Search other clients only if current edition doesn't have the balances
+      // Fallback: Search other clients in parallel if current edition doesn't have the balances
       const otherProjects = Object.keys(clients).filter(
         project => project !== edition?.config.project
       );
       
-      // Try each client sequentially instead of parallel to reduce load
-      for (const project of otherProjects) {
-        try {
-          const result = await fetchBalancesFromClient(
-            clients,
-            project,
-            address,
-            count,
-            cursor,
-          );
-          if (result.items.length > 0) {
-            return result;
+      const balances = await Promise.all(
+        otherProjects.map(async (project) => {
+          try {
+            return await fetchBalancesFromClient(
+              clients,
+              project,
+              address,
+              count,
+              cursor,
+            );
+          } catch (err) {
+            console.error(`Error fetching balances from ${project}:`, err);
+            return { items: [], cursor: undefined, client: undefined };
           }
-        } catch (err) {
-          console.error(`Error fetching balances from ${project}:`, err);
-        }
-      }
+        }),
+      );
+      
+      const filteredBalances = balances.filter(
+        (b) => b && b.items && b.items.length > 0,
+      );
 
-      return { items: [], cursor: undefined, client: undefined };
+      if (filteredBalances.length === 0) {
+        return { items: [], cursor: undefined, client: undefined };
+      }
+      
+      return filteredBalances[0];
     },
     [clients, client, edition],
   );
