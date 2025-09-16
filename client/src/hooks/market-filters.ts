@@ -52,8 +52,8 @@ export const useMarketFilters = () => {
 
   const { collection: collectionAddress } = useProject();
   const { orders } = useMarketplace();
-  const { collection } = useCollection(collectionAddress || "", 10000);
-  const { balances } = useBalances(collectionAddress || "", 10000);
+  const { collection } = useCollection(collectionAddress || "", 1000);
+  const { balances } = useBalances(collectionAddress || "", 1000);
   const [selected, setSelected] = useState<SearchResult | undefined>();
   const [selection, setSelection] = useState<Asset[]>([]);
 

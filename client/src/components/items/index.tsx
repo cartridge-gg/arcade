@@ -23,7 +23,7 @@ import {
   RpcProvider,
 } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useConnect } from "@starknet-react/core";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketFilters } from "@/hooks/market-filters";
@@ -69,6 +69,7 @@ export function Items() {
     setSelected,
   } = useMarketFilters();
   const { connector, isConnected } = useAccount();
+  const { connect } = useConnect();
   const { collection: collectionAddress, filter } = useProject();
   const { sales } = useMarketplace();
   const { collection } = useCollection(collectionAddress || "", 100);
@@ -79,6 +80,10 @@ export function Items() {
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
   const { edition } = useProject();
+
+  const connectWallet = useCallback(async () => {
+    connect({ connector });
+  }, [connect, connector]);
 
   const chain: Chain = useMemo(() => {
     return (
@@ -131,7 +136,7 @@ export function Items() {
     const height = parent.clientHeight;
     const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
     if (newCap < cap) return;
-    setCap(newCap + 0);
+    setCap(newCap + 10);
   }, [parentRef, cap, setCap]);
 
   const handleReset = useCallback(() => {
@@ -240,7 +245,7 @@ export function Items() {
     parent.scrollTop = 0;
     const height = parent.clientHeight;
     const cap = Math.ceil(height / ROW_HEIGHT);
-    setCap(cap + 0);
+    setCap(cap + 10);
   }, [parentRef, collection, setCap]);
 
   useEffect(() => {
@@ -318,6 +323,7 @@ export function Items() {
         {filteredTokens.slice(0, cap * 3).map((token) => (
           <Item
             key={`${token.contract_address}-${token.token_id}`}
+            connect={connectWallet}
             token={token}
             sales={sales[getChecksumAddress(token.contract_address)] || {}}
             selection={selection}
@@ -350,6 +356,7 @@ function Item({
   token,
   sales,
   selection,
+  connect,
   setSelection,
   handlePurchase,
   handleInspect,
@@ -362,6 +369,7 @@ function Item({
     };
   };
   selection: Asset[];
+  connect: () => void;
   setSelection: (selection: Asset[]) => void;
   handlePurchase: (tokens: Asset[]) => void;
   handleInspect: (token: Token) => void;
@@ -469,16 +477,16 @@ function Item({
         image={image}
         listingCount={token.orders.length}
         onClick={
-          isConnected ? (
-            selectable && openable
-              ? () => handlePurchase([token])
-              : openable
-                ? () => handleInspect(token)
+          selectable && openable && isConnected
+            ? () => handlePurchase([token])
+            : openable && isConnected
+              ? () => handleInspect(token)
+              : !isConnected
+                ? () => connect()
                 : undefined
-          ) : undefined
         }
         className={
-          isConnected && (selectable || openable)
+          selectable || openable
             ? "cursor-pointer"
             : "cursor-default pointer-events-none"
         }

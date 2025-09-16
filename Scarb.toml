@@ -10,20 +10,20 @@ members = [
 ]
 description = "Dojo achievement library"
 homepage = "https://github.com/cartridge-gg/arcade/"
-cairo-version = "2.12.0"
+cairo-version = "2.12.1"
 
 [workspace.package]
 version = "0.0.0"
 edition = "2024_07"
-cairo-version = "2.12.0"
+cairo-version = "2.12.1"
 
 [workspace.dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", rev = "2d82d6efb28558e726df7eac7b16a4a95999a52c" }
-dojo_macros = { git = "https://github.com/dojoengine/dojo", rev = "2d82d6efb28558e726df7eac7b16a4a95999a52c" }
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", rev = "2d82d6efb28558e726df7eac7b16a4a95999a52c" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.7.0-alpha.4" }
+dojo_macros = { git = "https://github.com/dojoengine/dojo", tag = "v1.7.0-alpha.4" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.7.0-alpha.4" }
 graffiti = { git = "https://github.com/bal7hazar/graffiti.git", rev = "e8b0854" }
-starknet = "2.12.0"
-cairo_test = "2.12.0"
+starknet = "2.12.1"
+cairo_test = "2.12.1"
 
 [workspace.tool.fmt]
 sort-module-level-items = true
