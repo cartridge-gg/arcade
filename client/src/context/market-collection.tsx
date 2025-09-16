@@ -62,14 +62,15 @@ export const MarketCollectionProvider = ({
   const { edition: editionParam } = useParams<{ edition: string }>();
   const loadedProjectsRef = useRef<Set<string>>(new Set());
   const isMountedRef = useRef(true);
-  
+
   // Get current edition from params
   const currentEdition = useMemo(() => {
     if (!editionParam || editions.length === 0) return null;
     return editions.find(
       (edition) =>
         edition.id.toString() === editionParam ||
-        edition.name.toLowerCase().replace(/ /g, "-") === editionParam.toLowerCase()
+        edition.name.toLowerCase().replace(/ /g, "-") ===
+          editionParam.toLowerCase(),
     );
   }, [editionParam, editions]);
 
@@ -88,12 +89,12 @@ export const MarketCollectionProvider = ({
           direction: "Forward",
         },
       });
-      
+
       const allTokens = [...tokens.items];
-      
+
       // Only continue fetching if component is still mounted
       if (!isMountedRef.current) return null;
-      
+
       // Fetch remaining tokens in background
       while (tokens.next_cursor && isMountedRef.current) {
         tokens = await client.getTokens({
@@ -112,10 +113,7 @@ export const MarketCollectionProvider = ({
       const filtereds = allTokens.filter((token) => !!token.metadata);
       if (!filtereds.length) return null;
 
-      const collection: Record<
-        string,
-        WithCount<Token>
-      > = filtereds.reduce(
+      const collection: Record<string, WithCount<Token>> = filtereds.reduce(
         (acc: Record<string, WithCount<Token>>, token: Token) => {
           const address = getChecksumAddress(token.contract_address);
           if (address in acc) {
@@ -148,16 +146,22 @@ export const MarketCollectionProvider = ({
 
   useEffect(() => {
     if (!clients || Object.keys(clients).length === 0) return;
-    
+
     const fetchCollections = async () => {
       // Only load collections for the current project/edition
-      if (currentEdition?.config.project && clients[currentEdition.config.project]) {
+      if (
+        currentEdition?.config.project &&
+        clients[currentEdition.config.project]
+      ) {
         const currentProject = currentEdition.config.project;
-        
+
         // Skip if already loaded for this project
         if (loadedProjectsRef.current.has(currentProject)) return;
-        
-        const collection = await fetchProjectTokens(currentProject, clients[currentProject]);
+
+        const collection = await fetchProjectTokens(
+          currentProject,
+          clients[currentProject],
+        );
         if (collection && isMountedRef.current) {
           setCollections({
             [currentProject]: collection,
@@ -167,27 +171,30 @@ export const MarketCollectionProvider = ({
       } else if (!currentEdition) {
         // If no specific edition, load all collections (marketplace view)
         const allCollections: Collections = {};
-        
+
         for (const project of Object.keys(clients)) {
           if (!isMountedRef.current) break;
           if (loadedProjectsRef.current.has(project)) continue;
-          
-          const collection = await fetchProjectTokens(project, clients[project]);
+
+          const collection = await fetchProjectTokens(
+            project,
+            clients[project],
+          );
           if (collection && isMountedRef.current) {
             allCollections[project] = collection;
             loadedProjectsRef.current.add(project);
           }
         }
-        
+
         if (isMountedRef.current && Object.keys(allCollections).length > 0) {
           setCollections(allCollections);
         }
       }
     };
-    
+
     // Clear loaded projects when edition changes
     loadedProjectsRef.current.clear();
-    
+
     fetchCollections();
   }, [clients, currentEdition?.config.project]);
 
