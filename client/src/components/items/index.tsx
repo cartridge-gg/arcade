@@ -23,7 +23,7 @@ import {
   RpcProvider,
 } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import { Connector, useAccount } from "@starknet-react/core";
+import { useAccount, useConnect } from "@starknet-react/core";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketFilters } from "@/hooks/market-filters";
@@ -69,6 +69,7 @@ export function Items() {
     setSelected,
   } = useMarketFilters();
   const { connector } = useAccount();
+  const { connect, connectors } = useConnect();
   const { collection: collectionAddress, filter } = useProject();
   const { sales } = useMarketplace();
   const { collection } = useCollection(collectionAddress || "", 1000);
@@ -79,6 +80,14 @@ export function Items() {
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
   const { edition } = useProject();
+
+  const connectWallet = useCallback(async () => {
+    connect({ connector: connectors[0] });
+  }, [connect, connectors]);
+
+  const isConnected = useMemo(() => {
+    return !!(connector as ControllerConnector)?.controller;
+  }, [connector]);
 
   const chain: Chain = useMemo(() => {
     return (
@@ -317,7 +326,8 @@ export function Items() {
         {filteredTokens.slice(0, cap * 3).map((token) => (
           <Item
             key={`${token.contract_address}-${token.token_id}`}
-            connector={connector}
+            isConnected={isConnected}
+            connect={connectWallet}
             token={token}
             sales={sales[getChecksumAddress(token.contract_address)] || {}}
             selection={selection}
@@ -342,15 +352,15 @@ export function Items() {
 }
 
 function Item({
-  connector,
   token,
   sales,
   selection,
+  isConnected,
+  connect,
   setSelection,
   handlePurchase,
   handleInspect,
 }: {
-  connector: Connector | undefined;
   token: Asset;
   sales: {
     [token: string]: {
@@ -358,6 +368,8 @@ function Item({
     };
   };
   selection: Asset[];
+  isConnected: boolean;
+  connect: () => void;
   setSelection: (selection: Asset[]) => void;
   handlePurchase: (tokens: Asset[]) => void;
   handleInspect: (token: Token) => void;
@@ -382,10 +394,8 @@ function Item({
   }, [token.orders, selection]);
 
   const openable = useMemo(() => {
-    return (
-      selection.length === 0 && !!(connector as ControllerConnector)?.controller
-    );
-  }, [selection, connector]);
+    return selection.length === 0;
+  }, [selection]);
 
   const price = useMemo(() => {
     if (!token.orders.length || token.orders.length > 1) return null;
@@ -420,6 +430,8 @@ function Item({
     const price = order.price / 10 ** decimals;
     return { value: price.toString(), image };
   }, [token, sales]);
+
+  console.log({ isConnected });
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -466,11 +478,13 @@ function Item({
         image={image}
         listingCount={token.orders.length}
         onClick={
-          selectable && openable
+          selectable && openable && isConnected
             ? () => handlePurchase([token])
-            : openable
+            : openable && isConnected
               ? () => handleInspect(token)
-              : undefined
+              : !isConnected
+                ? () => connect()
+                : undefined
         }
         className={
           selectable || openable
