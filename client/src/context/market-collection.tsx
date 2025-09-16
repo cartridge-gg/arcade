@@ -32,31 +32,6 @@ interface MarketCollectionContextType {
 export const MarketCollectionContext =
   createContext<MarketCollectionContextType | null>(null);
 
-function deduplicateCollections(collections: Collections): Collections {
-  const hasContract = (res: Collections, contract: string): boolean => {
-    for (const project in res) {
-      for (const c in res[project]) {
-        if (c === contract) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-
-  const res: Collections = {};
-  for (const project in collections) {
-    res[project] = {};
-    for (const contract in collections[project]) {
-      if (hasContract(res, contract)) {
-        continue;
-      }
-      res[project][contract] = collections[project][contract];
-    }
-  }
-  return res;
-}
-
 /**
  * Provider component that makes Collection context available to child components.
  *
@@ -175,47 +150,43 @@ export const MarketCollectionProvider = ({
     if (!clients || Object.keys(clients).length === 0) return;
     
     const fetchCollections = async () => {
-      const newCollections: Collections = {};
-      
-      // Priority 1: Load current edition's tokens first if available
+      // Only load collections for the current project/edition
       if (currentEdition?.config.project && clients[currentEdition.config.project]) {
         const currentProject = currentEdition.config.project;
-        if (!loadedProjectsRef.current.has(currentProject)) {
-          const collection = await fetchProjectTokens(currentProject, clients[currentProject]);
+        
+        // Skip if already loaded for this project
+        if (loadedProjectsRef.current.has(currentProject)) return;
+        
+        const collection = await fetchProjectTokens(currentProject, clients[currentProject]);
+        if (collection && isMountedRef.current) {
+          setCollections({
+            [currentProject]: collection,
+          });
+          loadedProjectsRef.current.add(currentProject);
+        }
+      } else if (!currentEdition) {
+        // If no specific edition, load all collections (marketplace view)
+        const allCollections: Collections = {};
+        
+        for (const project of Object.keys(clients)) {
+          if (!isMountedRef.current) break;
+          if (loadedProjectsRef.current.has(project)) continue;
+          
+          const collection = await fetchProjectTokens(project, clients[project]);
           if (collection && isMountedRef.current) {
-            newCollections[currentProject] = collection;
-            setCollections(prev => ({
-              ...prev,
-              [currentProject]: collection,
-            }));
-            loadedProjectsRef.current.add(currentProject);
+            allCollections[project] = collection;
+            loadedProjectsRef.current.add(project);
           }
         }
-      }
-      
-      // Priority 2: Load other projects in background
-      const otherProjects = Object.keys(clients).filter(
-        project => project !== currentEdition?.config.project && !loadedProjectsRef.current.has(project)
-      );
-      
-      // Load other projects sequentially with delay to avoid overwhelming
-      for (const project of otherProjects) {
-        if (!isMountedRef.current) break;
         
-        // Small delay between projects to keep UI responsive
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const collection = await fetchProjectTokens(project, clients[project]);
-        if (collection && isMountedRef.current) {
-          newCollections[project] = collection;
-          setCollections(prev => deduplicateCollections({
-            ...prev,
-            [project]: collection,
-          }));
-          loadedProjectsRef.current.add(project);
+        if (isMountedRef.current && Object.keys(allCollections).length > 0) {
+          setCollections(allCollections);
         }
       }
     };
+    
+    // Clear loaded projects when edition changes
+    loadedProjectsRef.current.clear();
     
     fetchCollections();
   }, [clients, currentEdition?.config.project]);

@@ -133,51 +133,19 @@ export function useCollection(
         );
       }
 
-      // Priority: Try current edition's client first
+      // Only fetch from current edition's client
       if (edition?.config.project && clients[edition.config.project]) {
-        const result = await fetchCollectionFromClient(
+        return await fetchCollectionFromClient(
           clients,
           edition.config.project,
           address,
           count,
           cursor,
         );
-        if (result.items.length > 0) {
-          return result;
-        }
       }
 
-      // Fallback: Search other clients in parallel if current edition doesn't have the collection
-      const otherProjects = Object.keys(clients).filter(
-        project => project !== edition?.config.project
-      );
-      
-      const collections = await Promise.all(
-        otherProjects.map(async (project) => {
-          try {
-            return await fetchCollectionFromClient(
-              clients,
-              project,
-              address,
-              count,
-              cursor,
-            );
-          } catch (err) {
-            console.error(`Error fetching from ${project}:`, err);
-            return { items: [], cursor: undefined, client: undefined };
-          }
-        }),
-      );
-      
-      const filteredCollections = collections.filter(
-        (c) => c && c.items && c.items.length > 0,
-      );
-
-      if (filteredCollections.length === 0) {
-        return { items: [], cursor: undefined, client: undefined };
-      }
-      
-      return filteredCollections[0];
+      // If no edition is selected, return empty (don't search other projects)
+      return { items: [], cursor: undefined, client: undefined };
     },
     [clients, client, edition],
   );
@@ -300,51 +268,19 @@ export const useBalances = (
         );
       }
 
-      // Priority: Try current edition's client first
+      // Only fetch from current edition's client
       if (edition?.config.project && clients[edition.config.project]) {
-        const result = await fetchBalancesFromClient(
+        return await fetchBalancesFromClient(
           clients,
           edition.config.project,
           address,
           count,
           cursor,
         );
-        if (result.items.length > 0) {
-          return result;
-        }
       }
 
-      // Fallback: Search other clients in parallel if current edition doesn't have the balances
-      const otherProjects = Object.keys(clients).filter(
-        project => project !== edition?.config.project
-      );
-      
-      const balances = await Promise.all(
-        otherProjects.map(async (project) => {
-          try {
-            return await fetchBalancesFromClient(
-              clients,
-              project,
-              address,
-              count,
-              cursor,
-            );
-          } catch (err) {
-            console.error(`Error fetching balances from ${project}:`, err);
-            return { items: [], cursor: undefined, client: undefined };
-          }
-        }),
-      );
-      
-      const filteredBalances = balances.filter(
-        (b) => b && b.items && b.items.length > 0,
-      );
-
-      if (filteredBalances.length === 0) {
-        return { items: [], cursor: undefined, client: undefined };
-      }
-      
-      return filteredBalances[0];
+      // If no edition is selected, return empty (don't search other projects)
+      return { items: [], cursor: undefined, client: undefined };
     },
     [clients, client, edition],
   );
