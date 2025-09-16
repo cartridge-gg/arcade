@@ -131,7 +131,7 @@ export function Items() {
     const height = parent.clientHeight;
     const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
     if (newCap < cap) return;
-    setCap(newCap + 0);
+    setCap(newCap + 10);
   }, [parentRef, cap, setCap]);
 
   const handleReset = useCallback(() => {
@@ -239,7 +239,7 @@ export function Items() {
     parent.scrollTop = 0;
     const height = parent.clientHeight;
     const cap = Math.ceil(height / ROW_HEIGHT);
-    setCap(cap + 0);
+    setCap(cap + 10);
   }, [parentRef, collection, setCap]);
 
   useEffect(() => {
