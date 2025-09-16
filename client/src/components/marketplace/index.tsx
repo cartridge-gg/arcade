@@ -1,6 +1,5 @@
 import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
 import { OrderModel, StatusType } from "@cartridge/marketplace";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -78,7 +77,6 @@ function Item({
   editions: EditionModel[];
   games: GameModel[];
 }) {
-  const { isSelf } = useAddress();
   const { orders, sales } = useMarketplace();
   const [image, setImage] = useState<string>(placeholder);
 
@@ -207,12 +205,9 @@ function Item({
         totalCount={collection.count}
         selectable={false}
         listingCount={listingCount}
-        onClick={isSelf ? handleClick : undefined}
+        onClick={handleClick}
         lastSale={lastSale ?? null}
         price={price ?? null}
-        className={
-          isSelf ? "cursor-pointer" : "cursor-default pointer-events-none"
-        }
       />
     </div>
   );

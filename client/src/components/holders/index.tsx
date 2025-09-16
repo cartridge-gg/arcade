@@ -63,6 +63,7 @@ export const Holders = () => {
       pathname = pathname.replace(/\/player\/[^/]+/, "");
       pathname = pathname.replace(/\/tab\/[^/]+/, "");
       pathname = pathname.replace(/\/collection\/[^/]+/, "");
+      pathname = pathname.replace(/\/edition\/[^/]+/, "");
       const player = nameOrAddress.toLowerCase();
       pathname = joinPaths(pathname, `/player/${player}`);
       navigate(pathname || "/");

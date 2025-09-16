@@ -23,7 +23,7 @@ import {
   RpcProvider,
 } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import { useAccount } from "@starknet-react/core";
+import { Connector, useAccount } from "@starknet-react/core";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketFilters } from "@/hooks/market-filters";
@@ -317,6 +317,7 @@ export function Items() {
         {filteredTokens.slice(0, cap * 3).map((token) => (
           <Item
             key={`${token.contract_address}-${token.token_id}`}
+            connector={connector}
             token={token}
             sales={sales[getChecksumAddress(token.contract_address)] || {}}
             selection={selection}
@@ -341,6 +342,7 @@ export function Items() {
 }
 
 function Item({
+  connector,
   token,
   sales,
   selection,
@@ -348,6 +350,7 @@ function Item({
   handlePurchase,
   handleInspect,
 }: {
+  connector: Connector | undefined;
   token: Asset;
   sales: {
     [token: string]: {
@@ -379,8 +382,10 @@ function Item({
   }, [token.orders, selection]);
 
   const openable = useMemo(() => {
-    return selection.length === 0;
-  }, [selection]);
+    return (
+      selection.length === 0 && !!(connector as ControllerConnector)?.controller
+    );
+  }, [selection, connector]);
 
   const price = useMemo(() => {
     if (!token.orders.length || token.orders.length > 1) return null;
