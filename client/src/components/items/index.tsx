@@ -431,8 +431,6 @@ function Item({
     return { value: price.toString(), image };
   }, [token, sales]);
 
-  console.log({ isConnected });
-
   useEffect(() => {
     const fetchImage = async () => {
       const toriiImage = await MetadataHelper.getToriiImage(
