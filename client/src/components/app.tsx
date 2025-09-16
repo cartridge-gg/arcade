@@ -2,6 +2,7 @@ import { Games } from "@/components/games";
 import { SceneLayout } from "@/components/scenes/layout";
 import { GamePage } from "./pages/game";
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { PlayerPage } from "./pages/player";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
@@ -13,11 +14,14 @@ import { useDevice } from "@/hooks/device";
 import { MarketPage } from "./pages/market";
 import { Filters } from "./filters";
 import { UserCard } from "./user/user-card";
+import { PredictionPage } from "./pages/prediction";
+import { PredictionSidebar } from "./games/prediction-sidebar";
 
 export function App() {
   const { isOpen, toggle, handleTouchMove, handleTouchStart } = useSidebar();
   const { setPlayer } = useArcade();
-  const { player, collection } = useProject();
+  const { player, collection, tab } = useProject();
+  const location = useLocation();
 
   const { isPWA, isMobile } = useDevice();
 
@@ -51,7 +55,13 @@ export function App() {
             <div className="lg:space-y-4 h-full flex flex-col">
               {!isMobile && <UserCard />}
               <div className="flex-1 overflow-hidden">
-                {!collection ? <Games /> : <Filters />}
+                {tab && tab.startsWith("prediction") ? (
+                  <PredictionSidebar />
+                ) : !collection ? (
+                  <Games />
+                ) : (
+                  <Filters />
+                )}
               </div>
             </div>
 
@@ -77,7 +87,10 @@ export function App() {
                     "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}
               >
-                {!player ? (
+                {location.pathname.includes("/prediction") ||
+                (tab && tab.startsWith("prediction-")) ? (
+                  <PredictionPage />
+                ) : !player ? (
                   !collection ? (
                     <GamePage />
                   ) : (

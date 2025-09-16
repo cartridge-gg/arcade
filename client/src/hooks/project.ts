@@ -34,7 +34,7 @@ export const useProject = () => {
     tab: string;
   }>();
 
-  const [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const filter = useMemo(() => {
     return searchParams.get("filter");

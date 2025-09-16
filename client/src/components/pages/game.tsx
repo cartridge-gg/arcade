@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
-import { TabsContent, Thumbnail, Empty, TabValue } from "@cartridge/ui";
+import { TabsContent, Thumbnail, Empty } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Socials } from "@cartridge/arcade";
-import { ArcadeTabs } from "../modules";
+import { ArcadeTabs, TabValue } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
 import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
@@ -29,26 +29,31 @@ export function GamePage() {
   const handleClick = useCallback(
     (value: string) => {
       let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
+      pathname = pathname.replace(/\/tab\/.*$/, "");
       pathname = joinPaths(pathname, `/tab/${value}`);
       navigate(pathname || "/");
     },
     [location, navigate],
   );
 
+  const isPreview = useMemo(() => {
+    return window.location.href.toLowerCase().includes(".preview.cartridge.gg");
+  }, []);
+
   const order: TabValue[] = useMemo(() => {
     const tabs: TabValue[] = game
       ? ["activity", "leaderboard", "marketplace", "predict", "about"]
       : ["activity", "leaderboard", "marketplace", "predict"];
 
-    if (process.env.NODE_ENV !== "development") {
+    // not in dev AND not preview deployments
+    if (process.env.NODE_ENV !== "development" && !isPreview) {
       // Remove predict tab in production for now
       const predictIndex = tabs.indexOf("predict");
       tabs.splice(predictIndex, 1);
     }
 
     return tabs;
-  }, [game]);
+  }, [game, isPreview]);
 
   const defaultValue = useMemo(() => {
     if (!order.includes(tab as TabValue)) return "activity";

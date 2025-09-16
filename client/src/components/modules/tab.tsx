@@ -27,12 +27,24 @@ export interface ArcadeTabProps extends VariantProps<typeof arcadeTabVariants> {
   label: string;
   active?: boolean;
   className?: string;
+  badge?: number;
   onClick?: () => void;
 }
 
 export const ArcadeTab = React.forwardRef<HTMLButtonElement, ArcadeTabProps>(
   (
-    { Icon, value, label, active, className, variant, size, onClick, ...props },
+    {
+      Icon,
+      value,
+      label,
+      active,
+      className,
+      variant,
+      size,
+      onClick,
+      badge,
+      ...props
+    },
     ref,
   ) => {
     return (
@@ -52,6 +64,20 @@ export const ArcadeTab = React.forwardRef<HTMLButtonElement, ArcadeTabProps>(
         >
           {Icon}
           <p className="font-normal">{label}</p>
+          {badge && (
+            <div
+              className={cn(
+                "rounded-full min-w-5 px-2 py-0.5 flex items-center gap-2.5",
+                active
+                  ? "bg-background-300 text-primary"
+                  : "bg-background-200 text-foreground-300",
+              )}
+            >
+              <span className="text-xs font-medium">
+                {badge.toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
         <div
           data-active={active}
