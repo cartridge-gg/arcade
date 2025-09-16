@@ -69,7 +69,7 @@ export function Items() {
     setSelected,
   } = useMarketFilters();
   const { connector, isConnected } = useAccount();
-  const { connect } = useConnect();
+  const { connect, connectors } = useConnect();
   const { collection: collectionAddress, filter } = useProject();
   const { sales } = useMarketplace();
   const { collection } = useCollection(collectionAddress || "", 1000);
@@ -82,8 +82,8 @@ export function Items() {
   const { edition } = useProject();
 
   const connectWallet = useCallback(async () => {
-    connect({ connector });
-  }, [connect, connector]);
+    connect({ connector: connectors[0] });
+  }, [connect, connectors]);
 
   const chain: Chain = useMemo(() => {
     return (
