@@ -68,7 +68,7 @@ export function Items() {
     selected,
     setSelected,
   } = useMarketFilters();
-  const { connector } = useAccount();
+  const { connector, isConnected } = useAccount();
   const { collection: collectionAddress, filter } = useProject();
   const { sales } = useMarketplace();
   const { collection } = useCollection(collectionAddress || "", 1000);
@@ -140,7 +140,7 @@ export function Items() {
 
   const handleInspect = useCallback(
     async (token: Token & { owner: string }) => {
-      if (!edition) return;
+      if (!edition || !isConnected || !connector) return;
       const contractAddress = token.contract_address;
       const controller = (connector as ControllerConnector)?.controller;
       const username = await controller?.username();
@@ -170,11 +170,12 @@ export function Items() {
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain],
+    [connector, edition, chain, isConnected],
   );
 
   const handlePurchase = useCallback(
     async (tokens: (Token & { orders: OrderModel[]; owner: string })[]) => {
+      if (!isConnected || !connector) return;
       const orders = tokens.map((token) => token.orders).flat();
       const contractAddresses = new Set(
         tokens.map((token) => token.contract_address),
@@ -217,7 +218,7 @@ export function Items() {
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain],
+    [connector, edition, chain, isConnected],
   );
 
   useEffect(() => {
@@ -281,11 +282,11 @@ export function Items() {
           className={cn(
             "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
             !selection.length && "text-foreground-400",
-            !!selection.length && "cursor-pointer",
+            isConnected && !!selection.length && "cursor-pointer",
           )}
-          onClick={handleReset}
+          onClick={isConnected ? handleReset : undefined}
         >
-          {selection.length > 0 && (
+          {isConnected && selection.length > 0 && (
             <Checkbox
               className="text-foreground-100"
               variant="minus-line"
@@ -293,7 +294,7 @@ export function Items() {
               checked
             />
           )}
-          {selection.length > 0 ? (
+          {isConnected && selection.length > 0 ? (
             <p>{`${selection.length} / ${filteredTokens.length} Selected`}</p>
           ) : (
             <p>{`${filteredTokens.length} Items`}</p>
@@ -323,19 +324,24 @@ export function Items() {
             setSelection={setSelection}
             handlePurchase={() => handlePurchase([token])}
             handleInspect={() => handleInspect(token)}
+            isConnected={isConnected}
           />
         ))}
       </div>
-      <Separator className="w-full h-px bg-background-200" />
-      <div className="w-full flex justify-end items-center p-4">
-        <Button
-          variant="primary"
-          onClick={() => handlePurchase(selection)}
-          disabled={selection.length === 0}
-        >
-          {`Buy (${selection.length})`}
-        </Button>
-      </div>
+      {isConnected && (
+        <>
+          <Separator className="w-full h-px bg-background-200" />
+          <div className="w-full flex justify-end items-center p-4">
+            <Button
+              variant="primary"
+              onClick={() => handlePurchase(selection)}
+              disabled={selection.length === 0}
+            >
+              {`Buy (${selection.length})`}
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -347,6 +353,7 @@ function Item({
   setSelection,
   handlePurchase,
   handleInspect,
+  isConnected,
 }: {
   token: Asset;
   sales: {
@@ -358,6 +365,7 @@ function Item({
   setSelection: (selection: Asset[]) => void;
   handlePurchase: (tokens: Asset[]) => void;
   handleInspect: (token: Token) => void;
+  isConnected?: boolean;
 }) {
   const { edition } = useProject();
   const [image, setImage] = useState<string>(placeholder);
@@ -448,7 +456,7 @@ function Item({
     <div
       className="w-full group select-none"
       onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-        if (selection.length > 0 && selectable) {
+        if (isConnected && selection.length > 0 && selectable) {
           e.preventDefault();
           handleSelect();
         }
@@ -461,22 +469,24 @@ function Item({
         image={image}
         listingCount={token.orders.length}
         onClick={
-          selectable && openable
-            ? () => handlePurchase([token])
-            : openable
-              ? () => handleInspect(token)
-              : undefined
+          isConnected ? (
+            selectable && openable
+              ? () => handlePurchase([token])
+              : openable
+                ? () => handleInspect(token)
+                : undefined
+          ) : undefined
         }
         className={
-          selectable || openable
+          isConnected && (selectable || openable)
             ? "cursor-pointer"
             : "cursor-default pointer-events-none"
         }
-        onSelect={selectable ? handleSelect : undefined}
+        onSelect={isConnected && selectable ? handleSelect : undefined}
         price={price}
         lastSale={lastSale}
-        selectable={selectable}
-        selected={selected}
+        selectable={isConnected && selectable}
+        selected={isConnected && selected}
       />
     </div>
   );
