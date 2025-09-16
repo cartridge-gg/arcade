@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { MarketCollectionContext } from "@/context/market-collection";
 import { useArcade } from "./arcade";
+import { useProject } from "./project";
 import { Token, ToriiClient, TokenBalance } from "@dojoengine/torii-wasm";
 export type { Collection, Collections } from "@/context/market-collection";
 
@@ -109,6 +110,7 @@ export function useCollection(
   initialCursor?: string,
 ) {
   const { clients } = useArcade();
+  const { edition } = useProject();
   const [cursor, setCursor] = useState<string | undefined>(initialCursor);
   const [prevCursors, setPrevCursors] = useState<string[]>([]);
   const [client, setClient] = useState<string | undefined>(undefined);
@@ -131,37 +133,46 @@ export function useCollection(
         );
       }
 
-      const collections = await Promise.all(
-        Object.keys(clients).map(async (project) => {
-          try {
-            return await fetchCollectionFromClient(
-              clients,
-              project,
-              address,
-              count,
-              cursor,
-            );
-          } catch (err) {
-            console.error(err);
-          }
-        }),
-      );
-      const filteredCollections = collections.filter(
-        (c) => c && c.items && c.items.length > 0,
-      );
-
-      if (filteredCollections.length === 0) {
-        return { items: [], cursor: undefined, client: undefined };
-      }
-      return (
-        filteredCollections[0] ?? {
-          items: [],
-          cursor: undefined,
-          client: undefined,
+      // Priority: Try current edition's client first
+      if (edition?.config.project && clients[edition.config.project]) {
+        const result = await fetchCollectionFromClient(
+          clients,
+          edition.config.project,
+          address,
+          count,
+          cursor,
+        );
+        if (result.items.length > 0) {
+          return result;
         }
+      }
+
+      // Fallback: Search other clients only if current edition doesn't have the collection
+      const otherProjects = Object.keys(clients).filter(
+        project => project !== edition?.config.project
       );
+      
+      // Try each client sequentially instead of parallel to reduce load
+      for (const project of otherProjects) {
+        try {
+          const result = await fetchCollectionFromClient(
+            clients,
+            project,
+            address,
+            count,
+            cursor,
+          );
+          if (result.items.length > 0) {
+            return result;
+          }
+        } catch (err) {
+          console.error(`Error fetching from ${project}:`, err);
+        }
+      }
+
+      return { items: [], cursor: undefined, client: undefined };
     },
-    [clients, client],
+    [clients, client, edition],
   );
 
   const loadPage = useCallback(
@@ -259,6 +270,7 @@ export const useBalances = (
   initialCursor?: string,
 ) => {
   const { clients } = useArcade();
+  const { edition } = useProject();
   const [cursor, setCursor] = useState<string | undefined>(initialCursor);
   const [prevCursors, setPrevCursors] = useState<string[]>([]);
   const [client, setClient] = useState<string | undefined>(undefined);
@@ -281,37 +293,46 @@ export const useBalances = (
         );
       }
 
-      const balances = await Promise.all(
-        Object.keys(clients).map(async (project) => {
-          try {
-            return await fetchBalancesFromClient(
-              clients,
-              project,
-              address,
-              count,
-              cursor,
-            );
-          } catch (err) {
-            console.error(err);
-          }
-        }),
-      );
-      const filteredBalances = balances.filter(
-        (b) => b && b.items && b.items.length > 0,
-      );
-
-      if (filteredBalances.length === 0) {
-        return { items: [], cursor: undefined, client: undefined };
-      }
-      return (
-        filteredBalances[0] ?? {
-          items: [],
-          cursor: undefined,
-          client: undefined,
+      // Priority: Try current edition's client first
+      if (edition?.config.project && clients[edition.config.project]) {
+        const result = await fetchBalancesFromClient(
+          clients,
+          edition.config.project,
+          address,
+          count,
+          cursor,
+        );
+        if (result.items.length > 0) {
+          return result;
         }
+      }
+
+      // Fallback: Search other clients only if current edition doesn't have the balances
+      const otherProjects = Object.keys(clients).filter(
+        project => project !== edition?.config.project
       );
+      
+      // Try each client sequentially instead of parallel to reduce load
+      for (const project of otherProjects) {
+        try {
+          const result = await fetchBalancesFromClient(
+            clients,
+            project,
+            address,
+            count,
+            cursor,
+          );
+          if (result.items.length > 0) {
+            return result;
+          }
+        } catch (err) {
+          console.error(`Error fetching balances from ${project}:`, err);
+        }
+      }
+
+      return { items: [], cursor: undefined, client: undefined };
     },
-    [clients, client],
+    [clients, client, edition],
   );
 
   const loadPage = useCallback(

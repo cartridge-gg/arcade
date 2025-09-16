@@ -4,11 +4,14 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
+  useMemo,
 } from "react";
 
 import { ArcadeContext } from "./arcade";
 import { Token } from "@dojoengine/torii-wasm";
 import { getChecksumAddress } from "starknet";
+import { useParams } from "react-router-dom";
 
 const LIMIT = 1000;
 
@@ -80,77 +83,142 @@ export const MarketCollectionProvider = ({
   }
 
   const [collections, setCollections] = useState<Collections>({});
-  const { clients } = context;
+  const { clients, editions } = context;
+  const { edition: editionParam } = useParams<{ edition: string }>();
+  const loadedProjectsRef = useRef<Set<string>>(new Set());
+  const isMountedRef = useRef(true);
+  
+  // Get current edition from params
+  const currentEdition = useMemo(() => {
+    if (!editionParam || editions.length === 0) return null;
+    return editions.find(
+      (edition) =>
+        edition.id.toString() === editionParam ||
+        edition.name.toLowerCase().replace(/ /g, "-") === editionParam.toLowerCase()
+    );
+  }, [editionParam, editions]);
+
+  // Helper function to fetch tokens for a single project
+  const fetchProjectTokens = async (project: string, client: any) => {
+    try {
+      // Initial fetch with smaller limit for faster first load
+      const initialLimit = 100;
+      let tokens = await client.getTokens({
+        contract_addresses: [],
+        token_ids: [],
+        pagination: {
+          cursor: undefined,
+          limit: initialLimit,
+          order_by: [],
+          direction: "Forward",
+        },
+      });
+      
+      const allTokens = [...tokens.items];
+      
+      // Only continue fetching if component is still mounted
+      if (!isMountedRef.current) return null;
+      
+      // Fetch remaining tokens in background
+      while (tokens.next_cursor && isMountedRef.current) {
+        tokens = await client.getTokens({
+          contract_addresses: [],
+          token_ids: [],
+          pagination: {
+            limit: LIMIT,
+            cursor: tokens.next_cursor,
+            order_by: [],
+            direction: "Forward",
+          },
+        });
+        allTokens.push(...tokens.items);
+      }
+
+      const filtereds = allTokens.filter((token) => !!token.metadata);
+      if (!filtereds.length) return null;
+
+      const collection: Record<
+        string,
+        WithCount<Token>
+      > = filtereds.reduce(
+        (acc: Record<string, WithCount<Token>>, token: Token) => {
+          const address = getChecksumAddress(token.contract_address);
+          if (address in acc) {
+            acc[address].count += 1;
+            return acc;
+          }
+          acc[address] = {
+            ...token,
+            contract_address: address,
+            count: 1,
+          };
+          return acc;
+        },
+        {},
+      );
+
+      return collection;
+    } catch (error) {
+      console.error("Error fetching tokens:", error, project);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!clients || Object.keys(clients).length === 0) return;
+    
     const fetchCollections = async () => {
-      const collections: Collections = {};
-      await Promise.all(
-        Object.keys(clients).map(async (project) => {
-          const client = clients[project];
-          try {
-            let tokens = await client.getTokens({
-              contract_addresses: [],
-              token_ids: [],
-              pagination: {
-                cursor: undefined,
-                limit: LIMIT,
-                order_by: [],
-                direction: "Forward",
-              },
-            });
-            const allTokens = [...tokens.items];
-            while (tokens.next_cursor) {
-              tokens = await client.getTokens({
-                contract_addresses: [],
-                token_ids: [],
-                pagination: {
-                  limit: LIMIT,
-                  cursor: tokens.next_cursor,
-                  order_by: [],
-                  direction: "Forward",
-                },
-              });
-              allTokens.push(...tokens.items);
-            }
-
-            const filtereds = allTokens.filter((token) => !!token.metadata);
-            if (!filtereds.length) return;
-
-            const collection: Record<
-              string,
-              WithCount<Token>
-            > = filtereds.reduce(
-              (acc: Record<string, WithCount<Token>>, token: Token) => {
-                const address = getChecksumAddress(token.contract_address);
-                if (address in acc) {
-                  acc[address].count += 1;
-                  return acc;
-                }
-                acc[address] = {
-                  ...token,
-                  contract_address: address,
-                  count: 1,
-                };
-
-                return acc;
-              },
-              {},
-            );
-
-            collections[project] = collection;
-            return;
-          } catch (error) {
-            console.error("Error fetching tokens:", error, project);
-            return;
+      const newCollections: Collections = {};
+      
+      // Priority 1: Load current edition's tokens first if available
+      if (currentEdition?.config.project && clients[currentEdition.config.project]) {
+        const currentProject = currentEdition.config.project;
+        if (!loadedProjectsRef.current.has(currentProject)) {
+          const collection = await fetchProjectTokens(currentProject, clients[currentProject]);
+          if (collection && isMountedRef.current) {
+            newCollections[currentProject] = collection;
+            setCollections(prev => ({
+              ...prev,
+              [currentProject]: collection,
+            }));
+            loadedProjectsRef.current.add(currentProject);
           }
-        }),
+        }
+      }
+      
+      // Priority 2: Load other projects in background
+      const otherProjects = Object.keys(clients).filter(
+        project => project !== currentEdition?.config.project && !loadedProjectsRef.current.has(project)
       );
-      setCollections(deduplicateCollections(collections));
+      
+      // Load other projects sequentially with delay to avoid overwhelming
+      for (const project of otherProjects) {
+        if (!isMountedRef.current) break;
+        
+        // Small delay between projects to keep UI responsive
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const collection = await fetchProjectTokens(project, clients[project]);
+        if (collection && isMountedRef.current) {
+          newCollections[project] = collection;
+          setCollections(prev => deduplicateCollections({
+            ...prev,
+            [project]: collection,
+          }));
+          loadedProjectsRef.current.add(project);
+        }
+      }
     };
+    
     fetchCollections();
-  }, [clients]);
+  }, [clients, currentEdition?.config.project]);
 
   return (
     <MarketCollectionContext.Provider
