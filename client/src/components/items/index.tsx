@@ -5,16 +5,11 @@ import {
   CollectibleCard,
   Empty,
   MarketplaceSearch,
-  SearchResult,
   Separator,
   Skeleton,
 } from "@cartridge/ui";
-import { useProject } from "@/hooks/project";
-import { useBalances, useCollection } from "@/hooks/market-collections";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Token } from "@dojoengine/torii-wasm";
-import { MetadataHelper } from "@/helpers/metadata";
-import placeholder from "@/assets/placeholder.svg";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
   FunctionAbi,
@@ -26,14 +21,13 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
-import { useMarketFilters } from "@/hooks/market-filters";
-import { useUsernames } from "@/hooks/account";
-import { UserAvatar } from "../user/avatar";
 import { OrderModel, SaleEvent } from "@cartridge/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
+import { EditionModel } from "@cartridge/arcade";
+import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
-const DEFAULT_ROW_CAP = 6;
 const ROW_HEIGHT = 218;
 const ERC1155_ENTRYPOINT = "balance_of_batch";
 
@@ -59,27 +53,20 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
   }
 };
 
-export function Items() {
-  const {
-    setAllMetadata,
-    setFilteredMetadata,
-    tokens,
-    filteredTokens,
-    selected,
-    setSelected,
-  } = useMarketFilters();
-  const { connector, isConnected } = useAccount();
+export function Items({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) {
+  const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
-  const { collection: collectionAddress, filter } = useProject();
   const { sales } = useMarketplace();
-  const { collection } = useCollection(collectionAddress || "", 1000);
-  const { balances } = useBalances(collectionAddress || "", 1000);
   const [search, setSearch] = useState<string>("");
-  const [cap, setCap] = useState(DEFAULT_ROW_CAP);
   const [selection, setSelection] = useState<Asset[]>([]);
+  const [columnsCount, setColumnsCount] = useState(3);
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
-  const { edition } = useProject();
+
+  const { collection, tokens, filteredTokens } = useMarketTokensFetcher({
+    project: edition ? [edition.config.project] : [],
+    address: collectionAddress
+  })
 
   const connectWallet = useCallback(async () => {
     connect({ connector: connectors[0] });
@@ -92,52 +79,6 @@ export function Items() {
       ) || mainnet
     );
   }, [chains, edition]);
-
-  const accounts = useMemo(() => {
-    if (!balances || balances.length === 0) return [];
-    const owners = balances
-      .filter((balance) => parseInt(balance.balance, 16) > 0)
-      .map((balance) => `0x${BigInt(balance.account_address).toString(16)}`);
-    return Array.from(new Set(owners));
-  }, [balances, collectionAddress]);
-
-  const { usernames } = useUsernames({ addresses: accounts });
-
-  const searchResults = useMemo(() => {
-    return usernames
-      .filter((item) => !!item.username)
-      .map((item) => {
-        const image = (
-          <UserAvatar
-            username={item.username || ""}
-            className="h-full w-full"
-          />
-        );
-        return {
-          image,
-          label: item.username,
-          address: getChecksumAddress(item.address || "0x0"),
-        };
-      });
-  }, [usernames]);
-
-  const options = useMemo(() => {
-    if (!search) return [];
-    return searchResults
-      .filter((item) =>
-        item.label?.toLowerCase().startsWith(search.toLowerCase()),
-      )
-      .slice(0, 3);
-  }, [searchResults, search]);
-
-  const handleScroll = useCallback(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-    const height = parent.clientHeight;
-    const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-    if (newCap < cap) return;
-    setCap(newCap + 10);
-  }, [parentRef, cap, setCap]);
 
   const handleReset = useCallback(() => {
     setSelection([]);
@@ -175,7 +116,7 @@ export function Items() {
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain, isConnected],
+    [connector, edition, chain, provider.provider],
   );
 
   const handlePurchase = useCallback(
@@ -223,55 +164,36 @@ export function Items() {
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain, isConnected],
+    [connector, edition, chain, provider.provider],
   );
 
+  // Calculate columns based on screen size
   useEffect(() => {
-    const parent = parentRef.current;
-    if (parent) {
-      parent.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (parent) {
-        parent.removeEventListener("scroll", handleScroll);
+    const updateColumns = () => {
+      if (parentRef.current) {
+        const width = parentRef.current.clientWidth;
+        setColumnsCount(width < 1024 ? 2 : 3);
       }
     };
-  }, [cap, parentRef, handleScroll]);
 
-  useEffect(() => {
-    // Reset scroll and cap on filter change
-    const parent = parentRef.current;
-    if (!parent) return;
-    parent.scrollTop = 0;
-    const height = parent.clientHeight;
-    const cap = Math.ceil(height / ROW_HEIGHT);
-    setCap(cap + 10);
-  }, [parentRef, collection, setCap]);
+    updateColumns();
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
 
-  useEffect(() => {
-    if (!tokens) return;
-    setAllMetadata(MetadataHelper.extract(tokens));
-  }, [tokens, setAllMetadata]);
+  // Calculate rows for virtualization
+  const rowCount = useMemo(() => {
+    if (!filteredTokens) return 0;
+    return Math.ceil(filteredTokens.length / columnsCount);
+  }, [filteredTokens, columnsCount]);
 
-  useEffect(() => {
-    if (!filteredTokens) return;
-    setFilteredMetadata(MetadataHelper.extract(filteredTokens));
-  }, [filteredTokens, setFilteredMetadata]);
-
-  useEffect(() => {
-    const selection = searchResults.find(
-      (option) => option.label?.toLowerCase() === filter?.toLowerCase(),
-    );
-    if (
-      !filter ||
-      !searchResults.length ||
-      selected?.label === selection?.label
-    )
-      return;
-    if (selection) {
-      setSelected(selection as SearchResult);
-    }
-  }, [filter, searchResults, setSelected, selected]);
+  // Set up virtualizer for rows
+  const virtualizer = useVirtualizer({
+    count: rowCount,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
+    overscan: 2,
+  });
 
   if (!collection) return <EmptyState />;
 
@@ -308,31 +230,66 @@ export function Items() {
         <MarketplaceSearch
           search={search}
           setSearch={setSearch}
-          selected={selected}
-          setSelected={(selected) => setSelected(selected as SearchResult)}
-          options={options as SearchResult[]}
+          selected={undefined}
+          setSelected={() => { }}
+          options={[]}
           variant="darkest"
           className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
         />
       </div>
       <div
         ref={parentRef}
-        className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 select-none overflow-y-scroll h-full auto-rows-max"
+        className="overflow-y-auto h-full"
         style={{ scrollbarWidth: "none" }}
       >
-        {filteredTokens.slice(0, cap * 3).map((token) => (
-          <Item
-            key={`${token.contract_address}-${token.token_id}`}
-            connect={connectWallet}
-            token={token}
-            sales={sales[getChecksumAddress(token.contract_address)] || {}}
-            selection={selection}
-            setSelection={setSelection}
-            handlePurchase={() => handlePurchase([token])}
-            handleInspect={() => handleInspect(token)}
-            isConnected={isConnected}
-          />
-        ))}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const startIndex = virtualRow.index * columnsCount;
+            const endIndex = Math.min(
+              startIndex + columnsCount,
+              filteredTokens.length
+            );
+            const rowTokens = filteredTokens.slice(startIndex, endIndex);
+
+            return (
+              <div
+                key={virtualRow.key}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                  {rowTokens.map((token) => {
+                    const assetToken = { ...token, orders: [], owner: address || "" } as Asset;
+                    return (
+                      <Item
+                        key={`${token.contract_address}-${token.token_id}`}
+                        isConnected={isConnected}
+                        connect={connectWallet}
+                        token={assetToken}
+                        sales={sales[getChecksumAddress(token.contract_address)] || {}}
+                        selection={selection}
+                        setSelection={setSelection}
+                        handlePurchase={() => handlePurchase([assetToken])}
+                        handleInspect={() => handleInspect(assetToken)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
       {isConnected && (
         <>
@@ -375,8 +332,6 @@ function Item({
   handleInspect: (token: Token) => void;
   isConnected?: boolean;
 }) {
-  const { edition } = useProject();
-  const [image, setImage] = useState<string>(placeholder);
 
   const selected = useMemo(() => {
     return selection.some((t) => t.token_id === token.token_id);
@@ -432,25 +387,6 @@ function Item({
     return { value: price.toString(), image };
   }, [token, sales]);
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const toriiImage = await MetadataHelper.getToriiImage(
-        edition?.config.project || "",
-        token,
-      );
-      if (toriiImage) {
-        setImage(toriiImage);
-        return;
-      }
-      const metadataImage = await MetadataHelper.getMetadataImage(token);
-      if (metadataImage) {
-        setImage(metadataImage);
-        return;
-      }
-    };
-    fetchImage();
-  }, [token, edition]);
-
   const handleSelect = useCallback(() => {
     // Toggle selection
     if (selection.some((t) => t.token_id === token.token_id)) {
@@ -474,7 +410,8 @@ function Item({
         title={
           (token.metadata as unknown as { name: string })?.name || token.name
         }
-        image={image}
+        // @ts-expect-error TODO: Fix this type to include image in metadata
+        image={token.metadata.image}
         listingCount={token.orders.length}
         onClick={
           selectable && openable && isConnected

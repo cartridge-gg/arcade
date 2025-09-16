@@ -2,22 +2,15 @@ import {
   createContext,
   ReactNode,
   useContext,
-  useEffect,
   useState,
-  useRef,
-  useMemo,
 } from "react";
 
 import { ArcadeContext } from "./arcade";
 import { Token } from "@dojoengine/torii-wasm";
-import { getChecksumAddress } from "starknet";
-import { useParams } from "react-router-dom";
 
-const LIMIT = 1000;
 
 export type Collection = Record<string, Token>;
 export type Collections = Record<string, Collection>;
-type WithCount<T> = T & { count: number };
 
 /**
  * Interface defining the shape of the Collection context.
@@ -57,92 +50,7 @@ export const MarketCollectionProvider = ({
     );
   }
 
-  const [collections, setCollections] = useState<Collections>({});
-  const { clients, editions } = context;
-  const { edition: editionParam } = useParams<{ edition: string }>();
-  const loadedProjectsRef = useRef<Set<string>>(new Set());
-  const isMountedRef = useRef(true);
-
-  // Get current edition from params
-  const currentEdition = useMemo(() => {
-    if (!editionParam || editions.length === 0) return null;
-    return editions.find(
-      (edition) =>
-        edition.id.toString() === editionParam ||
-        edition.name.toLowerCase().replace(/ /g, "-") ===
-          editionParam.toLowerCase(),
-    );
-  }, [editionParam, editions]);
-
-  // Helper function to fetch tokens for a single project
-  const fetchProjectTokens = async (project: string, client: any) => {
-    try {
-      // Initial fetch with smaller limit for faster first load
-      const initialLimit = 100;
-      let tokens = await client.getTokens({
-        contract_addresses: [],
-        token_ids: [],
-        pagination: {
-          cursor: undefined,
-          limit: initialLimit,
-          order_by: [],
-          direction: "Forward",
-        },
-      });
-
-      const allTokens = [...tokens.items];
-
-      // Only continue fetching if component is still mounted
-      if (!isMountedRef.current) return null;
-
-      // Fetch remaining tokens in background
-      while (tokens.next_cursor && isMountedRef.current) {
-        tokens = await client.getTokens({
-          contract_addresses: [],
-          token_ids: [],
-          pagination: {
-            limit: LIMIT,
-            cursor: tokens.next_cursor,
-            order_by: [],
-            direction: "Forward",
-          },
-        });
-        allTokens.push(...tokens.items);
-      }
-
-      const filtereds = allTokens.filter((token) => !!token.metadata);
-      if (!filtereds.length) return null;
-
-      const collection: Record<string, WithCount<Token>> = filtereds.reduce(
-        (acc: Record<string, WithCount<Token>>, token: Token) => {
-          const address = getChecksumAddress(token.contract_address);
-          if (address in acc) {
-            acc[address].count += 1;
-            return acc;
-          }
-          acc[address] = {
-            ...token,
-            contract_address: address,
-            count: 1,
-          };
-          return acc;
-        },
-        {},
-      );
-
-      return collection;
-    } catch (error) {
-      console.error("Error fetching tokens:", error, project);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  const [collections] = useState<Collections>({});
 
 
   return (

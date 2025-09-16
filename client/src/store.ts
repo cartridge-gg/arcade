@@ -122,3 +122,63 @@ export const useMarketplaceStore = create<MarketplaceState & MarketplaceActions>
     return Object.entries(collections).flatMap(([, c]) => Object.values(c))
   }
 }));
+
+export type MarketplaceToken = Token & {
+  project: string;
+  owner: string;
+  price?: string;
+  listed?: boolean;
+  image?: string;
+};
+
+type MarketplaceTokensState = {
+  tokens: {
+    [project: string]: {
+      [collectionAddress: string]: Token[];
+    };
+  };
+  loadingState: {
+    [key: string]: {
+      isLoading: boolean;
+      hasMore: boolean;
+      offset: number;
+      total: number;
+    };
+  };
+};
+
+type MarketplaceTokensActions = {
+  addTokens: (project: string, tokens: { [address: string]: Token[] }) => void;
+  getTokens: (project: string, address: string) => Token[];
+};
+
+export const useMarketplaceTokensStore = create<MarketplaceTokensState & MarketplaceTokensActions>((set, get) => ({
+  tokens: {},
+  loadingState: {},
+  addTokens: (project, newTokens) => set((state) => {
+    const existingTokens = { ...state.tokens };
+
+    // Initialize project if it doesn't exist
+    if (!existingTokens[project]) {
+      existingTokens[project] = {};
+    }
+
+    // Process each collection
+    for (const [collectionAddress, tokens] of Object.entries(newTokens)) {
+      if (!existingTokens[project][collectionAddress]) {
+        existingTokens[project][collectionAddress] = []
+      }
+      // Merge with existing tokens for this collection
+      const t = existingTokens[project][collectionAddress];
+
+      existingTokens[project][collectionAddress] = [...t, ...tokens];
+    }
+
+    return { tokens: existingTokens };
+  }),
+  getTokens: (project, address) => {
+    const projectTokens = get().tokens[project];
+    if (!projectTokens) return [];
+    return projectTokens[address] || [];
+  },
+}));

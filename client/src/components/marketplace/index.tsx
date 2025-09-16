@@ -172,7 +172,7 @@ function Item({
         onClick={handleClick}
         lastSale={lastSale ?? null}
         price={price ?? null}
-        className="cursor-pointer"
+        className={"cursor-pointer"}
       />
     </div>
   );

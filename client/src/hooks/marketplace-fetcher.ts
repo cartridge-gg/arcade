@@ -1,6 +1,6 @@
 import { Contract, useMarketplaceStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getChecksumAddress } from "starknet";
 import { Token } from "@dojoengine/torii-wasm";
 import { MetadataHelper } from "@/helpers/metadata";
@@ -31,6 +31,7 @@ export function useMarketCollectionFetcher({
     completed: number;
     total: number;
   }>({ completed: 0, total: 0 });
+  const hasInitialFetch = useRef(false);
 
   const addCollections = useMarketplaceStore((s) => s.addCollections);
   const getFlattenCollections = useMarketplaceStore((s) => s.getFlattenCollections);
@@ -160,8 +161,11 @@ export function useMarketCollectionFetcher({
   );
 
   useEffect(() => {
-    fetchData(false);
-  }, [fetchData, projects]);
+    if (projects.length > 0 && !hasInitialFetch.current) {
+      hasInitialFetch.current = true;
+      fetchData(false);
+    }
+  }, [projects]); // Remove fetchData from dependencies to avoid infinite loop
 
   return {
     collections: getFlattenCollections(projects),
