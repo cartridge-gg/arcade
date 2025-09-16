@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
-import { TabsContent, Thumbnail, Empty, TabValue } from "@cartridge/ui";
+import { useCallback, useMemo } from "react";
+import { TabsContent, Thumbnail, TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";
@@ -22,7 +22,6 @@ export function GamePage() {
   const { game, edition } = useProject();
   const { tab } = useProject();
   const { isMobile } = useDevice();
-  const [showMarketplace, setShowMarketplace] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -82,10 +81,7 @@ export function GamePage() {
               className="min-w-16 min-h-16"
             />
             <div className="flex flex-col gap-2 overflow-hidden">
-              <p
-                className="font-semibold text-xl/[24px] text-foreground-100 truncate"
-                onClick={() => setShowMarketplace(!showMarketplace)}
-              >
+              <p className="font-semibold text-xl/[24px] text-foreground-100 truncate">
                 {game?.name || "Dashboard"}
               </p>
               <Editions />
@@ -122,15 +118,7 @@ export function GamePage() {
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"
             value="marketplace"
           >
-            {showMarketplace ? (
-              <MarketplaceScene />
-            ) : (
-              <Empty
-                title="Coming soon"
-                icon="inventory"
-                className="h-full py-3 lg:py-6"
-              />
-            )}
+            <MarketplaceScene />
           </TabsContent>
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"
