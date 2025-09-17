@@ -1,34 +1,44 @@
 import { fetchToriisStream } from "@cartridge/arcade";
 import { Token, Tokens } from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getChecksumAddress } from "starknet";
 import { useMarketplaceTokensStore } from "@/store";
 import { useMarketCollectionFetcher } from "./marketplace-fetcher";
-import { MetadataHelper } from "@/helpers/metadata";
+import {
+  useFetcherState,
+  fetchTokenImage,
+  parseJsonSafe,
+  withRetry,
+  useAbortController,
+  sleep,
+} from "./fetcher-utils";
 
 type MarketTokensFetcherInput = {
   project: string[],
   address: string,
 }
 
+const LIMIT = 100;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY = 1000;
 
 export function useMarketTokensFetcher({ project, address }: MarketTokensFetcherInput) {
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [loadingProgress, setLoadingProgress] = useState<{
-    completed: number;
-    total: number;
-  }>({ completed: 0, total: 0 });
+  const {
+    status,
+    isLoading,
+    isError,
+    errorMessage,
+    loadingProgress,
+    retryCount,
+    setRetryCount,
+    startLoading,
+    setSuccess,
+    setError,
+    setLoadingProgress,
+    setErrorMessage,
+  } = useFetcherState(true);
   const [hasFetch, setHasFetch] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const isMountedRef = useRef(true);
+  const { createController, cleanup, isMounted } = useAbortController();
 
   const { collections } = useMarketCollectionFetcher({ projects: project });
   const collection = useMemo(() => collections.find(c => c.contract_address === address), [collections]);
@@ -37,36 +47,17 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
   const getTokens = useMarketplaceTokensStore(s => s.getTokens);
 
 
-  const fetchImage = async (token: Token, project: string) => {
-    const toriiImage = await MetadataHelper.unsafeGetToriiImage(
-      project,
-      token,
-    );
-    if (toriiImage) {
-      return toriiImage;
-    }
-    const metadataImage = await MetadataHelper.getMetadataImage(token);
-    if (metadataImage) {
-      return metadataImage;
-    }
-    return "";
-  };
 
   const batchProcessTokens = useCallback(async (data: Token[]) => {
     const processed: { [address: string]: Token[] } = { [address]: [] };
     for (const t of data) {
-
-      let metadata = t.metadata;
-      try {
-        metadata = JSON.parse(t.metadata);
-
-      } catch (err) { }
+      const metadata = parseJsonSafe(t.metadata, t.metadata);
 
       const item = {
         ...t,
         contract_address: getChecksumAddress(t.contract_address),
         metadata: metadata,
-        image: await fetchImage(t, project[0]),
+        image: await fetchTokenImage(t, project[0], true),
       }
 
       processed[address].push(item as Token)
@@ -75,104 +66,85 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
     return processed;
   }, [address, project]);
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const fetchTokensWithRetry = useCallback(async (attemptNumber: number = 0): Promise<void> => {
-    try {
-      if (!isMountedRef.current) return;
-
-      if (attemptNumber === 0) {
-        setStatus("loading");
-        setIsLoading(true);
-        setIsError(false);
-        setErrorMessage(null);
-        setLoadingProgress({ completed: 0, total: 0 });
-      }
-
-      abortControllerRef.current = new AbortController();
-
-      const stream = fetchToriisStream(project, {
-        client: async function* ({ client }) {
-          let cursor = undefined;
-          let totalFetched = 0;
-
-          while (true) {
-            if (!isMountedRef.current) break;
-
-            const response: Tokens = await client.getTokens({
-              contract_addresses: [address],
-              token_ids: [],
-              pagination: {
-                limit: 500,
-                cursor: cursor,
-                direction: 'Forward',
-                order_by: [],
-              }
-            });
-
-            totalFetched += response.items.length;
-
-            if (isMountedRef.current) {
-              setLoadingProgress({
-                completed: totalFetched,
-                total: totalFetched
-              });
-            }
-
-            yield response;
-
-            cursor = response.next_cursor;
-            if (!cursor) break;
-          }
-        }
-      });
-
-      for await (const result of stream) {
-        if (!isMountedRef.current) break;
-
-        const tokens = await batchProcessTokens(result.data.items);
-        addTokens(result.endpoint, tokens);
-      }
-
-      if (isMountedRef.current) {
-        setStatus("success");
-        setIsLoading(false);
-        setRetryCount(0);
-      }
-
-    } catch (error) {
-
-      if (!isMountedRef.current) return;
-
-      if (attemptNumber < MAX_RETRY_ATTEMPTS - 1) {
-        const delay = RETRY_BASE_DELAY * Math.pow(2, attemptNumber);
-        setRetryCount(attemptNumber + 1);
-        setErrorMessage(`Request failed. Retrying... (${attemptNumber + 1}/${MAX_RETRY_ATTEMPTS})`);
-
-        await sleep(delay);
-
-        if (isMountedRef.current) {
-          return fetchTokensWithRetry(attemptNumber + 1);
-        }
-      } else {
-        if (isMountedRef.current) {
-          setStatus("error");
-          setIsLoading(false);
-          setIsError(true);
-          setErrorMessage(
-            error instanceof Error
-              ? error.message
-              : "Failed to fetch tokens after multiple attempts"
-          );
-          setRetryCount(0);
-        }
-      }
+  const fetchTokensImpl = useCallback(async (attemptNumber: number = 0) => {
+    if (attemptNumber === 0) {
+      startLoading();
     }
-  }, [project, address, addTokens, batchProcessTokens]);
+
+    createController();
+
+    const stream = fetchToriisStream(project, {
+      client: async function* ({ client }) {
+        let cursor = undefined;
+        let totalFetched = 0;
+
+        while (true) {
+          if (!isMounted()) break;
+
+          const response: Tokens = await client.getTokens({
+            contract_addresses: [address],
+            token_ids: [],
+            pagination: {
+              limit: LIMIT,
+              cursor: cursor,
+              direction: 'Forward',
+              order_by: [],
+            }
+          });
+
+          totalFetched += response.items.length;
+
+          if (isMounted()) {
+            setLoadingProgress({
+              completed: totalFetched,
+              total: totalFetched
+            });
+          }
+
+          yield response;
+
+          cursor = response.next_cursor;
+          if (!cursor) break;
+        }
+      }
+    });
+
+    for await (const result of stream) {
+      if (!isMounted()) break;
+
+      const tokens = await batchProcessTokens(result.data.items);
+      addTokens(result.endpoint, tokens);
+    }
+
+    if (isMounted()) {
+      setSuccess();
+    }
+  }, [project, address, addTokens, batchProcessTokens, startLoading, setSuccess, setLoadingProgress, createController, isMounted]);
 
   const fetchTokens = useCallback(async () => {
-    await fetchTokensWithRetry(0);
-  }, [fetchTokensWithRetry]);
+    try {
+      await withRetry(
+        async (attemptNumber) => {
+          if (attemptNumber > 0) {
+            setRetryCount(attemptNumber);
+            setErrorMessage(`Request failed. Retrying... (${attemptNumber}/${MAX_RETRY_ATTEMPTS})`);
+            await sleep(RETRY_BASE_DELAY * Math.pow(2, attemptNumber - 1));
+          }
+          await fetchTokensImpl(attemptNumber);
+        },
+        { maxAttempts: MAX_RETRY_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }
+      );
+    } catch (error) {
+      if (isMounted()) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch tokens after multiple attempts"
+        );
+      }
+    }
+  }, [fetchTokensImpl, setRetryCount, setErrorMessage, setError, isMounted]);
 
   const refetch = useCallback(async () => {
     setHasFetch(false);
@@ -189,15 +161,8 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
   }, [hasFetch, project, fetchTokens]);
 
   useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
+    return cleanup;
+  }, [cleanup]);
 
   return {
     collection: collection ?? null,

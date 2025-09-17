@@ -1,9 +1,13 @@
 import { Contract, useMarketplaceStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { getChecksumAddress } from "starknet";
 import { Token } from "@dojoengine/torii-wasm";
-import { MetadataHelper } from "@/helpers/metadata";
+import {
+  useFetcherState,
+  fetchTokenImage,
+  processToriiStream
+} from "./fetcher-utils";
 
 type UseMarketplaceFetcherParams = {
   projects: string[];
@@ -22,34 +26,20 @@ const TOKENS_SQL = (limit: number = 5000, offset: number = 0) => `
 export function useMarketCollectionFetcher({
   projects,
 }: UseMarketplaceFetcherParams) {
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState<{
-    completed: number;
-    total: number;
-  }>({ completed: 0, total: 0 });
+  const {
+    status,
+    isLoading,
+    isError,
+    loadingProgress,
+    startLoading,
+    setSuccess,
+    setError,
+    setLoadingProgress,
+  } = useFetcherState();
   const hasInitialFetch = useRef(false);
 
   const addCollections = useMarketplaceStore((s) => s.addCollections);
   const getFlattenCollections = useMarketplaceStore((s) => s.getFlattenCollections);
-
-  const fetchImage = async (contract: Contract, project: string) => {
-    const toriiImage = await MetadataHelper.getToriiImage(
-      project,
-      contract as Token,
-    );
-    if (toriiImage) {
-      return toriiImage;
-    }
-    const metadataImage = await MetadataHelper.getMetadataImage(contract as Token);
-    if (metadataImage) {
-      return metadataImage;
-    }
-    return "";
-  };
 
   const processTokens = useCallback(
     async (contracts: Contract[], project: string): Promise<{ [address: string]: Contract }> => {
@@ -61,6 +51,7 @@ export function useMarketCollectionFetcher({
           collections[address].total_supply = collections[address].total_supply ?? c.total_supply ?? "0x0";
           continue;
         }
+
         let metadata = null;
         try {
           metadata = JSON.parse(c.metadata);
@@ -76,9 +67,8 @@ export function useMarketCollectionFetcher({
           token_id: c.token_id ?? null,
           metadata,
           project,
-          image: await fetchImage(c, project),
+          image: await fetchTokenImage(c as Token, project, false),
         };
-
       }
 
       return collections;
@@ -90,12 +80,7 @@ export function useMarketCollectionFetcher({
     async (quickLoad: boolean = false) => {
       if (projects.length === 0) return;
 
-      setIsLoading(true);
-      setStatus("loading");
-      setIsError(false);
-      setLoadingProgress({ completed: 0, total: projects.length });
-
-      let hasError = false;
+      startLoading();
 
       try {
         const limit = quickLoad ? 500 : 5000;
@@ -103,32 +88,12 @@ export function useMarketCollectionFetcher({
           projects,
           {
             sql: TOKENS_SQL(limit, 0)
-            // client: async ({ client, signal }) => {
-            //   // const contracts = await client.getTokenCollections({ contract_addresses: [], account_addresses: [], token_ids: [], pagination: { limit, cursor: undefined, direction: 'Forward', order_by: [] } });
-            //   const contracts = await client.getContracts({ contract_addresses: [], contract_types: ['ERC721', 'ERC1155'] });
-            //   console.log(contracts);
-            // },
-            // pagination: {
-            //   limit,
-            // }
           },
         );
 
-        for await (const result of stream) {
-          setLoadingProgress({
-            completed: result.metadata.completed,
-            total: result.metadata.total,
-          });
-
-          if (result.error) {
-            console.error(
-              `Error fetching collections from ${result.endpoint}:`,
-              result.error,
-            );
-            hasError = true;
-          } else if (result.data) {
-            const endpoint: string = result.data.endpoint || result.endpoint;
-            const tokensData: Contract[] = result.data.data || result.data;
+        await processToriiStream(stream, {
+          onData: async (data: any, endpoint: string) => {
+            const tokensData: Contract[] = data;
 
             if (Array.isArray(tokensData)) {
               const projectCollections = await processTokens(
@@ -138,25 +103,37 @@ export function useMarketCollectionFetcher({
 
               addCollections({ [endpoint]: projectCollections });
             }
-          }
-
-          if (result.metadata.isLast) {
-            setStatus(hasError ? "error" : "success");
-            setIsError(hasError);
-          }
-        }
+          },
+          onProgress: (completed, total) => {
+            setLoadingProgress({ completed, total });
+          },
+          onError: (endpoint, error) => {
+            console.error(
+              `Error fetching collections from ${endpoint}:`,
+              error,
+            );
+          },
+          onComplete: (hasError) => {
+            if (hasError) {
+              setError("Error fetching marketplace collections");
+            } else {
+              setSuccess();
+            }
+          },
+        });
       } catch (error) {
         console.error("Error fetching marketplace collections:", error);
-        setIsError(true);
-        setStatus("error");
-      } finally {
-        setIsLoading(false);
+        setError("Error fetching marketplace collections");
       }
     },
     [
       projects,
       processTokens,
       addCollections,
+      startLoading,
+      setSuccess,
+      setError,
+      setLoadingProgress,
     ],
   );
 

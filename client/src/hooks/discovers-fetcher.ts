@@ -1,8 +1,12 @@
 import { useAccounts, useEditionsMap } from "@/collections";
 import { useEventStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { getChecksumAddress } from "starknet";
+import {
+  useFetcherState,
+  processToriiStream
+} from "./fetcher-utils";
 
 export type Discover = {
   identifier: string;
@@ -132,16 +136,16 @@ export function useDiscoversFetcher({
   follows,
   refetchInterval = 30000,
 }: UseDiscoversFetcherParams) {
-
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState<{
-    completed: number;
-    total: number;
-  }>({ completed: 0, total: 0 });
+  const {
+    status,
+    isLoading,
+    isError,
+    loadingProgress,
+    startLoading,
+    setSuccess,
+    setError,
+    setLoadingProgress,
+  } = useFetcherState();
 
   const all = useEventStore((s) => s.getAllEvents);
   const following = useEventStore((s) => s.getFollowingEvents);
@@ -202,15 +206,9 @@ export function useDiscoversFetcher({
     async (daysBack: number) => {
       if (projects.length === 0) return;
 
-      setIsLoading(true);
-      setStatus("loading");
-      setIsError(false);
-      setLoadingProgress({ completed: 0, total: projects.length });
-
-      let hasError = false;
+      startLoading();
 
       try {
-        // Use the streaming generator function
         const stream = fetchToriisStream(
           projects.map((p) => p.project),
           {
@@ -218,27 +216,10 @@ export function useDiscoversFetcher({
           },
         );
 
-        // Consume the stream and update state incrementally
-        for await (const result of stream) {
-          // Update progress
-          setLoadingProgress({
-            completed: result.metadata.completed,
-            total: result.metadata.total,
-          });
+        await processToriiStream(stream, {
+          onData: (data: any, endpoint: string) => {
+            const playthroughsData = data;
 
-          if (result.error) {
-            console.error(
-              `Error fetching from ${result.endpoint}:`,
-              result.error,
-            );
-            hasError = true;
-          } else if (result.data) {
-            // The result.data contains the SQL query response for a single endpoint
-            // It should have { endpoint, data } structure where data is the array of playthroughs
-            const endpoint = result.data.endpoint || result.endpoint;
-            const playthroughsData = result.data.data || result.data;
-
-            // Create a response structure compatible with processPlaythroughs
             const singleResponseData: PlaythroughResponse = {
               items: [
                 {
@@ -250,26 +231,31 @@ export function useDiscoversFetcher({
               ],
             };
 
-            // Update state with accumulated results so far
-            // setPlaythroughs({ ...accumulatedData });
             setEvents({ ...processPlaythroughs(singleResponseData) });
-          }
-
-          // If this is the last result, update status
-          if (result.metadata.isLast) {
-            setStatus(hasError ? "error" : "success");
-            setIsError(hasError);
-          }
-        }
+          },
+          onProgress: (completed, total) => {
+            setLoadingProgress({ completed, total });
+          },
+          onError: (endpoint, error) => {
+            console.error(
+              `Error fetching from ${endpoint}:`,
+              error,
+            );
+          },
+          onComplete: (hasError) => {
+            if (hasError) {
+              setError("Error fetching playthroughs");
+            } else {
+              setSuccess();
+            }
+          },
+        });
       } catch (error) {
         console.error("Error fetching playthroughs:", error);
-        setIsError(true);
-        setStatus("error");
-      } finally {
-        setIsLoading(false);
+        setError("Error fetching playthroughs");
       }
     },
-    [projects, processPlaythroughs, setEvents],
+    [projects, processPlaythroughs, setEvents, startLoading, setSuccess, setError, setLoadingProgress],
   );
 
   useEffect(() => {
