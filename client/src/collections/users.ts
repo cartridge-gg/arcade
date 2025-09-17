@@ -79,6 +79,8 @@ export const accountsCollection = createCollection(
   })
 );
 
+
+
 export const useAccounts = () => {
   const query = useLiveQuery(accountsCollection);
   const accounts = query.state ? Array.from(query.state.values()) : [];

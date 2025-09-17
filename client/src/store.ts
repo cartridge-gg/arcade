@@ -131,29 +131,49 @@ export type MarketplaceToken = Token & {
   image?: string;
 };
 
+type CollectionLoadingState = {
+  isLoading: boolean;
+  isComplete: boolean;
+  lastCursor: string | null;
+  lastFetchTime: number;
+  totalCount?: number;
+};
+
 type MarketplaceTokensState = {
   tokens: {
     [project: string]: {
       [collectionAddress: string]: Token[];
     };
   };
-  loadingState: {
-    [key: string]: {
-      isLoading: boolean;
-      hasMore: boolean;
-      offset: number;
-      total: number;
+  owners: {
+    [project: string]: {
+      [collectionAddress: string]: {
+        [ownerAddress: string]: {
+          balance: number;
+          token_ids: string[];
+          username?: string;
+        };
+      };
     };
+  };
+  loadingState: {
+    [key: string]: CollectionLoadingState;
   };
 };
 
 type MarketplaceTokensActions = {
   addTokens: (project: string, tokens: { [address: string]: Token[] }) => void;
   getTokens: (project: string, address: string) => Token[];
+  updateLoadingState: (project: string, address: string, state: Partial<CollectionLoadingState>) => void;
+  getLoadingState: (project: string, address: string) => CollectionLoadingState | null;
+  clearTokens: (project: string, address: string) => void;
+  updateOwners: (project: string, collectionAddress: string, tokens: Token[], usernamesMap?: Map<string, string>) => void;
+  getOwners: (project: string, address: string) => Array<{ address: string; balance: number; ratio: number; token_ids: string[]; username?: string; }>;
 };
 
 export const useMarketplaceTokensStore = create<MarketplaceTokensState & MarketplaceTokensActions>((set, get) => ({
   tokens: {},
+  owners: {},
   loadingState: {},
   addTokens: (project, newTokens) => set((state) => {
     const existingTokens = { ...state.tokens };
@@ -171,7 +191,11 @@ export const useMarketplaceTokensStore = create<MarketplaceTokensState & Marketp
       // Merge with existing tokens for this collection
       const t = existingTokens[project][collectionAddress];
 
-      existingTokens[project][collectionAddress] = [...t, ...tokens];
+      // Avoid duplicates by checking token IDs
+      const existingIds = new Set(t.map(token => token.token_id));
+      const newUniqueTokens = tokens.filter(token => !existingIds.has(token.token_id));
+
+      existingTokens[project][collectionAddress] = [...t, ...newUniqueTokens];
     }
 
     return { tokens: existingTokens };
@@ -180,5 +204,107 @@ export const useMarketplaceTokensStore = create<MarketplaceTokensState & Marketp
     const projectTokens = get().tokens[project];
     if (!projectTokens) return [];
     return projectTokens[address] || [];
+  },
+  updateLoadingState: (project, address, state) => set((prevState) => {
+    const key = `${project}_${address}`;
+    const currentState = prevState.loadingState[key] || {
+      isLoading: false,
+      isComplete: false,
+      lastCursor: null,
+      lastFetchTime: 0,
+    };
+
+    return {
+      loadingState: {
+        ...prevState.loadingState,
+        [key]: {
+          ...currentState,
+          ...state,
+        },
+      },
+    };
+  }),
+  getLoadingState: (project, address) => {
+    const key = `${project}_${address}`;
+    return get().loadingState[key] || null;
+  },
+  clearTokens: (project, address) => set((state) => {
+    const tokens = { ...state.tokens };
+    const owners = { ...state.owners };
+    const loadingState = { ...state.loadingState };
+    const key = `${project}_${address}`;
+
+    if (tokens[project] && tokens[project][address]) {
+      delete tokens[project][address];
+    }
+
+    if (owners[project] && owners[project][address]) {
+      delete owners[project][address];
+    }
+
+    if (loadingState[key]) {
+      delete loadingState[key];
+    }
+
+    return { tokens, owners, loadingState };
+  }),
+  updateOwners: (project, collectionAddress, tokens, usernamesMap) => set((state) => {
+    const owners = { ...state.owners };
+
+    // Initialize project if it doesn't exist
+    if (!owners[project]) {
+      owners[project] = {};
+    }
+
+    // Initialize collection if it doesn't exist
+    if (!owners[project][collectionAddress]) {
+      owners[project][collectionAddress] = {};
+    }
+
+    // Count token ownership and collect token IDs
+    const ownerData: { [owner: string]: { count: number; token_ids: string[] } } = {};
+
+    for (const token of tokens) {
+      if (token.owner) {
+        if (!ownerData[token.owner]) {
+          ownerData[token.owner] = { count: 0, token_ids: [] };
+        }
+        ownerData[token.owner].count++;
+        if (token.token_id) {
+          ownerData[token.owner].token_ids.push(token.token_id);
+        }
+      }
+    }
+
+    // Update owners with balance, token_ids and username
+    for (const [owner, data] of Object.entries(ownerData)) {
+      owners[project][collectionAddress][owner] = {
+        balance: data.count,
+        token_ids: data.token_ids,
+        username: usernamesMap?.get(owner),
+      };
+    }
+
+    return { owners };
+  }),
+  getOwners: (project, address) => {
+    const projectOwners = get().owners[project];
+    if (!projectOwners || !projectOwners[address]) return [];
+
+    const ownersObj = projectOwners[address];
+
+    // Calculate total balance for ratio computation
+    const totalBalance = Object.values(ownersObj).reduce((sum, owner) => sum + owner.balance, 0);
+
+    // Convert to array, calculate ratios, and sort by balance descending
+    const ownersArray = Object.entries(ownersObj).map(([ownerAddress, data]) => ({
+      address: ownerAddress,
+      balance: data.balance,
+      ratio: totalBalance > 0 ? Math.round((data.balance / totalBalance) * 1000) / 10 : 0,
+      token_ids: data.token_ids,
+      username: data.username,
+    }));
+
+    return ownersArray.sort((a, b) => b.balance - a.balance);
   },
 }));

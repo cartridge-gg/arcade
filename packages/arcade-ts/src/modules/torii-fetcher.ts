@@ -16,12 +16,8 @@ export interface FetchToriiOptionsBase {
   pagination?: PaginationOptions;
 }
 
-export type ClientCallback<TNative extends boolean = false> =
-  | ((params: ClientCallbackParams<TNative>) => Promise<any> | void)
-  | ((params: ClientCallbackParams<TNative>) => AsyncGenerator<any, void, unknown>);
-
 export interface FetchToriiOptionsWithClient<TNative extends boolean = false> extends FetchToriiOptionsBase {
-  client: ClientCallback<TNative>;
+  client: (params: ClientCallbackParams<TNative>) => Promise<any> | void;
   native?: TNative;
   sql?: never;
 }
@@ -64,48 +60,24 @@ async function fetchFromEndpoint(
   toriiUrl: string,
   options: FetchToriiOptions,
   signal: AbortSignal,
-): Promise<any | AsyncGenerator<any, void, unknown>> {
+): Promise<any> {
   if ("client" in options && options.client) {
+
     const cfg = {
       toriiUrl,
       worldAddress: "0x0",
     }
-
     const client = options.native ? new ToriiGrpcClient(cfg) : await new ToriiClient(cfg);
 
     try {
-      const result = options.client({
+      return await options.client({
         client,
         signal,
       });
-
-      // Check if result is an async generator
-      if (result && typeof result === 'object' && Symbol.asyncIterator in result) {
-        // Return an async generator that yields results and handles cleanup
-        return (async function* () {
-          try {
-            for await (const data of result as AsyncGenerator<any>) {
-              yield { endpoint, data };
-            }
-          } finally {
-            if ('free' in client && typeof client.free === 'function') {
-              client.free();
-            }
-          }
-        })();
-      } else {
-        // Handle regular Promise or void return
-        const data = await result;
-        if ('free' in client && typeof client.free === 'function') {
-          client.free();
-        }
-        return { endpoint, data };
-      }
-    } catch (err) {
+    } finally {
       if ('free' in client && typeof client.free === 'function') {
         client.free();
       }
-      throw err;
     }
   }
 
@@ -144,17 +116,7 @@ export async function fetchToriis(endpoints: string[], options: FetchToriiOption
 
     try {
       const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
-
-      // Check if result is an async generator and consume it
-      if (result && typeof result === 'object' && Symbol.asyncIterator in result) {
-        const collectedData: any[] = [];
-        for await (const data of result as AsyncGenerator<any>) {
-          collectedData.push(data);
-        }
-        return { success: true as const, data: collectedData.length === 1 ? collectedData[0] : collectedData, endpoint };
-      } else {
-        return { success: true as const, data: result, endpoint };
-      }
+      return { success: true as const, data: result, endpoint };
     } catch (error) {
       const err = error instanceof Error ? error : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
       return { success: false as const, error: err, endpoint };
@@ -206,116 +168,74 @@ export async function* fetchToriisStream(
     return;
   }
 
-  let totalCompleted = 0;
-  const endpointStatuses = new Map<string, { completed: boolean; streamCount: number }>();
+  // Create promises with their indices
+  const pendingPromises = endpoints.map(async (endpoint, index) => {
+    const toriiUrl = getToriiUrl(endpoint);
 
-  // Initialize status tracking
-  endpoints.forEach(endpoint => {
-    endpointStatuses.set(endpoint, { completed: false, streamCount: 0 });
+    try {
+      const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
+      return { index, success: true as const, data: result, endpoint };
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
+      return { index, success: false as const, error: err, endpoint };
+    }
   });
 
-  // Process endpoints concurrently
-  const generators = await Promise.all(
-    endpoints.map(async (endpoint) => {
-      const toriiUrl = getToriiUrl(endpoint);
+  let completed = 0;
+  const remainingIndices = new Set(Array.from({ length: totalEndpoints }, (_, i) => i));
 
-      try {
-        const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
+  // Process promises as they complete using Promise.race
+  while (remainingIndices.size > 0) {
+    // Create a map of active promises
+    const activePromises = Array.from(remainingIndices).map((index) =>
+      pendingPromises[index].then((result) => ({ ...result, promiseIndex: index })),
+    );
 
-        // Check if result is an async generator
-        if (result && typeof result === 'object' && Symbol.asyncIterator in result) {
-          // Return the generator directly
-          return { type: 'generator' as const, generator: result as AsyncGenerator<any>, endpoint };
-        } else {
-          // Wrap single result in a generator
-          return {
-            type: 'single' as const,
-            generator: (async function* () {
-              yield result;
-            })(),
-            endpoint
-          };
+    try {
+      // Wait for the first promise to complete
+      const result = await Promise.race(activePromises);
+
+      // Remove completed promise from remaining set
+      remainingIndices.delete(result.promiseIndex);
+      completed++;
+      console.log('TORIIFETCTHER', result.data);
+    
+      const isAsyncGenerator = result.data?.next !==undefined;
+      console.log('TORIIFETCTHER', isAsyncGenerator);
+      let data = []
+      if (isAsyncGenerator) {
+        console.log(await result.data.next())
+        for await (const i of result.data) {
+          // data = yield i
         }
-      } catch (error) {
-        // Wrap error in a generator
-        return {
-          type: 'error' as const,
-          generator: (async function* () {
-            yield {
-              endpoint,
-              error: error instanceof Error ? error : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`)
-            };
-          })(),
-          endpoint
-        };
       }
-    })
-  );
+      console.log(data);
 
-  // Create async iterators from all generators
-  const iterators = generators.map((gen) => ({
-    iterator: gen.generator[Symbol.asyncIterator](),
-    endpoint: gen.endpoint,
-    type: gen.type,
-    done: false
-  }));
 
-  // Process all iterators concurrently
-  while (iterators.some(it => !it.done)) {
-    const promises = iterators
-      .filter(it => !it.done)
-      .map(async (it, idx) => {
-        try {
-          const result = await it.iterator.next();
-          return {
-            value: result.value,
-            done: result.done,
-            endpoint: it.endpoint,
-            type: it.type,
-            iteratorIndex: iterators.indexOf(it),
-            hasError: false
-          };
-        } catch (error) {
-          return {
-            value: {
-              endpoint: it.endpoint,
-              error: error instanceof Error ? error : new Error(String(error))
-            },
-            done: true,
-            endpoint: it.endpoint,
-            type: 'error' as const,
-            iteratorIndex: iterators.indexOf(it),
-            hasError: true
-          };
-        }
-      });
-
-    // Wait for the next available result
-    const nextResult = await Promise.race(promises);
-
-    if (nextResult.done) {
-      iterators[nextResult.iteratorIndex].done = true;
-      const status = endpointStatuses.get(nextResult.endpoint)!;
-      if (!status.completed) {
-        status.completed = true;
-        totalCompleted++;
-      }
-    }
-
-    if (!nextResult.done || nextResult.hasError) {
-      const status = endpointStatuses.get(nextResult.endpoint)!;
-      status.streamCount++;
-
+      // Yield the result
       yield {
-        endpoint: nextResult.endpoint,
-        data: nextResult.hasError ? undefined : nextResult.value?.data,
-        error: nextResult.hasError ? nextResult.value.error : nextResult.value?.error,
+        endpoint: result.endpoint,
+        data: result.success ? result.data : undefined,
+        error: result.success ? undefined : result.error,
         metadata: {
-          completed: totalCompleted,
+          completed,
           total: totalEndpoints,
-          isLast: totalCompleted === totalEndpoints && iterators.every(it => it.done),
+          isLast: completed === totalEndpoints,
         },
       };
+    } catch (error) {
+      // Handle unexpected errors
+      completed++;
+      yield {
+        endpoint: "unknown",
+        error: error instanceof Error ? error : new Error(String(error)),
+        metadata: {
+          completed,
+          total: totalEndpoints,
+          isLast: completed === totalEndpoints,
+        },
+      };
+      break;
     }
   }
 }
