@@ -1,23 +1,26 @@
 import { cva, VariantProps } from "class-variance-authority";
 import { AchievementPinIcon } from "./achievement-pin-icon";
 
-const achievementPinsVariants = cva("flex items-center gap-2", {
-  variants: {
-    variant: {
-      darkest: "",
-      darker: "",
-      dark: "",
-      default: "",
-      light: "",
-      lighter: "",
-      lightest: "",
-      ghost: "",
+const achievementPinsVariants = cva(
+  "flex items-center gap-1.5 lg:gap-2 p-1 lg:p-0",
+  {
+    variants: {
+      variant: {
+        darkest: "",
+        darker: "",
+        dark: "",
+        default: "",
+        light: "",
+        lighter: "",
+        lightest: "",
+        ghost: "",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
     },
   },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+);
 
 export interface AchievementPinIconsProps
   extends VariantProps<typeof achievementPinsVariants> {
