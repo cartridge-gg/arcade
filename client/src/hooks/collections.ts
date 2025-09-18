@@ -24,7 +24,14 @@ export const useCollections = () => {
   const { collections: allCollections, status } = context;
 
   const collections = useMemo(() => {
-    if (!edition) return allCollections;
+    if (!edition) {
+      // Remove duplicates
+      return allCollections.filter(
+        (collection, index) =>
+          allCollections.findIndex((i) => i.address === collection.address) ===
+          index,
+      );
+    }
     return allCollections.filter(
       (collection) => collection.project === edition.config.project,
     );
