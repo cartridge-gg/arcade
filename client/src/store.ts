@@ -167,7 +167,6 @@ type MarketplaceTokensActions = {
   updateLoadingState: (project: string, address: string, state: Partial<CollectionLoadingState>) => void;
   getLoadingState: (project: string, address: string) => CollectionLoadingState | null;
   clearTokens: (project: string, address: string) => void;
-  updateOwners: (project: string, collectionAddress: string, tokens: Token[], usernamesMap?: Map<string, string>) => void;
   getOwners: (project: string, address: string) => Array<{ address: string; balance: number; ratio: number; token_ids: string[]; username?: string; }>;
 };
 
@@ -247,45 +246,6 @@ export const useMarketplaceTokensStore = create<MarketplaceTokensState & Marketp
     }
 
     return { tokens, owners, loadingState };
-  }),
-  updateOwners: (project, collectionAddress, tokens, usernamesMap) => set((state) => {
-    const owners = { ...state.owners };
-
-    // Initialize project if it doesn't exist
-    if (!owners[project]) {
-      owners[project] = {};
-    }
-
-    // Initialize collection if it doesn't exist
-    if (!owners[project][collectionAddress]) {
-      owners[project][collectionAddress] = {};
-    }
-
-    // Count token ownership and collect token IDs
-    const ownerData: { [owner: string]: { count: number; token_ids: string[] } } = {};
-
-    for (const token of tokens) {
-      if (token.owner) {
-        if (!ownerData[token.owner]) {
-          ownerData[token.owner] = { count: 0, token_ids: [] };
-        }
-        ownerData[token.owner].count++;
-        if (token.token_id) {
-          ownerData[token.owner].token_ids.push(token.token_id);
-        }
-      }
-    }
-
-    // Update owners with balance, token_ids and username
-    for (const [owner, data] of Object.entries(ownerData)) {
-      owners[project][collectionAddress][owner] = {
-        balance: data.count,
-        token_ids: data.token_ids,
-        username: usernamesMap?.get(owner),
-      };
-    }
-
-    return { owners };
   }),
   getOwners: (project, address) => {
     const projectOwners = get().owners[project];

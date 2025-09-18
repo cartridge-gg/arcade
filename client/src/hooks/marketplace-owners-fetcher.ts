@@ -17,7 +17,6 @@ type MarketOwnersFetcherInput = {
   address: string,
 }
 
-const LIMIT = 100;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY = 1000;
 const POLL_INTERVAL = 30000; // 30 seconds

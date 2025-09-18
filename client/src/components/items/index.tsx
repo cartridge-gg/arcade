@@ -59,7 +59,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   const { sales } = useMarketplace();
   const [search, setSearch] = useState<string>("");
   const [selection, setSelection] = useState<Asset[]>([]);
-  const [columnsCount, setColumnsCount] = useState(3);
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
 
@@ -167,29 +166,9 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
     [connector, edition, chain, provider.provider],
   );
 
-  // Calculate columns based on screen size
-  useEffect(() => {
-    const updateColumns = () => {
-      if (parentRef.current) {
-        const width = parentRef.current.clientWidth;
-        setColumnsCount(width < 1024 ? 2 : 3);
-      }
-    };
-
-    updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
-  }, []);
-
-  // Calculate rows for virtualization
-  const rowCount = useMemo(() => {
-    if (!filteredTokens) return 0;
-    return Math.ceil(filteredTokens.length / columnsCount);
-  }, [filteredTokens, columnsCount]);
-
   // Set up virtualizer for rows
   const virtualizer = useVirtualizer({
-    count: rowCount,
+    count: filteredTokens.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
@@ -249,9 +228,9 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
           }}
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
-            const startIndex = virtualRow.index * columnsCount;
+            const startIndex = virtualRow.index * 3;
             const endIndex = Math.min(
-              startIndex + columnsCount,
+              startIndex + 3,
               filteredTokens.length
             );
             const rowTokens = filteredTokens.slice(startIndex, endIndex);

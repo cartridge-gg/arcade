@@ -17,7 +17,7 @@ export interface FetchToriiOptionsBase {
 }
 
 export interface FetchToriiOptionsWithClient<TNative extends boolean = false> extends FetchToriiOptionsBase {
-  client: (params: ClientCallbackParams<TNative>) => Promise<any> | void;
+  client: (params: ClientCallbackParams<TNative>) => Promise<any> | void | AsyncGenerator<any, void, unknown>;
   native?: TNative;
   sql?: never;
 }
@@ -74,11 +74,14 @@ async function fetchFromEndpoint(
         client,
         signal,
       });
-    } finally {
-      if ('free' in client && typeof client.free === 'function') {
-        client.free();
-      }
-    }
+    } catch(e) {}
+    // leave this commented out for now. 
+    // TODO: return client instance to free them at the end of caller function
+    // } finally {
+    //   if ('free' in client && typeof client.free === 'function') {
+    //     client.free();
+    //   }
+    // }
   }
 
   if ("sql" in options && options.sql) {
@@ -198,31 +201,35 @@ export async function* fetchToriisStream(
       // Remove completed promise from remaining set
       remainingIndices.delete(result.promiseIndex);
       completed++;
-      console.log('TORIIFETCTHER', result.data);
-    
-      const isAsyncGenerator = result.data?.next !==undefined;
-      console.log('TORIIFETCTHER', isAsyncGenerator);
-      let data = []
-      if (isAsyncGenerator) {
-        console.log(await result.data.next())
-        for await (const i of result.data) {
-          // data = yield i
+
+      // Check if result.data is an AsyncGenerator
+      if (result.success && result.data?.[Symbol.asyncIterator]) {
+        // Handle AsyncGenerator case - yield each item as it comes
+        for await (const item of result.data) {
+          yield {
+            endpoint: result.endpoint,
+            data: item,
+            error: undefined,
+            metadata: {
+              completed,
+              total: totalEndpoints,
+              isLast: completed === totalEndpoints,
+            },
+          };
         }
+      } else {
+        // Handle regular data case (arrays, objects)
+        yield {
+          endpoint: result.endpoint,
+          data: result.success ? result.data : undefined,
+          error: result.success ? undefined : result.error,
+          metadata: {
+            completed,
+            total: totalEndpoints,
+            isLast: completed === totalEndpoints,
+          },
+        };
       }
-      console.log(data);
-
-
-      // Yield the result
-      yield {
-        endpoint: result.endpoint,
-        data: result.success ? result.data : undefined,
-        error: result.success ? undefined : result.error,
-        metadata: {
-          completed,
-          total: totalEndpoints,
-          isLast: completed === totalEndpoints,
-        },
-      };
     } catch (error) {
       // Handle unexpected errors
       completed++;

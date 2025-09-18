@@ -12,7 +12,6 @@ import {
   useAbortController,
   sleep,
 } from "./fetcher-utils";
-import { useAccounts } from "@/collections";
 
 type MarketTokensFetcherInput = {
   project: string[],
@@ -23,7 +22,6 @@ const LIMIT = 100;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY = 1000;
 const POLL_INTERVAL = 30000; // 30 seconds
-const CACHE_DURATION = 30000; // 30 seconds
 
 enum FetchStrategy {
   INITIAL = 'initial',
@@ -49,7 +47,6 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
   const [hasFetch, setHasFetch] = useState(false);
   const { createController, cleanup, isMounted } = useAbortController();
 
-  const { data: usernamesMap } = useAccounts();
   const { collections } = useMarketCollectionFetcher({ projects: project });
   const collection = useMemo(() => collections.find(c => c.contract_address === address), [collections]);
 
@@ -58,7 +55,6 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
   const updateLoadingState = useMarketplaceTokensStore(s => s.updateLoadingState);
   const getLoadingState = useMarketplaceTokensStore(s => s.getLoadingState);
   const clearTokens = useMarketplaceTokensStore(s => s.clearTokens);
-  const updateOwners = useMarketplaceTokensStore(s => s.updateOwners);
   const getOwners = useMarketplaceTokensStore(s => s.getOwners);
 
 
@@ -84,7 +80,6 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
 
   const fetchTokensImpl = useCallback(async (strategy: FetchStrategy = FetchStrategy.INITIAL, attemptNumber: number = 0) => {
     const loadingState = getLoadingState(project[0], address);
-    const now = Date.now();
 
     if (attemptNumber === 0) {
       startLoading();
@@ -161,7 +156,6 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
 
       const tokens = await batchProcessTokens(result.data.items);
       addTokens(result.endpoint, tokens);
-      updateOwners(result.endpoint, address, tokens[address], usernamesMap);
     }
 
     if (isMounted()) {
