@@ -26,6 +26,7 @@ import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import { EditionModel } from "@cartridge/arcade";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
+import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 const ROW_HEIGHT = 218;
@@ -62,10 +63,24 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
 
-  const { collection, tokens, filteredTokens } = useMarketTokensFetcher({
+  const { collection, tokens } = useMarketTokensFetcher({
     project: edition ? [edition.config.project] : [],
     address: collectionAddress
   })
+
+  const {
+    filteredTokens,
+    activeFilters,
+    availableFilters,
+    setFilter,
+    removeFilter,
+    clearAllFilters,
+    isEmpty: isFilterEmpty
+  } = useMetadataFilters({
+    tokens: tokens || [],
+    collectionAddress,
+    enabled: true
+  });
 
   const connectWallet = useCallback(async () => {
     connect({ connector: connectors[0] });
@@ -178,8 +193,13 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
   if (!tokens || tokens.length === 0) return <LoadingState />;
 
-  if (!filteredTokens || filteredTokens.length === 0)
-    return <EmptySelectionState />;
+  // Show different empty states based on whether filters are active
+  if (!filteredTokens || filteredTokens.length === 0) {
+    if (isFilterEmpty && Object.keys(activeFilters).length > 0) {
+      return <EmptySelectionState />;
+    }
+    return <EmptyState />;
+  }
 
   return (
     <div className="p-6 flex flex-col gap-4 h-full w-full overflow-hidden">
@@ -203,7 +223,19 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
           {isConnected && selection.length > 0 ? (
             <p>{`${selection.length} / ${filteredTokens.length} Selected`}</p>
           ) : (
-            <p>{`${filteredTokens.length} Items`}</p>
+            <>
+              <p>{`${filteredTokens.length} ${tokens && filteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
+              {Object.keys(activeFilters).length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="ml-2 text-xs"
+                >
+                  Clear Filters
+                </Button>
+              )}
+            </>
           )}
         </div>
         <MarketplaceSearch

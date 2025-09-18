@@ -12,6 +12,8 @@ import {
   useAbortController,
   sleep,
 } from "./fetcher-utils";
+import { useMetadataFilterStore } from "@/store/metadata-filters";
+import { buildMetadataIndex, updateMetadataIndex } from "@/utils/metadata-indexer";
 
 type MarketTokensFetcherInput = {
   project: string[],
@@ -57,7 +59,8 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
   const clearTokens = useMarketplaceTokensStore(s => s.clearTokens);
   const getOwners = useMarketplaceTokensStore(s => s.getOwners);
 
-
+  // Metadata filter store
+  const { setMetadataIndex, getCollectionState } = useMetadataFilterStore();
 
   const batchProcessTokens = useCallback(async (data: Token[]) => {
     const processed: { [address: string]: Token[] } = { [address]: [] };
@@ -74,8 +77,24 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
       processed[address].push(item as Token)
     }
 
+    // Build/update metadata index for filtering
+    const collectionState = getCollectionState(address);
+    const existingIndex = collectionState?.metadataIndex;
+
+    if (existingIndex && Object.keys(existingIndex).length > 0) {
+      // Update existing index with new tokens
+      const updatedIndex = updateMetadataIndex(existingIndex, processed[address]);
+      setMetadataIndex(address, updatedIndex);
+    } else {
+      // Build new index from scratch
+      const allTokens = getTokens(project[0], address);
+      const combinedTokens = [...allTokens, ...processed[address]];
+      const newIndex = buildMetadataIndex(combinedTokens);
+      setMetadataIndex(address, newIndex);
+    }
+
     return processed;
-  }, [address, project]);
+  }, [address, project, getCollectionState, setMetadataIndex, getTokens]);
 
 
   const fetchTokensImpl = useCallback(async (strategy: FetchStrategy = FetchStrategy.INITIAL, attemptNumber: number = 0) => {

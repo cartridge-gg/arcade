@@ -1,4 +1,4 @@
-import { useMarketFilters } from "@/hooks/market-filters";
+import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 import {
   MarketplaceFilters,
   MarketplaceHeader,
@@ -21,7 +21,7 @@ export const Filters = () => {
     addSelected,
     isActive,
     resetSelected,
-  } = useMarketFilters();
+  } = useMetadataFiltersAdapter();
   const [search, setSearch] = useState<{ [key: string]: string }>({});
 
   const { attributes, properties } = useMemo(() => {
