@@ -34,7 +34,13 @@ export const Marketplace = () => {
           });
         },
       );
-      if (!edition) return data;
+      if (!edition)
+        return data.filter(
+          (collection, index) =>
+            data.findIndex(
+              (i) => i.contract_address === collection.contract_address,
+            ) === index,
+        );
       return data.filter(
         (collection) => collection.project === edition.config.project,
       );
