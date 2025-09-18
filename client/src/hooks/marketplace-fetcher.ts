@@ -1,3 +1,4 @@
+import { useEditionsMap } from "@/collections";
 import { Contract, useMarketplaceStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
 import { useEffect, useCallback, useRef } from "react";
@@ -30,6 +31,7 @@ export function useMarketCollectionFetcher({
     status,
     isLoading,
     isError,
+    editionError,
     loadingProgress,
     startLoading,
     setSuccess,
@@ -38,6 +40,7 @@ export function useMarketCollectionFetcher({
   } = useFetcherState();
   const hasInitialFetch = useRef(false);
 
+  const editions = useEditionsMap();
   const addCollections = useMarketplaceStore((s) => s.addCollections);
   const getFlattenCollections = useMarketplaceStore((s) => s.getFlattenCollections);
 
@@ -116,13 +119,11 @@ export function useMarketCollectionFetcher({
               `Error fetching collections from ${endpoint}:`,
               error,
             );
+            const e = editions.get(endpoint);
+            setError(e, "Error fetching marketplace collections");
           },
           onComplete: (hasError) => {
-            if (hasError) {
-              setError("Error fetching marketplace collections");
-            } else {
               setSuccess();
-            }
           },
         });
       } catch (error) {
@@ -153,6 +154,7 @@ export function useMarketCollectionFetcher({
     status,
     isLoading,
     isError,
+    editionError,
     loadingProgress,
     refetch: fetchData,
   };

@@ -12,6 +12,7 @@ import { useAchievements } from "@/hooks/achievements";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { getChecksumAddress } from "starknet";
 import { useDevice } from "@/hooks/device";
+import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
 const ROW_HEIGHT = 45;
 
@@ -43,6 +44,8 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   const {
     events: { all, following },
     status: activitiesStatus,
+    editionError,
+    loadingProgress,
   } = useDiscoversFetcher({
     projects,
     achievements,
@@ -91,7 +94,7 @@ export function Discover({ edition }: { edition?: EditionModel }) {
             <TabsContent className="p-0 mt-0 grow w-full h-full" value="all">
               {activitiesStatus === "loading" && all.length === 0 ? (
                 <LoadingState />
-              ) : activitiesStatus === "error" || all.length === 0 ? (
+              ) : activitiesStatus === "error" && all.length === 0 ? (
                 <EmptyState className={cn(isMobile && "pb-3")} />
               ) : (
                 <div
@@ -207,6 +210,10 @@ export function Discover({ edition }: { edition?: EditionModel }) {
           </div >
         </ArcadeSubTabs >
       </div >
+      <FloatingLoadingSpinner
+        isLoading={activitiesStatus === "loading" && (all.length > 0 || following.length > 0)}
+        loadingProgress={loadingProgress}
+      />
     </LayoutContent >
   );
 }

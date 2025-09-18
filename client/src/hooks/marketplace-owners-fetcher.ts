@@ -1,3 +1,4 @@
+import { useEditionsMap } from "@/collections";
 import { fetchToriisStream } from "@cartridge/arcade";
 import { TokenBalance } from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -41,6 +42,7 @@ export function useMarketOwnersFetcher({ project, address }: MarketOwnersFetcher
     status,
     isLoading,
     isError,
+    editionError,
     errorMessage,
     loadingProgress,
     retryCount,
@@ -60,6 +62,7 @@ export function useMarketOwnersFetcher({ project, address }: MarketOwnersFetcher
   const { collections } = useMarketCollectionFetcher({ projects: project });
   const collection = useMemo(() => collections.find(c => c.contract_address === address), [collections, address]);
 
+  const editions = useEditionsMap();
   const getOwners = useMarketplaceTokensStore(s => s.getOwners);
 
   const getLoadingState = useCallback((project: string, address: string) => {
@@ -288,7 +291,9 @@ export function useMarketOwnersFetcher({ project, address }: MarketOwnersFetcher
       );
     } catch (error) {
       if (isMounted()) {
+        const e = editions.get(project[0]);
         setError(
+          e,
           error instanceof Error
             ? error.message
             : "Failed to fetch owners after multiple attempts"
@@ -346,6 +351,7 @@ export function useMarketOwnersFetcher({ project, address }: MarketOwnersFetcher
     status,
     isLoading,
     isError,
+    editionError,
     errorMessage,
     loadingProgress,
     retryCount,

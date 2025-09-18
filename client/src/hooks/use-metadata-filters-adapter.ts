@@ -4,6 +4,7 @@ import { useMarketTokensFetcher } from './marketplace-tokens-fetcher';
 import { useProject } from './project';
 import { useSearchParams } from 'react-router-dom';
 import { useMetadataFilterStore } from '@/store/metadata-filters';
+import { useMarketplace } from './marketplace';
 
 /**
  * Adapter hook that provides the same interface as useMarketFilters
@@ -13,12 +14,18 @@ export function useMetadataFiltersAdapter() {
   const { collection: collectionAddress, edition } = useProject();
   const [active, setActive] = useState(1); // 0 = Buy Now, 1 = Show All
   const [, ] = useSearchParams();
+  const { getCollectionOrders } = useMarketplace();
 
   // Get tokens from the fetcher - use edition's project if available
   const { tokens } = useMarketTokensFetcher({
     project: edition ? [edition.config.project] : [],
     address: collectionAddress || ''
   });
+
+  // Get marketplace orders for this collection
+  const collectionOrders = useMemo(() => {
+    return getCollectionOrders(collectionAddress || '');
+  }, [getCollectionOrders, collectionAddress]);
 
   // Use the metadata filters hook
   const {
@@ -46,17 +53,17 @@ export function useMetadataFiltersAdapter() {
 
   // Apply "Buy Now" vs "Show All" filter
   const tokensAfterStatusFilter = useMemo(() => {
-    if (active === 0) {
-      // Buy Now - only show tokens with orders
-      return filteredTokens.filter(() => {
-        // TODO: Integrate with marketplace orders
-        return true;
-      });
-    } else {
-      // Show All
+    if (active === 1) {
       return filteredTokens;
     }
-  }, [filteredTokens, active]);
+    // Buy Now - only show tokens with orders
+    return filteredTokens.filter((token) => {
+      const tokenId = token.token_id?.toString();
+      if (!tokenId) return false;
+      const tokenOrders = collectionOrders[parseInt(tokenId)];
+      return !!(tokenOrders && tokenOrders.length > 0);
+    });
+  }, [filteredTokens, active, collectionOrders]);
 
   // Calculate filtered metadata based on active tokens
   const filteredMetadata = useMemo(() => {

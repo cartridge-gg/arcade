@@ -5,10 +5,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { joinPaths } from "@/helpers";
 import { EditionModel } from "@cartridge/arcade";
 import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
+import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
 export const Holders = ({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) => {
 
-  const { owners, status } = useMarketOwnersFetcher({
+  const { owners, status, editionError, loadingProgress } = useMarketOwnersFetcher({
     project: [edition.config.project],
     address: collectionAddress
   });
@@ -30,7 +31,9 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
     [location, navigate],
   );
 
-  if (status === 'idle') return <LoadingState />;
+  if (status === 'idle' || status === 'loading' && owners.length === 0) return <LoadingState />;
+
+  if (editionError.length > 0) return <Empty title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`} icon="alert" className="h-full py-6" />;
 
   if (Object.values(owners).length === 0) return <EmptyState />;
 
@@ -62,6 +65,10 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
           ))}
         </div>
       </div>
+      <FloatingLoadingSpinner
+        isLoading={status === "loading" && Object.values(owners).length > 0}
+        loadingProgress={loadingProgress}
+      />
     </div>
   );
 };

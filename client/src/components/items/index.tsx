@@ -26,8 +26,9 @@ import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import { EditionModel } from "@cartridge/arcade";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
-import { useMetadataFilters } from "@/hooks/use-metadata-filters";
+import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
 const ROW_HEIGHT = 218;
 const ERC1155_ENTRYPOINT = "balance_of_batch";
@@ -57,27 +58,42 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
 export function Items({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) {
   const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
-  const { sales } = useMarketplace();
+  const { sales, getCollectionOrders } = useMarketplace();
   const [search, setSearch] = useState<string>("");
   const [selection, setSelection] = useState<Asset[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
 
-  const { collection, tokens } = useMarketTokensFetcher({
-    project: edition ? [edition.config.project] : [],
-    address: collectionAddress
-  })
-
+  // Use the adapter hook which includes Buy Now/Show All functionality
   const {
+    tokens,
     filteredTokens,
     activeFilters,
-    clearAllFilters,
-    isEmpty: isFilterEmpty
-  } = useMetadataFilters({
-    tokens: tokens || [],
-    collectionAddress,
-    enabled: true
+    resetSelected: clearAllFilters
+  } = useMetadataFiltersAdapter();
+
+  // Get marketplace orders for this collection
+  const collectionOrders = useMemo(() => {
+    return getCollectionOrders(collectionAddress);
+  }, [getCollectionOrders, collectionAddress]);
+
+  // Get collection info
+  const { collection, status, loadingProgress } = useMarketTokensFetcher({
+    project: edition ? [edition.config.project] : [],
+    address: collectionAddress
   });
+
+  // Apply search filtering on top of metadata filters
+  const searchFilteredTokens = useMemo(() => {
+    if (!search.trim()) return filteredTokens;
+
+    const searchLower = search.toLowerCase();
+
+    return filteredTokens.filter(token => {
+      const tokenName = (token.metadata as any)?.name || token.name || '';
+      return tokenName.toLowerCase().includes(searchLower);
+    });
+  }, [filteredTokens, search]);
 
   const connectWallet = useCallback(async () => {
     connect({ connector: connectors[0] });
@@ -180,7 +196,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
   // Set up virtualizer for rows
   const virtualizer = useVirtualizer({
-    count: filteredTokens.length,
+    count: searchFilteredTokens.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
@@ -190,49 +206,43 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
   if (!tokens || tokens.length === 0) return <LoadingState />;
 
-  // Show different empty states based on whether filters are active
-  if (!filteredTokens || filteredTokens.length === 0) {
-    if (isFilterEmpty && Object.keys(activeFilters).length > 0) {
-      return <EmptySelectionState />;
-    }
-    return <EmptyState />;
-  }
-
   return (
     <div className="p-6 flex flex-col gap-4 h-full w-full overflow-hidden">
       <div className="min-h-10 w-full flex justify-between items-center relative">
-        <div
-          className={cn(
-            "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
-            !selection.length && "text-foreground-400",
-            isConnected && !!selection.length && "cursor-pointer",
-          )}
-          onClick={isConnected ? handleReset : undefined}
-        >
-          {isConnected && selection.length > 0 && (
-            <Checkbox
-              className="text-foreground-100"
-              variant="minus-line"
-              size="sm"
-              checked
-            />
-          )}
-          {isConnected && selection.length > 0 ? (
-            <p>{`${selection.length} / ${filteredTokens.length} Selected`}</p>
-          ) : (
-            <>
-              <p>{`${filteredTokens.length} ${tokens && filteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
-              {Object.keys(activeFilters).length > 0 && (
-                <Button
-                  variant="ghost"
-                  onClick={clearAllFilters}
-                  className="ml-2 text-xs"
-                >
-                  Clear Filters
-                </Button>
-              )}
-            </>
-          )}
+        <div className="flex items-center gap-4">
+          <div
+            className={cn(
+              "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
+              !selection.length && "text-foreground-400",
+              isConnected && !!selection.length && "cursor-pointer",
+            )}
+            onClick={isConnected ? handleReset : undefined}
+          >
+            {isConnected && selection.length > 0 && (
+              <Checkbox
+                className="text-foreground-100"
+                variant="minus-line"
+                size="sm"
+                checked
+              />
+            )}
+            {isConnected && selection.length > 0 ? (
+              <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
+            ) : (
+              <>
+                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
+                {Object.keys(activeFilters).length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={clearAllFilters}
+                    className="ml-2 text-xs"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
         <MarketplaceSearch
           search={search}
@@ -259,9 +269,9 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
             const startIndex = virtualRow.index * 3;
             const endIndex = Math.min(
               startIndex + 3,
-              filteredTokens.length
+              searchFilteredTokens.length
             );
-            const rowTokens = filteredTokens.slice(startIndex, endIndex);
+            const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
 
             return (
               <div
@@ -277,7 +287,10 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
               >
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
                   {rowTokens.map((token) => {
-                    const assetToken = { ...token, orders: [], owner: address || "" } as Asset;
+                    // Get orders for this specific token
+                    const tokenId = token.token_id?.toString();
+                    const tokenOrders = tokenId ? (collectionOrders?.[tokenId] || []) : [];
+                    const assetToken = { ...token, orders: tokenOrders, owner: address || "" } as Asset;
                     return (
                       <Item
                         key={`${token.contract_address}-${token.token_id}`}
@@ -312,6 +325,10 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
           </div>
         </>
       )}
+      <FloatingLoadingSpinner
+        isLoading={status === "loading" && tokens && tokens.length > 0}
+        loadingProgress={loadingProgress}
+      />
     </div>
   );
 }
@@ -470,12 +487,3 @@ const EmptyState = () => {
   );
 };
 
-const EmptySelectionState = () => {
-  return (
-    <Empty
-      title="No results meet this criteria"
-      icon="inventory"
-      className="h-full p-6"
-    />
-  );
-};

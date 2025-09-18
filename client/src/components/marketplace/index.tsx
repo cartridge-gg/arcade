@@ -11,6 +11,7 @@ import makeBlockie from "ethereum-blockies-base64";
 import { useMarketCollectionFetcher } from "@/hooks/marketplace-fetcher";
 import { useEditions, useGames } from "@/collections";
 import { Contract } from "@/store";
+import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
 export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
   const editions = useEditions();
@@ -20,23 +21,34 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
     return editions.map(e => e.config.project)
   }, [editions, edition]);
 
-  const { collections, status } = useMarketCollectionFetcher({ projects: projectsList });
+  const { collections, status, editionError, loadingProgress } = useMarketCollectionFetcher({ projects: projectsList });
 
-  if (status === "loading" && collections.length === 0) {
+  if ((status === "idle" || status === "loading") && collections.length === 0) {
     return <LoadingState />;
   }
 
-  if (status !== "loading" && collections.length === 0) {
+  if (status !== "loading" && collections.length === 0 && !editionError) {
     return <EmptyState />;
   }
 
+  const isStillLoading = status === "loading" || (loadingProgress && loadingProgress.total > 0 && loadingProgress.completed < loadingProgress.total);
+
   return (
     <>
+      {collections.length === 0 && editionError && editionError.length > 0 && (
+        <Empty
+          title="No collections available"
+          description="Failed to connect to data source"
+          icon="alert"
+          className="h-full py-3 lg:py-6"
+        />
+      )}
+      {collections.length > 0 && (
       <div
         className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}
       >
-        {collections.map((collection) => (
+          {collections.map((collection) => (
           <Item
             key={`${collection.project}-${collection.contract_address}`}
             project={collection.project}
@@ -45,7 +57,12 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
             games={games as GameModel[]}
           />
         ))}
-      </div>
+        </div>
+      )}
+      <FloatingLoadingSpinner
+        isLoading={isStillLoading && collections.length > 0}
+        loadingProgress={loadingProgress}
+      />
     </>
   );
 };

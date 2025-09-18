@@ -1,3 +1,4 @@
+import { type EditionModel} from "@cartridge/arcade";
 import { useState, useCallback, useRef } from "react";
 import { Token } from "@dojoengine/torii-wasm";
 import { MetadataHelper } from "@/helpers/metadata";
@@ -55,6 +56,7 @@ export function useFetcherState(includeRetry: boolean = false): FetcherStateBase
   const [status, setStatus] = useState<FetcherStatus>("idle");
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [editionError, setEditionError] = useState<EditionModel[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState<{
     completed: number;
@@ -67,6 +69,7 @@ export function useFetcherState(includeRetry: boolean = false): FetcherStateBase
     setIsLoading(false);
     setIsError(false);
     setErrorMessage(null);
+    setEditionError([]);
     setLoadingProgress({ completed: 0, total: 0 });
     if (includeRetry) {
       setRetryCount(0);
@@ -78,6 +81,7 @@ export function useFetcherState(includeRetry: boolean = false): FetcherStateBase
     setIsLoading(true);
     setIsError(false);
     setErrorMessage(null);
+    setEditionError([]);
     setLoadingProgress({ completed: 0, total: 0 });
   }, []);
 
@@ -89,11 +93,12 @@ export function useFetcherState(includeRetry: boolean = false): FetcherStateBase
     }
   }, [includeRetry]);
 
-  const setError = useCallback((message?: string) => {
+  const setError = useCallback((edition: EditionModel, message?: string) => {
     setStatus("error");
     setIsLoading(false);
     setIsError(true);
     setErrorMessage(message || "An error occurred");
+    setEditionError(e => [...e, edition])
   }, []);
 
   const base = {
@@ -101,6 +106,7 @@ export function useFetcherState(includeRetry: boolean = false): FetcherStateBase
     isLoading,
     isError,
     errorMessage,
+    editionError,
     loadingProgress,
     setStatus,
     setIsLoading,
