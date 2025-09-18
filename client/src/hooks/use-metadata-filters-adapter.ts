@@ -1,8 +1,9 @@
-import { useMemo, useCallback, useState, useEffect } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useMetadataFilters } from './use-metadata-filters';
 import { useMarketTokensFetcher } from './marketplace-tokens-fetcher';
 import { useProject } from './project';
 import { useSearchParams } from 'react-router-dom';
+import { useMetadataFilterStore } from '@/store/metadata-filters';
 
 /**
  * Adapter hook that provides the same interface as useMarketFilters
@@ -11,7 +12,7 @@ import { useSearchParams } from 'react-router-dom';
 export function useMetadataFiltersAdapter() {
   const { collection: collectionAddress, edition } = useProject();
   const [active, setActive] = useState(1); // 0 = Buy Now, 1 = Show All
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, ] = useSearchParams();
 
   // Get tokens from the fetcher - use edition's project if available
   const { tokens } = useMarketTokensFetcher({
@@ -26,42 +27,28 @@ export function useMetadataFiltersAdapter() {
     availableFilters,
     setFilter,
     removeFilter,
-    clearAllFilters,
-    metadataIndex
+    clearAllFilters
   } = useMetadataFilters({
     tokens: tokens || [],
     collectionAddress: collectionAddress || '',
     enabled: true
   });
 
-  // Transform metadata index to the format expected by the filter component
+  // Get pre-computed data from store
+  const { getCollectionState } = useMetadataFilterStore();
+  const collectionState = getCollectionState(collectionAddress || '');
+  const precomputed = collectionState?.precomputed;
+
+  // Use pre-computed allMetadata or fallback to empty array
   const allMetadata = useMemo(() => {
-    const metadata: Array<{
-      trait_type: string;
-      value: string;
-      tokens: Array<{ token_id: string }>;
-    }> = [];
-
-    for (const [trait, values] of Object.entries(metadataIndex)) {
-      for (const [value, tokenIds] of Object.entries(values)) {
-        metadata.push({
-          trait_type: trait,
-          value: value,
-          tokens: tokenIds.map(id => ({ token_id: id }))
-        });
-      }
-    }
-
-    return metadata;
-  }, [metadataIndex]);
+    return precomputed?.allMetadata || [];
+  }, [precomputed]);
 
   // Apply "Buy Now" vs "Show All" filter
   const tokensAfterStatusFilter = useMemo(() => {
     if (active === 0) {
       // Buy Now - only show tokens with orders
-      return filteredTokens.filter(token => {
-        // Check if token has orders (this would need to be integrated with marketplace data)
-        // For now, return all filtered tokens
+      return filteredTokens.filter(() => {
         // TODO: Integrate with marketplace orders
         return true;
       });
@@ -71,32 +58,19 @@ export function useMetadataFiltersAdapter() {
     }
   }, [filteredTokens, active]);
 
-  // Transform filtered data to the format expected by the filter component
+  // Calculate filtered metadata based on active tokens
   const filteredMetadata = useMemo(() => {
-    const metadata: Array<{
-      trait_type: string;
-      value: string;
-      tokens: Array<{ token_id: string }>;
-    }> = [];
+    if (!precomputed?.allMetadata) return [];
 
     // Get the set of filtered token IDs (after status filter)
     const filteredTokenIds = new Set(tokensAfterStatusFilter.map(t => t.token_id));
 
-    for (const [trait, values] of Object.entries(metadataIndex)) {
-      for (const [value, tokenIds] of Object.entries(values)) {
-        // Only include token IDs that are in the filtered set
-        const matchingIds = tokenIds.filter(id => filteredTokenIds.has(id));
-
-        metadata.push({
-          trait_type: trait,
-          value: value,
-          tokens: matchingIds.map(id => ({ token_id: id }))
-        });
-      }
-    }
-
-    return metadata;
-  }, [metadataIndex, tokensAfterStatusFilter]);
+    // Filter pre-computed metadata to only include tokens in filtered set
+    return precomputed.allMetadata.map(item => ({
+      ...item,
+      tokens: item.tokens.filter(t => filteredTokenIds.has(t.token_id))
+    }));
+  }, [precomputed, tokensAfterStatusFilter]);
 
   // Check if a filter is active
   const isActive = useCallback((trait: string, value: string) => {
@@ -138,13 +112,13 @@ export function useMetadataFiltersAdapter() {
   }, [activeFilters]);
 
   // Set all metadata (for context compatibility)
-  const setAllMetadata = useCallback((metadata: any) => {
+  const setAllMetadata = useCallback(() => {
     // This is handled automatically by the metadata index
     console.log('setAllMetadata called but handled by metadata index');
   }, []);
 
   // Set filtered metadata (for context compatibility)
-  const setFilteredMetadata = useCallback((metadata: any) => {
+  const setFilteredMetadata = useCallback(() => {
     // This is handled automatically by the filtering system
     console.log('setFilteredMetadata called but handled by filtering system');
   }, []);
@@ -159,6 +133,10 @@ export function useMetadataFiltersAdapter() {
     filteredMetadata,
     setAllMetadata,
     setFilteredMetadata,
+
+    // Pre-computed data for performance
+    precomputedAttributes: precomputed?.attributes || [],
+    precomputedProperties: precomputed?.properties || {},
 
     // Filter actions
     isActive,

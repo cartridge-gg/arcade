@@ -8,7 +8,7 @@ import {
   Separator,
   Skeleton,
 } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Token } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
@@ -71,9 +71,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   const {
     filteredTokens,
     activeFilters,
-    availableFilters,
-    setFilter,
-    removeFilter,
     clearAllFilters,
     isEmpty: isFilterEmpty
   } = useMetadataFilters({
@@ -228,7 +225,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
               {Object.keys(activeFilters).length > 0 && (
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={clearAllFilters}
                   className="ml-2 text-xs"
                 >

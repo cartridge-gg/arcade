@@ -30,6 +30,25 @@ export interface AvailableFilters {
   };
 }
 
+// Pre-computed filter data for performance
+export interface PrecomputedProperty {
+  property: string;
+  order: number;  // Total count across all tokens
+}
+
+export interface PrecomputedFilterData {
+  attributes: string[];  // Sorted list of unique traits
+  properties: {
+    [trait: string]: PrecomputedProperty[];  // Sorted properties with counts
+  };
+  // Pre-computed metadata format for UI
+  allMetadata: Array<{
+    trait_type: string;
+    value: string;
+    tokens: Array<{ token_id: string }>;
+  }>;
+}
+
 export interface FilterState {
   activeFilters: ActiveFilters;
   availableFilters: AvailableFilters;
@@ -37,6 +56,7 @@ export interface FilterState {
 
 export interface CollectionFilterState extends FilterState {
   metadataIndex: MetadataIndex;
+  precomputed?: PrecomputedFilterData;  // Optional for backward compatibility
   lastUpdated: number;
 }
 

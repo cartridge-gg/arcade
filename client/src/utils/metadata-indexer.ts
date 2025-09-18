@@ -1,9 +1,9 @@
-import { Token } from "@dojoengine/torii-wasm";
 import {
   MetadataIndex,
-  TokenAttribute,
   ActiveFilters,
   AvailableFilters,
+  PrecomputedFilterData,
+  PrecomputedProperty,
   BuildMetadataIndex,
   UpdateMetadataIndex,
   ExtractTokenAttributes,
@@ -30,7 +30,7 @@ export const buildMetadataIndex: BuildMetadataIndex = (tokens) => {
       if (!index['No Traits']['true']) {
         index['No Traits']['true'] = [];
       }
-      index['No Traits']['true'].push(token.token_id);
+      index['No Traits']['true'].push(token.token_id || '');
       continue;
     }
 
@@ -49,8 +49,9 @@ export const buildMetadataIndex: BuildMetadataIndex = (tokens) => {
         index[trait][value] = [];
       }
 
-      if (!index[trait][value].includes(token.token_id)) {
-        index[trait][value].push(token.token_id);
+      const tokenId = token.token_id || '';
+      if (!index[trait][value].includes(tokenId)) {
+        index[trait][value].push(tokenId);
       }
     }
   }
@@ -75,8 +76,9 @@ export const updateMetadataIndex: UpdateMetadataIndex = (existingIndex, newToken
       if (!updatedIndex['No Traits']['true']) {
         updatedIndex['No Traits']['true'] = [];
       }
-      if (!updatedIndex['No Traits']['true'].includes(token.token_id)) {
-        updatedIndex['No Traits']['true'].push(token.token_id);
+      const tokenId = token.token_id || '';
+      if (!updatedIndex['No Traits']['true'].includes(tokenId)) {
+        updatedIndex['No Traits']['true'].push(tokenId);
       }
       continue;
     }
@@ -96,8 +98,9 @@ export const updateMetadataIndex: UpdateMetadataIndex = (existingIndex, newToken
         updatedIndex[trait][value] = [];
       }
 
-      if (!updatedIndex[trait][value].includes(token.token_id)) {
-        updatedIndex[trait][value].push(token.token_id);
+      const tokenId = token.token_id || '';
+      if (!updatedIndex[trait][value].includes(tokenId)) {
+        updatedIndex[trait][value].push(tokenId);
       }
     }
   }
@@ -269,4 +272,61 @@ export const parseFiltersFromURL: ParseFiltersFromURL = (urlParams) => {
   }
 
   return filters;
+};
+
+/**
+ * Pre-compute filter data for performance optimization
+ * This runs once during index building to avoid repeated calculations in UI
+ */
+export const precomputeFilterData = (metadataIndex: MetadataIndex): PrecomputedFilterData => {
+  // Extract and sort unique attributes
+  const attributes = Object.keys(metadataIndex).sort();
+
+  // Pre-compute properties with counts for each trait
+  const properties: { [trait: string]: PrecomputedProperty[] } = {};
+
+  for (const trait of attributes) {
+    const traitValues = metadataIndex[trait];
+    const props: PrecomputedProperty[] = [];
+
+    for (const [value, tokenIds] of Object.entries(traitValues)) {
+      props.push({
+        property: value,
+        order: tokenIds.length
+      });
+    }
+
+    // Sort properties by count (descending) then alphabetically
+    props.sort((a, b) => {
+      if (b.order !== a.order) {
+        return b.order - a.order;
+      }
+      return a.property.localeCompare(b.property);
+    });
+
+    properties[trait] = props;
+  }
+
+  // Pre-compute the allMetadata format used by the UI
+  const allMetadata: Array<{
+    trait_type: string;
+    value: string;
+    tokens: Array<{ token_id: string }>;
+  }> = [];
+
+  for (const [trait, values] of Object.entries(metadataIndex)) {
+    for (const [value, tokenIds] of Object.entries(values)) {
+      allMetadata.push({
+        trait_type: trait,
+        value: value,
+        tokens: tokenIds.map(id => ({ token_id: id }))
+      });
+    }
+  }
+
+  return {
+    attributes,
+    properties,
+    allMetadata
+  };
 };

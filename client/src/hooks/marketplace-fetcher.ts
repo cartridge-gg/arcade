@@ -88,6 +88,10 @@ export function useMarketCollectionFetcher({
           projects,
           {
             sql: TOKENS_SQL(limit, 0)
+            // client: async function* ({ client }) {
+            //   const contracts = await client.getTokenContracts({ contract_addresses: [], contract_types: ['ERC721', 'ERC1155'], pagination: {limit: 1000, cursor: undefined, direction: 'Forward', order_by: []}});
+            //   console.log(contracts);
+            // },native: true,
           },
         );
 

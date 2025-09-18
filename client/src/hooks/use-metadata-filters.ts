@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Token } from '@dojoengine/torii-wasm';
 import { useMetadataFilterStore } from '@/store/metadata-filters';
 import {
   buildMetadataIndex,
@@ -85,7 +84,7 @@ export function useMetadataFilters({
     }
 
     const idSet = new Set(filteredIds);
-    return tokens.filter(token => idSet.has(token.token_id));
+    return tokens.filter(token => token.token_id && idSet.has(token.token_id));
   }, [tokens, collectionAddress, activeFilters, enabled, getFilteredTokenIds]);
 
   // Calculate available filters with counts

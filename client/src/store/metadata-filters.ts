@@ -1,29 +1,30 @@
 import { create } from 'zustand';
 import {
-  MetadataFilterStore,
-  CollectionFilterState,
-  MetadataIndex,
-  ActiveFilters,
-  AvailableFilters
+  MetadataFilterStore
 } from '@/types/metadata-filter.types';
-import { applyFilters } from '@/utils/metadata-indexer';
+import { applyFilters, precomputeFilterData } from '@/utils/metadata-indexer';
 
 export const useMetadataFilterStore = create<MetadataFilterStore>((set, get) => ({
   collections: {},
 
-  setMetadataIndex: (collectionAddress, index) =>
-    set((state) => ({
+  setMetadataIndex: (collectionAddress, index) => {
+    // Pre-compute filter data for performance
+    const precomputed = precomputeFilterData(index);
+
+    return set((state) => ({
       collections: {
         ...state.collections,
         [collectionAddress]: {
           ...(state.collections[collectionAddress] || {}),
           metadataIndex: index,
+          precomputed,  // Store pre-computed data
           activeFilters: state.collections[collectionAddress]?.activeFilters || {},
           availableFilters: state.collections[collectionAddress]?.availableFilters || {},
           lastUpdated: Date.now()
         }
       }
-    })),
+    }));
+  },
 
   setActiveFilters: (collectionAddress, filters) =>
     set((state) => ({
