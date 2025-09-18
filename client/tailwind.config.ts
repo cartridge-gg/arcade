@@ -8,15 +8,16 @@ const config = {
   ],
   presets: [cartridgeTWPreset],
   theme: {
-    screens: {
-      lg: "1200px",
-    },
+
     extend: {
       width: {
         desktop: "432px",
       },
       height: {
         desktop: "600px",
+      },
+      screens: {
+        lg: "1200px",
       },
     },
   },
