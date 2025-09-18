@@ -1,6 +1,6 @@
 import { TabsTrigger } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
 
 const arcadeSubTabVariants = cva(

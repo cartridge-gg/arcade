@@ -1,8 +1,8 @@
-import { GameModel } from "@cartridge/arcade";
+import type { GameModel } from "@cartridge/arcade";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
 import { useCallback, useMemo, useState } from "react";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { constants } from "starknet";
 import ControllerAction from "../modules/controller-action";
 

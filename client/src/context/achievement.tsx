@@ -1,14 +1,14 @@
-import { createContext, useState, ReactNode, useEffect, useMemo } from "react";
+import { createContext, useState, type ReactNode, useEffect, useMemo } from "react";
 import { TROPHY, PROGRESS } from "@/constants";
 import { Trophy, Progress } from "@/models";
 import { useProgressions } from "@/hooks/progressions";
 import { useTrophies } from "@/hooks/trophies";
 import {
   AchievementHelper,
-  AchievementData,
-  Item,
-  Player,
-  Event,
+  type AchievementData,
+  type Item,
+  type Player,
+  type Event,
 } from "@/helpers/achievements";
 import { useUsernames } from "@/hooks/account";
 import { getChecksumAddress } from "starknet";

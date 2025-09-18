@@ -11,9 +11,9 @@ import {
   LineElement,
   Tooltip,
   Filler,
-  ChartOptions,
-  ChartDataset,
-  TooltipItem,
+  type ChartOptions,
+  type ChartDataset,
+  type TooltipItem,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import zoomPlugin from "chartjs-plugin-zoom";
@@ -291,9 +291,7 @@ export function Metrics() {
         backgroundColor: "#212621",
         borderDash: [5, 5],
         borderWidth: 1,
-        pointBorderColor: function () {
-          return `${theme?.colors?.primary}` || "#fbcb4a";
-        },
+        pointBorderColor: () => `${theme?.colors?.primary}` || "#fbcb4a",
         pointBackgroundColor: "#242824",
         pointHoverBackgroundColor: `${theme?.colors?.primary}` || "#fbcb4a",
         pointBorderWidth,

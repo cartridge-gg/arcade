@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
 import { Register } from "./register";
-import { GameModel, RoleType } from "@cartridge/arcade";
+import { type GameModel, RoleType } from "@cartridge/arcade";
 import { useLocation, useNavigate } from "react-router-dom";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";

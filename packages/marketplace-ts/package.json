@@ -1,0 +1,64 @@
+{
+  "name": "@cartridge/marketplace",
+  "version": "0.0.0",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "browser": "dist/index.global.js",
+  "jsdelivr": "dist/index.global.js",
+  "unpkg": "dist/index.global.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "style": "module",
+      "parser": "typescript"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "build": "pnpm run build:deps",
+    "build:deps": "tsup",
+    "lint": "biome lint --fix src",
+    "lint:check": "biome lint src",
+    "format": "biome format --fix src",
+    "format:check": "biome format src",
+    "type:check": "tsc -b"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.10.0",
+  "dependencies": {
+    "@cartridge/arcade": "workspace:*",
+    "@dojoengine/core": "catalog:",
+    "@dojoengine/sdk": "catalog:",
+    "@dojoengine/torii-client": "catalog:",
+    "@dojoengine/torii-wasm": "catalog:",
+    "@starknet-react/chains": "catalog:",
+    "@starknet-react/core": "catalog:",
+    "starknet": "8.5.2"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.79.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@cartridge/arcade-config": "workspace:*",
+    "@types/react": "^18.3.23",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "^3.2.4"
+  }
+}

@@ -6,8 +6,8 @@ import {
   XIcon,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, VariantProps } from "class-variance-authority";
-import { HTMLAttributes } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import type { HTMLAttributes } from "react";
 
 interface GameSocialWebsiteProps
   extends VariantProps<typeof GameSocialVariants> {
@@ -146,7 +146,7 @@ const GameSocial = ({
       href={href}
       draggable={false}
       target="_blank"
-      className={cn(GameSocialVariants({ variant }), className)}
+      className={cn(GameSocialVariants({ variant }), className)} rel="noreferrer"
     >
       {icon}
       {label && <p className="px-0.5 truncate max-w-32">{label}</p>}

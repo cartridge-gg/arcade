@@ -1,6 +1,6 @@
 import {
   createContext,
-  ReactNode,
+  type ReactNode,
   useContext,
   useEffect,
   useState,
@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { ArcadeContext } from "./arcade";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 import { getChecksumAddress } from "starknet";
 import { useParams } from "react-router-dom";
 

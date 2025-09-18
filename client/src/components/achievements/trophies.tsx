@@ -1,12 +1,12 @@
 import { AchievementCard } from "@/components/modules/achievement-card";
-import { Item } from "@/hooks/achievements";
+import type { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Socials } from "@cartridge/arcade";
+import type { Socials } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
 import { constants } from "starknet";
 import { toast } from "sonner";
 import { useAccount } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 
 const HIDDEN_GROUP = "Hidden";
 
@@ -141,7 +141,7 @@ function Group({
         completed: item.completed,
         content: {
           points: item.earning,
-          difficulty: parseFloat(item.percentage),
+          difficulty: Number.parseFloat(item.percentage),
           hidden: item.hidden,
           icon: item.hidden && !item.completed ? undefined : item.icon,
           title: item.title,
@@ -157,7 +157,7 @@ function Group({
                 twitter: socials.twitter,
                 timestamp: item.timestamp,
                 points: item.earning,
-                difficulty: parseFloat(item.percentage),
+                difficulty: Number.parseFloat(item.percentage),
                 title: item.title,
               },
       };

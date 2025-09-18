@@ -5,31 +5,31 @@ import {
   CollectibleCard,
   Empty,
   MarketplaceSearch,
-  SearchResult,
+  type SearchResult,
   Separator,
   Skeleton,
 } from "@cartridge/ui";
 import { useProject } from "@/hooks/project";
 import { useBalances, useCollection } from "@/hooks/market-collections";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 import { MetadataHelper } from "@/helpers/metadata";
 import placeholder from "@/assets/placeholder.svg";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
-  FunctionAbi,
+  type FunctionAbi,
   getChecksumAddress,
-  InterfaceAbi,
-  RpcProvider,
+  type InterfaceAbi,
+  type RpcProvider,
 } from "starknet";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { Chain, mainnet } from "@starknet-react/chains";
+import { type Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketFilters } from "@/hooks/market-filters";
 import { useUsernames } from "@/hooks/account";
 import { UserAvatar } from "../user/avatar";
-import { OrderModel, SaleEvent } from "@cartridge/marketplace";
+import type { OrderModel, SaleEvent } from "@cartridge/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 
@@ -96,7 +96,7 @@ export function Items() {
   const accounts = useMemo(() => {
     if (!balances || balances.length === 0) return [];
     const owners = balances
-      .filter((balance) => parseInt(balance.balance, 16) > 0)
+      .filter((balance) => Number.parseInt(balance.balance, 16) > 0)
       .map((balance) => `0x${BigInt(balance.account_address).toString(16)}`);
     return Array.from(new Set(owners));
   }, [balances, collectionAddress]);
@@ -181,7 +181,7 @@ export function Items() {
   const handlePurchase = useCallback(
     async (tokens: (Token & { orders: OrderModel[]; owner: string })[]) => {
       if (!isConnected || !connector) return;
-      const orders = tokens.map((token) => token.orders).flat();
+      const orders = tokens.flatMap((token) => token.orders);
       const contractAddresses = new Set(
         tokens.map((token) => token.contract_address),
       );
@@ -416,7 +416,7 @@ function Item({
 
   const lastSale = useMemo(() => {
     if (!token.token_id) return null;
-    const tokenId = parseInt(token.token_id.toString());
+    const tokenId = Number.parseInt(token.token_id.toString());
     const tokenSales = sales[tokenId];
     if (!tokenSales || Object.keys(tokenSales).length === 0) return null;
     const sale = Object.values(tokenSales).sort((a, b) => b.time - a.time)[0];

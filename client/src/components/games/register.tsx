@@ -13,10 +13,10 @@ import {
 } from "@cartridge/ui";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
-import { AllowArray, byteArray, Call, constants } from "starknet";
-import { z } from "zod";
+import { type AllowArray, byteArray, type Call, constants } from "starknet";
+import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm, type UseFormReturn } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Attributes, Properties, Socials } from "@cartridge/arcade";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { MetadataHelper } from "@/helpers/metadata";
 import { formSchema } from "./register-form";
 // import { data } from "./data";

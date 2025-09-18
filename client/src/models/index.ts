@@ -1,4 +1,4 @@
-import { ByteArray, byteArray, hash } from "starknet";
+import { type ByteArray, byteArray, hash } from "starknet";
 
 export * from "./trophy";
 export * from "./progress";

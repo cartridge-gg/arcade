@@ -1,6 +1,7 @@
 pub mod constants;
 
 pub mod systems {
+    pub mod marketplace;
     pub mod registry;
     pub mod slot;
     pub mod social;

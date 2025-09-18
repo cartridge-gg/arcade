@@ -1,7 +1,7 @@
 import { SparklesIcon, Thumbnail } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, VariantProps } from "class-variance-authority";
-import { HTMLAttributes, useState } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { type HTMLAttributes, useState } from "react";
 
 interface ArcadeGameSelectProps
   extends HTMLAttributes<HTMLDivElement>,

@@ -109,11 +109,11 @@ export function usePlayerGameStats(projects: string[]) {
   const { achievements, players } = useAchievements();
 
   const gameAchievements = useMemo(() => {
-    return projects.map((project) => achievements[project || ""] || []).flat();
+    return projects.flatMap((project) => achievements[project || ""] || []);
   }, [achievements, projects]);
 
   const gamePlayers = useMemo(
-    () => projects.map((project) => players[project || ""] || []).flat(),
+    () => projects.flatMap((project) => players[project || ""] || []),
     [players, projects],
   );
 
@@ -126,7 +126,7 @@ export function usePlayerGameStats(projects: string[]) {
           : item.completed,
       )
       .sort((a, b) => a.id.localeCompare(b.id))
-      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+      .sort((a, b) => Number.parseFloat(a.percentage) - Number.parseFloat(b.percentage))
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     const completed = gameAchievements.filter((item) => item.completed).length;
     const total = gameAchievements.length;

@@ -1,14 +1,14 @@
 import { MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
 
 import placeholder from "@/assets/placeholder.svg";
 import { useAddress } from "@/hooks/address";
-import { Token } from "@/context/token";
-import { Chain, mainnet } from "@starknet-react/chains";
-import { EditionModel } from "@cartridge/arcade";
+import type { Token } from "@/context/token";
+import { type Chain, mainnet } from "@starknet-react/chains";
+import type { EditionModel } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
 import { DEFAULT_TOKENS_PROJECT } from "@/constants";
@@ -116,7 +116,7 @@ function Item({
       return;
     }
     const preset = edition?.properties.preset;
-    let options = ["closable=true"];
+    const options = ["closable=true"];
     if (
       token.metadata.project &&
       token.metadata.project !== DEFAULT_TOKENS_PROJECT

@@ -1,4 +1,4 @@
-import { formatAddress, FormatAddressOptions } from "@cartridge/ui/utils";
+import { formatAddress, type FormatAddressOptions } from "@cartridge/ui/utils";
 import { toast } from "sonner";
 import { useCallback } from "react";
 import { getChecksumAddress } from "starknet";

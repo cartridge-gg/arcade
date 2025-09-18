@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { TabsContent, Thumbnail, TabValue } from "@cartridge/ui";
+import { TabsContent, Thumbnail, type TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";

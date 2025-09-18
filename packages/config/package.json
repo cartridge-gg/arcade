@@ -1,0 +1,17 @@
+{
+  "name": "@cartridge/arcade-config",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "biome lint --fix .",
+    "lint:check": "biome lint .",
+    "format": "biome format --fix .",
+    "format:check": "biome format ."
+  },
+  "files": ["tsup.web.config.ts"],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.7.1"
+}

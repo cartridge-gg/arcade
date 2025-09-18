@@ -1,7 +1,7 @@
 import { cn, Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { EditionModel, GameModel } from "@cartridge/arcade";
+import type { EditionModel, GameModel } from "@cartridge/arcade";
 import { Connect } from "../errors";
 import { getChecksumAddress } from "starknet";
 import { ArcadeDiscoveryGroup } from "../modules/discovery-group";

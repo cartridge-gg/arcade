@@ -1,5 +1,5 @@
-import { HTMLAttributes, useMemo } from "react";
-import { cva, VariantProps } from "class-variance-authority";
+import { type HTMLAttributes, useMemo } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { FollowerTag } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import AchievementPlayerLabel from "./player-label";

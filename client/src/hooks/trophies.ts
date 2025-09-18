@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import {
-  Project,
+  type Project,
   useAchievementsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { RawTrophy, Trophy, getSelectorFromTag } from "@/models";
+import { type RawTrophy, type Trophy, getSelectorFromTag } from "@/models";
 
 interface Response {
   items: { meta: { project: string }; achievements: RawTrophy[] }[];
