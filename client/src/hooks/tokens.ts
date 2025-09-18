@@ -42,17 +42,19 @@ export const useTokens = () => {
     username,
     interval: 30000,
   });
+
   const credits: Token = useMemo(() => {
     return {
       balance: {
-        amount: Number(creditBalance.balance.formatted),
+        amount: Number(creditBalance.balance.value) / 10 ** 6,
         value: 0,
         change: 0,
       },
       metadata: {
         name: "Credits",
         symbol: "Credits",
-        decimals: 0,
+        decimals: 6,
+        address: "credit",
         image: "https://static.cartridge.gg/presets/credit/icon.svg",
       },
     };
