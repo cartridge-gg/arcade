@@ -1,4 +1,4 @@
-import PredictCard, { PredictCardProps } from "./predict-card";
+import PredictCard, { type PredictCardProps } from "./predict-card";
 
 const demoPredict = {
   image: "https://static.cartridge.gg/presets/loot-survivor/icon.png",

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchToriis } from "@cartridge/arcade";
 import { CollectionType } from "@/context/collection";
-import { ToriiClient } from "@dojoengine/torii-wasm";
+import type { ToriiClient } from "@dojoengine/torii-wasm";
 
 /**
  * Hook for fetching token balances from multiple Torii endpoints

@@ -12,11 +12,12 @@ dojo.workspace = true
 dojo_macros.workspace = true
 starknet.workspace = true
 achievement = { path = ".." }
+collection = { path = ".." }
 controller = { path = ".." }
+orderbook = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
 social = { path = ".." }
-collection = { path = ".." }
 
 [dev-dependencies]
 dojo_cairo_test.workspace = true
@@ -29,6 +30,13 @@ build-external-contracts = [
     "controller::models::index::m_Account",
     "controller::models::index::m_Controller",
     "controller::models::index::m_Signer",
+    "orderbook::models::index::m_Access",
+    "orderbook::models::index::m_Book",
+    "orderbook::models::index::m_Order",
+    "orderbook::models::index::m_MetadataAttribute",
+    "orderbook::events::index::e_Listing",
+    "orderbook::events::index::e_Offer",
+    "orderbook::events::index::e_Sale",
     "provider::models::index::m_Deployment",
     "provider::models::index::m_Factory",
     "provider::models::index::m_Team",

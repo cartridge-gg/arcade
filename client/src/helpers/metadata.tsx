@@ -1,5 +1,5 @@
-import { MetadataAttribute } from "@/context/market-filters";
-import { Token } from "@dojoengine/torii-wasm";
+import type { MetadataAttribute } from "@/context/market-filters";
+import type { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
 
 const JWT =

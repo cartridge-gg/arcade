@@ -1,7 +1,7 @@
 import { SpinnerIcon } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, VariantProps } from "class-variance-authority";
-import React, { HTMLAttributes } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import React, { type HTMLAttributes } from "react";
 
 const controllerActionVariants = cva(
   "flex items-center gap-1.5 px-3 py-2 h-10 min-w-48 cursor-pointer data-[disabled=true]:cursor-default",

@@ -1,21 +1,39 @@
 {
-	"$schema": "./node_modules/turbo/schema.json",
-	"ui": "tui",
+	"$schema": "https://turbo.build/schema.json",
 	"tasks": {
 		"dev": {
 			"persistent": true,
-			"dependsOn": ["^build:deps"],
-			"outputs": ["dist/**"]
+      		"dependsOn": ["^build:deps"],
+      		"outputs": ["dist/**"]
+		},
+		"build:scarb": {
+			"dependsOn": ["^build:scarb"],
+			"outputs": ["target/"]
 		},
 		"build:deps": {
 			"dependsOn": ["^build:deps"],
-			"outputs": ["dist/**"]
+			"outputs": ["dist/**", "target/"]
 		},
 		"build": {
 			"dependsOn": ["^build"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**"]
+			"outputs": ["dist/**", "target/"]
 		},
+		"lint:check": {
+			"dependsOn": ["^lint:check", "^build:scarb"]
+		},
+		"lint": {
+			"dependsOn": ["^lint", "^build:scarb"]
+		},
+		"format:check": {},
 		"format": {},
-		"format:check": {}
+		"test": {},
+		"test:watch": {
+			"persistent": true,
+			"cache": false
+		},
+		"type:check": {
+			"persistent": true,
+			"cache": false
+    }
 	}
 }

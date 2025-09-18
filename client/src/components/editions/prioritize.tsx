@@ -1,9 +1,9 @@
-import { EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import { useCallback, useMemo, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
-import ControllerConnector from "@cartridge/connector/controller";
-import { Call, constants } from "starknet";
+import type ControllerConnector from "@cartridge/connector/controller";
+import { type Call, constants } from "starknet";
 import ControllerAction from "../modules/controller-action";
 
 export function Prioritize({

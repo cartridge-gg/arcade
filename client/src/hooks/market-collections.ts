@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { MarketCollectionContext } from "@/context/market-collection";
 import { useArcade } from "./arcade";
 import { useProject } from "./project";
-import { Token, ToriiClient, TokenBalance } from "@dojoengine/torii-wasm";
+import type { Token, ToriiClient, TokenBalance } from "@dojoengine/torii-wasm";
 export type { Collection, Collections } from "@/context/market-collection";
 
 /**
@@ -106,7 +106,7 @@ async function fetchBalancesFromClient(
 
 export function useCollection(
   collectionAddress: string,
-  pageSize: number = 50,
+  pageSize = 50,
   initialCursor?: string,
 ) {
   const { clients } = useArcade();
@@ -241,7 +241,7 @@ export function useCollection(
 
 export const useBalances = (
   collectionAddress: string,
-  pageSize: number = 50,
+  pageSize = 50,
   initialCursor?: string,
 ) => {
   const { clients } = useArcade();
@@ -295,7 +295,7 @@ export const useBalances = (
           client: fetchedClient,
         } = await fetchBalances(collectionAddress, pageSize, newCursor);
         if (items.length > 0) {
-          setBalances(items.filter((item) => parseInt(item.balance, 16) > 0));
+          setBalances(items.filter((item) => Number.parseInt(item.balance, 16) > 0));
           setCursor(nextCursor);
           setCurrentCursor(newCursor);
           setClient(fetchedClient);

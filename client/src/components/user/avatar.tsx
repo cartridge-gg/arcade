@@ -1,5 +1,5 @@
 import { OlmechIcon } from "@cartridge/ui";
-import { VariantProps } from "class-variance-authority";
+import type { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 
 export const UserAvatar = ({

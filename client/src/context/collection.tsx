@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useMemo } from "react";
+import { createContext, type ReactNode, useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useCollectibles } from "@/hooks/token-fetcher";

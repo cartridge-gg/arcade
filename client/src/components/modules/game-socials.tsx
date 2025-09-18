@@ -1,7 +1,7 @@
 import { DotsIcon, Select, SelectContent, useMediaQuery } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, VariantProps } from "class-variance-authority";
-import { HTMLAttributes, useMemo } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { type HTMLAttributes, useMemo } from "react";
 import {
   GameSocialDiscord,
   GameSocialGithub,

@@ -6,7 +6,7 @@ import {
   Button,
   cn,
   TabsContent,
-  TabValue,
+  type TabValue,
   Thumbnail,
   TimesIcon,
   VerifiedIcon,

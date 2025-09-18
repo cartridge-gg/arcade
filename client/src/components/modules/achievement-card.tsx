@@ -2,18 +2,19 @@ import {
   AchievementBit,
   AchievementBits,
   AchievementContent,
-  AchievementContentProps,
+  type AchievementContentProps,
   AchievementPagination,
   AchievementPin,
-  AchievementPinProps,
+  type AchievementPinProps,
   AchievementShare,
-  AchievementShareProps,
+  type AchievementShareProps,
   Card,
   CardHeader,
   CardTitle,
   cn,
 } from "@cartridge/ui";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface AchievementCardProps
   extends React.HTMLAttributes<HTMLDivElement> {

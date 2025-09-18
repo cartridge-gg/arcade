@@ -7,7 +7,8 @@ export function Details({ content }: { content: string }) {
   const ref = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    const element = ref.current!;
+    if (!ref.current) return;
+    const element = ref.current;
     setIsOverflown(isExpanded || element.scrollHeight > element.clientHeight);
   }, [isExpanded, ref, content]);
 
@@ -29,10 +30,7 @@ export function Details({ content }: { content: string }) {
           {content}
         </span>
         <span
-          className={cn(
-            "text-xs font-medium text-foreground-100 hover:cursor-pointer hover:underline",
-            !isOverflown && "hidden",
-          )}
+          className={cn("text-xs font-medium text-foreground-100 hover:cursor-pointer hover:underline", !isOverflown && "hidden", )}
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {`Read ${isExpanded ? "less" : "more"}`}

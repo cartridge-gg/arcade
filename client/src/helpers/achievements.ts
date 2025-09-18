@@ -1,4 +1,4 @@
-import { Progress, Trophy, Task } from "@/models";
+import type { Progress, Trophy, Task } from "@/models";
 
 export interface Progressions {
   [game: string]: { [key: string]: Progress };

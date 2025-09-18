@@ -24,8 +24,8 @@ default = "ARCADE"
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/mainnet"
-account_address = "0x1024e16519da35d35b0637c32d0611cc36b724f69cdea25e8007cd6a7cffa51"
-keystore_path = "/Users/glihm/.snaccounts/dev-mainnet.key"
+account_address = "./account.json"
+keystore_path = "./keystore.json"
 world_address = "0x32a5d1ac8e2ced508eb840dd9fbfc1b9ebb6c7a61268ad5d26e82712160d97f"
 # world_block = 1339026
 ipfs_config.url = "https://ipfs.infura.io:5001"

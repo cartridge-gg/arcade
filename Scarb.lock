@@ -20,6 +20,7 @@ dependencies = [
  "dojo",
  "dojo_cairo_test",
  "dojo_macros",
+ "orderbook",
  "provider",
  "registry",
  "social",
@@ -121,6 +122,17 @@ name = "openzeppelin_utils"
 version = "1.0.0"
 source = "registry+https://scarbs.xyz/"
 checksum = "sha256:fd348b31c4a4407add33adc3c2b8f26dca71dbd7431faaf726168f37a91db0c1"
+
+[[package]]
+name = "orderbook"
+version = "0.0.0"
+dependencies = [
+ "dojo",
+ "dojo_cairo_test",
+ "dojo_macros",
+ "openzeppelin_introspection",
+ "openzeppelin_token",
+]
 
 [[package]]
 name = "provider"

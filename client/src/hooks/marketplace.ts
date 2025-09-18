@@ -2,7 +2,7 @@ import { useCallback, useContext, useMemo, useState } from "react";
 import { MarketplaceContext } from "@/context/marketplace";
 import { useParams } from "react-router-dom";
 import { getChecksumAddress } from "starknet";
-import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { type OrderModel, StatusType } from "@cartridge/marketplace";
 
 /**
  * Custom hook to access the Marketplace context and account information.

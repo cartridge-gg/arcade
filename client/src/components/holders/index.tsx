@@ -15,13 +15,13 @@ export const Holders = () => {
   const { accounts, total } = useMemo(() => {
     if (!balances || balances.length === 0) return { accounts: [], total: 0 };
     const filtered = balances.filter(
-      (balance) => parseInt(balance.balance, 16) > 0,
+      (balance) => Number.parseInt(balance.balance, 16) > 0,
     );
     const owners = filtered.map(
       (balance) => `0x${BigInt(balance.account_address).toString(16)}`,
     );
     const total = filtered.reduce(
-      (acc, balance) => acc + parseInt(balance.balance, 16),
+      (acc, balance) => acc + Number.parseInt(balance.balance, 16),
       0,
     );
     return { accounts: Array.from(new Set(owners)), total };
@@ -41,7 +41,7 @@ export const Holders = () => {
         const checksum = getChecksumAddress(address);
         const shorten = `${checksum.slice(0, 4)}...${checksum.slice(-4)}`;
         const quantity = userBalances.reduce(
-          (acc, balance) => acc + parseInt(balance.balance, 16),
+          (acc, balance) => acc + Number.parseInt(balance.balance, 16),
           0,
         );
         return {
