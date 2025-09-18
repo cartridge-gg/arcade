@@ -10,6 +10,4 @@ world_block = 1612497
 contracts = [
     "ERC721:0x055161714bb9e0083766a21f49253f3096babf049a5ecb23a6576c872c071163",
 ]
-
-[sql]
-historical = []
+namespaces = ["ARCADE"]

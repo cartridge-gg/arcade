@@ -1,0 +1,15 @@
+world_address = "0x230035e44105bbc11acf2dd1b271a78d53627a810e6a2fb024fd2edcf273c9c"
+rpc = "https://api.cartridge.gg/x/evolute-duel/katana"
+
+[runner]
+explorer = true
+
+[events]
+raw = true
+
+[indexing]
+pending = true
+transactions = true
+
+[sql]
+historical = ["evolute_duel-TrophyProgression"]

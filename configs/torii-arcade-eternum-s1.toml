@@ -2,10 +2,10 @@ rpc = "https://api.cartridge.gg/x/starknet/mainnet"
 world_address = "0x5c6d0020a9927edca9ddc984b97305439c0b32a1ec8d3f0eaf6291074cc9799"
 
 [indexing]
-pending = true # Enable indexing pending blocks
-transactions = true # Enable indexing pending blocks
-polling_interval = 500 # Polling interval in milliseconds
-max_concurrent_tasks = 100 # Maximum concurrent indexing tasks
+allowed_origins = ["*"]
+polling_interval = 500
+pending = true
+transactions = true
 contracts = [
     "ERC20:0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49", # LORDS
     "ERC20:0x264be95a4a2ace20add68cb321acdccd2f9f8440ee1c7abd85da44ddab01085",  # Donkeys
@@ -51,8 +51,3 @@ max_metadata_tasks = 5
 
 [sql]
 historical = ["s1_eternum-TrophyProgression"]
-cache_size = -78_125_000
-page_size = 32_768
-
-[server]
-http_cors_origins = ["*"]
