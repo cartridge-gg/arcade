@@ -4,8 +4,6 @@ import {
   cn,
   CollectibleCard,
   Empty,
-  MarketplaceSearch,
-  SearchResult,
   Separator,
   Skeleton,
 } from "@cartridge/ui";
@@ -27,8 +25,6 @@ import { useAccount, useConnect } from "@starknet-react/core";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketFilters } from "@/hooks/market-filters";
-import { useUsernames } from "@/hooks/account";
-import { UserAvatar } from "../user/avatar";
 import { OrderModel, SaleEvent } from "@cartridge/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
@@ -65,16 +61,12 @@ export function Items() {
     setFilteredMetadata,
     tokens,
     filteredTokens,
-    selected,
-    setSelected,
   } = useMarketFilters();
   const { connector, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
-  const { collection: collectionAddress, filter } = useProject();
+  const { collection: collectionAddress } = useProject();
   const { sales } = useMarketplace();
   const { collection } = useCollection(collectionAddress || "", 1000);
-  const { balances } = useBalances(collectionAddress || "", 1000);
-  const [search, setSearch] = useState<string>("");
   const [cap, setCap] = useState(DEFAULT_ROW_CAP);
   const [selection, setSelection] = useState<Asset[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -93,42 +85,6 @@ export function Items() {
     );
   }, [chains, edition]);
 
-  const accounts = useMemo(() => {
-    if (!balances || balances.length === 0) return [];
-    const owners = balances
-      .filter((balance) => parseInt(balance.balance, 16) > 0)
-      .map((balance) => `0x${BigInt(balance.account_address).toString(16)}`);
-    return Array.from(new Set(owners));
-  }, [balances, collectionAddress]);
-
-  const { usernames } = useUsernames({ addresses: accounts });
-
-  const searchResults = useMemo(() => {
-    return usernames
-      .filter((item) => !!item.username)
-      .map((item) => {
-        const image = (
-          <UserAvatar
-            username={item.username || ""}
-            className="h-full w-full"
-          />
-        );
-        return {
-          image,
-          label: item.username,
-          address: getChecksumAddress(item.address || "0x0"),
-        };
-      });
-  }, [usernames]);
-
-  const options = useMemo(() => {
-    if (!search) return [];
-    return searchResults
-      .filter((item) =>
-        item.label?.toLowerCase().startsWith(search.toLowerCase()),
-      )
-      .slice(0, 3);
-  }, [searchResults, search]);
 
   const handleScroll = useCallback(() => {
     const parent = parentRef.current;
@@ -258,20 +214,6 @@ export function Items() {
     setFilteredMetadata(MetadataHelper.extract(filteredTokens));
   }, [filteredTokens, setFilteredMetadata]);
 
-  useEffect(() => {
-    const selection = searchResults.find(
-      (option) => option.label?.toLowerCase() === filter?.toLowerCase(),
-    );
-    if (
-      !filter ||
-      !searchResults.length ||
-      selected?.label === selection?.label
-    )
-      return;
-    if (selection) {
-      setSelected(selection as SearchResult);
-    }
-  }, [filter, searchResults, setSelected, selected]);
 
   if (!collection) return <EmptyState />;
 
@@ -282,7 +224,7 @@ export function Items() {
 
   return (
     <div className="p-6 flex flex-col gap-4 h-full w-full overflow-hidden">
-      <div className="min-h-10 w-full flex justify-between items-center relative">
+      <div className="min-h-10 w-full flex justify-start items-center">
         <div
           className={cn(
             "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
@@ -305,15 +247,6 @@ export function Items() {
             <p>{`${filteredTokens.length} Items`}</p>
           )}
         </div>
-        <MarketplaceSearch
-          search={search}
-          setSearch={setSearch}
-          selected={selected}
-          setSelected={(selected) => setSelected(selected as SearchResult)}
-          options={options as SearchResult[]}
-          variant="darkest"
-          className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
-        />
       </div>
       <div
         ref={parentRef}
