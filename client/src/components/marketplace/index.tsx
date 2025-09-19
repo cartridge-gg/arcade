@@ -181,7 +181,7 @@ function Item({
       <CollectibleCard
         title={collection.name}
         image={collection.image}
-        // totalCount={collection.totalSupply as unknown as number}
+        totalCount={collection.totalSupply as unknown as number}
         selectable={false}
         listingCount={listingCount}
         onClick={handleClick}

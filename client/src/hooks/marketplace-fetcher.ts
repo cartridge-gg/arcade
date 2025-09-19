@@ -16,7 +16,7 @@ type UseMarketplaceFetcherParams = {
 
 
 const TOKENS_SQL = (limit: number = 5000, offset: number = 0) => `
-  SELECT t.*, c.contract_type
+  SELECT t.*, c.contract_type, (select count(id) FROM tokens tt where tt.contract_address = t.contract_address) as totalSupply
   FROM tokens t
   INNER JOIN contracts c on c.contract_address = t.contract_address
   WHERE metadata is not null
@@ -65,8 +65,8 @@ export function useMarketCollectionFetcher({
         collections[address] = {
           ...c,
           contract_address: address,
-          total_supply: c.total_supply ?? "0x0",
-          totalSupply: BigInt(c.total_supply ?? "0x0"),
+          total_supply: c.totalSupply.toString() ?? "0x0",
+          totalSupply: BigInt(c.totalSupply ?? "0x0"),
           token_id: c.token_id ?? null,
           metadata,
           project,
