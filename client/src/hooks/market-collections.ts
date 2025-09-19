@@ -1,35 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from "react";
-import { MarketCollectionContext } from "@/context/market-collection";
+import { useCallback, useEffect, useState } from "react";
 import { useArcade } from "./arcade";
 import { useProject } from "./project";
 import { Token, ToriiClient, TokenBalance } from "@dojoengine/torii-wasm";
 export type { Collection, Collections } from "@/context/market-collection";
 
-/**
- * Custom hook to access the Arcade context and account information.
- * Must be used within a ArcadeProvider component.
- *
- * @returns An object containing:
- * - chainId: The chain id
- * - provider: The Arcade provider instance
- * - pins: All the existing pins
- * - games: The registered games
- * - chains: The chains
- * @throws {Error} If used outside of a ArcadeProvider context
- */
-export const useMarketCollections = () => {
-  const context = useContext(MarketCollectionContext);
-
-  if (!context) {
-    throw new Error(
-      "The `useCollections` hook must be used within a `MarketCollectionProvider`",
-    );
-  }
-
-  const { collections } = context;
-
-  return { collections };
-};
 
 async function fetchCollectionFromClient(
   clients: { [key: string]: ToriiClient },

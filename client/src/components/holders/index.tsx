@@ -1,58 +1,25 @@
-import { useUsernames } from "@/hooks/account";
-import { useProject } from "@/hooks/project";
-import { Empty, Skeleton } from "@cartridge/ui";
+import { Empty, Skeleton, Button } from "@cartridge/ui";
 import { useCallback, useMemo } from "react";
 import { UserAvatar } from "../user/avatar";
-import { getChecksumAddress } from "starknet";
-import { useMarketFilters } from "@/hooks/market-filters";
 import { useLocation, useNavigate } from "react-router-dom";
 import { joinPaths } from "@/helpers";
+import { EditionModel } from "@cartridge/arcade";
+import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
+import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
+import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 
-export const Holders = () => {
-  const { collection: collectionAddress } = useProject();
-  const { filteredBalances: balances } = useMarketFilters();
+export const Holders = ({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) => {
 
-  const { accounts, total } = useMemo(() => {
-    if (!balances || balances.length === 0) return { accounts: [], total: 0 };
-    const filtered = balances.filter(
-      (balance) => parseInt(balance.balance, 16) > 0,
-    );
-    const owners = filtered.map(
-      (balance) => `0x${BigInt(balance.account_address).toString(16)}`,
-    );
-    const total = filtered.reduce(
-      (acc, balance) => acc + parseInt(balance.balance, 16),
-      0,
-    );
-    return { accounts: Array.from(new Set(owners)), total };
-  }, [balances, collectionAddress]);
+  const { owners, status, editionError, loadingProgress } = useMarketOwnersFetcher({
+    project: [edition.config.project],
+    address: collectionAddress
+  });
 
-  const { usernames } = useUsernames({ addresses: accounts });
-
-  const data = useMemo(() => {
-    return accounts
-      .map((address) => {
-        const user = usernames.find(
-          (user) => BigInt(user.address || "0x0") === BigInt(address),
-        );
-        const userBalances = balances.filter(
-          (balance) => BigInt(balance.account_address) === BigInt(address),
-        );
-        const checksum = getChecksumAddress(address);
-        const shorten = `${checksum.slice(0, 4)}...${checksum.slice(-4)}`;
-        const quantity = userBalances.reduce(
-          (acc, balance) => acc + parseInt(balance.balance, 16),
-          0,
-        );
-        return {
-          username: user?.username || shorten,
-          address: user?.address || address,
-          balance: quantity,
-          ratio: `${((quantity / total) * 100).toFixed(1)}%`,
-        };
-      })
-      .sort((a, b) => b.balance - a.balance);
-  }, [balances, usernames, total]);
+  const {
+    filteredTokens,
+    activeFilters,
+    resetSelected: clearAllFilters
+  } = useMetadataFiltersAdapter();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,38 +38,146 @@ export const Holders = () => {
     [location, navigate],
   );
 
-  if (usernames.length === 0) return <LoadingState />;
+  // Filter holders based on metadata filters
+  const filteredOwners = useMemo(() => {
+    // If no filters are active, return all owners
+    if (!owners || Object.keys(activeFilters).length === 0) {
+      return owners;
+    }
 
-  if (data.length === 0) return <EmptyState />;
+    // Get filtered token IDs
+    const filteredTokenIds = new Set(
+      filteredTokens.map(t => t.token_id?.toString()).filter(Boolean)
+    );
+
+    // Filter owners to only those who own filtered tokens
+    const tempOwnersMap = new Map();
+
+    Object.entries(owners).forEach(([ownerAddress, ownerData]) => {
+      // Check if this owner owns any of the filtered tokens
+      const ownedFilteredTokenIds = ownerData.token_ids.filter(
+        id => filteredTokenIds.has(id)
+      );
+
+      if (ownedFilteredTokenIds.length > 0) {
+        // Recalculate balance based on filtered tokens only
+        tempOwnersMap.set(ownerAddress, {
+          ...ownerData,
+          balance: ownedFilteredTokenIds.length,
+          token_ids: ownedFilteredTokenIds
+        });
+      }
+    });
+
+    // Recalculate ratios based on filtered total
+    const filteredTotal = Array.from(tempOwnersMap.values()).reduce(
+      (sum, owner) => sum + owner.balance,
+      0
+    );
+
+    tempOwnersMap.forEach(owner => {
+      owner.ratio = filteredTotal > 0
+        ? Math.round((owner.balance / filteredTotal) * 1000) / 10
+        : 0;
+    });
+
+    return new Map([...tempOwnersMap.entries()].sort(
+      ([, a], [, b]) => b.balance - a.balance
+    ));
+  }, [owners, activeFilters, filteredTokens]);
+
+  const hasActiveFilters = Object.keys(activeFilters).length > 0;
+
+  if (status === 'idle' || status === 'loading' && owners.length === 0) return <LoadingState />;
+
+  if (editionError.length > 0) return <Empty title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`} className="h-full py-6" />;
+
+  if (Object.values(owners).length === 0) return <EmptyState />;
+
+  const totalOwners = Object.keys(owners).length;
+  const filteredOwnersCount = filteredOwners instanceof Map
+    ? filteredOwners.size
+    : Object.keys(filteredOwners).length;
+
+  if (hasActiveFilters && filteredOwnersCount === 0) {
+    return (
+      <div className="flex flex-col pt-6 gap-4">
+        <div className="flex items-center gap-2">
+          <p className="text-foreground-300 text-sm">
+            No holders found with selected filters
+          </p>
+          <Button
+            variant="ghost"
+            onClick={clearAllFilters}
+            className="text-xs"
+          >
+            Clear Filters
+          </Button>
+        </div>
+        <Empty title="No holders match the selected filters" icon="guild" className="h-full py-3 lg:py-6" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col pt-6 gap-4">
+      {(hasActiveFilters || totalOwners > 0) && (
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            {hasActiveFilters ? (
+              <>
+                <p className="text-foreground-300 text-sm">
+                  Showing {filteredOwnersCount} of {totalOwners} holders
+                </p>
+                <Button
+                  variant="ghost"
+                  onClick={clearAllFilters}
+                  className="text-xs"
+                >
+                  Clear Filters
+                </Button>
+              </>
+            ) : (
+              <p className="text-foreground-300 text-sm">
+                {totalOwners} holders
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       <Header />
       <div className="rounded overflow-hidden w-full mb-6">
         <div className="flex flex-col gap-px overflow-y-auto">
-          {data.map((holder, index) => (
+          {(filteredOwners instanceof Map
+            ? [...filteredOwners.entries()]
+            : Object.entries(filteredOwners)
+          ).map(([holderAddress, holder], index) => (
             <div
-              key={`${holder.username}-${holder.address}-${index}`}
+              key={`${holder.username}-${holderAddress}-${index}`}
               className="flex items-center gap-3 bg-background-200 hover:bg-background-300 cursor-pointer text-foreground-100 font-medium text-sm h-10 w-full"
-              onClick={() => handleClick(holder.address)}
+              onClick={() => handleClick(holderAddress)}
             >
               <div className="flex items-center gap-2 w-1/2 px-3 py-1">
                 <p className="w-8 text-foreground-400 font-normal">
                   {index + 1}.
                 </p>
                 <div className="flex items-center gap-1">
-                  <UserAvatar username={holder.username} size="sm" />
+                  <UserAvatar username={holder.username ?? ""} size="sm" />
                   <p>{holder.username}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 w-1/2 px-3 py-1">
                 <p className="w-1/2 text-right">{holder.balance}</p>
-                <p className="w-1/2 text-right">{holder.ratio}</p>
+                <p className="w-1/2 text-right">{holder.ratio}%</p>
               </div>
             </div>
           ))}
         </div>
       </div>
+      <FloatingLoadingSpinner
+        isLoading={status === "loading" && Object.values(owners).length > 0}
+        loadingProgress={loadingProgress}
+      />
     </div>
   );
 };

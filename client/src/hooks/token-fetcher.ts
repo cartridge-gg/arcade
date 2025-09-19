@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchToriis } from "@cartridge/arcade";
 import { CollectionType } from "@/context/collection";
-import { ToriiClient } from "@dojoengine/torii-wasm";
 
 /**
  * Hook for fetching token balances from multiple Torii endpoints
@@ -87,7 +86,7 @@ function extractUniqueIdentifiers(tokenBalances: TokenBalance[]): {
  * @returns Map of token metadata keyed by contract_address-token_id
  */
 async function fetchTokenMetadataMap(
-  client: ToriiClient,
+  client: any,
   contractAddresses: string[],
   tokenIds: string[],
 ): Promise<Map<string, TokenMetadata>> {
@@ -236,7 +235,7 @@ export function useTokenFetcher(
 
           while (iterate) {
             // Fetch token balances
-            const response = await client.getTokenBalances({
+            const response: any = await client.getTokenBalances({
               contract_addresses: [],
               account_addresses: [address],
               token_ids: [],
@@ -482,7 +481,7 @@ export function useCollectibles(
 
           while (iterate) {
             // Fetch token balances
-            const response = await client.getTokenBalances({
+            const response: any = await client.getTokenBalances({
               contract_addresses: [],
               account_addresses: [address],
               token_ids: [],

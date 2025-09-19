@@ -9,10 +9,11 @@ catalog:
   "@cartridge/controller": 0.10.0-alpha.1
   "@starknet-react/core": 5.0.1
   "@starknet-react/chains": 5.0.1
-  "@dojoengine/core": 1.7.0-preview.3
-  "@dojoengine/sdk": 1.7.0-preview.3
-  "@dojoengine/torii-client": 1.7.0-preview.3
-  "@dojoengine/torii-wasm": 1.7.0-preview.3
+  "@dojoengine/core": 1.7.0
+  "@dojoengine/sdk": 1.7.1
+  "@dojoengine/torii-client": 1.7.1
+  "@dojoengine/torii-wasm": 1.7.1
+  "@dojoengine/grpc": 1.7.1
   class-variance-authority: ^0.7.1
   starknet: 8.5.2
   tsup: 8.4.0
