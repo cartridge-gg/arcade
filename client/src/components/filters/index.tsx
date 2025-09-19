@@ -15,7 +15,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useProject } from "@/hooks/project";
 import { useBalances } from "@/hooks/market-collections";
 import { useUsernames } from "@/hooks/account";
-import { getChecksumAddress } from "starknet";
 import { UserAvatar } from "@/components/user/avatar";
 import { usePlayerStats } from "@/hooks/achievements";
 
@@ -62,7 +61,6 @@ export const Filters = () => {
         return {
           image,
           label: item.username,
-          address: getChecksumAddress(item.address || "0x0"),
         };
       });
   }, [usernames]);
@@ -154,6 +152,7 @@ export const Filters = () => {
         {selected ? (
           <PlayerCard
             selected={selected}
+            usernames={usernames}
             onClose={() => {
               setSelected(undefined);
               setPlayerSearch("");
@@ -220,11 +219,17 @@ export const Filters = () => {
 function PlayerCard({
   selected,
   onClose,
+  usernames,
 }: {
   selected: SearchResult;
   onClose: () => void;
+  usernames: { username: string | undefined; address: string | undefined }[];
 }) {
-  const { earnings } = usePlayerStats(selected.address);
+  const account = usernames.find(
+    (item) => item.username === selected?.label,
+  )?.address;
+
+  const { earnings } = usePlayerStats(account || undefined);
 
   return (
     <div className="w-full bg-background-200 rounded-lg p-4 space-y-3">
@@ -237,7 +242,7 @@ function PlayerCard({
             {selected.label}
           </h3>
           <p className="text-foreground-300 text-xs">
-            {selected.address.slice(0, 6)}...{selected.address.slice(-4)}
+            {account ? `${account.slice(0, 6)}...${account.slice(-4)}` : 'Address not found'}
           </p>
         </div>
         <button

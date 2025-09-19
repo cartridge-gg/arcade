@@ -8,7 +8,7 @@ import {
   Skeleton,
 } from "@cartridge/ui";
 import { useProject } from "@/hooks/project";
-import { useBalances, useCollection } from "@/hooks/market-collections";
+import { useCollection } from "@/hooks/market-collections";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Token } from "@dojoengine/torii-wasm";
 import { MetadataHelper } from "@/helpers/metadata";
