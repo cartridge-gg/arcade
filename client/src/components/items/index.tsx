@@ -41,11 +41,11 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
     const code = await provider.getClassAt(address);
     if (!code) return;
     const interfaces = code.abi.filter(
-      (element) => element.type === "interface",
+      (element) => element.type === "interface"
     );
     if (interfaces.length > 0) {
       return interfaces.flatMap((element: InterfaceAbi) =>
-        element.items.map((item: FunctionAbi) => item.name),
+        element.items.map((item: FunctionAbi) => item.name)
       );
     }
     const functions = code.abi.filter((element) => element.type === "function");
@@ -102,7 +102,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   const chain: Chain = useMemo(() => {
     return (
       chains.find(
-        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
+        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc
       ) || mainnet
     );
   }, [chains, edition]);
@@ -124,7 +124,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
       const entrypoints = await getEntrypoints(
         provider.provider,
-        contractAddress,
+        contractAddress
       );
       const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
       const subpath = isERC1155 ? "collectible" : "collection";
@@ -151,7 +151,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
       if (!isConnected || !connector) return;
       const orders = tokens.map((token) => token.orders).flat();
       const contractAddresses = new Set(
-        tokens.map((token) => token.contract_address),
+        tokens.map((token) => token.contract_address)
       );
       if (!edition || contractAddresses.size !== 1) return;
       const contractAddress = `0x${BigInt(Array.from(contractAddresses)[0]).toString(16)}`;
@@ -164,7 +164,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
       const entrypoints = await getEntrypoints(
         provider.provider,
-        contractAddress,
+        contractAddress
       );
       const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
       const subpath = isERC1155 ? "collectible" : "collection";
@@ -382,11 +382,11 @@ function Item({
     const currency = token.orders[0].currency;
     const metadata = erc20Metadata.find(
       (m) =>
-        getChecksumAddress(m.l2_token_address) === getChecksumAddress(currency),
+        getChecksumAddress(m.l2_token_address) === getChecksumAddress(currency)
     );
     const image =
       erc20Metadata.find(
-        (m) => getChecksumAddress(m.l2_token_address) === currency,
+        (m) => getChecksumAddress(m.l2_token_address) === currency
       )?.logo_url || makeBlockie(currency);
     const decimals = metadata?.decimals || 0;
     const price = token.orders[0].price / 10 ** decimals;
@@ -403,7 +403,7 @@ function Item({
     const metadata = erc20Metadata.find(
       (m) =>
         getChecksumAddress(m.l2_token_address) ===
-        getChecksumAddress(order.currency),
+        getChecksumAddress(order.currency)
     );
     const image = metadata?.logo_url || makeBlockie(order.currency);
     const decimals = metadata?.decimals || 0;
@@ -466,7 +466,6 @@ const LoadingState = () => {
     <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full p-6">
       <div className="flex justify-between items-center">
         <Skeleton className="min-h-10 w-1/5" />
-        <Skeleton className="min-h-10 w-1/3" />
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-hidden h-full">
         {Array.from({ length: 20 }).map((_, index) => (
