@@ -44,7 +44,6 @@ export function Discover({ edition }: { edition?: EditionModel }) {
   const {
     events: { all, following },
     status: activitiesStatus,
-    editionError,
     loadingProgress,
   } = useDiscoversFetcher({
     projects,

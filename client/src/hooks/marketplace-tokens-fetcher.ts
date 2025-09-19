@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { getChecksumAddress } from "starknet";
 import { useMarketplaceTokensStore } from "@/store";
 import { useMarketCollectionFetcher } from "./marketplace-fetcher";
+import { useEditionsMap } from "@/collections";
 import {
   useFetcherState,
   fetchTokenImage,
@@ -48,6 +49,7 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
   } = useFetcherState(true);
   const [hasFetch, setHasFetch] = useState(false);
   const { createController, cleanup, isMounted } = useAbortController();
+  const editions = useEditionsMap();
 
   const { collections } = useMarketCollectionFetcher({ projects: project });
   const collection = useMemo(() => collections.find(c => c.contract_address === address), [collections]);
@@ -201,15 +203,19 @@ export function useMarketTokensFetcher({ project, address }: MarketTokensFetcher
       );
     } catch (error) {
       if (isMounted()) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch tokens after multiple attempts"
-        );
+        const e = editions.get(project[0]);
+        if (e) {
+          setError(
+            e,
+            error instanceof Error
+              ? error.message
+              : "Failed to fetch tokens after multiple attempts"
+          );
+        }
         updateLoadingState(project[0], address, { isLoading: false });
       }
     }
-  }, [fetchTokensImpl, setRetryCount, setErrorMessage, setError, isMounted, updateLoadingState, project, address]);
+  }, [fetchTokensImpl, setRetryCount, setErrorMessage, setError, isMounted, updateLoadingState, project, address, editions]);
 
   const refetch = useCallback(async (force: boolean = false) => {
     if (force) {

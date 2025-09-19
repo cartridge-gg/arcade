@@ -1,7 +1,7 @@
 import { useAccounts, useEditionsMap } from "@/collections";
 import { useEventStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback } from "react";
 import { getChecksumAddress } from "starknet";
 import {
   useFetcherState,
@@ -243,20 +243,22 @@ export function useDiscoversFetcher({
             const edition = editions.get(endpoint);
             setError(edition, `Error fetching from ${endpoint}`)
           },
-          onComplete: (hasError) => {
-            if (hasError) {
-              setError("Error fetching playthroughs");
-            } else {
-              setSuccess();
-            }
+          onComplete: () => {
+            setSuccess();
           },
         });
       } catch (error) {
         console.error("Error fetching playthroughs:", error);
-        setError("Error fetching playthroughs");
+        // Set error for all editions
+        for (const project of projects) {
+          const e = editions.get(project);
+          if (e) {
+            setError(e, "Error fetching playthroughs");
+          }
+        }
       }
     },
-    [projects, processPlaythroughs, setEvents, startLoading, setSuccess, setError, setLoadingProgress],
+    [projects, processPlaythroughs, setEvents, startLoading, setSuccess, setError, setLoadingProgress, editions],
   );
 
   useEffect(() => {

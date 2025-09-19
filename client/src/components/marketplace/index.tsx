@@ -37,9 +37,7 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
     <>
       {collections.length === 0 && editionError && editionError.length > 0 && (
         <Empty
-          title="No collections available"
-          description="Failed to connect to data source"
-          icon="alert"
+          title="No collections available - Failed to connect to data source"
           className="h-full py-3 lg:py-6"
         />
       )}
@@ -183,7 +181,7 @@ function Item({
       <CollectibleCard
         title={collection.name}
         image={collection.image}
-        totalCount={collection.totalSupply as unknown as number}
+        // totalCount={collection.totalSupply as unknown as number}
         selectable={false}
         listingCount={listingCount}
         onClick={handleClick}

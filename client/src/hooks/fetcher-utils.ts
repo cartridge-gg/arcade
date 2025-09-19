@@ -26,6 +26,7 @@ interface FetcherStateBase {
   isLoading: boolean;
   isError: boolean;
   errorMessage: string | null;
+  editionError: EditionModel[];
   loadingProgress: {
     completed: number;
     total: number;
@@ -41,7 +42,7 @@ interface FetcherStateBase {
   resetState: () => void;
   startLoading: () => void;
   setSuccess: () => void;
-  setError: (message?: string) => void;
+  setError: (edition: EditionModel, message?: string) => void;
 }
 
 interface FetcherStateWithRetry extends FetcherStateBase {

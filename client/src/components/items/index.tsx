@@ -202,7 +202,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
     overscan: 2,
   });
 
-  if (!collection) return <EmptyState />;
+  if (!collection && tokens.length === 0) return <EmptyState />;
 
   if (!tokens || tokens.length === 0) return <LoadingState />;
 

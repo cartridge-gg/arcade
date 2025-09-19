@@ -122,13 +122,19 @@ export function useMarketCollectionFetcher({
             const e = editions.get(endpoint);
             setError(e, "Error fetching marketplace collections");
           },
-          onComplete: (hasError) => {
+          onComplete: () => {
               setSuccess();
           },
         });
       } catch (error) {
         console.error("Error fetching marketplace collections:", error);
-        setError("Error fetching marketplace collections");
+        // Set error for all editions
+        for (const project of projects) {
+          const e = editions.get(project);
+          if (e) {
+            setError(e, "Error fetching marketplace collections");
+          }
+        }
       }
     },
     [
@@ -139,6 +145,7 @@ export function useMarketCollectionFetcher({
       setSuccess,
       setError,
       setLoadingProgress,
+      editions,
     ],
   );
 

@@ -1,11 +1,12 @@
-import { Empty, Skeleton } from "@cartridge/ui";
-import { useCallback } from "react";
+import { Empty, Skeleton, Button } from "@cartridge/ui";
+import { useCallback, useMemo } from "react";
 import { UserAvatar } from "../user/avatar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { joinPaths } from "@/helpers";
 import { EditionModel } from "@cartridge/arcade";
 import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
+import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 
 export const Holders = ({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) => {
 
@@ -13,6 +14,12 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
     project: [edition.config.project],
     address: collectionAddress
   });
+
+  const {
+    filteredTokens,
+    activeFilters,
+    resetSelected: clearAllFilters
+  } = useMetadataFiltersAdapter();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,18 +38,120 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
     [location, navigate],
   );
 
+  // Filter holders based on metadata filters
+  const filteredOwners = useMemo(() => {
+    // If no filters are active, return all owners
+    if (!owners || Object.keys(activeFilters).length === 0) {
+      return owners;
+    }
+
+    // Get filtered token IDs
+    const filteredTokenIds = new Set(
+      filteredTokens.map(t => t.token_id?.toString()).filter(Boolean)
+    );
+
+    // Filter owners to only those who own filtered tokens
+    const tempOwnersMap = new Map();
+
+    Object.entries(owners).forEach(([ownerAddress, ownerData]) => {
+      // Check if this owner owns any of the filtered tokens
+      const ownedFilteredTokenIds = ownerData.token_ids.filter(
+        id => filteredTokenIds.has(id)
+      );
+
+      if (ownedFilteredTokenIds.length > 0) {
+        // Recalculate balance based on filtered tokens only
+        tempOwnersMap.set(ownerAddress, {
+          ...ownerData,
+          balance: ownedFilteredTokenIds.length,
+          token_ids: ownedFilteredTokenIds
+        });
+      }
+    });
+
+    // Recalculate ratios based on filtered total
+    const filteredTotal = Array.from(tempOwnersMap.values()).reduce(
+      (sum, owner) => sum + owner.balance,
+      0
+    );
+
+    tempOwnersMap.forEach(owner => {
+      owner.ratio = filteredTotal > 0
+        ? Math.round((owner.balance / filteredTotal) * 1000) / 10
+        : 0;
+    });
+
+    return new Map([...tempOwnersMap.entries()].sort(
+      ([, a], [, b]) => b.balance - a.balance
+    ));
+  }, [owners, activeFilters, filteredTokens]);
+
+  const hasActiveFilters = Object.keys(activeFilters).length > 0;
+
   if (status === 'idle' || status === 'loading' && owners.length === 0) return <LoadingState />;
 
-  if (editionError.length > 0) return <Empty title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`} icon="alert" className="h-full py-6" />;
+  if (editionError.length > 0) return <Empty title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`} className="h-full py-6" />;
 
   if (Object.values(owners).length === 0) return <EmptyState />;
 
+  const totalOwners = Object.keys(owners).length;
+  const filteredOwnersCount = filteredOwners instanceof Map
+    ? filteredOwners.size
+    : Object.keys(filteredOwners).length;
+
+  if (hasActiveFilters && filteredOwnersCount === 0) {
+    return (
+      <div className="flex flex-col pt-6 gap-4">
+        <div className="flex items-center gap-2">
+          <p className="text-foreground-300 text-sm">
+            No holders found with selected filters
+          </p>
+          <Button
+            variant="ghost"
+            onClick={clearAllFilters}
+            className="text-xs"
+          >
+            Clear Filters
+          </Button>
+        </div>
+        <Empty title="No holders match the selected filters" icon="guild" className="h-full py-3 lg:py-6" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col pt-6 gap-4">
+      {(hasActiveFilters || totalOwners > 0) && (
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            {hasActiveFilters ? (
+              <>
+                <p className="text-foreground-300 text-sm">
+                  Showing {filteredOwnersCount} of {totalOwners} holders
+                </p>
+                <Button
+                  variant="ghost"
+                  onClick={clearAllFilters}
+                  className="text-xs"
+                >
+                  Clear Filters
+                </Button>
+              </>
+            ) : (
+              <p className="text-foreground-300 text-sm">
+                {totalOwners} holders
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       <Header />
       <div className="rounded overflow-hidden w-full mb-6">
         <div className="flex flex-col gap-px overflow-y-auto">
-          {Object.entries(owners).map(([holderAddress, holder], index) => (
+          {(filteredOwners instanceof Map
+            ? [...filteredOwners.entries()]
+            : Object.entries(filteredOwners)
+          ).map(([holderAddress, holder], index) => (
             <div
               key={`${holder.username}-${holderAddress}-${index}`}
               className="flex items-center gap-3 bg-background-200 hover:bg-background-300 cursor-pointer text-foreground-100 font-medium text-sm h-10 w-full"
