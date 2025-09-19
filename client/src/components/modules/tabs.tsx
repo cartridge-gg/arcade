@@ -64,11 +64,12 @@ export interface ArcadeTabsProps
     VariantProps<typeof arcadeTabsVariants> {
   defaultValue?: TabValue;
   order?: TabValue[];
+  disabledTabs?: TabValue[];
   onTabClick?: (tab: TabValue) => void;
 }
 
 export const ArcadeTabs = ({
-  defaultValue = "activity",
+  defaultValue,
   order = [
     "activity",
     "leaderboard",
@@ -82,13 +83,32 @@ export const ArcadeTabs = ({
     "items",
     "holders",
   ],
+  disabledTabs = ["activity"],
   onTabClick,
   variant,
   size,
   className,
   children,
 }: ArcadeTabsProps) => {
-  const [active, setActive] = useState<TabValue>(defaultValue);
+  const { isMobile, isPWA } = useDevice();
+
+  // Reorder tabs to put disabled ones at the end
+  const orderedTabs = useMemo(() => {
+    const enabledTabs = order.filter(tab => !disabledTabs.includes(tab));
+    const disabledTabsInOrder = order.filter(tab => disabledTabs.includes(tab));
+    return [...enabledTabs, ...disabledTabsInOrder];
+  }, [order, disabledTabs]);
+
+  // Set proper default value - use first enabled tab if default is disabled or not provided
+  const effectiveDefaultValue = useMemo(() => {
+    if (defaultValue && !disabledTabs.includes(defaultValue)) {
+      return defaultValue;
+    }
+    const firstEnabledTab = orderedTabs.find(tab => !disabledTabs.includes(tab));
+    return firstEnabledTab || orderedTabs[0];
+  }, [defaultValue, disabledTabs, orderedTabs]);
+
+  const [active, setActive] = useState<TabValue>(effectiveDefaultValue);
   const [visibleTabs, setVisibleTabs] = useState<TabValue[]>(order);
   const [overflowTabs, setOverflowTabs] = useState<TabValue[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -97,22 +117,30 @@ export const ArcadeTabs = ({
     new Map<TabValue, { width: number; visible: boolean }>(),
   );
 
-  const { isMobile, isPWA } = useDevice();
-
   useEffect(() => {
     if (isMobile) return;
     if (!hiddenRef.current) return;
     const tabWidths = new Map<TabValue, { width: number; visible: boolean }>();
     hiddenRef.current.childNodes.forEach((node) => {
       const element = node as HTMLDivElement;
-      const tab = element.textContent?.toLowerCase();
-      if (tab) {
-        const visible = order.includes(tab as TabValue);
-        tabWidths.set(tab as TabValue, { width: element.offsetWidth, visible });
+      const textContent = element.textContent?.toLowerCase();
+      if (textContent) {
+        // Extract the base tab name by removing "(coming soon)" suffix if present
+        const tab = textContent.replace(/\s*\(coming soon\)\s*$/, '') as TabValue;
+        // All tabs in orderedTabs should be visible
+        const visible = orderedTabs.includes(tab);
+        tabWidths.set(tab, { width: element.offsetWidth, visible });
+      }
+    });
+    
+    // Ensure all tabs in orderedTabs have entries in tabWidths
+    orderedTabs.forEach((tab) => {
+      if (!tabWidths.has(tab)) {
+        tabWidths.set(tab, { width: 100, visible: true }); // Default width for missing tabs
       }
     });
     tabRefs.current = tabWidths;
-  }, [tabRefs, hiddenRef, order, isMobile]);
+  }, [tabRefs, hiddenRef, orderedTabs, isMobile]);
 
   useEffect(() => {
     if (isMobile) return;
@@ -126,12 +154,13 @@ export const ArcadeTabs = ({
       const newVisibleTabs: TabValue[] = [];
       const newOverflowTabs: TabValue[] = [];
 
-      order.forEach((tab) => {
+      orderedTabs.forEach((tab) => {
         const { width, visible } = tabRefs.current.get(tab) || {
           width: 0,
           visible: false,
         };
         if (!visible) return;
+        
         if (
           usedWidth + width <= availableWidth &&
           newOverflowTabs.length === 0
@@ -154,8 +183,7 @@ export const ArcadeTabs = ({
     observer.observe(containerRef.current!);
     return () => observer.disconnect();
   }, [
-    order,
-    containerRef.current,
+    orderedTabs,
     visibleTabs,
     overflowTabs,
     tabRefs,
@@ -163,9 +191,9 @@ export const ArcadeTabs = ({
   ]);
 
   useEffect(() => {
-    if (order.includes(active)) return;
-    setActive(defaultValue);
-  }, [order, active, defaultValue]);
+    if (orderedTabs.includes(active)) return;
+    setActive(effectiveDefaultValue);
+  }, [orderedTabs, active, effectiveDefaultValue]);
 
   const overflowActive = useMemo(
     () => overflowTabs.includes(active),
@@ -174,7 +202,7 @@ export const ArcadeTabs = ({
 
   return (
     <Tabs
-      defaultValue={defaultValue}
+      defaultValue={effectiveDefaultValue}
       value={active}
       onValueChange={(value: string) => setActive(value as TabValue)}
       className="h-full flex flex-col overflow-hidden"
@@ -187,7 +215,7 @@ export const ArcadeTabs = ({
           )}
         >
           <TabsList className="h-full w-full p-0 flex gap-2 items-start justify-around">
-            {order.map((tab) => (
+            {orderedTabs.map((tab) => (
               <Tab
                 key={tab}
                 tab={tab}
@@ -195,6 +223,7 @@ export const ArcadeTabs = ({
                 size={size}
                 onTabClick={() => onTabClick?.(tab as TabValue)}
                 isMobile={true}
+                disabled={tab === "activity" ? disabledTabs.includes(tab) : false}
               />
             ))}
           </TabsList>
@@ -209,8 +238,8 @@ export const ArcadeTabs = ({
           )}
         >
           <div ref={hiddenRef} className="flex gap-2 absolute invisible">
-            {order.map((tab) => (
-              <Tab key={tab} tab={tab} value={active} size={size} />
+            {orderedTabs.map((tab) => (
+              <Tab key={tab} tab={tab} value={active} size={size} disabled={tab === "activity" ? disabledTabs.includes(tab) : false} />
             ))}
           </div>
           {visibleTabs.map((tab) => (
@@ -220,6 +249,7 @@ export const ArcadeTabs = ({
               value={active}
               size={size}
               onTabClick={() => onTabClick?.(tab as TabValue)}
+              disabled={tab === "activity" ? disabledTabs.includes(tab) : false}
             />
           ))}
           <Select>
@@ -238,6 +268,7 @@ export const ArcadeTabs = ({
                   size={size}
                   onTabClick={() => onTabClick?.(tab as TabValue)}
                   item={true}
+                  disabled={tab === "activity" ? disabledTabs.includes(tab) : false}
                 />
               ))}
             </SelectContent>
@@ -256,6 +287,7 @@ const Tab = ({
   onTabClick,
   item,
   isMobile = false,
+  disabled = false,
 }: {
   tab: TabValue;
   value: string;
@@ -263,6 +295,7 @@ const Tab = ({
   onTabClick?: () => void;
   item?: boolean;
   isMobile?: boolean;
+  disabled?: boolean;
 }) => {
   const props = {
     value: tab,
@@ -271,6 +304,7 @@ const Tab = ({
     onClick: onTabClick,
     item,
     isMobile,
+    disabled,
   };
   switch (tab) {
     case "inventory":
@@ -309,6 +343,7 @@ interface NavButtonProps {
   onClick?: () => void;
   item?: boolean;
   isMobile?: boolean;
+  disabled?: boolean;
 }
 
 const InventoryNavButton = React.forwardRef<HTMLButtonElement, NavButtonProps>(
@@ -490,16 +525,27 @@ const GuildsNavButton = React.forwardRef<HTMLButtonElement, NavButtonProps>(
 );
 
 const ActivityNavButton = React.forwardRef<HTMLButtonElement, NavButtonProps>(
-  ({ value, active, size, onClick, item, isMobile }, ref) => {
+  ({ value, active, size, onClick, item, isMobile, disabled }, ref) => {
     if (isMobile) {
       return (
         <TabsTrigger
-          className="p-0 grow data-[state=active]:bg-background-transparent data-[state=active]:shadow-none"
+          className={cn(
+            "p-0 grow data-[state=active]:bg-background-transparent data-[state=active]:shadow-none",
+            disabled && "opacity-50 cursor-not-allowed"
+          )}
           value={value}
           ref={ref}
+          disabled={disabled}
         >
-          <BottomTab status={active ? "active" : null} onClick={onClick}>
-            <PulseIcon variant="solid" size="lg" />
+          <BottomTab status={active ? "active" : null} onClick={disabled ? undefined : onClick}>
+            <div className="flex flex-col items-center gap-1">
+              <PulseIcon variant="solid" size="lg" />
+              {disabled && (
+                <div className="text-xs text-gray-500 whitespace-nowrap">
+                  Coming soon
+                </div>
+              )}
+            </div>
           </BottomTab>
         </TabsTrigger>
       );
@@ -511,10 +557,10 @@ const ActivityNavButton = React.forwardRef<HTMLButtonElement, NavButtonProps>(
           ref={ref}
           value={value}
           Icon={<PulseIcon variant="solid" size="sm" />}
-          label="Activity"
+          label={disabled ? "Activity (Coming soon)" : "Activity"}
           active={active}
           size={size}
-          onClick={onClick}
+          onClick={disabled ? undefined : onClick}
         />
       );
     }
@@ -524,10 +570,11 @@ const ActivityNavButton = React.forwardRef<HTMLButtonElement, NavButtonProps>(
         ref={ref}
         value={value}
         Icon={<PulseIcon variant="solid" size="sm" />}
-        label="Activity"
+        label={disabled ? "Activity (Coming soon)" : "Activity"}
         active={active}
         size={size}
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
+        disabled={disabled}
       />
     );
   },
