@@ -5,16 +5,11 @@ import {
   CollectibleCard,
   Empty,
   MarketplaceSearch,
-  type SearchResult,
   Separator,
   Skeleton,
 } from "@cartridge/ui";
-import { useProject } from "@/hooks/project";
-import { useBalances, useCollection } from "@/hooks/market-collections";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Token } from "@dojoengine/torii-wasm";
-import { MetadataHelper } from "@/helpers/metadata";
-import placeholder from "@/assets/placeholder.svg";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Token } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
   type FunctionAbi,
@@ -26,14 +21,15 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { type Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
-import { useMarketFilters } from "@/hooks/market-filters";
-import { useUsernames } from "@/hooks/account";
-import { UserAvatar } from "../user/avatar";
-import type { OrderModel, SaleEvent } from "@cartridge/marketplace";
+import { OrderModel, SaleEvent } from "@cartridge/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
+import { EditionModel } from "@cartridge/arcade";
+import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
+import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
-const DEFAULT_ROW_CAP = 6;
 const ROW_HEIGHT = 218;
 const ERC1155_ENTRYPOINT = "balance_of_batch";
 
@@ -59,27 +55,45 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
   }
 };
 
-export function Items() {
-  const {
-    setAllMetadata,
-    setFilteredMetadata,
-    tokens,
-    filteredTokens,
-    selected,
-    setSelected,
-  } = useMarketFilters();
-  const { connector, isConnected } = useAccount();
+export function Items({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) {
+  const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
-  const { collection: collectionAddress, filter } = useProject();
-  const { sales } = useMarketplace();
-  const { collection } = useCollection(collectionAddress || "", 1000);
-  const { balances } = useBalances(collectionAddress || "", 1000);
+  const { sales, getCollectionOrders } = useMarketplace();
   const [search, setSearch] = useState<string>("");
-  const [cap, setCap] = useState(DEFAULT_ROW_CAP);
   const [selection, setSelection] = useState<Asset[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
-  const { edition } = useProject();
+
+  // Use the adapter hook which includes Buy Now/Show All functionality
+  const {
+    tokens,
+    filteredTokens,
+    activeFilters,
+    resetSelected: clearAllFilters
+  } = useMetadataFiltersAdapter();
+
+  // Get marketplace orders for this collection
+  const collectionOrders = useMemo(() => {
+    return getCollectionOrders(collectionAddress);
+  }, [getCollectionOrders, collectionAddress]);
+
+  // Get collection info
+  const { collection, status, loadingProgress } = useMarketTokensFetcher({
+    project: edition ? [edition.config.project] : [],
+    address: collectionAddress
+  });
+
+  // Apply search filtering on top of metadata filters
+  const searchFilteredTokens = useMemo(() => {
+    if (!search.trim()) return filteredTokens;
+
+    const searchLower = search.toLowerCase();
+
+    return filteredTokens.filter(token => {
+      const tokenName = (token.metadata as any)?.name || token.name || '';
+      return tokenName.toLowerCase().includes(searchLower);
+    });
+  }, [filteredTokens, search]);
 
   const connectWallet = useCallback(async () => {
     connect({ connector: connectors[0] });
@@ -92,52 +106,6 @@ export function Items() {
       ) || mainnet
     );
   }, [chains, edition]);
-
-  const accounts = useMemo(() => {
-    if (!balances || balances.length === 0) return [];
-    const owners = balances
-      .filter((balance) => Number.parseInt(balance.balance, 16) > 0)
-      .map((balance) => `0x${BigInt(balance.account_address).toString(16)}`);
-    return Array.from(new Set(owners));
-  }, [balances, collectionAddress]);
-
-  const { usernames } = useUsernames({ addresses: accounts });
-
-  const searchResults = useMemo(() => {
-    return usernames
-      .filter((item) => !!item.username)
-      .map((item) => {
-        const image = (
-          <UserAvatar
-            username={item.username || ""}
-            className="h-full w-full"
-          />
-        );
-        return {
-          image,
-          label: item.username,
-          address: getChecksumAddress(item.address || "0x0"),
-        };
-      });
-  }, [usernames]);
-
-  const options = useMemo(() => {
-    if (!search) return [];
-    return searchResults
-      .filter((item) =>
-        item.label?.toLowerCase().startsWith(search.toLowerCase()),
-      )
-      .slice(0, 3);
-  }, [searchResults, search]);
-
-  const handleScroll = useCallback(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-    const height = parent.clientHeight;
-    const newCap = Math.ceil((height + parent.scrollTop) / ROW_HEIGHT);
-    if (newCap < cap) return;
-    setCap(newCap + 10);
-  }, [parentRef, cap, setCap]);
 
   const handleReset = useCallback(() => {
     setSelection([]);
@@ -175,7 +143,7 @@ export function Items() {
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain, isConnected],
+    [connector, edition, chain, provider.provider],
   );
 
   const handlePurchase = useCallback(
@@ -223,116 +191,125 @@ export function Items() {
       controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain, isConnected],
+    [connector, edition, chain, provider.provider],
   );
 
-  useEffect(() => {
-    const parent = parentRef.current;
-    if (parent) {
-      parent.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (parent) {
-        parent.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [cap, parentRef, handleScroll]);
+  // Set up virtualizer for rows
+  const virtualizer = useVirtualizer({
+    count: searchFilteredTokens.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
+    overscan: 2,
+  });
 
-  useEffect(() => {
-    // Reset scroll and cap on filter change
-    const parent = parentRef.current;
-    if (!parent) return;
-    parent.scrollTop = 0;
-    const height = parent.clientHeight;
-    const cap = Math.ceil(height / ROW_HEIGHT);
-    setCap(cap + 10);
-  }, [parentRef, collection, setCap]);
-
-  useEffect(() => {
-    if (!tokens) return;
-    setAllMetadata(MetadataHelper.extract(tokens));
-  }, [tokens, setAllMetadata]);
-
-  useEffect(() => {
-    if (!filteredTokens) return;
-    setFilteredMetadata(MetadataHelper.extract(filteredTokens));
-  }, [filteredTokens, setFilteredMetadata]);
-
-  useEffect(() => {
-    const selection = searchResults.find(
-      (option) => option.label?.toLowerCase() === filter?.toLowerCase(),
-    );
-    if (
-      !filter ||
-      !searchResults.length ||
-      selected?.label === selection?.label
-    )
-      return;
-    if (selection) {
-      setSelected(selection as SearchResult);
-    }
-  }, [filter, searchResults, setSelected, selected]);
-
-  if (!collection) return <EmptyState />;
+  if (!collection && tokens.length === 0) return <EmptyState />;
 
   if (!tokens || tokens.length === 0) return <LoadingState />;
-
-  if (!filteredTokens || filteredTokens.length === 0)
-    return <EmptySelectionState />;
 
   return (
     <div className="p-6 flex flex-col gap-4 h-full w-full overflow-hidden">
       <div className="min-h-10 w-full flex justify-between items-center relative">
-        <div
-          className={cn(
-            "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
-            !selection.length && "text-foreground-400",
-            isConnected && !!selection.length && "cursor-pointer",
-          )}
-          onClick={isConnected ? handleReset : undefined}
-        >
-          {isConnected && selection.length > 0 && (
-            <Checkbox
-              className="text-foreground-100"
-              variant="minus-line"
-              size="sm"
-              checked
-            />
-          )}
-          {isConnected && selection.length > 0 ? (
-            <p>{`${selection.length} / ${filteredTokens.length} Selected`}</p>
-          ) : (
-            <p>{`${filteredTokens.length} Items`}</p>
-          )}
+        <div className="flex items-center gap-4">
+          <div
+            className={cn(
+              "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
+              !selection.length && "text-foreground-400",
+              isConnected && !!selection.length && "cursor-pointer",
+            )}
+            onClick={isConnected ? handleReset : undefined}
+          >
+            {isConnected && selection.length > 0 && (
+              <Checkbox
+                className="text-foreground-100"
+                variant="minus-line"
+                size="sm"
+                checked
+              />
+            )}
+            {isConnected && selection.length > 0 ? (
+              <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
+            ) : (
+              <>
+                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
+                {Object.keys(activeFilters).length > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={clearAllFilters}
+                    className="ml-2 text-xs"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
         <MarketplaceSearch
           search={search}
           setSearch={setSearch}
-          selected={selected}
-          setSelected={(selected) => setSelected(selected as SearchResult)}
-          options={options as SearchResult[]}
+          selected={undefined}
+          setSelected={() => { }}
+          options={[]}
           variant="darkest"
           className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
         />
       </div>
       <div
         ref={parentRef}
-        className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 select-none overflow-y-scroll h-full auto-rows-max"
+        className="overflow-y-auto h-full"
         style={{ scrollbarWidth: "none" }}
       >
-        {filteredTokens.slice(0, cap * 3).map((token) => (
-          <Item
-            key={`${token.contract_address}-${token.token_id}`}
-            connect={connectWallet}
-            token={token}
-            sales={sales[getChecksumAddress(token.contract_address)] || {}}
-            selection={selection}
-            setSelection={setSelection}
-            handlePurchase={() => handlePurchase([token])}
-            handleInspect={() => handleInspect(token)}
-            isConnected={isConnected}
-          />
-        ))}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const startIndex = virtualRow.index * 4;
+            const endIndex = Math.min(
+              startIndex + 4,
+              searchFilteredTokens.length
+            );
+            const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
+
+            return (
+              <div
+                key={virtualRow.key}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                  {rowTokens.map((token) => {
+                    // Get orders for this specific token
+                    const tokenId = token.token_id?.toString();
+                    const tokenOrders = tokenId ? (collectionOrders?.[tokenId] || []) : [];
+                    const assetToken = { ...token, orders: tokenOrders, owner: address || "" } as Asset;
+                    return (
+                      <Item
+                        key={`${token.contract_address}-${token.token_id}`}
+                        isConnected={isConnected}
+                        connect={connectWallet}
+                        token={assetToken}
+                        sales={sales[getChecksumAddress(token.contract_address)] || {}}
+                        selection={selection}
+                        setSelection={setSelection}
+                        handlePurchase={() => handlePurchase([assetToken])}
+                        handleInspect={() => handleInspect(assetToken)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
       {isConnected && (
         <>
@@ -348,6 +325,10 @@ export function Items() {
           </div>
         </>
       )}
+      <FloatingLoadingSpinner
+        isLoading={status === "loading" && tokens && tokens.length > 0}
+        loadingProgress={loadingProgress}
+      />
     </div>
   );
 }
@@ -375,8 +356,6 @@ function Item({
   handleInspect: (token: Token) => void;
   isConnected?: boolean;
 }) {
-  const { edition } = useProject();
-  const [image, setImage] = useState<string>(placeholder);
 
   const selected = useMemo(() => {
     return selection.some((t) => t.token_id === token.token_id);
@@ -432,25 +411,6 @@ function Item({
     return { value: price.toString(), image };
   }, [token, sales]);
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const toriiImage = await MetadataHelper.getToriiImage(
-        edition?.config.project || "",
-        token,
-      );
-      if (toriiImage) {
-        setImage(toriiImage);
-        return;
-      }
-      const metadataImage = await MetadataHelper.getMetadataImage(token);
-      if (metadataImage) {
-        setImage(metadataImage);
-        return;
-      }
-    };
-    fetchImage();
-  }, [token, edition]);
-
   const handleSelect = useCallback(() => {
     // Toggle selection
     if (selection.some((t) => t.token_id === token.token_id)) {
@@ -474,7 +434,8 @@ function Item({
         title={
           (token.metadata as unknown as { name: string })?.name || token.name
         }
-        image={image}
+        // @ts-expect-error TODO: Fix this type to include image in metadata
+        image={token.metadata.image}
         listingCount={token.orders.length}
         onClick={
           selectable && openable && isConnected
@@ -507,7 +468,7 @@ const LoadingState = () => {
         <Skeleton className="min-h-10 w-1/5" />
         <Skeleton className="min-h-10 w-1/3" />
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-hidden h-full">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 place-items-center select-none overflow-hidden h-full">
         {Array.from({ length: 20 }).map((_, index) => (
           <Skeleton key={index} className="min-h-[218px] w-full" />
         ))}
@@ -526,12 +487,3 @@ const EmptyState = () => {
   );
 };
 
-const EmptySelectionState = () => {
-  return (
-    <Empty
-      title="No results meet this criteria"
-      icon="inventory"
-      className="h-full p-6"
-    />
-  );
-};

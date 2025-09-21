@@ -1,4 +1,4 @@
-import { useMarketFilters } from "@/hooks/market-filters";
+import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 import {
   MarketplaceFilters,
   MarketplaceHeader,
@@ -15,50 +15,40 @@ export const Filters = () => {
   const {
     active,
     setActive,
-    allMetadata,
     filteredMetadata,
     clearable,
     addSelected,
     isActive,
     resetSelected,
-  } = useMarketFilters();
+    precomputedAttributes,
+    precomputedProperties,
+  } = useMetadataFiltersAdapter();
   const [search, setSearch] = useState<{ [key: string]: string }>({});
 
-  const { attributes, properties } = useMemo(() => {
-    const attributes = Array.from(
-      new Set(allMetadata.map((attribute) => attribute.trait_type)),
-    ).sort();
-    const properties = attributes.reduce(
-      (acc, attribute) => {
-        const values = allMetadata
-          .filter((m) => m.trait_type === attribute)
-          .map((m) => m.value);
-        const props = Array.from(new Set(values))
-          .sort()
-          .filter((value) =>
-            `${value}`
-              .toLowerCase()
-              .includes(search[attribute]?.toLowerCase() || ""),
-          );
-        acc[attribute] = props.map((prop) => ({
-          property: prop,
-          order:
-            allMetadata.find(
-              (m) => m.trait_type === attribute && m.value === prop,
-            )?.tokens.length || 0,
-          count:
-            filteredMetadata.find(
-              (m) => m.trait_type === attribute && m.value === prop,
-            )?.tokens.length || 0,
-        }));
-        return acc;
-      },
-      {} as {
-        [key: string]: { property: string; order: number; count: number }[];
-      },
-    );
-    return { attributes, properties };
-  }, [allMetadata, filteredMetadata, search]);
+  // Build filtered properties with search and dynamic counts
+  const getFilteredProperties = useMemo(() => {
+    return (attribute: string) => {
+      const precomputedProps = precomputedProperties[attribute] || [];
+      const searchTerm = search[attribute]?.toLowerCase() || "";
+
+      // Filter by search term
+      const filtered = searchTerm
+        ? precomputedProps.filter((prop) =>
+            prop.property.toLowerCase().includes(searchTerm)
+          )
+        : precomputedProps;
+
+      // Add dynamic count from filtered metadata
+      return filtered.map((prop) => ({
+        property: prop.property,
+        order: prop.order,
+        count:
+          filteredMetadata.find(
+            (m) => m.trait_type === attribute && m.value === prop.property,
+          )?.tokens.length || 0,
+      }));
+    };
+  }, [precomputedProperties, filteredMetadata, search]);
 
   const clear = useCallback(() => {
     resetSelected();
@@ -87,40 +77,43 @@ export const Filters = () => {
         className="h-full flex flex-col gap-2 overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}
       >
-        {attributes.map((attribute, index) => (
-          <MarketplacePropertyHeader
-            key={index}
-            label={attribute}
-            count={properties[attribute].length}
-          >
-            <MarketplaceSearchEngine
-              variant="darkest"
-              search={search[attribute] || ""}
-              setSearch={(value: string) =>
-                setSearch((prev) => ({ ...prev, [attribute]: value }))
-              }
-            />
-            <div className="flex flex-col gap-px">
-              {properties[attribute]
-                .sort((a, b) => b.order - a.order)
-                .map(({ property, count }, index) => (
-                  <MarketplacePropertyFilter
-                    key={`${attribute}-${property}-${index}`}
-                    label={property}
-                    count={count}
-                    disabled={count === 0 && !isActive(attribute, property)}
-                    value={isActive(attribute, property)}
-                    setValue={(value: boolean) =>
-                      addSelected(attribute, property, value)
-                    }
-                  />
-                ))}
-              {properties[attribute].length === 0 && (
-                <MarketplacePropertyEmpty />
-              )}
-            </div>
-          </MarketplacePropertyHeader>
-        ))}
+        {precomputedAttributes.map((attribute, index) => {
+          const properties = getFilteredProperties(attribute);
+          return (
+            <MarketplacePropertyHeader
+              key={index}
+              label={attribute}
+              count={properties.length}
+            >
+              <MarketplaceSearchEngine
+                variant="darkest"
+                search={search[attribute] || ""}
+                setSearch={(value: string) =>
+                  setSearch((prev) => ({ ...prev, [attribute]: value }))
+                }
+              />
+              <div className="flex flex-col gap-px">
+                {properties
+                  .sort((a, b) => b.order - a.order)
+                  .map(({ property, count }, index) => (
+                    <MarketplacePropertyFilter
+                      key={`${attribute}-${property}-${index}`}
+                      label={property}
+                      count={count}
+                      disabled={count === 0 && !isActive(attribute, property)}
+                      value={isActive(attribute, property)}
+                      setValue={(value: boolean) =>
+                        addSelected(attribute, property, value)
+                      }
+                    />
+                  ))}
+                {properties.length === 0 && (
+                  <MarketplacePropertyEmpty />
+                )}
+              </div>
+            </MarketplacePropertyHeader>
+          );
+        })}
       </div>
     </MarketplaceFilters>
   );

@@ -45,6 +45,8 @@ export const ArcadeDiscoveryGroup = ({
   variant,
   className,
   onClick,
+  style,
+  ...rest
 }: ArcadeDiscoveryGroupProps) => {
   const [cachedIdentifier, setCachedIdentifier] = useState<number | undefined>(
     undefined,
@@ -84,6 +86,8 @@ export const ArcadeDiscoveryGroup = ({
     <div
       data-rounded={rounded}
       className={cn(arcadeDiscoveryGroupVariants({ variant }), className)}
+      style={style}
+      {...rest}
     >
       {isAnimated ? (
         <AnimatePresence initial={false}>

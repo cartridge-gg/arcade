@@ -1,68 +1,67 @@
 import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/marketplace";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useMarketCollections } from "@/hooks/market-collections";
-import type { Token } from "@dojoengine/torii-wasm";
-import { useProject } from "@/hooks/project";
 import { useLocation, useNavigate } from "react-router-dom";
 import { joinPaths } from "@/helpers";
-import { MetadataHelper } from "@/helpers/metadata";
-import { useArcade } from "@/hooks/arcade";
 import type { EditionModel, GameModel } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
-import placeholder from "@/assets/placeholder.svg";
 import makeBlockie from "ethereum-blockies-base64";
+import { useMarketCollectionFetcher } from "@/hooks/marketplace-fetcher";
+import { useEditions, useGames } from "@/collections";
+import { Contract } from "@/store";
+import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
-export const Marketplace = () => {
-  const { collections } = useMarketCollections();
-  const { editions, games } = useArcade();
-  const { edition } = useProject();
+export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
+  const editions = useEditions();
+  const games = useGames();
+  const projectsList = useMemo(() => {
+    if (edition) return [edition.config.project];
+    return editions.map(e => e.config.project)
+  }, [editions, edition]);
 
-  const fileteredCollections: (Token & { count: number; project: string })[] =
-    useMemo(() => {
-      const data = Object.entries(collections).flatMap(
-        ([project, collection]) => {
-          return Object.entries(collection).map(([address, token]) => {
-            return {
-              ...token,
-              contract_address: getChecksumAddress(address),
-              count: (token as Token & { count: number }).count,
-              project,
-            };
-          });
-        },
-      );
-      if (!edition) return data;
-      return data.filter(
-        (collection) => collection.project === edition.config.project,
-      );
-    }, [collections, edition]);
+  const { collections, status, editionError, loadingProgress } = useMarketCollectionFetcher({ projects: projectsList });
 
-  if (!collections) {
+  if ((status === "idle" || status === "loading") && collections.length === 0) {
     return <LoadingState />;
   }
 
-  if (!!collections && fileteredCollections.length === 0) {
+  if (status !== "loading" && collections.length === 0 && !editionError) {
     return <EmptyState />;
   }
 
+  const isStillLoading = status === "loading" || (loadingProgress && loadingProgress.total > 0 && loadingProgress.completed < loadingProgress.total);
+
   return (
-    <div
-      className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
-      style={{ scrollbarWidth: "none" }}
-    >
-      {fileteredCollections.map((collection) => (
-        <Item
-          key={`${collection.project}-${collection.contract_address}`}
-          project={collection.project}
-          collection={collection}
-          editions={editions}
-          games={games}
+    <>
+      {collections.length === 0 && editionError && editionError.length > 0 && (
+        <Empty
+          title="No collections available - Failed to connect to data source"
+          className="h-full py-3 lg:py-6"
         />
-      ))}
-    </div>
+      )}
+      {collections.length > 0 && (
+      <div
+        className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
+        style={{ scrollbarWidth: "none" }}
+      >
+          {collections.map((collection) => (
+          <Item
+            key={`${collection.project}-${collection.contract_address}`}
+            project={collection.project}
+            collection={collection}
+            editions={editions as EditionModel[]}
+            games={games as GameModel[]}
+          />
+        ))}
+        </div>
+      )}
+      <FloatingLoadingSpinner
+        isLoading={isStillLoading && collections.length > 0}
+        loadingProgress={loadingProgress}
+      />
+    </>
   );
 };
 
@@ -73,12 +72,11 @@ function Item({
   games,
 }: {
   project: string;
-  collection: Token & { count: number };
+  collection: Contract;
   editions: EditionModel[];
   games: GameModel[];
 }) {
   const { orders, sales } = useMarketplace();
-  const [image, setImage] = useState<string>(placeholder);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -151,25 +149,6 @@ function Item({
     return { game, edition };
   }, [collection, editions]);
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const toriiImage = await MetadataHelper.getToriiImage(
-        project,
-        collection,
-      );
-      if (toriiImage) {
-        setImage(toriiImage);
-        return;
-      }
-      const metadataImage = await MetadataHelper.getMetadataImage(collection);
-      if (metadataImage) {
-        setImage(metadataImage);
-        return;
-      }
-    };
-    fetchImage();
-  }, [collection, project]);
-
   const handleClick = useCallback(() => {
     let pathname = location.pathname;
     pathname = pathname.replace(/\/game\/[^/]+/, "");
@@ -201,14 +180,14 @@ function Item({
     <div className="w-full group select-none">
       <CollectibleCard
         title={collection.name}
-        image={image}
-        totalCount={collection.count}
+        image={collection.image}
+        totalCount={collection.totalSupply as unknown as number}
         selectable={false}
         listingCount={listingCount}
         onClick={handleClick}
         lastSale={lastSale ?? null}
         price={price ?? null}
-        className="cursor-pointer"
+        className={"cursor-pointer"}
       />
     </div>
   );
@@ -216,10 +195,12 @@ function Item({
 
 const LoadingState = () => {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none">
-      <Skeleton className="w-full h-[164px] rounded" />
-      <Skeleton className="w-full h-[164px] rounded" />
-      <Skeleton className="hidden lg:block w-full h-[164px] rounded" />
+    <div>
+      <div className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none">
+        <Skeleton className="w-full h-[164px] rounded" />
+        <Skeleton className="w-full h-[164px] rounded" />
+        <Skeleton className="hidden lg:block w-full h-[164px] rounded" />
+      </div>
     </div>
   );
 };

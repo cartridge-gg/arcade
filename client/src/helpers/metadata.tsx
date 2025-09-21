@@ -199,6 +199,13 @@ export const MetadataHelper = {
       console.error("Error fetching image:", error);
     }
   },
+  unsafeGetToriiImage: async (
+    project: string,
+    token: Token,
+  ): Promise<string | undefined> => {
+    if (!token.contract_address || !token.token_id) return;
+    return `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
+  },
 
   getMetadataImage: async (token: Token): Promise<string | undefined> => {
     if (!token.metadata) return;
