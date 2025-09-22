@@ -4,7 +4,6 @@ import {
   cn,
   CollectibleCard,
   Empty,
-  MarketplaceSearch,
   Separator,
   Skeleton,
 } from "@cartridge/ui";
@@ -41,11 +40,11 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
     const code = await provider.getClassAt(address);
     if (!code) return;
     const interfaces = code.abi.filter(
-      (element) => element.type === "interface",
+      (element) => element.type === "interface"
     );
     if (interfaces.length > 0) {
       return interfaces.flatMap((element: InterfaceAbi) =>
-        element.items.map((item: FunctionAbi) => item.name),
+        element.items.map((item: FunctionAbi) => item.name)
       );
     }
     const functions = code.abi.filter((element) => element.type === "function");
@@ -59,7 +58,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { sales, getCollectionOrders } = useMarketplace();
-  const [search, setSearch] = useState<string>("");
   const [selection, setSelection] = useState<Asset[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
@@ -83,17 +81,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
     address: collectionAddress
   });
 
-  // Apply search filtering on top of metadata filters
-  const searchFilteredTokens = useMemo(() => {
-    if (!search.trim()) return filteredTokens;
-
-    const searchLower = search.toLowerCase();
-
-    return filteredTokens.filter(token => {
-      const tokenName = (token.metadata as any)?.name || token.name || '';
-      return tokenName.toLowerCase().includes(searchLower);
-    });
-  }, [filteredTokens, search]);
 
   const connectWallet = useCallback(async () => {
     connect({ connector: connectors[0] });
@@ -102,7 +89,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   const chain: Chain = useMemo(() => {
     return (
       chains.find(
-        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
+        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc
       ) || mainnet
     );
   }, [chains, edition]);
@@ -124,7 +111,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
       const entrypoints = await getEntrypoints(
         provider.provider,
-        contractAddress,
+        contractAddress
       );
       const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
       const subpath = isERC1155 ? "collectible" : "collection";
@@ -151,7 +138,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
       if (!isConnected || !connector) return;
       const orders = tokens.map((token) => token.orders).flat();
       const contractAddresses = new Set(
-        tokens.map((token) => token.contract_address),
+        tokens.map((token) => token.contract_address)
       );
       if (!edition || contractAddresses.size !== 1) return;
       const contractAddress = `0x${BigInt(Array.from(contractAddresses)[0]).toString(16)}`;
@@ -164,7 +151,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
       const entrypoints = await getEntrypoints(
         provider.provider,
-        contractAddress,
+        contractAddress
       );
       const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
       const subpath = isERC1155 ? "collectible" : "collection";
@@ -196,7 +183,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
   // Set up virtualizer for rows
   const virtualizer = useVirtualizer({
-    count: searchFilteredTokens.length,
+    count: filteredTokens.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
@@ -227,10 +214,10 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
               />
             )}
             {isConnected && selection.length > 0 ? (
-              <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
+              <p>{`${selection.length} / ${filteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
+                <p>{`${filteredTokens.length} ${tokens && filteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -244,15 +231,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
             )}
           </div>
         </div>
-        <MarketplaceSearch
-          search={search}
-          setSearch={setSearch}
-          selected={undefined}
-          setSelected={() => { }}
-          options={[]}
-          variant="darkest"
-          className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
-        />
       </div>
       <div
         ref={parentRef}
@@ -269,9 +247,9 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
             const startIndex = virtualRow.index * 4;
             const endIndex = Math.min(
               startIndex + 4,
-              searchFilteredTokens.length
+              filteredTokens.length
             );
-            const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
+            const rowTokens = filteredTokens.slice(startIndex, endIndex);
 
             return (
               <div
@@ -382,11 +360,11 @@ function Item({
     const currency = token.orders[0].currency;
     const metadata = erc20Metadata.find(
       (m) =>
-        getChecksumAddress(m.l2_token_address) === getChecksumAddress(currency),
+        getChecksumAddress(m.l2_token_address) === getChecksumAddress(currency)
     );
     const image =
       erc20Metadata.find(
-        (m) => getChecksumAddress(m.l2_token_address) === currency,
+        (m) => getChecksumAddress(m.l2_token_address) === currency
       )?.logo_url || makeBlockie(currency);
     const decimals = metadata?.decimals || 0;
     const price = token.orders[0].price / 10 ** decimals;
@@ -403,7 +381,7 @@ function Item({
     const metadata = erc20Metadata.find(
       (m) =>
         getChecksumAddress(m.l2_token_address) ===
-        getChecksumAddress(order.currency),
+        getChecksumAddress(order.currency)
     );
     const image = metadata?.logo_url || makeBlockie(order.currency);
     const decimals = metadata?.decimals || 0;
@@ -466,7 +444,6 @@ const LoadingState = () => {
     <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full p-6">
       <div className="flex justify-between items-center">
         <Skeleton className="min-h-10 w-1/5" />
-        <Skeleton className="min-h-10 w-1/3" />
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 place-items-center select-none overflow-hidden h-full">
         {Array.from({ length: 20 }).map((_, index) => (
