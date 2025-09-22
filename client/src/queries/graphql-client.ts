@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_CARTRIDGE_API_URL || 'https://api.cartridge.gg';
+const API_URL =
+  import.meta.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
 
 export interface GraphQLError {
   message: string;
@@ -15,12 +16,12 @@ export interface GraphQLResponse<T = any> {
 
 export async function graphqlClient<T = any>(
   query: string,
-  variables?: Record<string, any>
+  variables?: Record<string, any>,
 ): Promise<T> {
   const response = await fetch(`${API_URL}/query`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       query,
@@ -35,19 +36,19 @@ export async function graphqlClient<T = any>(
   const json: GraphQLResponse<T> = await response.json();
 
   if (json.errors && json.errors.length > 0) {
-    const errorMessage = json.errors.map(e => e.message).join(', ');
+    const errorMessage = json.errors.map((e) => e.message).join(", ");
     throw new Error(`GraphQL error: ${errorMessage}`);
   }
 
   if (!json.data) {
-    throw new Error('No data returned from GraphQL query');
+    throw new Error("No data returned from GraphQL query");
   }
 
   return json.data;
 }
 
 export function createGraphQLQueryFn<TVariables = any, TData = any>(
-  query: string
+  query: string,
 ) {
   return async (variables: TVariables): Promise<TData> => {
     return graphqlClient<TData>(query, variables as Record<string, any>);

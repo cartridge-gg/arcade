@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { TabsContent, Thumbnail, TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { DiscoverScene } from "../scenes/discover";
 import { LeaderboardScene } from "../scenes/leaderboard";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Socials } from "@cartridge/arcade";
@@ -37,8 +36,8 @@ export function GamePage() {
 
   const order: TabValue[] = useMemo(() => {
     const tabs: TabValue[] = game
-      ? ["activity", "leaderboard", "marketplace", "predict", "about"]
-      : ["activity", "leaderboard", "marketplace", "predict"];
+      ? ["marketplace", "leaderboard", "predict", "about"]
+      : ["marketplace", "leaderboard", "predict"];
 
     if (process.env.NODE_ENV !== "development") {
       // Remove predict tab in production for now
@@ -50,7 +49,7 @@ export function GamePage() {
   }, [game]);
 
   const defaultValue = useMemo(() => {
-    if (!order.includes(tab as TabValue)) return "activity";
+    if (!order.includes(tab as TabValue)) return "marketplace";
     return tab;
   }, [tab, order]);
 
@@ -104,21 +103,15 @@ export function GamePage() {
         >
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"
-            value="activity"
+            value="marketplace"
           >
-            <DiscoverScene />
+            <MarketplaceScene />
           </TabsContent>
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"
             value="leaderboard"
           >
             <LeaderboardScene />
-          </TabsContent>
-          <TabsContent
-            className="p-0 px-3 lg:px-6 mt-0 grow w-full"
-            value="marketplace"
-          >
-            <MarketplaceScene />
           </TabsContent>
           <TabsContent
             className="p-0 px-3 lg:px-6 mt-0 grow w-full"

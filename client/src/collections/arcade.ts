@@ -1,4 +1,9 @@
-import { createCollection, eq, liveQueryCollectionOptions, useLiveQuery } from "@tanstack/react-db";
+import {
+  createCollection,
+  eq,
+  liveQueryCollectionOptions,
+  useLiveQuery,
+} from "@tanstack/react-db";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { QueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/queries/keys";
@@ -21,14 +26,14 @@ const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
 
 // Type discriminated union for Registry models
 export interface RegistryItem {
-  type: 'game' | 'edition' | 'access';
+  type: "game" | "edition" | "access";
   identifier: string;
   data: GameModel | EditionModel | AccessModel;
 }
 
 // Type discriminated union for Social models
 export interface SocialItem {
-  type: 'pin' | 'follow' | 'guild';
+  type: "pin" | "follow" | "guild";
   key: string;
   data: PinEvent | FollowEvent | GuildModel;
 }
@@ -48,7 +53,7 @@ export const arcadeRegistryCollection = createCollection(
               const game = model as GameModel;
               if (game.exists()) {
                 items.push({
-                  type: 'game',
+                  type: "game",
                   identifier: game.identifier,
                   data: game,
                 });
@@ -59,7 +64,7 @@ export const arcadeRegistryCollection = createCollection(
               const edition = model as EditionModel;
               if (edition.exists()) {
                 items.push({
-                  type: 'edition',
+                  type: "edition",
                   identifier: edition.identifier,
                   data: edition,
                 });
@@ -70,7 +75,7 @@ export const arcadeRegistryCollection = createCollection(
               const access = model as AccessModel;
               if (access.exists()) {
                 items.push({
-                  type: 'access',
+                  type: "access",
                   identifier: access.identifier,
                   data: access,
                 });
@@ -79,14 +84,14 @@ export const arcadeRegistryCollection = createCollection(
             }
           });
         },
-        { game: true, edition: true, access: true }
+        { game: true, edition: true, access: true },
       );
 
       return items;
     },
     queryClient: new QueryClient(),
     getKey: (item: RegistryItem) => `${item.type}-${item.identifier}`,
-  })
+  }),
 );
 
 // Main Social collection - fetches all social data in one call
@@ -105,7 +110,7 @@ export const arcadeSocialCollection = createCollection(
               if (pin.time > 0) {
                 const playerId = getChecksumAddress(pin.playerId);
                 items.push({
-                  type: 'pin',
+                  type: "pin",
                   key: `${playerId}-${pin.achievementId}`,
                   data: pin,
                 });
@@ -118,7 +123,7 @@ export const arcadeSocialCollection = createCollection(
                 const follower = getChecksumAddress(follow.follower);
                 const followed = getChecksumAddress(follow.followed);
                 items.push({
-                  type: 'follow',
+                  type: "follow",
                   key: `${follower}-${followed}`,
                   data: follow,
                 });
@@ -129,7 +134,7 @@ export const arcadeSocialCollection = createCollection(
               const guild = model as GuildModel;
               if (guild.exists()) {
                 items.push({
-                  type: 'guild',
+                  type: "guild",
                   key: guild.id.toString(),
                   data: guild,
                 });
@@ -138,95 +143,119 @@ export const arcadeSocialCollection = createCollection(
             }
           });
         },
-        { pin: true, follow: true, guild: true }
+        { pin: true, follow: true, guild: true },
       );
 
       return items;
     },
     queryClient: new QueryClient(),
-    getKey: (item: SocialItem) => `${item.type}-${item.key}`
-  })
+    getKey: (item: SocialItem) => `${item.type}-${item.key}`,
+  }),
 );
 
 // Derived queries for specific model types
-export const gamesQuery = createCollection(liveQueryCollectionOptions({
-  query: (q) => q
-    .from({ item: arcadeRegistryCollection })
-    .where(({ item }) => eq(item.type, 'game'))
-    .orderBy(({ item }) => (item.data as unknown as GameModel).name, 'desc')
-    .fn.select(({ item }) => {
-      return item.data as unknown as GameModel;
-    }),
-  getKey: (item) => item.identifier,
-}));
+export const gamesQuery = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ item: arcadeRegistryCollection })
+        .where(({ item }) => eq(item.type, "game"))
+        .orderBy(({ item }) => (item.data as unknown as GameModel).name, "desc")
+        .fn.select(({ item }) => {
+          return item.data as unknown as GameModel;
+        }),
+    getKey: (item) => item.identifier,
+  }),
+);
 
-export const editionsQuery = createCollection(liveQueryCollectionOptions({
-  query: (q) => q
-    .from({ item: arcadeRegistryCollection })
-    .where(({ item }) => eq(item.type, 'edition'))
-    .fn.select(({ item }) => {
-      return { ...item.data } as EditionModel;
-    }),
-  getKey: (item) => item.identifier,
-}));
+export const editionsQuery = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ item: arcadeRegistryCollection })
+        .where(({ item }) => eq(item.type, "edition"))
+        .fn.select(({ item }) => {
+          return { ...item.data } as EditionModel;
+        }),
+    getKey: (item) => item.identifier,
+  }),
+);
 
-export const editionsWithGames = createCollection(liveQueryCollectionOptions({
-  query: (q) => q
-    .from({ e: editionsQuery })
-    .innerJoin({ g: gamesQuery }, ({ e, g }) =>
-      eq(e.gameId, g.id))
-    .orderBy(({ g }) => g.name, 'asc')
-    .select(({ e, g }) => ({
-      project: e.config.project,
-      _edition: e,
-      _game: { ...g },
-    }))
-}));
+export const editionsWithGames = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ e: editionsQuery })
+        .innerJoin({ g: gamesQuery }, ({ e, g }) => eq(e.gameId, g.id))
+        .orderBy(({ g }) => g.name, "asc")
+        .select(({ e, g }) => ({
+          project: e.config.project,
+          _edition: e,
+          _game: { ...g },
+        })),
+  }),
+);
 
-const accessesQuery = createCollection(liveQueryCollectionOptions({
-  query: (q) => q
-    .from({ item: arcadeRegistryCollection })
-    .where(({ item }) => eq(item.type, 'access')),
-  getKey: (item) => item.identifier,
-}));
+const accessesQuery = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ item: arcadeRegistryCollection })
+        .where(({ item }) => eq(item.type, "access")),
+    getKey: (item) => item.identifier,
+  }),
+);
 
-const pinsQuery = createCollection(liveQueryCollectionOptions({
-  query: (q) => q
-    .from({ item: arcadeSocialCollection })
-    .where(({ item }) => eq(item.type, 'pin')),
-  getKey: (item) => `${getChecksumAddress((item.data as PinEvent).playerId)}-${(item.data as PinEvent).achievementId}`,
-}));
+const pinsQuery = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ item: arcadeSocialCollection })
+        .where(({ item }) => eq(item.type, "pin")),
+    getKey: (item) =>
+      `${getChecksumAddress((item.data as PinEvent).playerId)}-${(item.data as PinEvent).achievementId}`,
+  }),
+);
 
-const followsQuery = createCollection(liveQueryCollectionOptions({
-  query: (q) => q
-    .from({ item: arcadeSocialCollection })
-    .where(({ item }) => eq(item.type, 'follow')),
-  getKey: (item) => `${getChecksumAddress((item.data as FollowEvent).follower)}-${getChecksumAddress((item.data as FollowEvent).followed)}`,
-}));
+const followsQuery = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ item: arcadeSocialCollection })
+        .where(({ item }) => eq(item.type, "follow")),
+    getKey: (item) =>
+      `${getChecksumAddress((item.data as FollowEvent).follower)}-${getChecksumAddress((item.data as FollowEvent).followed)}`,
+  }),
+);
 
-const guildsQuery = createCollection(liveQueryCollectionOptions({
-  query: (q) => q
-    .from({ item: arcadeSocialCollection })
-    .where(({ item }) => eq(item.type, 'guild')),
-  getKey: (item) => (item.data as GuildModel).id.toString(),
-}));
+const guildsQuery = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ item: arcadeSocialCollection })
+        .where(({ item }) => eq(item.type, "guild")),
+    getKey: (item) => (item.data as GuildModel).id.toString(),
+  }),
+);
 
 // Hook functions for accessing the collections
 export function useGames() {
-  const { data } = useLiveQuery((q) => q
-    .from({ games: gamesQuery })
-    .orderBy(({ games }) => games.name, 'asc')
-    .select(({ games }) => ({ ...games }))
+  const { data } = useLiveQuery((q) =>
+    q
+      .from({ games: gamesQuery })
+      .orderBy(({ games }) => games.name, "asc")
+      .select(({ games }) => ({ ...games })),
   );
   return data || [];
 }
 
 export function useEditions() {
-  const { data } = useLiveQuery((q) => q
-    .from({ editions: editionsQuery })
-    .orderBy(({ editions }) => editions.priority, 'desc')
-    .orderBy(({ editions }) => editions.id, 'asc')
-    .select(({ editions }) => ({ ...editions }))
+  const { data } = useLiveQuery((q) =>
+    q
+      .from({ editions: editionsQuery })
+      .orderBy(({ editions }) => editions.priority, "desc")
+      .orderBy(({ editions }) => editions.id, "asc")
+      .select(({ editions }) => ({ ...editions })),
   );
   return data || [];
 }
@@ -234,17 +263,18 @@ export function useEditionsMap() {
   const editions = useEditions();
   const editionsMap = useMemo(() => {
     const map = new Map();
-    editions.forEach(e => map.set(e.config.project, e));
+    editions.forEach((e) => map.set(e.config.project, e));
     return map;
   }, [editions]);
   return editionsMap;
 }
 
 export function useAccesses() {
-  const { data } = useLiveQuery((q) => q
-    .from({ accesses: accessesQuery })
-    .orderBy(({ accesses }) => accesses.identifier, 'asc')
-    .select(({ accesses }) => ({ ...accesses }))
+  const { data } = useLiveQuery((q) =>
+    q
+      .from({ accesses: accessesQuery })
+      .orderBy(({ accesses }) => accesses.identifier, "asc")
+      .select(({ accesses }) => ({ ...accesses })),
   );
   return data || [];
 }
@@ -254,7 +284,12 @@ export function usePins(playerId?: string) {
     let query = q.from({ pins: pinsQuery });
     if (playerId) {
       const checksumAddress = getChecksumAddress(playerId);
-      query = query.where(({ pins }) => eq(getChecksumAddress((pins.data as PinEvent).playerId), checksumAddress));
+      query = query.where(({ pins }) =>
+        eq(
+          getChecksumAddress((pins.data as PinEvent).playerId),
+          checksumAddress,
+        ),
+      );
     }
     return query.select(({ pins }) => ({ ...pins }));
   });
@@ -266,7 +301,12 @@ export function useFollows(follower?: string) {
     let query = q.from({ follows: followsQuery });
     if (follower) {
       const checksumAddress = getChecksumAddress(follower);
-      query = query.where(({ follows }) => eq(getChecksumAddress((follows.data as FollowEvent).follower), checksumAddress));
+      query = query.where(({ follows }) =>
+        eq(
+          getChecksumAddress((follows.data as FollowEvent).follower),
+          checksumAddress,
+        ),
+      );
     }
     return query.select(({ follows }) => ({ ...follows }));
   });
@@ -274,13 +314,14 @@ export function useFollows(follower?: string) {
 }
 
 export function useGuilds() {
-  const { data } = useLiveQuery((q) => q
-    .from({ guilds: guildsQuery })
-    .select(({ guilds }) => ({ ...guilds }))
-    .orderBy(({ guilds }) => {
-      const guildData = guilds.data as unknown as GuildModel;
-      return (guildData.metadata as any)?.name || '';
-    })
+  const { data } = useLiveQuery((q) =>
+    q
+      .from({ guilds: guildsQuery })
+      .select(({ guilds }) => ({ ...guilds }))
+      .orderBy(({ guilds }) => {
+        const guildData = guilds.data as unknown as GuildModel;
+        return (guildData.metadata as any)?.name || "";
+      }),
   );
   return data || [];
 }

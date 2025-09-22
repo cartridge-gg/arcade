@@ -55,7 +55,13 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
   }
 };
 
-export function Items({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) {
+export function Items({
+  edition,
+  collectionAddress,
+}: {
+  edition: EditionModel;
+  collectionAddress: string;
+}) {
   const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { sales, getCollectionOrders } = useMarketplace();
@@ -69,7 +75,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
     tokens,
     filteredTokens,
     activeFilters,
-    resetSelected: clearAllFilters
+    resetSelected: clearAllFilters,
   } = useMetadataFiltersAdapter();
 
   // Get marketplace orders for this collection
@@ -80,7 +86,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   // Get collection info
   const { collection, status, loadingProgress } = useMarketTokensFetcher({
     project: edition ? [edition.config.project] : [],
-    address: collectionAddress
+    address: collectionAddress,
   });
 
   // Apply search filtering on top of metadata filters
@@ -89,8 +95,8 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
     const searchLower = search.toLowerCase();
 
-    return filteredTokens.filter(token => {
-      const tokenName = (token.metadata as any)?.name || token.name || '';
+    return filteredTokens.filter((token) => {
+      const tokenName = (token.metadata as any)?.name || token.name || "";
       return tokenName.toLowerCase().includes(searchLower);
     });
   }, [filteredTokens, search]);
@@ -230,7 +236,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
               <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
+                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -248,7 +254,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
           search={search}
           setSearch={setSearch}
           selected={undefined}
-          setSelected={() => { }}
+          setSelected={() => {}}
           options={[]}
           variant="darkest"
           className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
@@ -269,7 +275,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
             const startIndex = virtualRow.index * 4;
             const endIndex = Math.min(
               startIndex + 4,
-              searchFilteredTokens.length
+              searchFilteredTokens.length,
             );
             const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
 
@@ -289,15 +295,24 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
                   {rowTokens.map((token) => {
                     // Get orders for this specific token
                     const tokenId = token.token_id?.toString();
-                    const tokenOrders = tokenId ? (collectionOrders?.[tokenId] || []) : [];
-                    const assetToken = { ...token, orders: tokenOrders, owner: address || "" } as Asset;
+                    const tokenOrders = tokenId
+                      ? collectionOrders?.[tokenId] || []
+                      : [];
+                    const assetToken = {
+                      ...token,
+                      orders: tokenOrders,
+                      owner: address || "",
+                    } as Asset;
                     return (
                       <Item
                         key={`${token.contract_address}-${token.token_id}`}
                         isConnected={isConnected}
                         connect={connectWallet}
                         token={assetToken}
-                        sales={sales[getChecksumAddress(token.contract_address)] || {}}
+                        sales={
+                          sales[getChecksumAddress(token.contract_address)] ||
+                          {}
+                        }
                         selection={selection}
                         setSelection={setSelection}
                         handlePurchase={() => handlePurchase([assetToken])}
@@ -356,7 +371,6 @@ function Item({
   handleInspect: (token: Token) => void;
   isConnected?: boolean;
 }) {
-
   const selected = useMemo(() => {
     return selection.some((t) => t.token_id === token.token_id);
   }, [selection, token]);
@@ -486,4 +500,3 @@ const EmptyState = () => {
     />
   );
 };
-

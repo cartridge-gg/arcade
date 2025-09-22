@@ -1,10 +1,10 @@
-import { useMemo, useCallback, useState } from 'react';
-import { useMetadataFilters } from './use-metadata-filters';
-import { useMarketTokensFetcher } from './marketplace-tokens-fetcher';
-import { useProject } from './project';
-import { useSearchParams } from 'react-router-dom';
-import { useMetadataFilterStore } from '@/store/metadata-filters';
-import { useMarketplace } from './marketplace';
+import { useMemo, useCallback, useState } from "react";
+import { useMetadataFilters } from "./use-metadata-filters";
+import { useMarketTokensFetcher } from "./marketplace-tokens-fetcher";
+import { useProject } from "./project";
+import { useSearchParams } from "react-router-dom";
+import { useMetadataFilterStore } from "@/store/metadata-filters";
+import { useMarketplace } from "./marketplace";
 
 /**
  * Adapter hook that provides the same interface as useMarketFilters
@@ -13,18 +13,18 @@ import { useMarketplace } from './marketplace';
 export function useMetadataFiltersAdapter() {
   const { collection: collectionAddress, edition } = useProject();
   const [active, setActive] = useState(1); // 0 = Buy Now, 1 = Show All
-  const [, ] = useSearchParams();
+  const [,] = useSearchParams();
   const { getCollectionOrders } = useMarketplace();
 
   // Get tokens from the fetcher - use edition's project if available
   const { tokens } = useMarketTokensFetcher({
     project: edition ? [edition.config.project] : [],
-    address: collectionAddress || ''
+    address: collectionAddress || "",
   });
 
   // Get marketplace orders for this collection
   const collectionOrders = useMemo(() => {
-    return getCollectionOrders(collectionAddress || '');
+    return getCollectionOrders(collectionAddress || "");
   }, [getCollectionOrders, collectionAddress]);
 
   // Use the metadata filters hook
@@ -34,16 +34,16 @@ export function useMetadataFiltersAdapter() {
     availableFilters,
     setFilter,
     removeFilter,
-    clearAllFilters
+    clearAllFilters,
   } = useMetadataFilters({
     tokens: tokens || [],
-    collectionAddress: collectionAddress || '',
-    enabled: true
+    collectionAddress: collectionAddress || "",
+    enabled: true,
   });
 
   // Get pre-computed data from store
   const { getCollectionState } = useMetadataFilterStore();
-  const collectionState = getCollectionState(collectionAddress || '');
+  const collectionState = getCollectionState(collectionAddress || "");
   const precomputed = collectionState?.precomputed;
 
   // Use pre-computed allMetadata or fallback to empty array
@@ -70,28 +70,36 @@ export function useMetadataFiltersAdapter() {
     if (!precomputed?.allMetadata) return [];
 
     // Get the set of filtered token IDs (after status filter)
-    const filteredTokenIds = new Set(tokensAfterStatusFilter.map(t => t.token_id));
+    const filteredTokenIds = new Set(
+      tokensAfterStatusFilter.map((t) => t.token_id),
+    );
 
     // Filter pre-computed metadata to only include tokens in filtered set
-    return precomputed.allMetadata.map(item => ({
+    return precomputed.allMetadata.map((item) => ({
       ...item,
-      tokens: item.tokens.filter(t => filteredTokenIds.has(t.token_id))
+      tokens: item.tokens.filter((t) => filteredTokenIds.has(t.token_id)),
     }));
   }, [precomputed, tokensAfterStatusFilter]);
 
   // Check if a filter is active
-  const isActive = useCallback((trait: string, value: string) => {
-    return activeFilters[trait]?.has(value) || false;
-  }, [activeFilters]);
+  const isActive = useCallback(
+    (trait: string, value: string) => {
+      return activeFilters[trait]?.has(value) || false;
+    },
+    [activeFilters],
+  );
 
   // Add or remove a filter
-  const addSelected = useCallback((trait: string, value: string, selected: boolean) => {
-    if (selected) {
-      setFilter(trait, value);
-    } else {
-      removeFilter(trait, value);
-    }
-  }, [setFilter, removeFilter]);
+  const addSelected = useCallback(
+    (trait: string, value: string, selected: boolean) => {
+      if (selected) {
+        setFilter(trait, value);
+      } else {
+        removeFilter(trait, value);
+      }
+    },
+    [setFilter, removeFilter],
+  );
 
   // Reset all filters
   const resetSelected = useCallback(() => {
@@ -105,29 +113,35 @@ export function useMetadataFiltersAdapter() {
 
   // Check if filters result in empty state
   const empty = useMemo(() => {
-    return Object.keys(activeFilters).length > 0 && tokensAfterStatusFilter.length === 0;
+    return (
+      Object.keys(activeFilters).length > 0 &&
+      tokensAfterStatusFilter.length === 0
+    );
   }, [activeFilters, tokensAfterStatusFilter]);
 
   // Check if a specific filter is selected (for context compatibility)
-  const isSelected = useCallback((attributes: Array<{ trait_type: string; value: string }>) => {
-    for (const attr of attributes) {
-      if (!activeFilters[attr.trait_type]?.has(attr.value)) {
-        return false;
+  const isSelected = useCallback(
+    (attributes: Array<{ trait_type: string; value: string }>) => {
+      for (const attr of attributes) {
+        if (!activeFilters[attr.trait_type]?.has(attr.value)) {
+          return false;
+        }
       }
-    }
-    return true;
-  }, [activeFilters]);
+      return true;
+    },
+    [activeFilters],
+  );
 
   // Set all metadata (for context compatibility)
   const setAllMetadata = useCallback(() => {
     // This is handled automatically by the metadata index
-    console.log('setAllMetadata called but handled by metadata index');
+    console.log("setAllMetadata called but handled by metadata index");
   }, []);
 
   // Set filtered metadata (for context compatibility)
   const setFilteredMetadata = useCallback(() => {
     // This is handled automatically by the filtering system
-    console.log('setFilteredMetadata called but handled by filtering system');
+    console.log("setFilteredMetadata called but handled by filtering system");
   }, []);
 
   return {
@@ -159,6 +173,6 @@ export function useMetadataFiltersAdapter() {
     tokens,
     filteredTokens: tokensAfterStatusFilter,
     activeFilters,
-    availableFilters
+    availableFilters,
   };
 }

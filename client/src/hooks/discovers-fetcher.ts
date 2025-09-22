@@ -3,10 +3,7 @@ import { useEventStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
 import { useEffect, useCallback } from "react";
 import { getChecksumAddress } from "starknet";
-import {
-  useFetcherState,
-  processToriiStream
-} from "./fetcher-utils";
+import { useFetcherState, processToriiStream } from "./fetcher-utils";
 
 export type Discover = {
   identifier: string;
@@ -65,7 +62,11 @@ interface UseDiscoversFetcherParams {
   refetchInterval?: number;
 }
 
-const PLAYTHROUGH_SQL = (limit: number = 1000, offset:number =0,daysBack: number = 30) => `
+const PLAYTHROUGH_SQL = (
+  limit: number = 1000,
+  offset: number = 0,
+  daysBack: number = 30,
+) => `
   WITH world_contracts AS (
       SELECT contract_address
       FROM contracts
@@ -236,12 +237,9 @@ export function useDiscoversFetcher({
             setLoadingProgress({ completed, total });
           },
           onError: (endpoint, error) => {
-            console.error(
-              `Error fetching from ${endpoint}:`,
-              error,
-            );
+            console.error(`Error fetching from ${endpoint}:`, error);
             const edition = editions.get(endpoint);
-            setError(edition, `Error fetching from ${endpoint}`)
+            setError(edition, `Error fetching from ${endpoint}`);
           },
           onComplete: () => {
             setSuccess();
@@ -258,7 +256,16 @@ export function useDiscoversFetcher({
         }
       }
     },
-    [projects, processPlaythroughs, setEvents, startLoading, setSuccess, setError, setLoadingProgress, editions],
+    [
+      projects,
+      processPlaythroughs,
+      setEvents,
+      startLoading,
+      setSuccess,
+      setError,
+      setLoadingProgress,
+      editions,
+    ],
   );
 
   useEffect(() => {
@@ -266,7 +273,6 @@ export function useDiscoversFetcher({
     fetchData(1);
     // Background load: Full 30 days of historical data
     fetchData(30);
-
 
     const interval = setInterval(() => {
       fetchData(1);

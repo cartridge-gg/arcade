@@ -34,7 +34,7 @@ export const Filters = () => {
       // Filter by search term
       const filtered = searchTerm
         ? precomputedProps.filter((prop) =>
-            prop.property.toLowerCase().includes(searchTerm)
+            prop.property.toLowerCase().includes(searchTerm),
           )
         : precomputedProps;
 
@@ -107,9 +107,7 @@ export const Filters = () => {
                       }
                     />
                   ))}
-                {properties.length === 0 && (
-                  <MarketplacePropertyEmpty />
-                )}
+                {properties.length === 0 && <MarketplacePropertyEmpty />}
               </div>
             </MarketplacePropertyHeader>
           );

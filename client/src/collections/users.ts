@@ -11,7 +11,7 @@ export type Account = {
   username: string;
   avatar?: string;
   createdAt?: string;
-}
+};
 
 type AccountNamesResponse = {
   accounts: {
@@ -28,7 +28,7 @@ type AccountNamesResponse = {
       };
     }>;
   };
-}
+};
 
 const ACCOUNT_NAMES_QUERY = `
   query GetControllers {
@@ -52,13 +52,12 @@ const ACCOUNT_NAMES_QUERY = `
 export const accountsQueryOptions = {
   queryKey: queryKeys.users.accounts(),
   queryFn: async () => {
-    const data = await graphqlClient<AccountNamesResponse>(
-      ACCOUNT_NAMES_QUERY
-    );
+    const data = await graphqlClient<AccountNamesResponse>(ACCOUNT_NAMES_QUERY);
 
     const accounts: Account[] = [];
     data.accounts?.edges?.forEach((edge) => {
-      const controllerAddress = edge.node.controllers?.edges?.[0]?.node?.address;
+      const controllerAddress =
+        edge.node.controllers?.edges?.[0]?.node?.address;
       if (controllerAddress) {
         accounts.push({
           address: getChecksumAddress(controllerAddress),
@@ -76,27 +75,28 @@ export const accountsCollection = createCollection(
     ...accountsQueryOptions,
     queryClient,
     getKey: (item: Account) => item.address,
-  })
+  }),
 );
-
-
 
 export const useAccounts = () => {
   const query = useLiveQuery(accountsCollection);
   const accounts = query.state ? Array.from(query.state.values()) : [];
   const accountsMap = useMemo(() => {
     const map = new Map();
-    accounts.forEach(a => map.set(a.address, a.username));
-    return map
+    accounts.forEach((a) => map.set(a.address, a.username));
+    return map;
   }, [accounts]);
   return { ...query, data: accountsMap };
 };
 
 export const useAccountByAddress = (address: string | undefined) => {
   const query = useLiveQuery(accountsCollection);
-  const account = query.state && address
-    ? Array.from(query.state.values()).find((a: Account) => a.address === getChecksumAddress(address))
-    : undefined;
+  const account =
+    query.state && address
+      ? Array.from(query.state.values()).find(
+          (a: Account) => a.address === getChecksumAddress(address),
+        )
+      : undefined;
   return { ...query, data: account };
 };
 
@@ -104,7 +104,9 @@ export const useAccountsByAddresses = (addresses: string[]) => {
   const query = useLiveQuery(accountsCollection);
   const checksumAddresses = addresses.map(getChecksumAddress);
   const accounts = query.state
-    ? Array.from(query.state.values()).filter((a: Account) => checksumAddresses.includes(a.address))
+    ? Array.from(query.state.values()).filter((a: Account) =>
+        checksumAddresses.includes(a.address),
+      )
     : [];
   return { ...query, data: accounts };
 };

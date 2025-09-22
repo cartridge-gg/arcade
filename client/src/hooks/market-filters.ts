@@ -166,14 +166,16 @@ export const useMarketFilters = () => {
 
   useEffect(() => {
     if (!tokens) return;
-    // @ts-expect-error TODO: Fix this type 
+    // @ts-expect-error TODO: Fix this type
     setAllMetadata(MetadataHelper.extract(tokens as unknown as Token[]));
   }, [tokens, setAllMetadata]);
 
   useEffect(() => {
     if (!filteredTokens) return;
-    // @ts-expect-error TODO: Fix this type 
-    setFilteredMetadata(MetadataHelper.extract(filteredTokens as unknown as Token[]));
+    setFilteredMetadata(
+    // @ts-expect-error TODO: Fix this type
+      MetadataHelper.extract(filteredTokens as unknown as Token[]),
+    );
   }, [filteredTokens, setFilteredMetadata]);
 
   return {

@@ -7,13 +7,12 @@ import { Token } from "@dojoengine/torii-wasm";
 import {
   useFetcherState,
   fetchTokenImage,
-  processToriiStream
+  processToriiStream,
 } from "./fetcher-utils";
 
 type UseMarketplaceFetcherParams = {
   projects: string[];
-}
-
+};
 
 const TOKENS_SQL = (limit: number = 5000, offset: number = 0) => `
   SELECT t.*, c.contract_type, (select count(id) FROM tokens tt where tt.contract_address = t.contract_address) as totalSupply
@@ -42,16 +41,22 @@ export function useMarketCollectionFetcher({
 
   const editions = useEditionsMap();
   const addCollections = useMarketplaceStore((s) => s.addCollections);
-  const getFlattenCollections = useMarketplaceStore((s) => s.getFlattenCollections);
+  const getFlattenCollections = useMarketplaceStore(
+    (s) => s.getFlattenCollections,
+  );
 
   const processTokens = useCallback(
-    async (contracts: Contract[], project: string): Promise<{ [address: string]: Contract }> => {
+    async (
+      contracts: Contract[],
+      project: string,
+    ): Promise<{ [address: string]: Contract }> => {
       const collections: { [address: string]: Contract } = {};
 
       for (const c of contracts) {
         const address = getChecksumAddress(c.contract_address);
         if (address in collections) {
-          collections[address].total_supply = collections[address].total_supply ?? c.total_supply ?? "0x0";
+          collections[address].total_supply =
+            collections[address].total_supply ?? c.total_supply ?? "0x0";
           continue;
         }
 
@@ -59,7 +64,7 @@ export function useMarketCollectionFetcher({
         try {
           metadata = JSON.parse(c.metadata);
         } catch (_err) {
-          console.error('failed to parse json metadata for ', project);
+          console.error("failed to parse json metadata for ", project);
         }
 
         collections[address] = {
@@ -87,16 +92,13 @@ export function useMarketCollectionFetcher({
 
       try {
         const limit = quickLoad ? 500 : 5000;
-        const stream = fetchToriisStream(
-          projects,
-          {
-            sql: TOKENS_SQL(limit, 0)
-            // client: async function* ({ client }) {
-            //   const contracts = await client.getTokenContracts({ contract_addresses: [], contract_types: ['ERC721', 'ERC1155'], pagination: {limit: 1000, cursor: undefined, direction: 'Forward', order_by: []}});
-            //   console.log(contracts);
-            // },native: true,
-          },
-        );
+        const stream = fetchToriisStream(projects, {
+          sql: TOKENS_SQL(limit, 0),
+          // client: async function* ({ client }) {
+          //   const contracts = await client.getTokenContracts({ contract_addresses: [], contract_types: ['ERC721', 'ERC1155'], pagination: {limit: 1000, cursor: undefined, direction: 'Forward', order_by: []}});
+          //   console.log(contracts);
+          // },native: true,
+        });
 
         await processToriiStream(stream, {
           onData: async (data: any, endpoint: string) => {
@@ -123,7 +125,7 @@ export function useMarketCollectionFetcher({
             setError(e, "Error fetching marketplace collections");
           },
           onComplete: () => {
-              setSuccess();
+            setSuccess();
           },
         });
       } catch (error) {

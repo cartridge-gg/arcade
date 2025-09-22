@@ -6,11 +6,13 @@ interface FloatingLoadingSpinnerProps {
     completed: number;
     total: number;
   };
+  loadingMessage?: string;
 }
 
 export function FloatingLoadingSpinner({
   isLoading,
   loadingProgress,
+  loadingMessage
 }: FloatingLoadingSpinnerProps) {
   if (!isLoading) return null;
 
@@ -23,6 +25,7 @@ export function FloatingLoadingSpinner({
             ({loadingProgress.completed}/{loadingProgress.total})
           </span>
         )}
+        {loadingMessage && <span className="ml-1 text-foreground-400">{loadingMessage}</span>}
       </span>
     </div>
   );

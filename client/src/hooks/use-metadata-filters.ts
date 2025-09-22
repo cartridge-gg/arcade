@@ -1,22 +1,22 @@
-import { useEffect, useMemo, useCallback, useState, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useMetadataFilterStore } from '@/store/metadata-filters';
+import { useEffect, useMemo, useCallback, useState, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useMetadataFilterStore } from "@/store/metadata-filters";
 import {
   buildMetadataIndex,
   calculateFilterCounts,
   serializeFiltersToURL,
-  parseFiltersFromURL
-} from '@/utils/metadata-indexer';
+  parseFiltersFromURL,
+} from "@/utils/metadata-indexer";
 import {
   UseMetadataFiltersInput,
   UseMetadataFiltersReturn,
-  ActiveFilters
-} from '@/types/metadata-filter.types';
+  ActiveFilters,
+} from "@/types/metadata-filter.types";
 
 export function useMetadataFilters({
   tokens,
   collectionAddress,
-  enabled = true
+  enabled = true,
 }: UseMetadataFiltersInput): UseMetadataFiltersReturn {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +29,7 @@ export function useMetadataFilters({
     removeFilter: storeRemoveFilter,
     clearFilters,
     updateAvailableFilters,
-    getFilteredTokenIds
+    getFilteredTokenIds,
   } = useMetadataFilterStore();
 
   const collectionState = getCollectionState(collectionAddress);
@@ -47,7 +47,7 @@ export function useMetadataFilters({
       setIsLoading(false);
     };
 
-    if (tokens.length > 1000 && 'requestIdleCallback' in window) {
+    if (tokens.length > 1000 && "requestIdleCallback" in window) {
       const handle = window.requestIdleCallback(buildIndex);
       return () => window.cancelIdleCallback(handle);
     } else {
@@ -60,7 +60,7 @@ export function useMetadataFilters({
   useEffect(() => {
     if (!enabled || hasInitialized.current) return;
 
-    const filterParam = searchParams.get('filters');
+    const filterParam = searchParams.get("filters");
     if (filterParam) {
       const parsedFilters = parseFiltersFromURL(filterParam);
       setActiveFilters(collectionAddress, parsedFilters);
@@ -84,7 +84,9 @@ export function useMetadataFilters({
     }
 
     const idSet = new Set(filteredIds);
-    return tokens.filter(token => token.token_id && idSet.has(token.token_id));
+    return tokens.filter(
+      (token) => token.token_id && idSet.has(token.token_id),
+    );
   }, [tokens, collectionAddress, activeFilters, enabled, getFilteredTokenIds]);
 
   // Calculate available filters with counts
@@ -101,12 +103,21 @@ export function useMetadataFilters({
       const filteredIds = getFilteredTokenIds(collectionAddress);
       return calculateFilterCounts(metadataIndex, filteredIds);
     }
-  }, [metadataIndex, activeFilters, collectionAddress, enabled, getFilteredTokenIds]);
+  }, [
+    metadataIndex,
+    activeFilters,
+    collectionAddress,
+    enabled,
+    getFilteredTokenIds,
+  ]);
 
   // Update available filters in store - use useRef to prevent infinite loops
   const prevAvailableFilters = useRef(availableFilters);
   useEffect(() => {
-    if (JSON.stringify(prevAvailableFilters.current) !== JSON.stringify(availableFilters)) {
+    if (
+      JSON.stringify(prevAvailableFilters.current) !==
+      JSON.stringify(availableFilters)
+    ) {
       prevAvailableFilters.current = availableFilters;
       updateAvailableFilters(collectionAddress, availableFilters);
     }
@@ -117,18 +128,21 @@ export function useMetadataFilters({
   useEffect(() => {
     if (!enabled) return;
 
-    const currentFilterParam = searchParams.get('filters');
+    const currentFilterParam = searchParams.get("filters");
     const newFilterParam = serializeFiltersToURL(activeFilters);
 
     // Only update if filters actually changed (not just reference)
-    if (JSON.stringify(prevActiveFilters.current) !== JSON.stringify(activeFilters)) {
+    if (
+      JSON.stringify(prevActiveFilters.current) !==
+      JSON.stringify(activeFilters)
+    ) {
       prevActiveFilters.current = activeFilters;
 
       if (currentFilterParam !== newFilterParam) {
         if (newFilterParam) {
-          searchParams.set('filters', newFilterParam);
+          searchParams.set("filters", newFilterParam);
         } else {
-          searchParams.delete('filters');
+          searchParams.delete("filters");
         }
         setSearchParams(searchParams, { replace: true });
       }
@@ -142,7 +156,7 @@ export function useMetadataFilters({
       if (!enabled) return;
       toggleFilter(collectionAddress, trait, value);
     },
-    [collectionAddress, enabled, toggleFilter]
+    [collectionAddress, enabled, toggleFilter],
   );
 
   // Action: Remove filter
@@ -151,7 +165,7 @@ export function useMetadataFilters({
       if (!enabled) return;
       storeRemoveFilter(collectionAddress, trait, value);
     },
-    [collectionAddress, enabled, storeRemoveFilter]
+    [collectionAddress, enabled, storeRemoveFilter],
   );
 
   // Action: Clear all filters
@@ -161,7 +175,8 @@ export function useMetadataFilters({
   }, [collectionAddress, enabled, clearFilters]);
 
   // Check if results are empty
-  const isEmpty = filteredTokens.length === 0 && Object.keys(activeFilters).length > 0;
+  const isEmpty =
+    filteredTokens.length === 0 && Object.keys(activeFilters).length > 0;
 
   return {
     filteredTokens,
@@ -172,6 +187,6 @@ export function useMetadataFilters({
     removeFilter,
     clearAllFilters,
     isLoading,
-    isEmpty
+    isEmpty,
   };
 }

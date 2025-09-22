@@ -2,11 +2,18 @@ export const queryKeys = {
   achievements: {
     all: ["achievements"] as const,
     trophies: (projects?: string[]) =>
-      projects ? [...queryKeys.achievements.all, "trophies", projects] as const
-        : [...queryKeys.achievements.all, "trophies"] as const,
+      projects
+        ? ([...queryKeys.achievements.all, "trophies", projects] as const)
+        : ([...queryKeys.achievements.all, "trophies"] as const),
     completed: (address: string, projects?: string[]) =>
-      projects ? [...queryKeys.achievements.all, "completed", address, projects] as const
-        : [...queryKeys.achievements.all, "completed", address] as const,
+      projects
+        ? ([
+            ...queryKeys.achievements.all,
+            "completed",
+            address,
+            projects,
+          ] as const)
+        : ([...queryKeys.achievements.all, "completed", address] as const),
     progress: (address: string, project: string) =>
       [...queryKeys.achievements.all, "progress", address, project] as const,
   },
@@ -14,11 +21,13 @@ export const queryKeys = {
   activities: {
     all: ["activities"] as const,
     transfers: (address?: string) =>
-      address ? [...queryKeys.activities.all, "transfers", address] as const
-        : [...queryKeys.activities.all, "transfers"] as const,
+      address
+        ? ([...queryKeys.activities.all, "transfers", address] as const)
+        : ([...queryKeys.activities.all, "transfers"] as const),
     events: (editions?: string[]) =>
-      editions ? [...queryKeys.activities.all, "events", editions] as const
-        : [...queryKeys.activities.all, "events"] as const,
+      editions
+        ? ([...queryKeys.activities.all, "events", editions] as const)
+        : ([...queryKeys.activities.all, "events"] as const),
   },
 
   marketplace: {
@@ -33,8 +42,7 @@ export const queryKeys = {
 
   inventory: {
     all: ["inventory"] as const,
-    user: (address: string) =>
-      [...queryKeys.inventory.all, address] as const,
+    user: (address: string) => [...queryKeys.inventory.all, address] as const,
     collection: (address: string, collection: string) =>
       [...queryKeys.inventory.all, address, collection] as const,
   },
@@ -42,8 +50,9 @@ export const queryKeys = {
   tokens: {
     all: ["tokens"] as const,
     balance: (address: string, token?: string) =>
-      token ? [...queryKeys.tokens.all, "balance", address, token] as const
-        : [...queryKeys.tokens.all, "balance", address] as const,
+      token
+        ? ([...queryKeys.tokens.all, "balance", address, token] as const)
+        : ([...queryKeys.tokens.all, "balance", address] as const),
     metadata: (token: string) =>
       [...queryKeys.tokens.all, "metadata", token] as const,
   },
@@ -52,35 +61,30 @@ export const queryKeys = {
     all: ["users"] as const,
     profile: (address: string) =>
       [...queryKeys.users.all, "profile", address] as const,
-    accounts: () =>
-      [...queryKeys.users.all, "accounts"] as const,
+    accounts: () => [...queryKeys.users.all, "accounts"] as const,
   },
 
   discovery: {
     all: ["discovery"] as const,
     events: (editions?: string[]) =>
-      editions ? [...queryKeys.discovery.all, "events", editions] as const
-        : [...queryKeys.discovery.all, "events"] as const,
-    trending: () =>
-      [...queryKeys.discovery.all, "trending"] as const,
+      editions
+        ? ([...queryKeys.discovery.all, "events", editions] as const)
+        : ([...queryKeys.discovery.all, "events"] as const),
+    trending: () => [...queryKeys.discovery.all, "trending"] as const,
   },
 
   games: {
     all: ["games"] as const,
-    registry: () =>
-      [...queryKeys.games.all, "registry"] as const,
-    game: (identifier: string) =>
-      [...queryKeys.games.all, identifier] as const,
+    registry: () => [...queryKeys.games.all, "registry"] as const,
+    game: (identifier: string) => [...queryKeys.games.all, identifier] as const,
     edition: (identifier: string) =>
       [...queryKeys.games.all, "edition", identifier] as const,
-    social: () =>
-      [...queryKeys.games.all, "social"] as const,
+    social: () => [...queryKeys.games.all, "social"] as const,
   },
 
   torii: {
     all: ["torii"] as const,
-    client: (rpc: string) =>
-      [...queryKeys.torii.all, "client", rpc] as const,
+    client: (rpc: string) => [...queryKeys.torii.all, "client", rpc] as const,
   },
 } as const;
 

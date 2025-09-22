@@ -10,7 +10,7 @@ import {
   CalculateFilterCounts,
   ApplyFilters,
   SerializeFiltersToURL,
-  ParseFiltersFromURL
+  ParseFiltersFromURL,
 } from "@/types/metadata-filter.types";
 
 /**
@@ -24,13 +24,13 @@ export const buildMetadataIndex: BuildMetadataIndex = (tokens) => {
 
     if (attributes.length === 0) {
       // Handle tokens without attributes
-      if (!index['No Traits']) {
-        index['No Traits'] = {};
+      if (!index["No Traits"]) {
+        index["No Traits"] = {};
       }
-      if (!index['No Traits']['true']) {
-        index['No Traits']['true'] = [];
+      if (!index["No Traits"]["true"]) {
+        index["No Traits"]["true"] = [];
       }
-      index['No Traits']['true'].push(token.token_id || '');
+      index["No Traits"]["true"].push(token.token_id || "");
       continue;
     }
 
@@ -49,7 +49,7 @@ export const buildMetadataIndex: BuildMetadataIndex = (tokens) => {
         index[trait][value] = [];
       }
 
-      const tokenId = token.token_id || '';
+      const tokenId = token.token_id || "";
       if (!index[trait][value].includes(tokenId)) {
         index[trait][value].push(tokenId);
       }
@@ -62,7 +62,10 @@ export const buildMetadataIndex: BuildMetadataIndex = (tokens) => {
 /**
  * Update existing metadata index with new tokens
  */
-export const updateMetadataIndex: UpdateMetadataIndex = (existingIndex, newTokens) => {
+export const updateMetadataIndex: UpdateMetadataIndex = (
+  existingIndex,
+  newTokens,
+) => {
   // Create a deep copy of the existing index
   const updatedIndex: MetadataIndex = JSON.parse(JSON.stringify(existingIndex));
 
@@ -70,15 +73,15 @@ export const updateMetadataIndex: UpdateMetadataIndex = (existingIndex, newToken
     const attributes = extractTokenAttributes(token);
 
     if (attributes.length === 0) {
-      if (!updatedIndex['No Traits']) {
-        updatedIndex['No Traits'] = {};
+      if (!updatedIndex["No Traits"]) {
+        updatedIndex["No Traits"] = {};
       }
-      if (!updatedIndex['No Traits']['true']) {
-        updatedIndex['No Traits']['true'] = [];
+      if (!updatedIndex["No Traits"]["true"]) {
+        updatedIndex["No Traits"]["true"] = [];
       }
-      const tokenId = token.token_id || '';
-      if (!updatedIndex['No Traits']['true'].includes(tokenId)) {
-        updatedIndex['No Traits']['true'].push(tokenId);
+      const tokenId = token.token_id || "";
+      if (!updatedIndex["No Traits"]["true"].includes(tokenId)) {
+        updatedIndex["No Traits"]["true"].push(tokenId);
       }
       continue;
     }
@@ -98,7 +101,7 @@ export const updateMetadataIndex: UpdateMetadataIndex = (existingIndex, newToken
         updatedIndex[trait][value] = [];
       }
 
-      const tokenId = token.token_id || '';
+      const tokenId = token.token_id || "";
       if (!updatedIndex[trait][value].includes(tokenId)) {
         updatedIndex[trait][value].push(tokenId);
       }
@@ -123,14 +126,17 @@ export const extractTokenAttributes: ExtractTokenAttributes = (token) => {
   }
 
   return metadata.attributes.filter(
-    (attr: any) => attr && attr.trait_type && attr.value !== undefined
+    (attr: any) => attr && attr.trait_type && attr.value !== undefined,
   );
 };
 
 /**
  * Calculate filter counts for available options
  */
-export const calculateFilterCounts: CalculateFilterCounts = (metadataIndex, tokenIds) => {
+export const calculateFilterCounts: CalculateFilterCounts = (
+  metadataIndex,
+  tokenIds,
+) => {
   const counts: AvailableFilters = {};
   const validTokenIds = tokenIds ? new Set(tokenIds) : null;
 
@@ -140,7 +146,7 @@ export const calculateFilterCounts: CalculateFilterCounts = (metadataIndex, toke
     for (const [value, ids] of Object.entries(values)) {
       if (validTokenIds) {
         // Count only tokens in the provided subset
-        const matchingIds = ids.filter(id => validTokenIds.has(id));
+        const matchingIds = ids.filter((id) => validTokenIds.has(id));
         counts[trait][value] = matchingIds.length;
       } else {
         // Count all tokens
@@ -163,7 +169,7 @@ export const applyFilters: ApplyFilters = (metadataIndex, activeFilters) => {
     const allTokenIds = new Set<string>();
     for (const values of Object.values(metadataIndex)) {
       for (const ids of Object.values(values)) {
-        ids.forEach(id => allTokenIds.add(id));
+        ids.forEach((id) => allTokenIds.add(id));
       }
     }
     return Array.from(allTokenIds);
@@ -182,7 +188,7 @@ export const applyFilters: ApplyFilters = (metadataIndex, activeFilters) => {
     const traitMatches = new Set<string>();
     for (const value of selectedValues) {
       const tokenIds = metadataIndex[trait][value] || [];
-      tokenIds.forEach(id => traitMatches.add(id));
+      tokenIds.forEach((id) => traitMatches.add(id));
     }
 
     if (resultSet === null) {
@@ -215,7 +221,7 @@ export const serializeFiltersToURL: SerializeFiltersToURL = (filters) => {
   const filterEntries = Object.entries(filters);
 
   if (filterEntries.length === 0) {
-    return '';
+    return "";
   }
 
   const parts: string[] = [];
@@ -223,16 +229,16 @@ export const serializeFiltersToURL: SerializeFiltersToURL = (filters) => {
   for (const [trait, values] of filterEntries) {
     if (values.size === 0) continue;
 
-    const traitKey = trait.toLowerCase().replace(/\s+/g, '_');
+    const traitKey = trait.toLowerCase().replace(/\s+/g, "_");
     const valueList = Array.from(values)
-      .map(v => v.toString().toLowerCase().replace(/\s+/g, '_'))
+      .map((v) => v.toString().toLowerCase().replace(/\s+/g, "_"))
       .sort()
-      .join(',');
+      .join(",");
 
     parts.push(`${traitKey}:${valueList}`);
   }
 
-  return parts.join('|');
+  return parts.join("|");
 };
 
 /**
@@ -241,33 +247,33 @@ export const serializeFiltersToURL: SerializeFiltersToURL = (filters) => {
 export const parseFiltersFromURL: ParseFiltersFromURL = (urlParams) => {
   const filters: ActiveFilters = {};
 
-  if (!urlParams || urlParams.trim() === '') {
+  if (!urlParams || urlParams.trim() === "") {
     return filters;
   }
 
   try {
-    const traitPairs = urlParams.split('|');
+    const traitPairs = urlParams.split("|");
 
     for (const pair of traitPairs) {
-      if (!pair.includes(':')) continue;
+      if (!pair.includes(":")) continue;
 
-      const [traitKey, valueString] = pair.split(':');
+      const [traitKey, valueString] = pair.split(":");
       if (!traitKey || !valueString) continue;
 
       // Convert back from URL format to display format
       const trait = traitKey
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 
-      const values = valueString.split(',').map(v => v.trim());
+      const values = valueString.split(",").map((v) => v.trim());
 
       if (values.length > 0) {
         filters[trait] = new Set(values);
       }
     }
   } catch (error) {
-    console.error('Error parsing filter URL params:', error);
+    console.error("Error parsing filter URL params:", error);
     return {};
   }
 
@@ -278,7 +284,9 @@ export const parseFiltersFromURL: ParseFiltersFromURL = (urlParams) => {
  * Pre-compute filter data for performance optimization
  * This runs once during index building to avoid repeated calculations in UI
  */
-export const precomputeFilterData = (metadataIndex: MetadataIndex): PrecomputedFilterData => {
+export const precomputeFilterData = (
+  metadataIndex: MetadataIndex,
+): PrecomputedFilterData => {
   // Extract and sort unique attributes
   const attributes = Object.keys(metadataIndex).sort();
 
@@ -292,7 +300,7 @@ export const precomputeFilterData = (metadataIndex: MetadataIndex): PrecomputedF
     for (const [value, tokenIds] of Object.entries(traitValues)) {
       props.push({
         property: value,
-        order: tokenIds.length
+        order: tokenIds.length,
       });
     }
 
@@ -319,7 +327,7 @@ export const precomputeFilterData = (metadataIndex: MetadataIndex): PrecomputedF
       allMetadata.push({
         trait_type: trait,
         value: value,
-        tokens: tokenIds.map(id => ({ token_id: id }))
+        tokens: tokenIds.map((id) => ({ token_id: id })),
       });
     }
   }
@@ -327,6 +335,6 @@ export const precomputeFilterData = (metadataIndex: MetadataIndex): PrecomputedF
   return {
     attributes,
     properties,
-    allMetadata
+    allMetadata,
   };
 };

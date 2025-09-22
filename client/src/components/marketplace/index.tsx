@@ -18,10 +18,11 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
   const games = useGames();
   const projectsList = useMemo(() => {
     if (edition) return [edition.config.project];
-    return editions.map(e => e.config.project)
+    return editions.map((e) => e.config.project);
   }, [editions, edition]);
 
-  const { collections, status, editionError, loadingProgress } = useMarketCollectionFetcher({ projects: projectsList });
+  const { collections, status, editionError, loadingProgress } =
+    useMarketCollectionFetcher({ projects: projectsList });
 
   if ((status === "idle" || status === "loading") && collections.length === 0) {
     return <LoadingState />;
@@ -31,7 +32,11 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
     return <EmptyState />;
   }
 
-  const isStillLoading = status === "loading" || (loadingProgress && loadingProgress.total > 0 && loadingProgress.completed < loadingProgress.total);
+  const isStillLoading =
+    status === "loading" ||
+    (loadingProgress &&
+      loadingProgress.total > 0 &&
+      loadingProgress.completed < loadingProgress.total);
 
   return (
     <>
@@ -42,19 +47,19 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
         />
       )}
       {collections.length > 0 && (
-      <div
-        className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
-        style={{ scrollbarWidth: "none" }}
-      >
+        <div
+          className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
+          style={{ scrollbarWidth: "none" }}
+        >
           {collections.map((collection) => (
-          <Item
-            key={`${collection.project}-${collection.contract_address}`}
-            project={collection.project}
-            collection={collection}
-            editions={editions as EditionModel[]}
-            games={games as GameModel[]}
-          />
-        ))}
+            <Item
+              key={`${collection.project}-${collection.contract_address}`}
+              project={collection.project}
+              collection={collection}
+              editions={editions as EditionModel[]}
+              games={games as GameModel[]}
+            />
+          ))}
         </div>
       )}
       <FloatingLoadingSpinner
@@ -201,6 +206,10 @@ const LoadingState = () => {
         <Skeleton className="w-full h-[164px] rounded" />
         <Skeleton className="hidden lg:block w-full h-[164px] rounded" />
       </div>
+      <FloatingLoadingSpinner
+        isLoading={true}
+        loadingMessage="Loading collections."
+      />
     </div>
   );
 };

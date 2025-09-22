@@ -17,7 +17,6 @@ import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner
 const ROW_HEIGHT = 45;
 
 export function Discover({ edition }: { edition?: EditionModel }) {
-
   const parentRef = useRef<HTMLDivElement>(null);
   const allTabRef = useRef<HTMLDivElement>(null);
   const followingTabRef = useRef<HTMLDivElement>(null);
@@ -49,9 +48,8 @@ export function Discover({ edition }: { edition?: EditionModel }) {
     projects,
     achievements,
     editionFilter: filteredEditions.map((e) => e.config.project),
-    follows: follows[getChecksumAddress(address ?? "0x0")] || []
+    follows: follows[getChecksumAddress(address ?? "0x0")] || [],
   });
-
 
   // Virtual scrolling for all events
   const allVirtualizer = useVirtualizer({
@@ -142,9 +140,8 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                     ))}
                   </div>
                 </div>
-              )
-              }
-            </TabsContent >
+              )}
+            </TabsContent>
             <TabsContent
               className="p-0 mt-0 grow w-full h-full"
               value="following"
@@ -206,14 +203,17 @@ export function Discover({ edition }: { edition?: EditionModel }) {
                 </div>
               )}
             </TabsContent>
-          </div >
-        </ArcadeSubTabs >
-      </div >
+          </div>
+        </ArcadeSubTabs>
+      </div>
       <FloatingLoadingSpinner
-        isLoading={activitiesStatus === "loading" && (all.length > 0 || following.length > 0)}
+        isLoading={
+          activitiesStatus === "loading" &&
+          (all.length > 0 || following.length > 0)
+        }
         loadingProgress={loadingProgress}
       />
-    </LayoutContent >
+    </LayoutContent>
   );
 }
 

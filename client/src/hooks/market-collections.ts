@@ -4,7 +4,6 @@ import { useProject } from "./project";
 import { Token, ToriiClient, TokenBalance } from "@dojoengine/torii-wasm";
 export type { Collection, Collections } from "@/context/market-collection";
 
-
 async function fetchCollectionFromClient(
   clients: { [key: string]: ToriiClient },
   client: string,

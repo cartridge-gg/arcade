@@ -8,17 +8,23 @@ import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 
-export const Holders = ({ edition, collectionAddress }: { edition: EditionModel, collectionAddress: string }) => {
-
-  const { owners, status, editionError, loadingProgress } = useMarketOwnersFetcher({
-    project: [edition.config.project],
-    address: collectionAddress
-  });
+export const Holders = ({
+  edition,
+  collectionAddress,
+}: {
+  edition: EditionModel;
+  collectionAddress: string;
+}) => {
+  const { owners, status, editionError, loadingProgress } =
+    useMarketOwnersFetcher({
+      project: [edition.config.project],
+      address: collectionAddress,
+    });
 
   const {
     filteredTokens,
     activeFilters,
-    resetSelected: clearAllFilters
+    resetSelected: clearAllFilters,
   } = useMetadataFiltersAdapter();
 
   const navigate = useNavigate();
@@ -47,7 +53,7 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
 
     // Get filtered token IDs
     const filteredTokenIds = new Set(
-      filteredTokens.map(t => t.token_id?.toString()).filter(Boolean)
+      filteredTokens.map((t) => t.token_id?.toString()).filter(Boolean),
     );
 
     // Filter owners to only those who own filtered tokens
@@ -55,8 +61,8 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
 
     Object.entries(owners).forEach(([ownerAddress, ownerData]) => {
       // Check if this owner owns any of the filtered tokens
-      const ownedFilteredTokenIds = ownerData.token_ids.filter(
-        id => filteredTokenIds.has(id)
+      const ownedFilteredTokenIds = ownerData.token_ids.filter((id) =>
+        filteredTokenIds.has(id),
       );
 
       if (ownedFilteredTokenIds.length > 0) {
@@ -64,7 +70,7 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
         tempOwnersMap.set(ownerAddress, {
           ...ownerData,
           balance: ownedFilteredTokenIds.length,
-          token_ids: ownedFilteredTokenIds
+          token_ids: ownedFilteredTokenIds,
         });
       }
     });
@@ -72,32 +78,43 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
     // Recalculate ratios based on filtered total
     const filteredTotal = Array.from(tempOwnersMap.values()).reduce(
       (sum, owner) => sum + owner.balance,
-      0
+      0,
     );
 
-    tempOwnersMap.forEach(owner => {
-      owner.ratio = filteredTotal > 0
-        ? Math.round((owner.balance / filteredTotal) * 1000) / 10
-        : 0;
+    tempOwnersMap.forEach((owner) => {
+      owner.ratio =
+        filteredTotal > 0
+          ? Math.round((owner.balance / filteredTotal) * 1000) / 10
+          : 0;
     });
 
-    return new Map([...tempOwnersMap.entries()].sort(
-      ([, a], [, b]) => b.balance - a.balance
-    ));
+    return new Map(
+      [...tempOwnersMap.entries()].sort(
+        ([, a], [, b]) => b.balance - a.balance,
+      ),
+    );
   }, [owners, activeFilters, filteredTokens]);
 
   const hasActiveFilters = Object.keys(activeFilters).length > 0;
 
-  if (status === 'idle' || status === 'loading' && owners.length === 0) return <LoadingState />;
+  if (status === "idle" || (status === "loading" && owners.length === 0))
+    return <LoadingState />;
 
-  if (editionError.length > 0) return <Empty title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`} className="h-full py-6" />;
+  if (editionError.length > 0)
+    return (
+      <Empty
+        title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`}
+        className="h-full py-6"
+      />
+    );
 
   if (Object.values(owners).length === 0) return <EmptyState />;
 
   const totalOwners = Object.keys(owners).length;
-  const filteredOwnersCount = filteredOwners instanceof Map
-    ? filteredOwners.size
-    : Object.keys(filteredOwners).length;
+  const filteredOwnersCount =
+    filteredOwners instanceof Map
+      ? filteredOwners.size
+      : Object.keys(filteredOwners).length;
 
   if (hasActiveFilters && filteredOwnersCount === 0) {
     return (
@@ -106,15 +123,15 @@ export const Holders = ({ edition, collectionAddress }: { edition: EditionModel,
           <p className="text-foreground-300 text-sm">
             No holders found with selected filters
           </p>
-          <Button
-            variant="ghost"
-            onClick={clearAllFilters}
-            className="text-xs"
-          >
+          <Button variant="ghost" onClick={clearAllFilters} className="text-xs">
             Clear Filters
           </Button>
         </div>
-        <Empty title="No holders match the selected filters" icon="guild" className="h-full py-3 lg:py-6" />
+        <Empty
+          title="No holders match the selected filters"
+          icon="guild"
+          className="h-full py-3 lg:py-6"
+        />
       </div>
     );
   }
