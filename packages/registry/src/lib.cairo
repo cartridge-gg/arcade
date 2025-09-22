@@ -16,6 +16,7 @@ pub mod types {
 pub mod models {
     pub mod access;
     pub mod collection;
+    pub mod collection_edition;
     pub mod edition;
     pub mod game;
     pub mod index;

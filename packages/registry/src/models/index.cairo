@@ -19,6 +19,16 @@ pub struct Collection {
 
 #[derive(Clone, Drop, Serde)]
 #[dojo::model]
+pub struct CollectionEdition {
+    #[key]
+    pub collection: felt252,
+    #[key]
+    pub edition: felt252,
+    pub active: bool,
+}
+
+#[derive(Clone, Drop, Serde)]
+#[dojo::model]
 pub struct Game {
     #[key]
     pub id: felt252,

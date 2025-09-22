@@ -143,16 +143,10 @@ pub mod VerifiableComponent {
             }
             // [Check] Collection value
             let src5_dispatcher = ISRC5Dispatcher { contract_address: collection };
-            if src5_dispatcher.supports_interface(IERC1155_ID) {
-                // [Check] ERC1155 value
-                if (value == 0) {
-                    return (false, errors::SALE_INVALID_VALUE);
-                }
-            } else if src5_dispatcher.supports_interface(IERC721_ID) {
-                // [Check] ERC721 value
-                if (value != 0) {
-                    return (false, errors::SALE_INVALID_VALUE);
-                }
+            if src5_dispatcher.supports_interface(IERC1155_ID) && value == 0 {
+                return (false, errors::SALE_INVALID_VALUE);
+            } else if src5_dispatcher.supports_interface(IERC721_ID) && value != 0 {
+                return (false, errors::SALE_INVALID_VALUE);
             }
             (true, 0)
         }

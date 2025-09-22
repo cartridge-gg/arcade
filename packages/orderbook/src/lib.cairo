@@ -15,9 +15,9 @@ pub mod events {
 }
 
 pub mod models {
-    pub mod access;
     pub mod book;
     pub mod index;
+    pub mod moderator;
     pub mod order;
 }
 

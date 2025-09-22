@@ -9,8 +9,8 @@ pub mod ManageableComponent {
     // Internal imports
 
     use orderbook::constants::BOOK_ID;
-    use orderbook::models::access::{AccessAssert, AccessTrait};
     use orderbook::models::book::{BookAssert, BookTrait};
+    use orderbook::models::moderator::{ModeratorAssert, ModeratorTrait};
     use orderbook::store::StoreTrait;
     use orderbook::types::role::Role;
     use starknet::ContractAddress;
@@ -42,10 +42,10 @@ pub mod ManageableComponent {
             fee_receiver: ContractAddress,
             owner: ContractAddress,
         ) {
-            // [Effect] Initialize access
+            // [Effect] Initialize moderator
             let mut store = StoreTrait::new(world);
-            let access = AccessTrait::new(owner.into(), Role::Owner);
-            store.set_access(@access);
+            let moderator = ModeratorTrait::new(owner.into(), Role::Owner);
+            store.set_moderator(@moderator);
             // [Effect] Initialize book
             let mut store = StoreTrait::new(world);
             let book = BookTrait::new(BOOK_ID, royalties, fee_num, fee_receiver.into());
@@ -61,14 +61,14 @@ pub mod ManageableComponent {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
             // [Check] Caller is allowed
-            let caller_access = store.access(starknet::get_caller_address().into());
+            let caller_moderator = store.moderator(starknet::get_caller_address().into());
             let role: Role = role_id.into();
-            caller_access.assert_is_allowed(role);
+            caller_moderator.assert_is_allowed(role);
             // [Effect] Grant role
-            let mut access = store.access(account.into());
-            access.grant(role);
-            // [Effect] Store access
-            store.set_access(@access);
+            let mut moderator = store.moderator(account.into());
+            moderator.grant(role);
+            // [Effect] Store moderator
+            store.set_moderator(@moderator);
         }
 
         fn revoke_role(
@@ -77,20 +77,20 @@ pub mod ManageableComponent {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
             // [Check] Caller is allowed
-            let caller_access = store.access(starknet::get_caller_address().into());
-            caller_access.assert_is_allowed(Role::Owner);
+            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            caller_moderator.assert_is_allowed(Role::Owner);
             // [Effect] Grant role
-            let mut access = store.access(account.into());
-            access.revoke();
-            // [Effect] Store access
-            store.set_access(@access);
+            let mut moderator = store.moderator(account.into());
+            moderator.revoke();
+            // [Effect] Store moderator
+            store.set_moderator(@moderator);
         }
 
         fn pause(self: @ComponentState<TContractState>, world: WorldStorage) {
             // [Check] Caller is allowed
             let mut store = StoreTrait::new(world);
-            let caller_access = store.access(starknet::get_caller_address().into());
-            caller_access.assert_is_allowed(Role::Admin);
+            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            caller_moderator.assert_is_allowed(Role::Admin);
             // [Effect] Pause component
             let mut book = store.book(BOOK_ID);
             book.pause();
@@ -101,8 +101,8 @@ pub mod ManageableComponent {
         fn resume(self: @ComponentState<TContractState>, world: WorldStorage) {
             // [Check] Caller is allowed
             let mut store = StoreTrait::new(world);
-            let caller_access = store.access(starknet::get_caller_address().into());
-            caller_access.assert_is_allowed(Role::Admin);
+            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            caller_moderator.assert_is_allowed(Role::Admin);
             // [Effect] Resume component
             let mut book = store.book(BOOK_ID);
             book.resume();
@@ -118,8 +118,8 @@ pub mod ManageableComponent {
         ) {
             // [Check] Caller is allowed
             let mut store = StoreTrait::new(world);
-            let caller_access = store.access(starknet::get_caller_address().into());
-            caller_access.assert_is_allowed(Role::Owner);
+            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            caller_moderator.assert_is_allowed(Role::Owner);
             // [Effect] Set fee
             let mut book = store.book(BOOK_ID);
             book.set_fee(fee_num, fee_receiver.into());
@@ -132,8 +132,8 @@ pub mod ManageableComponent {
         ) {
             // [Check] Caller is allowed
             let mut store = StoreTrait::new(world);
-            let caller_access = store.access(starknet::get_caller_address().into());
-            caller_access.assert_is_allowed(Role::Owner);
+            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            caller_moderator.assert_is_allowed(Role::Owner);
             // [Effect] Set royalties
             let mut book = store.book(BOOK_ID);
             book.set_royalties(enabled);
