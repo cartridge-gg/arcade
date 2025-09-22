@@ -196,23 +196,17 @@ pub mod Registry {
             let world = self.world_storage();
 
             let src5_dispatcher = ISRC5Dispatcher { contract_address: collection_address };
-            let contract_type: Result<felt252, felt252> = if src5_dispatcher
-                .supports_interface(IERC1155_ID) {
-                Result::Ok('ERC1155')
+            let contract_name: ByteArray = if src5_dispatcher.supports_interface(IERC1155_ID) {
+                "ERC1155"
             } else if src5_dispatcher.supports_interface(IERC721_ID) {
-                Result::Ok('ERC721')
+                "ERC721"
             } else {
                 match starknet::syscalls::call_contract_syscall(
                     collection_address, selector!("decimals"), [].span(),
                 ) {
-                    Result::Ok(_) => Result::Ok('ERC20'),
-                    Result::Err(_) => Result::Err(0),
+                    Result::Ok(_) => "ERC20",
+                    Result::Err(_) => panic!("Unsupported collection"),
                 }
-            };
-
-            let contract_name = match contract_type {
-                Result::Ok(name) => format!("{}", name),
-                Result::Err(_) => panic!("Unsupported collection"),
             };
 
             let instance_name: felt252 = collection_address.into();

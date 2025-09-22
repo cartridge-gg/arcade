@@ -134,7 +134,7 @@ pub mod RegisterableComponent {
                     contract_name,
                     instance_name,
                     contract_address: collection_address,
-                    block_number: 0,
+                    block_number: 1 // Torii is considering block-number - 1 to start the indexing
                 )
         }
 
