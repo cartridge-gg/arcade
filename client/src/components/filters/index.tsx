@@ -18,6 +18,8 @@ import { useBalances } from "@/hooks/market-collections";
 import { useUsernames } from "@/hooks/account";
 import { UserAvatar } from "@/components/user/avatar";
 import { usePlayerStats } from "@/hooks/achievements";
+import { XIcon } from "lucide-react";
+import { SparklesIcon } from "@cartridge/ui";
 
 export const Filters = () => {
   const {
@@ -32,10 +34,7 @@ export const Filters = () => {
     precomputedProperties,
   } = useMetadataFiltersAdapter();
 
-  const {
-    selected,
-    setSelected,
-  } = useMarketFilters();
+  const { selected, setSelected } = useMarketFilters();
   const [search, setSearch] = useState<{ [key: string]: string }>({});
   const [playerSearch, setPlayerSearch] = useState<string>("");
 
@@ -113,7 +112,7 @@ export const Filters = () => {
         order: prop.order,
         count:
           filteredMetadata.find(
-            (m) => m.trait_type === attribute && m.value === prop.property,
+            (m) => m.trait_type === attribute && m.value === prop.property
           )?.tokens.length || 0,
       }));
     };
@@ -201,9 +200,7 @@ export const Filters = () => {
                       }
                     />
                   ))}
-                {properties.length === 0 && (
-                  <MarketplacePropertyEmpty />
-                )}
+                {properties.length === 0 && <MarketplacePropertyEmpty />}
               </div>
             </MarketplacePropertyHeader>
           );
@@ -223,39 +220,36 @@ function PlayerCard({
   usernames: { username: string | undefined; address: string | undefined }[];
 }) {
   const account = usernames.find(
-    (item) => item.username === selected?.label,
+    (item) => item.username === selected?.label
   )?.address;
 
   const { earnings } = usePlayerStats(account || undefined);
 
   return (
-    <div className="w-full bg-background-200 rounded-lg p-4 space-y-3">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+    <div className="w-full outline outline-1 border-4 border-background-100 outline-background-300 flex justify-between bg-background-200 rounded px-2 py-2">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
           {selected.image}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-foreground-100 font-semibold text-sm truncate">
-            {selected.label}
-          </h3>
-          <p className="text-foreground-300 text-xs">
-            {account ? `${account.slice(0, 6)}...${account.slice(-4)}` : 'Address not found'}
-          </p>
+          <p className=" font-light text-sm">{selected.label}</p>
         </div>
-        <button
-          onClick={onClose}
-          className="text-foreground-400 hover:text-foreground-200 transition-colors w-6 h-6 flex items-center justify-center rounded-full hover:bg-background-300"
-        >
-          ×
-        </button>
       </div>
-      <div className="border-t border-background-300 pt-3">
-        <div className="flex justify-between items-center">
-          <span className="text-foreground-300 text-xs">Total Points</span>
-          <span className="text-foreground-100 font-semibold text-sm">
+      <div className="flex items-center gap-2 rounded">
+        <div className="flex justify-between items-center bg-background-400 rounded py-1 pl-1 pr-2 gap-1">
+          <span className="text-foreground-300 text-xs">
+            <SparklesIcon variant="solid" size="xs" color="white" />
+          </span>
+          <span className="text-foreground-100 text-xs">
             {earnings.toLocaleString()}
           </span>
         </div>
+        <button
+          onClick={onClose}
+          className="text-foreground-400 hover:text-foreground-200 w-5 h-5"
+        >
+          <XIcon size="sm" />
+        </button>
       </div>
     </div>
   );
