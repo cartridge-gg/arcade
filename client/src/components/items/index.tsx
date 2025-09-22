@@ -4,7 +4,6 @@ import {
   cn,
   CollectibleCard,
   Empty,
-  MarketplaceSearch,
   Separator,
   Skeleton,
 } from "@cartridge/ui";
@@ -59,7 +58,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
   const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
   const { sales, getCollectionOrders } = useMarketplace();
-  const [search, setSearch] = useState<string>("");
   const [selection, setSelection] = useState<Asset[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
   const { chains, provider } = useArcade();
@@ -83,17 +81,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
     address: collectionAddress
   });
 
-  // Apply search filtering on top of metadata filters
-  const searchFilteredTokens = useMemo(() => {
-    if (!search.trim()) return filteredTokens;
-
-    const searchLower = search.toLowerCase();
-
-    return filteredTokens.filter(token => {
-      const tokenName = (token.metadata as any)?.name || token.name || '';
-      return tokenName.toLowerCase().includes(searchLower);
-    });
-  }, [filteredTokens, search]);
 
   const connectWallet = useCallback(async () => {
     connect({ connector: connectors[0] });
@@ -196,7 +183,7 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
 
   // Set up virtualizer for rows
   const virtualizer = useVirtualizer({
-    count: searchFilteredTokens.length,
+    count: filteredTokens.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
@@ -227,10 +214,10 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
               />
             )}
             {isConnected && selection.length > 0 ? (
-              <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
+              <p>{`${selection.length} / ${filteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
+                <p>{`${filteredTokens.length} ${tokens && filteredTokens.length < tokens.length ? `of ${tokens.length}` : ''} Items`}</p>
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -244,15 +231,6 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
             )}
           </div>
         </div>
-        <MarketplaceSearch
-          search={search}
-          setSearch={setSearch}
-          selected={undefined}
-          setSelected={() => { }}
-          options={[]}
-          variant="darkest"
-          className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
-        />
       </div>
       <div
         ref={parentRef}
@@ -269,9 +247,9 @@ export function Items({ edition, collectionAddress }: { edition: EditionModel, c
             const startIndex = virtualRow.index * 4;
             const endIndex = Math.min(
               startIndex + 4,
-              searchFilteredTokens.length
+              filteredTokens.length
             );
-            const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
+            const rowTokens = filteredTokens.slice(startIndex, endIndex);
 
             return (
               <div

@@ -17,14 +17,13 @@ import { useProject } from "@/hooks/project";
 import { useBalances } from "@/hooks/market-collections";
 import { useUsernames } from "@/hooks/account";
 import { UserAvatar } from "@/components/user/avatar";
-import { usePlayerStats } from "@/hooks/achievements";
-import { XIcon } from "lucide-react";
-import { SparklesIcon } from "@cartridge/ui";
 
 export const Filters = () => {
   const {
     active,
     setActive,
+    collectionSearch,
+    setCollectionSearch,
     filteredMetadata,
     clearable,
     addSelected,
@@ -122,8 +121,15 @@ export const Filters = () => {
     resetSelected();
     setSearch({});
     setPlayerSearch("");
+    setCollectionSearch("");
     setSelected(undefined);
-  }, [resetSelected, setSearch, setPlayerSearch, setSelected]);
+  }, [
+    resetSelected,
+    setSearch,
+    setPlayerSearch,
+    setCollectionSearch,
+    setSelected,
+  ]);
 
   return (
     <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden">
@@ -140,7 +146,20 @@ export const Filters = () => {
           onClick={() => setActive(1)}
         />
       </div>
-      <MarketplaceHeader label="Owners" />
+
+      <MarketplaceHeader label="Search"></MarketplaceHeader>
+      <div className="w-full pb-4">
+        <MarketplaceSearch
+          search={collectionSearch}
+          setSearch={setCollectionSearch}
+          selected={undefined}
+          setSelected={() => {}}
+          options={[]}
+          variant="darkest"
+          className="w-full"
+        />
+      </div>
+      {/* <MarketplaceHeader label="Owners" />
       <div className="w-full pb-4">
         {selected ? (
           <PlayerCard
@@ -162,7 +181,7 @@ export const Filters = () => {
             className="w-full"
           />
         )}
-      </div>
+      </div> */}
       <MarketplaceHeader label="Properties">
         {clearable && <MarketplaceHeaderReset onClick={clear} />}
       </MarketplaceHeader>
@@ -210,47 +229,47 @@ export const Filters = () => {
   );
 };
 
-function PlayerCard({
-  selected,
-  onClose,
-  usernames,
-}: {
-  selected: SearchResult;
-  onClose: () => void;
-  usernames: { username: string | undefined; address: string | undefined }[];
-}) {
-  const account = usernames.find(
-    (item) => item.username === selected?.label
-  )?.address;
+// function PlayerCard({
+//   selected,
+//   onClose,
+//   usernames,
+// }: {
+//   selected: SearchResult;
+//   onClose: () => void;
+//   usernames: { username: string | undefined; address: string | undefined }[];
+// }) {
+//   const account = usernames.find(
+//     (item) => item.username === selected?.label
+//   )?.address;
 
-  const { earnings } = usePlayerStats(account || undefined);
+//   const { earnings } = usePlayerStats(account || undefined);
 
-  return (
-    <div className="w-full outline outline-1 border-4 border-background-100 outline-background-300 flex justify-between bg-background-200 rounded px-2 py-2">
-      <div className="flex items-center gap-2">
-        <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-          {selected.image}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className=" font-light text-sm">{selected.label}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2 rounded">
-        <div className="flex justify-between items-center bg-background-400 rounded py-1 pl-1 pr-2 gap-1">
-          <span className="text-foreground-300 text-xs">
-            <SparklesIcon variant="solid" size="xs" color="white" />
-          </span>
-          <span className="text-foreground-100 text-xs">
-            {earnings.toLocaleString()}
-          </span>
-        </div>
-        <button
-          onClick={onClose}
-          className="text-foreground-400 hover:text-foreground-200 w-5 h-5"
-        >
-          <XIcon size="sm" />
-        </button>
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="w-full outline outline-1 border-4 border-background-100 outline-background-300 flex justify-between bg-background-200 rounded px-2 py-2">
+//       <div className="flex items-center gap-2">
+//         <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+//           {selected.image}
+//         </div>
+//         <div className="flex-1 min-w-0">
+//           <p className=" font-light text-sm">{selected.label}</p>
+//         </div>
+//       </div>
+//       <div className="flex items-center gap-2 rounded">
+//         <div className="flex justify-between items-center bg-background-400 rounded py-1 pl-1 pr-2 gap-1">
+//           <span className="text-foreground-300 text-xs">
+//             <SparklesIcon variant="solid" size="xs" color="white" />
+//           </span>
+//           <span className="text-foreground-100 text-xs">
+//             {earnings.toLocaleString()}
+//           </span>
+//         </div>
+//         <button
+//           onClick={onClose}
+//           className="text-foreground-400 hover:text-foreground-200 w-5 h-5"
+//         >
+//           <XIcon size="sm" />
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
