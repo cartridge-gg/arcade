@@ -7,29 +7,14 @@ use starknet::ContractAddress;
 #[starknet::interface]
 pub trait IRegistry<TContractState> {
     fn token_uri(self: @TContractState, token_id: u256) -> ByteArray;
-    fn grant(
-        ref self: TContractState,
-        world_address: ContractAddress,
-        account: ContractAddress,
-        role_id: u8,
-    );
-    fn revoke(ref self: TContractState, world_address: ContractAddress, account: ContractAddress);
-    fn register_collection(
-        ref self: TContractState,
-        world_address: ContractAddress,
-        collection_address: ContractAddress,
-    );
+    fn grant(ref self: TContractState, account: ContractAddress, role_id: u8);
+    fn revoke(ref self: TContractState, account: ContractAddress);
+    fn register_collection(ref self: TContractState, collection_address: ContractAddress);
     fn associate_collection(
-        ref self: TContractState,
-        world_address: ContractAddress,
-        collection_address: ContractAddress,
-        edition_id: felt252,
+        ref self: TContractState, collection_address: ContractAddress, edition_id: felt252,
     );
     fn dissociate_collection(
-        ref self: TContractState,
-        world_address: ContractAddress,
-        collection_address: ContractAddress,
-        edition_id: felt252,
+        ref self: TContractState, collection_address: ContractAddress, edition_id: felt252,
     );
     fn register_game(
         ref self: TContractState,
@@ -195,30 +180,19 @@ pub mod Registry {
             RegisterableImpl::token_uri(self: self.registerable, world: world, token_id: token_id)
         }
 
-        fn grant(
-            ref self: ContractState,
-            world_address: ContractAddress,
-            account: ContractAddress,
-            role_id: u8,
-        ) {
+        fn grant(ref self: ContractState, account: ContractAddress, role_id: u8) {
             let world = self.world_storage();
             RegisterableImpl::grant_role(
                 self: @self.registerable, world: world, account: account, role_id: role_id,
             );
         }
 
-        fn revoke(
-            ref self: ContractState, world_address: ContractAddress, account: ContractAddress,
-        ) {
+        fn revoke(ref self: ContractState, account: ContractAddress) {
             let world = self.world_storage();
             RegisterableImpl::revoke_role(self: @self.registerable, world: world, account: account);
         }
 
-        fn register_collection(
-            ref self: ContractState,
-            world_address: ContractAddress,
-            collection_address: ContractAddress,
-        ) {
+        fn register_collection(ref self: ContractState, collection_address: ContractAddress) {
             let world = self.world_storage();
 
             let src5_dispatcher = ISRC5Dispatcher { contract_address: collection_address };
@@ -253,10 +227,7 @@ pub mod Registry {
         }
 
         fn associate_collection(
-            ref self: ContractState,
-            world_address: ContractAddress,
-            collection_address: ContractAddress,
-            edition_id: felt252,
+            ref self: ContractState, collection_address: ContractAddress, edition_id: felt252,
         ) {
             let world = self.world_storage();
             RegisterableCollectionImpl::associate(
@@ -269,10 +240,7 @@ pub mod Registry {
         }
 
         fn dissociate_collection(
-            ref self: ContractState,
-            world_address: ContractAddress,
-            collection_address: ContractAddress,
-            edition_id: felt252,
+            ref self: ContractState, collection_address: ContractAddress, edition_id: felt252,
         ) {
             let world = self.world_storage();
             RegisterableCollectionImpl::dissociate(
