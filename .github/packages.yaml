@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  DOJO_VERSION: v1.7.0
+  SCARB_VERSION: 2.12.2
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    name: Check format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - uses: software-mansion/setup-scarb@v1
+        with:
+          scarb-version: ${{ env.SCARB_VERSION }}
+      - name: Format
+        run: pnpm run format:check
+        shell: bash
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    name: Build package
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Build
+        run: pnpm run build
+        shell: bash
+
+  test:
+    needs: [check, build]
+    runs-on: ubuntu-latest
+    name: Test packages and contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: software-mansion/setup-scarb@v1
+        with:
+          scarb-version: ${{ env.SCARB_VERSION }}
+      - uses: ./.github/actions/setup
+      - name: Test
+        run: sozo test
+        shell: bash
