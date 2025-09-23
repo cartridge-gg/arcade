@@ -23,7 +23,7 @@ pub mod setup {
 
     // Dojo imports
 
-    use dojo::world::{WorldStorage, WorldStorageTrait};
+    use dojo::world::{WorldStorage, WorldStorageTrait, world};
     use dojo_cairo_test::{
         ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
         spawn_test_world,
@@ -99,35 +99,35 @@ pub mod setup {
         NamespaceDef {
             namespace: NAMESPACE(),
             resources: [
-                TestResource::Model(controller_models::m_Account::TEST_CLASS_HASH.into()),
-                TestResource::Model(controller_models::m_Controller::TEST_CLASS_HASH.into()),
-                TestResource::Model(controller_models::m_Signer::TEST_CLASS_HASH.into()),
-                TestResource::Model(provider_models::m_Deployment::TEST_CLASS_HASH.into()),
-                TestResource::Model(provider_models::m_Factory::TEST_CLASS_HASH.into()),
-                TestResource::Model(provider_models::m_Team::TEST_CLASS_HASH.into()),
-                TestResource::Model(provider_models::m_Teammate::TEST_CLASS_HASH.into()),
-                TestResource::Model(registry_models::m_Access::TEST_CLASS_HASH.into()),
-                TestResource::Model(registry_models::m_Collection::TEST_CLASS_HASH.into()),
-                TestResource::Model(registry_models::m_Game::TEST_CLASS_HASH.into()),
-                TestResource::Model(registry_models::m_Edition::TEST_CLASS_HASH.into()),
-                TestResource::Model(registry_models::m_Unicity::TEST_CLASS_HASH.into()),
-                TestResource::Model(social_models::m_Alliance::TEST_CLASS_HASH.into()),
-                TestResource::Model(social_models::m_Guild::TEST_CLASS_HASH.into()),
-                TestResource::Model(social_models::m_Member::TEST_CLASS_HASH.into()),
-                TestResource::Model(orderbook_models::m_Moderator::TEST_CLASS_HASH.into()),
-                TestResource::Model(orderbook_models::m_Book::TEST_CLASS_HASH.into()),
-                TestResource::Model(orderbook_models::m_Order::TEST_CLASS_HASH.into()),
-                TestResource::Model(orderbook_models::m_MetadataAttribute::TEST_CLASS_HASH.into()),
-                TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH.into()),
-                TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH.into()),
-                TestResource::Event(orderbook_events::e_Listing::TEST_CLASS_HASH.into()),
-                TestResource::Event(orderbook_events::e_Sale::TEST_CLASS_HASH.into()),
-                TestResource::Event(orderbook_events::e_Offer::TEST_CLASS_HASH.into()),
-                TestResource::Contract(Registry::TEST_CLASS_HASH.into()),
-                TestResource::Contract(Slot::TEST_CLASS_HASH.into()),
-                TestResource::Contract(Social::TEST_CLASS_HASH.into()),
-                TestResource::Contract(Wallet::TEST_CLASS_HASH.into()),
-                TestResource::Contract(Marketplace::TEST_CLASS_HASH.into()),
+                TestResource::Model(controller_models::m_Account::TEST_CLASS_HASH),
+                TestResource::Model(controller_models::m_Controller::TEST_CLASS_HASH),
+                TestResource::Model(controller_models::m_Signer::TEST_CLASS_HASH),
+                TestResource::Model(provider_models::m_Deployment::TEST_CLASS_HASH),
+                TestResource::Model(provider_models::m_Factory::TEST_CLASS_HASH),
+                TestResource::Model(provider_models::m_Team::TEST_CLASS_HASH),
+                TestResource::Model(provider_models::m_Teammate::TEST_CLASS_HASH),
+                TestResource::Model(registry_models::m_Access::TEST_CLASS_HASH),
+                TestResource::Model(registry_models::m_Collection::TEST_CLASS_HASH),
+                TestResource::Model(registry_models::m_Game::TEST_CLASS_HASH),
+                TestResource::Model(registry_models::m_Edition::TEST_CLASS_HASH),
+                TestResource::Model(registry_models::m_Unicity::TEST_CLASS_HASH),
+                TestResource::Model(social_models::m_Alliance::TEST_CLASS_HASH),
+                TestResource::Model(social_models::m_Guild::TEST_CLASS_HASH),
+                TestResource::Model(social_models::m_Member::TEST_CLASS_HASH),
+                TestResource::Model(orderbook_models::m_Moderator::TEST_CLASS_HASH),
+                TestResource::Model(orderbook_models::m_Book::TEST_CLASS_HASH),
+                TestResource::Model(orderbook_models::m_Order::TEST_CLASS_HASH),
+                TestResource::Model(orderbook_models::m_MetadataAttribute::TEST_CLASS_HASH),
+                TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH),
+                TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH),
+                TestResource::Event(orderbook_events::e_Listing::TEST_CLASS_HASH),
+                TestResource::Event(orderbook_events::e_Sale::TEST_CLASS_HASH),
+                TestResource::Event(orderbook_events::e_Offer::TEST_CLASS_HASH),
+                TestResource::Contract(Registry::TEST_CLASS_HASH),
+                TestResource::Contract(Slot::TEST_CLASS_HASH),
+                TestResource::Contract(Social::TEST_CLASS_HASH),
+                TestResource::Contract(Wallet::TEST_CLASS_HASH),
+                TestResource::Contract(Marketplace::TEST_CLASS_HASH),
             ]
                 .span(),
         }
@@ -203,7 +203,7 @@ pub mod setup {
         // [Setup] World
         set_contract_address(OWNER());
         let namespace_def = setup_namespace();
-        let world = spawn_test_world([namespace_def].span());
+        let world = spawn_test_world(world::TEST_CLASS_HASH, [namespace_def].span());
         // [Setup] Context
         let context = Context {
             player_id: PLAYER().into(),

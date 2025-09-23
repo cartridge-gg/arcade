@@ -3,7 +3,7 @@ pub mod setup {
 
     // Dojo imports
 
-    use dojo::world::{WorldStorage, WorldStorageTrait};
+    use dojo::world::{WorldStorage, WorldStorageTrait, world};
     use dojo_cairo_test::{
         ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
         spawn_test_world,
@@ -52,12 +52,12 @@ pub mod setup {
         NamespaceDef {
             namespace: "namespace",
             resources: [
-                TestResource::Model(models::m_Access::TEST_CLASS_HASH.into()),
-                TestResource::Model(models::m_Collection::TEST_CLASS_HASH.into()),
-                TestResource::Model(models::m_Game::TEST_CLASS_HASH.into()),
-                TestResource::Model(models::m_Edition::TEST_CLASS_HASH.into()),
-                TestResource::Model(models::m_Unicity::TEST_CLASS_HASH.into()),
-                TestResource::Contract(Register::TEST_CLASS_HASH.into()),
+                TestResource::Model(models::m_Access::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Collection::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Game::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Edition::TEST_CLASS_HASH),
+                TestResource::Model(models::m_Unicity::TEST_CLASS_HASH),
+                TestResource::Contract(Register::TEST_CLASS_HASH),
             ]
                 .span(),
         }
@@ -67,9 +67,7 @@ pub mod setup {
         [
             ContractDefTrait::new(@"namespace", @"Register")
                 .with_writer_of([dojo::utils::bytearray_hash(@"namespace")].span())
-                .with_init_calldata(
-                    array![OWNER().into(), Collection::TEST_CLASS_HASH.into()].span(),
-                ),
+                .with_init_calldata(array![OWNER().into(), Collection::TEST_CLASS_HASH].span()),
         ]
             .span()
     }
@@ -79,7 +77,7 @@ pub mod setup {
         // [Setup] World
         set_contract_address(OWNER());
         let namespace_def = setup_namespace();
-        let world = spawn_test_world([namespace_def].span());
+        let world = spawn_test_world(world::TEST_CLASS_HASH, [namespace_def].span());
         world.sync_perms_and_inits(setup_contracts());
         // [Setup] Systems
         let (register_address, _) = world.dns(@"Register").unwrap();

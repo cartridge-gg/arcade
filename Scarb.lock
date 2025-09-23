@@ -6,8 +6,8 @@ name = "achievement"
 version = "0.0.0"
 dependencies = [
  "dojo",
+ "dojo_cairo_macros",
  "dojo_cairo_test",
- "dojo_macros",
 ]
 
 [[package]]
@@ -18,8 +18,8 @@ dependencies = [
  "collection",
  "controller",
  "dojo",
+ "dojo_cairo_macros",
  "dojo_cairo_test",
- "dojo_macros",
  "openzeppelin_account",
  "openzeppelin_introspection",
  "openzeppelin_token",
@@ -46,30 +46,33 @@ name = "controller"
 version = "0.0.0"
 dependencies = [
  "dojo",
+ "dojo_cairo_macros",
  "dojo_cairo_test",
- "dojo_macros",
 ]
 
 [[package]]
 name = "dojo"
-version = "1.7.0-alpha.4"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.7.0-alpha.4#7b78108ce7aea7753c0a9e34cb83465a76bbf2e4"
+version = "1.7.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:43866af1b23659c992fcf786f7f69429689eb684d42ffb77a351490e763bf915"
 dependencies = [
- "dojo_macros",
+ "dojo_cairo_macros",
 ]
+
+[[package]]
+name = "dojo_cairo_macros"
+version = "1.7.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:53d38987d9a0acc9493282711cd504ad4920fd4cd31f230deb5ff4ea11183958"
 
 [[package]]
 name = "dojo_cairo_test"
-version = "1.7.0-alpha.4"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.7.0-alpha.4#7b78108ce7aea7753c0a9e34cb83465a76bbf2e4"
+version = "1.7.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:3e95042deeef76bd43c8c05b15f8757060663269aed7e31f9c6c4a3934a5cba4"
 dependencies = [
  "dojo",
 ]
-
-[[package]]
-name = "dojo_macros"
-version = "1.7.0-alpha.4"
-source = "git+https://github.com/dojoengine/dojo?tag=v1.7.0-alpha.4#7b78108ce7aea7753c0a9e34cb83465a76bbf2e4"
 
 [[package]]
 name = "graffiti"
@@ -131,8 +134,8 @@ name = "orderbook"
 version = "0.0.0"
 dependencies = [
  "dojo",
+ "dojo_cairo_macros",
  "dojo_cairo_test",
- "dojo_macros",
  "openzeppelin_introspection",
  "openzeppelin_token",
 ]
@@ -142,8 +145,8 @@ name = "provider"
 version = "0.0.0"
 dependencies = [
  "dojo",
+ "dojo_cairo_macros",
  "dojo_cairo_test",
- "dojo_macros",
 ]
 
 [[package]]
@@ -152,8 +155,8 @@ version = "0.0.0"
 dependencies = [
  "collection",
  "dojo",
+ "dojo_cairo_macros",
  "dojo_cairo_test",
- "dojo_macros",
  "graffiti",
  "openzeppelin_access",
  "openzeppelin_introspection",
@@ -166,7 +169,7 @@ name = "social"
 version = "0.0.0"
 dependencies = [
  "dojo",
+ "dojo_cairo_macros",
  "dojo_cairo_test",
- "dojo_macros",
  "registry",
 ]
