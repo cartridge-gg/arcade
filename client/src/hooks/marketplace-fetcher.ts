@@ -14,15 +14,6 @@ type UseMarketplaceFetcherParams = {
   projects: string[];
 };
 
-const TOKENS_SQL = (limit: number = 5000, offset: number = 0) => `
-  SELECT t.*, c.contract_type, (select count(id) FROM tokens tt where tt.contract_address = t.contract_address) as totalSupply
-  FROM tokens t
-  INNER JOIN contracts c on c.contract_address = t.contract_address
-  WHERE metadata is not null
-  GROUP BY c.contract_address
-  LIMIT ${limit} OFFSET ${offset};
-`;
-
 export function useMarketCollectionFetcher({
   projects,
 }: UseMarketplaceFetcherParams) {
@@ -70,8 +61,8 @@ export function useMarketCollectionFetcher({
         collections[address] = {
           ...c,
           contract_address: address,
-          total_supply: c.totalSupply.toString() ?? "0x0",
-          totalSupply: BigInt(c.totalSupply ?? "0x0"),
+          total_supply: c.total_supply ?? "0x0",
+          totalSupply: BigInt(c.total_supply ?? "0x0"),
           token_id: c.token_id ?? null,
           metadata,
           project,
@@ -93,11 +84,16 @@ export function useMarketCollectionFetcher({
       try {
         const limit = quickLoad ? 500 : 5000;
         const stream = fetchToriisStream(projects, {
-          sql: TOKENS_SQL(limit, 0),
-          // client: async function* ({ client }) {
-          //   const contracts = await client.getTokenContracts({ contract_addresses: [], contract_types: ['ERC721', 'ERC1155'], pagination: {limit: 1000, cursor: undefined, direction: 'Forward', order_by: []}});
-          //   console.log(contracts);
-          // },native: true,
+          client: async function* ({ client }) {
+            const contracts = await client.getTokenContracts({ contract_addresses: [], contract_types: ['ERC721', 'ERC1155'], account_addresses: [], token_ids: [], pagination: { limit, cursor: undefined, direction: 'Forward', order_by: [] } });
+            for (const c of contracts.items) {
+              const token = await client.getTokens({ contract_addresses: [c.contract_address], token_ids: [], attribute_filters: [], pagination: { limit: 1, cursor: undefined, direction: 'Forward', order_by: [] } })
+              if (token.items.length > 0) {
+                c.metadata = token.items[0].metadata
+              }
+            }
+            yield contracts.items;
+          },
         });
 
         await processToriiStream(stream, {

@@ -95,6 +95,7 @@ async function fetchTokenMetadataMap(
   try {
     const tokensResponse = await client.getTokens({
       contract_addresses: contractAddresses,
+      attribute_filters: [],
       token_ids:
         tokenIds.length > 0 ? tokenIds.map((t) => t.replace("0x", "")) : [],
       pagination: {
@@ -404,7 +405,7 @@ function processNFTCollections(
     let innerMeta = undefined;
     try {
       innerMeta = JSON.parse(metadata?.metadata as string);
-    } catch (err) {}
+    } catch (err) { }
 
     // Determine collection type (could be enhanced with actual logic)
     // For now, default to ERC721

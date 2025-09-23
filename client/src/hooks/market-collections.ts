@@ -18,6 +18,7 @@ async function fetchCollectionFromClient(
   try {
     const tokens = await clients[client].getTokens({
       contract_addresses: [address],
+      attribute_filters: [],
       token_ids: [],
       pagination: {
         cursor: cursor,
