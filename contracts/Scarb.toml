@@ -11,7 +11,7 @@ sierra-replace-ids = true
 openzeppelin_introspection.workspace = true
 openzeppelin_token.workspace = true
 dojo.workspace = true
-dojo_macros.workspace = true
+dojo_cairo_macros.workspace = true
 starknet.workspace = true
 achievement = { path = ".." }
 collection = { path = ".." }
