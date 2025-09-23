@@ -27,14 +27,3 @@ pub mod components {
     pub mod initializable;
     pub mod registerable;
 }
-
-#[cfg(test)]
-mod tests {
-    mod setup;
-    mod test_registerable;
-
-    mod mocks {
-        pub mod collection;
-        pub mod register;
-    }
-}

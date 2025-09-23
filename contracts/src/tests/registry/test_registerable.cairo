@@ -1,12 +1,11 @@
 // Starknet imports
 
-use registry::models::game::Game;
-
 // Internal imports
 
+use arcade::systems::registry::IRegistryDispatcherTrait;
+use arcade::tests::setup::setup::{PLAYER, Systems, spawn};
+use registry::models::game::Game;
 use registry::store::StoreTrait;
-use registry::tests::mocks::register::IRegisterDispatcherTrait;
-use registry::tests::setup::setup::{PLAYER, Systems, spawn};
 use starknet::{ContractAddress, testing};
 
 // Constants
@@ -22,19 +21,27 @@ pub fn WORLD_ADDRESS() -> ContractAddress {
 fn register(systems: @Systems) {
     testing::set_contract_address(PLAYER());
     (*systems)
-        .register
+        .registry
         .register_game(
+            world_address: 'WORLD'.try_into().unwrap(),
+            namespace: 'NAMESPACE',
+            project: "project",
+            rpc: "rpc",
+            policies: "policies",
             color: "#123456",
-            image: "image",
-            image_data: "image_data",
+            game_image: "game_image",
+            edition_image: "edition_image",
             external_url: "external_url",
             description: "description",
-            name: "name",
-            attributes: "attributes",
+            game_name: "game_name",
+            edition_name: "edition_name",
+            game_attributes: "game_attributes",
+            edition_attributes: "edition_attributes",
             animation_url: "animation_url",
             youtube_url: "youtube_url",
             properties: "properties",
-            socials: "socials",
+            game_socials: "game_socials",
+            edition_socials: "edition_socials",
         );
 }
 
@@ -51,6 +58,6 @@ fn test_registrable_register() {
     let game: Game = store.get_game(1);
     assert_eq!(game.id, 1);
     // [Assert] URI
-    let uri = systems.register.token_uri(game.id.into());
+    let uri = systems.registry.token_uri(game.id.into());
     assert_eq!(uri != Default::default(), true);
 }

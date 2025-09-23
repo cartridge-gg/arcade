@@ -19,11 +19,11 @@ pub mod setup {
     // Constant
 
     pub fn OWNER() -> ContractAddress {
-        starknet::contract_address_const::<'OWNER'>()
+        'OWNER'.try_into().unwrap()
     }
 
     pub fn PLAYER() -> ContractAddress {
-        starknet::contract_address_const::<'PLAYER'>()
+        'PLAYER'.try_into().unwrap()
     }
 
     #[derive(Copy, Drop)]

@@ -13,6 +13,7 @@ pub mod setup {
     use arcade::systems::social::{ISocialDispatcher, Social};
     use arcade::systems::wallet::{IWalletDispatcher, Wallet};
     use arcade::tests::mocks::account::Account;
+    use arcade::tests::mocks::collection::Collection;
     use arcade::tests::mocks::erc1155::ERC1155;
     use arcade::tests::mocks::erc20::ERC20;
     use arcade::tests::mocks::erc721::ERC721;
@@ -108,6 +109,7 @@ pub mod setup {
                 TestResource::Model(provider_models::m_Teammate::TEST_CLASS_HASH),
                 TestResource::Model(registry_models::m_Access::TEST_CLASS_HASH),
                 TestResource::Model(registry_models::m_Collection::TEST_CLASS_HASH),
+                TestResource::Model(registry_models::m_CollectionEdition::TEST_CLASS_HASH),
                 TestResource::Model(registry_models::m_Game::TEST_CLASS_HASH),
                 TestResource::Model(registry_models::m_Edition::TEST_CLASS_HASH),
                 TestResource::Model(registry_models::m_Unicity::TEST_CLASS_HASH),
@@ -137,9 +139,11 @@ pub mod setup {
     fn setup_contracts(receiver: ContractAddress) -> Span<ContractDef> {
         [
             // TODO: Find a way to go through the deploy process
-            // ContractDefTrait::new(@NAMESPACE(), @"Registry")
-            //     .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span()),
-            //     .with_init_calldata(array![OWNER().into(), Collection::TEST_CLASS_HASH].span()),
+            ContractDefTrait::new(@NAMESPACE(), @"Registry")
+                .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
+                .with_init_calldata(
+                    array![OWNER().into(), Collection::TEST_CLASS_HASH.into()].span(),
+                ),
             ContractDefTrait::new(@NAMESPACE(), @"Slot")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(array![].span()),
