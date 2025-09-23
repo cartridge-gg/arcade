@@ -9,7 +9,7 @@ sierra-replace-ids = true
 
 [dependencies]
 dojo.workspace = true
-dojo_macros.workspace = true
+dojo_cairo_macros.workspace = true
 starknet.workspace = true
 achievement = { path = ".." }
 controller = { path = ".." }
