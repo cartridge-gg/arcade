@@ -60,7 +60,7 @@ export function useMarketTokensFetcher({
   const { collections } = useMarketCollectionFetcher({ projects: project });
   const collection = useMemo(
     () => collections.find((c) => c.contract_address === address),
-    [collections],
+    [collections, address],
   );
 
   const addTokens = useMarketplaceTokensStore((s) => s.addTokens);

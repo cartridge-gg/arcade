@@ -236,7 +236,7 @@ export function Items({
               <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
+                <p>{`${searchFilteredTokens.length} ${collection && `of ${collection?.totalSupply.toString()}`} Items`}</p>
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -254,7 +254,7 @@ export function Items({
           search={search}
           setSearch={setSearch}
           selected={undefined}
-          setSelected={() => {}}
+          setSelected={() => { }}
           options={[]}
           variant="darkest"
           className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
@@ -347,7 +347,7 @@ export function Items({
       </div>
       <FloatingLoadingSpinner
         isLoading={status === "loading" && tokens && tokens.length > 0}
-        loadingProgress={loadingProgress}
+        loadingProgress={{ completed: loadingProgress.completed, total: collection?.totalSupply.toString() as unknown as number }}
       />
     </div>
   );
