@@ -3,12 +3,11 @@ export * from "./social";
 export * from "./torii-fetcher";
 import { init } from "@dojoengine/sdk";
 import { configs } from "../configs";
-import { SchemaType } from "../bindings/models.gen";
 import { constants, shortString } from "starknet";
 
 export const initSDK = async (chainId: constants.StarknetChainId) => {
   const config = configs[chainId];
-  return init<SchemaType>({
+  return init<any>({
     client: {
       toriiUrl: config.toriiUrl,
       worldAddress: config.manifest.world.address,

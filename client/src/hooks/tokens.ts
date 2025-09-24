@@ -15,50 +15,50 @@ import { useAddress } from "./address";
  * @throws {Error} If used outside of a TokenProvider context
  */
 export const useTokens = () => {
-  const context = useContext(TokenContext);
-  const { address } = useAddress();
-  const { edition } = useProject();
+	const context = useContext(TokenContext);
+	const { address } = useAddress();
+	const { edition } = useProject();
 
-  if (!context) {
-    throw new Error(
-      "The `useTokens` hook must be used within a `TokenProvider`",
-    );
-  }
+	if (!context) {
+		throw new Error(
+			"The `useTokens` hook must be used within a `TokenProvider`",
+		);
+	}
 
-  const { tokens: allTokens, status } = context;
+	const { tokens: allTokens, status } = context;
 
-  const tokens = useMemo(() => {
-    if (!edition) return allTokens;
-    return allTokens.filter(
-      (token) =>
-        token.metadata.project === edition.config.project ||
-        !token.metadata.project,
-    );
-  }, [allTokens, edition]);
+	const tokens = useMemo(() => {
+		if (!edition) return allTokens;
+		return allTokens.filter(
+			(token) =>
+				token.metadata.project === edition.config.project ||
+				!token.metadata.project,
+		);
+	}, [allTokens, edition]);
 
-  const { username } = useUsername({ address });
+	const { username } = useUsername({ address });
 
-  const creditBalance = useCreditBalance({
-    username,
-    interval: 30000,
-  });
+	const creditBalance = useCreditBalance({
+		username,
+		interval: 30000,
+	});
 
-  const credits: Token = useMemo(() => {
-    return {
-      balance: {
-        amount: Number(creditBalance.balance.value) / 10 ** 6,
-        value: 0,
-        change: 0,
-      },
-      metadata: {
-        name: "Credits",
-        symbol: "Credits",
-        decimals: 6,
-        address: "credit",
-        image: "https://static.cartridge.gg/presets/credit/icon.svg",
-      },
-    };
-  }, [creditBalance]);
+	const credits: Token = useMemo(() => {
+		return {
+			balance: {
+				amount: Number(creditBalance.balance.value) / 10 ** 6,
+				value: 0,
+				change: 0,
+			},
+			metadata: {
+				name: "Credits",
+				symbol: "Credits",
+				decimals: 6,
+				address: "credit",
+				image: "https://static.cartridge.gg/presets/credit/icon.svg",
+			},
+		};
+	}, [creditBalance]);
 
-  return { tokens, status, credits };
+	return { tokens, status, credits };
 };

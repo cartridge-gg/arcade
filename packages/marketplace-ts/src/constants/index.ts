@@ -1,1 +1,1 @@
-export const NAMESPACE = "MARKETPLACE";
+export const NAMESPACE = "ARCADE";

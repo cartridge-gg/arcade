@@ -7,7 +7,7 @@ import {
 	isTokenListed,
 } from "../queries/token";
 import { SDKOrder, type OrderModel } from "../modules/marketplace";
-import type { SchemaType, setupWorld } from "../bindings";
+import type { SchemaType, setupWorld } from "@cartridge/models";
 import { useEffect, useMemo, useRef } from "react";
 import type { Subscription } from "@dojoengine/torii-wasm/types";
 import type { Clause } from "@dojoengine/torii-wasm/types";
@@ -34,8 +34,8 @@ export function useEntitySubscription(
 			sdk.client
 				.onEntityUpdated(subscriptionClause, wrappedCallback)
 				.then((s) => {
-          subscriptionRef.current = s;
-        });
+					subscriptionRef.current = s;
+				});
 		}
 
 		return () => {

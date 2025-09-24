@@ -2,11 +2,11 @@ import { Marketplace } from "@/components/marketplace";
 import { useProject } from "@/hooks/project";
 
 export const MarketplaceScene = () => {
-  const { game, edition } = useProject();
+	const { game, edition } = useProject();
 
-  if (!game) return <Marketplace />;
+	if (!game) return <Marketplace />;
 
-  if (!edition) return null;
+	if (!edition) return null;
 
-  return <Marketplace edition={edition} />;
+	return <Marketplace edition={edition} />;
 };

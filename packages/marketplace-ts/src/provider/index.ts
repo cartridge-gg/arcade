@@ -4,7 +4,7 @@
  * @param manifest - The manifest containing contract addresses and ABIs
  * @param url - Optional RPC URL for the provider
  */
-import { setupWorld } from "../bindings/contracts.gen";
+import { setupWorld } from "@cartridge/models";
 import { DojoProvider } from "@dojoengine/core";
 import * as torii from "@dojoengine/torii-wasm";
 import type {

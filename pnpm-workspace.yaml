@@ -1,5 +1,6 @@
 packages:
   - client
+  - contracts
   - packages/**
 catalog:
   "@cartridge/presets": github:cartridge-gg/presets#e6a5022
@@ -14,6 +15,6 @@ catalog:
   "@dojoengine/torii-wasm": 1.7.1
   "@dojoengine/grpc": 1.7.1
   class-variance-authority: ^0.7.1
-  starknet: 8.5.2
+  starknet: 8.5.4
   tsup: 8.4.0
   typescript: "5.8"

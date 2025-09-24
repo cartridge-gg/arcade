@@ -12,7 +12,7 @@ import {
   ToriiQueryBuilder,
   ToriiResponse,
 } from "@dojoengine/sdk";
-import { SchemaType } from "../../bindings";
+import { SchemaType } from "@cartridge/models";
 import { NAMESPACE } from "../../constants";
 import { RegistryOptions, DefaultRegistryOptions } from "./options";
 import { Helpers } from "../../helpers";
@@ -52,15 +52,15 @@ export const Registry = {
       await Promise.all(
         items.map(async (entity: ParsedEntity<SchemaType>) => {
           if (entity.models[NAMESPACE][Access.getModelName()]) {
-            models.push(Access.parse(entity));
+            models.push(Access.parse(entity as any));
           }
           if (entity.models[NAMESPACE][Game.getModelName()]) {
-            const game = Game.parse(entity);
+            const game = Game.parse(entity as any);
             game.image = await Helpers.getImage(game.image, game.properties.preset);
             models.push(game);
           }
           if (entity.models[NAMESPACE][Edition.getModelName()]) {
-            models.push(Edition.parse(entity));
+            models.push(Edition.parse(entity as any));
           }
           return entity;
         }),
@@ -87,15 +87,15 @@ export const Registry = {
       const entity = data[0];
       const eraseable = !entity.models[NAMESPACE];
       if (!!entity.models[NAMESPACE]?.[Access.getModelName()] || eraseable) {
-        const access = Access.parse(entity);
+        const access = Access.parse(entity as any);
         callback([access]);
       }
       if (!!entity.models[NAMESPACE]?.[Game.getModelName()] || eraseable) {
-        const game = Game.parse(entity);
+        const game = Game.parse(entity as any);
         callback([game]);
       }
       if (!!entity.models[NAMESPACE]?.[Edition.getModelName()] || eraseable) {
-        const edition = Edition.parse(entity);
+        const edition = Edition.parse(entity as any);
         callback([edition]);
       }
     };

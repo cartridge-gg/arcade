@@ -1,7 +1,7 @@
 export * from "./marketplace";
 import { init } from "@dojoengine/sdk";
 import { configs } from "../configs";
-import type { SchemaType } from "../bindings/models.gen";
+import type { SchemaType } from "@cartridge/models";
 import { type constants, shortString } from "starknet";
 
 export const initSDK = async (chainId: constants.StarknetChainId) => {

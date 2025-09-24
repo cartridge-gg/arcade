@@ -1,6 +1,6 @@
 import { NAMESPACE } from "../../constants";
 import { getChecksumAddress } from "starknet";
-import { SchemaType } from "../../bindings";
+import type { SchemaType } from "@cartridge/models";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
 
 const MODEL_NAME = "Follow";

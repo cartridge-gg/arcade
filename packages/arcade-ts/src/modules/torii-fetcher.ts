@@ -62,11 +62,10 @@ async function fetchFromEndpoint(
   signal: AbortSignal,
 ): Promise<any> {
   if ("client" in options && options.client) {
-
     const cfg = {
       toriiUrl,
       worldAddress: "0x0",
-    }
+    };
     const client = options.native ? new ToriiGrpcClient(cfg) : await new ToriiClient(cfg);
 
     try {
@@ -74,8 +73,8 @@ async function fetchFromEndpoint(
         client,
         signal,
       });
-    } catch(e) {}
-    // leave this commented out for now. 
+    } catch (e) {}
+    // leave this commented out for now.
     // TODO: return client instance to free them at the end of caller function
     // } finally {
     //   if ('free' in client && typeof client.free === 'function') {

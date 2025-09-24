@@ -15,7 +15,7 @@ import {
 	ToriiQueryBuilder,
 	type ToriiResponse,
 } from "@dojoengine/sdk";
-import type { SchemaType } from "../../bindings";
+import type { SchemaType } from "@cartridge/models";
 import { NAMESPACE } from "../../constants";
 import { MarketplaceOptions, DefaultMarketplaceOptions } from "./options";
 import type { Token, ToriiClient } from "@dojoengine/torii-wasm";
@@ -40,7 +40,14 @@ export type MarketplaceModel =
 	| OfferEvent
 	| SaleEvent;
 
-export type { AccessInterface, BookInterface, OrderInterface, ListingInterface, OfferInterface, SaleInterface };
+export type {
+	AccessInterface,
+	BookInterface,
+	OrderInterface,
+	ListingInterface,
+	OfferInterface,
+	SaleInterface,
+};
 
 export type WithCount<T> = T & { count: number };
 export type Collection = Record<string, WithCount<Token>>;

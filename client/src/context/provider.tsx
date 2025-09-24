@@ -19,48 +19,48 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { queryClient, persister } from "../queries";
 
 export function Provider({ children }: PropsWithChildren) {
-  const qc = new QueryClient();
+	const qc = new QueryClient();
 
-  return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister }}
-    >
-      <PostHogProvider>
-        <CartridgeAPIProvider
-          url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
-        >
-          <IndexerAPIProvider credentials="omit">
-            <QueryClientProvider client={qc}>
-              <MarketplaceProvider>
-                <ArcadeProvider>
-                  <MarketCollectionProvider>
-                    <StarknetProvider>
-                      <OwnershipsProvider>
-                        <CollectionProvider>
-                          <TokenProvider>
-                            <AchievementProvider>
-                              <ActivitiesProvider>
-                                <MetricsProvider>
-                                  <MarketFiltersProvider>
-                                    <SidebarProvider>
-                                      {children}
-                                    </SidebarProvider>
-                                  </MarketFiltersProvider>
-                                </MetricsProvider>
-                              </ActivitiesProvider>
-                            </AchievementProvider>
-                          </TokenProvider>
-                        </CollectionProvider>
-                      </OwnershipsProvider>
-                    </StarknetProvider>
-                  </MarketCollectionProvider>
-                </ArcadeProvider>
-              </MarketplaceProvider>
-            </QueryClientProvider>
-          </IndexerAPIProvider>
-        </CartridgeAPIProvider>
-      </PostHogProvider>
-    </PersistQueryClientProvider>
-  );
+	return (
+		<PersistQueryClientProvider
+			client={queryClient}
+			persistOptions={{ persister }}
+		>
+			<PostHogProvider>
+				<CartridgeAPIProvider
+					url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
+				>
+					<IndexerAPIProvider credentials="omit">
+						<QueryClientProvider client={qc}>
+							<MarketplaceProvider>
+								<ArcadeProvider>
+									<MarketCollectionProvider>
+										<StarknetProvider>
+											<OwnershipsProvider>
+												<CollectionProvider>
+													<TokenProvider>
+														<AchievementProvider>
+															<ActivitiesProvider>
+																<MetricsProvider>
+																	<MarketFiltersProvider>
+																		<SidebarProvider>
+																			{children}
+																		</SidebarProvider>
+																	</MarketFiltersProvider>
+																</MetricsProvider>
+															</ActivitiesProvider>
+														</AchievementProvider>
+													</TokenProvider>
+												</CollectionProvider>
+											</OwnershipsProvider>
+										</StarknetProvider>
+									</MarketCollectionProvider>
+								</ArcadeProvider>
+							</MarketplaceProvider>
+						</QueryClientProvider>
+					</IndexerAPIProvider>
+				</CartridgeAPIProvider>
+			</PostHogProvider>
+		</PersistQueryClientProvider>
+	);
 }

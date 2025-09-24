@@ -79,7 +79,7 @@ export function useMarketplaceActions() {
 				currency,
 				expiration,
 			);
-			return await ctx.provider.execute(snAccount, calls, "MARKETPLACE");
+			return await ctx.provider.execute(snAccount, calls, "ARCADE");
 		} catch (error) {
 			console.error(error);
 			throw error;
@@ -134,7 +134,7 @@ export function useMarketplaceActions() {
 				currency,
 				expiration,
 			);
-			return await ctx.provider.execute(snAccount, calls, "MARKETPLACE");
+			return await ctx.provider.execute(snAccount, calls, "ARCADE");
 		} catch (error) {
 			console.error(error);
 			throw error;
@@ -196,7 +196,7 @@ export function useMarketplaceActions() {
 				clientFee,
 				clientReceiver,
 			);
-			return await ctx.provider.execute(snAccount, calls, "MARKETPLACE");
+			return await ctx.provider.execute(snAccount, calls, "ARCADE");
 		} catch (error) {
 			console.error(error);
 			throw error;
@@ -262,7 +262,7 @@ export function useMarketplaceActions() {
 				clientFee,
 				clientReceiver,
 			);
-			return await ctx.provider.execute(snAccount, calls, "MARKETPLACE");
+			return await ctx.provider.execute(snAccount, calls, "ARCADE");
 		} catch (error) {
 			console.error(error);
 			throw error;

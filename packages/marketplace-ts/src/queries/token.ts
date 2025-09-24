@@ -4,7 +4,7 @@ import {
 	MemberClause,
 	ToriiQueryBuilder,
 } from "@dojoengine/sdk";
-import { ModelsMapping, OrderCategory, OrderStatus } from "../bindings";
+import { ModelsMapping, OrderCategory, OrderStatus } from "@cartridge/models";
 import { addAddressPadding, type BigNumberish } from "starknet";
 
 export function subscribeToTokenUpdatesClause(

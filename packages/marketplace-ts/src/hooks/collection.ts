@@ -195,7 +195,16 @@ export function useCollection(
 				loadPage(1, tokenIds, initialCursor);
 			}
 		}
-	}, [initialCursor, tokenIds, cursor, currentPage, collection.length, currentCursor, isLoading, loadPage]); // React to cursor and address changes
+	}, [
+		initialCursor,
+		tokenIds,
+		cursor,
+		currentPage,
+		collection.length,
+		currentCursor,
+		isLoading,
+		loadPage,
+	]); // React to cursor and address changes
 
 	return {
 		collection,

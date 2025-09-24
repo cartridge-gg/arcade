@@ -4,7 +4,7 @@ import { useDojoSDK } from "@dojoengine/sdk/react";
 import { addAddressPadding } from "starknet";
 import type { Subscription } from "@dojoengine/torii-wasm/types";
 import type { Clause } from "@dojoengine/torii-wasm/types";
-import type { SchemaType, setupWorld } from "../bindings";
+import type { SchemaType, setupWorld } from "@cartridge/models";
 import {
 	filterMetadataByTraits,
 	getCollectionMetadataQuery,
@@ -22,7 +22,10 @@ interface QueryInterface {
 /**
  * Hook to manage subscription lifecycle for metadata updates
  */
-function useMetadataSubscription(subscriptionClause: Clause, queryKey: (string | QueryInterface)[]) {
+function useMetadataSubscription(
+	subscriptionClause: Clause,
+	queryKey: (string | QueryInterface)[],
+) {
 	const { sdk } = useDojoSDK<typeof setupWorld, SchemaType>();
 	const subscriptionRef = useRef<Subscription | null>(null);
 	const queryClient = useQueryClient();
@@ -38,8 +41,8 @@ function useMetadataSubscription(subscriptionClause: Clause, queryKey: (string |
 			sdk.client
 				.onEntityUpdated(subscriptionClause, wrappedCallback)
 				.then((s) => {
-          subscriptionRef.current = s;
-        });
+					subscriptionRef.current = s;
+				});
 		}
 
 		return () => {

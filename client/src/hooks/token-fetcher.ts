@@ -17,37 +17,37 @@ const LIMIT = 1000;
  * @returns Processed tokens mapped by checksum address
  */
 function processTokensWithMetadata(
-  projectTokens: TokenWithMetadata[],
-  projectIndex: number,
-  projects: string[],
+	projectTokens: TokenWithMetadata[],
+	projectIndex: number,
+	projects: string[],
 ): { [key: string]: FetchedToken } {
-  const processedTokens: { [key: string]: FetchedToken } = {};
+	const processedTokens: { [key: string]: FetchedToken } = {};
 
-  projectTokens.forEach((token: TokenWithMetadata) => {
-    if (token.contract_address) {
-      // const checksumAddress = getChecksumAddress(token.contract_address);
-      const checksumAddress = token.contract_address;
-      const decimals = token.decimals || token.metadata?.decimals || 18;
-      const balance = Number(token.balance) || 0;
+	projectTokens.forEach((token: TokenWithMetadata) => {
+		if (token.contract_address) {
+			// const checksumAddress = getChecksumAddress(token.contract_address);
+			const checksumAddress = token.contract_address;
+			const decimals = token.decimals || token.metadata?.decimals || 18;
+			const balance = Number(token.balance) || 0;
 
-      processedTokens[checksumAddress] = {
-        balance: {
-          amount: decimals > 0 ? balance / Math.pow(10, decimals) : balance,
-          value: 0, // Will be calculated with price data
-          change: 0, // Will be calculated with historical price data
-        },
-        metadata: {
-          name: token.name || token.metadata?.name || "",
-          symbol: token.symbol || token.metadata?.symbol || "",
-          decimals: decimals,
-          address: checksumAddress,
-          project: projects[projectIndex] || undefined,
-        },
-      };
-    }
-  });
+			processedTokens[checksumAddress] = {
+				balance: {
+					amount: decimals > 0 ? balance / Math.pow(10, decimals) : balance,
+					value: 0, // Will be calculated with price data
+					change: 0, // Will be calculated with historical price data
+				},
+				metadata: {
+					name: token.name || token.metadata?.name || "",
+					symbol: token.symbol || token.metadata?.symbol || "",
+					decimals: decimals,
+					address: checksumAddress,
+					project: projects[projectIndex] || undefined,
+				},
+			};
+		}
+	});
 
-  return processedTokens;
+	return processedTokens;
 }
 
 /**
@@ -56,26 +56,26 @@ function processTokensWithMetadata(
  * @returns Object containing unique contract addresses and token IDs
  */
 function extractUniqueIdentifiers(tokenBalances: TokenBalance[]): {
-  contractAddresses: string[];
-  tokenIds: string[];
+	contractAddresses: string[];
+	tokenIds: string[];
 } {
-  const contractAddresses = [
-    ...new Set(
-      tokenBalances
-        .map((item: TokenBalance) => item.contract_address)
-        .filter(Boolean),
-    ),
-  ];
+	const contractAddresses = [
+		...new Set(
+			tokenBalances
+				.map((item: TokenBalance) => item.contract_address)
+				.filter(Boolean),
+		),
+	];
 
-  const tokenIds = [
-    ...new Set(
-      tokenBalances
-        .map((item: TokenBalance) => item.token_id ?? "")
-        .filter(Boolean),
-    ),
-  ];
+	const tokenIds = [
+		...new Set(
+			tokenBalances
+				.map((item: TokenBalance) => item.token_id ?? "")
+				.filter(Boolean),
+		),
+	];
 
-  return { contractAddresses, tokenIds };
+	return { contractAddresses, tokenIds };
 }
 
 /**
@@ -86,37 +86,37 @@ function extractUniqueIdentifiers(tokenBalances: TokenBalance[]): {
  * @returns Map of token metadata keyed by contract_address-token_id
  */
 async function fetchTokenMetadataMap(
-  client: any,
-  contractAddresses: string[],
-  tokenIds: string[],
+	client: any,
+	contractAddresses: string[],
+	tokenIds: string[],
 ): Promise<Map<string, TokenMetadata>> {
-  const tokenMetadataMap: Map<string, TokenMetadata> = new Map();
+	const tokenMetadataMap: Map<string, TokenMetadata> = new Map();
 
-  try {
-    const tokensResponse = await client.getTokens({
-      contract_addresses: contractAddresses,
-      token_ids:
-        tokenIds.length > 0 ? tokenIds.map((t) => t.replace("0x", "")) : [],
-      pagination: {
-        limit: LIMIT,
-        cursor: undefined,
-        direction: "Forward",
-        order_by: [],
-      },
-    });
+	try {
+		const tokensResponse = await client.getTokens({
+			contract_addresses: contractAddresses,
+			token_ids:
+				tokenIds.length > 0 ? tokenIds.map((t) => t.replace("0x", "")) : [],
+			pagination: {
+				limit: LIMIT,
+				cursor: undefined,
+				direction: "Forward",
+				order_by: [],
+			},
+		});
 
-    // Create a map for quick lookup
-    if (tokensResponse.items) {
-      tokensResponse.items.forEach((token: TokenMetadata) => {
-        const key = `${token.contract_address}${token.token_id ? `-${token.token_id}` : ""}`;
-        tokenMetadataMap.set(key, token);
-      });
-    }
-  } catch (error) {
-    console.warn("Failed to fetch token metadata:", error);
-  }
+		// Create a map for quick lookup
+		if (tokensResponse.items) {
+			tokensResponse.items.forEach((token: TokenMetadata) => {
+				const key = `${token.contract_address}${token.token_id ? `-${token.token_id}` : ""}`;
+				tokenMetadataMap.set(key, token);
+			});
+		}
+	} catch (error) {
+		console.warn("Failed to fetch token metadata:", error);
+	}
 
-  return tokenMetadataMap;
+	return tokenMetadataMap;
 }
 
 /**
@@ -126,69 +126,69 @@ async function fetchTokenMetadataMap(
  * @returns Array of tokens with merged metadata
  */
 function mergeTokensWithMetadata(
-  tokenBalances: TokenBalance[],
-  tokenMetadataMap: Map<string, TokenMetadata>,
+	tokenBalances: TokenBalance[],
+	tokenMetadataMap: Map<string, TokenMetadata>,
 ): TokenWithMetadata[] {
-  return tokenBalances.map((tokenBalance: TokenBalance) => {
-    const key = `${tokenBalance.contract_address}${tokenBalance.token_id ? `-${tokenBalance.token_id}` : ""}`;
-    const metadata = tokenMetadataMap.get(key);
+	return tokenBalances.map((tokenBalance: TokenBalance) => {
+		const key = `${tokenBalance.contract_address}${tokenBalance.token_id ? `-${tokenBalance.token_id}` : ""}`;
+		const metadata = tokenMetadataMap.get(key);
 
-    return {
-      ...tokenBalance,
-      name: metadata?.name || tokenBalance.name,
-      symbol: metadata?.symbol || tokenBalance.symbol,
-      decimals:
-        metadata?.decimals !== undefined
-          ? metadata.decimals
-          : tokenBalance.decimals,
-      metadata,
-    } as TokenWithMetadata;
-  });
+		return {
+			...tokenBalance,
+			name: metadata?.name || tokenBalance.name,
+			symbol: metadata?.symbol || tokenBalance.symbol,
+			decimals:
+				metadata?.decimals !== undefined
+					? metadata.decimals
+					: tokenBalance.decimals,
+			metadata,
+		} as TokenWithMetadata;
+	});
 }
 
 export type TokenBalance = {
-  balance: string;
-  account_address: string;
-  contract_address: string;
-  token_id?: string;
-  name?: string;
-  symbol?: string;
-  decimals?: number;
+	balance: string;
+	account_address: string;
+	contract_address: string;
+	token_id?: string;
+	name?: string;
+	symbol?: string;
+	decimals?: number;
 };
 
 export type TokenMetadata = {
-  contract_address: string;
-  token_id?: string;
-  name: string;
-  symbol: string;
-  decimals: number;
-  metadata?: string;
+	contract_address: string;
+	token_id?: string;
+	name: string;
+	symbol: string;
+	decimals: number;
+	metadata?: string;
 };
 
 export type TokenWithMetadata = TokenBalance & {
-  metadata?: TokenMetadata;
+	metadata?: TokenMetadata;
 };
 
 export type FetchedToken = {
-  balance: {
-    amount: number;
-    value: number;
-    change: number;
-  };
-  metadata: {
-    name: string;
-    symbol: string;
-    decimals: number;
-    address: string;
-    project?: string;
-  };
+	balance: {
+		amount: number;
+		value: number;
+		change: number;
+	};
+	metadata: {
+		name: string;
+		symbol: string;
+		decimals: number;
+		address: string;
+		project?: string;
+	};
 };
 
 export type UseTokenFetcherResult = {
-  tokens: { [key: string]: FetchedToken };
-  status: "idle" | "loading" | "success" | "error";
-  error: Error | null;
-  refetch: () => void;
+	tokens: { [key: string]: FetchedToken };
+	status: "idle" | "loading" | "success" | "error";
+	error: Error | null;
+	refetch: () => void;
 };
 
 /**
@@ -201,152 +201,152 @@ export type UseTokenFetcherResult = {
  * @example
  * ```ts
  * const { tokens, status, error, refetch } = useTokenFetcher(
- *   ['arcade-blobarena', 'arcade-mainnet'],
+ *   ['arcade-blobarena', 'arcade-main'],
  *   '0x123...'
  * );
  * ```
  */
 export function useTokenFetcher(
-  projects: string[],
-  address: string | undefined,
+	projects: string[],
+	address: string | undefined,
 ): UseTokenFetcherResult {
-  const [tokens, setTokens] = useState<{ [key: string]: FetchedToken }>({});
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [error, setError] = useState<Error | null>(null);
+	const [tokens, setTokens] = useState<{ [key: string]: FetchedToken }>({});
+	const [status, setStatus] = useState<
+		"idle" | "loading" | "success" | "error"
+	>("idle");
+	const [error, setError] = useState<Error | null>(null);
 
-  const fetchTokens = async () => {
-    if (!projects.length || !address) {
-      setStatus("idle");
-      setTokens({});
-      return;
-    }
+	const fetchTokens = async () => {
+		if (!projects.length || !address) {
+			setStatus("idle");
+			setTokens({});
+			return;
+		}
 
-    setStatus("loading");
-    setError(null);
+		setStatus("loading");
+		setError(null);
 
-    try {
-      const result = await fetchToriis(projects, {
-        client: async ({ client }) => {
-          let iterate = true;
-          let next_cursor = undefined;
-          const allTokensWithMetadata: TokenWithMetadata[] = [];
+		try {
+			const result = await fetchToriis(projects, {
+				client: async ({ client }) => {
+					let iterate = true;
+					let next_cursor = undefined;
+					const allTokensWithMetadata: TokenWithMetadata[] = [];
 
-          while (iterate) {
-            // Fetch token balances
-            const response: any = await client.getTokenBalances({
-              contract_addresses: [],
-              account_addresses: [address],
-              token_ids: [],
-              pagination: {
-                cursor: next_cursor,
-                direction: "Forward",
-                limit: LIMIT,
-                order_by: [],
-              },
-            });
+					while (iterate) {
+						// Fetch token balances
+						const response: any = await client.getTokenBalances({
+							contract_addresses: [],
+							account_addresses: [address],
+							token_ids: [],
+							pagination: {
+								cursor: next_cursor,
+								direction: "Forward",
+								limit: LIMIT,
+								order_by: [],
+							},
+						});
 
-            // For each batch, fetch token metadata to enrich the balance data
-            // This provides accurate name, symbol, and decimals for each token
-            if (response.items && response.items.length > 0) {
-              // Extract unique identifiers from this batch
-              const { contractAddresses, tokenIds } = extractUniqueIdentifiers(
-                response.items,
-              );
+						// For each batch, fetch token metadata to enrich the balance data
+						// This provides accurate name, symbol, and decimals for each token
+						if (response.items && response.items.length > 0) {
+							// Extract unique identifiers from this batch
+							const { contractAddresses, tokenIds } = extractUniqueIdentifiers(
+								response.items,
+							);
 
-              // Fetch metadata for all tokens in this batch
-              const tokenMetadataMap = await fetchTokenMetadataMap(
-                client,
-                contractAddresses,
-                tokenIds,
-              );
+							// Fetch metadata for all tokens in this batch
+							const tokenMetadataMap = await fetchTokenMetadataMap(
+								client,
+								contractAddresses,
+								tokenIds,
+							);
 
-              // Merge balance data with metadata
-              const tokensWithMetadata = mergeTokensWithMetadata(
-                response.items,
-                tokenMetadataMap,
-              );
+							// Merge balance data with metadata
+							const tokensWithMetadata = mergeTokensWithMetadata(
+								response.items,
+								tokenMetadataMap,
+							);
 
-              allTokensWithMetadata.push(...tokensWithMetadata);
-            }
+							allTokensWithMetadata.push(...tokensWithMetadata);
+						}
 
-            if (!response.next_cursor) {
-              iterate = false;
-              break;
-            }
+						if (!response.next_cursor) {
+							iterate = false;
+							break;
+						}
 
-            next_cursor = response.next_cursor;
-          }
+						next_cursor = response.next_cursor;
+					}
 
-          return allTokensWithMetadata;
-        },
-      });
+					return allTokensWithMetadata;
+				},
+			});
 
-      // Process the fetched token balances with metadata
-      let processedTokens: { [key: string]: FetchedToken } = {};
+			// Process the fetched token balances with metadata
+			let processedTokens: { [key: string]: FetchedToken } = {};
 
-      if (result.data && Array.isArray(result.data)) {
-        // Process tokens from all projects
-        result.data.forEach((projectTokens, projectIndex) => {
-          if (Array.isArray(projectTokens)) {
-            const projectProcessedTokens = processTokensWithMetadata(
-              projectTokens,
-              projectIndex,
-              projects,
-            );
-            // Merge tokens from this project into the main collection
-            processedTokens = { ...processedTokens, ...projectProcessedTokens };
-          }
-        });
-      }
+			if (result.data && Array.isArray(result.data)) {
+				// Process tokens from all projects
+				result.data.forEach((projectTokens, projectIndex) => {
+					if (Array.isArray(projectTokens)) {
+						const projectProcessedTokens = processTokensWithMetadata(
+							projectTokens,
+							projectIndex,
+							projects,
+						);
+						// Merge tokens from this project into the main collection
+						processedTokens = { ...processedTokens, ...projectProcessedTokens };
+					}
+				});
+			}
 
-      setTokens(processedTokens);
-      setStatus("success");
-    } catch (err) {
-      console.error("Error fetching tokens:", err);
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch tokens"),
-      );
-      setStatus("error");
-    }
-  };
+			setTokens(processedTokens);
+			setStatus("success");
+		} catch (err) {
+			console.error("Error fetching tokens:", err);
+			setError(
+				err instanceof Error ? err : new Error("Failed to fetch tokens"),
+			);
+			setStatus("error");
+		}
+	};
 
-  useEffect(() => {
-    fetchTokens();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects.join(","), address]); // Using join to create stable dependency
+	useEffect(() => {
+		fetchTokens();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [projects.join(","), address]); // Using join to create stable dependency
 
-  const refetch = () => {
-    fetchTokens();
-  };
+	const refetch = () => {
+		fetchTokens();
+	};
 
-  return {
-    tokens,
-    status,
-    error,
-    refetch,
-  };
+	return {
+		tokens,
+		status,
+		error,
+		refetch,
+	};
 }
 
 export type Collection = {
-  address: string;
-  name: string;
-  type: CollectionType;
-  imageUrl: string;
-  totalCount: number;
-  project: string;
+	address: string;
+	name: string;
+	type: CollectionType;
+	imageUrl: string;
+	totalCount: number;
+	project: string;
 };
 
 export type CollectibleMetadata = TokenMetadata & {
-  image?: string;
+	image?: string;
 };
 
 export type UseCollectiblesResult = {
-  collections: Collection[];
-  status: "idle" | "loading" | "success" | "error";
-  error: Error | null;
-  refetch: () => void;
+	collections: Collection[];
+	status: "idle" | "loading" | "success" | "error";
+	error: Error | null;
+	refetch: () => void;
 };
 
 /**
@@ -355,11 +355,11 @@ export type UseCollectiblesResult = {
  * @returns True if the token is an NFT
  */
 function isNFT(token: TokenBalance | TokenWithMetadata): boolean {
-  return (
-    token.token_id !== null &&
-    token.token_id !== undefined &&
-    BigInt(token.balance) > 0
-  );
+	return (
+		token.token_id !== null &&
+		token.token_id !== undefined &&
+		BigInt(token.balance) > 0
+	);
 }
 
 /**
@@ -368,20 +368,20 @@ function isNFT(token: TokenBalance | TokenWithMetadata): boolean {
  * @returns Map of collection addresses to NFT arrays
  */
 function aggregateNFTsByCollection(
-  tokens: TokenWithMetadata[],
+	tokens: TokenWithMetadata[],
 ): Map<string, TokenWithMetadata[]> {
-  const collectionMap = new Map<string, TokenWithMetadata[]>();
+	const collectionMap = new Map<string, TokenWithMetadata[]>();
 
-  tokens.forEach((token) => {
-    if (isNFT(token) && token.contract_address) {
-      // const address = getChecksumAddress(token.contract_address);
-      const address = token.contract_address;
-      const existing = collectionMap.get(address) || [];
-      collectionMap.set(address, [...existing, token]);
-    }
-  });
+	tokens.forEach((token) => {
+		if (isNFT(token) && token.contract_address) {
+			// const address = getChecksumAddress(token.contract_address);
+			const address = token.contract_address;
+			const existing = collectionMap.get(address) || [];
+			collectionMap.set(address, [...existing, token]);
+		}
+	});
 
-  return collectionMap;
+	return collectionMap;
 }
 
 /**
@@ -391,50 +391,50 @@ function aggregateNFTsByCollection(
  * @returns Array of Collection objects
  */
 function processNFTCollections(
-  collectionMap: Map<string, TokenWithMetadata[]>,
-  project: string,
+	collectionMap: Map<string, TokenWithMetadata[]>,
+	project: string,
 ): Collection[] {
-  const collections: Collection[] = [];
+	const collections: Collection[] = [];
 
-  collectionMap.forEach((nfts, address) => {
-    // Get metadata from the first NFT in the collection
-    const firstNFT = nfts[0];
-    const metadata = firstNFT.metadata;
+	collectionMap.forEach((nfts, address) => {
+		// Get metadata from the first NFT in the collection
+		const firstNFT = nfts[0];
+		const metadata = firstNFT.metadata;
 
-    let innerMeta = undefined;
-    try {
-      innerMeta = JSON.parse(metadata?.metadata as string);
-    } catch (err) {}
+		let innerMeta = undefined;
+		try {
+			innerMeta = JSON.parse(metadata?.metadata as string);
+		} catch (err) {}
 
-    // Determine collection type (could be enhanced with actual logic)
-    // For now, default to ERC721
-    const collectionType = CollectionType.ERC721;
+		// Determine collection type (could be enhanced with actual logic)
+		// For now, default to ERC721
+		const collectionType = CollectionType.ERC721;
 
-    collections.push({
-      address: address,
-      name: metadata?.name || firstNFT.name || "---",
-      type: collectionType,
-      imageUrl: getAssetImage(project, metadata, innerMeta, firstNFT),
-      totalCount: nfts.length,
-      project: project,
-    });
-  });
+		collections.push({
+			address: address,
+			name: metadata?.name || firstNFT.name || "---",
+			type: collectionType,
+			imageUrl: getAssetImage(project, metadata, innerMeta, firstNFT),
+			totalCount: nfts.length,
+			project: project,
+		});
+	});
 
-  return collections;
+	return collections;
 }
 
 function getAssetImage(
-  project: string,
-  metadata: TokenMetadata | undefined,
-  inner: CollectibleMetadata,
-  firstNFT: TokenWithMetadata,
+	project: string,
+	metadata: TokenMetadata | undefined,
+	inner: CollectibleMetadata,
+	firstNFT: TokenWithMetadata,
 ): string {
-  const image = inner?.image;
-  image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
-  return (
-    image ??
-    `https://api.cartridge.gg/x/${project}/torii/static/${metadata?.contract_address}/${firstNFT.token_id}/image`
-  );
+	const image = inner?.image;
+	image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+	return (
+		image ??
+		`https://api.cartridge.gg/x/${project}/torii/static/${metadata?.contract_address}/${firstNFT.token_id}/image`
+	);
 }
 
 /**
@@ -447,135 +447,135 @@ function getAssetImage(
  * @example
  * ```ts
  * const { collections, status, error, refetch } = useCollectibles(
- *   ['arcade-blobarena', 'arcade-mainnet'],
+ *   ['arcade-blobarena', 'arcade-main'],
  *   '0x123...'
  * );
  * ```
  */
 export function useCollectibles(
-  projects: string[],
-  address: string | undefined,
+	projects: string[],
+	address: string | undefined,
 ): UseCollectiblesResult {
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [error, setError] = useState<Error | null>(null);
+	const [collections, setCollections] = useState<Collection[]>([]);
+	const [status, setStatus] = useState<
+		"idle" | "loading" | "success" | "error"
+	>("idle");
+	const [error, setError] = useState<Error | null>(null);
 
-  const fetchCollectibles = async () => {
-    if (!projects.length || !address) {
-      setStatus("idle");
-      setCollections([]);
-      return;
-    }
+	const fetchCollectibles = async () => {
+		if (!projects.length || !address) {
+			setStatus("idle");
+			setCollections([]);
+			return;
+		}
 
-    setStatus("loading");
-    setError(null);
+		setStatus("loading");
+		setError(null);
 
-    try {
-      const result = await fetchToriis(projects, {
-        client: async ({ client }) => {
-          let iterate = true;
-          let next_cursor = undefined;
-          const allNFTs: TokenWithMetadata[] = [];
+		try {
+			const result = await fetchToriis(projects, {
+				client: async ({ client }) => {
+					let iterate = true;
+					let next_cursor = undefined;
+					const allNFTs: TokenWithMetadata[] = [];
 
-          while (iterate) {
-            // Fetch token balances
-            const response: any = await client.getTokenBalances({
-              contract_addresses: [],
-              account_addresses: [address],
-              token_ids: [],
-              pagination: {
-                cursor: next_cursor,
-                direction: "Forward",
-                limit: LIMIT,
-                order_by: [],
-              },
-            });
+					while (iterate) {
+						// Fetch token balances
+						const response: any = await client.getTokenBalances({
+							contract_addresses: [],
+							account_addresses: [address],
+							token_ids: [],
+							pagination: {
+								cursor: next_cursor,
+								direction: "Forward",
+								limit: LIMIT,
+								order_by: [],
+							},
+						});
 
-            // Filter for NFTs only
-            const nftBalances = response.items.filter((item: TokenBalance) =>
-              isNFT(item),
-            );
+						// Filter for NFTs only
+						const nftBalances = response.items.filter((item: TokenBalance) =>
+							isNFT(item),
+						);
 
-            if (nftBalances.length > 0) {
-              // Extract unique identifiers from NFT batch
-              const { contractAddresses, tokenIds } =
-                extractUniqueIdentifiers(nftBalances);
+						if (nftBalances.length > 0) {
+							// Extract unique identifiers from NFT batch
+							const { contractAddresses, tokenIds } =
+								extractUniqueIdentifiers(nftBalances);
 
-              // Fetch metadata for all NFTs in this batch
-              const tokenMetadataMap = await fetchTokenMetadataMap(
-                client,
-                contractAddresses,
-                tokenIds,
-              );
+							// Fetch metadata for all NFTs in this batch
+							const tokenMetadataMap = await fetchTokenMetadataMap(
+								client,
+								contractAddresses,
+								tokenIds,
+							);
 
-              // Merge balance data with metadata
-              const nftsWithMetadata = mergeTokensWithMetadata(
-                nftBalances,
-                tokenMetadataMap,
-              );
+							// Merge balance data with metadata
+							const nftsWithMetadata = mergeTokensWithMetadata(
+								nftBalances,
+								tokenMetadataMap,
+							);
 
-              allNFTs.push(...nftsWithMetadata);
-            }
+							allNFTs.push(...nftsWithMetadata);
+						}
 
-            if (!response.next_cursor) {
-              iterate = false;
-              break;
-            }
+						if (!response.next_cursor) {
+							iterate = false;
+							break;
+						}
 
-            next_cursor = response.next_cursor;
-          }
+						next_cursor = response.next_cursor;
+					}
 
-          return allNFTs;
-        },
-      });
+					return allNFTs;
+				},
+			});
 
-      // Process the fetched NFTs into collections
-      const allCollections: Collection[] = [];
+			// Process the fetched NFTs into collections
+			const allCollections: Collection[] = [];
 
-      if (result.data && Array.isArray(result.data)) {
-        // Process NFTs from all projects
-        result.data.forEach((projectNFTs, projectIndex) => {
-          if (Array.isArray(projectNFTs)) {
-            // Aggregate NFTs by collection
-            const collectionMap = aggregateNFTsByCollection(projectNFTs);
+			if (result.data && Array.isArray(result.data)) {
+				// Process NFTs from all projects
+				result.data.forEach((projectNFTs, projectIndex) => {
+					if (Array.isArray(projectNFTs)) {
+						// Aggregate NFTs by collection
+						const collectionMap = aggregateNFTsByCollection(projectNFTs);
 
-            // Process into Collection objects
-            const projectCollections = processNFTCollections(
-              collectionMap,
-              projects[projectIndex] || "",
-            );
+						// Process into Collection objects
+						const projectCollections = processNFTCollections(
+							collectionMap,
+							projects[projectIndex] || "",
+						);
 
-            allCollections.push(...projectCollections);
-          }
-        });
-      }
+						allCollections.push(...projectCollections);
+					}
+				});
+			}
 
-      setCollections(allCollections);
-      setStatus("success");
-    } catch (err) {
-      console.error("Error fetching collectibles:", err);
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch collectibles"),
-      );
-      setStatus("error");
-    }
-  };
+			setCollections(allCollections);
+			setStatus("success");
+		} catch (err) {
+			console.error("Error fetching collectibles:", err);
+			setError(
+				err instanceof Error ? err : new Error("Failed to fetch collectibles"),
+			);
+			setStatus("error");
+		}
+	};
 
-  useEffect(() => {
-    fetchCollectibles();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects.join(","), address]); // Using join to create stable dependency
+	useEffect(() => {
+		fetchCollectibles();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [projects.join(","), address]); // Using join to create stable dependency
 
-  const refetch = () => {
-    fetchCollectibles();
-  };
+	const refetch = () => {
+		fetchCollectibles();
+	};
 
-  return {
-    collections,
-    status,
-    error,
-    refetch,
-  };
+	return {
+		collections,
+		status,
+		error,
+		refetch,
+	};
 }

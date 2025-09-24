@@ -1,5 +1,5 @@
 import { NAMESPACE } from "../../constants";
-import { SchemaType } from "../../bindings";
+import type { SchemaType } from "@cartridge/models";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
 import { Attributes, Properties, Socials } from "../../classes";
 

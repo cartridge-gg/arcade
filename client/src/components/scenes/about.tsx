@@ -2,9 +2,9 @@ import { About } from "@/components/about";
 import { useProject } from "@/hooks/project";
 
 export const AboutScene = () => {
-  const { edition } = useProject();
+	const { edition } = useProject();
 
-  if (!edition) return null;
+	if (!edition) return null;
 
-  return <About edition={edition} />;
+	return <About edition={edition} />;
 };

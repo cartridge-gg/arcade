@@ -4,7 +4,7 @@ import {
 	MemberClause,
 	ToriiQueryBuilder,
 } from "@dojoengine/sdk";
-import { ModelsMapping } from "../bindings";
+import { ModelsMapping } from "@cartridge/models";
 import { addAddressPadding, type BigNumberish } from "starknet";
 import { NAMESPACE } from "../constants";
 

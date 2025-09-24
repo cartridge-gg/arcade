@@ -18,88 +18,88 @@ import { getChecksumAddress } from "starknet";
  * @throws {Error} If used outside of a ProjectProvider context
  */
 export const useProject = () => {
-  const { games, editions } = useArcade();
+	const { games, editions } = useArcade();
 
-  const {
-    game: gameParam,
-    edition: editionParam,
-    player: playerParam,
-    collection: collectionParam,
-    tab,
-  } = useParams<{
-    game: string;
-    edition: string;
-    player: string;
-    collection: string;
-    tab: string;
-  }>();
+	const {
+		game: gameParam,
+		edition: editionParam,
+		player: playerParam,
+		collection: collectionParam,
+		tab,
+	} = useParams<{
+		game: string;
+		edition: string;
+		player: string;
+		collection: string;
+		tab: string;
+	}>();
 
-  const [searchParams, _] = useSearchParams();
+	const [searchParams, _] = useSearchParams();
 
-  const filter = useMemo(() => {
-    return searchParams.get("filter");
-  }, [searchParams]);
+	const filter = useMemo(() => {
+		return searchParams.get("filter");
+	}, [searchParams]);
 
-  const { data: playerData } = useAddressByUsernameQuery(
-    {
-      username: playerParam?.toLowerCase() || "",
-    },
-    {
-      enabled: !!playerParam && !playerParam.match(/^0x[0-9a-fA-F]+$/),
-      refetchOnWindowFocus: false,
-    },
-  );
+	const { data: playerData } = useAddressByUsernameQuery(
+		{
+			username: playerParam?.toLowerCase() || "",
+		},
+		{
+			enabled: !!playerParam && !playerParam.match(/^0x[0-9a-fA-F]+$/),
+			refetchOnWindowFocus: false,
+		},
+	);
 
-  const game = useMemo(() => {
-    if (!gameParam || games.length === 0) return;
-    return games.find(
-      (game) =>
-        game.id.toString() === gameParam ||
-        game.name.toLowerCase().replace(/ /g, "-") === gameParam.toLowerCase(),
-    );
-  }, [gameParam, games]);
+	const game = useMemo(() => {
+		if (!gameParam || games.length === 0) return;
+		return games.find(
+			(game) =>
+				game.id.toString() === gameParam ||
+				game.name.toLowerCase().replace(/ /g, "-") === gameParam.toLowerCase(),
+		);
+	}, [gameParam, games]);
 
-  const collection = useMemo(() => {
-    if (!collectionParam) return;
-    return getChecksumAddress(collectionParam);
-  }, [collectionParam]);
+	const collection = useMemo(() => {
+		if (!collectionParam) return;
+		return getChecksumAddress(collectionParam);
+	}, [collectionParam]);
 
-  const edition = useMemo(() => {
-    if (!game || editions.length === 0) return;
-    const gameEditions = editions.filter(
-      (edition) => edition.gameId === game.id,
-    );
-    if (gameEditions.length === 0) return;
-    if (!editionParam) {
-      return gameEditions
-        .sort((a, b) => b.id - a.id)
-        .sort((a, b) => b.priority - a.priority)[0];
-    }
-    return gameEditions.find(
-      (edition) =>
-        edition.id.toString() === editionParam ||
-        edition.name.toLowerCase().replace(/ /g, "-") ===
-          editionParam.toLowerCase(),
-    );
-  }, [game, editionParam, editions]);
+	const edition = useMemo(() => {
+		if (!game || editions.length === 0) return;
+		const gameEditions = editions.filter(
+			(edition) => edition.gameId === game.id,
+		);
+		if (gameEditions.length === 0) return;
+		if (!editionParam) {
+			return gameEditions
+				.sort((a, b) => b.id - a.id)
+				.sort((a, b) => b.priority - a.priority)[0];
+		}
+		return gameEditions.find(
+			(edition) =>
+				edition.id.toString() === editionParam ||
+				edition.name.toLowerCase().replace(/ /g, "-") ===
+					editionParam.toLowerCase(),
+		);
+	}, [game, editionParam, editions]);
 
-  const player = useMemo(() => {
-    if (playerParam && playerParam.match(/^0x[0-9a-fA-F]+$/)) {
-      return getChecksumAddress(playerParam);
-    }
-    const address = playerData?.account?.controllers?.edges?.[0]?.node?.address;
-    if (address) {
-      return getChecksumAddress(address);
-    }
-    return;
-  }, [playerData, playerParam]);
+	const player = useMemo(() => {
+		if (playerParam && playerParam.match(/^0x[0-9a-fA-F]+$/)) {
+			return getChecksumAddress(playerParam);
+		}
+		const address = playerData?.account?.controllers?.edges?.[0]?.node?.address;
+		if (address) {
+			return getChecksumAddress(address);
+		}
+		return;
+	}, [playerData, playerParam]);
 
-  return {
-    game,
-    edition,
-    player,
-    filter,
-    collection,
-    tab,
-  };
+	return {
+		game,
+		edition,
+		player,
+		filter,
+		collection,
+		tab,
+	};
 };

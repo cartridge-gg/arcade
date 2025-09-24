@@ -1,6 +1,6 @@
 import { NAMESPACE } from "../../constants";
 import { shortString, getChecksumAddress } from "starknet";
-import { SchemaType } from "../../bindings";
+import type { SchemaType } from "@cartridge/models";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
 import { Config } from "../../classes/config";
 import { Attributes, Properties, Socials } from "../../classes";
