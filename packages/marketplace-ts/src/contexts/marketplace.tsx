@@ -10,7 +10,7 @@ import {
 import {
 	Marketplace,
 	type MarketplaceModel,
-	AccessModel,
+	ModeratorModel,
 	BookModel,
 	OrderModel,
 	ListingEvent,
@@ -56,7 +56,7 @@ export type MarketplaceContextType = {
 	/** The Marketplace client instance */
 	chainId: string;
 	provider: ExternalProvider;
-	accesses: AccessModel[];
+	accesses: ModeratorModel[];
 	books: BookModel[];
 	orders: OrderModel[];
 	listings: ListingEvent[];
@@ -87,7 +87,7 @@ export const MarketplaceContextProvider = ({
 	}
 
 	const [accesses, setAccesses] = useState<
-		MarketplaceStateInnerType<AccessModel>
+		MarketplaceStateInnerType<ModeratorModel>
 	>({});
 	const [books, setBooks] = useState<MarketplaceStateInnerType<BookModel>>({});
 	const [orders, setOrders] = useState<MarketplaceStateInnerType<OrderModel>>(
@@ -110,7 +110,7 @@ export const MarketplaceContextProvider = ({
 
 	const handleMarketplaceModels = useCallback((models: MarketplaceModel[]) => {
 		models.map(async (model: MarketplaceModel) => {
-			hydrateModel(model as AccessModel, AccessModel.isType, setAccesses);
+			hydrateModel(model as ModeratorModel, ModeratorModel.isType, setAccesses);
 			hydrateModel(model as BookModel, BookModel.isType, setBooks);
 			hydrateModel(model as OrderModel, OrderModel.isType, setOrders);
 			hydrateModel(model as ListingEvent, ListingEvent.isType, setListings);

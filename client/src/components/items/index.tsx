@@ -12,14 +12,14 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Token } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
-	type FunctionAbi,
+	FunctionAbi,
 	getChecksumAddress,
-	type InterfaceAbi,
-	type RpcProvider,
+	InterfaceAbi,
+	RpcProvider,
 } from "starknet";
-import type ControllerConnector from "@cartridge/connector/controller";
+import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { type Chain, mainnet } from "@starknet-react/chains";
+import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
 import { OrderModel, SaleEvent } from "@cartridge/marketplace";
 import { erc20Metadata } from "@cartridge/presets";
@@ -155,7 +155,7 @@ export function Items({
 	const handlePurchase = useCallback(
 		async (tokens: (Token & { orders: OrderModel[]; owner: string })[]) => {
 			if (!isConnected || !connector) return;
-			const orders = tokens.flatMap((token) => token.orders);
+			const orders = tokens.map((token) => token.orders).flat();
 			const contractAddresses = new Set(
 				tokens.map((token) => token.contract_address),
 			);
@@ -380,6 +380,18 @@ function Item({
 		return selection.some((t) => t.token_id === token.token_id);
 	}, [selection, token]);
 
+	const selectable = useMemo(() => {
+		if (
+			selection.length === 0 ||
+			selection[0].orders.length === 0 ||
+			!token.orders.length
+		)
+			return token.orders.length > 0;
+		const tokenCurrency = token.orders[0].currency;
+		const selectionCurrency = selection[0].orders[0].currency;
+		return tokenCurrency === selectionCurrency;
+	}, [token.orders, selection]);
+
 	const openable = useMemo(() => {
 		return selection.length === 0;
 	}, [selection]);
@@ -402,7 +414,7 @@ function Item({
 
 	const lastSale = useMemo(() => {
 		if (!token.token_id) return null;
-		const tokenId = Number.parseInt(token.token_id.toString());
+		const tokenId = parseInt(token.token_id.toString());
 		const tokenSales = sales[tokenId];
 		if (!tokenSales || Object.keys(tokenSales).length === 0) return null;
 		const sale = Object.values(tokenSales).sort((a, b) => b.time - a.time)[0];

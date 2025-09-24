@@ -4,11 +4,8 @@ import { type PropsWithChildren, useContext, useMemo, useRef } from "react";
 import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
 import type { KeychainOptions, ProviderOptions } from "@cartridge/controller";
-import {
-	getSocialPolicies,
-	getRegistryPolicies,
-	getMarketplacePolicies,
-} from "@cartridge/arcade";
+import { getSocialPolicies, getRegistryPolicies } from "@cartridge/arcade";
+import { getMarketplacePolicies } from "@cartridge/marketplace";
 import { ArcadeContext } from "./arcade";
 
 const chainId = constants.StarknetChainId.SN_MAIN;
@@ -18,7 +15,7 @@ const keychain: KeychainOptions = {
 		contracts: {
 			...getSocialPolicies(chainId).contracts,
 			...getRegistryPolicies(chainId).contracts,
-			// ...getMarketplacePolicies(chainId).contracts,
+			...getMarketplacePolicies(chainId).contracts,
 		},
 	},
 };

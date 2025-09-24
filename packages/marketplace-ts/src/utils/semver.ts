@@ -2,18 +2,18 @@
  * Represents a parsed semantic version.
  */
 export interface SemVer {
-	/** Major version number (X in X.Y.Z) */
-	major: number;
-	/** Minor version number (Y in X.Y.Z) */
-	minor: number;
-	/** Patch version number (Z in X.Y.Z) */
-	patch: number;
-	/** Prerelease version identifier (e.g., "alpha.1" in "1.0.0-alpha.1") */
-	prerelease?: string;
-	/** Build metadata (e.g., "build.123" in "1.0.0+build.123") */
-	build?: string;
-	/** The original version string */
-	raw: string;
+  /** Major version number (X in X.Y.Z) */
+  major: number;
+  /** Minor version number (Y in X.Y.Z) */
+  minor: number;
+  /** Patch version number (Z in X.Y.Z) */
+  patch: number;
+  /** Prerelease version identifier (e.g., "alpha.1" in "1.0.0-alpha.1") */
+  prerelease?: string;
+  /** Build metadata (e.g., "build.123" in "1.0.0+build.123") */
+  build?: string;
+  /** The original version string */
+  raw: string;
 }
 
 /**
@@ -23,26 +23,26 @@ export interface SemVer {
  * @throws Error if the version string is invalid
  */
 export function parseSemVer(version: string): SemVer {
-	const cleanVersion = version.startsWith("v") ? version.slice(1) : version;
+  const cleanVersion = version.startsWith("v") ? version.slice(1) : version;
 
-	const semverRegex =
-		/^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?(?:\+([a-zA-Z0-9.-]+))?$/;
-	const match = cleanVersion.match(semverRegex);
+  const semverRegex =
+    /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?(?:\+([a-zA-Z0-9.-]+))?$/;
+  const match = cleanVersion.match(semverRegex);
 
-	if (!match) {
-		throw new Error(`Invalid semver format: ${version}`);
-	}
+  if (!match) {
+    throw new Error(`Invalid semver format: ${version}`);
+  }
 
-	const [, major, minor, patch, prerelease, build] = match;
+  const [, major, minor, patch, prerelease, build] = match;
 
-	return {
-		major: Number.parseInt(major, 10),
-		minor: Number.parseInt(minor, 10),
-		patch: Number.parseInt(patch, 10),
-		prerelease,
-		build,
-		raw: version,
-	};
+  return {
+    major: Number.parseInt(major, 10),
+    minor: Number.parseInt(minor, 10),
+    patch: Number.parseInt(patch, 10),
+    prerelease,
+    build,
+    raw: version,
+  };
 }
 
 /**
@@ -53,39 +53,39 @@ export function parseSemVer(version: string): SemVer {
  * @returns Negative if a < b, positive if a > b, 0 if equal
  */
 function comparePrereleaseIdentifiers(a: string, b: string): number {
-	const aParts = a.split(".");
-	const bParts = b.split(".");
+  const aParts = a.split(".");
+  const bParts = b.split(".");
 
-	const maxLength = Math.max(aParts.length, bParts.length);
+  const maxLength = Math.max(aParts.length, bParts.length);
 
-	for (let i = 0; i < maxLength; i++) {
-		const aPart = aParts[i];
-		const bPart = bParts[i];
+  for (let i = 0; i < maxLength; i++) {
+    const aPart = aParts[i];
+    const bPart = bParts[i];
 
-		// If one version has fewer parts, it's considered smaller
-		if (aPart === undefined) return -1;
-		if (bPart === undefined) return 1;
+    // If one version has fewer parts, it's considered smaller
+    if (aPart === undefined) return -1;
+    if (bPart === undefined) return 1;
 
-		const aIsNumeric = /^\d+$/.test(aPart);
-		const bIsNumeric = /^\d+$/.test(bPart);
+    const aIsNumeric = /^\d+$/.test(aPart);
+    const bIsNumeric = /^\d+$/.test(bPart);
 
-		// Numeric identifiers always have lower precedence than non-numeric
-		if (aIsNumeric && !bIsNumeric) return -1;
-		if (!aIsNumeric && bIsNumeric) return 1;
+    // Numeric identifiers always have lower precedence than non-numeric
+    if (aIsNumeric && !bIsNumeric) return -1;
+    if (!aIsNumeric && bIsNumeric) return 1;
 
-		// Compare numerically if both are numeric
-		if (aIsNumeric && bIsNumeric) {
-			const aNum = Number.parseInt(aPart, 10);
-			const bNum = Number.parseInt(bPart, 10);
-			if (aNum !== bNum) return aNum - bNum;
-		} else {
-			// Compare lexically if both are non-numeric
-			const result = aPart.localeCompare(bPart);
-			if (result !== 0) return result;
-		}
-	}
+    // Compare numerically if both are numeric
+    if (aIsNumeric && bIsNumeric) {
+      const aNum = Number.parseInt(aPart, 10);
+      const bNum = Number.parseInt(bPart, 10);
+      if (aNum !== bNum) return aNum - bNum;
+    } else {
+      // Compare lexically if both are non-numeric
+      const result = aPart.localeCompare(bPart);
+      if (result !== 0) return result;
+    }
+  }
 
-	return 0;
+  return 0;
 }
 
 /**
@@ -95,18 +95,18 @@ function comparePrereleaseIdentifiers(a: string, b: string): number {
  * @returns Negative if a < b, positive if a > b, 0 if equal
  */
 export function compareSemVer(a: SemVer, b: SemVer): number {
-	if (a.major !== b.major) return a.major - b.major;
-	if (a.minor !== b.minor) return a.minor - b.minor;
-	if (a.patch !== b.patch) return a.patch - b.patch;
+  if (a.major !== b.major) return a.major - b.major;
+  if (a.minor !== b.minor) return a.minor - b.minor;
+  if (a.patch !== b.patch) return a.patch - b.patch;
 
-	if (a.prerelease && !b.prerelease) return -1;
-	if (!a.prerelease && b.prerelease) return 1;
+  if (a.prerelease && !b.prerelease) return -1;
+  if (!a.prerelease && b.prerelease) return 1;
 
-	if (a.prerelease && b.prerelease) {
-		return comparePrereleaseIdentifiers(a.prerelease, b.prerelease);
-	}
+  if (a.prerelease && b.prerelease) {
+    return comparePrereleaseIdentifiers(a.prerelease, b.prerelease);
+  }
 
-	return 0;
+  return 0;
 }
 
 /**
@@ -116,20 +116,20 @@ export function compareSemVer(a: SemVer, b: SemVer): number {
  * @returns True if the current version satisfies the requirements
  */
 export function isVersionCompatible(
-	current: SemVer,
-	required: { major?: number; minor?: number; patch?: number },
+  current: SemVer,
+  required: { major?: number; minor?: number; patch?: number },
 ): boolean {
-	if (required.major !== undefined && current.major !== required.major) {
-		return false;
-	}
+  if (required.major !== undefined && current.major !== required.major) {
+    return false;
+  }
 
-	if (required.minor !== undefined && current.minor < required.minor) {
-		return false;
-	}
+  if (required.minor !== undefined && current.minor < required.minor) {
+    return false;
+  }
 
-	if (required.patch !== undefined && current.patch < required.patch) {
-		return false;
-	}
+  if (required.patch !== undefined && current.patch < required.patch) {
+    return false;
+  }
 
-	return true;
+  return true;
 }

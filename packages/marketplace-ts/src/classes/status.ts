@@ -1,23 +1,23 @@
 export enum StatusType {
-	None = "None",
-	Placed = "Placed",
-	Canceled = "Canceled",
-	Executed = "Executed",
+  None = "None",
+  Placed = "Placed",
+  Canceled = "Canceled",
+  Executed = "Executed",
 }
 
 export class Status {
-	value: StatusType;
+  value: StatusType;
 
-	constructor(value: StatusType) {
-		this.value = value;
-	}
+  constructor(value: StatusType) {
+    this.value = value;
+  }
 
-	public into(): number {
-		return Object.values(StatusType).indexOf(this.value);
-	}
+  public into(): number {
+    return Object.values(StatusType).indexOf(this.value);
+  }
 
-	public static from(index: number): Status {
-		const item = Object.values(StatusType)[index];
-		return new Status(item);
-	}
+  public static from(index: number): Status {
+    const item = Object.values(StatusType)[index];
+    return new Status(item);
+  }
 }
