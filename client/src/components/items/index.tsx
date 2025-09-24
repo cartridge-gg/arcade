@@ -58,7 +58,10 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
 export function Items({
 	edition,
 	collectionAddress,
-}: { edition: EditionModel; collectionAddress: string }) {
+}: {
+	edition: EditionModel;
+	collectionAddress: string;
+}) {
 	const { connector, address, isConnected } = useAccount();
 	const { connect, connectors } = useConnect();
 	const { sales, getCollectionOrders } = useMarketplace();
@@ -323,20 +326,25 @@ export function Items({
 					})}
 				</div>
 			</div>
-			{isConnected && (
-				<>
-					<Separator className="w-full h-px bg-background-200" />
-					<div className="w-full flex justify-end items-center p-4">
-						<Button
-							variant="primary"
-							onClick={() => handlePurchase(selection)}
-							disabled={selection.length === 0}
-						>
-							{`Buy (${selection.length})`}
-						</Button>
-					</div>
-				</>
-			)}
+			<div
+				className={cn(
+					"overflow-hidden transition-all duration-500 ease-out",
+					isConnected && selection.length > 0
+						? "max-h-20 opacity-100"
+						: "max-h-0 opacity-0",
+				)}
+			>
+				<Separator className="w-full bg-background-200" />
+				<div className="w-full flex justify-end items-center py-3">
+					<Button
+						variant="primary"
+						onClick={() => handlePurchase(selection)}
+						disabled={selection.length === 0}
+					>
+						{`Buy (${selection.length})`}
+					</Button>
+				</div>
+			</div>
 			<FloatingLoadingSpinner
 				isLoading={status === "loading" && tokens && tokens.length > 0}
 				loadingProgress={loadingProgress}
@@ -371,18 +379,6 @@ function Item({
 	const selected = useMemo(() => {
 		return selection.some((t) => t.token_id === token.token_id);
 	}, [selection, token]);
-
-	const selectable = useMemo(() => {
-		if (
-			selection.length === 0 ||
-			selection[0].orders.length === 0 ||
-			!token.orders.length
-		)
-			return token.orders.length > 0;
-		const tokenCurrency = token.orders[0].currency;
-		const selectionCurrency = selection[0].orders[0].currency;
-		return tokenCurrency === selectionCurrency;
-	}, [token.orders, selection]);
 
 	const openable = useMemo(() => {
 		return selection.length === 0;

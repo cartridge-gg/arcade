@@ -21,9 +21,6 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 	const allTabRef = useRef<HTMLDivElement>(null);
 	const followingTabRef = useRef<HTMLDivElement>(null);
 
-	const { address, isConnected } = useAccount();
-	const isMobile = useDevice();
-
 	const { editions, follows } = useArcade();
 
 	const projects = useMemo(() => {
@@ -39,6 +36,17 @@ export function Discover({ edition }: { edition?: EditionModel }) {
 	const filteredEditions = useMemo(() => {
 		return !edition ? editions : [edition];
 	}, [editions, edition]);
+
+	const {
+		events: { all, following },
+		status: activitiesStatus,
+		loadingProgress,
+	} = useDiscoversFetcher({
+		projects,
+		achievements,
+		editionFilter: filteredEditions.map((e) => e.config.project),
+		follows: follows[getChecksumAddress(address ?? "0x0")] || [],
+	});
 
 	const {
 		events: { all, following },

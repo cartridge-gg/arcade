@@ -206,6 +206,10 @@ const LoadingState = () => {
 				<Skeleton className="w-full h-[164px] rounded" />
 				<Skeleton className="hidden lg:block w-full h-[164px] rounded" />
 			</div>
+			<FloatingLoadingSpinner
+				isLoading={true}
+				loadingMessage="Loading collections."
+			/>
 		</div>
 	);
 };

@@ -25,6 +25,7 @@ async function fetchCollectionFromClient(
 				order_by: [],
 				direction: "Forward",
 			},
+			attribute_filters: [],
 		});
 		if (tokens.items.length !== 0) {
 			return {

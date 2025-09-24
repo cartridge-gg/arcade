@@ -146,6 +146,7 @@ export function useMarketTokensFetcher({
 
 						const response: Tokens = await client.getTokens({
 							contract_addresses: [address],
+							attribute_filters: [],
 							token_ids: [],
 							pagination: {
 								limit: strategy === FetchStrategy.CHECK_NEW ? 10 : LIMIT,
@@ -289,13 +290,6 @@ export function useMarketTokensFetcher({
 		},
 		[fetchTokens, clearTokens, getLoadingState, project, address],
 	);
-
-	useEffect(() => {
-		if (!hasFetch && project.length > 0) {
-			fetchTokens(FetchStrategy.INITIAL);
-			setHasFetch(true);
-		}
-	}, [hasFetch, project]); // Remove fetchTokens from deps to avoid re-runs
 
 	// Periodic polling for new items
 	useEffect(() => {

@@ -95,6 +95,7 @@ async function fetchTokenMetadataMap(
 	try {
 		const tokensResponse = await client.getTokens({
 			contract_addresses: contractAddresses,
+			attribute_filters: [],
 			token_ids:
 				tokenIds.length > 0 ? tokenIds.map((t) => t.replace("0x", "")) : [],
 			pagination: {

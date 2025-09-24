@@ -63,9 +63,9 @@ interface UseDiscoversFetcherParams {
 }
 
 const PLAYTHROUGH_SQL = (
-	limit: number = 1000,
-	offset: number = 0,
-	daysBack: number = 30,
+  limit: number = 1000,
+  offset: number = 0,
+  daysBack: number = 30,
 ) => `
   WITH world_contracts AS (
       SELECT contract_address
@@ -231,42 +231,42 @@ export function useDiscoversFetcher({
 							],
 						};
 
-						setEvents({ ...processPlaythroughs(singleResponseData) });
-					},
-					onProgress: (completed, total) => {
-						setLoadingProgress({ completed, total });
-					},
-					onError: (endpoint, error) => {
-						console.error(`Error fetching from ${endpoint}:`, error);
-						const edition = editions.get(endpoint);
-						setError(edition, `Error fetching from ${endpoint}`);
-					},
-					onComplete: () => {
-						setSuccess();
-					},
-				});
-			} catch (error) {
-				console.error("Error fetching playthroughs:", error);
-				// Set error for all editions
-				for (const project of projects) {
-					const e = editions.get(project);
-					if (e) {
-						setError(e, "Error fetching playthroughs");
-					}
-				}
-			}
-		},
-		[
-			projects,
-			processPlaythroughs,
-			setEvents,
-			startLoading,
-			setSuccess,
-			setError,
-			setLoadingProgress,
-			editions,
-		],
-	);
+            setEvents({ ...processPlaythroughs(singleResponseData) });
+          },
+          onProgress: (completed, total) => {
+            setLoadingProgress({ completed, total });
+          },
+          onError: (endpoint, error) => {
+            console.error(`Error fetching from ${endpoint}:`, error);
+            const edition = editions.get(endpoint);
+            setError(edition, `Error fetching from ${endpoint}`);
+          },
+          onComplete: () => {
+            setSuccess();
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching playthroughs:", error);
+        // Set error for all editions
+        for (const project of projects) {
+          const e = editions.get(project);
+          if (e) {
+            setError(e, "Error fetching playthroughs");
+          }
+        }
+      }
+    },
+    [
+      projects,
+      processPlaythroughs,
+      setEvents,
+      startLoading,
+      setSuccess,
+      setError,
+      setLoadingProgress,
+      editions,
+    ],
+  );
 
 	useEffect(() => {
 		// Quick load: 1 day of data for immediate display
@@ -274,12 +274,9 @@ export function useDiscoversFetcher({
 		// Background load: Full 30 days of historical data
 		fetchData(30);
 
-		const interval = setInterval(() => {
-			fetchData(1);
-		}, refetchInterval);
-
-		return () => clearInterval(interval);
-	}, [fetchData, refetchInterval]);
+    const interval = setInterval(() => {
+      fetchData(1);
+    }, refetchInterval);
 
 	return {
 		events: {

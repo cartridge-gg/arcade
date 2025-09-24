@@ -172,8 +172,8 @@ export const useMarketFilters = () => {
 
 	useEffect(() => {
 		if (!filteredTokens) return;
-		// @ts-expect-error TODO: Fix this type
 		setFilteredMetadata(
+			// @ts-expect-error TODO: Fix this type
 			MetadataHelper.extract(filteredTokens as unknown as Token[]),
 		);
 	}, [filteredTokens, setFilteredMetadata]);

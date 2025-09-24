@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 import { ArcadeContext } from "./arcade";
 import { Token } from "@dojoengine/torii-wasm";

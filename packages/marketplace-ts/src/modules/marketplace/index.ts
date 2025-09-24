@@ -294,6 +294,7 @@ export const Marketplace = {
 							order_by: [],
 							direction: "Forward",
 						},
+						attribute_filters: [],
 					});
 					const allTokens = [...tokens.items];
 					while (tokens.next_cursor) {
@@ -306,6 +307,7 @@ export const Marketplace = {
 								order_by: [],
 								direction: "Forward",
 							},
+							attribute_filters: [],
 						});
 						allTokens.push(...tokens.items);
 					}
