@@ -11,19 +11,19 @@ import { DiscoversContext } from "@/context";
  * @throws {Error} If used outside of a DiscoversProvider context
  */
 export const useDiscovers = () => {
-	const context = useContext(DiscoversContext);
+  const context = useContext(DiscoversContext);
 
-	if (!context) {
-		throw new Error(
-			"The `useDiscovers` hook must be used within a `DiscoversProvider`",
-		);
-	}
+  if (!context) {
+    throw new Error(
+      "The `useDiscovers` hook must be used within a `DiscoversProvider`",
+    );
+  }
 
-	const { playthroughs, usernames, status } = context;
+  const { playthroughs, usernames, status } = context;
 
-	return {
-		playthroughs,
-		usernames,
-		status,
-	};
+  return {
+    playthroughs,
+    usernames,
+    status,
+  };
 };

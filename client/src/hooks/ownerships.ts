@@ -11,15 +11,15 @@ import { OwnershipContext } from "@/context/ownerships";
  * @throws {Error} If used outside of a CollectionProvider context
  */
 export const useOwnerships = () => {
-	const context = useContext(OwnershipContext);
+  const context = useContext(OwnershipContext);
 
-	if (!context) {
-		throw new Error(
-			"The `useOwnerships` hook must be used within a `OwnershipProvider`",
-		);
-	}
+  if (!context) {
+    throw new Error(
+      "The `useOwnerships` hook must be used within a `OwnershipProvider`",
+    );
+  }
 
-	const { ownerships, status } = context;
+  const { ownerships, status } = context;
 
-	return { ownerships, status };
+  return { ownerships, status };
 };

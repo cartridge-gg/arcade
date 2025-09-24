@@ -17,103 +17,103 @@ import { useOwnerships } from "./ownerships";
  * @throws {Error} If used outside of a ArcadeProvider context
  */
 export const useArcade = () => {
-	const context = useContext(ArcadeContext);
+  const context = useContext(ArcadeContext);
 
-	if (!context) {
-		throw new Error(
-			"The `useArcade` hook must be used within a `ArcadeProvider`",
-		);
-	}
+  if (!context) {
+    throw new Error(
+      "The `useArcade` hook must be used within a `ArcadeProvider`",
+    );
+  }
 
-	const {
-		chainId,
-		provider,
-		pins,
-		follows,
-		accesses,
-		games,
-		editions,
-		chains,
-		clients,
-		player,
-		setPlayer,
-	} = context;
-	const { address } = useAccount();
-	const { ownerships } = useOwnerships();
+  const {
+    chainId,
+    provider,
+    pins,
+    follows,
+    accesses,
+    games,
+    editions,
+    chains,
+    clients,
+    player,
+    setPlayer,
+  } = context;
+  const { address } = useAccount();
+  const { ownerships } = useOwnerships();
 
-	const access = useMemo(() => {
-		return accesses.find(
-			(access) => BigInt(access.address) === BigInt(address || "0x1"),
-		);
-	}, [accesses, address]);
+  const access = useMemo(() => {
+    return accesses.find(
+      (access) => BigInt(access.address) === BigInt(address || "0x1"),
+    );
+  }, [accesses, address]);
 
-	const admin = useMemo(() => {
-		return (
-			access?.role?.value === RoleType.Owner ||
-			access?.role.value === RoleType.Admin
-		);
-	}, [access]);
+  const admin = useMemo(() => {
+    return (
+      access?.role?.value === RoleType.Owner ||
+      access?.role.value === RoleType.Admin
+    );
+  }, [access]);
 
-	const fileteredGames = useMemo(() => {
-		return games.filter((game) => {
-			const gameOwner = ownerships.find(
-				(ownership) => ownership.tokenId === BigInt(game.id),
-			);
-			const isGameOwner =
-				BigInt(gameOwner?.accountAddress || "0x0") === BigInt(address || "0x1");
-			return admin || isGameOwner || (game.whitelisted && game.published);
-		});
-	}, [games, ownerships, admin, address]);
+  const fileteredGames = useMemo(() => {
+    return games.filter((game) => {
+      const gameOwner = ownerships.find(
+        (ownership) => ownership.tokenId === BigInt(game.id),
+      );
+      const isGameOwner =
+        BigInt(gameOwner?.accountAddress || "0x0") === BigInt(address || "0x1");
+      return admin || isGameOwner || (game.whitelisted && game.published);
+    });
+  }, [games, ownerships, admin, address]);
 
-	const filteredEditions = useMemo(() => {
-		return editions
-			.filter((edition) => {
-				const gameOwner = ownerships.find(
-					(ownership) => ownership.tokenId === BigInt(edition.gameId),
-				);
-				const editionOwner = ownerships.find(
-					(ownership) => ownership.tokenId === BigInt(edition.id),
-				);
-				const isGameOwner =
-					BigInt(gameOwner?.accountAddress || "0x0") ===
-					BigInt(address || "0x1");
-				const isEditionOwner =
-					BigInt(editionOwner?.accountAddress || "0x0") ===
-					BigInt(address || "0x1");
-				return (
-					admin ||
-					isGameOwner ||
-					isEditionOwner ||
-					(edition.whitelisted && edition.published)
-				);
-			})
-			.map((edition) => {
-				const game = games.find((game) => game.id === edition.gameId);
-				const gameOwnership = ownerships.find(
-					(ownership) => ownership.tokenId === BigInt(game?.id || "0x0"),
-				);
-				if (!gameOwnership) return edition;
-				const editionOwnership = ownerships.find(
-					(ownership) => ownership.tokenId === BigInt(edition.id),
-				);
-				if (!editionOwnership) return edition;
-				edition.certified =
-					gameOwnership.accountAddress == editionOwnership.accountAddress;
-				return edition.clone();
-			});
-	}, [editions, games, ownerships, admin, address]);
+  const filteredEditions = useMemo(() => {
+    return editions
+      .filter((edition) => {
+        const gameOwner = ownerships.find(
+          (ownership) => ownership.tokenId === BigInt(edition.gameId),
+        );
+        const editionOwner = ownerships.find(
+          (ownership) => ownership.tokenId === BigInt(edition.id),
+        );
+        const isGameOwner =
+          BigInt(gameOwner?.accountAddress || "0x0") ===
+          BigInt(address || "0x1");
+        const isEditionOwner =
+          BigInt(editionOwner?.accountAddress || "0x0") ===
+          BigInt(address || "0x1");
+        return (
+          admin ||
+          isGameOwner ||
+          isEditionOwner ||
+          (edition.whitelisted && edition.published)
+        );
+      })
+      .map((edition) => {
+        const game = games.find((game) => game.id === edition.gameId);
+        const gameOwnership = ownerships.find(
+          (ownership) => ownership.tokenId === BigInt(game?.id || "0x0"),
+        );
+        if (!gameOwnership) return edition;
+        const editionOwnership = ownerships.find(
+          (ownership) => ownership.tokenId === BigInt(edition.id),
+        );
+        if (!editionOwnership) return edition;
+        edition.certified =
+          gameOwnership.accountAddress == editionOwnership.accountAddress;
+        return edition.clone();
+      });
+  }, [editions, games, ownerships, admin, address]);
 
-	return {
-		chainId,
-		provider,
-		pins,
-		follows,
-		accesses,
-		games: fileteredGames,
-		editions: filteredEditions,
-		chains,
-		clients,
-		player,
-		setPlayer,
-	};
+  return {
+    chainId,
+    provider,
+    pins,
+    follows,
+    accesses,
+    games: fileteredGames,
+    editions: filteredEditions,
+    chains,
+    clients,
+    player,
+    setPlayer,
+  };
 };

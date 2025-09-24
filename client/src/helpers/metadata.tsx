@@ -3,91 +3,91 @@ import type { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
 
 const JWT =
-	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI3ZjhjN2JlYy00OGIwLTQ4ODQtOTllMS1lY2U2NTk4YTNjZWQiLCJlbWFpbCI6ImJhbDdoYXphckBwcm90b24ubWUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiNTgxNjFkM2ZkYjNlOTE5MGVlNjUiLCJzY29wZWRLZXlTZWNyZXQiOiJhNjk1MjFjMjYwZWQ4ODA2YjdlYTg1YmU2OWFlMGE5MTE0ZmQ1YmIyOTJiYzJjM2FhYWVmZDgxZjU0ZmFlN2ExIiwiZXhwIjoxNzc4MDc3MDE3fQ.vNU3I0QnD-D-jZChENS5mTFYNGjppU56IJv38K8X7gQ";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI3ZjhjN2JlYy00OGIwLTQ4ODQtOTllMS1lY2U2NTk4YTNjZWQiLCJlbWFpbCI6ImJhbDdoYXphckBwcm90b24ubWUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiNTgxNjFkM2ZkYjNlOTE5MGVlNjUiLCJzY29wZWRLZXlTZWNyZXQiOiJhNjk1MjFjMjYwZWQ4ODA2YjdlYTg1YmU2OWFlMGE5MTE0ZmQ1YmIyOTJiYzJjM2FhYWVmZDgxZjU0ZmFlN2ExIiwiZXhwIjoxNzc4MDc3MDE3fQ.vNU3I0QnD-D-jZChENS5mTFYNGjppU56IJv38K8X7gQ";
 
 export const MetadataHelper = {
-	async check(url: string): Promise<boolean> {
-		const response = await fetch(url);
-		return response.ok;
-	},
+  async check(url: string): Promise<boolean> {
+    const response = await fetch(url);
+    return response.ok;
+  },
 
-	extract: (tokens: Token[]) => {
-		const newMetadata: { [key: string]: MetadataAttribute } = {};
-		tokens.forEach((token) => {
-			const metadata = token.metadata as unknown as {
-				attributes: { trait_type: string; value: string }[];
-			};
-			if (!metadata.attributes) return;
-			metadata.attributes.forEach((attribute) => {
-				const trait = attribute.trait_type;
-				const value = attribute.value;
-				const key = `${trait}-${value}`;
-				if (!newMetadata[key]) {
-					newMetadata[key] = {
-						trait_type: trait,
-						value: value,
-						tokens: [token.token_id || ""],
-					};
-					return;
-				}
-				newMetadata[key].tokens.push(token.token_id || "");
-			});
-		});
-		return Object.values(newMetadata);
-	},
+  extract: (tokens: Token[]) => {
+    const newMetadata: { [key: string]: MetadataAttribute } = {};
+    tokens.forEach((token) => {
+      const metadata = token.metadata as unknown as {
+        attributes: { trait_type: string; value: string }[];
+      };
+      if (!metadata.attributes) return;
+      metadata.attributes.forEach((attribute) => {
+        const trait = attribute.trait_type;
+        const value = attribute.value;
+        const key = `${trait}-${value}`;
+        if (!newMetadata[key]) {
+          newMetadata[key] = {
+            trait_type: trait,
+            value: value,
+            tokens: [token.token_id || ""],
+          };
+          return;
+        }
+        newMetadata[key].tokens.push(token.token_id || "");
+      });
+    });
+    return Object.values(newMetadata);
+  },
 
-	async encode(url: string): Promise<string | ArrayBuffer | null> {
-		const response = await fetch(url);
-		const blob = await response.blob();
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				resolve(reader.result);
-			};
-			reader.onerror = reject;
-			reader.readAsDataURL(blob);
-		});
-	},
+  async encode(url: string): Promise<string | ArrayBuffer | null> {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  },
 
-	async upload(content: string) {
-		if (!content) return "";
+  async upload(content: string) {
+    if (!content) return "";
 
-		const blob = new Blob([content], { type: "image/svg+xml" });
-		const file = new File([blob], "image.svg", { type: "image/svg+xml" });
+    const blob = new Blob([content], { type: "image/svg+xml" });
+    const file = new File([blob], "image.svg", { type: "image/svg+xml" });
 
-		const formData = new FormData();
-		formData.append("file", file);
-		formData.append("network", "public");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("network", "public");
 
-		const res = await fetch("https://uploads.pinata.cloud/v3/files", {
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${JWT}`,
-			},
-			body: formData,
-		});
+    const res = await fetch("https://uploads.pinata.cloud/v3/files", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${JWT}`,
+      },
+      body: formData,
+    });
 
-		if (!res.ok) {
-			console.error("❌ IPFS upload failed:", await res.text());
-			throw new Error("Failed to upload to IPFS");
-		}
+    if (!res.ok) {
+      console.error("❌ IPFS upload failed:", await res.text());
+      throw new Error("Failed to upload to IPFS");
+    }
 
-		const data = await res.json();
-		const cid = data.data.cid;
-		const ipfsUrl = `https://turquoise-legal-fox-870.mypinata.cloud/ipfs/${cid}`;
+    const data = await res.json();
+    const cid = data.data.cid;
+    const ipfsUrl = `https://turquoise-legal-fox-870.mypinata.cloud/ipfs/${cid}`;
 
-		console.log("✅ Image uploaded to IPFS:", ipfsUrl);
-		return ipfsUrl;
-	},
+    console.log("✅ Image uploaded to IPFS:", ipfsUrl);
+    return ipfsUrl;
+  },
 
-	async gameImage(
-		color: string,
-		coverUrl: string,
-		imageUrl: string,
-	): Promise<string> {
-		const image = await MetadataHelper.encode(imageUrl);
-		const cover = await MetadataHelper.encode(coverUrl);
-		const data = `<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  async gameImage(
+    color: string,
+    coverUrl: string,
+    imageUrl: string,
+  ): Promise<string> {
+    const image = await MetadataHelper.encode(imageUrl);
+    const cover = await MetadataHelper.encode(coverUrl);
+    const data = `<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <rect width="300" height="300" fill="#161A17"/>
 <mask id="mask0_10793_49693" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300">
 <rect width="300" height="300" fill="url(#paint0_linear_10793_49693)"/>
@@ -126,18 +126,18 @@ export const MetadataHelper = {
 <image id="image1_10793_49693" width="800" height="800" preserveAspectRatio="none" xlink:href="${image}" />
 </defs>
 </svg>`;
-		const minified = data.replace(/\s+/g, " ").trim();
-		return MetadataHelper.upload(minified);
-	},
+    const minified = data.replace(/\s+/g, " ").trim();
+    return MetadataHelper.upload(minified);
+  },
 
-	async editionImage(
-		color: string,
-		coverUrl: string,
-		imageUrl: string,
-	): Promise<string> {
-		const image = await MetadataHelper.encode(imageUrl);
-		const cover = await MetadataHelper.encode(coverUrl);
-		const data = `<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  async editionImage(
+    color: string,
+    coverUrl: string,
+    imageUrl: string,
+  ): Promise<string> {
+    const image = await MetadataHelper.encode(imageUrl);
+    const cover = await MetadataHelper.encode(coverUrl);
+    const data = `<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <rect width="300" height="300" fill="#161A17"/>
 <mask id="mask0_10793_49658" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300">
 <rect width="300" height="300" fill="url(#paint0_linear_10793_49658)"/>
@@ -179,47 +179,47 @@ export const MetadataHelper = {
 <image id="image1_10793_49658" width="800" height="800" preserveAspectRatio="none" xlink:href="${image}" />
 </defs>
 </svg>`;
-		const minified = data.replace(/\s+/g, " ").trim();
-		return MetadataHelper.upload(minified);
-	},
+    const minified = data.replace(/\s+/g, " ").trim();
+    return MetadataHelper.upload(minified);
+  },
 
-	getToriiImage: async (
-		project: string,
-		token: Token,
-	): Promise<string | undefined> => {
-		if (!token.contract_address || !token.token_id) return;
-		const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
-		// Fetch if the image exists
-		try {
-			const response = await fetch(toriiImage);
-			if (response.ok) {
-				return toriiImage;
-			}
-		} catch (error) {
-			console.error("Error fetching image:", error);
-		}
-	},
-	unsafeGetToriiImage: async (
-		project: string,
-		token: Token,
-	): Promise<string | undefined> => {
-		if (!token.contract_address || !token.token_id) return;
-		return `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
-	},
+  getToriiImage: async (
+    project: string,
+    token: Token,
+  ): Promise<string | undefined> => {
+    if (!token.contract_address || !token.token_id) return;
+    const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
+    // Fetch if the image exists
+    try {
+      const response = await fetch(toriiImage);
+      if (response.ok) {
+        return toriiImage;
+      }
+    } catch (error) {
+      console.error("Error fetching image:", error);
+    }
+  },
+  unsafeGetToriiImage: async (
+    project: string,
+    token: Token,
+  ): Promise<string | undefined> => {
+    if (!token.contract_address || !token.token_id) return;
+    return `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
+  },
 
-	getMetadataImage: async (token: Token): Promise<string | undefined> => {
-		if (!token.metadata) return;
-		let metadata;
-		if (typeof token.metadata === "string") {
-			try {
-				metadata = JSON.parse(token.metadata);
-				const response = await fetch(metadata.image);
-				if (response.ok) {
-					return metadata.image;
-				}
-			} catch (error) {
-				console.error("Error parsing metadata:", error);
-			}
-		}
-	},
+  getMetadataImage: async (token: Token): Promise<string | undefined> => {
+    if (!token.metadata) return;
+    let metadata;
+    if (typeof token.metadata === "string") {
+      try {
+        metadata = JSON.parse(token.metadata);
+        const response = await fetch(metadata.image);
+        if (response.ok) {
+          return metadata.image;
+        }
+      } catch (error) {
+        console.error("Error parsing metadata:", error);
+      }
+    }
+  },
 };

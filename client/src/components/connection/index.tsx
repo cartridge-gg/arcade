@@ -3,9 +3,9 @@ import { User } from "./user";
 import { Connect } from "./connect";
 
 export function Connection() {
-	const { account } = useAccount();
-	const { isConnected } = useAccount();
+  const { account } = useAccount();
+  const { isConnected } = useAccount();
 
-	if (!isConnected || !account) return <Connect />;
-	return <User />;
+  if (!isConnected || !account) return <Connect />;
+  return <User />;
 }

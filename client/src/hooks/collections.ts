@@ -12,23 +12,23 @@ import { useProject } from "./project";
  * @throws {Error} If used outside of a CollectionProvider context
  */
 export const useCollections = () => {
-	const context = useContext(CollectionContext);
-	const { edition } = useProject();
+  const context = useContext(CollectionContext);
+  const { edition } = useProject();
 
-	if (!context) {
-		throw new Error(
-			"The `useCollections` hook must be used within a `CollectionProvider`",
-		);
-	}
+  if (!context) {
+    throw new Error(
+      "The `useCollections` hook must be used within a `CollectionProvider`",
+    );
+  }
 
-	const { collections: allCollections, status } = context;
+  const { collections: allCollections, status } = context;
 
-	const collections = useMemo(() => {
-		if (!edition) return allCollections;
-		return allCollections.filter(
-			(collection) => collection.project === edition.config.project,
-		);
-	}, [edition, allCollections]);
+  const collections = useMemo(() => {
+    if (!edition) return allCollections;
+    return allCollections.filter(
+      (collection) => collection.project === edition.config.project,
+    );
+  }, [edition, allCollections]);
 
-	return { collections, status };
+  return { collections, status };
 };
