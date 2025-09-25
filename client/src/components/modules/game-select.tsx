@@ -1,7 +1,8 @@
 import { SparklesIcon, Thumbnail } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, type VariantProps } from "class-variance-authority";
 import { type HTMLAttributes, useState } from "react";
+import { cva, VariantProps } from "class-variance-authority";
+import { useProject } from "@/hooks/project";
 
 interface ArcadeGameSelectProps
   extends HTMLAttributes<HTMLDivElement>,
@@ -13,27 +14,11 @@ interface ArcadeGameSelectProps
   active?: boolean;
   downlighted?: boolean;
   icon?: string;
+  gameColor?: string;
 }
 
 export const arcadeGameSelectVariants = cva(
-  "select-none h-10 flex gap-3 justify-start items-center p-2 gap-2 cursor-pointer data-[active=true]:cursor-default",
-  {
-    variants: {
-      variant: {
-        darkest: "bg-background-100 hover:bg-background-150",
-        darker: "bg-background-100 hover:bg-background-150",
-        dark: "bg-background-100 hover:bg-background-150",
-        default: "bg-background-100 hover:bg-background-150",
-        light: "bg-background-200 hover:bg-background-200",
-        lighter: "bg-background-200 hover:bg-background-200",
-        lightest: "bg-background-200 hover:bg-background-200",
-        ghost: "",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
+  "select-none h-10 flex gap-3 justify-start items-center p-2 gap-2 cursor-pointer data-[active=true]:cursor-default"
 );
 
 export const ArcadeGameSelect = ({
@@ -44,16 +29,35 @@ export const ArcadeGameSelect = ({
   active,
   downlighted,
   icon,
-  variant,
+  gameColor,
   className,
   ...props
 }: ArcadeGameSelectProps) => {
   const [hover, setHover] = useState(false);
+  const { game } = useProject();
+
+  const getBackgroundStyle = () => {
+    // For "All Games" card, use a specific fallback color
+    let primaryColor = gameColor || game?.color || "#fbcb4a";
+
+    if (name === "All Games" && !gameColor) {
+      primaryColor = "#fbcb4a"; // Use the default arcade color for "All Games"
+    }
+
+    if (active) {
+      return { backgroundColor: `${primaryColor}15` }; // 15% opacity
+    }
+    if (hover) {
+      return { backgroundColor: `${primaryColor}0D` }; // ~5% opacity
+    }
+    return {};
+  };
 
   return (
     <div
       data-active={active}
-      className={cn(arcadeGameSelectVariants({ variant }), className)}
+      className={cn(arcadeGameSelectVariants(), className)}
+      style={getBackgroundStyle()}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       {...props}

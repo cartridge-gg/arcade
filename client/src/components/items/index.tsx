@@ -330,12 +330,12 @@ export function Items({
         className={cn(
           "overflow-hidden transition-all duration-500 ease-out",
           isConnected && selection.length > 0
-            ? "max-h-20 opacity-100"
-            : "max-h-0 opacity-0",
+            ? " max-h-36 opacity-100"
+            : "max-h-0 opacity-0"
         )}
       >
         <Separator className="w-full bg-background-200" />
-        <div className="w-full flex justify-end items-center py-3">
+        <div className="w-full flex justify-end items-center">
           <Button
             variant="primary"
             onClick={() => handlePurchase(selection)}
