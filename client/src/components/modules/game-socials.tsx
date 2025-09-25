@@ -1,4 +1,3 @@
-import { DotsIcon, Select, SelectContent, useMediaQuery } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { type HTMLAttributes, useMemo } from "react";
@@ -7,9 +6,7 @@ import {
   GameSocialGithub,
   GameSocialTelegram,
   GameSocialTwitter,
-  GameSocialWebsite,
 } from "./game-social";
-import ArcadeMenuButton from "./menu-button";
 
 const gameSocialsVariants = cva("flex gap-3", {
   variants: {
@@ -48,69 +45,102 @@ const GameSocials = ({
   socials,
   ...props
 }: GameSocialsProps) => {
-  const isMobile = useMediaQuery("(max-width: 1024px)");
+  // Create dynamic array of available social platforms
+  const availableSocials = useMemo(() => {
+    const platforms = [];
 
-  const isEmpty = useMemo(() => {
-    if (!socials) return true;
-    const { website, discord, telegram, twitter, github } = socials;
-    return !website && !discord && !telegram && !twitter && !github;
+    if (socials?.twitter) {
+      platforms.push({
+        key: "twitter",
+        component: (
+          <GameSocialTwitter twitter={socials.twitter} label variant="dark" />
+        ),
+      });
+    }
+    if (socials?.discord) {
+      platforms.push({
+        key: "discord",
+        component: (
+          <GameSocialDiscord discord={socials.discord} label variant="dark" />
+        ),
+      });
+    }
+    if (socials?.telegram) {
+      platforms.push({
+        key: "telegram",
+        component: (
+          <GameSocialTelegram
+            telegram={socials.telegram}
+            label
+            variant="dark"
+          />
+        ),
+      });
+    }
+    if (socials?.github) {
+      platforms.push({
+        key: "github",
+        component: (
+          <GameSocialGithub github={socials.github} label variant="dark" />
+        ),
+      });
+    }
+
+    return platforms;
   }, [socials]);
 
+  // Return early if no socials available
+  if (availableSocials.length === 0) {
+    return null;
+  }
+
+  // Group socials into rows for table structure
+  const socialRows = useMemo(() => {
+    const rows = [];
+    for (let i = 0; i < availableSocials.length; i += 2) {
+      rows.push(availableSocials.slice(i, i + 2));
+    }
+    return rows;
+  }, [availableSocials]);
+
   return (
-    <div
-      className={cn(
-        gameSocialsVariants({ variant }),
-        isEmpty && "hidden",
-        className,
-      )}
-      {...props}
-    >
-      <Select>
-        <div className="grow flex justify-end items-center self-center">
-          <ArcadeMenuButton
-            active={false}
-            className={cn(
-              "bg-background-100 text-foreground-100 hover:bg-background-200 hover:text-foreground-100 w-9 h-9 rounded-full",
-              !isMobile && "hidden",
-            )}
-          >
-            <DotsIcon size="sm" />
-          </ArcadeMenuButton>
-        </div>
-        <SelectContent className="bg-background-100">
-          {socials?.twitter && (
-            <GameSocialTwitter twitter={socials.twitter} label variant="dark" />
-          )}
-          {socials?.discord && (
-            <GameSocialDiscord discord={socials.discord} label variant="dark" />
-          )}
-          {socials?.telegram && (
-            <GameSocialTelegram
-              telegram={socials.telegram}
-              label
-              variant="dark"
-            />
-          )}
-          {socials?.github && (
-            <GameSocialGithub github={socials.github} label variant="dark" />
-          )}
-        </SelectContent>
-        {socials?.twitter && !isMobile && (
-          <GameSocialTwitter twitter={socials.twitter} variant="dark" />
-        )}
-        {socials?.discord && !isMobile && (
-          <GameSocialDiscord discord={socials.discord} variant="dark" />
-        )}
-        {socials?.telegram && !isMobile && (
-          <GameSocialTelegram telegram={socials.telegram} variant="dark" />
-        )}
-        {socials?.github && !isMobile && (
-          <GameSocialGithub github={socials.github} variant="dark" />
-        )}
-        {socials?.website && !isMobile && (
-          <GameSocialWebsite website={socials.website} label />
-        )}
-      </Select>
+    <div className={cn("w-full", className)} {...props}>
+      {/* Mobile: Single column stack */}
+      <div className="block lg:hidden">
+        <table className="w-full border-collapse">
+          <tbody>
+            {availableSocials.map((social, index) => (
+              <tr key={`mobile-${index}`}>
+                <td className="border border-background-200 p-0">
+                  {social.component}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Desktop: Two column table */}
+      <div className="hidden lg:block">
+        <table className="w-full border-collapse">
+          <tbody>
+            {socialRows.map((row, rowIndex) => (
+              <tr key={`desktop-row-${rowIndex}`}>
+                {row.map((social, colIndex) => (
+                  <td
+                    key={`desktop-${rowIndex}-${colIndex}`}
+                    className="border border-background-200 p-0 w-1/2"
+                  >
+                    {social.component}
+                  </td>
+                ))}
+                {/* Fill empty cell if odd number of items - no border for empty cell */}
+                {row.length === 1 && <td className="p-0 w-1/2"></td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

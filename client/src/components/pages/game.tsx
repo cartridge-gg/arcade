@@ -8,14 +8,13 @@ import { ArcadeTabs } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
 import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
-import GameSocials from "../modules/game-socials";
 import { Editions } from "../editions";
 import arcade from "@/assets/arcade-logo.png";
-import { GameSocialWebsite } from "../modules/game-social";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 import { useDevice } from "@/hooks/device";
 import { PredictScene } from "../scenes/predict";
+import { GameSocialWebsite } from "../modules/game-social";
 
 export function GamePage() {
   const { game, edition } = useProject();
@@ -31,7 +30,7 @@ export function GamePage() {
       pathname = joinPaths(pathname, `/tab/${value}`);
       navigate(pathname || "/");
     },
-    [location, navigate],
+    [location, navigate]
   );
 
   const order: TabValue[] = useMemo(() => {
@@ -64,14 +63,14 @@ export function GamePage() {
       <div
         className={cn(
           "lg:h-[88px] w-full flex flex-col gap-4 lg:p-6 lg:pb-0 border-b border-background-200 lg:border-none",
-          isDashboard ? "p-0" : "p-4",
+          isDashboard ? "p-0" : "p-4"
         )}
       >
         <div className="flex items-start justify-between">
           <div
             className={cn(
               "flex gap-4 items-center overflow-hidden",
-              isDashboard && isMobile && "hidden",
+              isDashboard && isMobile && "hidden"
             )}
           >
             <Thumbnail
@@ -86,12 +85,15 @@ export function GamePage() {
               <Editions />
             </div>
           </div>
-          <GameSocials socials={socials} />
+          <div className=" hidden lg:block">
+            <GameSocialWebsite website={socials?.website || ""} label />
+          </div>
         </div>
-        <div className={cn("lg:hidden", !socials?.website && "hidden")}>
+        <div className="block lg:hidden">
           <GameSocialWebsite website={socials?.website || ""} label />
         </div>
       </div>
+
       <ArcadeTabs
         order={order}
         defaultValue={defaultValue as TabValue}
