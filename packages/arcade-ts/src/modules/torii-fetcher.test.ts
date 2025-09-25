@@ -90,7 +90,7 @@ describe("torii-fetcher", () => {
       json: async () => mockResponse,
     });
 
-    const res = await fetchToriis(["arcade-blobarena", "arcade-main"], {
+    const res = await fetchToriis(["arcade-blobarena", "arcade-main-2"], {
       sql: "SELECT * FROM TestModel LIMIT 5",
     });
 

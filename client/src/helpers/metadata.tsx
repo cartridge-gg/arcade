@@ -215,7 +215,11 @@ export const MetadataHelper = {
         metadata = JSON.parse(token.metadata);
         const response = await fetch(metadata.image);
         if (response.ok) {
-          return metadata.image;
+          const image = metadata.image;
+          if (image.startsWith("ipfs://")) {
+            return image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+          }
+          return image;
         }
       } catch (error) {
         console.error("Error parsing metadata:", error);

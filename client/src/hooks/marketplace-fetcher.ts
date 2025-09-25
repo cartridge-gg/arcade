@@ -58,6 +58,8 @@ export function useMarketCollectionFetcher({
           console.error("failed to parse json metadata for ", project);
         }
 
+        const image = await fetchTokenImage(c as Token, project, false);
+
         collections[address] = {
           ...c,
           contract_address: address,
@@ -66,7 +68,7 @@ export function useMarketCollectionFetcher({
           token_id: c.token_id ?? null,
           metadata,
           project,
-          image: await fetchTokenImage(c as Token, project, false),
+          image,
         };
       }
 

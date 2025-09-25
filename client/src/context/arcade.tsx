@@ -313,9 +313,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
           }
         }),
       );
-      const arcade = "https://api.cartridge.gg/x/arcade-main/torii";
+      const arcade = "https://api.cartridge.gg/x/arcade-main-2/torii";
       const client: torii.ToriiClient = await provider.getToriiClient(arcade);
-      clients["arcade-main"] = client;
+      clients["arcade-main-2"] = client;
       setClients(clients);
     };
     getClients();

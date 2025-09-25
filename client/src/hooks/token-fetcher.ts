@@ -202,7 +202,7 @@ export type UseTokenFetcherResult = {
  * @example
  * ```ts
  * const { tokens, status, error, refetch } = useTokenFetcher(
- *   ['arcade-blobarena', 'arcade-main'],
+ *   ['arcade-blobarena', 'arcade-main-2'],
  *   '0x123...'
  * );
  * ```
@@ -448,7 +448,7 @@ function getAssetImage(
  * @example
  * ```ts
  * const { collections, status, error, refetch } = useCollectibles(
- *   ['arcade-blobarena', 'arcade-main'],
+ *   ['arcade-blobarena', 'arcade-main-2'],
  *   '0x123...'
  * );
  * ```
