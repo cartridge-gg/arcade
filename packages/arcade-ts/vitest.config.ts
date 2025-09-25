@@ -17,10 +17,5 @@ export default defineConfig({
         },
       },
     },
-    server: {
-      deps: {
-        external: ["@dojoengine/torii-wasm"],
-      },
-    },
   },
 });

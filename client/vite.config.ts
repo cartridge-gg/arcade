@@ -71,7 +71,6 @@ export default defineConfig({
 
         defaultHandler(warning);
       },
-      external: ["@dojoengine/torii-wasm"],
     },
   },
   publicDir: "public",
