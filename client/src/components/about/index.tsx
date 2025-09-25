@@ -19,6 +19,7 @@ interface AboutProps {
 
 export function About({ edition, socials }: AboutProps) {
   const items = useMemo(() => {
+    if (!edition) return [];
     const videos = edition.socials.videos?.filter((v) => !!v) ?? [];
     const images = edition.socials.images?.filter((i) => !!i) ?? [];
     return [...videos, ...images];
@@ -26,7 +27,7 @@ export function About({ edition, socials }: AboutProps) {
 
   return (
     <div className="flex flex-col gap-4 py-3 lg:py-6">
-      <Media key={edition.id} items={items} />
+      <Media key={edition?.id} items={items} />
 
       {socials && (
         <div className="flex flex-col gap-2">

@@ -89,12 +89,7 @@ const GameSocials = ({
     return platforms;
   }, [socials]);
 
-  // Return early if no socials available
-  if (availableSocials.length === 0) {
-    return null;
-  }
-
-  // Group socials into rows for table structure
+  // Group socials into rows for table structure - MUST be called before early return
   const socialRows = useMemo(() => {
     const rows = [];
     for (let i = 0; i < availableSocials.length; i += 2) {
@@ -102,6 +97,11 @@ const GameSocials = ({
     }
     return rows;
   }, [availableSocials]);
+
+  // Return early if no socials available
+  if (availableSocials.length === 0) {
+    return null;
+  }
 
   return (
     <div className={cn("w-full", className)} {...props}>
