@@ -10,6 +10,7 @@ pub mod errors {
     pub const COLLECTION_ALREADY_EXISTS: felt252 = 'Collection: already exists';
     pub const COLLECTION_NOT_EXIST: felt252 = 'Collection: does not exist';
     pub const COLLECTION_INVALID_ADDRESS: felt252 = 'Collection: invalid address';
+    pub const COLLECTION_INVALID_TYPE: felt252 = 'Collection: invalid type';
 }
 
 #[generate_trait]
@@ -78,6 +79,16 @@ pub impl CollectionAssert of AssertTrait {
     #[inline]
     fn assert_valid_address(contract_address: ContractAddress) {
         assert(contract_address.is_non_zero(), errors::COLLECTION_INVALID_ADDRESS);
+    }
+
+    #[inline]
+    fn assert_valid_type(collection_type: @ByteArray) {
+        assert(
+            collection_type == @"ERC20"
+                || collection_type == @"ERC721"
+                || collection_type == @"ERC1155",
+            errors::COLLECTION_INVALID_TYPE,
+        );
     }
 }
 

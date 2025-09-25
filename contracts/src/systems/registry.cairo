@@ -10,6 +10,9 @@ pub trait IRegistry<TContractState> {
     fn grant(ref self: TContractState, account: ContractAddress, role_id: u8);
     fn revoke(ref self: TContractState, account: ContractAddress);
     fn register_collection(ref self: TContractState, collection_address: ContractAddress);
+    fn register_collection_admin(
+        ref self: TContractState, collection_address: ContractAddress, collection_type: ByteArray,
+    );
     fn associate_collection(
         ref self: TContractState, collection_address: ContractAddress, edition_id: felt252,
     );
@@ -196,7 +199,7 @@ pub mod Registry {
             let world = self.world_storage();
 
             let src5_dispatcher = ISRC5Dispatcher { contract_address: collection_address };
-            let contract_name: ByteArray = if src5_dispatcher.supports_interface(IERC1155_ID) {
+            let contract_type: ByteArray = if src5_dispatcher.supports_interface(IERC1155_ID) {
                 "ERC1155"
             } else if src5_dispatcher.supports_interface(IERC721_ID) {
                 "ERC721"
@@ -215,7 +218,24 @@ pub mod Registry {
                 world: world,
                 collection_address: collection_address,
                 namespace: NAMESPACE(),
-                contract_name: contract_name,
+                contract_type: contract_type,
+                instance_name: format!("{}", instance_name),
+            );
+        }
+
+        fn register_collection_admin(
+            ref self: ContractState,
+            collection_address: ContractAddress,
+            collection_type: ByteArray,
+        ) {
+            let world = self.world_storage();
+            let instance_name: felt252 = collection_address.into();
+            RegisterableCollectionImpl::register_admin(
+                self: @self.registerable,
+                world: world,
+                collection_address: collection_address,
+                namespace: NAMESPACE(),
+                contract_type: collection_type,
                 instance_name: format!("{}", instance_name),
             );
         }

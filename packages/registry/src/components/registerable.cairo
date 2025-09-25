@@ -123,16 +123,45 @@ pub mod RegisterableComponent {
             world: WorldStorage,
             collection_address: ContractAddress,
             namespace: ByteArray,
-            contract_name: ByteArray,
+            contract_type: ByteArray,
             instance_name: ByteArray,
         ) {
             // [Effect] Emit a new registered contract
             world
                 .dispatcher
                 .register_external_contract(
-                    namespace,
-                    contract_name,
-                    instance_name,
+                    namespace: namespace,
+                    contract_name: contract_type,
+                    instance_name: instance_name,
+                    contract_address: collection_address,
+                    block_number: 1 // Torii is considering block-number - 1 to start the indexing
+                )
+        }
+        fn register_admin(
+            self: @ComponentState<TContractState>,
+            world: WorldStorage,
+            collection_address: ContractAddress,
+            namespace: ByteArray,
+            contract_type: ByteArray,
+            instance_name: ByteArray,
+        ) {
+            // [Setup] Datastore
+            let mut store: Store = StoreTrait::new(world);
+
+            // [Check] Caller is allowed
+            let caller_access = store.get_access(starknet::get_caller_address().into());
+            caller_access.assert_is_allowed(Role::Admin);
+
+            // [Check] Collection type is valid
+            CollectionAssert::assert_valid_type(@contract_type);
+
+            // [Effect] Emit a new registered contract
+            world
+                .dispatcher
+                .register_external_contract(
+                    namespace: namespace,
+                    contract_name: contract_type,
+                    instance_name: instance_name,
                     contract_address: collection_address,
                     block_number: 1 // Torii is considering block-number - 1 to start the indexing
                 )

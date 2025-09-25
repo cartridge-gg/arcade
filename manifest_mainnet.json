@@ -2102,7 +2102,7 @@
     },
     {
       "address": "0x7ddf3ed9540e1ed47ab3708d920c354b5795c1a420d6ae5593032b39d533881",
-      "class_hash": "0x29c117c96ae720e26467fe0f6f1fc912af8e81c8233034d7ab9ed58beb79f1",
+      "class_hash": "0x346ffc0b42a88af4832d3544d93fa32a5e7e30d10c00a5569adbb83ebac085f",
       "abi": [
         {
           "type": "impl",
@@ -2244,6 +2244,22 @@
                 {
                   "name": "collection_address",
                   "type": "core::starknet::contract_address::ContractAddress"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "register_collection_admin",
+              "inputs": [
+                {
+                  "name": "collection_address",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                },
+                {
+                  "name": "collection_type",
+                  "type": "core::byte_array::ByteArray"
                 }
               ],
               "outputs": [],
@@ -2844,6 +2860,7 @@
         "grant",
         "revoke",
         "register_collection",
+        "register_collection_admin",
         "associate_collection",
         "dissociate_collection",
         "register_game",

@@ -4,7 +4,7 @@ export default defineConfig(() => ({
   entry: ["src/index.ts"],
   sourcemap: true,
   clean: true,
-  format: ["cjs"],
+  format: ["cjs", "esm"],
   globalName: "starknet",
   esbuildOptions(options, context) {
     if (context.format === "iife") {
