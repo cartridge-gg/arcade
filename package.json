@@ -2,32 +2,22 @@
 	"name": "arcade",
 	"packageManager": "pnpm@10.5.2",
 	"scripts": {
-    "clean": "git clean -xdf",
-		"dev": "turbo watch dev",
-		"test": "turbo run test",
-		"test:watch": "turbo run test:watch",
-		"prepare": "husky",
-		"format": "turbo run format",
-		"format:check": "turbo run format:check",
-		"lint": "turbo run lint",
-		"lint:check": "turbo run lint:check",
-		"build:scarb": "turbo run build:scarb",
-		"build": "turbo run build",
-		"build:deps": "turbo run build:deps",
-		"type:check": "turbo run type:check"
+		"build:deps": "turbo build:deps",
+		"build": "turbo build",
+		"format": "turbo format",
+		"format:check": "turbo format:check",
+		"lint": "turbo lint",
+		"lint:check": "turbo lint:check",
+		"dev": "turbo watch dev --concurrency 15"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
-		"@commitlint/cli": "^19.8.1",
-		"@commitlint/config-conventional": "^19.8.1",
-		"husky": "^9.1.7",
-		"turbo": "^2.5.4",
 		"@types/node": "^22.15.23",
 		"change-case": "^5.4.4",
 		"csv-parser": "^3.2.0",
 		"eslint": "^9.12.0",
 		"prettier": "^3.5.3",
-		"tsup": "^8.3.5"
+		"tsup": "^8.3.5",
+		"turbo": "^2.4.4"
 	},
 	"bin": {
 		"gen": "./scripts/genAchievements.ts"

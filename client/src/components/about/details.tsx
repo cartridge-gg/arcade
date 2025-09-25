@@ -7,8 +7,7 @@ export function Details({ content }: { content: string }) {
   const ref = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
-    const element = ref.current;
+    const element = ref.current!;
     setIsOverflown(isExpanded || element.scrollHeight > element.clientHeight);
   }, [isExpanded, ref, content]);
 

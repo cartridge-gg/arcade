@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { SVGProps } from "react";
+import { SVGProps } from "react";
 
 export const BranchIcon = ({
   className,

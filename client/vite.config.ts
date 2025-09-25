@@ -18,7 +18,6 @@ export default defineConfig({
       includeAssets: ["favicon.svg", "favicon.ico", "robots.txt"],
       workbox: {
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
-        mode: "development",
       },
       manifest: {
         name: "Arcade",
@@ -71,7 +70,6 @@ export default defineConfig({
 
         defaultHandler(warning);
       },
-      external: ["@dojoengine/torii-wasm"],
     },
   },
   publicDir: "public",

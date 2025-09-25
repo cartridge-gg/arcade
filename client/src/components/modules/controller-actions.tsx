@@ -1,7 +1,7 @@
 import { DotsIcon, Select, SelectContent } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, type VariantProps } from "class-variance-authority";
-import { type HTMLAttributes, useState } from "react";
+import { cva, VariantProps } from "class-variance-authority";
+import { HTMLAttributes, useState } from "react";
 import ArcadeMenuButton from "./menu-button";
 
 const controllerActionsVariants = cva("flex gap-2", {

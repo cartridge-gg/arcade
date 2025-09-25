@@ -1,38 +1,34 @@
 [workspace]
 members = [
-  "contracts",
-  "packages/achievement",
-  "packages/collection",
-  "packages/controller",
-  "packages/orderbook",
-  "packages/provider",
-  "packages/registry",
-  "packages/social",
-  "packages/models",
+    "contracts",
+    "packages/collection",
+    "packages/controller",
+    "packages/provider",
+    "packages/registry",
+    "packages/social",
+    "packages/achievement",
 ]
 description = "Dojo achievement library"
 homepage = "https://github.com/cartridge-gg/arcade/"
-cairo-version = "2.12.2"
+cairo-version = "2.12.1"
 
 [workspace.package]
 version = "0.0.0"
 edition = "2024_07"
-cairo-version = "2.12.2"
+cairo-version = "2.12.1"
 
 [workspace.dependencies]
-dojo = "1.7.0"
-dojo_cairo_macros = "1.7.0"
-dojo_cairo_test = "1.7.0"
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.7.0-alpha.4" }
+dojo_macros = { git = "https://github.com/dojoengine/dojo", tag = "v1.7.0-alpha.4" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.7.0-alpha.4" }
 graffiti = { git = "https://github.com/bal7hazar/graffiti.git", rev = "e8b0854" }
-openzeppelin_account = "1.0.0"
-openzeppelin_token = "1.0.0"
-openzeppelin_introspection = "1.0.0"
-openzeppelin_access = "1.0.0"
-openzeppelin_upgrades = "1.0.0"
-starknet = "2.12.2"
-cairo_test = "2.12.2"
+starknet = "2.12.1"
+cairo_test = "2.12.1"
 
 [workspace.tool.fmt]
 sort-module-level-items = true
 
 [profile.mainnet]
+
+[scripts]
+dev = "sozo clean && sozo build --typescript && sozo migrate plan && sozo migrate apply"

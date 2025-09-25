@@ -1,7 +1,7 @@
 import { Tabs, TabsList, UsersIcon } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import React, { useState } from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, VariantProps } from "class-variance-authority";
 import ArcadeSubTab from "./sub-tab";
 import { UserCheck } from "lucide-react";
 

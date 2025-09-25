@@ -1,6 +1,6 @@
-import { createContext, useState, type ReactNode, useMemo } from "react";
+import { createContext, useState, ReactNode, useMemo } from "react";
 import {
-  type MetricsProject,
+  MetricsProject,
   useMetricsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";

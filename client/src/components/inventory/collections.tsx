@@ -1,15 +1,15 @@
 import { CollectibleCard, Skeleton } from "@cartridge/ui";
 import { useArcade } from "@/hooks/arcade";
 import { useCallback, useMemo } from "react";
-import type { EditionModel } from "@cartridge/arcade";
+import { EditionModel } from "@cartridge/arcade";
 import placeholder from "@/assets/placeholder.svg";
 import { useAccount } from "@starknet-react/core";
-import type ControllerConnector from "@cartridge/connector/controller";
-import { type Chain, mainnet } from "@starknet-react/chains";
-import { type Collection, CollectionType } from "@/context/collection";
+import ControllerConnector from "@cartridge/connector/controller";
+import { Chain, mainnet } from "@starknet-react/chains";
+import { Collection, CollectionType } from "@/context/collection";
 import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
-import { type OrderModel, StatusType } from "@cartridge/arcade";
+import { OrderModel, StatusType } from "@cartridge/marketplace";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername } from "@/hooks/account";
@@ -129,7 +129,7 @@ function Item({
     }
     if (!subpath) return;
     const preset = edition?.properties.preset;
-    const options = [`ps=${collection.project}`, "closable=true"];
+    let options = [`ps=${collection.project}`, "closable=true"];
     if (preset) {
       options.push(`preset=${preset}`);
     } else {

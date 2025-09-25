@@ -6,15 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "format": "biome format --fix src",
-    "format:check": "biome format src",
-    "type:check": "tsc -b"
+    "lint": "eslint .",
+    "format": "prettier --write ./src index.html",
+    "format:check": "prettier --check ./src index.html",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@cartridge/arcade": "workspace:*",
     "@cartridge/connector": "catalog:",
     "@cartridge/controller": "catalog:",
+    "@cartridge/marketplace": "catalog:",
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/presets": "catalog:",
     "@cartridge/ui": "catalog:",

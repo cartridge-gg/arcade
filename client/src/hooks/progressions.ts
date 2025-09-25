@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import {
-  type Project,
+  Project,
   useProgressionsQuery,
 } from "@cartridge/ui/utils/api/cartridge";
-import { type Progress, type RawProgress, getSelectorFromTag } from "@/models";
-import type { TrophiesProps } from "./trophies";
+import { Progress, RawProgress, getSelectorFromTag } from "@/models";
+import { TrophiesProps } from "./trophies";
 
 interface Response {
   items: { meta: { project: string }; achievements: RawProgress[] }[];

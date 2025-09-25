@@ -1,8 +1,8 @@
 import { NAMESPACE } from "../../constants";
 import { getChecksumAddress } from "starknet";
-import type { SchemaType } from "@cartridge/models";
+import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
-import { Role, RoleType } from "../../classes";
+import { Role, RoleType } from "../../classes/role";
 
 const MODEL_NAME = "Access";
 
@@ -45,10 +45,7 @@ export class AccessModel {
 
 export const Access = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return AccessModel.from(
-      entity.entityId,
-      entity.models[NAMESPACE]?.[MODEL_NAME],
-    );
+    return AccessModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
   },
 
   getModelName: () => {
@@ -56,12 +53,7 @@ export const Access = {
   },
 
   getClause: () => {
-    return MemberClause(
-      `${NAMESPACE}-${Access.getModelName()}`,
-      "world_address",
-      "Neq",
-      "0x0",
-    );
+    return MemberClause(`${NAMESPACE}-${Access.getModelName()}`, "world_address", "Neq", "0x0");
   },
 
   getMethods: () => [],

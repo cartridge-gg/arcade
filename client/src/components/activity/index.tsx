@@ -14,8 +14,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import ActivityAchievementCard from "../modules/activity-achievement-card";
 import { Link } from "react-router-dom";
 import { VoyagerUrl } from "@cartridge/ui/utils";
-import type { constants } from "starknet";
-import type { CardProps } from "@/context/activities";
+import { constants } from "starknet";
+import { CardProps } from "@/context/activities";
 import { useProject } from "@/hooks/project";
 
 const OFFSET = 20;

@@ -1,4 +1,4 @@
-import { createContext, useState, type ReactNode, useMemo } from "react";
+import { createContext, useState, ReactNode, useMemo } from "react";
 import { useOwnershipsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { DEFAULT_PROJECT } from "@/constants";
 

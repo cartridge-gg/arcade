@@ -8,25 +8,17 @@ version = "0.0.0"
 sierra-replace-ids = true
 
 [dependencies]
-openzeppelin_introspection.workspace = true
-openzeppelin_token.workspace = true
 dojo.workspace = true
-dojo_cairo_macros.workspace = true
+dojo_macros.workspace = true
 starknet.workspace = true
 achievement = { path = ".." }
-collection = { path = ".." }
 controller = { path = ".." }
-orderbook = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
 social = { path = ".." }
+collection = { path = ".." }
 
 [dev-dependencies]
-openzeppelin_access.workspace = true
-openzeppelin_account.workspace = true
-openzeppelin_introspection.workspace = true
-openzeppelin_token.workspace = true
-openzeppelin_upgrades.workspace = true
 dojo_cairo_test.workspace = true
 cairo_test.workspace = true
 
@@ -37,20 +29,12 @@ build-external-contracts = [
     "controller::models::index::m_Account",
     "controller::models::index::m_Controller",
     "controller::models::index::m_Signer",
-    "orderbook::models::index::m_Moderator",
-    "orderbook::models::index::m_Book",
-    "orderbook::models::index::m_Order",
-    "orderbook::models::index::m_MetadataAttribute",
-    "orderbook::events::index::e_Listing",
-    "orderbook::events::index::e_Offer",
-    "orderbook::events::index::e_Sale",
     "provider::models::index::m_Deployment",
     "provider::models::index::m_Factory",
     "provider::models::index::m_Team",
     "provider::models::index::m_Teammate",
     "registry::models::index::m_Access",
     "registry::models::index::m_Collection",
-    "registry::models::index::m_CollectionEdition",
     "registry::models::index::m_Game",
     "registry::models::index::m_Edition",
     "registry::models::index::m_Unicity",

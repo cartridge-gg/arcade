@@ -1,5 +1,5 @@
 import { cn } from "@cartridge/ui/utils";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, VariantProps } from "class-variance-authority";
 
 const achievementPinIconVariants = cva(
   "p-1.5 lg:p-2 rounded flex justify-center items-center data-[theme=true]:text-primary transition-colors",

@@ -2,7 +2,7 @@
 name = "Cartridge World"
 description = "Cartridge World"
 website = "https://github.com/dojoengine/dojo-starter"
-seed = "Arcade-2.0.4"
+seed = "Arcade-glihm1"
 
 [world.socials]
 x = "https://x.com/ohayo_dojo"
@@ -15,32 +15,19 @@ default = "ARCADE"
 
 [init_call_args]
 "ARCADE-Registry" = [
-    "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b", # Owner
-    "0x061ad918e9b69991bbf1e01021d4ce1629e36eb58bd2d00eef04eeb3b98edba1", # Collection
-]
-"ARCADE-Marketplace" = [
-    "0x1",                                                                # Royalties
-    "0x0",                                                                # 0% fee
-    "0x03F7F4E5a23A712787F0C100f02934c4A88606B7F0C880c2FD43e817E6275d83", # Fee receiver
-    "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b", # Owner
+    "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b",
+    "0x061ad918e9b69991bbf1e01021d4ce1629e36eb58bd2d00eef04eeb3b98edba1",
 ]
 
 [writers]
-"ARCADE" = [
-    "ARCADE-Slot",
-    "ARCADE-Social",
-    "ARCADE-Wallet",
-    "ARCADE-Marketplace",
-]
-
-[owners]
-"ARCADE" = ["ARCADE-Registry"]
+"ARCADE" = ["ARCADE-Registry", "ARCADE-Slot", "ARCADE-Social", "ARCADE-Wallet"]
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/mainnet"
-account_address = "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b"
-keystore_path = "./keystore.json"
-world_address = "0x07a079295990e43441a7389fdc3b9ba063c6cd6aee16fb846f598c42a9f04ff7"
+account_address = "0x1024e16519da35d35b0637c32d0611cc36b724f69cdea25e8007cd6a7cffa51"
+keystore_path = "/Users/glihm/.snaccounts/dev-mainnet.key"
+world_address = "0x32a5d1ac8e2ced508eb840dd9fbfc1b9ebb6c7a61268ad5d26e82712160d97f"
+# world_block = 1339026
 ipfs_config.url = "https://ipfs.infura.io:5001"
 ipfs_config.username = "2EBrzr7ZASQZKH32sl2xWauXPSA"
 ipfs_config.password = "12290b883db9138a8ae3363b6739d220"

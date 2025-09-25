@@ -1,6 +1,6 @@
 import { NAMESPACE } from "../../constants";
 import { getChecksumAddress } from "starknet";
-import type { SchemaType } from "@cartridge/models";
+import { SchemaType } from "../../bindings";
 import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
 
 const MODEL_NAME = "TrophyPinning";

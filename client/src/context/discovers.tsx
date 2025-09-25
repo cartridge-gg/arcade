@@ -1,4 +1,4 @@
-import { createContext, useState, type ReactNode, useMemo } from "react";
+import { createContext, useState, ReactNode, useMemo } from "react";
 import { usePlaythroughsQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
 import { useUsernames } from "@/hooks/account";

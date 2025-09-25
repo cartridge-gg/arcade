@@ -1,14 +1,10 @@
-import { createContext, type ReactNode, useMemo } from "react";
+import { createContext, ReactNode, useMemo } from "react";
 import {
   useActivitiesQuery,
   useTransfersQuery,
 } from "@cartridge/ui/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
-import {
-  addAddressPadding,
-  type constants,
-  getChecksumAddress,
-} from "starknet";
+import { addAddressPadding, constants, getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";

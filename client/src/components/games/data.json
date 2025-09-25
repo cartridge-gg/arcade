@@ -270,26 +270,5 @@
     "images": [
       "https://i.ibb.co/fG1SVtqn/specials.png https://i.ibb.co/G4LzFFch/Screenshot-2025-07-03-at-8-19-50-AM.png"
     ]
-  },
-  "lootsurvivor": {
-    "worldAddress": "0x02ef591697f0fd9adc0ba9dbe0ca04dabad80cf95f08ba02e435d9cb6698a28a",
-    "namespace": "ls_0_0_8",
-    "project": "arcade-ls2",
-    "rpc": "https://api.cartridge.gg/x/starknet/mainnet",
-    "policies": "",
-    "color": "#33FF33",
-    "preset": "loot-survivor",
-    "name": "v2.0.0",
-    "description": "A fully onchain arcade dungeon crawler built on Starknet in conjunction with Realms.world. Explore the dynamically generated dungeons while you fight for your life against beasts and obstacles in pursuit of a spot on the esteemed leaderboard.",
-    "image": "https://static.cartridge.gg/presets/loot-survivor/icon.png",
-    "banner": "https://static.cartridge.gg/presets/loot-survivor/cover.png",
-    "cover": "https://static.cartridge.gg/presets/loot-survivor/cover.png",
-    "website": "https://lootsurvivor.io",
-    "videos": [
-      "https://www.youtube.com/watch?v=-6R2H4ywnRk https://www.youtube.com/watch?v=BDBeVlNwFik https://www.youtube.com/watch?v=dq1q67t2rJw"
-    ],
-    "images": [
-      "https://static.cartridge.gg/presets/loot-survivor/cover.png https://lootsurvivor.io/images/start.png"
-    ]
   }
 }

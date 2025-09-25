@@ -1,4 +1,4 @@
-import { createContext, useState, type ReactNode, useMemo } from "react";
+import { createContext, useState, ReactNode, useMemo } from "react";
 import { useBalancesQuery } from "@cartridge/ui/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
 import { erc20Metadata } from "@cartridge/presets";
@@ -10,7 +10,7 @@ import {
   USDT_CONTRACT_ADDRESS,
   useCountervalue,
   useERC20Balance,
-  type UseERC20BalanceResponse,
+  UseERC20BalanceResponse,
 } from "@cartridge/ui/utils";
 import makeBlockie from "ethereum-blockies-base64";
 import { DEFAULT_TOKENS_PROJECT } from "@/constants";

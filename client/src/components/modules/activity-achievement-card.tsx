@@ -5,10 +5,10 @@ import {
   TrophyIcon,
   ActivityCard,
   ActivitySocialWebsite,
-  type activityCardVariants,
+  activityCardVariants,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import type { VariantProps } from "class-variance-authority";
+import { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 
 export interface ActivityAchievementCardProps

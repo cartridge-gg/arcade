@@ -1,5 +1,5 @@
 import { ColumnLabels } from "./column-labels";
-import { PositionCard, type PositionCardProps } from "./position-card";
+import { PositionCard, PositionCardProps } from "./position-card";
 
 export function Positions() {
   const positions = [

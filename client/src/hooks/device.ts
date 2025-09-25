@@ -2,8 +2,8 @@ import { useMediaQuery } from "@cartridge/ui";
 import { useEffect, useState } from "react";
 
 enum DeviceType {
-  MOBILE = 0,
-  DESKTOP = 1,
+  MOBILE,
+  DESKTOP,
 }
 
 const DESKTOP_WIDTH = 1200;
