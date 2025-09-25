@@ -55,7 +55,6 @@
     "@dojoengine/core": "catalog:",
     "@dojoengine/sdk": "catalog:",
     "@dojoengine/torii-client": "catalog:",
-    "@dojoengine/torii-wasm": "catalog:",
     "@dojoengine/grpc": "catalog:",
     "@starknet-io/types-js": "^0.9.1",
     "eventemitter3": "^5.0.1",
