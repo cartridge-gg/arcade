@@ -2,6 +2,7 @@
 	"name": "arcade",
 	"packageManager": "pnpm@10.5.2",
 	"scripts": {
+    "clean": "git clean -xdf",
 		"dev": "turbo watch dev",
 		"test": "turbo run test",
 		"test:watch": "turbo run test:watch",
