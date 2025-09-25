@@ -1,4 +1,4 @@
-import { initSDK } from "..";
+import { initMarketplaceSDK } from "..";
 import { getChecksumAddress, type constants } from "starknet";
 import {
   Moderator,
@@ -62,7 +62,7 @@ export const Marketplace = {
   unsubEntities: undefined as (() => void) | undefined,
 
   init: async (chainId: constants.StarknetChainId) => {
-    Marketplace.sdk = await initSDK(chainId);
+    Marketplace.sdk = await initMarketplaceSDK(chainId);
   },
 
   isEntityQueryable(options: MarketplaceOptions) {

@@ -6,6 +6,7 @@ export default defineConfig(() => ({
   clean: true,
   format: ["cjs"],
   globalName: "starknet",
+  noExternal: ["@cartridge/internal"],
   esbuildOptions(options, context) {
     if (context.format === "iife") {
       options.platform = "browser";

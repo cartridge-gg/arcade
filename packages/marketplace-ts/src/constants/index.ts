@@ -1,1 +1,1 @@
-export const NAMESPACE = "ARCADE";
+export { NAMESPACE } from "@cartridge/internal";

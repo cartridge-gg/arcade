@@ -1,22 +1,8 @@
+import { createInitSDK } from "@cartridge/internal";
+import type { SchemaType } from "@cartridge/models";
+
 export * from "./registry";
 export * from "./social";
 export * from "./torii-fetcher";
-import { init } from "@dojoengine/sdk";
-import { configs } from "../configs";
-import { constants, shortString } from "starknet";
 
-export const initSDK = async (chainId: constants.StarknetChainId) => {
-  const config = configs[chainId];
-  return init<any>({
-    client: {
-      toriiUrl: config.toriiUrl,
-      worldAddress: config.manifest.world.address,
-    },
-    domain: {
-      name: "Arcade",
-      version: "1.0",
-      chainId: shortString.decodeShortString(chainId),
-      revision: "1",
-    },
-  });
-};
+export const initArcadeSDK = createInitSDK<SchemaType>({ name: "Arcade" });

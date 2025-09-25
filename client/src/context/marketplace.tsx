@@ -17,7 +17,7 @@ import {
   SaleEvent,
   StatusType,
   BookModel,
-} from "@cartridge/marketplace";
+} from "@cartridge/arcade";
 import { constants, getChecksumAddress } from "starknet";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;

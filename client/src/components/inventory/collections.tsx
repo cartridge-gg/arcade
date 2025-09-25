@@ -9,7 +9,7 @@ import { type Chain, mainnet } from "@starknet-react/chains";
 import { type Collection, CollectionType } from "@/context/collection";
 import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
-import { type OrderModel, StatusType } from "@cartridge/marketplace";
+import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername } from "@/hooks/account";

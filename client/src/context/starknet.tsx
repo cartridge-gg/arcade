@@ -5,7 +5,7 @@ import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
 import type { KeychainOptions, ProviderOptions } from "@cartridge/controller";
 import { getSocialPolicies, getRegistryPolicies } from "@cartridge/arcade";
-import { getMarketplacePolicies } from "@cartridge/marketplace";
+import { getMarketplacePolicies } from "@cartridge/arcade";
 import { ArcadeContext } from "./arcade";
 
 const chainId = constants.StarknetChainId.SN_MAIN;

@@ -21,7 +21,7 @@ import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
-import { OrderModel, SaleEvent } from "@cartridge/marketplace";
+import { OrderModel, SaleEvent } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import { EditionModel } from "@cartridge/arcade";

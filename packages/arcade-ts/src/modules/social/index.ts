@@ -1,4 +1,4 @@
-import { initSDK } from "..";
+import { initArcadeSDK } from "..";
 import { constants } from "starknet";
 import { Pin, PinEvent } from "./pin";
 import { Follow, FollowEvent } from "./follow";
@@ -18,8 +18,20 @@ import { SocialOptions, DefaultSocialOptions } from "./options";
 import type { SchemaType } from "@cartridge/models";
 
 export * from "./policies";
-export { PinEvent, FollowEvent, GuildModel, AllianceModel, MemberModel, SocialOptions };
-export type SocialModel = AllianceModel | GuildModel | MemberModel | PinEvent | FollowEvent;
+export {
+  PinEvent,
+  FollowEvent,
+  GuildModel,
+  AllianceModel,
+  MemberModel,
+  SocialOptions,
+};
+export type SocialModel =
+  | AllianceModel
+  | GuildModel
+  | MemberModel
+  | PinEvent
+  | FollowEvent;
 
 export const Social = {
   sdk: undefined as SDK<SchemaType> | undefined,
@@ -27,7 +39,7 @@ export const Social = {
   unsubEvents: undefined as (() => void) | undefined,
 
   init: async (chainId: constants.StarknetChainId) => {
-    Social.sdk = await initSDK(chainId);
+    Social.sdk = await initArcadeSDK(chainId);
   },
 
   isEntityQueryable(options: SocialOptions) {
@@ -44,7 +56,9 @@ export const Social = {
     if (options.guild) keys.push(`${NAMESPACE}-${Guild.getModelName()}`);
     if (options.member) keys.push(`${NAMESPACE}-${Member.getModelName()}`);
     const clauses = new ClauseBuilder().keys(keys, []);
-    return new ToriiQueryBuilder<SchemaType>().withClause(clauses.build()).includeHashedKeys();
+    return new ToriiQueryBuilder<SchemaType>()
+      .withClause(clauses.build())
+      .includeHashedKeys();
   },
 
   getEventQuery: (options: SocialOptions = DefaultSocialOptions) => {
@@ -52,10 +66,15 @@ export const Social = {
     if (options.pin) keys.push(`${NAMESPACE}-${Pin.getModelName()}`);
     if (options.follow) keys.push(`${NAMESPACE}-${Follow.getModelName()}`);
     const clauses = new ClauseBuilder().keys(keys, []);
-    return new ToriiQueryBuilder<SchemaType>().withClause(clauses.build()).includeHashedKeys();
+    return new ToriiQueryBuilder<SchemaType>()
+      .withClause(clauses.build())
+      .includeHashedKeys();
   },
 
-  fetchEntities: async (callback: (models: SocialModel[]) => void, options: SocialOptions) => {
+  fetchEntities: async (
+    callback: (models: SocialModel[]) => void,
+    options: SocialOptions,
+  ) => {
     if (!Social.sdk) return;
 
     const wrappedCallback = (entities: ToriiResponse<SchemaType>) => {
@@ -84,7 +103,10 @@ export const Social = {
     }
   },
 
-  fetchEvents: async (callback: (models: SocialModel[]) => void, options: SocialOptions) => {
+  fetchEvents: async (
+    callback: (models: SocialModel[]) => void,
+    options: SocialOptions,
+  ) => {
     if (!Social.sdk) return;
     const wrappedCallback = (entities: ToriiResponse<SchemaType>) => {
       if (!entities) return;
@@ -102,14 +124,20 @@ export const Social = {
     };
     const query = Social.getEventQuery(options);
     try {
-      const events = await Social.sdk.getEventMessages({ query, historical: false });
+      const events = await Social.sdk.getEventMessages({
+        query,
+        historical: false,
+      });
       wrappedCallback(events);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
   },
 
-  subEntities: async (callback: (models: SocialModel[]) => void, options: SocialOptions) => {
+  subEntities: async (
+    callback: (models: SocialModel[]) => void,
+    options: SocialOptions,
+  ) => {
     if (!Social.sdk) return;
 
     const wrappedCallback = ({
@@ -123,7 +151,12 @@ export const Social = {
         console.error("Error subscribing to entities:", error);
         return;
       }
-      if (!data || data.length === 0 || (data[0] as ParsedEntity<SchemaType>).entityId === "0x0") return;
+      if (
+        !data ||
+        data.length === 0 ||
+        (data[0] as ParsedEntity<SchemaType>).entityId === "0x0"
+      )
+        return;
       const entity = (data as ParsedEntity<SchemaType>[])[0];
       const eraseable = !entity.models[NAMESPACE];
       if (entity.models[NAMESPACE]?.[Alliance.getModelName()] || eraseable) {
@@ -139,25 +172,39 @@ export const Social = {
 
     const query = Social.getEntityQuery(options);
 
-    const [_, subscription] = await Social.sdk.subscribeEntityQuery({ query, callback: wrappedCallback });
+    const [_, subscription] = await Social.sdk.subscribeEntityQuery({
+      query,
+      callback: wrappedCallback,
+    });
     Social.unsubEntities = () => subscription.cancel();
   },
 
-  subEvents: async (callback: (models: SocialModel[]) => void, options: SocialOptions) => {
+  subEvents: async (
+    callback: (models: SocialModel[]) => void,
+    options: SocialOptions,
+  ) => {
     if (!Social.sdk) return;
 
     const wrappedCallback = ({
       data,
       error,
     }: {
-      data?: StandardizedQueryResult<SchemaType> | StandardizedQueryResult<SchemaType>[] | undefined;
+      data?:
+        | StandardizedQueryResult<SchemaType>
+        | StandardizedQueryResult<SchemaType>[]
+        | undefined;
       error?: Error | undefined;
     }) => {
       if (error) {
         console.error("Error subscribing to events:", error);
         return;
       }
-      if (!data || data.length === 0 || (data[0] as ParsedEntity<SchemaType>).entityId === "0x0") return;
+      if (
+        !data ||
+        data.length === 0 ||
+        (data[0] as ParsedEntity<SchemaType>).entityId === "0x0"
+      )
+        return;
       const entity = (data as ParsedEntity<SchemaType>[])[0];
       const eraseable = !entity.models[NAMESPACE];
       if (entity.models[NAMESPACE]?.[Pin.getModelName()] || eraseable) {
@@ -170,11 +217,17 @@ export const Social = {
 
     const query = Social.getEventQuery(options);
 
-    const [_, subscription] = await Social.sdk.subscribeEventQuery({ query, callback: wrappedCallback });
+    const [_, subscription] = await Social.sdk.subscribeEventQuery({
+      query,
+      callback: wrappedCallback,
+    });
     Social.unsubEvents = () => subscription.cancel();
   },
 
-  fetch: async (callback: (models: SocialModel[]) => void, options: SocialOptions = DefaultSocialOptions) => {
+  fetch: async (
+    callback: (models: SocialModel[]) => void,
+    options: SocialOptions = DefaultSocialOptions,
+  ) => {
     if (!Social.sdk) {
       throw new Error("SDK not initialized");
     }
@@ -186,7 +239,10 @@ export const Social = {
     }
   },
 
-  sub: async (callback: (models: SocialModel[]) => void, options: SocialOptions = DefaultSocialOptions) => {
+  sub: async (
+    callback: (models: SocialModel[]) => void,
+    options: SocialOptions = DefaultSocialOptions,
+  ) => {
     if (!Social.sdk) {
       throw new Error("SDK not initialized");
     }

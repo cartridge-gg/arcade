@@ -3,7 +3,7 @@ import { MarketFiltersContext } from "@/context/market-filters";
 import { useProject } from "./project";
 import { useBalances, useCollection } from "./market-collections";
 import { SearchResult } from "@cartridge/ui";
-import { OrderModel, Token } from "@cartridge/marketplace";
+import { OrderModel, Token } from "@cartridge/arcade";
 import { useMarketplace } from "./marketplace";
 import { getChecksumAddress } from "starknet";
 import { MetadataHelper } from "@/helpers/metadata";
