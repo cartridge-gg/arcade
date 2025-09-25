@@ -331,7 +331,7 @@ export function Items({
           "overflow-hidden transition-all duration-500 ease-out",
           isConnected && selection.length > 0
             ? " max-h-36 opacity-100"
-            : "max-h-0 opacity-0"
+            : "max-h-0 opacity-0",
         )}
       >
         <Separator className="w-full bg-background-200" />
@@ -454,7 +454,7 @@ function Item({
           (token.metadata as unknown as { name: string })?.name || token.name
         }
         // @ts-expect-error TODO: Fix this type to include image in metadata
-        image={token.image}
+        image={token.image ?? collection.image}
         listingCount={token.orders.length}
         onClick={
           selectable && openable && isConnected

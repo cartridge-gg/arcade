@@ -112,7 +112,12 @@ export function useMarketCollectionFetcher({
                 },
               });
               if (token.items.length > 0) {
-                c.metadata = token.items[0].metadata;
+                const t = token.items[0];
+                if (c.metadata === "" && t.metadata !== "") {
+                  c.metadata = token.items[0].metadata;
+                }
+                // @ts-expect-error trust me i'm an engineer
+                c.token_id = token.items[0].token_id;
               }
             }
             yield contracts.items;

@@ -82,6 +82,16 @@ version = "0.1.0"
 source = "git+https://github.com/bal7hazar/graffiti.git?rev=e8b0854#e8b0854798ebbcebde504ea299ed556900564ff2"
 
 [[package]]
+name = "models"
+version = "0.0.0"
+dependencies = [
+ "dojo",
+ "dojo_cairo_macros",
+ "dojo_cairo_test",
+ "registry",
+]
+
+[[package]]
 name = "openzeppelin_access"
 version = "1.0.0"
 source = "registry+https://scarbs.xyz/"

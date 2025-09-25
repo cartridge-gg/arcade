@@ -11,7 +11,7 @@
       }
     },
     "scripts": {
-      "build": "sozo build --profile mainnet --typescript --bindings-output src",
+      "gen:types": "sozo build --profile mainnet --typescript --bindings-output src",
       "build:ts": "tsup",
       "prepare": "pnpm build:ts"
     },
