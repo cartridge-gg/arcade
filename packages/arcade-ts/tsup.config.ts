@@ -7,6 +7,7 @@ export default defineConfig(() => ({
   clean: true,
   format: ["cjs", "esm"],
   globalName: "starknet",
+  noExternal: ["@cartridge/models"],
   esbuildOptions(options, context) {
     // 🔥 forcer la résolution sur le code source local
     options.alias = {
