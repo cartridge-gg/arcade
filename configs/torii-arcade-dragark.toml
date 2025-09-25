@@ -1,0 +1,21 @@
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+world_address = "0x33e7c93e90e9f35e1daadb3ab1c59cca5944deff5a79e6167f587f13efe18cc"
+
+[indexing]
+allowed_origins = ["*"]
+polling_interval = 500
+pending = true
+transactions = true
+contracts = [
+    "ERC721:0x51d0844f96f86c7363cc7eb3ab939e0ef5b70939dcbc17895b2fa178d9af420",
+    "ERC721:0x537fa10cefbb8ff7e61e86e950746809f95faa7398f250f0063069b29bb7933",
+]
+
+namespaces = ["dragark"]
+world_block = 0
+
+[erc]
+max_metadata_tasks = 5
+
+[sql]
+historical = ["dragark-TrophyProgression"]
