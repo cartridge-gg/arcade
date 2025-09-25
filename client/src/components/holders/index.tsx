@@ -1,8 +1,6 @@
 import { Empty, Skeleton, Button } from "@cartridge/ui";
-import { useCallback, useMemo } from "react";
 import { UserAvatar } from "../user/avatar";
-import { useLocation, useNavigate } from "react-router-dom";
-import { joinPaths } from "@/helpers";
+import { useMemo } from "react";
 import { EditionModel } from "@cartridge/arcade";
 import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
@@ -27,22 +25,22 @@ export const Holders = ({
     resetSelected: clearAllFilters,
   } = useMetadataFiltersAdapter();
 
-  const navigate = useNavigate();
-  const location = useLocation();
-  const handleClick = useCallback(
-    (nameOrAddress: string) => {
-      // On click, we update the url param address to the address of the player
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = pathname.replace(/\/collection\/[^/]+/, "");
-      pathname = pathname.replace(/\/edition\/[^/]+/, "");
-      const player = nameOrAddress.toLowerCase();
-      pathname = joinPaths(pathname, `/player/${player}`);
-      navigate(pathname || "/");
-    },
-    [location, navigate],
-  );
+  // const navigate = useNavigate();
+  // const location = useLocation();
+  // const handleClick = useCallback(
+  //   (nameOrAddress: string) => {
+  //     // On click, we update the url param address to the address of the player
+  //     let pathname = location.pathname;
+  //     pathname = pathname.replace(/\/player\/[^/]+/, "");
+  //     pathname = pathname.replace(/\/tab\/[^/]+/, "");
+  //     pathname = pathname.replace(/\/collection\/[^/]+/, "");
+  //     pathname = pathname.replace(/\/edition\/[^/]+/, "");
+  //     const player = nameOrAddress.toLowerCase();
+  //     pathname = joinPaths(pathname, `/player/${player}`);
+  //     navigate(pathname || "/");
+  //   },
+  //   [location, navigate],
+  // );
 
   // Filter holders based on metadata filters
   const filteredOwners = useMemo(() => {
@@ -171,8 +169,9 @@ export const Holders = ({
           ).map(([holderAddress, holder], index) => (
             <div
               key={`${holder.username}-${holderAddress}-${index}`}
-              className="flex items-center gap-3 bg-background-200 hover:bg-background-300 cursor-pointer text-foreground-100 font-medium text-sm h-10 w-full"
-              onClick={() => handleClick(holderAddress)}
+              // className="flex items-center gap-3 bg-background-200 hover:bg-background-300 cursor-pointer text-foreground-100 font-medium text-sm h-10 w-full"
+              className="flex items-center gap-3 bg-background-200 text-foreground-100 font-medium text-sm h-10 w-full"
+              // onClick={() => handleClick(holderAddress)}
             >
               <div className="flex items-center gap-2 w-1/2 px-3 py-1">
                 <p className="w-8 text-foreground-400 font-normal">
