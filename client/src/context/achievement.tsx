@@ -20,6 +20,7 @@ import { useUsernames } from "@/hooks/account";
 import { getChecksumAddress } from "starknet";
 import { useAddress } from "@/hooks/address";
 import { useArcade } from "@/hooks/arcade";
+import { useAccounts } from "@/collections";
 
 type AchievementContextType = {
   achievements: { [game: string]: Item[] };
@@ -120,7 +121,18 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
     return uniqueAddresses;
   }, [players]);
 
-  const { usernames } = useUsernames({ addresses });
+  const { data } = useAccounts();
+
+  const usernames = useMemo(() => {
+    if (!data || addresses.length === 0) return [];
+    return addresses.map((address) => {
+      return {
+        address: getChecksumAddress(address),
+        username: data.get(getChecksumAddress(address)) || address.slice(0, 9),
+      };
+    }, {} as { [key: string]: string });
+  }, [data, addresses]);
+
   const usernamesData = useMemo(() => {
     const data: { [key: string]: string | undefined } = {};
     addresses.forEach((address) => {
