@@ -15,7 +15,7 @@ import {
 } from "@cartridge/ui";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
-import { type AllowArray, byteArray, type Call, constants } from "starknet";
+import { type AllowArray, byteArray, type Call } from "starknet";
 import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type UseFormReturn } from "react-hook-form";
@@ -85,7 +85,6 @@ export function Register({
           editionId: edition.id,
         };
         const calls = provider.registry.remove_edition(args);
-        controller.switchStarknetChain(constants.StarknetChainId.SN_MAIN);
         await account.execute(calls);
         setClose(true);
       } catch (error) {
@@ -150,7 +149,6 @@ export function Register({
           } else {
             calls = provider.registry.update_edition(args);
           }
-          controller.switchStarknetChain(constants.StarknetChainId.SN_MAIN);
           await account.execute(calls);
           setClose(true);
         } catch (error) {

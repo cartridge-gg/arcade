@@ -5,7 +5,6 @@ import type { EditionModel } from "@cartridge/arcade";
 import placeholder from "@/assets/placeholder.svg";
 import { useAccount } from "@starknet-react/core";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { type Chain, mainnet } from "@starknet-react/chains";
 import { type Collection, CollectionType } from "@/context/collection";
 import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
@@ -21,7 +20,7 @@ interface CollectionsProps {
 }
 
 export const Collections = ({ collections, status }: CollectionsProps) => {
-  const { editions, chains } = useArcade();
+  const { editions } = useArcade();
 
   switch (status) {
     case "loading": {
@@ -35,7 +34,6 @@ export const Collections = ({ collections, status }: CollectionsProps) => {
               key={collection.address}
               collection={collection}
               editions={editions}
-              chains={chains}
             />
           ))}
         </div>
@@ -47,11 +45,9 @@ export const Collections = ({ collections, status }: CollectionsProps) => {
 function Item({
   collection,
   editions,
-  chains,
 }: {
   collection: Collection;
   editions: EditionModel[];
-  chains: Chain[];
 }) {
   const { isSelf, address } = useAddress();
   const { connector } = useAccount();
@@ -62,14 +58,6 @@ function Item({
       (edition) => edition.config.project === collection.project,
     );
   }, [editions, collection]);
-
-  const chain: Chain = useMemo(() => {
-    return (
-      chains.find(
-        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
-      ) || mainnet
-    );
-  }, [chains, edition]);
 
   const listingCount = useMemo(() => {
     const collectionOrders = orders[getChecksumAddress(collection.address)];
@@ -136,7 +124,6 @@ function Item({
       options.push("preset=cartridge");
     }
     const path = `account/${username}/inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-    controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
     controller.openProfileAt(path);
   }, [
     collection.address,

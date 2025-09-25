@@ -7,7 +7,6 @@ import { useAccount } from "@starknet-react/core";
 import placeholder from "@/assets/placeholder.svg";
 import { useAddress } from "@/hooks/address";
 import type { Token } from "@/context/token";
-import { type Chain, mainnet } from "@starknet-react/chains";
 import type { EditionModel } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
@@ -22,7 +21,7 @@ interface TokensProps {
 }
 
 export const Tokens = ({ tokens, credits }: TokensProps) => {
-  const { editions, chains } = useArcade();
+  const { editions } = useArcade();
   const { edition } = useProject();
   const [unfolded, setUnfolded] = useState(false);
 
@@ -45,7 +44,6 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
         key={credits.metadata.address}
         token={credits}
         editions={editions}
-        chains={chains}
         clickable={false}
       />
       {filteredTokens
@@ -55,7 +53,6 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
             key={token.metadata.address}
             token={token}
             editions={editions}
-            chains={chains}
           />
         ))}
       <div
@@ -82,12 +79,10 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
 function Item({
   token,
   editions,
-  chains,
   clickable = true,
 }: {
   token: Token;
   editions: EditionModel[];
-  chains: Chain[];
   clickable?: boolean;
 }) {
   const { isSelf } = useAddress();
@@ -98,14 +93,6 @@ function Item({
       (edition) => edition.config.project === token.metadata.project,
     );
   }, [editions, token]);
-
-  const chain: Chain = useMemo(() => {
-    return (
-      chains.find(
-        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
-      ) || mainnet
-    );
-  }, [chains, edition]);
 
   const handleClick = useCallback(async () => {
     if (!token.metadata.address) return;
@@ -129,7 +116,6 @@ function Item({
       options.push(`preset=cartridge`);
     }
     const path = `account/${username}/inventory/token/${token.metadata.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-    controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
     controller.openProfileAt(path);
   }, [token, connector, edition]);
 

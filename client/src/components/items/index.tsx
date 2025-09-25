@@ -19,7 +19,6 @@ import {
 } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { Chain, mainnet } from "@starknet-react/chains";
 import { useArcade } from "@/hooks/arcade";
 import { OrderModel, SaleEvent } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
@@ -68,7 +67,7 @@ export function Items({
   const [search, setSearch] = useState<string>("");
   const [selection, setSelection] = useState<Asset[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
-  const { chains, provider } = useArcade();
+  const { provider } = useArcade();
 
   // Use the adapter hook which includes Buy Now/Show All functionality
   const {
@@ -105,14 +104,6 @@ export function Items({
     connect({ connector: connectors[0] });
   }, [connect, connectors]);
 
-  const chain: Chain = useMemo(() => {
-    return (
-      chains.find(
-        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
-      ) || mainnet
-    );
-  }, [chains, edition]);
-
   const handleReset = useCallback(() => {
     setSelection([]);
   }, [setSelection]);
@@ -146,10 +137,9 @@ export function Items({
       options.push(`address=${getChecksumAddress(token.owner)}`);
       options.push("purchaseView=true");
       const path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-      controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain, provider.provider],
+    [connector, edition, provider.provider],
   );
 
   const handlePurchase = useCallback(
@@ -194,10 +184,9 @@ export function Items({
         options.push(`tokenIds=${[token.token_id].join(",")}`);
         path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
       }
-      controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
       controller.openProfileAt(path);
     },
-    [connector, edition, chain, provider.provider],
+    [connector, edition, provider.provider],
   );
 
   // Set up virtualizer for rows

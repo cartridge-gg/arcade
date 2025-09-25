@@ -3,7 +3,6 @@ import type { Item } from "@/hooks/achievements";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Socials } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
-import { constants } from "starknet";
 import { toast } from "sonner";
 import { useAccount } from "@starknet-react/core";
 import type ControllerConnector from "@cartridge/connector/controller";
@@ -106,7 +105,6 @@ function Group({
           const calls = pinned
             ? provider.social.unpin({ achievementId })
             : provider.social.pin({ achievementId });
-          controller.switchStarknetChain(constants.StarknetChainId.SN_MAIN);
           const res = await account.execute(calls);
           if (res) {
             toast.success(

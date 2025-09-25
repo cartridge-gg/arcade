@@ -12,7 +12,6 @@ import { MetricsProvider } from "./metrics";
 import { OwnershipsProvider } from "./ownerships";
 import { PostHogProvider } from "./posthog";
 import { SidebarProvider } from "./sidebar";
-import { MarketplaceProvider } from "./marketplace";
 import { MarketCollectionProvider } from "./market-collection";
 import { MarketFiltersProvider } from "./market-filters";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -32,31 +31,29 @@ export function Provider({ children }: PropsWithChildren) {
         >
           <IndexerAPIProvider credentials="omit">
             <QueryClientProvider client={qc}>
-              <MarketplaceProvider>
-                <ArcadeProvider>
-                  <MarketCollectionProvider>
-                    <StarknetProvider>
-                      <OwnershipsProvider>
-                        <CollectionProvider>
-                          <TokenProvider>
-                            <AchievementProvider>
-                              <ActivitiesProvider>
-                                <MetricsProvider>
-                                  <MarketFiltersProvider>
-                                    <SidebarProvider>
-                                      {children}
-                                    </SidebarProvider>
-                                  </MarketFiltersProvider>
-                                </MetricsProvider>
-                              </ActivitiesProvider>
-                            </AchievementProvider>
-                          </TokenProvider>
-                        </CollectionProvider>
-                      </OwnershipsProvider>
-                    </StarknetProvider>
-                  </MarketCollectionProvider>
-                </ArcadeProvider>
-              </MarketplaceProvider>
+              <ArcadeProvider>
+                <MarketCollectionProvider>
+                  <StarknetProvider>
+                    <OwnershipsProvider>
+                      <CollectionProvider>
+                        <TokenProvider>
+                          <AchievementProvider>
+                            <ActivitiesProvider>
+                              <MetricsProvider>
+                                <MarketFiltersProvider>
+                                  <SidebarProvider>
+                                    {children}
+                                  </SidebarProvider>
+                                </MarketFiltersProvider>
+                              </MetricsProvider>
+                            </ActivitiesProvider>
+                          </AchievementProvider>
+                        </TokenProvider>
+                      </CollectionProvider>
+                    </OwnershipsProvider>
+                  </StarknetProvider>
+                </MarketCollectionProvider>
+              </ArcadeProvider>
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>

@@ -14,20 +14,23 @@ import type {
   GetTransactionReceiptResponse,
 } from "starknet";
 
-import { BaseProvider, type InvokeContext } from "@cartridge/internal";
+import { BaseProvider, type InvokeContext } from "./base";
 
 import { NAMESPACE } from "../constants";
 import { Social } from "./social";
 import { Registry } from "./registry";
 import { Slot } from "./slot";
 import { TransactionType } from "./types";
+import { setupWorld } from "@cartridge/models";
 
 export { TransactionType };
 
 export class ArcadeProvider extends BaseProvider {
+  public world: ReturnType<typeof setupWorld>;
   public social: Social;
   public registry: Registry;
   public slot: Slot;
+  public marketplace: ReturnType<typeof setupWorld>["Marketplace"];
 
   /**
    * Create a new ArcadeProvider instance
@@ -39,7 +42,8 @@ export class ArcadeProvider extends BaseProvider {
       namespace: NAMESPACE,
       torii: { ToriiClient: torii.ToriiClient },
     });
-
+    this.world = setupWorld(this);
+    this.marketplace = this.world.Marketplace;
     this.social = new Social(this.manifest);
     this.registry = new Registry(this.manifest);
     this.slot = new Slot(this.manifest);

@@ -6,8 +6,6 @@ export default defineConfig(() => ({
   clean: true,
   format: ["cjs", "esm"],
   globalName: "starknet",
-  noExternal: ["@cartridge/internal", "@cartridge/marketplace"],
-  external: ["@dojoengine/torii-wasm"],
   esbuildOptions(options, context) {
     if (context.format === "iife") {
       options.platform = "browser";

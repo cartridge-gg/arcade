@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   ArcadeProvider as ExternalProvider,
+  Marketplace,
   Registry,
   Social,
   PinEvent,
@@ -20,6 +21,14 @@ import {
   type RegistryOptions,
   FollowEvent,
   EditionModel,
+  BookModel,
+  OrderModel,
+  ListingEvent,
+  SaleEvent,
+  MarketplaceModel,
+  CategoryType,
+  StatusType,
+  MarketplaceOptions,
 } from "@cartridge/arcade";
 import {
   constants,
@@ -61,6 +70,18 @@ interface ArcadeContextType {
   chains: Chain[];
   player: string | undefined;
   clients: { [key: string]: torii.ToriiClient };
+  book: BookModel | null;
+  orders: {
+    [collection: string]: { [token: string]: { [order: string]: OrderModel } };
+  };
+  listings: {
+    [collection: string]: { [token: string]: { [listing: string]: ListingEvent } };
+  };
+  sales: {
+    [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
+  };
+  addOrder: (order: OrderModel) => void;
+  removeOrder: (order: OrderModel) => void;
   setPlayer: (address: string | undefined) => void;
 }
 
@@ -76,6 +97,18 @@ export const ArcadeContext = createContext<ArcadeContextType | null>(null);
  * @throws {Error} If ArcadeProvider is used more than once in the component tree
  */
 export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
+  const [book, setBook] = useState<BookModel | null>(null);
+  const [orders, setOrders] = useState<{
+    [collection: string]: { [token: string]: { [order: string]: OrderModel } };
+  }>({});
+  const [listings, setListings] = useState<{
+    [collection: string]: {
+      [token: string]: { [listing: string]: ListingEvent };
+    };
+  }>({});
+  const [sales, setSales] = useState<{
+    [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
+  }>({});
   const [player, setPlayer] = useState<string | undefined>();
   const currentValue = useContext(ArcadeContext);
   const [pins, setPins] = useState<{ [playerId: string]: string[] }>({});
@@ -145,6 +178,93 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     // TODO: Update here to select either Mainnet or Sepolia
     () => new ExternalProvider(CHAIN_ID),
     [],
+  );
+
+
+  const removeOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => {
+        const newOrders = { ...prev };
+        if (newOrders[collection]?.[token]?.[order.id]) {
+          delete newOrders[collection][token][order.id];
+        }
+        return newOrders;
+      });
+    },
+    [setOrders],
+  );
+
+  const addOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => ({
+        ...prev,
+        [collection]: {
+          ...(prev[collection] || {}),
+          [token]: {
+            ...(prev[collection]?.[token] || {}),
+            [order.id]: order,
+          },
+        },
+      }));
+    },
+    [setOrders],
+  );
+
+  const handleMarketplaceEntities = useCallback(
+    (entities: MarketplaceModel[]) => {
+      const now = Date.now();
+      entities.forEach((entity: MarketplaceModel) => {
+        if (BookModel.isType(entity as BookModel)) {
+          const book = entity as BookModel;
+          if (book.version === 0) return;
+          setBook(book);
+        } else if (OrderModel.isType(entity as OrderModel)) {
+          const order = entity as OrderModel;
+          if (order.expiration * 1000 < now) return;
+          if (order.category.value !== CategoryType.Sell) return;
+          if (order.status.value === StatusType.Placed) {
+            addOrder(order);
+          } else {
+            removeOrder(order);
+          }
+        } else if (SaleEvent.isType(entity as SaleEvent)) {
+          const sale = entity as SaleEvent;
+          const order = sale.order;
+          const collection = getChecksumAddress(order.collection);
+          const token = order.tokenId.toString();
+          setSales((prev) => ({
+            ...prev,
+            [collection]: {
+              ...(prev[collection] || {}),
+              [token]: {
+                ...(prev[collection]?.[token] || {}),
+                [order.id]: sale,
+              },
+            },
+          }));
+        } else if (ListingEvent.isType(entity as ListingEvent)) {
+          const listing = entity as ListingEvent;
+          const order = listing.order;
+          const collection = getChecksumAddress(order.collection);
+          const token = order.tokenId.toString();
+          setListings((prev) => ({
+            ...prev,
+            [collection]: {
+              ...(prev[collection] || {}),
+              [token]: {
+                ...(prev[collection]?.[token] || {}),
+                [order.id]: listing,
+              },
+            },
+          }));
+        }
+      });
+    },
+    [addOrder, removeOrder, setBook, setListings, setSales],
   );
 
   const handlePinEvent = useCallback((event: PinEvent) => {
@@ -262,6 +382,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     const initialize = async () => {
       await Social.init(CHAIN_ID);
       await Registry.init(CHAIN_ID);
+      await Marketplace.init(CHAIN_ID);
       setInitialized(true);
     };
     initialize();
@@ -290,6 +411,21 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       Registry.unsub();
     };
   }, [initialized, handleRegistryModels]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    const options: MarketplaceOptions = {
+      book: true,
+      order: true,
+      sale: true,
+      listing: true,
+    };
+    Marketplace.fetch(handleMarketplaceEntities, options);
+    Marketplace.sub(handleMarketplaceEntities, options);
+    return () => {
+      Marketplace.unsub();
+    };
+  }, [initialized, handleMarketplaceEntities]);
 
   useEffect(() => {
     const getClients = async () => {
@@ -354,6 +490,12 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         chains,
         clients,
         player,
+        book,
+        orders,
+        listings,
+        sales,
+        addOrder,
+        removeOrder,
         setPlayer,
       }}
     >
