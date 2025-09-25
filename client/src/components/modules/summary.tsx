@@ -1,15 +1,15 @@
 import {
-  type AchievementContentProps,
-  type AchievementPinProps,
+  AchievementContentProps,
+  AchievementPinProps,
   AchievementProgress,
   Card,
   CardContent,
-  type Socials,
+  Socials,
 } from "@cartridge/ui";
 import { AchievementPinIcons } from "./achievement-pin-icons";
-import { cva, type VariantProps } from "class-variance-authority";
-import { type HTMLAttributes, useMemo } from "react";
-import ArcadeGameHeader, { type Metadata } from "./game-header";
+import { cva, VariantProps } from "class-variance-authority";
+import { HTMLAttributes, useMemo } from "react";
+import ArcadeGameHeader, { Metadata } from "./game-header";
 import { cn } from "@/lib/utils";
 
 export interface AchievementSummaryProps

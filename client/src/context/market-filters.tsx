@@ -1,6 +1,6 @@
 import {
   createContext,
-  type ReactNode,
+  ReactNode,
   useCallback,
   useContext,
   useMemo,

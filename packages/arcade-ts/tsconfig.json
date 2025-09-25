@@ -12,10 +12,9 @@
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
-    "esModuleInterop": true,
-    "jsx": "react-jsx"
+    "esModuleInterop": true
   },
   "include": ["src/**/*.ts", "src/**/*.json", "../../contracts/manifest_*.json"],
   "skipLibCheck": true,
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist"]
 }

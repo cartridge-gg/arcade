@@ -1,5 +1,5 @@
 import { useProject } from "@/hooks/project";
-import { defaultTheme, type ControllerTheme } from "@cartridge/presets";
+import { defaultTheme, ControllerTheme } from "@cartridge/presets";
 import { useThemeEffect } from "@cartridge/ui";
 import { createContext, useCallback, useEffect, useState } from "react";
 

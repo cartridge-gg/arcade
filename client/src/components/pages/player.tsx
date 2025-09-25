@@ -6,7 +6,7 @@ import {
   Button,
   cn,
   TabsContent,
-  type TabValue,
+  TabValue,
   TimesIcon,
   UserAddIcon,
   UserCheckIcon,
@@ -20,7 +20,7 @@ import AchievementPlayerHeader from "../modules/player-header";
 import { UserAvatar } from "../user/avatar";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
-import type ControllerConnector from "@cartridge/connector/controller";
+import ControllerConnector from "@cartridge/connector/controller";
 import { constants, getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/project";

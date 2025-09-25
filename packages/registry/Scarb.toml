@@ -5,17 +5,20 @@ edition.workspace = true
 
 [dependencies]
 dojo.workspace = true
-dojo_cairo_macros.workspace = true
+dojo_macros.workspace = true
 starknet.workspace = true
 graffiti.workspace = true
 collection = { path = "../collection" }
 
 [dev-dependencies]
-openzeppelin_token.workspace = true
-openzeppelin_introspection.workspace = true
-openzeppelin_access.workspace = true
-openzeppelin_upgrades.workspace = true
+openzeppelin_token = "1.0.0"
+openzeppelin_introspection = "1.0.0"
+openzeppelin_access = "1.0.0"
+openzeppelin_upgrades = "1.0.0"
 dojo_cairo_test.workspace = true
 cairo_test.workspace = true
 
 [lib]
+
+[[target.starknet-contract]]
+build-external-contracts = ["dojo::world::world_contract::world"]

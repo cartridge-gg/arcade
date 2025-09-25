@@ -2,7 +2,7 @@ import {
   ClockIcon,
   cn,
   CoinsIcon,
-  type StateIconProps,
+  StateIconProps,
   TrophyIcon,
 } from "@cartridge/ui";
 import { useMemo } from "react";

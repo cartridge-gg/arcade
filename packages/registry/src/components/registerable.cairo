@@ -8,14 +8,13 @@ pub mod RegisterableComponent {
 
     // Dojo imports
 
-    use dojo::world::{IWorldDispatcherTrait, WorldStorage};
+    use dojo::world::WorldStorage;
 
     // Internal imports
 
     use registry::constants::COLLECTION_ID;
     use registry::models::access::{AccessAssert, AccessTrait};
     use registry::models::collection::{CollectionAssert, CollectionTrait};
-    use registry::models::collection_edition::{CollectionEditionAssert, CollectionEditionTrait};
     use registry::models::edition::{EditionAssert, EditionTrait};
     use registry::models::game::{GameAssert, GameTrait};
     use registry::models::unicity::{UnicityAssert, UnicityTrait};
@@ -111,114 +110,6 @@ pub mod RegisterableComponent {
             access.revoke();
             // [Effect] Store access
             store.set_access(@access);
-        }
-    }
-
-    #[generate_trait]
-    pub impl InternalCollectionImpl<
-        TContractState, +HasComponent<TContractState>,
-    > of InternalCollectionTrait<TContractState> {
-        fn register(
-            self: @ComponentState<TContractState>,
-            world: WorldStorage,
-            collection_address: ContractAddress,
-            namespace: ByteArray,
-            contract_type: ByteArray,
-            instance_name: ByteArray,
-        ) {
-            // [Effect] Emit a new registered contract
-            world
-                .dispatcher
-                .register_external_contract(
-                    namespace: namespace,
-                    contract_name: contract_type,
-                    instance_name: instance_name,
-                    contract_address: collection_address,
-                    block_number: 1 // Torii is considering block-number - 1 to start the indexing
-                )
-        }
-        fn register_admin(
-            self: @ComponentState<TContractState>,
-            world: WorldStorage,
-            collection_address: ContractAddress,
-            namespace: ByteArray,
-            contract_type: ByteArray,
-            instance_name: ByteArray,
-        ) {
-            // [Setup] Datastore
-            let mut store: Store = StoreTrait::new(world);
-
-            // [Check] Caller is allowed
-            let caller_access = store.get_access(starknet::get_caller_address().into());
-            caller_access.assert_is_allowed(Role::Admin);
-
-            // [Check] Collection type is valid
-            CollectionAssert::assert_valid_type(@contract_type);
-
-            // [Effect] Emit a new registered contract
-            world
-                .dispatcher
-                .register_external_contract(
-                    namespace: namespace,
-                    contract_name: contract_type,
-                    instance_name: instance_name,
-                    contract_address: collection_address,
-                    block_number: 1 // Torii is considering block-number - 1 to start the indexing
-                )
-        }
-
-        fn associate(
-            self: @ComponentState<TContractState>,
-            world: WorldStorage,
-            caller_id: ContractAddress,
-            collection_address: ContractAddress,
-            edition_id: felt252,
-        ) {
-            // [Setup] Datastore
-            let mut store: Store = StoreTrait::new(world);
-
-            // [Check] Edition exists
-            let edition = store.get_edition(edition_id);
-            edition.assert_does_exist();
-
-            // [Check] Caller is allowed
-            self.assert_is_authorized(world, caller_id, edition.id.into());
-
-            // [Check] Collection edition is not already registered
-            let collection_id: felt252 = collection_address.into();
-            let collection_edition = store.get_collection_edition(collection_id, edition_id);
-            collection_edition.assert_does_not_exist();
-
-            // [Effect] Associate collection edition
-            let collection_edition = CollectionEditionTrait::new(collection_address, edition_id);
-            store.set_collection_edition(@collection_edition);
-        }
-
-        fn dissociate(
-            self: @ComponentState<TContractState>,
-            world: WorldStorage,
-            caller_id: ContractAddress,
-            collection_address: ContractAddress,
-            edition_id: felt252,
-        ) {
-            // [Setup] Datastore
-            let mut store: Store = StoreTrait::new(world);
-
-            // [Check] Edition exists
-            let edition = store.get_edition(edition_id);
-            edition.assert_does_exist();
-
-            // [Check] Caller is allowed
-            self.assert_is_authorized(world, caller_id, edition.id.into());
-
-            // [Check] Collection edition exists
-            let collection_id: felt252 = collection_address.into();
-            let mut collection_edition = store.get_collection_edition(collection_id, edition_id);
-            collection_edition.assert_does_exist();
-
-            // [Effect] Dissociate collection edition
-            collection_edition.disable();
-            store.set_collection_edition(@collection_edition);
         }
     }
 

@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ArcadeProvider } from "./arcade";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";

@@ -2,10 +2,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@cartridge/ui/utils";
 import {
   ArcadeDiscoveryEvent,
-  type ArcadeDiscoveryEventProps,
+  ArcadeDiscoveryEventProps,
 } from "./discovery-event";
-import { cva, type VariantProps } from "class-variance-authority";
-import { type HTMLAttributes, useEffect, useRef, useState } from "react";
+import { cva, VariantProps } from "class-variance-authority";
+import { HTMLAttributes, useEffect, useRef, useState } from "react";
 
 interface ArcadeDiscoveryGroupProps
   extends HTMLAttributes<HTMLDivElement>,

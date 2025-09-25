@@ -1,7 +1,7 @@
 import { Button } from "@cartridge/ui";
 import { useSidebar } from "@/hooks/sidebar";
 import { cn } from "@cartridge/ui/utils";
-import type { SVGProps } from "react";
+import { SVGProps } from "react";
 
 type SidebarToggleProps = {
   className?: string;

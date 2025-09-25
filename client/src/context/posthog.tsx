@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { PropsWithChildren } from "react";
 import { PostHogProvider as PH } from "posthog-js/react";
 
 export function PostHogProvider({ children }: PropsWithChildren) {

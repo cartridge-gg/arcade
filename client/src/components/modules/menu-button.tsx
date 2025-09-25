@@ -1,7 +1,7 @@
 import { SelectTrigger } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, type VariantProps } from "class-variance-authority";
-import React, { type HTMLAttributes } from "react";
+import { cva, VariantProps } from "class-variance-authority";
+import React, { HTMLAttributes } from "react";
 
 const arcadeMenuButtonVariants = cva("p-0 flex items-center justify-center", {
   variants: {

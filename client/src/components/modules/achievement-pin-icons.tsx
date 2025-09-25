@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, VariantProps } from "class-variance-authority";
 import { AchievementPinIcon } from "./achievement-pin-icon";
 
 const achievementPinsVariants = cva("flex items-center gap-2", {

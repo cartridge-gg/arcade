@@ -1,6 +1,6 @@
 import {
   createContext,
-  type ReactNode,
+  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -8,16 +8,16 @@ import {
 } from "react";
 import {
   MarketplaceProvider as ExternalProvider,
-  type MarketplaceModel,
+  MarketplaceModel,
   Marketplace,
   OrderModel,
-  type MarketplaceOptions,
+  MarketplaceOptions,
   CategoryType,
   ListingEvent,
   SaleEvent,
   StatusType,
   BookModel,
-} from "@cartridge/arcade";
+} from "@cartridge/marketplace";
 import { constants, getChecksumAddress } from "starknet";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;

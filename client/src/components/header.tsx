@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Connection } from "./connection";
 import ArcadeHeader from "./modules/arcade-header";
 
-type HeaderProps = {};
+interface HeaderProps {}
 
 export const Header = ({}: HeaderProps) => {
   const navigate = useNavigate();

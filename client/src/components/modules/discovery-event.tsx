@@ -1,7 +1,7 @@
 import { getTime } from "@/helpers";
 import { CardTitle, cn, Thumbnail } from "@cartridge/ui";
-import { cva, type VariantProps } from "class-variance-authority";
-import { useMemo, type HTMLAttributes, useState, useEffect } from "react";
+import { cva, VariantProps } from "class-variance-authority";
+import { useMemo, HTMLAttributes, useState, useEffect } from "react";
 
 export interface ArcadeDiscoveryEventProps
   extends HTMLAttributes<HTMLDivElement>,

@@ -7,5 +7,5 @@ use arcade::tests::setup::setup::spawn;
 #[test]
 fn test_setup() {
     // [Setup]
-    spawn();
+    let (_, _, _) = spawn();
 }

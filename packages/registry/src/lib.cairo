@@ -16,7 +16,6 @@ pub mod types {
 pub mod models {
     pub mod access;
     pub mod collection;
-    pub mod collection_edition;
     pub mod edition;
     pub mod game;
     pub mod index;
@@ -26,4 +25,15 @@ pub mod models {
 pub mod components {
     pub mod initializable;
     pub mod registerable;
+}
+
+#[cfg(test)]
+mod tests {
+    mod setup;
+    mod test_registerable;
+
+    mod mocks {
+        pub mod collection;
+        pub mod register;
+    }
 }

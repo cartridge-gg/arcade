@@ -1,5 +1,5 @@
-import type { MetadataAttribute } from "@/context/market-filters";
-import type { Token } from "@dojoengine/torii-wasm";
+import { MetadataAttribute } from "@/context/market-filters";
+import { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
 
 const JWT =
@@ -215,11 +215,7 @@ export const MetadataHelper = {
         metadata = JSON.parse(token.metadata);
         const response = await fetch(metadata.image);
         if (response.ok) {
-          const image = metadata.image;
-          if (image.startsWith("ipfs://")) {
-            return image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
-          }
-          return image;
+          return metadata.image;
         }
       } catch (error) {
         console.error("Error parsing metadata:", error);

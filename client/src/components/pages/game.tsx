@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { TabsContent, Thumbnail, type TabValue } from "@cartridge/ui";
+import { TabsContent, Thumbnail, TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { LeaderboardScene } from "../scenes/leaderboard";
 import { useLocation, useNavigate } from "react-router-dom";

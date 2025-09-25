@@ -202,7 +202,7 @@ export type UseTokenFetcherResult = {
  * @example
  * ```ts
  * const { tokens, status, error, refetch } = useTokenFetcher(
- *   ['arcade-blobarena', 'arcade-main'],
+ *   ['arcade-blobarena', 'arcade-mainnet'],
  *   '0x123...'
  * );
  * ```
@@ -405,7 +405,7 @@ function processNFTCollections(
     let innerMeta = undefined;
     try {
       innerMeta = JSON.parse(metadata?.metadata as string);
-    } catch (err) {}
+    } catch (err) { }
 
     // Determine collection type (could be enhanced with actual logic)
     // For now, default to ERC721
@@ -448,7 +448,7 @@ function getAssetImage(
  * @example
  * ```ts
  * const { collections, status, error, refetch } = useCollectibles(
- *   ['arcade-blobarena', 'arcade-main'],
+ *   ['arcade-blobarena', 'arcade-mainnet'],
  *   '0x123...'
  * );
  * ```
