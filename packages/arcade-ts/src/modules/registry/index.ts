@@ -12,7 +12,7 @@ import {
   ToriiQueryBuilder,
   ToriiResponse,
 } from "@dojoengine/sdk";
-import { SchemaType } from "@cartridge/models";
+import { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { RegistryOptions, DefaultRegistryOptions } from "./options";
 import { Helpers } from "../../helpers";

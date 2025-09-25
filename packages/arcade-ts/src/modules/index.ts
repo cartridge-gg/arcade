@@ -1,5 +1,5 @@
 import { init } from "@dojoengine/sdk";
-import { SchemaType } from "@cartridge/models";
+import { SchemaType } from "../bindings";
 import { constants, shortString } from "starknet";
 
 import { configs } from "../configs";

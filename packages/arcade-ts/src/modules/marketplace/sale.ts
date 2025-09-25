@@ -1,5 +1,5 @@
 import { NAMESPACE } from "../../constants";
-import type { SchemaType } from "@cartridge/models";
+import type { SchemaType } from "../../bindings";
 import type { ParsedEntity } from "@dojoengine/sdk";
 import { type MarketplaceModel, type OrderInterface, OrderModel } from "..";
 import { getChecksumAddress } from "starknet";

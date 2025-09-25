@@ -19,7 +19,7 @@ import {
   ToriiQueryBuilder,
   type ToriiResponse,
 } from "@dojoengine/sdk";
-import type { SchemaType } from "@cartridge/models";
+import type { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { MarketplaceOptions, DefaultMarketplaceOptions } from "./options";
 import type { Token, ToriiClient } from "@dojoengine/torii-wasm";

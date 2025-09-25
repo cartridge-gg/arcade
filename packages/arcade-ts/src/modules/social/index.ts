@@ -15,7 +15,7 @@ import {
 } from "@dojoengine/sdk";
 import { NAMESPACE } from "../../constants";
 import { SocialOptions, DefaultSocialOptions } from "./options";
-import type { SchemaType } from "@cartridge/models";
+import type { SchemaType } from "../../bindings";
 
 export * from "./policies";
 export {

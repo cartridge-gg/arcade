@@ -21,7 +21,7 @@ import { Social } from "./social";
 import { Registry } from "./registry";
 import { Slot } from "./slot";
 import { TransactionType } from "./types";
-import { setupWorld } from "@cartridge/models";
+import { setupWorld } from "../bindings";
 
 export { TransactionType };
 
