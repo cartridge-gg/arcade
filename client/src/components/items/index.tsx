@@ -454,7 +454,7 @@ function Item({
           (token.metadata as unknown as { name: string })?.name || token.name
         }
         // @ts-expect-error TODO: Fix this type to include image in metadata
-        image={token.metadata.image}
+        image={token.image}
         listingCount={token.orders.length}
         onClick={
           selectable && openable && isConnected
