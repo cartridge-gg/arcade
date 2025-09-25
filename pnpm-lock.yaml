@@ -320,9 +320,6 @@ importers:
 
   packages/arcade-ts:
     dependencies:
-      '@cartridge/models':
-        specifier: workspace:*
-        version: link:../models
       '@dojoengine/core':
         specifier: 'catalog:'
         version: 1.7.1(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
