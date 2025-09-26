@@ -29,6 +29,7 @@ export interface ArcadeMenuItemProps
   active?: boolean;
   className?: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export const ArcadeMenuItem = React.forwardRef<
@@ -36,7 +37,7 @@ export const ArcadeMenuItem = React.forwardRef<
   ArcadeMenuItemProps
 >(
   (
-    { Icon, value, label, active, className, variant, size, onClick, ...props },
+    { Icon, value, label, active, className, variant, size, onClick, disabled, ...props },
     ref,
   ) => {
     const handleFocus = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
@@ -49,17 +50,20 @@ export const ArcadeMenuItem = React.forwardRef<
         value={value}
         className={cn(
           "w-full p-0 flex cursor-pointer select-none transition-colors data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+          disabled && "opacity-50 cursor-not-allowed",
           className,
         )}
         ref={ref}
+        disabled={disabled}
         {...props}
       >
         <SelectItem
-          onSelect={onClick}
+          onSelect={disabled ? undefined : onClick}
           onFocus={handleFocus}
           data-active={active}
           value={value}
           simplified
+          disabled={disabled}
           className={cn(arcadeMenuItemVariants({ variant, size }))}
         >
           <div className={cn("flex justify-start items-center gap-1")}>
@@ -72,4 +76,5 @@ export const ArcadeMenuItem = React.forwardRef<
   },
 );
 
+// Updated to support disabled state - TypeScript refresh
 export default ArcadeMenuItem;
