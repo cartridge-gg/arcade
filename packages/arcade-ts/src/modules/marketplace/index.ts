@@ -1,10 +1,6 @@
 import { initArcadeSDK } from "..";
 import { getChecksumAddress, type constants } from "starknet";
-import {
-  Moderator,
-  ModeratorModel,
-  type ModeratorInterface,
-} from "./moderator";
+import { Moderator, ModeratorModel, type ModeratorInterface } from "./moderator";
 import { Book, BookModel, type BookInterface } from "./book";
 import { Order, OrderModel, type OrderInterface } from "./order";
 import { Listing, ListingEvent, type ListingInterface } from "./listing";
@@ -36,22 +32,9 @@ export {
   SaleEvent,
   MarketplaceOptions,
 };
-export type MarketplaceModel =
-  | ModeratorModel
-  | BookModel
-  | OrderModel
-  | ListingEvent
-  | OfferEvent
-  | SaleEvent;
+export type MarketplaceModel = ModeratorModel | BookModel | OrderModel | ListingEvent | OfferEvent | SaleEvent;
 
-export type {
-  ModeratorInterface,
-  BookInterface,
-  OrderInterface,
-  ListingInterface,
-  OfferInterface,
-  SaleInterface,
-};
+export type { ModeratorInterface, BookInterface, OrderInterface, ListingInterface, OfferInterface, SaleInterface };
 
 export type WithCount<T> = T & { count: number };
 export type Collection = Record<string, WithCount<Token>>;
@@ -79,10 +62,7 @@ export const Marketplace = {
     if (options.book) keys.push(`${NAMESPACE}-${Book.getModelName()}`);
     if (options.order) keys.push(`${NAMESPACE}-${Order.getModelName()}`);
     const clauses = new ClauseBuilder().keys(keys, []);
-    return new ToriiQueryBuilder<SchemaType>()
-      .withClause(clauses.build())
-      .withEntityModels(keys)
-      .includeHashedKeys();
+    return new ToriiQueryBuilder<SchemaType>().withClause(clauses.build()).withEntityModels(keys).includeHashedKeys();
   },
 
   getEventQuery: (options: MarketplaceOptions = DefaultMarketplaceOptions) => {
@@ -91,16 +71,10 @@ export const Marketplace = {
     if (options.offer) keys.push(`${NAMESPACE}-${Offer.getModelName()}`);
     if (options.sale) keys.push(`${NAMESPACE}-${Sale.getModelName()}`);
     const clauses = new ClauseBuilder().keys(keys, []);
-    return new ToriiQueryBuilder<SchemaType>()
-      .withClause(clauses.build())
-      .withEntityModels(keys)
-      .includeHashedKeys();
+    return new ToriiQueryBuilder<SchemaType>().withClause(clauses.build()).withEntityModels(keys).includeHashedKeys();
   },
 
-  fetchEntities: async (
-    callback: (models: MarketplaceModel[]) => void,
-    options: MarketplaceOptions,
-  ) => {
+  fetchEntities: async (callback: (models: MarketplaceModel[]) => void, options: MarketplaceOptions) => {
     if (!Marketplace.sdk) return;
 
     const wrappedCallback = async (entities?: ToriiResponse<SchemaType>) => {
@@ -132,10 +106,7 @@ export const Marketplace = {
     }
   },
 
-  fetchEvents: async (
-    callback: (models: MarketplaceModel[]) => void,
-    options: MarketplaceOptions,
-  ) => {
+  fetchEvents: async (callback: (models: MarketplaceModel[]) => void, options: MarketplaceOptions) => {
     if (!Marketplace.sdk) return;
 
     const wrappedCallback = async (entities?: ToriiResponse<SchemaType>) => {
@@ -167,18 +138,9 @@ export const Marketplace = {
     }
   },
 
-  subEntities: async (
-    callback: (models: MarketplaceModel[]) => void,
-    options: MarketplaceOptions,
-  ) => {
+  subEntities: async (callback: (models: MarketplaceModel[]) => void, options: MarketplaceOptions) => {
     if (!Marketplace.sdk) return;
-    const wrappedCallback = ({
-      data,
-      error,
-    }: SubscriptionCallbackArgs<
-      StandardizedQueryResult<SchemaType>,
-      Error
-    >) => {
+    const wrappedCallback = ({ data, error }: SubscriptionCallbackArgs<StandardizedQueryResult<SchemaType>, Error>) => {
       if (error) {
         console.error("Error subscribing to marketplace entities:", error);
         return;
@@ -205,18 +167,9 @@ export const Marketplace = {
     Marketplace.unsubEntities = () => subscription.cancel();
   },
 
-  subEvents: async (
-    callback: (models: MarketplaceModel[]) => void,
-    options: MarketplaceOptions,
-  ) => {
+  subEvents: async (callback: (models: MarketplaceModel[]) => void, options: MarketplaceOptions) => {
     if (!Marketplace.sdk) return;
-    const wrappedCallback = ({
-      data,
-      error,
-    }: SubscriptionCallbackArgs<
-      StandardizedQueryResult<SchemaType>,
-      Error
-    >) => {
+    const wrappedCallback = ({ data, error }: SubscriptionCallbackArgs<StandardizedQueryResult<SchemaType>, Error>) => {
       if (error) {
         console.error("Error subscribing to marketplace events:", error);
         return;
@@ -280,10 +233,7 @@ export const Marketplace = {
     }
   },
 
-  fetchCollections: async (
-    clients: { [key: string]: ToriiClient },
-    limit = 1000,
-  ) => {
+  fetchCollections: async (clients: { [key: string]: ToriiClient }, limit = 1000) => {
     const collections: Collections = {};
     await Promise.all(
       Object.keys(clients).map(async (project) => {
@@ -319,25 +269,22 @@ export const Marketplace = {
           const filtereds = allTokens.filter((token) => !!token.metadata);
           if (filtereds.length === 0) return;
 
-          const collection: Collection = filtereds.reduce(
-            (acc: Collection, curr: Token) => {
-              const checksumAddress = getChecksumAddress(curr.contract_address);
+          const collection: Collection = filtereds.reduce((acc: Collection, curr: Token) => {
+            const checksumAddress = getChecksumAddress(curr.contract_address);
 
-              if (Object.hasOwn(acc, checksumAddress)) {
-                acc[checksumAddress].count += 1;
-                return acc;
-              }
-
-              acc[checksumAddress] = {
-                ...curr,
-                contract_address: checksumAddress,
-                count: 1,
-              };
-
+            if (Object.hasOwn(acc, checksumAddress)) {
+              acc[checksumAddress].count += 1;
               return acc;
-            },
-            {},
-          );
+            }
+
+            acc[checksumAddress] = {
+              ...curr,
+              contract_address: checksumAddress,
+              count: 1,
+            };
+
+            return acc;
+          }, {});
 
           collections[project] = collection;
           return;

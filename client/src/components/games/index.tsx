@@ -48,7 +48,7 @@ export const Games = () => {
         "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
         isMobile && "fixed z-50 top-0 left-0", // Fixed position for mobile
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0", // Slide in/out animation
-        "transition-transform duration-300 ease-in-out" // Smooth transition
+        "transition-transform duration-300 ease-in-out", // Smooth transition
       )}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -81,8 +81,8 @@ export const Games = () => {
                 owner={
                   BigInt(
                     ownerships.find(
-                      (ownership) => ownership.tokenId === BigInt(game.id)
-                    )?.accountAddress || "0x0"
+                      (ownership) => ownership.tokenId === BigInt(game.id),
+                    )?.accountAddress || "0x0",
                   ) === BigInt(address || "0x1")
                 }
                 original={game}
@@ -96,7 +96,7 @@ export const Games = () => {
       <div
         className={cn(
           "flex items-center justify-center p-3 lg:pb-3 gap-2.5 bg-background-100",
-          isPWA ? "pb-6" : "pb-3"
+          isPWA ? "pb-6" : "pb-3",
         )}
       >
         <Register />
@@ -161,7 +161,7 @@ export const Game = ({
 
   const access = useMemo(() => {
     return accesses.find(
-      (access) => BigInt(access.address) === BigInt(address || "0x1")
+      (access) => BigInt(access.address) === BigInt(address || "0x1"),
     );
   }, [accesses, address]);
 
@@ -202,7 +202,7 @@ export const Game = ({
       newEdition.whitelisted = status;
       setGame(newEdition);
     },
-    [game]
+    [game],
   );
 
   const setPublished = useCallback(
@@ -212,7 +212,7 @@ export const Game = ({
       newEdition.published = status;
       setGame(newEdition);
     },
-    [game]
+    [game],
   );
 
   useEffect(() => {

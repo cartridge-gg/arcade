@@ -69,7 +69,10 @@ export const useMarketFilters = () => {
   const usernames = useMemo(() => {
     if (!data || accounts.length === 0) return [];
     return accounts.map((address) => {
-      return { address: getChecksumAddress(address), username: data.get(address) || address.slice(0, 9) };
+      return {
+        address: getChecksumAddress(address),
+        username: data.get(address) || address.slice(0, 9),
+      };
     });
   }, [data, accounts]);
 

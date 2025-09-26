@@ -217,7 +217,10 @@ export const MetadataHelper = {
         if (response.ok) {
           const image = metadata.image;
           if (image.startsWith("ipfs://")) {
-            return image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+            return image.replace(
+              "ipfs://",
+              "https://gateway.pinata.cloud/ipfs/",
+            );
           }
           return image;
         }

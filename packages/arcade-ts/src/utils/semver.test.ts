@@ -63,9 +63,7 @@ describe("parseSemVer", () => {
   });
 
   it("should throw error for invalid semver", () => {
-    expect(() => parseSemVer("invalid")).toThrow(
-      "Invalid semver format: invalid",
-    );
+    expect(() => parseSemVer("invalid")).toThrow("Invalid semver format: invalid");
     expect(() => parseSemVer("1.2")).toThrow("Invalid semver format: 1.2");
     expect(() => parseSemVer("1.2.a")).toThrow("Invalid semver format: 1.2.a");
   });
@@ -182,11 +180,7 @@ describe("isVersionCompatible", () => {
     const current = parseSemVer("2.3.4");
     expect(isVersionCompatible(current, { major: 2, minor: 3 })).toBe(true);
     expect(isVersionCompatible(current, { major: 2, minor: 4 })).toBe(false);
-    expect(isVersionCompatible(current, { major: 2, minor: 3, patch: 4 })).toBe(
-      true,
-    );
-    expect(isVersionCompatible(current, { major: 2, minor: 3, patch: 5 })).toBe(
-      false,
-    );
+    expect(isVersionCompatible(current, { major: 2, minor: 3, patch: 4 })).toBe(true);
+    expect(isVersionCompatible(current, { major: 2, minor: 3, patch: 5 })).toBe(false);
   });
 });

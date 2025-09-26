@@ -54,9 +54,7 @@ export const defaultFetcher: VersionFetcher = async (url: string) => {
   }
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch Torii version: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`Failed to fetch Torii version: ${response.status} ${response.statusText}`);
   }
 
   try {
@@ -64,9 +62,7 @@ export const defaultFetcher: VersionFetcher = async (url: string) => {
     return data as ToriiVersionResponse;
   } catch (error) {
     throw new Error(
-      `Failed to parse JSON response from ${url}: ${
-        error instanceof Error ? error.message : "Invalid JSON"
-      }`,
+      `Failed to parse JSON response from ${url}: ${error instanceof Error ? error.message : "Invalid JSON"}`,
     );
   }
 };
@@ -81,8 +77,7 @@ export function parseToriiVersion(version: string): ToriiSemVer {
   // Pattern to match versions like "1.5.8-preview.4 (main 5392c8a)"
   // Branch names: letters, numbers, hyphens, underscores, dots, and forward slashes
   // Commit hashes: 1-40 alphanumeric characters (flexible for various hash lengths)
-  const toriiVersionRegex =
-    /^([^(]+?)(?:\s*\(([a-zA-Z0-9._\/-]+)\s+([a-zA-Z0-9]{1,40})\))?$/;
+  const toriiVersionRegex = /^([^(]+?)(?:\s*\(([a-zA-Z0-9._\/-]+)\s+([a-zA-Z0-9]{1,40})\))?$/;
   const match = version.match(toriiVersionRegex);
 
   if (!match) {
@@ -114,9 +109,7 @@ export async function getToriiVersion(
   const response = await fetcher(toriiUrl);
 
   if (response.service !== "torii") {
-    throw new Error(
-      `Invalid service: expected 'torii', got '${response.service}'`,
-    );
+    throw new Error(`Invalid service: expected 'torii', got '${response.service}'`);
   }
 
   if (!response.success) {

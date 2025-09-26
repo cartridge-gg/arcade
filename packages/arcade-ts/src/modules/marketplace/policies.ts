@@ -8,8 +8,7 @@ import { Order } from "./order";
 import { DefaultMarketplaceOptions, type MarketplaceOptions } from "./options";
 
 const CONTRACT_NAME = "Marketplace";
-const CONTRACT_DESCRIPTION =
-  "Marketplace contract to manage asset listings and offers.";
+const CONTRACT_DESCRIPTION = "Marketplace contract to manage asset listings and offers.";
 
 export const getMarketplacePolicies = (
   chainId: constants.StarknetChainId,

@@ -41,9 +41,7 @@ export function Provider({ children }: PropsWithChildren) {
                             <ActivitiesProvider>
                               <MetricsProvider>
                                 <MarketFiltersProvider>
-                                  <SidebarProvider>
-                                    {children}
-                                  </SidebarProvider>
+                                  <SidebarProvider>{children}</SidebarProvider>
                                 </MarketFiltersProvider>
                               </MetricsProvider>
                             </ActivitiesProvider>

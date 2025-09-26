@@ -119,10 +119,7 @@ export class OrderModel {
 
 export const Order = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return OrderModel.from(
-      entity.entityId,
-      entity.models[NAMESPACE]?.[MODEL_NAME] as OrderInterface,
-    );
+    return OrderModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME] as OrderInterface);
   },
 
   getModelName: () => {
