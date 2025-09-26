@@ -9,6 +9,7 @@ import {
   fetchTokenImage,
   processToriiStream,
 } from "./fetcher-utils";
+import { BLACKLISTS } from "@/constants";
 
 type UseMarketplaceFetcherParams = {
   projects: string[];
@@ -44,6 +45,9 @@ export function useMarketCollectionFetcher({
       const collections: { [address: string]: Contract } = {};
 
       for (const c of contracts) {
+        if (BLACKLISTS.includes(BigInt(c.contract_address))) {
+          continue;
+        }
         const address = getChecksumAddress(c.contract_address);
         if (address in collections) {
           collections[address].total_supply =
