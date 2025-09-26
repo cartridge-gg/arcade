@@ -84,7 +84,14 @@ export function Items({
   }, [getCollectionOrders, collectionAddress]);
 
   // Get collection info
-  const { collection, status, loadingProgress } = useMarketTokensFetcher({
+  const {
+    collection,
+    status,
+    loadingProgress,
+    hasMore,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useMarketTokensFetcher({
     project: [DEFAULT_PROJECT],
     address: collectionAddress,
   });
@@ -241,62 +248,28 @@ export function Items({
   );
 
   // Set up virtualizer for rows
-  const rowCount = Math.ceil(searchFilteredTokens.length / 4);
+  const rowCount = Math.ceil(tokens.length / 4);
 
   const virtualizer = useVirtualizer({
-    count: hasMore ? rowCount + 1 : rowCount,
+    count: rowCount + 1,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
   });
 
+  useEffect(() => {
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+
+    if (!lastItem) {
+      return;
+    }
+
+    if (lastItem.index >= rowCount - 1 && hasMore && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [rowCount, hasMore, fetchNextPage, isFetchingNextPage, virtualizer]);
+
   const virtualItems = virtualizer.getVirtualItems();
-  const lastRequestedCursorRef = useRef<string | null | undefined>(null);
-
-  useEffect(() => {
-    lastRequestedCursorRef.current = null;
-  }, [collectionAddress]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const element = parentRef.current;
-    if (!element) return;
-
-    let rafId: number | null = null;
-    const threshold = ROW_HEIGHT * 2;
-
-    const maybeLoadMore = () => {
-      rafId = null;
-      if (!hasMore || isPageLoading) return;
-
-      const { scrollTop, clientHeight, scrollHeight } = element;
-      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-
-      if (distanceFromBottom <= threshold) {
-        if (lastRequestedCursorRef.current === nextCursor) {
-          return;
-        }
-
-        lastRequestedCursorRef.current = nextCursor;
-        void getNextPage();
-      }
-    };
-
-    const onScroll = () => {
-      if (rafId !== null) return;
-      rafId = window.requestAnimationFrame(maybeLoadMore);
-    };
-
-    element.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-      }
-      element.removeEventListener("scroll", onScroll);
-    };
-  }, [hasMore, isPageLoading, getNextPage, nextCursor]);
 
   if (!collection && tokens.length === 0) return <EmptyState />;
 
@@ -326,7 +299,7 @@ export function Items({
               <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
+                <p>{`${Number.parseInt(collection?.total_supply ?? "0x0", 16)} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -379,7 +352,7 @@ export function Items({
                 >
                   {hasMore && (
                     <div className="w-full flex justify-center items-center py-6 text-sm text-foreground-300">
-                      {isPageLoading
+                      {isFetchingNextPage
                         ? "Loading more items…"
                         : "Scroll to load more"}
                     </div>
@@ -393,7 +366,7 @@ export function Items({
               startIndex + 4,
               searchFilteredTokens.length,
             );
-            const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
+            const rowTokens = tokens.slice(startIndex, endIndex);
 
             return (
               <div

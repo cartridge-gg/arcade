@@ -12,23 +12,22 @@ import type {
 } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
-import { useMarketCollectionFetcher } from "@/hooks/marketplace-fetcher";
-import { useCollectionEditions, useEditions, useGames } from "@/collections";
+import {
+  useCollectionEditions,
+  useEditions,
+  useGames,
+  useTokenContracts,
+} from "@/collections";
 import { Contract } from "@/store";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
-import { DEFAULT_PROJECT } from "@/constants";
 
 export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
   const editions = useEditions();
   const games = useGames();
   const collectionEditions = useCollectionEditions();
 
-  const {
-    collections: allCollections,
-    status,
-    editionError,
-    loadingProgress,
-  } = useMarketCollectionFetcher({ projects: [DEFAULT_PROJECT] });
+  const { data: allCollections, status } = useTokenContracts();
+  console.log(status);
 
   const collections = useMemo(() => {
     if (!edition) return allCollections;
@@ -41,25 +40,19 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
             BigInt(edition.id),
       );
     });
-  }, [allCollections, collectionEditions]);
+  }, [allCollections, collectionEditions, edition]);
 
   if ((status === "idle" || status === "loading") && collections.length === 0) {
     return <LoadingState />;
   }
 
-  if (status !== "loading" && collections.length === 0 && !editionError) {
+  if (status !== "loading" && collections.length === 0) {
     return <EmptyState />;
   }
 
-  const isStillLoading =
-    status === "loading" ||
-    (loadingProgress &&
-      loadingProgress.total > 0 &&
-      loadingProgress.completed < loadingProgress.total);
-
   return (
     <>
-      {collections.length === 0 && editionError && editionError.length > 0 && (
+      {collections.length === 0 && (
         <Empty
           title="No collections available - Failed to connect to data source"
           className="h-full py-3 lg:py-6"
@@ -74,17 +67,13 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
             <Item
               key={`${collection.project}-${collection.contract_address}`}
               project={collection.project}
-              collection={collection}
+              collection={collection as Contract}
               editions={editions as EditionModel[]}
               games={games as GameModel[]}
             />
           ))}
         </div>
       )}
-      <FloatingLoadingSpinner
-        isLoading={isStillLoading && collections.length > 0}
-        loadingProgress={loadingProgress}
-      />
     </>
   );
 };

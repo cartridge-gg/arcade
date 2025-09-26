@@ -49,6 +49,7 @@ export const queryKeys = {
 
   tokens: {
     all: ["tokens"] as const,
+    collections: ["tokens", "collections"],
     balance: (address: string, token?: string) =>
       token
         ? ([...queryKeys.tokens.all, "balance", address, token] as const)
