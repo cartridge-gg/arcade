@@ -1,23 +1,10 @@
-import { fetchToriis, fetchToriisStream } from "@cartridge/arcade";
-import { Token, Tokens, ToriiClient } from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fetchToriis } from "@cartridge/arcade";
+import { Token, ToriiClient } from "@dojoengine/torii-wasm";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getChecksumAddress } from "starknet";
-import { useMarketCollectionFetcher } from "./marketplace-fetcher";
 import { useMarketplaceTokensStore } from "@/store";
-import { useEditionsMap } from "@/collections";
-import {
-  useFetcherState,
-  fetchTokenImage,
-  parseJsonSafe,
-  withRetry,
-  useAbortController,
-  sleep,
-} from "./fetcher-utils";
-import { useMetadataFilterStore } from "@/store/metadata-filters";
-import {
-  buildMetadataIndex,
-  updateMetadataIndex,
-} from "@/utils/metadata-indexer";
+import { useTokenContract } from "@/collections";
+import { useFetcherState, fetchTokenImage, parseJsonSafe } from "./fetcher-utils";
 
 type MarketTokensFetcherInput = {
   project: string[];
@@ -27,11 +14,12 @@ type MarketTokensFetcherInput = {
 
 const LIMIT = 100;
 
-type FetchMode = "append" | "reset";
+type TokenPage = Awaited<ReturnType<ToriiClient["getTokens"]>>;
 
 export function useMarketTokensFetcher({
   project,
   address,
+  autoFetch = true,
 }: MarketTokensFetcherInput) {
   const {
     status,
@@ -40,95 +28,122 @@ export function useMarketTokensFetcher({
     errorMessage,
     loadingProgress,
     retryCount,
-    setRetryCount,
-    startLoading,
-    setSuccess,
-    setError,
-    setLoadingProgress,
-    setErrorMessage,
   } = useFetcherState(true);
 
-  const editions = useEditionsMap();
-
   const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const queryHandleRef = useRef<boolean>();
+  const isFetchingRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
-  const { collections } = useMarketCollectionFetcher({ projects: project });
-  console.log(collections);
-  const collection = useMemo(
-    () => collections.find((c) => c.contract_address === address) ?? null,
-    [collections, address],
-  );
+  const projectId = project[0] ?? "arcade-main";
+
+  const normalizedAddress = (() => {
+    if (!address) return "";
+    try {
+      return getChecksumAddress(address);
+    } catch (error) {
+      console.warn("Invalid contract address provided to useMarketTokensFetcher", {
+        address,
+        error,
+      });
+      return "";
+    }
+  })();
+
+  const collection = useTokenContract(normalizedAddress);
 
   const addTokens = useMarketplaceTokensStore((state) => state.addTokens);
-  // const updateLoadingState = useMarketplaceTokensStore(
-  //   (state) => state.updateLoadingState,
-  // );
-  // const getLoadingState = useMarketplaceTokensStore(
-  //   (state) => state.getLoadingState,
-  // );
-  // const clearTokens = useMarketplaceTokensStore((state) => state.clearTokens);
-  // const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
-  // const getOwners = useMarketplaceTokensStore((state) => state.getOwners);
-  //
-  // const { setMetadataIndex, getCollectionState } = useMetadataFilterStore();
+  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
 
-  const processTokens = useCallback(async (tokens: Tokens) => {
-    const data = [];
-    for (const token of tokens) {
-      const metadata = parseJsonSafe(token.metadata, token.metadata);
-      const image = await fetchTokenImage(token, "arcade-main", true);
+  const processTokens = useCallback(
+    async (tokens: Token[]) => {
+      const data: Token[] = [];
 
-      data.push({
-        ...token,
-        contract_address: getChecksumAddress(token.contract_address),
-        metadata,
-        image,
-      } as Token);
-    }
-    return data;
-  }, []);
+      for (const token of tokens) {
+        const metadata = parseJsonSafe(token.metadata, token.metadata);
+        const image = await fetchTokenImage(token, projectId, true);
+
+        data.push({
+          ...token,
+          contract_address: getChecksumAddress(token.contract_address),
+          metadata,
+          image,
+        } as Token);
+      }
+
+      return data;
+    },
+    [projectId],
+  );
 
   const fetchData = useCallback(
-    async (cursor: string | undefined) => {
-      const tokens = await fetchToriis(["arcade-main"], {
-        client: async ({ client }: { client: ToriiClient }) => {
-          return await client.getTokens({
-            contract_addresses: [address],
-            token_ids: [],
-            attribute_filters: [],
-            pagination: {
-              limit: LIMIT,
-              cursor: cursor,
-              direction: "Forward",
-              order_by: [],
-            },
-          });
-        },
-      });
+    async (currentCursor: string | undefined) => {
+      if (isFetchingRef.current) return;
+      if (!projectId || !normalizedAddress) return;
+      if (!address) return;
 
-      for (const res of tokens.data) {
-        setCursor(res.next_cursor);
-        addTokens("arcade-main", { [address]: await processTokens(res.items) });
+      isFetchingRef.current = true;
+
+      try {
+        const tokens = await fetchToriis(project.length ? project : [projectId], {
+          client: async ({ client }) => {
+            return client.getTokens({
+              contract_addresses: [address],
+              token_ids: [],
+              attribute_filters: [],
+              pagination: {
+                limit: LIMIT,
+                cursor: currentCursor,
+                direction: "Forward",
+                order_by: [],
+              },
+            });
+          },
+        });
+
+        const pages = tokens.data as TokenPage[];
+        let nextCursorValue: string | undefined;
+
+        for (const res of pages) {
+          nextCursorValue = res.next_cursor;
+          addTokens(projectId, {
+            [address]: await processTokens(res.items),
+          });
+        }
+
+        setCursor(nextCursorValue);
+      } catch (error) {
+        console.error("Error fetching marketplace tokens:", error);
+      } finally {
+        isFetchingRef.current = false;
       }
     },
-    [address, processTokens],
+    [address, addTokens, processTokens, project, projectId, normalizedAddress],
   );
 
   useEffect(() => {
-    if (!cursor && !queryHandleRef.current) {
-      queryHandleRef.current = true;
-      fetchData(cursor);
-    }
-  });
+    if (!autoFetch) return;
+    if (hasInitializedRef.current) return;
+    if (!projectId || !normalizedAddress) return;
+    if (collection === null) return;
+
+    hasInitializedRef.current = true;
+    void fetchData(undefined);
+  }, [
+    autoFetch,
+    collection,
+    fetchData,
+    normalizedAddress,
+    projectId,
+  ]);
 
   const fetchNextPage = useCallback(() => {
-    console.log("fetchnextpage");
-  }, []);
+    if (!cursor) return;
+    void fetchData(cursor);
+  }, [cursor, fetchData]);
 
   return {
     collection,
-    tokens: [],
+    tokens: getTokens(projectId, address),
     owners: [],
     status,
     isLoading,
@@ -136,9 +151,8 @@ export function useMarketTokensFetcher({
     errorMessage,
     loadingProgress,
     retryCount,
-    getNextPage: fetchNextPage,
-    hasMore,
-    isPageLoading,
-    nextCursor,
+    hasMore: Boolean(cursor),
+    isFetchingNextPage: isFetchingRef.current,
+    fetchNextPage,
   };
 }

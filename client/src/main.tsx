@@ -5,12 +5,18 @@ import { Provider } from "@/context";
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { accountsCollection, gamesQuery, editionsQuery } from "@/collections";
+import {
+  accountsCollection,
+  gamesQuery,
+  editionsQuery,
+  tokenContractsCollection,
+} from "@/collections";
 
 registerSW();
 
 async function main() {
   // Preload essential collections
+  tokenContractsCollection.preload();
   accountsCollection.preload();
   await gamesQuery.preload();
   await editionsQuery.preload();
