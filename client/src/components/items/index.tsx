@@ -8,7 +8,7 @@ import {
   Separator,
   Skeleton,
 } from "@cartridge/ui";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Token } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
@@ -81,7 +81,14 @@ export function Items({
   }, [getCollectionOrders, collectionAddress]);
 
   // Get collection info
-  const { collection, status, loadingProgress } = useMarketTokensFetcher({
+  const {
+    collection,
+    status,
+    loadingProgress,
+    hasMore,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useMarketTokensFetcher({
     project: [DEFAULT_PROJECT],
     address: collectionAddress,
   });
@@ -188,12 +195,28 @@ export function Items({
   );
 
   // Set up virtualizer for rows
+  const rowCount = Math.ceil(tokens.length / 4);
+
   const virtualizer = useVirtualizer({
-    count: searchFilteredTokens.length,
+    count: rowCount + 1,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
   });
+
+  useEffect(() => {
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+
+    if (!lastItem) {
+      return;
+    }
+
+    if (lastItem.index >= rowCount - 1 && hasMore && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [rowCount, hasMore, fetchNextPage, isFetchingNextPage, virtualizer]);
+
+  const virtualItems = virtualizer.getVirtualItems();
 
   if (!collection && tokens.length === 0) return <EmptyState />;
 
@@ -223,7 +246,7 @@ export function Items({
               <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
+                <p>{`${Number.parseInt(collection?.total_supply ?? "0x0", 16)} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -258,13 +281,39 @@ export function Items({
             position: "relative",
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
+          {virtualItems.map((virtualRow) => {
+            const isLoaderRow = virtualRow.index >= rowCount;
+
+            if (isLoaderRow) {
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  {hasMore && (
+                    <div className="w-full flex justify-center items-center py-6 text-sm text-foreground-300">
+                      {isFetchingNextPage
+                        ? "Loading more items…"
+                        : "Scroll to load more"}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             const startIndex = virtualRow.index * 4;
             const endIndex = Math.min(
               startIndex + 4,
               searchFilteredTokens.length,
             );
-            const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
+            const rowTokens = tokens.slice(startIndex, endIndex);
 
             return (
               <div

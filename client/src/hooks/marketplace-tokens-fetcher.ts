@@ -1,43 +1,25 @@
-import { fetchToriisStream } from "@cartridge/arcade";
-import { Token, Tokens } from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { fetchToriis } from "@cartridge/arcade";
+import { Token, ToriiClient } from "@dojoengine/torii-wasm";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getChecksumAddress } from "starknet";
 import { useMarketplaceTokensStore } from "@/store";
-import { useMarketCollectionFetcher } from "./marketplace-fetcher";
-import { useEditionsMap } from "@/collections";
-import {
-  useFetcherState,
-  fetchTokenImage,
-  parseJsonSafe,
-  withRetry,
-  useAbortController,
-  sleep,
-} from "./fetcher-utils";
-import { useMetadataFilterStore } from "@/store/metadata-filters";
-import {
-  buildMetadataIndex,
-  updateMetadataIndex,
-} from "@/utils/metadata-indexer";
+import { useTokenContract } from "@/collections";
+import { useFetcherState, fetchTokenImage, parseJsonSafe } from "./fetcher-utils";
 
 type MarketTokensFetcherInput = {
   project: string[];
   address: string;
+  autoFetch?: boolean;
 };
 
 const LIMIT = 100;
-const MAX_RETRY_ATTEMPTS = 3;
-const RETRY_BASE_DELAY = 1000;
-const POLL_INTERVAL = 30000; // 30 seconds
 
-enum FetchStrategy {
-  INITIAL = "initial",
-  INCREMENTAL = "incremental",
-  CHECK_NEW = "check_new",
-}
+type TokenPage = Awaited<ReturnType<ToriiClient["getTokens"]>>;
 
 export function useMarketTokensFetcher({
   project,
   address,
+  autoFetch = true,
 }: MarketTokensFetcherInput) {
   const {
     status,
@@ -46,289 +28,131 @@ export function useMarketTokensFetcher({
     errorMessage,
     loadingProgress,
     retryCount,
-    setRetryCount,
-    startLoading,
-    setSuccess,
-    setError,
-    setLoadingProgress,
-    setErrorMessage,
   } = useFetcherState(true);
-  const [hasFetch, setHasFetch] = useState(false);
-  const { createController, cleanup, isMounted } = useAbortController();
-  const editions = useEditionsMap();
 
-  const { collections } = useMarketCollectionFetcher({ projects: project });
-  const collection = useMemo(
-    () =>
-      collections.find((c) => BigInt(c.contract_address) === BigInt(address)),
-    [collections],
-  );
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const isFetchingRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
-  const addTokens = useMarketplaceTokensStore((s) => s.addTokens);
-  const getTokens = useMarketplaceTokensStore((s) => s.getTokens);
-  const updateLoadingState = useMarketplaceTokensStore(
-    (s) => s.updateLoadingState,
-  );
-  const getLoadingState = useMarketplaceTokensStore((s) => s.getLoadingState);
-  const clearTokens = useMarketplaceTokensStore((s) => s.clearTokens);
-  const getOwners = useMarketplaceTokensStore((s) => s.getOwners);
+  const projectId = project[0] ?? "arcade-main";
 
-  // Metadata filter store
-  const { setMetadataIndex, getCollectionState } = useMetadataFilterStore();
+  const normalizedAddress = (() => {
+    if (!address) return "";
+    try {
+      return getChecksumAddress(address);
+    } catch (error) {
+      console.warn("Invalid contract address provided to useMarketTokensFetcher", {
+        address,
+        error,
+      });
+      return "";
+    }
+  })();
 
-  const batchProcessTokens = useCallback(
-    async (data: Token[]) => {
-      const processed: { [address: string]: Token[] } = { [address]: [] };
-      for (const t of data) {
-        const metadata = parseJsonSafe(t.metadata, t.metadata);
+  const collection = useTokenContract(normalizedAddress);
 
-        const item = {
-          ...t,
-          contract_address: getChecksumAddress(t.contract_address),
-          metadata: metadata,
-          image: await fetchTokenImage(t, project[0], true),
-        };
+  const addTokens = useMarketplaceTokensStore((state) => state.addTokens);
+  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
 
-        processed[address].push(item as Token);
+  const processTokens = useCallback(
+    async (tokens: Token[]) => {
+      const data: Token[] = [];
+
+      for (const token of tokens) {
+        const metadata = parseJsonSafe(token.metadata, token.metadata);
+        const image = await fetchTokenImage(token, projectId, true);
+
+        data.push({
+          ...token,
+          contract_address: getChecksumAddress(token.contract_address),
+          metadata,
+          image,
+        } as Token);
       }
 
-      // Build/update metadata index for filtering
-      const collectionState = getCollectionState(address);
-      const existingIndex = collectionState?.metadataIndex;
-
-      if (existingIndex && Object.keys(existingIndex).length > 0) {
-        // Update existing index with new tokens
-        const updatedIndex = updateMetadataIndex(
-          existingIndex,
-          processed[address],
-        );
-        setMetadataIndex(address, updatedIndex);
-      } else {
-        // Build new index from scratch
-        const allTokens = getTokens(project[0], address);
-        const combinedTokens = [...allTokens, ...processed[address]];
-        const newIndex = buildMetadataIndex(combinedTokens);
-        setMetadataIndex(address, newIndex);
-      }
-
-      return processed;
+      return data;
     },
-    [address, project, getCollectionState, setMetadataIndex, getTokens],
+    [projectId],
   );
 
-  const fetchTokensImpl = useCallback(
-    async (
-      strategy: FetchStrategy = FetchStrategy.INITIAL,
-      attemptNumber: number = 0,
-    ) => {
-      const loadingState = getLoadingState(project[0], address);
+  const fetchData = useCallback(
+    async (currentCursor: string | undefined) => {
+      if (isFetchingRef.current) return;
+      if (!projectId || !normalizedAddress) return;
+      if (!address) return;
 
-      if (attemptNumber === 0) {
-        startLoading();
-        updateLoadingState(project[0], address, { isLoading: true });
-      }
+      isFetchingRef.current = true;
 
-      createController();
-
-      const stream = fetchToriisStream(project, {
-        client: async function* ({ client }) {
-          let cursor =
-            strategy === FetchStrategy.INCREMENTAL && loadingState?.lastCursor
-              ? loadingState.lastCursor
-              : undefined;
-          let totalFetched =
-            strategy === FetchStrategy.INCREMENTAL && loadingState?.totalCount
-              ? loadingState.totalCount
-              : 0;
-          let latestCursor = cursor;
-
-          while (true) {
-            if (!isMounted()) break;
-
-            const response: Tokens = await client.getTokens({
+      try {
+        const tokens = await fetchToriis(project.length ? project : [projectId], {
+          client: async ({ client }) => {
+            return client.getTokens({
               contract_addresses: [address],
-              attribute_filters: [],
               token_ids: [],
+              attribute_filters: [],
               pagination: {
-                limit: strategy === FetchStrategy.CHECK_NEW ? 10 : LIMIT,
-                cursor: cursor,
+                limit: LIMIT,
+                cursor: currentCursor,
                 direction: "Forward",
                 order_by: [],
               },
             });
-
-            totalFetched += response.items.length;
-            latestCursor = response.next_cursor || latestCursor;
-
-            if (isMounted()) {
-              setLoadingProgress({
-                completed: totalFetched,
-                total: totalFetched,
-              });
-            }
-
-            yield response;
-
-            // For CHECK_NEW strategy, only fetch one batch
-            if (
-              strategy === FetchStrategy.CHECK_NEW &&
-              response.items.length > 0
-            ) {
-              break;
-            }
-
-            cursor = response.next_cursor;
-            if (!cursor) {
-              // Collection fully fetched
-              updateLoadingState(project[0], address, {
-                isComplete: true,
-                lastCursor: null,
-                lastFetchTime: Date.now(),
-                totalCount: totalFetched,
-                isLoading: false,
-              });
-              break;
-            } else {
-              // Update cursor for incremental fetching
-              updateLoadingState(project[0], address, {
-                lastCursor: cursor,
-                totalCount: totalFetched,
-              });
-            }
-          }
-        },
-      });
-
-      for await (const result of stream) {
-        if (!isMounted()) break;
-
-        const tokens = await batchProcessTokens(result.data.items);
-        addTokens(result.endpoint, tokens);
-      }
-
-      if (isMounted()) {
-        setSuccess();
-        updateLoadingState(project[0], address, {
-          isLoading: false,
-          lastFetchTime: Date.now(),
-        });
-      }
-    },
-    [
-      project,
-      address,
-      addTokens,
-      batchProcessTokens,
-      startLoading,
-      setSuccess,
-      setLoadingProgress,
-      createController,
-      isMounted,
-      getLoadingState,
-      updateLoadingState,
-    ],
-  );
-
-  const fetchTokens = useCallback(
-    async (strategy: FetchStrategy = FetchStrategy.INITIAL) => {
-      try {
-        await withRetry(
-          async (attemptNumber) => {
-            if (attemptNumber > 0) {
-              setRetryCount(attemptNumber);
-              setErrorMessage(
-                `Request failed. Retrying... (${attemptNumber}/${MAX_RETRY_ATTEMPTS})`,
-              );
-              await sleep(RETRY_BASE_DELAY * Math.pow(2, attemptNumber - 1));
-            }
-            await fetchTokensImpl(strategy, attemptNumber);
           },
-          { maxAttempts: MAX_RETRY_ATTEMPTS, baseDelay: RETRY_BASE_DELAY },
-        );
+        });
+
+        const pages = tokens.data as TokenPage[];
+        let nextCursorValue: string | undefined;
+
+        for (const res of pages) {
+          nextCursorValue = res.next_cursor;
+          addTokens(projectId, {
+            [address]: await processTokens(res.items),
+          });
+        }
+
+        setCursor(nextCursorValue);
       } catch (error) {
-        if (isMounted()) {
-          const e = editions.get(project[0]);
-          if (e) {
-            setError(
-              e,
-              error instanceof Error
-                ? error.message
-                : "Failed to fetch tokens after multiple attempts",
-            );
-          }
-          updateLoadingState(project[0], address, { isLoading: false });
-        }
+        console.error("Error fetching marketplace tokens:", error);
+      } finally {
+        isFetchingRef.current = false;
       }
     },
-    [
-      fetchTokensImpl,
-      setRetryCount,
-      setErrorMessage,
-      setError,
-      isMounted,
-      updateLoadingState,
-      project,
-      address,
-      editions,
-    ],
-  );
-
-  const refetch = useCallback(
-    async (force: boolean = false) => {
-      if (force) {
-        // Force full refetch by clearing tokens and state
-        clearTokens(project[0], address);
-        await fetchTokens(FetchStrategy.INITIAL);
-      } else {
-        // Incremental fetch from last cursor
-        const loadingState = getLoadingState(project[0], address);
-        if (loadingState?.isComplete) {
-          await fetchTokens(FetchStrategy.CHECK_NEW);
-        } else {
-          await fetchTokens(FetchStrategy.INCREMENTAL);
-        }
-      }
-    },
-    [fetchTokens, clearTokens, getLoadingState, project, address],
+    [address, addTokens, processTokens, project, projectId, normalizedAddress],
   );
 
   useEffect(() => {
-    if (!hasFetch && project.length > 0) {
-      fetchTokens(FetchStrategy.INITIAL);
-      setHasFetch(true);
-    }
-  }, [hasFetch, project]); // Remove fetchTokens from deps to avoid re-runs
+    if (!autoFetch) return;
+    if (hasInitializedRef.current) return;
+    if (!projectId || !normalizedAddress) return;
+    if (collection === null) return;
 
-  // Periodic polling for new items
-  useEffect(() => {
-    if (!project.length || !hasFetch) return;
+    hasInitializedRef.current = true;
+    void fetchData(undefined);
+  }, [
+    autoFetch,
+    collection,
+    fetchData,
+    normalizedAddress,
+    projectId,
+  ]);
 
-    const interval = setInterval(() => {
-      const loadingState = getLoadingState(project[0], address);
-      if (loadingState?.isComplete && !loadingState.isLoading) {
-        // Check for new items
-        fetchTokens(FetchStrategy.CHECK_NEW);
-      }
-    }, POLL_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [project, address, hasFetch, getLoadingState]); // Remove fetchTokens from deps
-
-  useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
+  const fetchNextPage = useCallback(() => {
+    if (!cursor) return;
+    void fetchData(cursor);
+  }, [cursor, fetchData]);
 
   return {
-    collection: collection ?? null,
-    tokens: getTokens(project[0], address),
-    filteredTokens: getTokens(project[0], address),
-    owners: getOwners(project[0], address),
+    collection,
+    tokens: getTokens(projectId, address),
+    owners: [],
     status,
     isLoading,
     isError,
     errorMessage,
     loadingProgress,
     retryCount,
-    refetch,
+    hasMore: Boolean(cursor),
+    isFetchingNextPage: isFetchingRef.current,
+    fetchNextPage,
   };
 }
