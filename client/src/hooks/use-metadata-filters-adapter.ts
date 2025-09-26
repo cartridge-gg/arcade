@@ -5,20 +5,21 @@ import { useProject } from "./project";
 import { useSearchParams } from "react-router-dom";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
 import { useMarketplace } from "./marketplace";
+import { DEFAULT_PROJECT } from "@/constants";
 
 /**
  * Adapter hook that provides the same interface as useMarketFilters
  * but uses the new metadata filtering system
  */
 export function useMetadataFiltersAdapter() {
-  const { collection: collectionAddress, edition } = useProject();
+  const { collection: collectionAddress } = useProject();
   const [active, setActive] = useState(1); // 0 = Buy Now, 1 = Show All
   const [,] = useSearchParams();
   const { getCollectionOrders } = useMarketplace();
 
   // Get tokens from the fetcher - use edition's project if available
   const { tokens } = useMarketTokensFetcher({
-    project: edition ? [edition.config.project] : [],
+    project: [DEFAULT_PROJECT],
     address: collectionAddress || "",
   });
 

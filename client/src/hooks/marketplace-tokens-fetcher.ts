@@ -59,7 +59,8 @@ export function useMarketTokensFetcher({
 
   const { collections } = useMarketCollectionFetcher({ projects: project });
   const collection = useMemo(
-    () => collections.find((c) => c.contract_address === address),
+    () =>
+      collections.find((c) => BigInt(c.contract_address) === BigInt(address)),
     [collections],
   );
 

@@ -5,20 +5,23 @@ import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useLocation, useNavigate } from "react-router-dom";
 import { joinPaths } from "@/helpers";
-import type { EditionModel, GameModel } from "@cartridge/arcade";
+import type {
+  CollectionEditionModel,
+  EditionModel,
+  GameModel,
+} from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import { useMarketCollectionFetcher } from "@/hooks/marketplace-fetcher";
-import { useEditions, useGames } from "@/collections";
+import { useCollectionEditions, useEditions, useGames } from "@/collections";
 import { Contract } from "@/store";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 import { DEFAULT_PROJECT } from "@/constants";
-import { useArcade } from "@/hooks/arcade";
 
 export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
   const editions = useEditions();
   const games = useGames();
-  const { collectionEditions } = useArcade();
+  const collectionEditions = useCollectionEditions();
 
   const {
     collections: allCollections,
@@ -30,8 +33,12 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
   const collections = useMemo(() => {
     if (!edition) return allCollections;
     return allCollections.filter((collection) => {
-      return collectionEditions[collection.contract_address]?.includes(
-        edition.id,
+      return collectionEditions.some(
+        (collectionEdition) =>
+          BigInt((collectionEdition as CollectionEditionModel).collection) ===
+            BigInt(collection.contract_address) &&
+          BigInt((collectionEdition as CollectionEditionModel).edition) ===
+            BigInt(edition.id),
       );
     });
   }, [allCollections, collectionEditions]);

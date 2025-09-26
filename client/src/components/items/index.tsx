@@ -23,11 +23,11 @@ import { useArcade } from "@/hooks/arcade";
 import { OrderModel, SaleEvent } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
-import { EditionModel } from "@cartridge/arcade";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
 import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
+import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 
 const ROW_HEIGHT = 218;
 const ERC1155_ENTRYPOINT = "balance_of_batch";
@@ -55,10 +55,8 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
 };
 
 export function Items({
-  edition,
   collectionAddress,
 }: {
-  edition: EditionModel;
   collectionAddress: string;
 }) {
   const { connector, address, isConnected } = useAccount();
@@ -84,7 +82,7 @@ export function Items({
 
   // Get collection info
   const { collection, status, loadingProgress } = useMarketTokensFetcher({
-    project: edition ? [edition.config.project] : [],
+    project: [DEFAULT_PROJECT],
     address: collectionAddress,
   });
 
@@ -110,7 +108,7 @@ export function Items({
 
   const handleInspect = useCallback(
     async (token: Token & { owner: string }) => {
-      if (!edition || !isConnected || !connector) return;
+      if (!isConnected || !connector) return;
       const contractAddress = token.contract_address;
       const controller = (connector as ControllerConnector)?.controller;
       const username = await controller?.username();
@@ -126,8 +124,8 @@ export function Items({
       const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
       const subpath = isERC1155 ? "collectible" : "collection";
 
-      const project = edition?.config.project;
-      const preset = edition?.properties.preset;
+      const project = DEFAULT_PROJECT;
+      const preset = DEFAULT_PRESET;
       const options = [`ps=${project}`];
       if (preset) {
         options.push(`preset=${preset}`);
@@ -139,7 +137,7 @@ export function Items({
       const path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
       controller.openProfileAt(path);
     },
-    [connector, edition, provider.provider],
+    [connector, provider.provider],
   );
 
   const handlePurchase = useCallback(
@@ -149,7 +147,7 @@ export function Items({
       const contractAddresses = new Set(
         tokens.map((token) => token.contract_address),
       );
-      if (!edition || contractAddresses.size !== 1) return;
+      if (contractAddresses.size !== 1) return;
       const contractAddress = `0x${BigInt(Array.from(contractAddresses)[0]).toString(16)}`;
       const controller = (connector as ControllerConnector)?.controller;
       const username = await controller?.username();
@@ -165,8 +163,8 @@ export function Items({
       const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
       const subpath = isERC1155 ? "collectible" : "collection";
 
-      const project = edition?.config.project;
-      const preset = edition?.properties.preset;
+      const project = DEFAULT_PROJECT;
+      const preset = DEFAULT_PRESET;
       const options = [`ps=${project}`];
       if (preset) {
         options.push(`preset=${preset}`);
@@ -186,7 +184,7 @@ export function Items({
       }
       controller.openProfileAt(path);
     },
-    [connector, edition, provider.provider],
+    [connector, provider.provider],
   );
 
   // Set up virtualizer for rows

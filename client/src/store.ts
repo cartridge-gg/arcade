@@ -98,7 +98,9 @@ export const useMarketplaceStore = create<
   clearCollections: () => set({ collections: {} }),
   getFlattenCollections: (projects: string[]) => {
     const collections = get().getAllCollections(projects);
-    return Object.entries(collections).flatMap(([, c]) => Object.values(c));
+    return Object.entries(collections)
+      .flatMap(([, c]) => Object.values(c))
+      .sort((a, b) => a.name.localeCompare(b.name));
   },
 }));
 
