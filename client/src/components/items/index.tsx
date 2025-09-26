@@ -8,7 +8,7 @@ import {
   Separator,
   Skeleton,
 } from "@cartridge/ui";
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Token } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
@@ -241,12 +241,62 @@ export function Items({
   );
 
   // Set up virtualizer for rows
+  const rowCount = Math.ceil(searchFilteredTokens.length / 4);
+
   const virtualizer = useVirtualizer({
-    count: searchFilteredTokens.length,
+    count: hasMore ? rowCount + 1 : rowCount,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
   });
+
+  const virtualItems = virtualizer.getVirtualItems();
+  const lastRequestedCursorRef = useRef<string | null | undefined>(null);
+
+  useEffect(() => {
+    lastRequestedCursorRef.current = null;
+  }, [collectionAddress]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const element = parentRef.current;
+    if (!element) return;
+
+    let rafId: number | null = null;
+    const threshold = ROW_HEIGHT * 2;
+
+    const maybeLoadMore = () => {
+      rafId = null;
+      if (!hasMore || isPageLoading) return;
+
+      const { scrollTop, clientHeight, scrollHeight } = element;
+      const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+
+      if (distanceFromBottom <= threshold) {
+        if (lastRequestedCursorRef.current === nextCursor) {
+          return;
+        }
+
+        lastRequestedCursorRef.current = nextCursor;
+        void getNextPage();
+      }
+    };
+
+    const onScroll = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(maybeLoadMore);
+    };
+
+    element.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      element.removeEventListener("scroll", onScroll);
+    };
+  }, [hasMore, isPageLoading, getNextPage, nextCursor]);
 
   if (!collection && tokens.length === 0) return <EmptyState />;
 
@@ -311,7 +361,33 @@ export function Items({
             position: "relative",
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
+          {virtualItems.map((virtualRow) => {
+            const isLoaderRow = virtualRow.index >= rowCount;
+
+            if (isLoaderRow) {
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  {hasMore && (
+                    <div className="w-full flex justify-center items-center py-6 text-sm text-foreground-300">
+                      {isPageLoading
+                        ? "Loading more items…"
+                        : "Scroll to load more"}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             const startIndex = virtualRow.index * 4;
             const endIndex = Math.min(
               startIndex + 4,

@@ -21,6 +21,7 @@ export function useMetadataFiltersAdapter() {
   const { tokens } = useMarketTokensFetcher({
     project: [DEFAULT_PROJECT],
     address: collectionAddress || "",
+    autoFetch: false,
   });
 
   // Get marketplace orders for this collection
