@@ -45,7 +45,7 @@ export function useMarketCollectionFetcher({
       const collections: { [address: string]: Contract } = {};
 
       for (const c of contracts) {
-        if (BLACKLISTS.includes(BigInt(c.contract_address))) {
+        if (BLACKLISTS.includes(getChecksumAddress(c.contract_address))) {
           continue;
         }
         const address = getChecksumAddress(c.contract_address);

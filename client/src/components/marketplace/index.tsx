@@ -27,7 +27,6 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
   const collectionEditions = useCollectionEditions();
 
   const { data: allCollections, status } = useTokenContracts();
-  console.log(status);
 
   const collections = useMemo(() => {
     if (!edition) return allCollections;
