@@ -86,6 +86,7 @@ export function useTokenContracts() {
       .where(({ collections }) =>
         not(inArray(collections.contract_address, BLACKLISTS)),
       )
+      .orderBy(({ collections }) => collections.name)
       .select(({ collections }) => ({ ...collections })),
   );
   if (!data) {
