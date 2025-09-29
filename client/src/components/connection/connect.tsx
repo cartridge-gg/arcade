@@ -4,9 +4,9 @@ import { useCallback } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 export function Connect() {
-  const { account } = useAccount();
+  const { account, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
-  const { isConnected } = useAccount();
+
   const { trackEvent, events } = useAnalytics();
 
   const connectWallet = useCallback(async () => {
@@ -15,7 +15,7 @@ export function Connect() {
     });
 
     try {
-      await connect({ connector: connectors[0] });
+      connect({ connector: connectors[0] });
       trackEvent(events.AUTH_WALLET_CONNECTED, {
         connector_type: connectors[0]?.id || "unknown",
       });

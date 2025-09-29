@@ -12,7 +12,6 @@ import {
 } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ActivityAchievementCard from "../modules/activity-achievement-card";
-import { Link } from "react-router-dom";
 import { VoyagerUrl } from "@cartridge/ui/utils";
 import type { constants } from "starknet";
 import type { CardProps } from "@/context/activities";
@@ -61,10 +60,11 @@ export function Activity() {
                 switch (props.variant) {
                   case "token":
                     return (
-                      <Link
+                      <a
                         key={`${props.key}-${index}`}
-                        to={toExplorer(props.transactionHash, props.chainId)}
+                        href={toExplorer(props.transactionHash, props.chainId)}
                         target="_blank"
+                        rel="noreferrer"
                       >
                         <ActivityTokenCard
                           amount={props.amount}
@@ -73,14 +73,15 @@ export function Activity() {
                           image={props.image}
                           action={props.action}
                         />
-                      </Link>
+                      </a>
                     );
                   case "collectible":
                     return (
-                      <Link
+                      <a
                         key={`${props.key}-${index}`}
-                        to={toExplorer(props.transactionHash, props.chainId)}
+                        href={toExplorer(props.transactionHash, props.chainId)}
                         target="_blank"
+                        rel="noreferrer"
                       >
                         <ActivityCollectibleCard
                           name={props.name}
@@ -89,14 +90,15 @@ export function Activity() {
                           image={props.image}
                           action={props.action}
                         />
-                      </Link>
+                      </a>
                     );
                   case "game":
                     return (
-                      <Link
+                      <a
                         key={`${props.key}-${index}`}
-                        to={toExplorer(props.transactionHash, props.chainId)}
+                        href={toExplorer(props.transactionHash, props.chainId)}
                         target="_blank"
+                        rel="noreferrer"
                       >
                         <ActivityGameCard
                           title={props.title}
@@ -104,7 +106,7 @@ export function Activity() {
                           image={props.image}
                           certified={props.certified}
                         />
-                      </Link>
+                      </a>
                     );
                   case "achievement":
                     return (

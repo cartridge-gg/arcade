@@ -100,7 +100,7 @@ export function useMarketCollectionFetcher({
                 direction: "Forward",
                 order_by: [],
               },
-            });
+            } as any);
             for (const c of contracts.items) {
               const token = await client.getTokens({
                 contract_addresses: [c.contract_address],

@@ -24,3 +24,5 @@ credentials.txt
 *.sln
 *.sw?
 *.tsbuildinfo
+tsconfig.app.tsbuildinfo
+tsconfig.node.tsbuildinfo

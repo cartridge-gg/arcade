@@ -12,7 +12,7 @@ import { useArcade } from "@/hooks/arcade";
 import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
 import { Register } from "./register";
 import { type GameModel, RoleType } from "@cartridge/arcade";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";
 import ArcadeGameSelect from "../modules/game-select";
@@ -183,8 +183,8 @@ export const Game = ({
   const { close } = useSidebar();
   const { trackGameInteraction } = useAnalytics();
 
-  const location = useLocation();
   const navigate = useNavigate();
+  const { location } = useRouterState();
   const handleClick = useCallback(() => {
     // Track game selection
     trackGameInteraction({
@@ -204,13 +204,34 @@ export const Game = ({
       },
     });
 
-    // Update the url params
-    let pathname = location.pathname;
-    const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || id}`;
-    pathname = pathname.replace(/\/game\/[^/]+/, "");
-    pathname = pathname.replace(/\/edition\/[^/]+/, "");
-    if (id !== 0) pathname = joinPaths(`/game/${gameName}`, pathname);
-    navigate(pathname || "/");
+    const segments = location.pathname.split("/").filter(Boolean);
+    const playerIndex = segments.indexOf("player");
+    const hasPlayer = playerIndex !== -1;
+
+    // Extract player path if it exists (e.g., ["player", "valdozzo", "inventory"])
+    const playerPath = hasPlayer ? segments.slice(playerIndex) : [];
+
+    // Build new path
+    let targetSegments: string[] = [];
+
+    if (id === 0) {
+      // "All Games" button
+      if (hasPlayer) {
+        targetSegments = playerPath; // Navigate to /player/$player/...
+      }
+      // else: targetSegments = [] → navigate to "/"
+    } else {
+      // Specific game selected
+      const gameName = game?.name.toLowerCase().replace(/ /g, "-") || id.toString();
+      targetSegments = ["game", gameName];
+
+      if (hasPlayer) {
+        targetSegments.push(...playerPath); // Navigate to /game/$game/player/$player/...
+      }
+    }
+
+    const target = targetSegments.length ? joinPaths(...targetSegments) : "/";
+    navigate({ to: target });
     // Close sidebar on mobile when a game is selected
     close();
   }, [
@@ -226,7 +247,6 @@ export const Game = ({
     whitelisted,
     published,
   ]);
-
   const setWhitelisted = useCallback(
     (status: boolean) => {
       if (!game) return;

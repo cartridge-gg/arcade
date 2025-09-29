@@ -13,7 +13,7 @@ import {
 } from "@cartridge/ui";
 import { ActivityScene } from "../scenes/activity";
 import { ArcadeTabs } from "../modules";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useUsername, useUsernames } from "@/hooks/account";
 import { useAddress } from "@/hooks/address";
 import AchievementPlayerHeader from "../modules/player-header";
@@ -57,24 +57,31 @@ export function PlayerPage() {
     return tab;
   }, [tab, order]);
 
-  const location = useLocation();
   const navigate = useNavigate();
+  const { location } = useRouterState();
   const handleClick = useCallback(
     (value: string) => {
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(pathname, `/tab/${value}`);
-      navigate(pathname || "/");
+      const segments = location.pathname.split("/").filter(Boolean);
+      const last = segments[segments.length - 1];
+      if (last === value) return;
+      if (order.includes(last as TabValue)) {
+        segments.pop();
+      }
+      segments.push(value as TabValue);
+      const target = joinPaths(...segments);
+      navigate({ to: target || "/" });
     },
-    [location, navigate],
+    [location.pathname, navigate, order],
   );
 
   const handleClose = useCallback(() => {
-    let pathname = location.pathname;
-    pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
-    navigate(pathname || "/");
-  }, [location, navigate]);
+    const segments = location.pathname.split("/").filter(Boolean);
+    const playerIndex = segments.indexOf("player");
+    const baseSegments =
+      playerIndex === -1 ? segments : segments.slice(0, playerIndex);
+    const target = baseSegments.length ? joinPaths(...baseSegments) : "/";
+    navigate({ to: target });
+  }, [location.pathname, navigate]);
 
   const { rank, points } = useMemo(() => {
     if (edition) {

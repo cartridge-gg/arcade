@@ -1,7 +1,6 @@
 import { useMemo, useCallback, useState } from "react";
 import { useMetadataFilters } from "./use-metadata-filters";
 import { useProject } from "./project";
-import { useSearchParams } from "react-router-dom";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
 import { useMarketplace } from "./marketplace";
 import { useMetadata } from "@/queries";
@@ -15,7 +14,6 @@ import { DEFAULT_PROJECT } from "@/constants";
 export function useMetadataFiltersAdapter() {
   const { collection: collectionAddress } = useProject();
   const [active, setActive] = useState(1); // 0 = Buy Now, 1 = Show All
-  const [,] = useSearchParams();
   const { getCollectionOrders } = useMarketplace();
 
   // Get pre-computed data from store

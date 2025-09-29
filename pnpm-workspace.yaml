@@ -5,10 +5,10 @@ packages:
 catalog:
   "@cartridge/presets": github:cartridge-gg/presets#e6a5022
   "@cartridge/ui": github:cartridge-gg/ui#a823aea
-  "@cartridge/connector": 0.10.0-alpha.1
-  "@cartridge/controller": 0.10.0-alpha.1
-  "@starknet-react/core": 5.0.1
-  "@starknet-react/chains": 5.0.1
+  "@cartridge/connector": 0.10.6
+  "@cartridge/controller": 0.10.6
+  "@starknet-react/core": =5.0.1
+  "@starknet-react/chains": =5.0.1
   "@dojoengine/core": 1.7.4
   "@dojoengine/sdk": 1.7.6
   "@dojoengine/torii-client": 1.7.3

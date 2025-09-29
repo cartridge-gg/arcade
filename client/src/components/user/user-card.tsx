@@ -5,7 +5,7 @@ import { useUsername } from "@/hooks/account";
 import { AchievementPlayerBadge, SparklesIcon } from "@cartridge/ui";
 import { usePlayerStats } from "@/hooks/achievements";
 import { joinPaths } from "@/helpers";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/sidebar";
 import { useAccount } from "@starknet-react/core";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -27,8 +27,8 @@ const UserCardInner = (
   const { className, address, ref, ...rest } = props;
 
   const { username } = useUsername({ address });
-  const location = useLocation();
   const navigate = useNavigate();
+  const { location } = useRouterState();
   const { close } = useSidebar();
   const { trackEvent, events } = useAnalytics();
 
@@ -57,7 +57,7 @@ const UserCardInner = (
     pathname = pathname.replace(/\/tab\/[^/]+/, "");
     pathname = pathname.replace(/\/edition\/[^/]+/, "");
     pathname = joinPaths(pathname, `/player/${playerName}`);
-    navigate(pathname);
+    navigate({ to: pathname });
 
     // Close sidebar on mobile
     close();

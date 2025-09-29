@@ -11,7 +11,7 @@ import {
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useLocation } from "react-router-dom";
+import { useRouterState } from "@tanstack/react-router";
 
 export const Filters = () => {
   const {
@@ -27,7 +27,7 @@ export const Filters = () => {
   } = useMetadataFiltersAdapter();
   const [search, setSearch] = useState<{ [key: string]: string }>({});
   const { trackEvent, events } = useAnalytics();
-  const location = useLocation();
+  const { location } = useRouterState();
 
   // Build filtered properties with search and dynamic counts
   const getFilteredProperties = useMemo(() => {

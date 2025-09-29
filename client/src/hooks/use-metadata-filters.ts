@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useCallback, useState, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
 import {
   buildMetadataIndex,
@@ -18,7 +18,23 @@ export function useMetadataFilters({
   collectionAddress,
   enabled = true,
 }: UseMetadataFiltersInput): UseMetadataFiltersReturn {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { location } = useRouterState();
+  const searchParams = useMemo(() => {
+    return new URLSearchParams(location.searchStr ?? "");
+  }, [location.searchStr]);
+  const setSearchParams = useCallback(
+    (params: URLSearchParams, options?: { replace?: boolean }) => {
+      const payload: Record<string, string> = {};
+      params.forEach((value, key) => {
+        if (value) {
+          payload[key] = value;
+        }
+      });
+      navigate({ to: location.pathname, search: payload, replace: options?.replace });
+    },
+    [navigate, location.pathname],
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const {

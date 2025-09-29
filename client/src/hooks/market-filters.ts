@@ -7,8 +7,8 @@ import { OrderModel, Token } from "@cartridge/arcade";
 import { useMarketplace } from "./marketplace";
 import { getChecksumAddress } from "starknet";
 import { MetadataHelper } from "@/helpers/metadata";
-import { useSearchParams } from "react-router-dom";
 import { useAccounts } from "@/collections";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 export type Asset = Token & { orders: OrderModel[]; owner: string };
 
@@ -157,7 +157,25 @@ export const useMarketFilters = () => {
     setSelection([]);
   }, [setSelection]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { location } = useRouterState();
+
+  const searchParams = useMemo(() => {
+    return new URLSearchParams(location.searchStr ?? "");
+  }, [location.searchStr]);
+
+  const setSearchParams = useCallback(
+    (params: URLSearchParams) => {
+      const payload: Record<string, string> = {};
+      params.forEach((value, key) => {
+        if (value) {
+          payload[key] = value;
+        }
+      });
+      navigate({ to: location.pathname, search: payload });
+    },
+    [navigate, location.pathname],
+  );
   const handleSetSelected = useCallback(
     (selected: SearchResult | undefined) => {
       if (!selected) {

@@ -3,8 +3,8 @@ import { useCallback, useMemo } from "react";
 import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useLocation, useNavigate } from "react-router-dom";
-import { joinPaths, resizeImage } from "@/helpers";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { joinPaths } from "@/helpers";
 import type {
   CollectionEditionModel,
   EditionModel,
@@ -98,8 +98,8 @@ function Item({
 }) {
   const { orders, sales } = useMarketplace();
 
-  const location = useLocation();
   const navigate = useNavigate();
+  const { location } = useRouterState();
 
   const listingCount = useMemo(() => {
     const collectionOrders = orders[collectionAddress];
@@ -190,7 +190,7 @@ function Item({
     } else {
       pathname = joinPaths(pathname, `/collection/${address}`);
     }
-    navigate(pathname || "/");
+    navigate({ to: pathname || "/" });
   }, [collectionAddress, location, navigate, game, edition]);
 
   return (

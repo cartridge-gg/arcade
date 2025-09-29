@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { Connection } from "./connection";
 import ArcadeHeader from "./modules/arcade-header";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -13,7 +13,7 @@ export const Header = ({}: HeaderProps) => {
     trackEvent(events.NAVIGATION_HOME_CLICKED, {
       from_page: window.location.pathname,
     });
-    navigate("/");
+    navigate({ to: "/" });
   };
 
   return (

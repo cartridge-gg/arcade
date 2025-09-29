@@ -12,7 +12,7 @@ import {
   VerifiedIcon,
 } from "@cartridge/ui";
 import { ArcadeTabs } from "../modules";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 import arcade from "@/assets/arcade-logo.png";
@@ -36,10 +36,10 @@ export function MarketPage() {
     return tab;
   }, [tab]);
 
-  const location = useLocation();
   const navigate = useNavigate();
   const { trackEvent, events } = useAnalytics();
 
+  const { location } = useRouterState();
   const handleClick = useCallback(
     (value: string) => {
       // Track marketplace tab switch
@@ -50,33 +50,33 @@ export function MarketPage() {
         collection_address: collectionAddress,
         collection_name: props.name,
       });
-
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(pathname, `/tab/${value}`);
-      navigate(pathname || "/");
+      const segments = location.pathname.split("/").filter(Boolean);
+      const last = segments[segments.length - 1];
+      if (last === value) return;
+      if (TABS_ORDER.includes(last as TabValue)) {
+        segments.pop();
+      }
+      segments.push(value as TabValue);
+      const target = joinPaths(...segments);
+      navigate({ to: target || "/" });
     },
-    [
-      location,
-      navigate,
-      trackEvent,
-      events,
-      tab,
-      collectionAddress,
-      props.name,
-    ],
+    [location.pathname, navigate],
   );
 
   const handleClose = useCallback(() => {
-    let pathname = location.pathname;
-    pathname = pathname.replace(/\/collection\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "/tab/marketplace");
-    if (!pathname.includes("/tab/")) {
-      pathname = `${pathname}/tab/marketplace`;
+    const segments = location.pathname.split("/").filter(Boolean);
+    const collectionIndex = segments.lastIndexOf("collection");
+    if (collectionIndex !== -1) {
+      segments.splice(collectionIndex, 2);
     }
-
-    navigate(pathname || "/");
-  }, [location, navigate]);
+    const last = segments[segments.length - 1];
+    if (TABS_ORDER.includes(last as TabValue)) {
+      segments.pop();
+    }
+    segments.push("marketplace");
+    const target = joinPaths(...segments);
+    navigate({ to: target || "/" });
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

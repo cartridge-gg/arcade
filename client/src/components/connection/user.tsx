@@ -3,7 +3,7 @@ import { Button, SignOutIcon, Skeleton } from "@cartridge/ui";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { useCallback, useEffect } from "react";
 import { UserAvatar } from "../user/avatar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
@@ -49,8 +49,15 @@ export function User() {
       username: name,
     });
     disconnect();
-    navigate("/");
-  }, [disconnect, navigate, trackEvent, events, account?.address, name]);
+    navigate({ to: "/" });
+  }, [
+    disconnect,
+    navigate,
+    account?.address,
+    events.AUTH_WALLET_DISCONNECTED,
+    name,
+    trackEvent,
+  ]);
 
   useEffect(() => {
     if (isLoading) {
@@ -88,6 +95,7 @@ export function User() {
         <p className="text-sm font-medium normal-case">{name}</p>
       </Button>
       <button
+        type="button"
         onClick={handleDisconnect}
         className="p-2 rounded bg-background-100 hover:bg-background-150"
       >

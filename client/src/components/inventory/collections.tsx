@@ -10,10 +10,11 @@ import { useAddress } from "@/hooks/address";
 import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useUsername } from "@/hooks/account";
 import { joinPaths, resizeImage } from "@/helpers";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { TAB_SEGMENTS } from "@/hooks/project";
 
 interface CollectionsProps {
   collections: Collection[];
@@ -85,7 +86,7 @@ function Item({
   const { username } = useUsername({ address });
 
   const navigate = useNavigate();
-  const location = useLocation();
+  const { location } = useRouterState();
   const handleClick = useCallback(async () => {
     // Track collection click
     trackEvent(events.INVENTORY_COLLECTION_CLICKED, {
@@ -101,14 +102,17 @@ function Item({
     // If the user is not logged in, or not the current user then we navigate to the marketplace
     if (!isSelf) {
       const player = username.toLowerCase();
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(
-        pathname,
-        `/collection/${collection.address}/tab/items?filter=${player}`,
-      );
-      navigate(pathname || "/");
+      const segments = location.pathname.split("/").filter(Boolean);
+      const playerIndex = segments.indexOf("player");
+      const baseSegments =
+        playerIndex === -1 ? segments : segments.slice(0, playerIndex);
+      const last = baseSegments[baseSegments.length - 1];
+      if (TAB_SEGMENTS.includes(last as (typeof TAB_SEGMENTS)[number])) {
+        baseSegments.pop();
+      }
+      baseSegments.push("collection", collection.address, "items");
+      const target = baseSegments.length ? joinPaths(...baseSegments) : "/";
+      navigate({ to: target || "/", search: { filter: player } });
       return;
     }
     const controller = (connector as ControllerConnector)?.controller;
