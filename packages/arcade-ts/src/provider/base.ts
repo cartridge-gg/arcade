@@ -29,11 +29,17 @@ interface InvokeContext {
 
 type WithoutIndexSignature<T> = {
   [K in keyof T as K extends string
-    ? (string extends K ? never : K)
+    ? string extends K
+      ? never
+      : K
     : K extends number
-      ? (number extends K ? never : K)
+      ? number extends K
+        ? never
+        : K
       : K extends symbol
-        ? (symbol extends K ? never : K)
+        ? symbol extends K
+          ? never
+          : K
         : K]: T[K];
 };
 
@@ -43,8 +49,7 @@ type DojoProviderConstructorLike = new (
   ...args: ConstructorParameters<typeof DojoProvider>
 ) => DojoProviderInstanceLike;
 
-const DojoProviderBaseCtor =
-  DojoProvider as unknown as DojoProviderConstructorLike;
+const DojoProviderBaseCtor = DojoProvider as unknown as DojoProviderConstructorLike;
 
 export class BaseProvider extends DojoProviderBaseCtor {
   protected readonly namespace: string;

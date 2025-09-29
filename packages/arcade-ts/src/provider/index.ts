@@ -6,14 +6,7 @@
  */
 import type { DojoProvider } from "@dojoengine/core";
 import * as torii from "@dojoengine/torii-client";
-import type {
-  Account,
-  AccountInterface,
-  AllowArray,
-  Call,
-  constants,
-  GetTransactionReceiptResponse,
-} from "starknet";
+import type { Account, AccountInterface, AllowArray, Call, constants, GetTransactionReceiptResponse } from "starknet";
 
 import { BaseProvider, type InvokeContext } from "./base";
 
