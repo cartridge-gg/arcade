@@ -1,11 +1,11 @@
-import { Chain, mainnet, sepolia } from "@starknet-react/chains";
+import { type Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
-import { PropsWithChildren, useContext, useMemo, useRef } from "react";
+import { type PropsWithChildren, useContext, useMemo, useRef } from "react";
 import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
-import { KeychainOptions, ProviderOptions } from "@cartridge/controller";
+import type { KeychainOptions, ProviderOptions } from "@cartridge/controller";
 import { getSocialPolicies, getRegistryPolicies } from "@cartridge/arcade";
-import { getMarketplacePolicies } from "@cartridge/marketplace";
+import { getMarketplacePolicies } from "@cartridge/arcade";
 import { ArcadeContext } from "./arcade";
 
 const chainId = constants.StarknetChainId.SN_MAIN;
@@ -73,7 +73,6 @@ export function StarknetProvider({ children }: PropsWithChildren) {
     controllerRef.current = new ControllerConnector({
       ...provider,
       ...keychain,
-      // ...profile,
     });
     return controllerRef.current;
   }, [controllerRef, provider]);
@@ -81,7 +80,7 @@ export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[mainnet, sepolia]}
+      chains={[mainnet]}
       connectors={!controller ? [] : [controller]}
       explorer={voyager}
       provider={jsonProvider}

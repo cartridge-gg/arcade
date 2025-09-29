@@ -1,9 +1,9 @@
-import { EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import { useCallback, useMemo, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
-import ControllerConnector from "@cartridge/connector/controller";
-import { Call, constants } from "starknet";
+import type ControllerConnector from "@cartridge/connector/controller";
+import { type Call } from "starknet";
 import ControllerAction from "../modules/controller-action";
 
 export function Prioritize({
@@ -60,7 +60,6 @@ export function Prioritize({
           const args = { editionId: e.id, priority: priority };
           return provider.registry.prioritize_edition(args) as Call;
         });
-        controller.switchStarknetChain(constants.StarknetChainId.SN_MAIN);
         await account.execute(calls);
       } catch (error) {
         console.error(error);

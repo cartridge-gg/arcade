@@ -1,0 +1,18 @@
+{
+	"files": {
+		"include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.tsx", "*.config.ts"],
+		"ignore": ["dist/*", "**/dist/**"]
+	},
+	"formatter": {
+		"indentStyle": "space",
+		"indentWidth": 2
+	},
+	"linter": {
+		"ignore": ["*.test.ts", "*.spec.ts"],
+		"rules": {
+			"suspicious": {
+			  "noExplicitAny": "off"
+			}
+		  }
+	}
+}

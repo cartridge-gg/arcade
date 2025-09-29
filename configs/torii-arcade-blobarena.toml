@@ -1,0 +1,13 @@
+world_address = "0x2d26295d6c541d64740e1ae56abc079b82b22c35ab83985ef8bd15dc0f9edfb"
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+
+[indexing]
+allowed_origins = ["*"]
+polling_interval = 500
+world_block = 1460162
+pending = true
+transactions = true
+contracts = []
+
+[sql]
+historical = ["achievements-TrophyProgression"]

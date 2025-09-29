@@ -1,9 +1,8 @@
-import { GameModel } from "@cartridge/arcade";
+import type { GameModel } from "@cartridge/arcade";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
 import { useCallback, useMemo, useState } from "react";
-import ControllerConnector from "@cartridge/connector/controller";
-import { constants } from "starknet";
+import type ControllerConnector from "@cartridge/connector/controller";
 import ControllerAction from "../modules/controller-action";
 
 export function Publish({
@@ -39,7 +38,6 @@ export function Publish({
           action === "publish"
             ? provider.registry.publish_game(args)
             : provider.registry.hide_game(args);
-        controller.switchStarknetChain(constants.StarknetChainId.SN_MAIN);
         await account.execute(calls);
         setPublished(action === "publish");
       } catch (error) {

@@ -1,19 +1,25 @@
-import { createContext, useState, ReactNode, useEffect, useMemo } from "react";
+import {
+  createContext,
+  useState,
+  type ReactNode,
+  useEffect,
+  useMemo,
+} from "react";
 import { TROPHY, PROGRESS } from "@/constants";
 import { Trophy, Progress } from "@/models";
 import { useProgressions } from "@/hooks/progressions";
 import { useTrophies } from "@/hooks/trophies";
 import {
   AchievementHelper,
-  AchievementData,
-  Item,
-  Player,
-  Event,
+  type AchievementData,
+  type Item,
+  type Player,
+  type Event,
 } from "@/helpers/achievements";
-import { useUsernames } from "@/hooks/account";
 import { getChecksumAddress } from "starknet";
 import { useAddress } from "@/hooks/address";
 import { useArcade } from "@/hooks/arcade";
+import { useAccounts } from "@/collections";
 
 type AchievementContextType = {
   achievements: { [game: string]: Item[] };
@@ -114,7 +120,22 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
     return uniqueAddresses;
   }, [players]);
 
-  const { usernames } = useUsernames({ addresses });
+  const { data } = useAccounts();
+
+  const usernames = useMemo(() => {
+    if (!data || addresses.length === 0) return [];
+    return addresses.map(
+      (address) => {
+        return {
+          address: getChecksumAddress(address),
+          username:
+            data.get(getChecksumAddress(address)) || address.slice(0, 9),
+        };
+      },
+      {} as { [key: string]: string },
+    );
+  }, [data, addresses]);
+
   const usernamesData = useMemo(() => {
     const data: { [key: string]: string | undefined } = {};
     addresses.forEach((address) => {

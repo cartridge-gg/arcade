@@ -8,6 +8,7 @@ use dojo::world::WorldStorage;
 
 use registry::models::access::Access;
 use registry::models::collection::Collection;
+use registry::models::collection_edition::CollectionEdition;
 use registry::models::edition::{Edition, EditionTrait};
 use registry::models::game::{Game, GameTrait};
 use registry::models::unicity::{Unicity, UnicityTrait};
@@ -39,6 +40,13 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
+    fn get_collection_edition(
+        self: Store, collection: felt252, edition: felt252,
+    ) -> CollectionEdition {
+        self.world.read_model((collection, edition))
+    }
+
+    #[inline]
     fn get_game(self: Store, game_id: felt252) -> Game {
         self.world.read_model(game_id)
     }
@@ -61,6 +69,11 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn set_collection(ref self: Store, collection: @Collection) {
         self.world.write_model(collection);
+    }
+
+    #[inline]
+    fn set_collection_edition(ref self: Store, collection_edition: @CollectionEdition) {
+        self.world.write_model(collection_edition);
     }
 
     #[inline]

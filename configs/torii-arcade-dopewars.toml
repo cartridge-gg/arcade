@@ -1,0 +1,15 @@
+world_address = "0x04f3dccb47477c087ad9c76b8067b8aadded57f8df7f2d7543e6066bcb25332c"
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+
+[indexing]
+allowed_origins = ["*"]
+polling_interval = 500
+world_block = 554560
+pending = true
+transactions = true
+contracts = [
+    "ERC20:0x0410466536b5ae074f7fea81e5533b8134a9fa08b3dd077dd9db08f64997d113",
+]
+
+[sql]
+historical = ["dopewars-TrophyProgression"]

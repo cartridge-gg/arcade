@@ -1,25 +1,25 @@
 import { useCallback, useContext, useMemo, useState } from "react";
-import { MarketplaceContext } from "@/context/marketplace";
 import { useParams } from "react-router-dom";
 import { getChecksumAddress } from "starknet";
-import { OrderModel, StatusType } from "@cartridge/marketplace";
+import { type OrderModel, StatusType } from "@cartridge/arcade";
+import { ArcadeContext } from "@/context";
 
 /**
  * Custom hook to access the Marketplace context and account information.
- * Must be used within a MarketplaceProvider component.
+ * Must be used within a ArcadeProvider component.
  *
  * @returns An object containing:
  * - chainId: The chain id
  * - provider: The Marketplace provider instance
  * - orders: All the existing orders
- * @throws {Error} If used outside of a MarketplaceProvider context
+ * @throws {Error} If used outside of a ArcadeProvider context
  */
 export const useMarketplace = () => {
-  const context = useContext(MarketplaceContext);
+  const context = useContext(ArcadeContext);
 
   if (!context) {
     throw new Error(
-      "The `useMarketplace` hook must be used within a `MarketplaceProvider`",
+      "The `useMarketplace` hook must be used within a `ArcadeProvider`",
     );
   }
 

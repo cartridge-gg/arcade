@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { cn, Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import { getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import { Connect } from "../errors";
@@ -65,7 +65,10 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
             (ids.length === 0 || ids.includes(item.id)),
         )
         .sort((a, b) => a.id.localeCompare(b.id))
-        .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+        .sort(
+          (a, b) =>
+            Number.parseFloat(a.percentage) - Number.parseFloat(b.percentage),
+        )
         .slice(0, 3)
         .map((item) => {
           return {

@@ -1,8 +1,8 @@
 import { BranchIcon } from "@/icons/branch";
 import { VerifiedIcon } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, VariantProps } from "class-variance-authority";
-import { HTMLAttributes } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import type { HTMLAttributes } from "react";
 
 const editionActionVariants = cva(
   "flex items-center gap-1 px-2 py-2.5 h-10 cursor-pointer",

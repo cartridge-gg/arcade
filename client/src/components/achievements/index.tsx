@@ -2,10 +2,10 @@ import { Empty, LayoutContent, Skeleton, useMediaQuery } from "@cartridge/ui";
 import { useMemo } from "react";
 import { Trophies } from "./trophies";
 import { useArcade } from "@/hooks/arcade";
-import { EditionModel, GameModel, Socials } from "@cartridge/arcade";
+import { type EditionModel, type GameModel, Socials } from "@cartridge/arcade";
 import { getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
-import { Item } from "@/helpers/achievements";
+import type { Item } from "@/helpers/achievements";
 import banner from "@/assets/banner.png";
 import AchievementSummary from "../modules/summary";
 import { useAddress } from "@/hooks/address";
@@ -42,7 +42,10 @@ export function Achievements({
         (item) => item.completed && (ids.length === 0 || ids.includes(item.id)),
       )
       .sort((a, b) => a.id.localeCompare(b.id))
-      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+      .sort(
+        (a, b) =>
+          Number.parseFloat(a.percentage) - Number.parseFloat(b.percentage),
+      )
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     return { pinneds };
   }, [gameAchievements, pins, address, self]);
@@ -170,7 +173,10 @@ export function Row({
         (item) => item.completed && (ids.length === 0 || ids.includes(item.id)),
       )
       .sort((a, b) => a.id.localeCompare(b.id))
-      .sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage))
+      .sort(
+        (a, b) =>
+          Number.parseFloat(a.percentage) - Number.parseFloat(b.percentage),
+      )
       .slice(0, 3); // There is a front-end limit of 3 pinneds
     return { pinneds };
   }, [gameAchievements, pins, address, self]);
@@ -184,7 +190,7 @@ export function Row({
           id: achievement.id,
           content: {
             points: achievement.earning,
-            difficulty: parseFloat(achievement.percentage),
+            difficulty: Number.parseFloat(achievement.percentage),
             hidden: achievement.hidden,
             icon: achievement.icon,
             tasks: achievement.tasks,

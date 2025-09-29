@@ -1,4 +1,4 @@
-import { initSDK } from "..";
+import { initArcadeSDK } from "..";
 import { constants } from "starknet";
 import { Pin, PinEvent } from "./pin";
 import { Follow, FollowEvent } from "./follow";
@@ -13,9 +13,9 @@ import {
   ToriiQueryBuilder,
   ToriiResponse,
 } from "@dojoengine/sdk";
-import { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { SocialOptions, DefaultSocialOptions } from "./options";
+import type { SchemaType } from "../../bindings";
 
 export * from "./policies";
 export { PinEvent, FollowEvent, GuildModel, AllianceModel, MemberModel, SocialOptions };
@@ -27,7 +27,7 @@ export const Social = {
   unsubEvents: undefined as (() => void) | undefined,
 
   init: async (chainId: constants.StarknetChainId) => {
-    Social.sdk = await initSDK(chainId);
+    Social.sdk = await initArcadeSDK(chainId);
   },
 
   isEntityQueryable(options: SocialOptions) {
@@ -64,13 +64,13 @@ export const Social = {
       const items = entities?.getItems();
       items.forEach((entity: ParsedEntity<SchemaType>) => {
         if (entity.models[NAMESPACE][Alliance.getModelName()]) {
-          models.push(Alliance.parse(entity));
+          models.push(Alliance.parse(entity as any));
         }
         if (entity.models[NAMESPACE][Guild.getModelName()]) {
-          models.push(Guild.parse(entity));
+          models.push(Guild.parse(entity as any));
         }
         if (entity.models[NAMESPACE][Member.getModelName()]) {
-          models.push(Member.parse(entity));
+          models.push(Member.parse(entity as any));
         }
       });
       callback(models);
@@ -92,17 +92,20 @@ export const Social = {
       const items = entities?.getItems();
       items.forEach((entity: ParsedEntity<SchemaType>) => {
         if (entity.models[NAMESPACE][Pin.getModelName()]) {
-          events.push(Pin.parse(entity));
+          events.push(Pin.parse(entity as any));
         }
         if (entity.models[NAMESPACE][Follow.getModelName()]) {
-          events.push(Follow.parse(entity));
+          events.push(Follow.parse(entity as any));
         }
       });
       callback(events);
     };
     const query = Social.getEventQuery(options);
     try {
-      const events = await Social.sdk.getEventMessages({ query, historical: false });
+      const events = await Social.sdk.getEventMessages({
+        query,
+        historical: false,
+      });
       wrappedCallback(events);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -127,19 +130,22 @@ export const Social = {
       const entity = (data as ParsedEntity<SchemaType>[])[0];
       const eraseable = !entity.models[NAMESPACE];
       if (entity.models[NAMESPACE]?.[Alliance.getModelName()] || eraseable) {
-        callback([Alliance.parse(entity)]);
+        callback([Alliance.parse(entity as any)]);
       }
       if (entity.models[NAMESPACE]?.[Guild.getModelName()] || eraseable) {
-        callback([Guild.parse(entity)]);
+        callback([Guild.parse(entity as any)]);
       }
       if (entity.models[NAMESPACE]?.[Member.getModelName()] || eraseable) {
-        callback([Member.parse(entity)]);
+        callback([Member.parse(entity as any)]);
       }
     };
 
     const query = Social.getEntityQuery(options);
 
-    const [_, subscription] = await Social.sdk.subscribeEntityQuery({ query, callback: wrappedCallback });
+    const [_, subscription] = await Social.sdk.subscribeEntityQuery({
+      query,
+      callback: wrappedCallback,
+    });
     Social.unsubEntities = () => subscription.cancel();
   },
 
@@ -161,16 +167,19 @@ export const Social = {
       const entity = (data as ParsedEntity<SchemaType>[])[0];
       const eraseable = !entity.models[NAMESPACE];
       if (entity.models[NAMESPACE]?.[Pin.getModelName()] || eraseable) {
-        callback([Pin.parse(entity)]);
+        callback([Pin.parse(entity as any)]);
       }
       if (entity.models[NAMESPACE]?.[Follow.getModelName()] || eraseable) {
-        callback([Follow.parse(entity)]);
+        callback([Follow.parse(entity as any)]);
       }
     };
 
     const query = Social.getEventQuery(options);
 
-    const [_, subscription] = await Social.sdk.subscribeEventQuery({ query, callback: wrappedCallback });
+    const [_, subscription] = await Social.sdk.subscribeEventQuery({
+      query,
+      callback: wrappedCallback,
+    });
     Social.unsubEvents = () => subscription.cancel();
   },
 

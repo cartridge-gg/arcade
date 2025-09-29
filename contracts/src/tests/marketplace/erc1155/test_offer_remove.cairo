@@ -1,0 +1,132 @@
+// External imports
+
+// Internal imports
+
+use arcade::systems::marketplace::IMarketplaceDispatcherTrait;
+use arcade::tests::setup::setup::spawn;
+use openzeppelin_token::erc1155::interface::IERC1155DispatcherTrait;
+use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
+use orderbook::models::order::OrderAssert;
+
+// Package imports
+
+use orderbook::store::StoreTrait;
+use orderbook::types::status::Status;
+
+// Constants
+
+const EXPIRATION: u64 = 1748950141;
+const ORDER_ID: u32 = 1;
+const TOKEN_ID: u256 = 1;
+const QUANTITY: u128 = 5;
+const PRICE: u128 = 1_000_000_000_000_000_000;
+
+// Tests
+
+#[test]
+fn test_offer_remove() {
+    // [Setup] World
+    let (world, contracts, context) = spawn();
+    // [Sell] Create a sell order on the Marketplace
+    starknet::testing::set_contract_address(context.spender);
+    contracts.erc20.approve(contracts.marketplace.contract_address, QUANTITY.into() * PRICE.into());
+    contracts
+        .marketplace
+        .offer(
+            collection: contracts.erc1155.contract_address,
+            token_id: TOKEN_ID,
+            quantity: QUANTITY,
+            price: PRICE,
+            currency: contracts.erc20.contract_address,
+            expiration: EXPIRATION,
+        );
+    // [Action] Revoke approval
+    contracts.erc20.approve(contracts.marketplace.contract_address, 0);
+    // [Remove] Remove order
+    starknet::testing::set_contract_address(context.spender);
+    contracts
+        .marketplace
+        .remove(
+            order_id: ORDER_ID, collection: contracts.erc1155.contract_address, token_id: TOKEN_ID,
+        );
+    // [Assert] Order is removed
+    let store = StoreTrait::new(world);
+    let collection: felt252 = contracts.erc1155.contract_address.into();
+    let order = store.order(ORDER_ID, collection, TOKEN_ID);
+    // [Assert] Order values
+    assert_eq!(order.status, Status::Canceled.into());
+}
+
+#[test]
+#[should_panic(expected: ('Sale: not invalid', 'ENTRYPOINT_FAILED'))]
+fn test_offer_remove_revert_not_invalid() {
+    // [Setup] World
+    let (_world, contracts, context) = spawn();
+    // [Sell] Create a sell order on the Marketplace
+    starknet::testing::set_contract_address(context.spender);
+    contracts.erc20.approve(contracts.marketplace.contract_address, QUANTITY.into() * PRICE.into());
+    contracts
+        .marketplace
+        .offer(
+            collection: contracts.erc1155.contract_address,
+            token_id: TOKEN_ID,
+            quantity: QUANTITY,
+            price: PRICE,
+            currency: contracts.erc20.contract_address,
+            expiration: EXPIRATION,
+        );
+    // [Remove] Remove order
+    starknet::testing::set_contract_address(context.spender);
+    contracts
+        .marketplace
+        .remove(
+            order_id: ORDER_ID, collection: contracts.erc1155.contract_address, token_id: TOKEN_ID,
+        );
+}
+
+#[test]
+#[should_panic(expected: ('Order: invalid status', 'ENTRYPOINT_FAILED'))]
+fn test_offer_remove_execute_revert_cannot_be_executed() {
+    // [Setup] World
+    let (_world, contracts, context) = spawn();
+    // [Sell] Create a sell order on the Marketplace
+    starknet::testing::set_contract_address(context.spender);
+    contracts.erc20.approve(contracts.marketplace.contract_address, QUANTITY.into() * PRICE.into());
+    contracts
+        .marketplace
+        .offer(
+            collection: contracts.erc1155.contract_address,
+            token_id: TOKEN_ID,
+            quantity: QUANTITY,
+            price: PRICE,
+            currency: contracts.erc20.contract_address,
+            expiration: EXPIRATION,
+        );
+    // [Action] Revoke approval
+    contracts.erc20.approve(contracts.marketplace.contract_address, 0);
+    // [Remove] Remove order
+    starknet::testing::set_contract_address(context.holder);
+    contracts
+        .marketplace
+        .remove(
+            order_id: ORDER_ID, collection: contracts.erc1155.contract_address, token_id: TOKEN_ID,
+        );
+    // [Action] Set approval
+    starknet::testing::set_contract_address(context.spender);
+    contracts.erc20.approve(contracts.marketplace.contract_address, QUANTITY.into() * PRICE.into());
+    // [Buy] Spender buys the token;
+    starknet::testing::set_contract_address(context.holder);
+    contracts.erc1155.set_approval_for_all(contracts.marketplace.contract_address, true);
+    contracts
+        .marketplace
+        .execute(
+            order_id: ORDER_ID,
+            collection: contracts.erc1155.contract_address,
+            token_id: TOKEN_ID,
+            asset_id: TOKEN_ID,
+            quantity: QUANTITY,
+            royalties: true,
+            client_fee: 0,
+            client_receiver: context.receiver,
+        );
+}

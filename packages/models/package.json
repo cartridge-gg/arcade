@@ -1,0 +1,30 @@
+{
+    "name": "@cartridge/models",
+    "version": "0.0.0",
+    "description": "",
+    "main": "index.js",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
+      }
+    },
+    "scripts": {
+      "gen:types": "sozo build --profile mainnet --typescript --bindings-output src",
+      "build:ts": "tsup",
+      "prepare": "pnpm build:ts"
+    },
+    "dependencies": {
+        "starknet": "catalog:",
+        "@dojoengine/core": "catalog:",
+        "@dojoengine/sdk": "catalog:"
+    },
+    "devDependencies": {
+        "tsup": "catalog:"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.7.1"
+  }

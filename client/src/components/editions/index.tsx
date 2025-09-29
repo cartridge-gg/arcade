@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Register } from "./register";
-import { EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import EditionActions from "../modules/edition-actions";
 import EditionAction from "../modules/edition-item";
 import { useProject } from "@/hooks/project";

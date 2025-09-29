@@ -22,7 +22,7 @@ import {
   LightbulbIcon,
 } from "@cartridge/ui";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import ArcadeTab from "./tab";
 import { useDevice } from "@/hooks/device";
 

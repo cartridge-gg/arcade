@@ -1,6 +1,6 @@
 import {
   createContext,
-  ReactNode,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
@@ -9,17 +9,27 @@ import {
 } from "react";
 import {
   ArcadeProvider as ExternalProvider,
+  Marketplace,
   Registry,
   Social,
   PinEvent,
   AccessModel,
   GameModel,
-  RegistryModel,
-  SocialModel,
-  SocialOptions,
-  RegistryOptions,
+  type RegistryModel,
+  type SocialModel,
+  type SocialOptions,
+  type RegistryOptions,
   FollowEvent,
   EditionModel,
+  BookModel,
+  OrderModel,
+  ListingEvent,
+  SaleEvent,
+  MarketplaceModel,
+  CategoryType,
+  StatusType,
+  MarketplaceOptions,
+  CollectionEditionModel,
 } from "@cartridge/arcade";
 import {
   constants,
@@ -27,8 +37,8 @@ import {
   RpcProvider,
   shortString,
 } from "starknet";
-import { Chain } from "@starknet-react/chains";
-import * as torii from "@dojoengine/torii-wasm";
+import type { Chain } from "@starknet-react/chains";
+import type * as torii from "@dojoengine/torii-wasm";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
 const IGNORES = [
@@ -58,9 +68,24 @@ interface ArcadeContextType {
   accesses: AccessModel[];
   games: GameModel[];
   editions: EditionModel[];
+  collectionEditions: { [collection: string]: number[] };
   chains: Chain[];
   player: string | undefined;
   clients: { [key: string]: torii.ToriiClient };
+  book: BookModel | null;
+  orders: {
+    [collection: string]: { [token: string]: { [order: string]: OrderModel } };
+  };
+  listings: {
+    [collection: string]: {
+      [token: string]: { [listing: string]: ListingEvent };
+    };
+  };
+  sales: {
+    [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
+  };
+  addOrder: (order: OrderModel) => void;
+  removeOrder: (order: OrderModel) => void;
   setPlayer: (address: string | undefined) => void;
 }
 
@@ -76,6 +101,18 @@ export const ArcadeContext = createContext<ArcadeContextType | null>(null);
  * @throws {Error} If ArcadeProvider is used more than once in the component tree
  */
 export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
+  const [book, setBook] = useState<BookModel | null>(null);
+  const [orders, setOrders] = useState<{
+    [collection: string]: { [token: string]: { [order: string]: OrderModel } };
+  }>({});
+  const [listings, setListings] = useState<{
+    [collection: string]: {
+      [token: string]: { [listing: string]: ListingEvent };
+    };
+  }>({});
+  const [sales, setSales] = useState<{
+    [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
+  }>({});
   const [player, setPlayer] = useState<string | undefined>();
   const currentValue = useContext(ArcadeContext);
   const [pins, setPins] = useState<{ [playerId: string]: string[] }>({});
@@ -86,6 +123,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const [games, setGames] = useState<{ [gameId: string]: GameModel }>({});
   const [editions, setEditions] = useState<{
     [editionId: string]: EditionModel;
+  }>({});
+  const [collectionEditions, setCollectionEditions] = useState<{
+    [collectionEditionId: string]: CollectionEditionModel;
   }>({});
   const [chains, setChains] = useState<Chain[]>([]);
   const [clients, setClients] = useState<{ [key: string]: torii.ToriiClient }>(
@@ -145,6 +185,92 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     // TODO: Update here to select either Mainnet or Sepolia
     () => new ExternalProvider(CHAIN_ID),
     [],
+  );
+
+  const removeOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => {
+        const newOrders = { ...prev };
+        if (newOrders[collection]?.[token]?.[order.id]) {
+          delete newOrders[collection][token][order.id];
+        }
+        return newOrders;
+      });
+    },
+    [setOrders],
+  );
+
+  const addOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => ({
+        ...prev,
+        [collection]: {
+          ...(prev[collection] || {}),
+          [token]: {
+            ...(prev[collection]?.[token] || {}),
+            [order.id]: order,
+          },
+        },
+      }));
+    },
+    [setOrders],
+  );
+
+  const handleMarketplaceEntities = useCallback(
+    (entities: MarketplaceModel[]) => {
+      const now = Date.now();
+      entities.forEach((entity: MarketplaceModel) => {
+        if (BookModel.isType(entity as BookModel)) {
+          const book = entity as BookModel;
+          if (book.version === 0) return;
+          setBook(book);
+        } else if (OrderModel.isType(entity as OrderModel)) {
+          const order = entity as OrderModel;
+          if (order.expiration * 1000 < now) return;
+          if (order.category.value !== CategoryType.Sell) return;
+          if (order.status.value === StatusType.Placed) {
+            addOrder(order);
+          } else {
+            removeOrder(order);
+          }
+        } else if (SaleEvent.isType(entity as SaleEvent)) {
+          const sale = entity as SaleEvent;
+          const order = sale.order;
+          const collection = getChecksumAddress(order.collection);
+          const token = order.tokenId.toString();
+          setSales((prev) => ({
+            ...prev,
+            [collection]: {
+              ...(prev[collection] || {}),
+              [token]: {
+                ...(prev[collection]?.[token] || {}),
+                [order.id]: sale,
+              },
+            },
+          }));
+        } else if (ListingEvent.isType(entity as ListingEvent)) {
+          const listing = entity as ListingEvent;
+          const order = listing.order;
+          const collection = getChecksumAddress(order.collection);
+          const token = order.tokenId.toString();
+          setListings((prev) => ({
+            ...prev,
+            [collection]: {
+              ...(prev[collection] || {}),
+              [token]: {
+                ...(prev[collection]?.[token] || {}),
+                [order.id]: listing,
+              },
+            },
+          }));
+        }
+      });
+    },
+    [addOrder, removeOrder, setBook, setListings, setSales],
   );
 
   const handlePinEvent = useCallback((event: PinEvent) => {
@@ -253,6 +379,16 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
           ...prevEditions,
           [edition.identifier]: edition,
         }));
+      } else if (
+        CollectionEditionModel.isType(model as CollectionEditionModel)
+      ) {
+        const collectionEdition = model as CollectionEditionModel;
+        if (collectionEdition.exists()) {
+          setCollectionEditions((prevCollectionEditions) => ({
+            ...prevCollectionEditions,
+            [collectionEdition.identifier]: collectionEdition,
+          }));
+        }
       }
     });
   }, []);
@@ -262,6 +398,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     const initialize = async () => {
       await Social.init(CHAIN_ID);
       await Registry.init(CHAIN_ID);
+      await Marketplace.init(CHAIN_ID);
       setInitialized(true);
     };
     initialize();
@@ -283,6 +420,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       access: true,
       game: true,
       edition: true,
+      collectionEdition: true,
     };
     Registry.fetch(handleRegistryModels, options);
     Registry.sub(handleRegistryModels, options);
@@ -290,6 +428,21 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       Registry.unsub();
     };
   }, [initialized, handleRegistryModels]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    const options: MarketplaceOptions = {
+      book: true,
+      order: true,
+      sale: true,
+      listing: true,
+    };
+    Marketplace.fetch(handleMarketplaceEntities, options);
+    Marketplace.sub(handleMarketplaceEntities, options);
+    return () => {
+      Marketplace.unsub();
+    };
+  }, [initialized, handleMarketplaceEntities]);
 
   useEffect(() => {
     const getClients = async () => {
@@ -313,9 +466,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
           }
         }),
       );
-      const arcade = "https://api.cartridge.gg/x/arcade-mainnet/torii";
+      const arcade = "https://api.cartridge.gg/x/arcade-main/torii";
       const client: torii.ToriiClient = await provider.getToriiClient(arcade);
-      clients["arcade-mainnet"] = client;
+      clients["arcade-main"] = client;
       setClients(clients);
     };
     getClients();
@@ -341,6 +494,19 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       .sort((a, b) => b.priority - a.priority);
   }, [editions, sortedGames]);
 
+  const formmatedCollectionEditions = useMemo(() => {
+    const results: { [collection: string]: number[] } = {};
+    for (const collectionEdition of Object.values(collectionEditions)) {
+      if (!results[collectionEdition.collection]) {
+        results[collectionEdition.collection] = [];
+      }
+      results[collectionEdition.collection].push(
+        parseInt(collectionEdition.edition),
+      );
+    }
+    return results;
+  }, [collectionEditions]);
+
   return (
     <ArcadeContext.Provider
       value={{
@@ -351,9 +517,16 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         accesses: sortedAccesses,
         games: sortedGames,
         editions: sortedEditions,
+        collectionEditions: formmatedCollectionEditions,
         chains,
         clients,
         player,
+        book,
+        orders,
+        listings,
+        sales,
+        addOrder,
+        removeOrder,
         setPlayer,
       }}
     >

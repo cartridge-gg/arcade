@@ -1,9 +1,8 @@
-import { EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
 import { useCallback, useMemo, useState } from "react";
-import ControllerConnector from "@cartridge/connector/controller";
-import { constants } from "starknet";
+import type ControllerConnector from "@cartridge/connector/controller";
 import ControllerAction from "../modules/controller-action";
 
 export function Whitelist({
@@ -40,7 +39,6 @@ export function Whitelist({
           action === "whitelist"
             ? provider.registry.whitelist_edition(args)
             : provider.registry.blacklist_edition(args);
-        controller.switchStarknetChain(constants.StarknetChainId.SN_MAIN);
         await account.execute(calls);
         setWhitelisted(action === "whitelist");
       } catch (error) {

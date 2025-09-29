@@ -8,7 +8,7 @@ pub mod setup {
 
     // Dojo imports
 
-    use dojo::world::{WorldStorage, WorldStorageTrait};
+    use dojo::world::{WorldStorage, WorldStorageTrait, world};
     use dojo_cairo_test::{
         ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
         spawn_test_world,
@@ -19,11 +19,11 @@ pub mod setup {
     // Constant
 
     pub fn OWNER() -> ContractAddress {
-        starknet::contract_address_const::<'OWNER'>()
+        'OWNER'.try_into().unwrap()
     }
 
     pub fn PLAYER() -> ContractAddress {
-        starknet::contract_address_const::<'PLAYER'>()
+        'PLAYER'.try_into().unwrap()
     }
 
     #[derive(Copy, Drop)]
@@ -73,7 +73,7 @@ pub mod setup {
         // [Setup] World
         set_contract_address(OWNER());
         let namespace_def = setup_namespace();
-        let world = spawn_test_world([namespace_def].span());
+        let world = spawn_test_world(world::TEST_CLASS_HASH, [namespace_def].span());
         world.sync_perms_and_inits(setup_contracts());
         // [Setup] Systems
         let (achiever_address, _) = world.dns(@"Achiever").unwrap();

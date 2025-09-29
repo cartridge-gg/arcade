@@ -13,10 +13,10 @@ import {
 } from "@cartridge/ui";
 import { useAccount } from "@starknet-react/core";
 import { useCallback, useMemo, useState } from "react";
-import { AllowArray, byteArray, Call, constants } from "starknet";
-import { z } from "zod";
+import { type AllowArray, byteArray, type Call } from "starknet";
+import type { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm, type UseFormReturn } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -26,7 +26,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Attributes, Properties, Socials } from "@cartridge/arcade";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { MetadataHelper } from "@/helpers/metadata";
 import { formSchema } from "./register-form";
 // import { data } from "./data";
@@ -136,7 +136,6 @@ export function Register() {
             edition_socials: editionSocials.compile(),
           };
           const calls: AllowArray<Call> = provider.registry.register_game(args);
-          controller.switchStarknetChain(constants.StarknetChainId.SN_MAIN);
           await account.execute(calls);
           setClose(true);
         } catch (error) {
@@ -157,7 +156,7 @@ export function Register() {
           data-disabled
           className="normal-case text-sm font-medium text-foreground-300 tracking-normal font-sans grow data-[disabled]:opacity-50"
           variant="secondary"
-          disabled
+          // disabled
         >
           <PlusIcon size="xs" variant="solid" />
           Register Game

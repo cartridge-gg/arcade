@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchToriis } from "@cartridge/arcade";
 import { CollectionType } from "@/context/collection";
-import { ToriiClient } from "@dojoengine/torii-wasm";
 
 /**
  * Hook for fetching token balances from multiple Torii endpoints
@@ -87,7 +86,7 @@ function extractUniqueIdentifiers(tokenBalances: TokenBalance[]): {
  * @returns Map of token metadata keyed by contract_address-token_id
  */
 async function fetchTokenMetadataMap(
-  client: ToriiClient,
+  client: any,
   contractAddresses: string[],
   tokenIds: string[],
 ): Promise<Map<string, TokenMetadata>> {
@@ -96,6 +95,7 @@ async function fetchTokenMetadataMap(
   try {
     const tokensResponse = await client.getTokens({
       contract_addresses: contractAddresses,
+      attribute_filters: [],
       token_ids:
         tokenIds.length > 0 ? tokenIds.map((t) => t.replace("0x", "")) : [],
       pagination: {
@@ -202,7 +202,7 @@ export type UseTokenFetcherResult = {
  * @example
  * ```ts
  * const { tokens, status, error, refetch } = useTokenFetcher(
- *   ['arcade-blobarena', 'arcade-mainnet'],
+ *   ['arcade-blobarena', 'arcade-main'],
  *   '0x123...'
  * );
  * ```
@@ -236,7 +236,7 @@ export function useTokenFetcher(
 
           while (iterate) {
             // Fetch token balances
-            const response = await client.getTokenBalances({
+            const response: any = await client.getTokenBalances({
               contract_addresses: [],
               account_addresses: [address],
               token_ids: [],
@@ -448,7 +448,7 @@ function getAssetImage(
  * @example
  * ```ts
  * const { collections, status, error, refetch } = useCollectibles(
- *   ['arcade-blobarena', 'arcade-mainnet'],
+ *   ['arcade-blobarena', 'arcade-main'],
  *   '0x123...'
  * );
  * ```
@@ -482,7 +482,7 @@ export function useCollectibles(
 
           while (iterate) {
             // Fetch token balances
-            const response = await client.getTokenBalances({
+            const response: any = await client.getTokenBalances({
               contract_addresses: [],
               account_addresses: [address],
               token_ids: [],

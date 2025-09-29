@@ -1,14 +1,13 @@
 import { MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount } from "@starknet-react/core";
 
 import placeholder from "@/assets/placeholder.svg";
 import { useAddress } from "@/hooks/address";
-import { Token } from "@/context/token";
-import { Chain, mainnet } from "@starknet-react/chains";
-import { EditionModel } from "@cartridge/arcade";
+import type { Token } from "@/context/token";
+import type { EditionModel } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
 import { DEFAULT_TOKENS_PROJECT } from "@/constants";
@@ -22,7 +21,7 @@ interface TokensProps {
 }
 
 export const Tokens = ({ tokens, credits }: TokensProps) => {
-  const { editions, chains } = useArcade();
+  const { editions } = useArcade();
   const { edition } = useProject();
   const [unfolded, setUnfolded] = useState(false);
 
@@ -45,7 +44,6 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
         key={credits.metadata.address}
         token={credits}
         editions={editions}
-        chains={chains}
         clickable={false}
       />
       {filteredTokens
@@ -55,7 +53,6 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
             key={token.metadata.address}
             token={token}
             editions={editions}
-            chains={chains}
           />
         ))}
       <div
@@ -82,12 +79,10 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
 function Item({
   token,
   editions,
-  chains,
   clickable = true,
 }: {
   token: Token;
   editions: EditionModel[];
-  chains: Chain[];
   clickable?: boolean;
 }) {
   const { isSelf } = useAddress();
@@ -99,14 +94,6 @@ function Item({
     );
   }, [editions, token]);
 
-  const chain: Chain = useMemo(() => {
-    return (
-      chains.find(
-        (chain) => chain.rpcUrls.default.http[0] === edition?.config.rpc,
-      ) || mainnet
-    );
-  }, [chains, edition]);
-
   const handleClick = useCallback(async () => {
     if (!token.metadata.address) return;
     const controller = (connector as ControllerConnector)?.controller;
@@ -116,7 +103,7 @@ function Item({
       return;
     }
     const preset = edition?.properties.preset;
-    let options = ["closable=true"];
+    const options = ["closable=true"];
     if (
       token.metadata.project &&
       token.metadata.project !== DEFAULT_TOKENS_PROJECT
@@ -129,7 +116,6 @@ function Item({
       options.push(`preset=cartridge`);
     }
     const path = `account/${username}/inventory/token/${token.metadata.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-    controller.switchStarknetChain(`0x${chain.id.toString(16)}`);
     controller.openProfileAt(path);
   }, [token, connector, edition]);
 

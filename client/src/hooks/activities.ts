@@ -26,10 +26,10 @@ export const useActivities = () => {
   const filteredActivities = useMemo(() => {
     if (!edition) {
       return [
-        ...Object.values(erc20s).flatMap((activities) => activities),
-        ...Object.values(erc721s).flatMap((activities) => activities),
-        ...Object.values(actions).flatMap((activities) => activities),
-        ...Object.values(trophies).flatMap((activities) => activities),
+        ...Object.values(erc20s).flat(),
+        ...Object.values(erc721s).flat(),
+        ...Object.values(actions).flat(),
+        ...Object.values(trophies).flat(),
       ];
     }
     return [

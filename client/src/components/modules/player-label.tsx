@@ -5,7 +5,7 @@ import {
   AchievementPlayerBadge,
   cn,
 } from "@cartridge/ui";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 import { CopyAddress } from "./copy-address";
 

@@ -7,6 +7,7 @@ import {
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { cva, VariantProps } from "class-variance-authority";
+import { SquareArrowOutUpRightIcon } from "lucide-react";
 import { HTMLAttributes } from "react";
 
 interface GameSocialWebsiteProps
@@ -14,19 +15,17 @@ interface GameSocialWebsiteProps
   website: string;
   label?: boolean;
 }
-export const GameSocialWebsite = ({
-  website,
-  label,
-  variant,
-}: GameSocialWebsiteProps) => {
+export const GameSocialWebsite = ({ website }: GameSocialWebsiteProps) => {
   return (
-    <GameSocial
-      icon={<PlayIcon size="sm" />}
+    <a
       href={website}
-      label={label ? "Play" : undefined}
-      variant={variant}
-      className="text-spacer-100 bg-primary hover:bg-primary hover:opacity-80 justify-center text-base/[20px] lg:px-4 py-2.5"
-    />
+      draggable={false}
+      target="_blank"
+      className="flex items-center rounded-full p-2 cursor-pointer text-spacer-100 bg-primary hover:bg-primary hover:opacity-80 justify-center lg:px-4 py-2.5"
+    >
+      <PlayIcon size="sm" />
+      <p className="px-0.5 truncate max-w-32">Play</p>
+    </a>
   );
 };
 
@@ -112,7 +111,7 @@ export const GameSocialTelegram = ({
 };
 
 const GameSocialVariants = cva(
-  "flex items-center gap-x-0.5 rounded-full p-2 lg:px-3 cursor-pointer text-foreground-100 text-xs",
+  "flex transition-colors items-center gap-x-0.5 p-2 lg:px-3 cursor-pointer text-foreground-100 text-xs justify-between",
   {
     variants: {
       variant: {
@@ -147,9 +146,16 @@ const GameSocial = ({
       draggable={false}
       target="_blank"
       className={cn(GameSocialVariants({ variant }), className)}
+      rel="noreferrer"
     >
-      {icon}
-      {label && <p className="px-0.5 truncate max-w-32">{label}</p>}
+      <div className="flex gap-2 items-center">
+        {icon}
+        {label && <p className="px-0.5 truncate max-w-32">{label}</p>}
+      </div>
+
+      <div className=" text-background-500">
+        <SquareArrowOutUpRightIcon size={16} />
+      </div>
     </a>
   );
 };

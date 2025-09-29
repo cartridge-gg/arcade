@@ -1,5 +1,5 @@
-import { MetadataAttribute } from "@/context/market-filters";
-import { Token } from "@dojoengine/torii-wasm";
+import type { MetadataAttribute } from "@/context/market-filters";
+import type { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
 
 const JWT =
@@ -199,6 +199,13 @@ export const MetadataHelper = {
       console.error("Error fetching image:", error);
     }
   },
+  unsafeGetToriiImage: async (
+    project: string,
+    token: Token,
+  ): Promise<string | undefined> => {
+    if (!token.contract_address || !token.token_id) return;
+    return `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
+  },
 
   getMetadataImage: async (token: Token): Promise<string | undefined> => {
     if (!token.metadata) return;
@@ -208,7 +215,14 @@ export const MetadataHelper = {
         metadata = JSON.parse(token.metadata);
         const response = await fetch(metadata.image);
         if (response.ok) {
-          return metadata.image;
+          const image = metadata.image;
+          if (image.startsWith("ipfs://")) {
+            return image.replace(
+              "ipfs://",
+              "https://gateway.pinata.cloud/ipfs/",
+            );
+          }
+          return image;
         }
       } catch (error) {
         console.error("Error parsing metadata:", error);

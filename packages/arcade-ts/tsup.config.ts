@@ -4,8 +4,8 @@ export default defineConfig(() => ({
   entry: ["src/index.ts"],
   sourcemap: true,
   clean: true,
-  format: ["cjs"],
-  globalName: "starknet",
+  format: ["cjs", "esm"],
+  globalName: "arcade",
   esbuildOptions(options, context) {
     if (context.format === "iife") {
       options.platform = "browser";

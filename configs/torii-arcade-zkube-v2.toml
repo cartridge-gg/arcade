@@ -1,0 +1,15 @@
+world_address = "0x5c6d0020a9927edca9ddc984b97305439c0b32a1ec8d3f0eaf6291074cc9799"
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+
+[indexing]
+world_block = 1386668
+polling_interval = 500
+pending = true
+transactions = true
+namespaces = ["zkube_budo_v1_1_0"]
+contracts = [
+    "ERC721:0x4fd5df500e6c6615e4423258639f189455672bc841ba58f1c781ac7c5ff4bd8",
+]
+
+[sql]
+historical = ["zkube_budo_v1_1_0-TrophyProgression"]

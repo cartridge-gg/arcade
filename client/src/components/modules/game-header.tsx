@@ -1,6 +1,6 @@
 import {
-  AchievementContentProps,
-  AchievementPinProps,
+  type AchievementContentProps,
+  type AchievementPinProps,
   BranchIcon,
   cn,
   DojoIcon,
@@ -8,8 +8,8 @@ import {
   VerifiedIcon,
 } from "@cartridge/ui";
 import { AchievementPinIcons } from "./achievement-pin-icons";
-import { cva, VariantProps } from "class-variance-authority";
-import { HTMLAttributes, useMemo, useState } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { type HTMLAttributes, useMemo, useState } from "react";
 
 export interface Metadata {
   game: string;
