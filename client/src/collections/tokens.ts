@@ -45,7 +45,7 @@ export const tokenContractsCollection = createCollection(
               order_by: [],
             },
           });
-          const enrichedContract = { ...contract };
+          const enrichedContract = { ...contract, token_id: undefined };
           if (token.items.length > 0) {
             const t = token.items[0];
             if (enrichedContract.metadata === "" && t.metadata !== "") {
@@ -65,7 +65,6 @@ export const tokenContractsCollection = createCollection(
             contract_address: getChecksumAddress(contract.contract_address),
             total_supply: enrichedContract.total_supply ?? "0x0",
             totalSupply: BigInt(enrichedContract.total_supply ?? "0x0"),
-            // @ts-expect-error trust me i'm an engineer
             token_id: enrichedContract.token_id ?? null,
             project: DEFAULT_PROJECT,
             image,
