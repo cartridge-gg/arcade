@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
 import { useMarketplace } from "./marketplace";
 import { DEFAULT_PROJECT } from "@/constants";
+import { useMetadata } from "@/queries";
 
 /**
  * Adapter hook that provides the same interface as useMarketFilters
@@ -48,10 +49,56 @@ export function useMetadataFiltersAdapter() {
   const collectionState = getCollectionState(collectionAddress || "");
   const precomputed = collectionState?.precomputed;
 
+  const queryProps = useMemo(() => {
+    if (!collectionAddress)
+      return {
+        contractAddress: "0x0",
+        traits: [],
+      };
+    if (!collectionState)
+      return {
+        contractAddress: collectionAddress,
+        traits: [],
+      };
+    const traits = Object.keys(collectionState.activeFilters)
+      .map((key) => {
+        const values = Array.from(collectionState.activeFilters[key].values());
+        return values.map((value) => ({ name: key, value }));
+      })
+      .flat();
+    return {
+      contractAddress: collectionAddress,
+      traits: traits,
+    };
+  }, [collectionAddress, collectionState]);
+
+  // FIXME: We should use the TokenCollection data to define the frame of the metadata and keep SQL only for the count updates (+ isLoading for the loading state of the counts)
+  const { data: sqlAllmetadata } = useMetadata({
+    contractAddress: queryProps.contractAddress,
+    traits: [],
+  });
+  const { data: sqlFilteredmetadata } = useMetadata(queryProps);
+
   // Use pre-computed allMetadata or fallback to empty array
   const allMetadata = useMemo(() => {
-    return precomputed?.allMetadata || [];
-  }, [precomputed]);
+    if (!sqlAllmetadata) return [];
+    return sqlAllmetadata.map((item) => ({
+      trait_type: item.traitName,
+      value: item.traitValue,
+      count: item.count,
+      tokens: [],
+    }));
+  }, [sqlAllmetadata]);
+
+  const filteredMetadata = useMemo(() => {
+    if (!sqlFilteredmetadata) return [];
+    return sqlFilteredmetadata.map((item) => ({
+      trait_type: item.traitName,
+      value: item.traitValue,
+      count: item.count,
+      tokens: [],
+    }));
+  }, [sqlFilteredmetadata]);
 
   // Apply "Buy Now" vs "Show All" filter
   const tokensAfterStatusFilter = useMemo(() => {
@@ -66,22 +113,6 @@ export function useMetadataFiltersAdapter() {
       return !!(tokenOrders && tokenOrders.length > 0);
     });
   }, [filteredTokens, active, collectionOrders]);
-
-  // Calculate filtered metadata based on active tokens
-  const filteredMetadata = useMemo(() => {
-    if (!precomputed?.allMetadata) return [];
-
-    // Get the set of filtered token IDs (after status filter)
-    const filteredTokenIds = new Set(
-      tokensAfterStatusFilter.map((t) => t.token_id),
-    );
-
-    // Filter pre-computed metadata to only include tokens in filtered set
-    return precomputed.allMetadata.map((item) => ({
-      ...item,
-      tokens: item.tokens.filter((t) => filteredTokenIds.has(t.token_id)),
-    }));
-  }, [precomputed, tokensAfterStatusFilter]);
 
   // Check if a filter is active
   const isActive = useCallback(

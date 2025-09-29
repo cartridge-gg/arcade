@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getChecksumAddress } from "starknet";
 import { useMarketplaceTokensStore } from "@/store";
 import { useTokenContract } from "@/collections";
-import { useFetcherState, fetchTokenImage, parseJsonSafe } from "./fetcher-utils";
+import {
+  useFetcherState,
+  fetchTokenImage,
+  parseJsonSafe,
+} from "./fetcher-utils";
 
 type MarketTokensFetcherInput = {
   project: string[];
@@ -41,10 +45,13 @@ export function useMarketTokensFetcher({
     try {
       return getChecksumAddress(address);
     } catch (error) {
-      console.warn("Invalid contract address provided to useMarketTokensFetcher", {
-        address,
-        error,
-      });
+      console.warn(
+        "Invalid contract address provided to useMarketTokensFetcher",
+        {
+          address,
+          error,
+        },
+      );
       return "";
     }
   })();
@@ -84,21 +91,24 @@ export function useMarketTokensFetcher({
       isFetchingRef.current = true;
 
       try {
-        const tokens = await fetchToriis(project.length ? project : [projectId], {
-          client: async ({ client }) => {
-            return client.getTokens({
-              contract_addresses: [address],
-              token_ids: [],
-              attribute_filters: [],
-              pagination: {
-                limit: LIMIT,
-                cursor: currentCursor,
-                direction: "Forward",
-                order_by: [],
-              },
-            });
+        const tokens = await fetchToriis(
+          project.length ? project : [projectId],
+          {
+            client: async ({ client }) => {
+              return client.getTokens({
+                contract_addresses: [address],
+                token_ids: [],
+                attribute_filters: [],
+                pagination: {
+                  limit: LIMIT,
+                  cursor: currentCursor,
+                  direction: "Forward",
+                  order_by: [],
+                },
+              });
+            },
           },
-        });
+        );
 
         const pages = tokens.data as TokenPage[];
         let nextCursorValue: string | undefined;
@@ -128,13 +138,7 @@ export function useMarketTokensFetcher({
 
     hasInitializedRef.current = true;
     void fetchData(undefined);
-  }, [
-    autoFetch,
-    collection,
-    fetchData,
-    normalizedAddress,
-    projectId,
-  ]);
+  }, [autoFetch, collection, fetchData, normalizedAddress, projectId]);
 
   const fetchNextPage = useCallback(() => {
     if (!cursor) return;

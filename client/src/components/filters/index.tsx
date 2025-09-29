@@ -49,7 +49,7 @@ export const Filters = () => {
         count:
           filteredMetadata.find(
             (m) => m.trait_type === attribute && m.value === prop.property,
-          )?.tokens.length || 0,
+          )?.count || 0,
       }));
     };
   }, [precomputedProperties, filteredMetadata, search]);

@@ -65,6 +65,20 @@ export const queryKeys = {
     accounts: () => [...queryKeys.users.all, "accounts"] as const,
   },
 
+  metadata: {
+    all: ["metadata"] as const,
+    traits: (
+      contractAddress: string,
+      traits: { name: string; value: string }[],
+    ) =>
+      [
+        ...queryKeys.metadata.all,
+        "traits",
+        contractAddress,
+        traits.map((t) => `${t.name}-${t.value}`).join("-"),
+      ] as const,
+  },
+
   discovery: {
     all: ["discovery"] as const,
     events: (editions?: string[]) =>
