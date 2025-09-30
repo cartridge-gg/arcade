@@ -74,4 +74,19 @@ export default defineConfig({
     },
   },
   publicDir: "public",
+  // SSR Configuration
+  ssr: {
+    noExternal: [
+      "@cartridge/arcade",
+      "@cartridge/connector",
+      "@cartridge/controller",
+      "@cartridge/penpal",
+      "@cartridge/presets",
+      "@dojoengine/sdk",
+      "@dojoengine/torii-wasm",
+      "@starknet-react/chains",
+      "@starknet-react/core",
+    ],
+    external: ["@cartridge/ui", "posthog-js"],
+  },
 });
