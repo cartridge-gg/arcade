@@ -1,8 +1,16 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 /**
- * Vercel Serverless Function for SSR with dynamic meta tags
- * This function serves a minimal HTML page with injected meta tags for social media crawlers
+ * Vercel Serverless Function for dynamic meta tags
+ *
+ * This function serves a minimal HTML page with dynamically generated meta tags
+ * for all requests to /player/* and /game/* routes.
+ *
+ * Why always serve meta tags instead of only for crawlers?
+ * - Simpler code - no crawler detection needed
+ * - 100% reliable - works for all bots, preview tools, and SEO
+ * - Future-proof - no need to maintain crawler list
+ * - Negligible performance impact - JavaScript redirect is ~10ms
  *
  * Why inline HTML instead of reading from disk?
  * - Vercel serverless functions are isolated from static assets
@@ -14,28 +22,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Get the requested path from query params or URL
     const requestPath = (req.query.path as string) || req.url || "/";
 
-    // Check if this is a crawler request
-    // Handle both string and string[] from headers
-    const userAgentHeader = req.headers["user-agent"];
-    const userAgent = Array.isArray(userAgentHeader)
-      ? userAgentHeader[0] || ""
-      : userAgentHeader || "";
-
-    const isCrawler = detectCrawler(userAgent);
-
-    // For non-crawler requests, redirect to the SPA
-    if (!isCrawler) {
-      res.setHeader("Location", requestPath);
-      res.status(302).end();
-      return;
-    }
-
     // Generate meta tags based on route
     const metaTags = generateMetaTags(requestPath);
 
     // Create minimal HTML with meta tags and redirect
     // Social crawlers parse meta tags but don't execute JS
-    // Regular browsers will redirect via meta refresh and JS
+    // Regular browsers will redirect instantly via JS
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,26 +52,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error("SSR error:", error);
     res.status(500).send("Internal Server Error");
   }
-}
-
-/**
- * Detect if the request is from a social media crawler
- */
-function detectCrawler(userAgent: string): boolean {
-  const crawlers = [
-    "facebookexternalhit",
-    "facebookcatalog",
-    "Twitterbot",
-    "LinkedInBot",
-    "Discordbot",
-    "WhatsApp",
-    "TelegramBot",
-    "Slackbot",
-    "redditbot",
-  ];
-
-  const lowerAgent = userAgent.toLowerCase();
-  return crawlers.some((bot) => lowerAgent.includes(bot.toLowerCase()));
 }
 
 /**
