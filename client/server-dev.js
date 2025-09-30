@@ -79,20 +79,19 @@ async function generateMetaTags(url) {
     // Profile page: /player/:username
     if (urlParts[0] === "player" && urlParts[1]) {
       const username = urlParts[1];
-      // TODO: Fetch user data from API
       title = `${username} - Cartridge Arcade`;
       description = `View ${username}'s profile, achievements, and game stats on Cartridge Arcade`;
-      imageUrl = `https://play.cartridge.gg/api/og/profile?username=${encodeURIComponent(username)}`;
+      imageUrl = `https://api.cartridge.gg/og/profile?username=${encodeURIComponent(username)}`;
     }
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
       const gameId = urlParts[1];
-      // TODO: Fetch game data from API
       title = `${gameId} - Cartridge Arcade`;
       description = `Play ${gameId} on Cartridge Arcade - Discover onchain gaming`;
-      imageUrl = `https://play.cartridge.gg/api/og/game?gameId=${encodeURIComponent(gameId)}`;
+      // Use internal OG service - path-based for games
+      imageUrl = `https://api.cartridge.gg/og/${gameId}`;
     }
-    // TODO: Achievement page logic when we have the route structure
+    // TODO: Achievement page - OG service support needed
   } catch (error) {
     console.error("Error generating meta tags:", error);
   }
