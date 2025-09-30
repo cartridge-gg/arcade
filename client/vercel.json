@@ -64,7 +64,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(facebookexternalhit|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot).*"
+          "value": ".*(facebookexternalhit|facebookcatalog|Facebot|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot|bot|crawler|spider).*"
         }
       ],
       "destination": "/api/ssr?path=/player/:username"
@@ -75,7 +75,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(facebookexternalhit|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot).*"
+          "value": ".*(facebookexternalhit|facebookcatalog|Facebot|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot|bot|crawler|spider).*"
         }
       ],
       "destination": "/api/ssr?path=/game/:gameId"

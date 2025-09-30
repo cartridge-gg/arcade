@@ -91,13 +91,4 @@ export default defineConfig({
     ],
     external: ["@cartridge/ui", "posthog-js"],
   },
-  // Vercel Configuration
-  vercel: {
-    additionalEndpoints: [
-      {
-        source: "/api/ssr",
-        destination: "api/ssr.ts",
-      },
-    ],
-  },
 });

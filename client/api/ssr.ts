@@ -1,17 +1,17 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Vercel Serverless Function for SSR with dynamic meta tags
- * This function serves the index.html with injected meta tags for social media crawlers
+ * This function serves a minimal HTML page with injected meta tags for social media crawlers
+ *
+ * Why inline HTML instead of reading from disk?
+ * - Vercel serverless functions are isolated from static assets
+ * - Static files (dist/client/) are deployed to CDN separately
+ * - This approach is simpler, faster, and more reliable
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    // Get the requested path from query params
+    // Get the requested path from query params or URL
     const requestPath = (req.query.path as string) || req.url || "/";
 
     // Check if this is a crawler request
@@ -25,23 +25,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    // Read the built index.html
-    const indexPath = path.resolve(__dirname, "../dist/client/index.html");
-    let template: string;
-
-    try {
-      template = fs.readFileSync(indexPath, "utf-8");
-    } catch (error) {
-      // Fallback for different potential paths
-      const altPath = path.resolve(__dirname, "../../dist/client/index.html");
-      template = fs.readFileSync(altPath, "utf-8");
-    }
-
     // Generate meta tags based on route
     const metaTags = generateMetaTags(requestPath);
 
-    // Inject meta tags
-    const html = template.replace(`<!--ssr-meta-tags-->`, metaTags);
+    // Create minimal HTML with meta tags and redirect
+    // Social crawlers parse meta tags but don't execute JS
+    // Regular browsers will redirect via meta refresh and JS
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cartridge Arcade</title>
+  ${metaTags}
+  <meta http-equiv="refresh" content="0;url=${requestPath}">
+</head>
+<body>
+  <script>window.location.href = "${requestPath}";</script>
+  <noscript>
+    <p>Redirecting to <a href="${requestPath}">Cartridge Arcade</a>...</p>
+  </noscript>
+</body>
+</html>`;
 
     res.setHeader("Content-Type", "text/html");
     res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate");
