@@ -29,6 +29,7 @@ import {
   CategoryType,
   StatusType,
   MarketplaceOptions,
+  CollectionEditionModel,
 } from "@cartridge/arcade";
 import {
   constants,
@@ -67,6 +68,7 @@ interface ArcadeContextType {
   accesses: AccessModel[];
   games: GameModel[];
   editions: EditionModel[];
+  collectionEditions: { [collection: string]: number[] };
   chains: Chain[];
   player: string | undefined;
   clients: { [key: string]: torii.ToriiClient };
@@ -75,7 +77,9 @@ interface ArcadeContextType {
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
   };
   listings: {
-    [collection: string]: { [token: string]: { [listing: string]: ListingEvent } };
+    [collection: string]: {
+      [token: string]: { [listing: string]: ListingEvent };
+    };
   };
   sales: {
     [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
@@ -119,6 +123,9 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const [games, setGames] = useState<{ [gameId: string]: GameModel }>({});
   const [editions, setEditions] = useState<{
     [editionId: string]: EditionModel;
+  }>({});
+  const [collectionEditions, setCollectionEditions] = useState<{
+    [collectionEditionId: string]: CollectionEditionModel;
   }>({});
   const [chains, setChains] = useState<Chain[]>([]);
   const [clients, setClients] = useState<{ [key: string]: torii.ToriiClient }>(
@@ -179,7 +186,6 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     () => new ExternalProvider(CHAIN_ID),
     [],
   );
-
 
   const removeOrder = useCallback(
     (order: OrderModel) => {
@@ -373,6 +379,16 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
           ...prevEditions,
           [edition.identifier]: edition,
         }));
+      } else if (
+        CollectionEditionModel.isType(model as CollectionEditionModel)
+      ) {
+        const collectionEdition = model as CollectionEditionModel;
+        if (collectionEdition.exists()) {
+          setCollectionEditions((prevCollectionEditions) => ({
+            ...prevCollectionEditions,
+            [collectionEdition.identifier]: collectionEdition,
+          }));
+        }
       }
     });
   }, []);
@@ -404,6 +420,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       access: true,
       game: true,
       edition: true,
+      collectionEdition: true,
     };
     Registry.fetch(handleRegistryModels, options);
     Registry.sub(handleRegistryModels, options);
@@ -477,6 +494,19 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
       .sort((a, b) => b.priority - a.priority);
   }, [editions, sortedGames]);
 
+  const formmatedCollectionEditions = useMemo(() => {
+    const results: { [collection: string]: number[] } = {};
+    for (const collectionEdition of Object.values(collectionEditions)) {
+      if (!results[collectionEdition.collection]) {
+        results[collectionEdition.collection] = [];
+      }
+      results[collectionEdition.collection].push(
+        parseInt(collectionEdition.edition),
+      );
+    }
+    return results;
+  }, [collectionEditions]);
+
   return (
     <ArcadeContext.Provider
       value={{
@@ -487,6 +517,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         accesses: sortedAccesses,
         games: sortedGames,
         editions: sortedEditions,
+        collectionEditions: formmatedCollectionEditions,
         chains,
         clients,
         player,

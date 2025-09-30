@@ -85,13 +85,17 @@ export function GamePage() {
               <Editions />
             </div>
           </div>
-          <div className=" hidden lg:block">
+          {game ? (
+            <div className=" hidden lg:block">
+              <GameSocialWebsite website={socials?.website || ""} label />
+            </div>
+          ) : null}
+        </div>
+        {game ? (
+          <div className="block lg:hidden">
             <GameSocialWebsite website={socials?.website || ""} label />
           </div>
-        </div>
-        <div className="block lg:hidden">
-          <GameSocialWebsite website={socials?.website || ""} label />
-        </div>
+        ) : null}
       </div>
 
       <ArcadeTabs

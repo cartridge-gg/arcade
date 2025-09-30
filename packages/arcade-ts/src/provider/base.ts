@@ -1,19 +1,10 @@
 import { DojoProvider } from "@dojoengine/core";
 import type { ToriiClient } from "@dojoengine/torii-client";
-import type {
-  Account,
-  AccountInterface,
-  AllowArray,
-  Call,
-  constants,
-  GetTransactionReceiptResponse,
-} from "starknet";
+import type { Account, AccountInterface, AllowArray, Call, constants, GetTransactionReceiptResponse } from "starknet";
 
 import { configs } from "../configs";
 
-type Constructor<TArgs extends any[] = any[], TInstance = object> = new (
-  ...args: TArgs
-) => TInstance;
+type Constructor<TArgs extends any[] = any[], TInstance = object> = new (...args: TArgs) => TInstance;
 
 type ToriiClientCtor = Constructor<
   [
@@ -40,10 +31,7 @@ export class BaseProvider extends DojoProvider {
   protected readonly namespace: string;
   protected readonly toriiCtor: ToriiClientCtor;
 
-  constructor(
-    chainId: constants.StarknetChainId,
-    { namespace, torii }: BaseProviderOptions,
-  ) {
+  constructor(chainId: constants.StarknetChainId, { namespace, torii }: BaseProviderOptions) {
     const config = configs[chainId];
 
     if (!config) {
@@ -68,14 +56,9 @@ export class BaseProvider extends DojoProvider {
     });
   }
 
-  protected onTransactionReverted(
-    _receipt: GetTransactionReceiptResponse,
-  ): void {}
+  protected onTransactionReverted(_receipt: GetTransactionReceiptResponse): void {}
 
-  protected onInvokeCompleted(
-    _receipt: GetTransactionReceiptResponse,
-    _context?: InvokeContext,
-  ): void {}
+  protected onInvokeCompleted(_receipt: GetTransactionReceiptResponse, _context?: InvokeContext): void {}
 
   async process(transactionHash: string): Promise<GetTransactionReceiptResponse> {
     let receipt: GetTransactionReceiptResponse;
@@ -91,9 +74,7 @@ export class BaseProvider extends DojoProvider {
 
     if (receipt.isReverted()) {
       this.onTransactionReverted(receipt);
-      throw new Error(
-        `Transaction failed with reason: ${receipt.value.revert_reason}`,
-      );
+      throw new Error(`Transaction failed with reason: ${receipt.value.revert_reason}`);
     }
 
     return receipt;

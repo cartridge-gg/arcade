@@ -124,12 +124,16 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
 
   const usernames = useMemo(() => {
     if (!data || addresses.length === 0) return [];
-    return addresses.map((address) => {
-      return {
-        address: getChecksumAddress(address),
-        username: data.get(getChecksumAddress(address)) || address.slice(0, 9),
-      };
-    }, {} as { [key: string]: string });
+    return addresses.map(
+      (address) => {
+        return {
+          address: getChecksumAddress(address),
+          username:
+            data.get(getChecksumAddress(address)) || address.slice(0, 9),
+        };
+      },
+      {} as { [key: string]: string },
+    );
   }, [data, addresses]);
 
   const usernamesData = useMemo(() => {

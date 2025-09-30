@@ -178,7 +178,12 @@ export const Holders = ({
                   {index + 1}.
                 </p>
                 <div className="flex items-center gap-1">
-                  <UserAvatar username={holder.username || holder.address.slice(0, 9) || ""} size="sm" />
+                  <UserAvatar
+                    username={
+                      holder.username || holder.address.slice(0, 9) || ""
+                    }
+                    size="sm"
+                  />
                   <p>{holder.username || holder.address.slice(0, 9) || ""}</p>
                 </div>
               </div>

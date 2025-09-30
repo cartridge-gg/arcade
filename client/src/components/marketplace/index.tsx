@@ -5,24 +5,43 @@ import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useLocation, useNavigate } from "react-router-dom";
 import { joinPaths } from "@/helpers";
-import type { EditionModel, GameModel } from "@cartridge/arcade";
+import type {
+  CollectionEditionModel,
+  EditionModel,
+  GameModel,
+} from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import { useMarketCollectionFetcher } from "@/hooks/marketplace-fetcher";
-import { useEditions, useGames } from "@/collections";
+import { useCollectionEditions, useEditions, useGames } from "@/collections";
 import { Contract } from "@/store";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
+import { DEFAULT_PROJECT } from "@/constants";
 
 export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
   const editions = useEditions();
   const games = useGames();
-  const projectsList = useMemo(() => {
-    if (edition) return [edition.config.project];
-    return editions.map((e) => e.config.project);
-  }, [editions, edition]);
+  const collectionEditions = useCollectionEditions();
 
-  const { collections, status, editionError, loadingProgress } =
-    useMarketCollectionFetcher({ projects: projectsList });
+  const {
+    collections: allCollections,
+    status,
+    editionError,
+    loadingProgress,
+  } = useMarketCollectionFetcher({ projects: [DEFAULT_PROJECT] });
+
+  const collections = useMemo(() => {
+    if (!edition) return allCollections;
+    return allCollections.filter((collection) => {
+      return collectionEditions.some(
+        (collectionEdition) =>
+          BigInt((collectionEdition as CollectionEditionModel).collection) ===
+            BigInt(collection.contract_address) &&
+          BigInt((collectionEdition as CollectionEditionModel).edition) ===
+            BigInt(edition.id),
+      );
+    });
+  }, [allCollections, collectionEditions]);
 
   if ((status === "idle" || status === "loading") && collections.length === 0) {
     return <LoadingState />;

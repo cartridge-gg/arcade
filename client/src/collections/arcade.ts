@@ -18,6 +18,7 @@ import {
   PinEvent,
   FollowEvent,
   GuildModel,
+  CollectionEditionModel,
 } from "@cartridge/arcade";
 import { constants, getChecksumAddress } from "starknet";
 import { useMemo } from "react";
@@ -26,9 +27,9 @@ const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
 
 // Type discriminated union for Registry models
 export interface RegistryItem {
-  type: "game" | "edition" | "access";
+  type: "game" | "edition" | "access" | "collectionEdition";
   identifier: string;
-  data: GameModel | EditionModel | AccessModel;
+  data: GameModel | EditionModel | AccessModel | CollectionEditionModel;
 }
 
 // Type discriminated union for Social models
@@ -82,9 +83,22 @@ export const arcadeRegistryCollection = createCollection(
                 return;
               }
             }
+            if (
+              CollectionEditionModel.isType(model as CollectionEditionModel)
+            ) {
+              const collectionEdition = model as CollectionEditionModel;
+              if (collectionEdition.exists()) {
+                items.push({
+                  type: "collectionEdition",
+                  identifier: collectionEdition.identifier,
+                  data: collectionEdition,
+                });
+                return;
+              }
+            }
           });
         },
-        { game: true, edition: true, access: true },
+        { game: true, edition: true, access: true, collectionEdition: true },
       );
 
       return items;
@@ -196,6 +210,17 @@ export const editionsWithGames = createCollection(
   }),
 );
 
+export const collectionEditionsQuery = createCollection(
+  liveQueryCollectionOptions({
+    query: (q) =>
+      q
+        .from({ item: arcadeRegistryCollection })
+        .where(({ item }) => eq(item.type, "collectionEdition"))
+        .select(({ item }) => ({ ...item.data })),
+    getKey: (item) => item.identifier,
+  }),
+);
+
 const accessesQuery = createCollection(
   liveQueryCollectionOptions({
     query: (q) =>
@@ -259,6 +284,7 @@ export function useEditions() {
   );
   return data || [];
 }
+
 export function useEditionsMap() {
   const editions = useEditions();
   const editionsMap = useMemo(() => {
@@ -267,6 +293,15 @@ export function useEditionsMap() {
     return map;
   }, [editions]);
   return editionsMap;
+}
+
+export function useCollectionEditions() {
+  const { data } = useLiveQuery((q) =>
+    q
+      .from({ collectionEditions: collectionEditionsQuery })
+      .select(({ collectionEditions }) => ({ ...collectionEditions })),
+  );
+  return data || [];
 }
 
 export function useAccesses() {

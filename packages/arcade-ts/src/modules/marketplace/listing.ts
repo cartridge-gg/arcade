@@ -47,21 +47,13 @@ export class ListingEvent {
   }
 
   clone(): ListingEvent {
-    return new ListingEvent(
-      this.identifier,
-      this.id,
-      this.order.clone(),
-      this.time,
-    );
+    return new ListingEvent(this.identifier, this.id, this.order.clone(), this.time);
   }
 }
 
 export const Listing = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return ListingEvent.from(
-      entity.entityId,
-      entity.models[NAMESPACE]?.[MODEL_NAME] as ListingInterface,
-    );
+    return ListingEvent.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME] as ListingInterface);
   },
 
   getModelName: () => {

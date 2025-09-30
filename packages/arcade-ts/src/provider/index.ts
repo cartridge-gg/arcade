@@ -5,14 +5,7 @@
  * @param url - Optional RPC URL for the provider
  */
 import * as torii from "@dojoengine/torii-client";
-import type {
-  Account,
-  AccountInterface,
-  AllowArray,
-  Call,
-  constants,
-  GetTransactionReceiptResponse,
-} from "starknet";
+import type { Account, AccountInterface, AllowArray, Call, constants, GetTransactionReceiptResponse } from "starknet";
 
 import { BaseProvider, type InvokeContext } from "./base";
 
@@ -72,10 +65,7 @@ export class ArcadeProvider extends BaseProvider {
     calls: AllowArray<Call>,
     contextOrEntrypoint?: InvokeContext | string,
   ): Promise<GetTransactionReceiptResponse> {
-    const context =
-      typeof contextOrEntrypoint === "string"
-        ? { entrypoint: contextOrEntrypoint }
-        : contextOrEntrypoint;
+    const context = typeof contextOrEntrypoint === "string" ? { entrypoint: contextOrEntrypoint } : contextOrEntrypoint;
 
     return super.invoke(signer, calls, context);
   }
