@@ -14,12 +14,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Get the requested path from query params or URL
     const requestPath = (req.query.path as string) || req.url || "/";
 
-    // DEBUG: Log ALL headers
-    console.log("=== SSR Function Debug ===");
-    console.log("All headers:", JSON.stringify(req.headers, null, 2));
-    console.log("Request URL:", req.url);
-    console.log("Request Path:", requestPath);
-
     // Check if this is a crawler request
     // Handle both string and string[] from headers
     const userAgentHeader = req.headers["user-agent"];
@@ -27,12 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? userAgentHeader[0] || ""
       : userAgentHeader || "";
 
-    console.log("User-Agent value:", userAgent);
-    console.log("User-Agent type:", typeof userAgent);
-
     const isCrawler = detectCrawler(userAgent);
-    console.log("Is Crawler detected:", isCrawler);
-    console.log("========================");
 
     // For non-crawler requests, redirect to the SPA
     if (!isCrawler) {
