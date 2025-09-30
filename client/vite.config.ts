@@ -5,6 +5,7 @@ import topLevelAwait from "vite-plugin-top-level-await";
 import process from "node:process";
 import mkcert from "vite-plugin-mkcert";
 import { VitePWA } from "vite-plugin-pwa";
+import vercel from "vite-plugin-vercel";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
     wasm(),
     topLevelAwait(),
     mkcert(),
+    vercel(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "favicon.ico", "robots.txt"],
@@ -88,5 +90,14 @@ export default defineConfig({
       "@starknet-react/core",
     ],
     external: ["@cartridge/ui", "posthog-js"],
+  },
+  // Vercel Configuration
+  vercel: {
+    additionalEndpoints: [
+      {
+        source: "/api/ssr",
+        destination: "api/ssr.ts",
+      },
+    ],
   },
 });

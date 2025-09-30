@@ -59,6 +59,28 @@
       "destination": "https://us.i.posthog.com/:path*"
     },
     {
+      "source": "/player/:username",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot).*"
+        }
+      ],
+      "destination": "/api/ssr?path=/player/:username"
+    },
+    {
+      "source": "/game/:gameId",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot).*"
+        }
+      ],
+      "destination": "/api/ssr?path=/game/:gameId"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }
