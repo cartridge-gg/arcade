@@ -94,6 +94,7 @@ export function Items({
   } = useMarketTokensFetcher({
     project: [DEFAULT_PROJECT],
     address: collectionAddress,
+    attributeFilters: activeFilters,
   });
 
   // Apply search filtering on top of metadata filters
@@ -299,7 +300,14 @@ export function Items({
               <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${Number.parseInt(collection?.total_supply ?? "0x0", 16)} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
+                <CollectionCount
+                  collectionCount={Number.parseInt(
+                    collection.total_supply ?? "0x0",
+                    16,
+                  )}
+                  tokensCount={tokens.length}
+                  searchFilteredTokensCount={searchFilteredTokens.length}
+                />
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -594,3 +602,21 @@ const EmptyState = () => {
     />
   );
 };
+
+function CollectionCount({
+  collectionCount,
+  tokensCount,
+  searchFilteredTokensCount,
+}: {
+  collectionCount: number;
+  tokensCount: number;
+  searchFilteredTokensCount: number;
+}) {
+  if (0 === searchFilteredTokensCount) return <p>{collectionCount} Items</p>;
+
+  return (
+    <p>
+      {tokensCount} of {collectionCount} Items
+    </p>
+  );
+}

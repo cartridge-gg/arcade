@@ -18,11 +18,16 @@ export function useMetadataFiltersAdapter() {
   const [,] = useSearchParams();
   const { getCollectionOrders } = useMarketplace();
 
+  // Get pre-computed data from store
+  const { getCollectionState } = useMetadataFilterStore();
+  const collectionState = getCollectionState(collectionAddress || "");
+
   // Get tokens from the fetcher - use edition's project if available
   const { tokens } = useMarketTokensFetcher({
     project: [DEFAULT_PROJECT],
     address: collectionAddress || "",
     autoFetch: false,
+    attributeFilters: collectionState?.activeFilters || {},
   });
 
   // Get marketplace orders for this collection
@@ -44,9 +49,6 @@ export function useMetadataFiltersAdapter() {
     enabled: true,
   });
 
-  // Get pre-computed data from store
-  const { getCollectionState } = useMetadataFilterStore();
-  const collectionState = getCollectionState(collectionAddress || "");
   const precomputed = collectionState?.precomputed;
 
   const queryProps = useMemo(() => {

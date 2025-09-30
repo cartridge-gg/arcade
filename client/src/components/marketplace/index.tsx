@@ -68,7 +68,7 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
               collectionAddress={collection.contract_address}
               collectionName={collection.name}
               collectionImage={collection.image}
-              collectionTotalSupply={collection.total_supply}
+              collectionTotalSupply={parseInt(collection.total_supply)}
               editions={editions as EditionModel[]}
               games={games as GameModel[]}
             />
@@ -92,7 +92,7 @@ function Item({
   collectionAddress: string;
   collectionName: string;
   collectionImage: string;
-  collectionTotalSupply: string;
+  collectionTotalSupply: number;
   editions: EditionModel[];
   games: GameModel[];
 }) {

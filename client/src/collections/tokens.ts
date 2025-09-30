@@ -94,6 +94,7 @@ export function useTokenContracts() {
 
   return { data, ...rest };
 }
+
 export function useTokenContract(address: string) {
   const { data } = useLiveQuery((q) =>
     q
