@@ -57,6 +57,7 @@ export function useMetadataFilters({
 
   // Initialize filters from URL on mount - use ref to track if already initialized
   const hasInitialized = useRef(false);
+
   useEffect(() => {
     if (!enabled || hasInitialized.current) return;
 
@@ -87,7 +88,7 @@ export function useMetadataFilters({
     return tokens.filter(
       (token) => token.token_id && idSet.has(token.token_id),
     );
-  }, [tokens, collectionAddress, activeFilters, enabled, getFilteredTokenIds]);
+  }, [tokens, collectionAddress, enabled, getFilteredTokenIds]);
 
   // Calculate available filters with counts
   const availableFilters = useMemo(() => {
@@ -98,18 +99,11 @@ export function useMetadataFilters({
     if (Object.keys(activeFilters).length === 0) {
       // No filters active, show counts for all tokens
       return calculateFilterCounts(metadataIndex);
-    } else {
-      // Filters active, calculate filtered IDs directly to avoid dependency on filteredTokens
-      const filteredIds = getFilteredTokenIds(collectionAddress);
-      return calculateFilterCounts(metadataIndex, filteredIds);
     }
-  }, [
-    metadataIndex,
-    activeFilters,
-    collectionAddress,
-    enabled,
-    getFilteredTokenIds,
-  ]);
+    // Filters active, calculate filtered IDs directly to avoid dependency on filteredTokens
+    const filteredIds = getFilteredTokenIds(collectionAddress);
+    return calculateFilterCounts(metadataIndex, filteredIds);
+  }, [collectionAddress, enabled, getFilteredTokenIds]);
 
   // Update available filters in store - use useRef to prevent infinite loops
   const prevAvailableFilters = useRef(availableFilters);

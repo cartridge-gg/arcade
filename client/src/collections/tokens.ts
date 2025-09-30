@@ -1,4 +1,3 @@
-import { ToriiGrpcClient } from "@dojoengine/grpc";
 import {
   createCollection,
   eq,
@@ -9,7 +8,7 @@ import {
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { queryKeys } from "@/queries/keys";
 import { queryClient } from "@/queries";
-import { Token, TokenContract } from "@dojoengine/torii-wasm";
+import { Token, TokenContract, ToriiClient } from "@dojoengine/torii-wasm";
 import { getChecksumAddress } from "starknet";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchTokenImage } from "@/hooks/fetcher-utils";
@@ -18,7 +17,7 @@ export const tokenContractsCollection = createCollection(
   queryCollectionOptions({
     queryKey: queryKeys.tokens.collections,
     queryFn: async () => {
-      const client = new ToriiGrpcClient({
+      const client = await new ToriiClient({
         toriiUrl: `https://api.cartridge.gg/x/${DEFAULT_PROJECT}/torii`,
         worldAddress: "0x0",
       });
@@ -26,7 +25,7 @@ export const tokenContractsCollection = createCollection(
         contract_addresses: [],
         contract_types: [],
         pagination: {
-          limit: 1000,
+          limit: 100,
           cursor: undefined,
           direction: "Forward",
           order_by: [],

@@ -29,6 +29,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
+import { useMarketplaceTokensStore } from "@/store";
 
 const ROW_HEIGHT = 218;
 const ERC1155_ENTRYPOINT = "balance_of_batch";
@@ -69,10 +70,12 @@ export function Items({
   const { provider } = useArcade();
   const { trackEvent, events } = useAnalytics();
   const [lastSearch, setLastSearch] = useState<string>("");
+  const getTokens = useMarketplaceTokensStore((s) => s.getTokens);
+  const tokens = getTokens(DEFAULT_PROJECT, collectionAddress);
 
   // Use the adapter hook which includes Buy Now/Show All functionality
   const {
-    tokens,
+    // tokens,
     filteredTokens,
     activeFilters,
     resetSelected: clearAllFilters,
@@ -249,7 +252,7 @@ export function Items({
   );
 
   // Set up virtualizer for rows
-  const rowCount = Math.ceil(tokens.length / 4);
+  const rowCount = Math.ceil(searchFilteredTokens.length / 4);
 
   const virtualizer = useVirtualizer({
     count: rowCount + 1,
@@ -302,7 +305,7 @@ export function Items({
               <>
                 <CollectionCount
                   collectionCount={Number.parseInt(
-                    collection.total_supply ?? "0x0",
+                    collection?.total_supply ?? "0x0",
                     16,
                   )}
                   tokensCount={tokens.length}
@@ -374,7 +377,7 @@ export function Items({
               startIndex + 4,
               searchFilteredTokens.length,
             );
-            const rowTokens = tokens.slice(startIndex, endIndex);
+            const rowTokens = searchFilteredTokens.slice(startIndex, endIndex);
 
             return (
               <div

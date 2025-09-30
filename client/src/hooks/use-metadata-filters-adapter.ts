@@ -1,12 +1,12 @@
 import { useMemo, useCallback, useState } from "react";
 import { useMetadataFilters } from "./use-metadata-filters";
-import { useMarketTokensFetcher } from "./marketplace-tokens-fetcher";
 import { useProject } from "./project";
 import { useSearchParams } from "react-router-dom";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
 import { useMarketplace } from "./marketplace";
-import { DEFAULT_PROJECT } from "@/constants";
 import { useMetadata } from "@/queries";
+import { useMarketplaceTokensStore } from "@/store";
+import { DEFAULT_PROJECT } from "@/constants";
 
 /**
  * Adapter hook that provides the same interface as useMarketFilters
@@ -22,13 +22,8 @@ export function useMetadataFiltersAdapter() {
   const { getCollectionState } = useMetadataFilterStore();
   const collectionState = getCollectionState(collectionAddress || "");
 
-  // Get tokens from the fetcher - use edition's project if available
-  const { tokens } = useMarketTokensFetcher({
-    project: [DEFAULT_PROJECT],
-    address: collectionAddress || "",
-    autoFetch: false,
-    attributeFilters: collectionState?.activeFilters || {},
-  });
+  const getTokens = useMarketplaceTokensStore((s) => s.getTokens);
+  const tokens = getTokens(DEFAULT_PROJECT, collectionAddress ?? "");
 
   // Get marketplace orders for this collection
   const collectionOrders = useMemo(() => {
@@ -62,12 +57,10 @@ export function useMetadataFiltersAdapter() {
         contractAddress: collectionAddress,
         traits: [],
       };
-    const traits = Object.keys(collectionState.activeFilters)
-      .map((key) => {
-        const values = Array.from(collectionState.activeFilters[key].values());
-        return values.map((value) => ({ name: key, value }));
-      })
-      .flat();
+    const traits = Object.keys(collectionState.activeFilters).flatMap((key) => {
+      const values = Array.from(collectionState.activeFilters[key].values());
+      return values.map((value) => ({ name: key, value }));
+    });
     return {
       contractAddress: collectionAddress,
       traits: traits,
