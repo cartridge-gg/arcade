@@ -18,7 +18,6 @@ import {
   useGames,
   useTokenContracts,
 } from "@/collections";
-import { Contract } from "@/store";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
 export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
@@ -66,7 +65,10 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
             <Item
               key={`${collection.project}-${collection.contract_address}`}
               project={collection.project}
-              collection={collection as Contract}
+              collectionAddress={collection.contract_address}
+              collectionName={collection.name}
+              collectionImage={collection.image}
+              collectionTotalSupply={collection.total_supply}
               editions={editions as EditionModel[]}
               games={games as GameModel[]}
             />
@@ -79,12 +81,18 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
 
 function Item({
   project,
-  collection,
+  collectionAddress,
+  collectionName,
+  collectionImage,
+  collectionTotalSupply,
   editions,
   games,
 }: {
   project: string;
-  collection: Contract;
+  collectionAddress: string;
+  collectionName: string;
+  collectionImage: string;
+  collectionTotalSupply: string;
   editions: EditionModel[];
   games: GameModel[];
 }) {
@@ -94,7 +102,7 @@ function Item({
   const navigate = useNavigate();
 
   const listingCount = useMemo(() => {
-    const collectionOrders = orders[collection.contract_address];
+    const collectionOrders = orders[collectionAddress];
     if (!collectionOrders) return 0;
     const tokenOrders = Object.entries(collectionOrders).reduce(
       (acc, [token, orders]) => {
@@ -107,13 +115,13 @@ function Item({
       {} as { [token: string]: OrderModel[] },
     );
     return Object.values(tokenOrders).length;
-  }, [collection, orders]);
+  }, [collectionAddress, orders]);
 
   const lastSale = useMemo(() => {
-    if (!sales[collection.contract_address]) return undefined;
-    const orderedSales = Object.values(
-      sales[collection.contract_address],
-    ).flatMap((i) => Object.values(i).sort((a, b) => b.time - a.time));
+    if (!sales[collectionAddress]) return undefined;
+    const orderedSales = Object.values(sales[collectionAddress]).flatMap((i) =>
+      Object.values(i).sort((a, b) => b.time - a.time),
+    );
     const ls = orderedSales[orderedSales.length - 1];
 
     const erc20Data = erc20Metadata.find(
@@ -128,12 +136,12 @@ function Item({
     const decimals = erc20Data?.decimals || 0;
     const price = ls.order.price / 10 ** decimals;
     return { value: price.toString(), image };
-  }, [sales, collection.contract_address]);
+  }, [sales, collectionAddress]);
 
   const price = useMemo(() => {
-    if (!orders[collection.contract_address]) return undefined;
-    const listings = Object.values(orders[collection.contract_address]).flatMap(
-      (i) => Object.values(i).sort((a, b) => a.price - b.price),
+    if (!orders[collectionAddress]) return undefined;
+    const listings = Object.values(orders[collectionAddress]).flatMap((i) =>
+      Object.values(i).sort((a, b) => a.price - b.price),
     );
     const cheapest = listings[listings.length - 1];
 
@@ -149,7 +157,7 @@ function Item({
     const decimals = erc20Data?.decimals || 0;
     const price = cheapest.price / 10 ** decimals;
     return { value: price.toString(), image };
-  }, [orders, collection.contract_address]);
+  }, [orders, collectionAddress]);
 
   const { game, edition } = useMemo(() => {
     if (!project) return { game: null, edition: null };
@@ -159,7 +167,7 @@ function Item({
     if (!edition) return { game: null, edition: null };
     const game = games.find((game) => game.id === edition.gameId);
     return { game, edition };
-  }, [collection, editions]);
+  }, [collectionAddress, editions]);
 
   const handleClick = useCallback(() => {
     let pathname = location.pathname;
@@ -168,32 +176,29 @@ function Item({
     pathname = pathname.replace(/\/player\/[^/]+/, "");
     pathname = pathname.replace(/\/tab\/[^/]+/, "");
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
-    const collectionAddress = collection.contract_address.toLowerCase();
+    const address = collectionAddress.toLowerCase();
     if (game && edition) {
       const gameName = game.name.replace(/ /g, "-").toLowerCase();
       const editionName = edition.name.replace(/ /g, "-").toLowerCase();
       pathname = joinPaths(
         pathname,
-        `/game/${gameName}/edition/${editionName}/collection/${collectionAddress}`,
+        `/game/${gameName}/edition/${editionName}/collection/${address}`,
       );
     } else if (game) {
       const gameName = game.name.replace(/ /g, "-").toLowerCase();
-      pathname = joinPaths(
-        pathname,
-        `/game/${gameName}/collection/${collectionAddress}`,
-      );
+      pathname = joinPaths(pathname, `/game/${gameName}/collection/${address}`);
     } else {
-      pathname = joinPaths(pathname, `/collection/${collectionAddress}`);
+      pathname = joinPaths(pathname, `/collection/${address}`);
     }
     navigate(pathname || "/");
-  }, [collection, location, navigate, game, edition]);
+  }, [collectionAddress, location, navigate, game, edition]);
 
   return (
     <div className="w-full group select-none">
       <CollectibleCard
-        title={collection.name}
-        image={collection.image}
-        totalCount={collection.totalSupply as unknown as number}
+        title={collectionName}
+        image={collectionImage}
+        totalCount={collectionTotalSupply as unknown as number}
         selectable={false}
         listingCount={listingCount}
         onClick={handleClick}
