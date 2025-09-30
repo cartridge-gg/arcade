@@ -1,6 +1,5 @@
 {
-  "buildCommand": "pnpm build:client",
-  "outputDirectory": "dist/client",
+  "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
   "git": {
     "deploymentEnabled": true
