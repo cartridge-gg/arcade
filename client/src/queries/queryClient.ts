@@ -19,12 +19,9 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Only create persister in browser environment
-export const persister = typeof window !== "undefined"
-  ? createAsyncStoragePersister({
-      storage: window.localStorage,
-    })
-  : undefined;
+export const persister = createAsyncStoragePersister({
+  storage: window.localStorage,
+});
 
 export const queryConfigs = {
   achievements: {

@@ -2,8 +2,7 @@ import type { PropsWithChildren } from "react";
 import { PostHogProvider as PH } from "posthog-js/react";
 
 export function PostHogProvider({ children }: PropsWithChildren) {
-  // Skip PostHog in SSR environment
-  if (typeof window === "undefined" || !import.meta.env.VITE_POSTHOG_KEY) {
+  if (!import.meta.env.VITE_POSTHOG_KEY) {
     return <>{children}</>;
   }
 
