@@ -2,14 +2,6 @@
   "git": {
     "deploymentEnabled": true
   },
-  "functions": {
-    "api/og/**/*.tsx": {
-      "runtime": "edge"
-    },
-    "api/og-meta/[...path].ts": {
-      "runtime": "edge"
-    }
-  },
   "headers": [
     {
       "source": "/ingest/static/:path(.*)",
