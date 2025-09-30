@@ -20,11 +20,17 @@ import { queryClient, persister } from "../queries";
 export function Provider({ children }: PropsWithChildren) {
   const qc = new QueryClient();
 
+  // Use PersistQueryClientProvider only in browser, fallback to QueryClientProvider in SSR
+  const QueryProvider = typeof window !== "undefined" && persister
+    ? PersistQueryClientProvider
+    : QueryClientProvider;
+
+  const queryProviderProps = typeof window !== "undefined" && persister
+    ? { client: queryClient, persistOptions: { persister } }
+    : { client: queryClient };
+
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister }}
-    >
+    <QueryProvider {...(queryProviderProps as any)}>
       <PostHogProvider>
         <CartridgeAPIProvider
           url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
@@ -58,6 +64,6 @@ export function Provider({ children }: PropsWithChildren) {
           </IndexerAPIProvider>
         </CartridgeAPIProvider>
       </PostHogProvider>
-    </PersistQueryClientProvider>
+    </QueryProvider>
   );
 }

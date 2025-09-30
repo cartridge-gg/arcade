@@ -4,21 +4,7 @@
     <title>Cartridge Arcade</title>
     <meta charset="UTF-8" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://play.cartridge.gg" />
-    <meta property="og:title" content="Cartridge Arcade" />
-    <meta property="og:description" content="Discover, Play and Compete in Onchain Games" />
-    <meta property="og:image" content="https://play.cartridge.gg/preview.png" />
-    <meta property="og:site_name" content="Cartridge Arcade" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@cartridge_gg" />
-    <meta name="twitter:creator" content="@cartridge_gg" />
-    <meta name="twitter:title" content="Cartridge Arcade" />
-    <meta name="twitter:description" content="Discover, Play and Compete in Onchain Games" />
-    <meta name="twitter:image" content="https://play.cartridge.gg/preview.png" />
+    <!--ssr-meta-tags-->
 
     <link rel="icon" type="image/png" href="/favicon-48x48.png" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -41,7 +27,7 @@
     <script src="/noflash.js"></script>
   </head>
   <body class="h-screen bg-background text-foreground">
-    <div id="root"></div>
+    <div id="root"><!--ssr-outlet--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

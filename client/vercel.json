@@ -2,6 +2,8 @@
   "git": {
     "deploymentEnabled": true
   },
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist/client",
   "headers": [
     {
       "source": "/ingest/static/:path(.*)",
@@ -54,10 +56,16 @@
     {
       "source": "/ingest/:path(.*)",
       "destination": "https://us.i.posthog.com/:path*"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/og/(.*)",
+      "dest": "/api/og/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "src": "/(.*)",
+      "dest": "/server.js"
     }
   ]
 }

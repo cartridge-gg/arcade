@@ -1,52 +1,17 @@
 import { ImageResponse } from "@vercel/og";
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 
 export const config = {
   runtime: "edge",
 };
 
-interface AchievementOGData {
-  title: string;
-  description: string;
-  icon: string;
-  game: string;
-  points: number;
-  percentage: string;
-  difficulty?: string;
-}
-
-async function fetchAchievementData(achievementId: string): Promise<AchievementOGData | null> {
-  // TODO: Replace with actual API call
-  return {
-    title: achievementId.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
-    description: "Complete an epic challenge and earn legendary rewards",
-    icon: "🏆",
-    game: "Epic Quest",
-    points: 500,
-    percentage: "2.3",
-    difficulty: "Expert",
-  };
-}
-
 export default async function handler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const achievementId = searchParams.get("achievementId") || "achievement";
+    const achievementId = searchParams.get("achievementId") || "Achievement";
 
-    const data = await fetchAchievementData(achievementId);
-    if (!data) {
-      return new Response("Achievement not found", { status: 404 });
-    }
-
-    const getDifficultyColor = (difficulty?: string) => {
-      switch (difficulty) {
-        case "Easy": return "#22C55E";
-        case "Medium": return "#FBBF24";
-        case "Hard": return "#F97316";
-        case "Expert": return "#DC2626";
-        default: return "#FF6B42";
-      }
-    };
+    // TODO: Fetch actual achievement data from API
+    // const achievementData = await fetchAchievementDetails(achievementId);
 
     return new ImageResponse(
       (
@@ -58,154 +23,93 @@ export default async function handler(req: NextRequest) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#0D0E14",
-            background: "linear-gradient(135deg, #0D0E14 0%, #1A1B26 100%)",
-            fontFamily: "system-ui, sans-serif",
-            padding: "60px",
-            position: "relative",
+            backgroundColor: "#161A17",
+            backgroundImage:
+              "linear-gradient(to bottom right, #161A17 0%, #1F2420 100%)",
           }}
         >
+          {/* Logo/Brand */}
           <div
             style={{
               position: "absolute",
-              inset: 0,
-              backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255, 107, 66, 0.05) 1px, transparent 1px)`,
-              backgroundSize: "50px 50px",
+              top: 40,
+              left: 40,
+              display: "flex",
+              alignItems: "center",
+              color: "#FBCB4A",
+              fontSize: 32,
+              fontWeight: "bold",
             }}
-          />
+          >
+            CARTRIDGE
+          </div>
 
+          {/* Main Content */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              width: "100%",
-              maxWidth: "900px",
-              position: "relative",
+              justifyContent: "center",
+              padding: "40px 80px",
+              textAlign: "center",
             }}
           >
+            {/* Trophy/Badge Icon */}
             <div
               style={{
-                position: "absolute",
-                top: "-20px",
-                left: "-10px",
-                fontSize: "32px",
-                fontWeight: "700",
-                color: "#FF6B42",
+                fontSize: 120,
+                marginBottom: 40,
               }}
             >
-              CARTRIDGE
+              🏆
             </div>
 
+            {/* Achievement Name */}
             <div
               style={{
-                width: "180px",
-                height: "180px",
-                borderRadius: "90px",
-                backgroundColor: "#FF6B42",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "80px",
-                marginBottom: "30px",
-                border: "6px solid #FF6B42",
-              }}
-            >
-              {data.icon}
-            </div>
-
-            <div
-              style={{
-                fontSize: "48px",
-                fontWeight: "700",
+                fontSize: 64,
+                fontWeight: "bold",
                 color: "#FFFFFF",
-                marginBottom: "10px",
-                textAlign: "center",
+                marginBottom: 20,
               }}
             >
-              {data.title}
+              Achievement Unlocked
             </div>
 
+            {/* Subtitle */}
             <div
               style={{
-                fontSize: "24px",
-                color: "#FF6B42",
-                marginBottom: "20px",
-                fontWeight: "600",
+                fontSize: 36,
+                color: "#FBCB4A",
+                marginBottom: 20,
               }}
             >
-              {data.game}
+              {achievementId.replace(/-/g, " ").toUpperCase()}
             </div>
 
+            {/* Description placeholder */}
             <div
               style={{
-                fontSize: "20px",
-                color: "#8B8D98",
-                marginBottom: "30px",
-                textAlign: "center",
-                maxWidth: "600px",
+                fontSize: 28,
+                color: "#9CA3AF",
+                maxWidth: 800,
               }}
             >
-              {data.description}
+              Discover achievements and compete with players on Cartridge Arcade
             </div>
+          </div>
 
-            <div style={{ display: "flex", gap: "60px", marginTop: "10px" }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ fontSize: "36px", fontWeight: "700", color: "#FF6B42" }}>
-                  {data.points}
-                </div>
-                <div
-                  style={{
-                    fontSize: "16px",
-                    color: "#8B8D98",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  Points
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ fontSize: "36px", fontWeight: "700", color: "#FF6B42" }}>
-                  {data.percentage}%
-                </div>
-                <div
-                  style={{
-                    fontSize: "16px",
-                    color: "#8B8D98",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  Completion
-                </div>
-              </div>
-
-              {data.difficulty && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <div
-                    style={{
-                      fontSize: "36px",
-                      fontWeight: "700",
-                      color: getDifficultyColor(data.difficulty),
-                    }}
-                  >
-                    {data.difficulty}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "16px",
-                      color: "#8B8D98",
-                      textTransform: "uppercase",
-                      letterSpacing: "1px",
-                    }}
-                  >
-                    Difficulty
-                  </div>
-                </div>
-              )}
-            </div>
+          {/* Footer */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 40,
+              fontSize: 24,
+              color: "#6B7280",
+            }}
+          >
+            play.cartridge.gg
           </div>
         </div>
       ),
@@ -214,8 +118,10 @@ export default async function handler(req: NextRequest) {
         height: 630,
       }
     );
-  } catch (error) {
-    console.error("Error generating achievement OG image:", error);
-    return new Response("Failed to generate image", { status: 500 });
+  } catch (e) {
+    console.error("Error generating OG image:", e);
+    return new Response(`Failed to generate image`, {
+      status: 500,
+    });
   }
 }

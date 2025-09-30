@@ -1,40 +1,17 @@
 import { ImageResponse } from "@vercel/og";
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 
 export const config = {
   runtime: "edge",
 };
 
-interface ProfileOGData {
-  username: string;
-  address: string;
-  achievements: number;
-  games: number;
-  earnings: number;
-  rank?: number;
-}
-
-async function fetchProfileData(username: string): Promise<ProfileOGData | null> {
-  // TODO: Replace with actual API call
-  return {
-    username: username,
-    address: "0x1234...5678",
-    achievements: 42,
-    games: 8,
-    earnings: 15230,
-    rank: 127,
-  };
-}
-
 export default async function handler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const username = searchParams.get("username") || "player";
+    const username = searchParams.get("username") || "Player";
 
-    const profileData = await fetchProfileData(username);
-    if (!profileData) {
-      return new Response("Profile not found", { status: 404 });
-    }
+    // TODO: Fetch actual user data from API
+    // const userData = await fetchUserProfile(username);
 
     return new ImageResponse(
       (
@@ -46,144 +23,94 @@ export default async function handler(req: NextRequest) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#0D0E14",
-            background: "linear-gradient(135deg, #0D0E14 0%, #1A1B26 100%)",
-            fontFamily: "system-ui, sans-serif",
-            padding: "60px",
+            backgroundColor: "#161A17",
+            backgroundImage:
+              "linear-gradient(to bottom right, #161A17 0%, #1F2420 100%)",
           }}
         >
+          {/* Logo/Brand */}
+          <div
+            style={{
+              position: "absolute",
+              top: 40,
+              left: 40,
+              display: "flex",
+              alignItems: "center",
+              color: "#FBCB4A",
+              fontSize: 32,
+              fontWeight: "bold",
+            }}
+          >
+            CARTRIDGE
+          </div>
+
+          {/* Main Content */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              width: "100%",
-              maxWidth: "900px",
-              position: "relative",
+              justifyContent: "center",
+              padding: "40px 80px",
+              textAlign: "center",
             }}
           >
+            {/* Username */}
             <div
               style={{
-                position: "absolute",
-                top: "-20px",
-                left: "-10px",
-                fontSize: "32px",
-                fontWeight: "700",
-                color: "#FF6B42",
-              }}
-            >
-              CARTRIDGE
-            </div>
-
-            <div
-              style={{
-                width: "160px",
-                height: "160px",
-                borderRadius: "80px",
-                backgroundColor: "#FF6B42",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "64px",
-                fontWeight: "700",
-                color: "#fff",
-                marginBottom: "30px",
-                border: "4px solid rgba(255, 107, 66, 0.3)",
-              }}
-            >
-              {profileData.username.slice(0, 2).toUpperCase()}
-            </div>
-
-            <div
-              style={{
-                fontSize: "56px",
-                fontWeight: "700",
+                fontSize: 80,
+                fontWeight: "bold",
                 color: "#FFFFFF",
-                marginBottom: "10px",
+                marginBottom: 20,
               }}
             >
-              {profileData.username}
+              {username}
             </div>
 
+            {/* Subtitle */}
             <div
               style={{
-                fontSize: "20px",
-                color: "#8B8D98",
-                marginBottom: "40px",
-                fontFamily: "monospace",
+                fontSize: 40,
+                color: "#9CA3AF",
+                marginBottom: 40,
               }}
             >
-              {profileData.address}
+              Arcade Profile
             </div>
 
-            <div style={{ display: "flex", gap: "60px", marginTop: "20px" }}>
+            {/* Stats placeholder */}
+            <div
+              style={{
+                display: "flex",
+                gap: 60,
+                marginTop: 40,
+              }}
+            >
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ fontSize: "42px", fontWeight: "700", color: "#FF6B42" }}>
-                  {profileData.achievements}
+                <div style={{ fontSize: 48, fontWeight: "bold", color: "#FBCB4A" }}>
+                  --
                 </div>
-                <div
-                  style={{
-                    fontSize: "18px",
-                    color: "#8B8D98",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  Achievements
-                </div>
+                <div style={{ fontSize: 24, color: "#9CA3AF" }}>Games</div>
               </div>
-
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ fontSize: "42px", fontWeight: "700", color: "#FF6B42" }}>
-                  {profileData.games}
+                <div style={{ fontSize: 48, fontWeight: "bold", color: "#FBCB4A" }}>
+                  --
                 </div>
-                <div
-                  style={{
-                    fontSize: "18px",
-                    color: "#8B8D98",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  Games Played
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{ fontSize: "42px", fontWeight: "700", color: "#FF6B42" }}>
-                  {profileData.earnings}
-                </div>
-                <div
-                  style={{
-                    fontSize: "18px",
-                    color: "#8B8D98",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  Total Points
-                </div>
+                <div style={{ fontSize: 24, color: "#9CA3AF" }}>Achievements</div>
               </div>
             </div>
+          </div>
 
-            {profileData.rank && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "-20px",
-                  right: "-10px",
-                  backgroundColor: "rgba(255, 107, 66, 0.2)",
-                  padding: "10px 20px",
-                  borderRadius: "20px",
-                  fontSize: "24px",
-                  fontWeight: "600",
-                  color: "#FF6B42",
-                  border: "2px solid #FF6B42",
-                }}
-              >
-                Rank #{profileData.rank}
-              </div>
-            )}
+          {/* Footer */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 40,
+              fontSize: 24,
+              color: "#6B7280",
+            }}
+          >
+            play.cartridge.gg
           </div>
         </div>
       ),
@@ -192,8 +119,10 @@ export default async function handler(req: NextRequest) {
         height: 630,
       }
     );
-  } catch (error) {
-    console.error("Error generating profile OG image:", error);
-    return new Response("Failed to generate image", { status: 500 });
+  } catch (e) {
+    console.error("Error generating OG image:", e);
+    return new Response(`Failed to generate image`, {
+      status: 500,
+    });
   }
 }
