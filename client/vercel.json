@@ -59,24 +59,10 @@
     },
     {
       "source": "/player/:username",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(facebookexternalhit|facebookcatalog|Facebot|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot|bot|crawler|spider).*"
-        }
-      ],
       "destination": "/api/ssr?path=/player/:username"
     },
     {
       "source": "/game/:gameId",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(facebookexternalhit|facebookcatalog|Facebot|Twitterbot|LinkedInBot|Discordbot|WhatsApp|TelegramBot|Slackbot|redditbot|bot|crawler|spider).*"
-        }
-      ],
       "destination": "/api/ssr?path=/game/:gameId"
     },
     {
