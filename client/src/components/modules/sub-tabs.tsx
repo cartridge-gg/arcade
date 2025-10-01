@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import ArcadeSubTab from "./sub-tab";
 import { UserCheck } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const arcadeSubTabsVariants = cva(
   "flex justify-between items-end w-full p-0 rounded-none w-full",
@@ -44,11 +45,24 @@ export const ArcadeSubTabs = ({
   children,
 }: ArcadeSubTabsProps) => {
   const [active, setActive] = useState<SubTabValue>(defaultValue);
+  const { trackEvent, events } = useAnalytics();
+
+  const handleTabChange = (value: string) => {
+    const newTab = value as SubTabValue;
+    if (newTab !== active) {
+      trackEvent(events.DISCOVERY_TAB_SWITCHED, {
+        from_tab: active,
+        to_tab: newTab,
+        discovery_tab: newTab,
+      });
+    }
+    setActive(newTab);
+  };
 
   return (
     <Tabs
       defaultValue={defaultValue}
-      onValueChange={(value: string) => setActive(value as SubTabValue)}
+      onValueChange={handleTabChange}
       className="h-full flex flex-col overflow-hidden"
     >
       <TabsList

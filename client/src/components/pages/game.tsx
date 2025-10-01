@@ -30,7 +30,7 @@ export function GamePage() {
       pathname = joinPaths(pathname, `/tab/${value}`);
       navigate(pathname || "/");
     },
-    [location, navigate]
+    [location, navigate],
   );
 
   const order: TabValue[] = useMemo(() => {
@@ -63,14 +63,14 @@ export function GamePage() {
       <div
         className={cn(
           "lg:h-[88px] w-full flex flex-col gap-4 lg:p-6 lg:pb-0 border-b border-background-200 lg:border-none",
-          isDashboard ? "p-0" : "p-4"
+          isDashboard ? "p-0" : "p-4",
         )}
       >
         <div className="flex items-start justify-between">
           <div
             className={cn(
               "flex gap-4 items-center overflow-hidden",
-              isDashboard && isMobile && "hidden"
+              isDashboard && isMobile && "hidden",
             )}
           >
             <Thumbnail

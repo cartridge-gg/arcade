@@ -29,6 +29,8 @@ import { Attributes, Properties, Socials } from "@cartridge/arcade";
 import type ControllerConnector from "@cartridge/connector/controller";
 import { MetadataHelper } from "@/helpers/metadata";
 import { formSchema } from "./register-form";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { toast } from "sonner";
 // import { data } from "./data";
 
 export function Register() {
@@ -36,6 +38,7 @@ export function Register() {
   const { provider } = useArcade();
   const [loading, setLoading] = useState(false);
   const [close, setClose] = useState(false);
+  const { trackEvent, events } = useAnalytics();
 
   const defaultValues = useMemo(() => {
     // return { ...data.eternum };
@@ -73,6 +76,13 @@ export function Register() {
       if (!account) return;
       const controller = (connector as ControllerConnector)?.controller;
       if (!controller) return;
+
+      // Track registration started
+      trackEvent(events.GAME_REGISTER_STARTED, {
+        game_name: values.name,
+        game_namespace: values.namespace,
+      });
+
       const process = async (values: z.infer<typeof formSchema>) => {
         setLoading(true);
         // Fetch images and encode them in base64
@@ -137,16 +147,33 @@ export function Register() {
           };
           const calls: AllowArray<Call> = provider.registry.register_game(args);
           await account.execute(calls);
+
+          // Track successful registration
+          trackEvent(events.GAME_REGISTER_SUBMITTED, {
+            game_name: values.name,
+            game_namespace: values.namespace,
+            game_world_address: values.worldAddress,
+          });
+          toast.success("Game registered successfully");
           setClose(true);
         } catch (error) {
           console.error(error);
+
+          // Track registration failure
+          trackEvent(events.GAME_REGISTER_FAILED, {
+            game_name: values.name,
+            game_namespace: values.namespace,
+            error_message:
+              error instanceof Error ? error.message : "Registration failed",
+          });
+          toast.error("Failed to register game");
         } finally {
           setLoading(false);
         }
       };
       process(values);
     },
-    [provider, account, connector, setClose],
+    [provider, account, connector, setClose, trackEvent, events],
   );
 
   return (

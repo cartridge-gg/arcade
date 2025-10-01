@@ -27,6 +27,7 @@ import ArcadeMenuButton from "../modules/menu-button";
 import { Publish } from "./publish";
 import { Whitelist } from "./whitelist";
 import { UserCard } from "../user/user-card";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export const Games = () => {
   const { address } = useAccount();
@@ -180,10 +181,29 @@ export const Game = ({
   const { earnings: totalEarnings } = usePlayerStats();
   const { earnings: gameEarnings } = usePlayerGameStats(projects);
   const { close } = useSidebar();
+  const { trackGameInteraction } = useAnalytics();
 
   const location = useLocation();
   const navigate = useNavigate();
   const handleClick = useCallback(() => {
+    // Track game selection
+    trackGameInteraction({
+      game: {
+        action: "select",
+        data: {
+          id: id.toString(),
+          name: name,
+        },
+      },
+      properties: {
+        is_all_games: id === 0,
+        is_owner: owner,
+        is_admin: admin,
+        is_whitelisted: whitelisted,
+        is_published: published,
+      },
+    });
+
     // Update the url params
     let pathname = location.pathname;
     const gameName = `${game?.name.toLowerCase().replace(/ /g, "-") || id}`;
@@ -193,7 +213,19 @@ export const Game = ({
     navigate(pathname || "/");
     // Close sidebar on mobile when a game is selected
     close();
-  }, [game, location, navigate, close]);
+  }, [
+    game,
+    location,
+    navigate,
+    close,
+    trackGameInteraction,
+    id,
+    name,
+    owner,
+    admin,
+    whitelisted,
+    published,
+  ]);
 
   const setWhitelisted = useCallback(
     (status: boolean) => {
@@ -201,8 +233,19 @@ export const Game = ({
       const newEdition = game.clone();
       newEdition.whitelisted = status;
       setGame(newEdition);
+
+      // Track whitelist action
+      trackGameInteraction({
+        game: {
+          action: status ? "whitelist" : "blacklist",
+          data: {
+            id: game.id.toString(),
+            name: game.name,
+          },
+        },
+      });
     },
-    [game],
+    [game, trackGameInteraction],
   );
 
   const setPublished = useCallback(
@@ -211,8 +254,19 @@ export const Game = ({
       const newEdition = game.clone();
       newEdition.published = status;
       setGame(newEdition);
+
+      // Track publish action
+      trackGameInteraction({
+        game: {
+          action: status ? "publish" : "hide",
+          data: {
+            id: game.id.toString(),
+            name: game.name,
+          },
+        },
+      });
     },
-    [game],
+    [game, trackGameInteraction],
   );
 
   useEffect(() => {

@@ -17,6 +17,7 @@ import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 import arcade from "@/assets/arcade-logo.png";
 import { useCollection } from "@/hooks/market-collections";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const TABS_ORDER = ["activity", "items", "holders"] as TabValue[];
 
@@ -37,14 +38,33 @@ export function MarketPage() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const { trackEvent, events } = useAnalytics();
+
   const handleClick = useCallback(
     (value: string) => {
+      // Track marketplace tab switch
+      trackEvent(events.MARKETPLACE_TAB_SWITCHED, {
+        from_tab: tab || "items",
+        to_tab: value,
+        marketplace_tab: value,
+        collection_address: collectionAddress,
+        collection_name: props.name,
+      });
+
       let pathname = location.pathname;
       pathname = pathname.replace(/\/tab\/[^/]+/, "");
       pathname = joinPaths(pathname, `/tab/${value}`);
       navigate(pathname || "/");
     },
-    [location, navigate],
+    [
+      location,
+      navigate,
+      trackEvent,
+      events,
+      tab,
+      collectionAddress,
+      props.name,
+    ],
   );
 
   const handleClose = useCallback(() => {

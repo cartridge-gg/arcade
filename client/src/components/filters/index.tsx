@@ -10,6 +10,8 @@ import {
   MarketplaceSearchEngine,
 } from "@cartridge/ui";
 import { useCallback, useMemo, useState } from "react";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { useLocation } from "react-router-dom";
 
 export const Filters = () => {
   const {
@@ -24,6 +26,8 @@ export const Filters = () => {
     precomputedProperties,
   } = useMetadataFiltersAdapter();
   const [search, setSearch] = useState<{ [key: string]: string }>({});
+  const { trackEvent, events } = useAnalytics();
+  const location = useLocation();
 
   // Build filtered properties with search and dynamic counts
   const getFilteredProperties = useMemo(() => {
@@ -45,10 +49,25 @@ export const Filters = () => {
         count:
           filteredMetadata.find(
             (m) => m.trait_type === attribute && m.value === prop.property,
-          )?.tokens.length || 0,
+          )?.count || 0,
       }));
     };
   }, [precomputedProperties, filteredMetadata, search]);
+
+  const handleAddSelected = useCallback(
+    (attribute: string, property: string, value: boolean) => {
+      addSelected(attribute, property, value);
+
+      // Track filter application
+      trackEvent(events.MARKETPLACE_FILTER_APPLIED, {
+        filter_type: attribute,
+        filter_value: property,
+        filter_enabled: value,
+        from_page: location.pathname,
+      });
+    },
+    [addSelected, trackEvent, events, location.pathname],
+  );
 
   const clear = useCallback(() => {
     resetSelected();
@@ -103,7 +122,7 @@ export const Filters = () => {
                       disabled={count === 0 && !isActive(attribute, property)}
                       value={isActive(attribute, property)}
                       setValue={(value: boolean) =>
-                        addSelected(attribute, property, value)
+                        handleAddSelected(attribute, property, value)
                       }
                     />
                   ))}

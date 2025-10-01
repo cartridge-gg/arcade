@@ -45,7 +45,7 @@ export function useMarketCollectionFetcher({
       const collections: { [address: string]: Contract } = {};
 
       for (const c of contracts) {
-        if (BLACKLISTS.includes(BigInt(c.contract_address))) {
+        if (BLACKLISTS.includes(getChecksumAddress(c.contract_address))) {
           continue;
         }
         const address = getChecksumAddress(c.contract_address);
@@ -94,8 +94,6 @@ export function useMarketCollectionFetcher({
             const contracts = await client.getTokenContracts({
               contract_addresses: [],
               contract_types: ["ERC721", "ERC1155"],
-              account_addresses: [],
-              token_ids: [],
               pagination: {
                 limit,
                 cursor: undefined,

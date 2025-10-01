@@ -4,6 +4,7 @@
  * @param manifest - The manifest containing contract addresses and ABIs
  * @param url - Optional RPC URL for the provider
  */
+import type { DojoProvider } from "@dojoengine/core";
 import * as torii from "@dojoengine/torii-client";
 import type { Account, AccountInterface, AllowArray, Call, constants, GetTransactionReceiptResponse } from "starknet";
 
@@ -35,7 +36,11 @@ export class ArcadeProvider extends BaseProvider {
       namespace: NAMESPACE,
       torii: { ToriiClient: torii.ToriiClient },
     });
-    this.world = setupWorld(this);
+
+    const dojoProvider = this as unknown as DojoProvider;
+    // The typed DojoProvider interface still expects the string index signature,
+    // so cast to avoid the mismatch while we host the runtime instance.
+    this.world = setupWorld(dojoProvider);
     this.marketplace = this.world.Marketplace;
     this.social = new Social(this.manifest);
     this.registry = new Registry(this.manifest);

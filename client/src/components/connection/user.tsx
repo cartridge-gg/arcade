@@ -5,11 +5,13 @@ import { useCallback, useEffect } from "react";
 import { UserAvatar } from "../user/avatar";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export function User() {
   const { account, connector } = useAccount();
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
+  const { trackEvent, events } = useAnalytics();
 
   const { data: name, isLoading } = useQuery({
     queryKey: ["controller-username", account?.address],
@@ -32,13 +34,23 @@ export function User() {
       console.error("Connector not initialized");
       return;
     }
+    // Track profile button click
+    trackEvent(events.PROFILE_BUTTON_CLICKED, {
+      username: name,
+      wallet_address: account?.address,
+    });
     controller.openProfile();
-  }, [connector]);
+  }, [connector, trackEvent, events, name, account?.address]);
 
   const handleDisconnect = useCallback(() => {
+    // Track wallet disconnect
+    trackEvent(events.AUTH_WALLET_DISCONNECTED, {
+      wallet_address: account?.address,
+      username: name,
+    });
     disconnect();
     navigate("/");
-  }, [disconnect, navigate]);
+  }, [disconnect, navigate, trackEvent, events, account?.address, name]);
 
   useEffect(() => {
     if (isLoading) {

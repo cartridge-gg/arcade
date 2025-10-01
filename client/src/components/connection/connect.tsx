@@ -1,14 +1,32 @@
 import { Button } from "@cartridge/ui";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { useCallback } from "react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export function Connect() {
   const { account } = useAccount();
   const { connect, connectors } = useConnect();
   const { isConnected } = useAccount();
+  const { trackEvent, events } = useAnalytics();
+
   const connectWallet = useCallback(async () => {
-    connect({ connector: connectors[0] });
-  }, [connect, connectors]);
+    trackEvent(events.AUTH_WALLET_CONNECT_CLICKED, {
+      connector_type: connectors[0]?.id || "unknown",
+    });
+
+    try {
+      await connect({ connector: connectors[0] });
+      trackEvent(events.AUTH_WALLET_CONNECTED, {
+        connector_type: connectors[0]?.id || "unknown",
+      });
+    } catch (error) {
+      trackEvent("auth_wallet_connect_failed", {
+        error_message:
+          error instanceof Error ? error.message : "Connection failed",
+        connector_type: connectors[0]?.id || "unknown",
+      });
+    }
+  }, [connect, connectors, trackEvent, events]);
 
   if (isConnected || !!account) return null;
 

@@ -8,6 +8,7 @@ import { joinPaths } from "@/helpers";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSidebar } from "@/hooks/sidebar";
 import { useAccount } from "@starknet-react/core";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export const UserCard = React.forwardRef<
   HTMLButtonElement,
@@ -29,6 +30,7 @@ const UserCardInner = (
   const location = useLocation();
   const navigate = useNavigate();
   const { close } = useSidebar();
+  const { trackEvent, events } = useAnalytics();
 
   const Icon = useMemo(() => {
     return <UserAvatar username={username} className="h-full w-full" />;
@@ -38,6 +40,15 @@ const UserCardInner = (
 
   const handleClick = useCallback(() => {
     if (!username && !address) return;
+
+    // Track user card click
+    trackEvent(events.AUTH_USER_CARD_CLICKED, {
+      profile_address: address,
+      profile_username: username || undefined,
+      from_page: location.pathname,
+      total_points: totalEarnings,
+    });
+
     // Update the url params
     let pathname = location.pathname;
     const playerName = `${!username ? address?.toLowerCase() : username.toLowerCase()}`;
@@ -50,7 +61,16 @@ const UserCardInner = (
 
     // Close sidebar on mobile
     close();
-  }, [address, navigate, username, location, close]);
+  }, [
+    address,
+    navigate,
+    username,
+    location,
+    close,
+    trackEvent,
+    events,
+    totalEarnings,
+  ]);
 
   return (
     <button

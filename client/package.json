@@ -18,6 +18,7 @@
     "@cartridge/penpal": "^6.2.3",
     "@cartridge/presets": "catalog:",
     "@cartridge/ui": "catalog:",
+    "@dojoengine/grpc": "catalog:",
     "@dojoengine/sdk": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",
     "@hookform/resolvers": "^3.10.0",

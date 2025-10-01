@@ -36,12 +36,15 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { MetadataHelper } from "@/helpers/metadata";
 import ControllerAction from "../modules/controller-action";
 import { formSchema } from "./update-form";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { toast } from "sonner";
 
 export function Update({ game }: { game: GameModel }) {
   const { account, connector } = useAccount();
   const { provider } = useArcade();
   const [loading, setLoading] = useState(false);
   const [close, setClose] = useState(false);
+  const { trackEvent, events } = useAnalytics();
 
   const defaultValues = useMemo(() => {
     return {
@@ -141,16 +144,24 @@ export function Update({ game }: { game: GameModel }) {
           };
           calls = provider.registry.update_game(args);
           await account.execute(calls);
+
+          // Track successful update
+          trackEvent(events.GAME_UPDATED, {
+            game_id: game.id.toString(),
+            game_name: values.name,
+          });
+          toast.success("Game updated successfully");
           setClose(true);
         } catch (error) {
           console.error(error);
+          toast.error("Failed to update game");
         } finally {
           setLoading(false);
         }
       };
       process(values);
     },
-    [provider, account, connector, setClose],
+    [provider, account, connector, setClose, trackEvent, events, game.id],
   );
 
   return (

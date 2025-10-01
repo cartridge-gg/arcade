@@ -15,6 +15,7 @@ import {
 } from "@cartridge/ui";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export interface AchievementCardProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -35,6 +36,8 @@ export const AchievementCard = ({
 }: AchievementCardProps) => {
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState<number[]>([]);
+  const { trackEvent, events } = useAnalytics();
+  const [hasTrackedView, setHasTrackedView] = useState(false);
 
   const visibles = useMemo(() => {
     return (achievements || []).filter(
@@ -46,14 +49,31 @@ export const AchievementCard = ({
     const index = pages.indexOf(page);
     const next = pages[index + 1];
     if (!next) return;
+
+    trackEvent(events.ACHIEVEMENT_PAGE_CHANGED, {
+      achievement_name: name,
+      from_page: page.toString(),
+      to_page: next.toString(),
+      direction: "next",
+    });
+
     setPage(next);
-  }, [page, pages]);
+  }, [page, pages, trackEvent, events, name]);
 
   const handlePrevious = useCallback(() => {
     const index = pages.indexOf(page);
     if (index === 0) return;
-    setPage(pages[index - 1]);
-  }, [page, pages]);
+    const previousPage = pages[index - 1];
+
+    trackEvent(events.ACHIEVEMENT_PAGE_CHANGED, {
+      achievement_name: name,
+      from_page: page.toString(),
+      to_page: previousPage.toString(),
+      direction: "previous",
+    });
+
+    setPage(previousPage);
+  }, [page, pages, trackEvent, events, name]);
 
   useEffect(() => {
     // Set the page to the first uncompleted achievement or 0 if there are none
@@ -67,6 +87,20 @@ export const AchievementCard = ({
     const page = filtereds.find((a) => !a.completed);
     setPage(page ? page.index : pages[pages.length - 1]);
   }, [achievements]);
+
+  // Track achievement view when component first renders
+  useEffect(() => {
+    if (!hasTrackedView && visibles.length > 0) {
+      visibles.forEach((achievement) => {
+        trackEvent(events.ACHIEVEMENT_VIEWED, {
+          achievement_id: achievement.id,
+          achievement_name: name,
+          completed: achievement.completed,
+        });
+      });
+      setHasTrackedView(true);
+    }
+  }, [hasTrackedView, visibles, trackEvent, events, name]);
 
   if (visibles.length === 0) return null;
 
@@ -102,7 +136,17 @@ export const AchievementCard = ({
                     .filter((a) => a.index === p)
                     .every((a) => a.completed)}
                   active={p === page}
-                  onClick={() => setPage(p)}
+                  onClick={() => {
+                    if (p !== page) {
+                      trackEvent(events.ACHIEVEMENT_PAGE_CHANGED, {
+                        achievement_name: name,
+                        from_page: page.toString(),
+                        to_page: p.toString(),
+                        direction: "direct",
+                      });
+                    }
+                    setPage(p);
+                  }}
                 />
               ))}
             </AchievementBits>
@@ -110,7 +154,17 @@ export const AchievementCard = ({
         )}
       </div>
       {visibles.map((achievement) => (
-        <div key={achievement.id} className="flex gap-x-px">
+        <div
+          key={achievement.id}
+          className="flex gap-x-px"
+          onClick={() => {
+            trackEvent(events.ACHIEVEMENT_CARD_CLICKED, {
+              achievement_id: achievement.id,
+              achievement_name: name,
+              completed: achievement.completed,
+            });
+          }}
+        >
           <AchievementContent {...achievement.content} />
           <div
             className={cn(

@@ -11,6 +11,7 @@ import type { EditionModel } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
 import { DEFAULT_TOKENS_PROJECT } from "@/constants";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const DEFAULT_TOKENS_COUNT = 3;
 
@@ -24,6 +25,7 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
   const { editions } = useArcade();
   const { edition } = useProject();
   const [unfolded, setUnfolded] = useState(false);
+  const { trackEvent, events } = useAnalytics();
 
   useEffect(() => {
     setUnfolded(false);
@@ -61,7 +63,20 @@ export const Tokens = ({ tokens, credits }: TokensProps) => {
           "bg-background-200 hover:bg-background-300 text-foreground-300 hover:text-foreground-200",
           filteredTokens.length <= DEFAULT_TOKENS_COUNT && "hidden",
         )}
-        onClick={() => setUnfolded(!unfolded)}
+        onClick={() => {
+          trackEvent(
+            unfolded
+              ? events.INVENTORY_VIEW_COLLAPSED
+              : events.INVENTORY_VIEW_EXPANDED,
+            {
+              token_count: filteredTokens.length,
+              visible_count: unfolded
+                ? filteredTokens.length
+                : DEFAULT_TOKENS_COUNT,
+            },
+          );
+          setUnfolded(!unfolded);
+        }}
       >
         {unfolded ? (
           <MinusIcon size="xs" />
@@ -87,6 +102,7 @@ function Item({
 }) {
   const { isSelf } = useAddress();
   const { connector } = useAccount();
+  const { trackEvent, events } = useAnalytics();
 
   const edition = useMemo(() => {
     return editions.find(
@@ -96,6 +112,16 @@ function Item({
 
   const handleClick = useCallback(async () => {
     if (!token.metadata.address) return;
+
+    // Track token click
+    trackEvent(events.INVENTORY_TOKEN_CLICKED, {
+      token_address: token.metadata.address,
+      token_symbol: token.metadata.symbol,
+      token_amount: token.balance.amount.toString(),
+      token_value: token.balance.value,
+      token_project: token.metadata.project || null,
+    });
+
     const controller = (connector as ControllerConnector)?.controller;
     const username = await controller?.username();
     if (!controller || !username) {

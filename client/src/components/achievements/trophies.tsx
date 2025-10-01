@@ -6,6 +6,7 @@ import { useArcade } from "@/hooks/arcade";
 import { toast } from "sonner";
 import { useAccount } from "@starknet-react/core";
 import type ControllerConnector from "@cartridge/connector/controller";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const HIDDEN_GROUP = "Hidden";
 
@@ -89,11 +90,13 @@ function Group({
 }) {
   const { account, connector } = useAccount();
   const { provider } = useArcade();
+  const { trackEvent, events } = useAnalytics();
 
   const handlePin = useCallback(
     (
       pinned: boolean,
       achievementId: string,
+      achievementName: string,
       setLoading: (loading: boolean) => void,
     ) => {
       if (!account || (!enabled && !pinned)) return;
@@ -107,6 +110,15 @@ function Group({
             : provider.social.pin({ achievementId });
           const res = await account.execute(calls);
           if (res) {
+            // Track pin/unpin event
+            trackEvent(
+              pinned ? events.ACHIEVEMENT_UNPINNED : events.ACHIEVEMENT_PINNED,
+              {
+                achievement_id: achievementId,
+                achievement_name: achievementName,
+                achievement_game: group,
+              },
+            );
             toast.success(
               `Trophy ${pinned ? "unpinned" : "pinned"} successfully`,
             );
@@ -120,7 +132,7 @@ function Group({
       };
       process();
     },
-    [enabled, account, connector],
+    [enabled, account, connector, trackEvent, events, group],
   );
 
   const achievements = useMemo(() => {
@@ -157,10 +169,42 @@ function Group({
                 points: item.earning,
                 difficulty: Number.parseFloat(item.percentage),
                 title: item.title,
+                onShare: () => {
+                  // Track share event
+                  trackEvent(events.ACHIEVEMENT_SHARED, {
+                    achievement_id: item.id,
+                    achievement_name: item.title,
+                    achievement_game: group,
+                    social_platform: "twitter",
+                  });
+                },
+              },
+        pin:
+          softview || !item.completed
+            ? undefined
+            : {
+                pinned: Object.values(pins).some((playerPins) =>
+                  playerPins.includes(item.id),
+                ),
+                enabled: enabled,
+                onPin: (
+                  pinned: boolean,
+                  setLoading: (loading: boolean) => void,
+                ) => handlePin(pinned, item.id, item.title, setLoading),
               },
       };
     });
-  }, [items, pins, handlePin]);
+  }, [
+    items,
+    pins,
+    handlePin,
+    enabled,
+    softview,
+    socials,
+    trackEvent,
+    events,
+    group,
+  ]);
 
   return <AchievementCard name={group} achievements={achievements} />;
 }

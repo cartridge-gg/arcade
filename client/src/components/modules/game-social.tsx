@@ -9,6 +9,7 @@ import { cn } from "@cartridge/ui/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { SquareArrowOutUpRightIcon } from "lucide-react";
 import { HTMLAttributes } from "react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface GameSocialWebsiteProps
   extends VariantProps<typeof GameSocialVariants> {
@@ -16,11 +17,21 @@ interface GameSocialWebsiteProps
   label?: boolean;
 }
 export const GameSocialWebsite = ({ website }: GameSocialWebsiteProps) => {
+  const { trackEvent, events, trackSocialClick } = useAnalytics();
+
+  const handleClick = () => {
+    trackEvent(events.GAME_PLAY_CLICKED, {
+      game_url: website,
+    });
+    trackSocialClick("website", website);
+  };
+
   return (
     <a
       href={website}
       draggable={false}
       target="_blank"
+      onClick={handleClick}
       className="flex items-center rounded-full p-2 cursor-pointer text-spacer-100 bg-primary hover:bg-primary hover:opacity-80 justify-center lg:px-4 py-2.5"
     >
       <PlayIcon size="sm" />
@@ -140,11 +151,27 @@ const GameSocial = ({
   variant,
   className,
 }: GameSocialProps) => {
+  const { trackSocialClick } = useAnalytics();
+
+  const handleClick = () => {
+    // Determine platform from href
+    let platform = "website";
+    if (href.includes("discord")) platform = "discord";
+    else if (href.includes("twitter.com") || href.includes("x.com"))
+      platform = "twitter";
+    else if (href.includes("github.com")) platform = "github";
+    else if (href.includes("t.me") || href.includes("telegram"))
+      platform = "telegram";
+
+    trackSocialClick(platform, href);
+  };
+
   return (
     <a
       href={href}
       draggable={false}
       target="_blank"
+      onClick={handleClick}
       className={cn(GameSocialVariants({ variant }), className)}
       rel="noreferrer"
     >

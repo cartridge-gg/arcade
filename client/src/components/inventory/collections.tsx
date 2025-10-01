@@ -13,6 +13,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername } from "@/hooks/account";
 import { joinPaths } from "@/helpers";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface CollectionsProps {
   collections: Collection[];
@@ -52,6 +53,7 @@ function Item({
   const { isSelf, address } = useAddress();
   const { connector } = useAccount();
   const { orders } = useMarketplace();
+  const { trackEvent, events } = useAnalytics();
 
   const edition = useMemo(() => {
     return editions.find(
@@ -85,6 +87,17 @@ function Item({
   const navigate = useNavigate();
   const location = useLocation();
   const handleClick = useCallback(async () => {
+    // Track collection click
+    trackEvent(events.INVENTORY_COLLECTION_CLICKED, {
+      collection_address: collection.address,
+      collection_name: collection.name,
+      collection_type: collection.type,
+      total_count: collection.totalCount,
+      listing_count: listingCount,
+      is_self: isSelf,
+      from_page: location.pathname,
+    });
+
     // If the user is not logged in, or not the current user then we navigate to the marketplace
     if (!isSelf) {
       const player = username.toLowerCase();
@@ -127,13 +140,18 @@ function Item({
     controller.openProfileAt(path);
   }, [
     collection.address,
+    collection.name,
+    collection.type,
+    collection.totalCount,
     connector,
     username,
-    collection.type,
     edition,
     location,
     navigate,
     isSelf,
+    trackEvent,
+    events,
+    listingCount,
   ]);
 
   return (

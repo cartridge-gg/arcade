@@ -8,7 +8,7 @@ import {
   Separator,
   Skeleton,
 } from "@cartridge/ui";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Token } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
@@ -27,7 +27,9 @@ import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
 import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
+import { useMarketplaceTokensStore } from "@/store";
 
 const ROW_HEIGHT = 218;
 const ERC1155_ENTRYPOINT = "balance_of_batch";
@@ -66,10 +68,14 @@ export function Items({
   const [selection, setSelection] = useState<Asset[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
   const { provider } = useArcade();
+  const { trackEvent, events } = useAnalytics();
+  const [lastSearch, setLastSearch] = useState<string>("");
+  const getTokens = useMarketplaceTokensStore((s) => s.getTokens);
+  const tokens = getTokens(DEFAULT_PROJECT, collectionAddress);
 
   // Use the adapter hook which includes Buy Now/Show All functionality
   const {
-    tokens,
+    // tokens,
     filteredTokens,
     activeFilters,
     resetSelected: clearAllFilters,
@@ -81,9 +87,17 @@ export function Items({
   }, [getCollectionOrders, collectionAddress]);
 
   // Get collection info
-  const { collection, status, loadingProgress } = useMarketTokensFetcher({
+  const {
+    collection,
+    status,
+    loadingProgress,
+    hasMore,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useMarketTokensFetcher({
     project: [DEFAULT_PROJECT],
     address: collectionAddress,
+    attributeFilters: activeFilters,
   });
 
   // Apply search filtering on top of metadata filters
@@ -98,6 +112,28 @@ export function Items({
     });
   }, [filteredTokens, search]);
 
+  // Track search with debouncing
+  useEffect(() => {
+    if (search && search !== lastSearch) {
+      const timer = setTimeout(() => {
+        trackEvent(events.MARKETPLACE_SEARCH_PERFORMED, {
+          search_query: search,
+          collection_address: collectionAddress,
+          results_count: searchFilteredTokens.length,
+        });
+        setLastSearch(search);
+      }, 500); // Debounce 500ms
+      return () => clearTimeout(timer);
+    }
+  }, [
+    search,
+    lastSearch,
+    searchFilteredTokens.length,
+    trackEvent,
+    events,
+    collectionAddress,
+  ]);
+
   const connectWallet = useCallback(async () => {
     connect({ connector: connectors[0] });
   }, [connect, connectors]);
@@ -109,6 +145,15 @@ export function Items({
   const handleInspect = useCallback(
     async (token: Token & { owner: string }) => {
       if (!isConnected || !connector) return;
+
+      // Track item inspection
+      trackEvent(events.MARKETPLACE_ITEM_INSPECTED, {
+        item_token_id: token.token_id,
+        item_name: (token.metadata as any)?.name || token.name || "",
+        collection_address: token.contract_address,
+        seller_address: token.owner,
+      });
+
       const contractAddress = token.contract_address;
       const controller = (connector as ControllerConnector)?.controller;
       const username = await controller?.username();
@@ -137,7 +182,7 @@ export function Items({
       const path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
       controller.openProfileAt(path);
     },
-    [connector, provider.provider],
+    [connector, provider.provider, trackEvent, events],
   );
 
   const handlePurchase = useCallback(
@@ -148,11 +193,30 @@ export function Items({
         tokens.map((token) => token.contract_address),
       );
       if (contractAddresses.size !== 1) return;
+
+      // Track purchase initiation
+      const eventType =
+        tokens.length > 1
+          ? events.MARKETPLACE_BULK_PURCHASE_INITIATED
+          : events.MARKETPLACE_PURCHASE_INITIATED;
+
+      trackEvent(eventType, {
+        purchase_type: tokens.length > 1 ? "bulk" : "single",
+        items_count: tokens.length,
+        order_ids: orders.map((o) => o.id.toString()),
+        collection_address: Array.from(contractAddresses)[0],
+        buyer_address: address,
+        item_token_ids: tokens.map((t) => t.token_id?.toString() || ""),
+      });
       const contractAddress = `0x${BigInt(Array.from(contractAddresses)[0]).toString(16)}`;
       const controller = (connector as ControllerConnector)?.controller;
       const username = await controller?.username();
       if (!controller || !username) {
         console.error("Connector not initialized");
+        trackEvent(events.MARKETPLACE_PURCHASE_FAILED, {
+          error_message: "Connector not initialized",
+          purchase_type: tokens.length > 1 ? "bulk" : "single",
+        });
         return;
       }
 
@@ -184,16 +248,32 @@ export function Items({
       }
       controller.openProfileAt(path);
     },
-    [connector, provider.provider],
+    [connector, provider.provider, address, trackEvent, events],
   );
 
   // Set up virtualizer for rows
+  const rowCount = Math.ceil(searchFilteredTokens.length / 4);
+
   const virtualizer = useVirtualizer({
-    count: searchFilteredTokens.length,
+    count: rowCount + 1,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT + 16, // ROW_HEIGHT + gap
     overscan: 2,
   });
+
+  useEffect(() => {
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+
+    if (!lastItem) {
+      return;
+    }
+
+    if (lastItem.index >= rowCount - 1 && hasMore && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [rowCount, hasMore, fetchNextPage, isFetchingNextPage, virtualizer]);
+
+  const virtualItems = virtualizer.getVirtualItems();
 
   if (!collection && tokens.length === 0) return <EmptyState />;
 
@@ -223,7 +303,14 @@ export function Items({
               <p>{`${selection.length} / ${searchFilteredTokens.length} Selected`}</p>
             ) : (
               <>
-                <p>{`${searchFilteredTokens.length} ${tokens && searchFilteredTokens.length < tokens.length ? `of ${tokens.length}` : ""} Items`}</p>
+                <CollectionCount
+                  collectionCount={Number.parseInt(
+                    collection?.total_supply ?? "0x0",
+                    16,
+                  )}
+                  tokensCount={tokens.length}
+                  searchFilteredTokensCount={searchFilteredTokens.length}
+                />
                 {Object.keys(activeFilters).length > 0 && (
                   <Button
                     variant="ghost"
@@ -258,7 +345,33 @@ export function Items({
             position: "relative",
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
+          {virtualItems.map((virtualRow) => {
+            const isLoaderRow = virtualRow.index >= rowCount;
+
+            if (isLoaderRow) {
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  {hasMore && (
+                    <div className="w-full flex justify-center items-center py-6 text-sm text-foreground-300">
+                      {isFetchingNextPage
+                        ? "Loading more items…"
+                        : "Scroll to load more"}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             const startIndex = virtualRow.index * 4;
             const endIndex = Math.min(
               startIndex + 4,
@@ -492,3 +605,21 @@ const EmptyState = () => {
     />
   );
 };
+
+function CollectionCount({
+  collectionCount,
+  tokensCount,
+  searchFilteredTokensCount,
+}: {
+  collectionCount: number;
+  tokensCount: number;
+  searchFilteredTokensCount: number;
+}) {
+  if (0 === searchFilteredTokensCount) return <p>{collectionCount} Items</p>;
+
+  return (
+    <p>
+      {tokensCount} of {collectionCount} Items
+    </p>
+  );
+}

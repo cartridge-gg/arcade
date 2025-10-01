@@ -13,8 +13,13 @@ import { useDevice } from "@/hooks/device";
 import { MarketPage } from "./pages/market";
 import { Filters } from "./filters";
 import { UserCard } from "./user/user-card";
+import { usePageTracking } from "@/hooks/usePageTracking";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export function App() {
+  // Initialize page tracking
+  usePageTracking();
+  const { trackEvent, events } = useAnalytics();
   const { isOpen, toggle, handleTouchMove, handleTouchStart } = useSidebar();
   const { setPlayer } = useArcade();
   const { player, collection } = useProject();
@@ -24,6 +29,14 @@ export function App() {
   useEffect(() => {
     setPlayer(player);
   }, [player, setPlayer]);
+
+  const handleSidebarToggle = () => {
+    trackEvent(events.NAVIGATION_SIDEBAR_TOGGLED, {
+      action: isOpen ? "close" : "open",
+      is_mobile: isMobile,
+    });
+    toggle();
+  };
 
   return (
     <ThemeProvider defaultScheme="dark">
@@ -43,7 +56,7 @@ export function App() {
                 "absolute inset-0 bg-transparent z-10",
                 !isOpen && "hidden",
               )}
-              onClick={() => toggle()}
+              onClick={handleSidebarToggle}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             />
