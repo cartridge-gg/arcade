@@ -30,6 +30,7 @@ import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
+import { resizeImage } from "@/helpers";
 
 const ROW_HEIGHT = 218;
 const ERC1155_ENTRYPOINT = "balance_of_batch";
@@ -554,7 +555,7 @@ function Item({
           (token.metadata as unknown as { name: string })?.name || token.name
         }
         // @ts-expect-error TODO: Fix this type to include image in metadata
-        image={token.image ?? collection.image}
+        image={resizeImage(token.image ?? collection.image, 300, 300)}
         listingCount={token.orders.length}
         onClick={
           selectable && openable && isConnected

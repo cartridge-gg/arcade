@@ -12,7 +12,7 @@ import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername } from "@/hooks/account";
-import { joinPaths } from "@/helpers";
+import { joinPaths, resizeImage } from "@/helpers";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface CollectionsProps {
@@ -159,8 +159,14 @@ function Item({
       <CollectibleCard
         title={collection.name}
         image={
-          collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
-          placeholder
+          resizeImage(
+            collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
+              placeholder,
+            300,
+            300,
+          ) ??
+          (collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
+            placeholder)
         }
         totalCount={collection.totalCount}
         listingCount={listingCount}
