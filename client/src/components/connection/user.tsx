@@ -3,7 +3,7 @@ import { Button, SignOutIcon, Skeleton } from "@cartridge/ui";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { useCallback, useEffect } from "react";
 import { UserAvatar } from "../user/avatar";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
@@ -27,7 +27,6 @@ export function User() {
     enabled: !!connector,
   });
 
-  const navigate = useNavigate();
   const handleClick = useCallback(() => {
     const controller = (connector as ControllerConnector)?.controller;
     if (!controller) {
@@ -43,16 +42,13 @@ export function User() {
   }, [connector, trackEvent, events, name, account?.address]);
 
   const handleDisconnect = useCallback(() => {
-    // Track wallet disconnect
     trackEvent(events.AUTH_WALLET_DISCONNECTED, {
       wallet_address: account?.address,
       username: name,
     });
     disconnect();
-    navigate({ to: "/" });
   }, [
     disconnect,
-    navigate,
     account?.address,
     events.AUTH_WALLET_DISCONNECTED,
     name,
@@ -94,13 +90,15 @@ export function User() {
         </div>
         <p className="text-sm font-medium normal-case">{name}</p>
       </Button>
-      <button
-        type="button"
-        onClick={handleDisconnect}
-        className="p-2 rounded bg-background-100 hover:bg-background-150"
-      >
-        <SignOutIcon size="default" />
-      </button>
+      <Link to="/">
+        <button
+          type="button"
+          onClick={handleDisconnect}
+          className="p-2 rounded bg-background-100 hover:bg-background-150"
+        >
+          <SignOutIcon size="default" />
+        </button>
+      </Link>
     </div>
   );
 }

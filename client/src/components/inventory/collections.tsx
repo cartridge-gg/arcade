@@ -5,24 +5,41 @@ import type { EditionModel } from "@cartridge/arcade";
 import placeholder from "@/assets/placeholder.svg";
 import { useAccount } from "@starknet-react/core";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { type Collection, CollectionType } from "@/context/collection";
+import { CollectionType } from "@/context/collection";
 import { useAddress } from "@/hooks/address";
-import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useUsername } from "@/hooks/account";
 import { joinPaths, resizeImage } from "@/helpers";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { TAB_SEGMENTS } from "@/hooks/project";
+import { type EnrichedTokenContract } from "@/collections";
+import { useCollections } from "@/hooks/collections";
+import { getChecksumAddress } from "starknet";
 
 interface CollectionsProps {
-  collections: Collection[];
-  status: "loading" | "error" | "idle" | "success";
+  collections: EnrichedTokenContract[];
+  status:
+    | "loading"
+    | "error"
+    | "idle"
+    | "success"
+    | "initialCommit"
+    | "ready"
+    | "cleaned-up";
 }
 
 export const Collections = ({ collections, status }: CollectionsProps) => {
   const { editions } = useArcade();
+  const { collections: ownedCollections } = useCollections();
+
+  const filteredCollections = useMemo(() => {
+    const ownedAddresses = new Set(
+      ownedCollections.map((c) => getChecksumAddress(c.address)),
+    );
+    return collections.filter((c) => ownedAddresses.has(c.contract_address));
+  }, [collections, ownedCollections]);
 
   switch (status) {
     case "loading": {
@@ -31,9 +48,9 @@ export const Collections = ({ collections, status }: CollectionsProps) => {
     default: {
       return (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none">
-          {collections.map((collection) => (
+          {filteredCollections.map((collection) => (
             <Item
-              key={collection.address}
+              key={collection.contract_address}
               collection={collection}
               editions={editions}
             />
@@ -48,7 +65,7 @@ function Item({
   collection,
   editions,
 }: {
-  collection: Collection;
+  collection: EnrichedTokenContract;
   editions: EditionModel[];
 }) {
   const { isSelf, address } = useAddress();
@@ -63,7 +80,7 @@ function Item({
   }, [editions, collection]);
 
   const listingCount = useMemo(() => {
-    const collectionOrders = orders[getChecksumAddress(collection.address)];
+    const collectionOrders = orders[collection.contract_address];
     if (!collectionOrders) return 0;
     const tokenOrders = Object.entries(collectionOrders).reduce(
       (acc, [token, orders]) => {
@@ -85,99 +102,108 @@ function Item({
 
   const { username } = useUsername({ address });
 
-  const navigate = useNavigate();
   const { location } = useRouterState();
+
+  const collectionType = useMemo(() => {
+    return collection.contract_type === "ERC721"
+      ? CollectionType.ERC721
+      : CollectionType.ERC1155;
+  }, [collection.contract_type]);
+
+  const target = useMemo(() => {
+    if (isSelf) return undefined;
+    const segments = location.pathname.split("/").filter(Boolean);
+    const playerIndex = segments.indexOf("player");
+    const baseSegments =
+      playerIndex === -1 ? segments : segments.slice(0, playerIndex);
+    const last = baseSegments[baseSegments.length - 1];
+    if (TAB_SEGMENTS.includes(last as (typeof TAB_SEGMENTS)[number])) {
+      baseSegments.pop();
+    }
+    baseSegments.push("collection", collection.contract_address, "items");
+    return baseSegments.length ? joinPaths(...baseSegments) : "/";
+  }, [isSelf, location.pathname, collection.contract_address]);
+
   const handleClick = useCallback(async () => {
-    // Track collection click
     trackEvent(events.INVENTORY_COLLECTION_CLICKED, {
-      collection_address: collection.address,
+      collection_address: collection.contract_address,
       collection_name: collection.name,
-      collection_type: collection.type,
-      total_count: collection.totalCount,
+      collection_type: collectionType,
+      total_count: Number(collection.totalSupply),
       listing_count: listingCount,
       is_self: isSelf,
       from_page: location.pathname,
     });
 
-    // If the user is not logged in, or not the current user then we navigate to the marketplace
-    if (!isSelf) {
-      const player = username.toLowerCase();
-      const segments = location.pathname.split("/").filter(Boolean);
-      const playerIndex = segments.indexOf("player");
-      const baseSegments =
-        playerIndex === -1 ? segments : segments.slice(0, playerIndex);
-      const last = baseSegments[baseSegments.length - 1];
-      if (TAB_SEGMENTS.includes(last as (typeof TAB_SEGMENTS)[number])) {
-        baseSegments.pop();
-      }
-      baseSegments.push("collection", collection.address, "items");
-      const target = baseSegments.length ? joinPaths(...baseSegments) : "/";
-      navigate({ to: target || "/", search: { filter: player } });
-      return;
-    }
-    const controller = (connector as ControllerConnector)?.controller;
-    if (!controller || !username) {
-      console.error("Connector not initialized");
-      return;
-    }
-    let subpath;
-    switch (collection.type) {
-      case CollectionType.ERC721:
-        subpath = "collection";
-        break;
-      case CollectionType.ERC1155:
-        subpath = "collectible";
-        break;
-      default:
-        console.error("Unknown collection type");
+    if (isSelf) {
+      const controller = (connector as ControllerConnector)?.controller;
+      if (!controller || !username) {
+        console.error("Connector not initialized");
         return;
+      }
+      let subpath;
+      switch (collectionType) {
+        case CollectionType.ERC721:
+          subpath = "collection";
+          break;
+        case CollectionType.ERC1155:
+          subpath = "collectible";
+          break;
+        default:
+          console.error("Unknown collection type");
+          return;
+      }
+      if (!subpath) return;
+      const preset = edition?.properties.preset;
+      const options = [`ps=${collection.project}`, "closable=true"];
+      if (preset) {
+        options.push(`preset=${preset}`);
+      } else {
+        options.push("preset=cartridge");
+      }
+      const path = `account/${username}/inventory/${subpath}/${collection.contract_address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+      controller.openProfileAt(path);
     }
-    if (!subpath) return;
-    const preset = edition?.properties.preset;
-    const options = [`ps=${collection.project}`, "closable=true"];
-    if (preset) {
-      options.push(`preset=${preset}`);
-    } else {
-      options.push("preset=cartridge");
-    }
-    const path = `account/${username}/inventory/${subpath}/${collection.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-    controller.openProfileAt(path);
   }, [
-    collection.address,
+    collection.contract_address,
     collection.name,
-    collection.type,
-    collection.totalCount,
+    collectionType,
+    collection.totalSupply,
+    collection.project,
     connector,
     username,
     edition,
-    location,
-    navigate,
+    location.pathname,
     isSelf,
     trackEvent,
     events,
     listingCount,
   ]);
 
-  return (
-    <div className="w-full group select-none">
-      <CollectibleCard
-        title={collection.name}
-        image={
-          resizeImage(
-            collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
-              placeholder,
-            300,
-            300,
-          ) ??
-          (collection.imageUrl.replace("ipfs://", "https://ipfs.io/ipfs/") ||
-            placeholder)
-        }
-        totalCount={collection.totalCount}
-        listingCount={listingCount}
-        onClick={handleClick}
-      />
-    </div>
+  const content = (
+    <CollectibleCard
+      title={collection.name}
+      image={resizeImage(collection.image, 300, 300) || placeholder}
+      totalCount={Number(collection.totalSupply)}
+      listingCount={listingCount}
+      onClick={isSelf ? handleClick : undefined}
+    />
   );
+
+  if (target) {
+    return (
+      <Link
+        to={target}
+        search={{ filter: username.toLowerCase() }}
+        className="w-full group select-none"
+        onClick={handleClick}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className="w-full group select-none">{content}</div>;
 }
 
 const LoadingState = () => {

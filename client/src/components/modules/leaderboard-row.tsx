@@ -8,9 +8,10 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import LeaderboardUsername from "./leaderboard-username";
 import AchievementFollowTag from "./follow-tag";
+import { Link } from "@tanstack/react-router";
 
 export interface LeaderboardRowProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onClick'> {
   pins: { id: string; icon: string }[];
   rank: number;
   name: string;
@@ -18,6 +19,7 @@ export interface LeaderboardRowProps
   icon?: string;
   highlight?: boolean;
   following?: boolean;
+  to?: string;
 }
 
 export const LeaderboardRow = ({
@@ -28,6 +30,7 @@ export const LeaderboardRow = ({
   icon,
   highlight,
   following,
+  to,
   className,
   ...props
 }: LeaderboardRowProps) => {
@@ -62,7 +65,7 @@ export const LeaderboardRow = ({
     };
   }, [ref, highlight]);
 
-  return (
+  const content = (
     <div
       ref={ref}
       className={cn(
@@ -105,6 +108,12 @@ export const LeaderboardRow = ({
       </div>
     </div>
   );
+
+  if (to) {
+    return <Link to={to}>{content}</Link>;
+  }
+
+  return content;
 };
 
 export default LeaderboardRow;

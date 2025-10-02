@@ -12,7 +12,7 @@ import { useArcade } from "@/hooks/arcade";
 import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
 import { Register } from "./register";
 import { type GameModel, RoleType } from "@cartridge/arcade";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";
 import ArcadeGameSelect from "../modules/game-select";
@@ -183,10 +183,34 @@ export const Game = ({
   const { close } = useSidebar();
   const { trackGameInteraction } = useAnalytics();
 
-  const navigate = useNavigate();
   const { location } = useRouterState();
+
+  const target = useMemo(() => {
+    const segments = location.pathname.split("/").filter(Boolean);
+    const playerIndex = segments.indexOf("player");
+    const hasPlayer = playerIndex !== -1;
+
+    const playerPath = hasPlayer ? segments.slice(playerIndex) : [];
+
+    let targetSegments: string[] = [];
+
+    if (id === 0) {
+      if (hasPlayer) {
+        targetSegments = playerPath;
+      }
+    } else {
+      const gameName = game?.name.toLowerCase().replace(/ /g, "-") || id.toString();
+      targetSegments = ["game", gameName];
+
+      if (hasPlayer) {
+        targetSegments.push(...playerPath);
+      }
+    }
+
+    return targetSegments.length ? joinPaths(...targetSegments) : "/";
+  }, [game, location.pathname, id]);
+
   const handleClick = useCallback(() => {
-    // Track game selection
     trackGameInteraction({
       game: {
         action: "select",
@@ -203,41 +227,8 @@ export const Game = ({
         is_published: published,
       },
     });
-
-    const segments = location.pathname.split("/").filter(Boolean);
-    const playerIndex = segments.indexOf("player");
-    const hasPlayer = playerIndex !== -1;
-
-    // Extract player path if it exists (e.g., ["player", "valdozzo", "inventory"])
-    const playerPath = hasPlayer ? segments.slice(playerIndex) : [];
-
-    // Build new path
-    let targetSegments: string[] = [];
-
-    if (id === 0) {
-      // "All Games" button
-      if (hasPlayer) {
-        targetSegments = playerPath; // Navigate to /player/$player/...
-      }
-      // else: targetSegments = [] → navigate to "/"
-    } else {
-      // Specific game selected
-      const gameName = game?.name.toLowerCase().replace(/ /g, "-") || id.toString();
-      targetSegments = ["game", gameName];
-
-      if (hasPlayer) {
-        targetSegments.push(...playerPath); // Navigate to /game/$game/player/$player/...
-      }
-    }
-
-    const target = targetSegments.length ? joinPaths(...targetSegments) : "/";
-    navigate({ to: target });
-    // Close sidebar on mobile when a game is selected
     close();
   }, [
-    game,
-    location,
-    navigate,
     close,
     trackGameInteraction,
     id,
@@ -301,7 +292,9 @@ export const Game = ({
 
   return (
     <div className="flex items-center gap-2">
-      <div
+      <Link
+        to={target}
+        onClick={handleClick}
         data-active={active}
         className="grow rounded border border-transparent transition-colors duration-300 ease-in-out"
       >
@@ -311,7 +304,6 @@ export const Game = ({
           cover={cover}
           points={game ? gameEarnings : totalEarnings}
           active={active}
-          onClick={handleClick}
           downlighted={!whitelisted}
           icon={
             whitelisted ? undefined : published ? "fa-rocket" : "fa-eye-slash"
@@ -319,7 +311,7 @@ export const Game = ({
           gameColor={game?.color}
           className="grow rounded"
         />
-      </div>
+      </Link>
       {game && (admin || owner) && (
         <Select>
           <div className="flex justify-end items-center self-center">

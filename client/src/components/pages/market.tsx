@@ -12,7 +12,7 @@ import {
   VerifiedIcon,
 } from "@cartridge/ui";
 import { ArcadeTabs } from "../modules";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 import arcade from "@/assets/arcade-logo.png";
@@ -36,13 +36,11 @@ export function MarketPage() {
     return tab;
   }, [tab]);
 
-  const navigate = useNavigate();
   const { trackEvent, events } = useAnalytics();
 
   const { location } = useRouterState();
   const handleClick = useCallback(
     (value: string) => {
-      // Track marketplace tab switch
       trackEvent(events.MARKETPLACE_TAB_SWITCHED, {
         from_tab: tab || "items",
         to_tab: value,
@@ -58,12 +56,12 @@ export function MarketPage() {
       }
       segments.push(value as TabValue);
       const target = joinPaths(...segments);
-      navigate({ to: target || "/" });
+      window.history.pushState({}, "", target || "/");
     },
-    [location.pathname, navigate],
+    [location.pathname, tab, collectionAddress, props.name, trackEvent, events],
   );
 
-  const handleClose = useCallback(() => {
+  const closeTarget = useMemo(() => {
     const segments = location.pathname.split("/").filter(Boolean);
     const collectionIndex = segments.lastIndexOf("collection");
     if (collectionIndex !== -1) {
@@ -74,19 +72,18 @@ export function MarketPage() {
       segments.pop();
     }
     segments.push("marketplace");
-    const target = joinPaths(...segments);
-    navigate({ to: target || "/" });
-  }, [location.pathname, navigate]);
+    return joinPaths(...segments) || "/";
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && handleClose) {
-        handleClose();
+      if (event.key === "Escape") {
+        window.location.href = closeTarget;
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose]);
+  }, [closeTarget]);
 
   return (
     <>
@@ -115,7 +112,7 @@ export function MarketPage() {
         </div>
       </div>
       <div className="absolute flex flex-col-reverse lg:flex-row gap-3 top-3 right-3 lg:top-6 lg:right-6">
-        <CloseButton handleClose={handleClose} />
+        <CloseButton closeTarget={closeTarget} />
       </div>
       <ArcadeTabs
         order={TABS_ORDER}
@@ -147,15 +144,16 @@ export function MarketPage() {
   );
 }
 
-function CloseButton({ handleClose }: { handleClose: () => void }) {
+function CloseButton({ closeTarget }: { closeTarget: string }) {
   return (
-    <Button
-      variant="secondary"
-      size="icon"
-      onClick={handleClose}
-      className="bg-background-200 hover:bg-background-300 h-9 w-9 rounded-full"
-    >
-      <TimesIcon size="sm" />
-    </Button>
+    <Link to={closeTarget}>
+      <Button
+        variant="secondary"
+        size="icon"
+        className="bg-background-200 hover:bg-background-300 h-9 w-9 rounded-full"
+      >
+        <TimesIcon size="sm" />
+      </Button>
+    </Link>
   );
 }

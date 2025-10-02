@@ -13,6 +13,14 @@ import { getChecksumAddress } from "starknet";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchTokenImage } from "@/hooks/fetcher-utils";
 
+export type EnrichedTokenContract = TokenContract & {
+  totalSupply: bigint;
+  token_id: string | null;
+  project: string;
+  image: string;
+  contract_type: string;
+};
+
 export const tokenContractsCollection = createCollection(
   queryCollectionOptions({
     queryKey: queryKeys.tokens.collections,
@@ -59,6 +67,7 @@ export const tokenContractsCollection = createCollection(
             DEFAULT_PROJECT,
             false,
           );
+          const contractType = (contract as any).contract_type ?? "ERC721";
           return {
             ...enrichedContract,
             contract_address: getChecksumAddress(contract.contract_address),
@@ -67,6 +76,7 @@ export const tokenContractsCollection = createCollection(
             token_id: enrichedContract.token_id ?? null,
             project: DEFAULT_PROJECT,
             image,
+            contract_type: contractType as string,
           };
         }),
       );

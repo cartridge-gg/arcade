@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { TabsContent, Thumbnail, type TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { LeaderboardScene } from "../scenes/leaderboard";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
 import { Socials } from "@cartridge/arcade";
 import { ArcadeTabs } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
@@ -20,7 +20,6 @@ export function GamePage() {
   const { game, edition, tab } = useProject();
   const { isMobile } = useDevice();
 
-  const navigate = useNavigate();
   const { location } = useRouterState();
   const handleClick = useCallback(
     (value: string) => {
@@ -32,9 +31,9 @@ export function GamePage() {
       }
       segments.push(value as TabValue);
       const target = joinPaths(...segments);
-      navigate({ to: target || "/" });
+      window.history.pushState({}, "", target || "/");
     },
-    [location.pathname, navigate],
+    [location.pathname],
   );
 
   const order: TabValue[] = useMemo(() => {

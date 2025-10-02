@@ -1,10 +1,10 @@
 import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { joinPaths } from "@/helpers";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { joinPaths, resizeImage } from "@/helpers";
 import type {
   CollectionEditionModel,
   EditionModel,
@@ -98,7 +98,6 @@ function Item({
 }) {
   const { orders, sales } = useMarketplace();
 
-  const navigate = useNavigate();
   const { location } = useRouterState();
 
   const listingCount = useMemo(() => {
@@ -169,7 +168,7 @@ function Item({
     return { game, edition };
   }, [collectionAddress, editions]);
 
-  const handleClick = useCallback(() => {
+  const target = useMemo(() => {
     let pathname = location.pathname;
     pathname = pathname.replace(/\/game\/[^/]+/, "");
     pathname = pathname.replace(/\/edition\/[^/]+/, "");
@@ -190,23 +189,22 @@ function Item({
     } else {
       pathname = joinPaths(pathname, `/collection/${address}`);
     }
-    navigate({ to: pathname || "/" });
-  }, [collectionAddress, location, navigate, game, edition]);
+    return pathname || "/";
+  }, [collectionAddress, location.pathname, game, edition]);
 
   return (
-    <div className="w-full group select-none">
+    <Link to={target} className="w-full group select-none">
       <CollectibleCard
         title={collectionName}
         image={resizeImage(collectionImage, 300, 300) ?? collectionImage}
         totalCount={collectionTotalSupply as unknown as number}
         selectable={false}
         listingCount={listingCount}
-        onClick={handleClick}
         lastSale={lastSale ?? null}
         price={price ?? null}
         className={"cursor-pointer"}
       />
-    </div>
+    </Link>
   );
 }
 

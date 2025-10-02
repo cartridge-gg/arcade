@@ -13,7 +13,7 @@ import {
 } from "@cartridge/ui";
 import { ActivityScene } from "../scenes/activity";
 import { ArcadeTabs } from "../modules";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useUsername, useUsernames } from "@/hooks/account";
 import { useAddress } from "@/hooks/address";
 import AchievementPlayerHeader from "../modules/player-header";
@@ -57,7 +57,6 @@ export function PlayerPage() {
     return tab;
   }, [tab, order]);
 
-  const navigate = useNavigate();
   const { location } = useRouterState();
   const handleClick = useCallback(
     (value: string) => {
@@ -69,19 +68,18 @@ export function PlayerPage() {
       }
       segments.push(value as TabValue);
       const target = joinPaths(...segments);
-      navigate({ to: target || "/" });
+      window.history.pushState({}, "", target || "/");
     },
-    [location.pathname, navigate, order],
+    [location.pathname, order],
   );
 
-  const handleClose = useCallback(() => {
+  const closeTarget = useMemo(() => {
     const segments = location.pathname.split("/").filter(Boolean);
     const playerIndex = segments.indexOf("player");
     const baseSegments =
       playerIndex === -1 ? segments : segments.slice(0, playerIndex);
-    const target = baseSegments.length ? joinPaths(...baseSegments) : "/";
-    navigate({ to: target });
-  }, [location.pathname, navigate]);
+    return baseSegments.length ? joinPaths(...baseSegments) : "/";
+  }, [location.pathname]);
 
   const { rank, points } = useMemo(() => {
     if (edition) {
@@ -202,13 +200,13 @@ export function PlayerPage() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && handleClose) {
-        handleClose();
+      if (event.key === "Escape") {
+        window.location.href = closeTarget;
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose]);
+  }, [closeTarget]);
 
   return (
     <>
@@ -243,7 +241,7 @@ export function PlayerPage() {
             handleFollow={() => handleFollow(following, address)}
           />
         )}
-        <CloseButton handleClose={handleClose} />
+        <CloseButton closeTarget={closeTarget} />
       </div>
       <ArcadeTabs
         order={order}
@@ -285,16 +283,17 @@ export function PlayerPage() {
   );
 }
 
-function CloseButton({ handleClose }: { handleClose: () => void }) {
+function CloseButton({ closeTarget }: { closeTarget: string }) {
   return (
-    <Button
-      variant="secondary"
-      size="icon"
-      onClick={handleClose}
-      className="bg-background-200 hover:bg-background-300 h-9 w-9 rounded-full"
-    >
-      <TimesIcon size="sm" />
-    </Button>
+    <Link to={closeTarget}>
+      <Button
+        variant="secondary"
+        size="icon"
+        className="bg-background-200 hover:bg-background-300 h-9 w-9 rounded-full"
+      >
+        <TimesIcon size="sm" />
+      </Button>
+    </Link>
   );
 }
 
