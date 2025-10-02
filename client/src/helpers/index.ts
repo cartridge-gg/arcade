@@ -50,3 +50,5 @@ export const joinPaths = (...parts: string[]) => {
       .join("/")
   );
 };
+
+export { resizeImage } from "./image";
