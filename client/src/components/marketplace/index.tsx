@@ -4,7 +4,7 @@ import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useLocation, useNavigate } from "react-router-dom";
-import { joinPaths } from "@/helpers";
+import { joinPaths, resizeImage } from "@/helpers";
 import type {
   CollectionEditionModel,
   EditionModel,
@@ -197,7 +197,7 @@ function Item({
     <div className="w-full group select-none">
       <CollectibleCard
         title={collectionName}
-        image={collectionImage}
+        image={resizeImage(collectionImage, 300, 300) ?? collectionImage}
         totalCount={collectionTotalSupply as unknown as number}
         selectable={false}
         listingCount={listingCount}
