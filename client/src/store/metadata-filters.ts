@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { MetadataFilterStore } from "@/types/metadata-filter.types";
+import type { MetadataFilterStore } from "@/types/metadata-filter.types";
 import { applyFilters, precomputeFilterData } from "@/utils/metadata-indexer";
 
 export const useMetadataFilterStore = create<MetadataFilterStore>(

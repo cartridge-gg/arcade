@@ -1,4 +1,4 @@
-import { byteArray, ByteArray } from "starknet";
+import { byteArray, type ByteArray } from "starknet";
 
 interface Attribute {
   trait_type: string;
@@ -31,9 +31,12 @@ export class Attributes {
       const json = JSON.parse(value || "[]");
       const array = Array.isArray(json) ? json : [json];
       return new Attributes({
-        color: array.find((item: Attribute) => item.trait_type === "color")?.value,
-        preset: array.find((item: Attribute) => item.trait_type === "preset")?.value,
-        game: array.find((item: Attribute) => item.trait_type === "game")?.value,
+        color: array.find((item: Attribute) => item.trait_type === "color")
+          ?.value,
+        preset: array.find((item: Attribute) => item.trait_type === "preset")
+          ?.value,
+        game: array.find((item: Attribute) => item.trait_type === "game")
+          ?.value,
       });
     } catch (error: unknown) {
       console.error("Error parsing attributes:", error);
@@ -44,7 +47,8 @@ export class Attributes {
   compile(): ByteArray {
     const attributes: Attribute[] = [];
     if (this.color) attributes.push({ trait_type: "color", value: this.color });
-    if (this.preset) attributes.push({ trait_type: "preset", value: this.preset });
+    if (this.preset)
+      attributes.push({ trait_type: "preset", value: this.preset });
     if (this.game) attributes.push({ trait_type: "game", value: this.game });
     return byteArray.byteArrayFromString(JSON.stringify(attributes));
   }

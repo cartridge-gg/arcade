@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import Details from "./details";
 import Media from "./media";
 import Metrics from "./metrics";
-import { EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import GameSocials from "../modules/game-socials";
 
 interface AboutProps {

@@ -6,9 +6,9 @@ import {
   XIcon,
 } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { SquareArrowOutUpRightIcon } from "lucide-react";
-import { HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface GameSocialWebsiteProps
@@ -33,6 +33,7 @@ export const GameSocialWebsite = ({ website }: GameSocialWebsiteProps) => {
       target="_blank"
       onClick={handleClick}
       className="flex items-center rounded-full p-2 cursor-pointer text-spacer-100 bg-primary hover:bg-primary hover:opacity-80 justify-center lg:px-4 py-2.5"
+      rel="noreferrer"
     >
       <PlayIcon size="sm" />
       <p className="px-0.5 truncate max-w-32">Play</p>

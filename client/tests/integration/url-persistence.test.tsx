@@ -3,7 +3,7 @@ import { describe, it, expect } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Items } from '@/components/items';
-import { EditionModel } from '@cartridge/arcade';
+import type { EditionModel } from '@cartridge/arcade';
 import { createMockTokenCollection } from '../setup/metadata-filter.setup';
 
 jest.mock('@/hooks/marketplace-tokens-fetcher', () => ({
@@ -47,11 +47,11 @@ describe('URL Persistence Integration', () => {
       }
 
       const filtered = tokens.filter(token => {
-        if (!activeFilters['Rarity']) return true;
+        if (!activeFilters.Rarity) return true;
         const rarity = token.metadata?.attributes?.find(
           attr => attr.trait_type === 'Rarity'
         )?.value;
-        return activeFilters['Rarity'].has(rarity);
+        return activeFilters.Rarity.has(rarity);
       });
 
       return {

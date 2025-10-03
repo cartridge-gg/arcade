@@ -1,7 +1,7 @@
 import { NAMESPACE } from "../../constants";
 import { shortString, getChecksumAddress } from "starknet";
 import type { SchemaType } from "../../bindings";
-import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
+import { MemberClause, type ParsedEntity } from "@dojoengine/sdk";
 import { Config } from "../../classes/config";
 import { Attributes, Properties, Socials } from "../../classes";
 
@@ -60,12 +60,16 @@ export class EditionModel {
     if (!model) return EditionModel.default(identifier);
     const id = Number(model.id);
     const worldAddress = getChecksumAddress(model.world_address);
-    const namespace = shortString.decodeShortString(`0x${BigInt(model.namespace).toString(16)}`);
+    const namespace = shortString.decodeShortString(
+      `0x${BigInt(model.namespace).toString(16)}`,
+    );
     const published = !!model.published;
     const whitelisted = !!model.whitelisted;
     const priority = Number(model.priority);
     const gameId = Number(model.game_id);
-    const config = Config.from(model.config.replace(`"{`, `{`).replace(`}"`, `}`));
+    const config = Config.from(
+      model.config.replace('"{', "{").replace('}"', "}"),
+    );
     const color = model.color;
     const image = model.image;
     const image_data = model.image_data;
@@ -163,7 +167,10 @@ export class EditionModel {
 
 export const Edition = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return EditionModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
+    return EditionModel.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME],
+    );
   },
 
   getModelName: () => {
@@ -171,17 +178,54 @@ export const Edition = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${Edition.getModelName()}`, "world_address", "Neq", "0x0");
+    return MemberClause(
+      `${NAMESPACE}-${Edition.getModelName()}`,
+      "world_address",
+      "Neq",
+      "0x0",
+    );
   },
 
   getMethods: () => [
-    { name: "register_edition", entrypoint: "register_edition", description: "Register an edition." },
-    { name: "update_edition", entrypoint: "update_edition", description: "Update edition." },
-    { name: "prioritize_edition", entrypoint: "prioritize_edition", description: "Set edition priority." },
-    { name: "publish_edition", entrypoint: "publish_edition", description: "Publish edition." },
-    { name: "hide_edition", entrypoint: "hide_edition", description: "Hide edition." },
-    { name: "whitelist_edition", entrypoint: "whitelist_edition", description: "Whitelist edition." },
-    { name: "blacklist_edition", entrypoint: "blacklist_edition", description: "Blacklist edition." },
-    { name: "remove_edition", entrypoint: "remove_edition", description: "Remove edition." },
+    {
+      name: "register_edition",
+      entrypoint: "register_edition",
+      description: "Register an edition.",
+    },
+    {
+      name: "update_edition",
+      entrypoint: "update_edition",
+      description: "Update edition.",
+    },
+    {
+      name: "prioritize_edition",
+      entrypoint: "prioritize_edition",
+      description: "Set edition priority.",
+    },
+    {
+      name: "publish_edition",
+      entrypoint: "publish_edition",
+      description: "Publish edition.",
+    },
+    {
+      name: "hide_edition",
+      entrypoint: "hide_edition",
+      description: "Hide edition.",
+    },
+    {
+      name: "whitelist_edition",
+      entrypoint: "whitelist_edition",
+      description: "Whitelist edition.",
+    },
+    {
+      name: "blacklist_edition",
+      entrypoint: "blacklist_edition",
+      description: "Blacklist edition.",
+    },
+    {
+      name: "remove_edition",
+      entrypoint: "remove_edition",
+      description: "Remove edition.",
+    },
   ],
 };

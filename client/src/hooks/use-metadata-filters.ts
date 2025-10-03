@@ -7,7 +7,7 @@ import {
   serializeFiltersToURL,
   parseFiltersFromURL,
 } from "@/utils/metadata-indexer";
-import {
+import type {
   UseMetadataFiltersInput,
   UseMetadataFiltersReturn,
   ActiveFilters,
@@ -31,7 +31,11 @@ export function useMetadataFilters({
           payload[key] = value;
         }
       });
-      navigate({ to: location.pathname, search: payload, replace: options?.replace });
+      navigate({
+        to: location.pathname,
+        search: payload,
+        replace: options?.replace,
+      });
     },
     [navigate, location.pathname],
   );
@@ -66,9 +70,8 @@ export function useMetadataFilters({
     if (tokens.length > 1000 && "requestIdleCallback" in window) {
       const handle = window.requestIdleCallback(buildIndex);
       return () => window.cancelIdleCallback(handle);
-    } else {
-      buildIndex();
     }
+    buildIndex();
   }, [tokens, collectionAddress, enabled, setMetadataIndex]);
 
   // Initialize filters from URL on mount - use ref to track if already initialized

@@ -199,7 +199,8 @@ export const Game = ({
         targetSegments = playerPath;
       }
     } else {
-      const gameName = game?.name.toLowerCase().replace(/ /g, "-") || id.toString();
+      const gameName =
+        game?.name.toLowerCase().replace(/ /g, "-") || id.toString();
       targetSegments = ["game", gameName];
 
       if (hasPlayer) {

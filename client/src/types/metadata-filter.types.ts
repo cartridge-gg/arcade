@@ -1,4 +1,4 @@
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 
 // Core metadata structures
 export interface MetadataIndex {

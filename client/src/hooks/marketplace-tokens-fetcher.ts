@@ -1,5 +1,9 @@
 import { fetchToriis } from "@cartridge/arcade";
-import { AttributeFilter, Token, ToriiClient } from "@dojoengine/torii-wasm";
+import type {
+  AttributeFilter,
+  Token,
+  ToriiClient,
+} from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getChecksumAddress } from "starknet";
 import { useMarketplaceTokensStore } from "@/store";

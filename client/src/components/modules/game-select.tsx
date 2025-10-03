@@ -1,7 +1,7 @@
 import { SparklesIcon, Thumbnail } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { type HTMLAttributes, useState } from "react";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { useProject } from "@/hooks/project";
 
 interface ArcadeGameSelectProps

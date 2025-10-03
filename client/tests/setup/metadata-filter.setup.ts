@@ -1,5 +1,5 @@
-import { Token } from "@dojoengine/torii-wasm";
-import { MetadataIndex, ActiveFilters, TokenAttribute } from "@/types/metadata-filter.types";
+import type { Token } from "@dojoengine/torii-wasm";
+import type { MetadataIndex, ActiveFilters, TokenAttribute } from "@/types/metadata-filter.types";
 
 // Mock token factory
 export function createMockToken(

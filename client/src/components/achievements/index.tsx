@@ -83,7 +83,7 @@ export function Achievements({
       );
       if (!ownership) return;
       values[edition.id] =
-        gameOwnership.accountAddress == ownership.accountAddress;
+        gameOwnership.accountAddress === ownership.accountAddress;
     });
     return values;
   }, [gameEditions, game]);

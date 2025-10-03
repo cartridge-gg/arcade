@@ -1,5 +1,5 @@
 import { cartridgeTWPreset } from "@cartridge/ui/preset";
-import { Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
 const config = {
   content: [

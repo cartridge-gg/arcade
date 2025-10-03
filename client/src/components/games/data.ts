@@ -62,8 +62,8 @@ export const data = {
     videos: rawData["evolute-duel"].videos.join("\n"),
   },
   jokersofneondev: {
-    ...rawData["jokersofneondev"],
-    images: rawData["jokersofneondev"].images.join("\n"),
-    videos: rawData["jokersofneondev"].videos.join("\n"),
+    ...rawData.jokersofneondev,
+    images: rawData.jokersofneondev.images.join("\n"),
+    videos: rawData.jokersofneondev.videos.join("\n"),
   },
 };

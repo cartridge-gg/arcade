@@ -9,9 +9,13 @@
     "preview": "vite preview",
     "format": "biome format --fix src",
     "format:check": "biome format src",
-    "format:ts": "biome format --fix src",
-    "format:check:ts": "biome format src",
-    "type:check": "tsc -b"
+    "format:ts": "pnpm format",
+    "format:check:ts": "pnpm format:check",
+    "type:check": "tsc -b",
+    "lint": "biome lint --fix .",
+    "lint:check": "biome lint .",
+    "lint:ts": "pnpm lint",
+    "lint:check:ts": "pnpm lint:check"
   },
   "dependencies": {
     "@cartridge/arcade": "workspace:*",

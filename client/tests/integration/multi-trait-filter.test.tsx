@@ -3,7 +3,7 @@ import { describe, it, expect } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Items } from '@/components/items';
-import { EditionModel } from '@cartridge/arcade';
+import type { EditionModel } from '@cartridge/arcade';
 import { createMockTokenCollection } from '../setup/metadata-filter.setup';
 
 jest.mock('@/hooks/marketplace-tokens-fetcher', () => ({

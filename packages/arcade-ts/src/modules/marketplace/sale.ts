@@ -45,7 +45,14 @@ export class SaleEvent {
 
   static default(identifier: string) {
     const zero = getChecksumAddress("0x0");
-    return new SaleEvent(identifier, 0, OrderModel.default(identifier), zero, zero, 0);
+    return new SaleEvent(
+      identifier,
+      0,
+      OrderModel.default(identifier),
+      zero,
+      zero,
+      0,
+    );
   }
 
   static isType(model: MarketplaceModel): boolean {
@@ -57,13 +64,23 @@ export class SaleEvent {
   }
 
   clone(): SaleEvent {
-    return new SaleEvent(this.identifier, this.id, this.order.clone(), this.from, this.to, this.time);
+    return new SaleEvent(
+      this.identifier,
+      this.id,
+      this.order.clone(),
+      this.from,
+      this.to,
+      this.time,
+    );
   }
 }
 
 export const Sale = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return SaleEvent.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME] as SaleInterface);
+    return SaleEvent.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME] as SaleInterface,
+    );
   },
 
   getModelName: () => {

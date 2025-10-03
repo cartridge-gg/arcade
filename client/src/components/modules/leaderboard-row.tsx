@@ -11,7 +11,7 @@ import AchievementFollowTag from "./follow-tag";
 import { Link } from "@tanstack/react-router";
 
 export interface LeaderboardRowProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onClick'> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onClick"> {
   pins: { id: string; icon: string }[];
   rank: number;
   name: string;

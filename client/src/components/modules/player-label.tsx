@@ -62,7 +62,6 @@ export const AchievementPlayerLabel = ({
         return <SilverTagIcon size="default" className="min-h-6 min-w-6" />;
       case "bronze":
         return <BronzeTagIcon size="default" className="min-h-6 min-w-6" />;
-      case "default":
       default:
         return null;
     }

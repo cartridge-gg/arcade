@@ -1,14 +1,28 @@
-import { AndComposeClause, KeysClause, MemberClause, ToriiQueryBuilder } from "@dojoengine/sdk";
+import {
+  AndComposeClause,
+  KeysClause,
+  MemberClause,
+  ToriiQueryBuilder,
+} from "@dojoengine/sdk";
 import { ModelsMapping } from "../bindings";
 import { addAddressPadding, type BigNumberish } from "starknet";
 import { NAMESPACE } from "../constants";
 
-export function getTokenMetadataQuery(identity: string, collectionAddress: string, tokenId: BigNumberish) {
+export function getTokenMetadataQuery(
+  identity: string,
+  collectionAddress: string,
+  tokenId: BigNumberish,
+) {
   return new ToriiQueryBuilder()
     .withClause(
       KeysClause(
         [ModelsMapping.MetadataAttribute],
-        [addAddressPadding(identity), addAddressPadding(collectionAddress), tokenId.toString(), undefined],
+        [
+          addAddressPadding(identity),
+          addAddressPadding(collectionAddress),
+          tokenId.toString(),
+          undefined,
+        ],
         "FixedLen",
       ).build(),
     )
@@ -16,12 +30,21 @@ export function getTokenMetadataQuery(identity: string, collectionAddress: strin
     .addOrderBy("index", "Asc");
 }
 
-export function getCollectionMetadataQuery(identity: string, collectionAddress: string) {
+export function getCollectionMetadataQuery(
+  identity: string,
+  collectionAddress: string,
+) {
   return new ToriiQueryBuilder()
     .withClause(
       KeysClause(
         [ModelsMapping.MetadataAttribute],
-        [addAddressPadding(identity), addAddressPadding(collectionAddress), undefined, undefined, undefined],
+        [
+          addAddressPadding(identity),
+          addAddressPadding(collectionAddress),
+          undefined,
+          undefined,
+          undefined,
+        ],
         "FixedLen",
       ).build(),
     )
@@ -30,29 +53,52 @@ export function getCollectionMetadataQuery(identity: string, collectionAddress: 
     .withLimit(100000);
 }
 
-export function getMetadataByTraitQuery(identity: string, collectionAddress: string, traitType: string) {
+export function getMetadataByTraitQuery(
+  identity: string,
+  collectionAddress: string,
+  traitType: string,
+) {
   return new ToriiQueryBuilder()
     .withClause(
       AndComposeClause([
         KeysClause(
           [ModelsMapping.MetadataAttribute],
-          [addAddressPadding(identity), addAddressPadding(collectionAddress), undefined, undefined],
+          [
+            addAddressPadding(identity),
+            addAddressPadding(collectionAddress),
+            undefined,
+            undefined,
+          ],
           "FixedLen",
         ),
-        MemberClause(ModelsMapping.MetadataAttribute, "trait_type", "Eq", traitType),
+        MemberClause(
+          ModelsMapping.MetadataAttribute,
+          "trait_type",
+          "Eq",
+          traitType,
+        ),
       ]).build(),
     )
     .withEntityModels([ModelsMapping.MetadataAttribute])
     .addOrderBy("token_id", "Asc");
 }
 
-export function getMetadataByValueQuery(identity: string, collectionAddress: string, value: string) {
+export function getMetadataByValueQuery(
+  identity: string,
+  collectionAddress: string,
+  value: string,
+) {
   return new ToriiQueryBuilder()
     .withClause(
       AndComposeClause([
         KeysClause(
           [ModelsMapping.MetadataAttribute],
-          [addAddressPadding(identity), addAddressPadding(collectionAddress), undefined, undefined],
+          [
+            addAddressPadding(identity),
+            addAddressPadding(collectionAddress),
+            undefined,
+            undefined,
+          ],
           "FixedLen",
         ),
         MemberClause(ModelsMapping.MetadataAttribute, "value", "Eq", value),
@@ -69,7 +115,12 @@ export function subscribeToMetadataUpdatesClause(
 ) {
   return KeysClause(
     [ModelsMapping.MetadataAttribute],
-    [addAddressPadding(identity), addAddressPadding(collectionAddress), tokenId?.toString(), undefined],
+    [
+      addAddressPadding(identity),
+      addAddressPadding(collectionAddress),
+      tokenId?.toString(),
+      undefined,
+    ],
   ).build();
 }
 
@@ -86,7 +137,9 @@ export type CollectionMetadataUI = {
   tokens: TokenMetadataUI[];
 };
 
-export function transformMetadataForUI(metadataEntities: any[]): TokenMetadataUI[] {
+export function transformMetadataForUI(
+  metadataEntities: any[],
+): TokenMetadataUI[] {
   const tokenMap = new Map<string, TokenMetadataUI>();
 
   for (const entity of metadataEntities) {
@@ -111,7 +164,9 @@ export function transformMetadataForUI(metadataEntities: any[]): TokenMetadataUI
     }
   }
 
-  return Array.from(tokenMap.values()).sort((a, b) => (BigInt(a.tokenId) > BigInt(b.tokenId) ? 1 : -1));
+  return Array.from(tokenMap.values()).sort((a, b) =>
+    BigInt(a.tokenId) > BigInt(b.tokenId) ? 1 : -1,
+  );
 }
 
 export function transformCollectionMetadataForUI(
@@ -130,7 +185,10 @@ export function filterMetadataByTraits(
 ): TokenMetadataUI[] {
   return metadata.filter((token) => {
     return traitFilters.every((filter) =>
-      token.attributes.some((attr) => attr.traitType === filter.traitType && attr.value === filter.value),
+      token.attributes.some(
+        (attr) =>
+          attr.traitType === filter.traitType && attr.value === filter.value,
+      ),
     );
   });
 }
@@ -144,7 +202,9 @@ export type MetadataStatistic = {
   }>;
 };
 export type MetadataStatistics = MetadataStatistic[];
-export function getMetadataStatistics(metadata: TokenMetadataUI[]): MetadataStatistics {
+export function getMetadataStatistics(
+  metadata: TokenMetadataUI[],
+): MetadataStatistics {
   const traitStats = new Map<string, Map<string, number>>();
 
   for (const token of metadata) {

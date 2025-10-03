@@ -51,7 +51,10 @@ export class ModeratorModel {
 
 export const Moderator = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return ModeratorModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME] as ModeratorInterface);
+    return ModeratorModel.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME] as ModeratorInterface,
+    );
   },
 
   getModelName: () => {

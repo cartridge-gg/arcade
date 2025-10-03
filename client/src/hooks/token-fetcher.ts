@@ -32,7 +32,7 @@ function processTokensWithMetadata(
 
       processedTokens[checksumAddress] = {
         balance: {
-          amount: decimals > 0 ? balance / Math.pow(10, decimals) : balance,
+          amount: decimals > 0 ? balance / 10 ** decimals : balance,
           value: 0, // Will be calculated with price data
           change: 0, // Will be calculated with historical price data
         },

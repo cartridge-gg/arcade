@@ -68,7 +68,7 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
               collectionAddress={collection.contract_address}
               collectionName={collection.name}
               collectionImage={collection.image}
-              collectionTotalSupply={parseInt(collection.total_supply)}
+              collectionTotalSupply={Number.parseInt(collection.total_supply)}
               editions={editions as EditionModel[]}
               games={games as GameModel[]}
             />

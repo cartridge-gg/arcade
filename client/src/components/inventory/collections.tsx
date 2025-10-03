@@ -14,7 +14,7 @@ import { useUsername } from "@/hooks/account";
 import { joinPaths, resizeImage } from "@/helpers";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { TAB_SEGMENTS } from "@/hooks/project";
-import { type EnrichedTokenContract } from "@/collections";
+import type { EnrichedTokenContract } from "@/collections";
 import { useCollections } from "@/hooks/collections";
 import { getChecksumAddress } from "starknet";
 

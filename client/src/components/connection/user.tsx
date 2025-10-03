@@ -1,4 +1,4 @@
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { Button, SignOutIcon, Skeleton } from "@cartridge/ui";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { useCallback, useEffect } from "react";

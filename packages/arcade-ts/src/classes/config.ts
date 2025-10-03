@@ -15,7 +15,7 @@ export class Config {
 
   static from(value: string) {
     try {
-      const json = JSON.parse(value.replace(`"{`, `{`).replace(`}"`, `}`));
+      const json = JSON.parse(value.replace('"{', "{").replace('}"', "}"));
       return new Config(json.project, json.rpc, json.policies);
     } catch (error: unknown) {
       console.error("Error parsing config:", error);

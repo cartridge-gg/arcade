@@ -1,26 +1,39 @@
 import { initArcadeSDK } from "..";
-import { constants } from "starknet";
+import type { constants } from "starknet";
 import { Access, AccessModel } from "./access";
 import { Game, GameModel } from "./game";
 import { Edition, EditionModel } from "./edition";
-import { CollectionEdition, CollectionEditionModel } from "./collection-edition";
+import {
+  CollectionEdition,
+  CollectionEditionModel,
+} from "./collection-edition";
 import {
   ClauseBuilder,
-  ParsedEntity,
-  SDK,
-  StandardizedQueryResult,
-  SubscriptionCallbackArgs,
+  type ParsedEntity,
+  type SDK,
+  type StandardizedQueryResult,
+  type SubscriptionCallbackArgs,
   ToriiQueryBuilder,
-  ToriiResponse,
+  type ToriiResponse,
 } from "@dojoengine/sdk";
-import { SchemaType } from "../../bindings";
+import type { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { RegistryOptions, DefaultRegistryOptions } from "./options";
 import { Helpers } from "../../helpers";
 
 export * from "./policies";
-export { AccessModel, GameModel, EditionModel, CollectionEditionModel, RegistryOptions };
-export type RegistryModel = AccessModel | GameModel | EditionModel | CollectionEditionModel;
+export {
+  AccessModel,
+  GameModel,
+  EditionModel,
+  CollectionEditionModel,
+  RegistryOptions,
+};
+export type RegistryModel =
+  | AccessModel
+  | GameModel
+  | EditionModel
+  | CollectionEditionModel;
 
 export const Registry = {
   sdk: undefined as SDK<SchemaType> | undefined,
@@ -31,7 +44,12 @@ export const Registry = {
   },
 
   isEntityQueryable(options: RegistryOptions) {
-    return options.game || options.edition || options.access || options.collectionEdition;
+    return (
+      options.game ||
+      options.edition ||
+      options.access ||
+      options.collectionEdition
+    );
   },
 
   getEntityQuery: (options: RegistryOptions = DefaultRegistryOptions) => {
@@ -39,12 +57,18 @@ export const Registry = {
     if (options.access) keys.push(`${NAMESPACE}-${Access.getModelName()}`);
     if (options.game) keys.push(`${NAMESPACE}-${Game.getModelName()}`);
     if (options.edition) keys.push(`${NAMESPACE}-${Edition.getModelName()}`);
-    if (options.collectionEdition) keys.push(`${NAMESPACE}-${CollectionEdition.getModelName()}`);
+    if (options.collectionEdition)
+      keys.push(`${NAMESPACE}-${CollectionEdition.getModelName()}`);
     const clauses = new ClauseBuilder().keys(keys, []);
-    return new ToriiQueryBuilder<SchemaType>().withClause(clauses.build()).includeHashedKeys();
+    return new ToriiQueryBuilder<SchemaType>()
+      .withClause(clauses.build())
+      .includeHashedKeys();
   },
 
-  fetchEntities: async (callback: (models: RegistryModel[]) => void, options: RegistryOptions) => {
+  fetchEntities: async (
+    callback: (models: RegistryModel[]) => void,
+    options: RegistryOptions,
+  ) => {
     if (!Registry.sdk) return;
 
     const wrappedCallback = async (entities?: ToriiResponse<SchemaType>) => {
@@ -58,7 +82,10 @@ export const Registry = {
           }
           if (entity.models[NAMESPACE][Game.getModelName()]) {
             const game = Game.parse(entity as any);
-            game.image = await Helpers.getImage(game.image, game.properties.preset);
+            game.image = await Helpers.getImage(
+              game.image,
+              game.properties.preset,
+            );
             models.push(game);
           }
           if (entity.models[NAMESPACE][Edition.getModelName()]) {
@@ -81,9 +108,18 @@ export const Registry = {
     }
   },
 
-  subEntities: async (callback: (models: RegistryModel[]) => void, options: RegistryOptions) => {
+  subEntities: async (
+    callback: (models: RegistryModel[]) => void,
+    options: RegistryOptions,
+  ) => {
     if (!Registry.sdk) return;
-    const wrappedCallback = ({ data, error }: SubscriptionCallbackArgs<StandardizedQueryResult<SchemaType>, Error>) => {
+    const wrappedCallback = ({
+      data,
+      error,
+    }: SubscriptionCallbackArgs<
+      StandardizedQueryResult<SchemaType>,
+      Error
+    >) => {
       if (error) {
         console.error("Error subscribing to entities:", error);
         return;
@@ -103,7 +139,10 @@ export const Registry = {
         const edition = Edition.parse(entity as any);
         callback([edition]);
       }
-      if (!!entity.models[NAMESPACE]?.[CollectionEdition.getModelName()] || eraseable) {
+      if (
+        !!entity.models[NAMESPACE]?.[CollectionEdition.getModelName()] ||
+        eraseable
+      ) {
         const collectionEdition = CollectionEdition.parse(entity as any);
         callback([collectionEdition]);
       }
@@ -117,7 +156,10 @@ export const Registry = {
     Registry.unsubEntities = () => subscription.cancel();
   },
 
-  fetch: async (callback: (models: RegistryModel[]) => void, options: RegistryOptions = DefaultRegistryOptions) => {
+  fetch: async (
+    callback: (models: RegistryModel[]) => void,
+    options: RegistryOptions = DefaultRegistryOptions,
+  ) => {
     if (!Registry.sdk) {
       throw new Error("SDK not initialized");
     }
@@ -126,7 +168,10 @@ export const Registry = {
     }
   },
 
-  sub: async (callback: (models: RegistryModel[]) => void, options: RegistryOptions = DefaultRegistryOptions) => {
+  sub: async (
+    callback: (models: RegistryModel[]) => void,
+    options: RegistryOptions = DefaultRegistryOptions,
+  ) => {
     if (!Registry.sdk) {
       throw new Error("SDK not initialized");
     }

@@ -87,7 +87,13 @@ export const useProject = () => {
   const routerState = useRouterState();
   const search = useSearch({ strict: false });
 
-  const { game: gameParam, edition: editionParam, player: playerParam, collection: collectionParam, tab } = useMemo(
+  const {
+    game: gameParam,
+    edition: editionParam,
+    player: playerParam,
+    collection: collectionParam,
+    tab,
+  } = useMemo(
     () => parseRouteParams(routerState.location.pathname),
     [routerState.location.pathname],
   );
@@ -130,7 +136,9 @@ export const useProject = () => {
 
   const edition = useMemo(() => {
     if (!game || editions.length === 0) return undefined;
-    const gameEditions = editions.filter((candidate) => candidate.gameId === game.id);
+    const gameEditions = editions.filter(
+      (candidate) => candidate.gameId === game.id,
+    );
     if (gameEditions.length === 0) return undefined;
 
     if (!editionParam) {
@@ -148,7 +156,7 @@ export const useProject = () => {
   }, [game, editionParam, editions]);
 
   const player = useMemo(() => {
-    if (playerParam && playerParam.match(/^0x[0-9a-fA-F]+$/)) {
+    if (playerParam?.match(/^0x[0-9a-fA-F]+$/)) {
       try {
         return getChecksumAddress(playerParam);
       } catch (error) {

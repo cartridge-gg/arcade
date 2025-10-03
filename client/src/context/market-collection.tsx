@@ -1,7 +1,7 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 
 import { ArcadeContext } from "./arcade";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 
 export type Collection = Record<string, Token>;
 export type Collections = Record<string, Collection>;

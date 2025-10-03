@@ -1,6 +1,6 @@
 import { useEditionsMap } from "@/collections";
 import { fetchToriisStream } from "@cartridge/arcade";
-import { TokenBalance } from "@dojoengine/torii-wasm";
+import type { TokenBalance } from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getChecksumAddress } from "starknet";
 import { useMarketplaceTokensStore } from "@/store";
@@ -200,7 +200,7 @@ export function useMarketOwnersFetcher({
     useMarketplaceTokensStore.setState((state) => {
       const owners = { ...state.owners };
 
-      if (owners[project] && owners[project][address]) {
+      if (owners[project]?.[address]) {
         delete owners[project][address];
       }
 
@@ -219,7 +219,7 @@ export function useMarketOwnersFetcher({
   const fetchOwnersImpl = useCallback(
     async (
       strategy: FetchStrategy = FetchStrategy.INITIAL,
-      attemptNumber: number = 0,
+      attemptNumber = 0,
     ) => {
       const loadingState = getLoadingState(project[0], address);
       const now = Date.now();
@@ -302,13 +302,12 @@ export function useMarketOwnersFetcher({
                 isLoading: false,
               });
               break;
-            } else {
-              // Update cursor for incremental fetching
-              updateLoadingState(project[0], address, {
-                lastCursor: cursor,
-                totalCount: totalFetched,
-              });
             }
+            // Update cursor for incremental fetching
+            updateLoadingState(project[0], address, {
+              lastCursor: cursor,
+              totalCount: totalFetched,
+            });
           }
         },
       });
@@ -353,7 +352,7 @@ export function useMarketOwnersFetcher({
               setErrorMessage(
                 `Request failed. Retrying... (${attemptNumber}/${MAX_RETRY_ATTEMPTS})`,
               );
-              await sleep(RETRY_BASE_DELAY * Math.pow(2, attemptNumber - 1));
+              await sleep(RETRY_BASE_DELAY * 2 ** (attemptNumber - 1));
             }
             await fetchOwnersImpl(strategy, attemptNumber);
           },
@@ -385,7 +384,7 @@ export function useMarketOwnersFetcher({
   );
 
   const refetch = useCallback(
-    async (force: boolean = false) => {
+    async (force = false) => {
       if (force) {
         // Force full refetch by clearing owners and state
         clearOwners(project[0], address);

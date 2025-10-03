@@ -50,17 +50,13 @@ describe("torii-fetcher", () => {
 
     // Verify fetch was called with correct parameters
     expect(global.fetch).toHaveBeenCalledWith(
-      "https://api.cartridge.gg/x/arcade-blobarena/torii",
+      "https://api.cartridge.gg/x/arcade-blobarena/torii/sql",
       expect.objectContaining({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          sql: "SELECT * FROM ARCADE-Edition",
-          limit: 10,
-          cursor: undefined,
-        }),
+        body: "SELECT * FROM ARCADE-Edition",
       }),
     );
   });
@@ -147,11 +143,7 @@ describe("torii-fetcher", () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          body: JSON.stringify({
-            sql: "SELECT * FROM TestModel",
-            limit: 10,
-            cursor: "test-cursor",
-          }),
+          body: "SELECT * FROM TestModel",
         }),
       );
     });

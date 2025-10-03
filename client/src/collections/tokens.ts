@@ -8,7 +8,11 @@ import {
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { queryKeys } from "@/queries/keys";
 import { queryClient } from "@/queries";
-import { Token, TokenContract, ToriiClient } from "@dojoengine/torii-wasm";
+import {
+  type Token,
+  type TokenContract,
+  ToriiClient,
+} from "@dojoengine/torii-wasm";
 import { getChecksumAddress } from "starknet";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchTokenImage } from "@/hooks/fetcher-utils";

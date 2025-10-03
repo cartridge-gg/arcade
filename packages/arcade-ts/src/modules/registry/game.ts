@@ -1,6 +1,6 @@
 import { NAMESPACE } from "../../constants";
 import type { SchemaType } from "../../bindings";
-import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
+import { MemberClause, type ParsedEntity } from "@dojoengine/sdk";
 import { Attributes, Properties, Socials } from "../../classes";
 
 const MODEL_NAME = "Game";
@@ -128,7 +128,10 @@ export class GameModel {
 
 export const Game = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return GameModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
+    return GameModel.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME],
+    );
   },
 
   getModelName: () => {
@@ -136,16 +139,45 @@ export const Game = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${Game.getModelName()}`, "name", "Neq", "");
+    return MemberClause(
+      `${NAMESPACE}-${Game.getModelName()}`,
+      "name",
+      "Neq",
+      "",
+    );
   },
 
   getMethods: () => [
-    { name: "register_game", entrypoint: "register_game", description: "Register a game." },
-    { name: "update_game", entrypoint: "update_game", description: "Update a game." },
-    { name: "publish_game", entrypoint: "publish_game", description: "Publish a game." },
+    {
+      name: "register_game",
+      entrypoint: "register_game",
+      description: "Register a game.",
+    },
+    {
+      name: "update_game",
+      entrypoint: "update_game",
+      description: "Update a game.",
+    },
+    {
+      name: "publish_game",
+      entrypoint: "publish_game",
+      description: "Publish a game.",
+    },
     { name: "hide_game", entrypoint: "hide_game", description: "Hide a game." },
-    { name: "whitelist_game", entrypoint: "whitelist_game", description: "Whitelist a game." },
-    { name: "blacklist_game", entrypoint: "blacklist_game", description: "Blacklist a game." },
-    { name: "remove_game", entrypoint: "remove_game", description: "Remove a game." },
+    {
+      name: "whitelist_game",
+      entrypoint: "whitelist_game",
+      description: "Whitelist a game.",
+    },
+    {
+      name: "blacklist_game",
+      entrypoint: "blacklist_game",
+      description: "Blacklist a game.",
+    },
+    {
+      name: "remove_game",
+      entrypoint: "remove_game",
+      description: "Remove a game.",
+    },
   ],
 };

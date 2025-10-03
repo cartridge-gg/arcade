@@ -1,9 +1,9 @@
 import { useEditionsMap } from "@/collections";
-import { Contract, useMarketplaceStore } from "@/store";
+import { type Contract, useMarketplaceStore } from "@/store";
 import { fetchToriisStream } from "@cartridge/arcade";
 import { useEffect, useCallback, useRef } from "react";
 import { getChecksumAddress } from "starknet";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 import {
   useFetcherState,
   fetchTokenImage,
@@ -82,7 +82,7 @@ export function useMarketCollectionFetcher({
   );
 
   const fetchData = useCallback(
-    async (quickLoad: boolean = false) => {
+    async (quickLoad = false) => {
       if (projects.length === 0) return;
 
       startLoading();

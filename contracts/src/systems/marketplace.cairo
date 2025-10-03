@@ -82,7 +82,6 @@ pub mod Marketplace {
 
     // Dojo imports
 
-
     // Internal imports
 
     use arcade::constants::NAMESPACE;

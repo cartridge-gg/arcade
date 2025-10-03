@@ -4,7 +4,8 @@ export const getChainId = (rpc: string | undefined) => {
   if (!rpc) return undefined;
   if (rpc.includes("mainnet")) {
     return constants.StarknetChainId.SN_MAIN;
-  } else if (rpc.includes("testnet") || rpc.includes("sepolia")) {
+  }
+  if (rpc.includes("testnet") || rpc.includes("sepolia")) {
     return constants.StarknetChainId.SN_SEPOLIA;
   }
   return constants.StarknetChainId.SN_MAIN;
@@ -24,7 +25,7 @@ export const getDuration = (deltatime: number) => {
   if (state.days > 0) return `${state.days}d`;
   if (state.hours > 0) return `${state.hours}h`;
   if (state.minutes > 0) return `${state.minutes}m`;
-  return `< 1m`;
+  return "< 1m";
 };
 
 export const getTime = (timestamp: number) => {
@@ -42,13 +43,10 @@ export const getTime = (timestamp: number) => {
 };
 
 export const joinPaths = (...parts: string[]) => {
-  return (
-    "/" +
-    parts
-      .map((p) => p.replace(/^\/+|\/+$/g, "")) // trim leading/trailing slashes
-      .filter(Boolean)
-      .join("/")
-  );
+  return `/${parts
+    .map((p) => p.replace(/^\/+|\/+$/g, "")) // trim leading/trailing slashes
+    .filter(Boolean)
+    .join("/")}`;
 };
 
 export { resizeImage } from "./image";

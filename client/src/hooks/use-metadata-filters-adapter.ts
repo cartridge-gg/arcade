@@ -102,7 +102,7 @@ export function useMetadataFiltersAdapter() {
     return filteredTokens.filter((token) => {
       const tokenId = token.token_id?.toString();
       if (!tokenId) return false;
-      const tokenOrders = collectionOrders[parseInt(tokenId)];
+      const tokenOrders = collectionOrders[Number.parseInt(tokenId)];
       return !!(tokenOrders && tokenOrders.length > 0);
     });
   }, [filteredTokens, active, collectionOrders]);

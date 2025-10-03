@@ -25,10 +25,10 @@ import {
   OrderModel,
   ListingEvent,
   SaleEvent,
-  MarketplaceModel,
+  type MarketplaceModel,
   CategoryType,
   StatusType,
-  MarketplaceOptions,
+  type MarketplaceOptions,
   CollectionEditionModel,
 } from "@cartridge/arcade";
 import {
@@ -275,7 +275,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
 
   const handlePinEvent = useCallback((event: PinEvent) => {
     const playerId = getChecksumAddress(event.playerId);
-    if (event.time == 0) {
+    if (event.time === 0) {
       // Remove the achievement from the player's list
       setPins((prevPins) => {
         const achievementIds = prevPins[playerId] || [];
@@ -301,7 +301,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
   const handleFollowEvent = useCallback((event: FollowEvent) => {
     const follower = getChecksumAddress(event.follower);
     const followed = getChecksumAddress(event.followed);
-    if (event.time == 0) {
+    if (event.time === 0) {
       // Remove the follow
       setFollows((prevFollows) => {
         const followeds = prevFollows[follower] || [];
@@ -501,7 +501,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         results[collectionEdition.collection] = [];
       }
       results[collectionEdition.collection].push(
-        parseInt(collectionEdition.edition),
+        Number.parseInt(collectionEdition.edition),
       );
     }
     return results;

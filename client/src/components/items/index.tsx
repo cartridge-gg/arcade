@@ -9,18 +9,18 @@ import {
   Skeleton,
 } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 import { useMarketplace } from "@/hooks/marketplace";
 import {
-  FunctionAbi,
+  type FunctionAbi,
   getChecksumAddress,
-  InterfaceAbi,
-  RpcProvider,
+  type InterfaceAbi,
+  type RpcProvider,
 } from "starknet";
-import ControllerConnector from "@cartridge/connector/controller";
+import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
-import { OrderModel, SaleEvent } from "@cartridge/arcade";
+import type { OrderModel, SaleEvent } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
@@ -189,7 +189,7 @@ export function Items({
   const handlePurchase = useCallback(
     async (tokens: (Token & { orders: OrderModel[]; owner: string })[]) => {
       if (!isConnected || !connector) return;
-      const orders = tokens.map((token) => token.orders).flat();
+      const orders = tokens.flatMap((token) => token.orders);
       const contractAddresses = new Set(
         tokens.map((token) => token.contract_address),
       );
@@ -515,7 +515,7 @@ function Item({
 
   const lastSale = useMemo(() => {
     if (!token.token_id) return null;
-    const tokenId = parseInt(token.token_id.toString());
+    const tokenId = Number.parseInt(token.token_id.toString());
     const tokenSales = sales[tokenId];
     if (!tokenSales || Object.keys(tokenSales).length === 0) return null;
     const sale = Object.values(tokenSales).sort((a, b) => b.time - a.time)[0];

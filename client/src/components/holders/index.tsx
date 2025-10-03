@@ -1,7 +1,7 @@
 import { Empty, Skeleton, Button } from "@cartridge/ui";
 import { UserAvatar } from "../user/avatar";
 import { useMemo } from "react";
-import { EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";

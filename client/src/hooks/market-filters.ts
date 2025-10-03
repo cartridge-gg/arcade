@@ -2,8 +2,8 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { MarketFiltersContext } from "@/context/market-filters";
 import { useProject } from "./project";
 import { useBalances, useCollection } from "./market-collections";
-import { SearchResult } from "@cartridge/ui";
-import { OrderModel, Token } from "@cartridge/arcade";
+import type { SearchResult } from "@cartridge/ui";
+import type { OrderModel, Token } from "@cartridge/arcade";
 import { useMarketplace } from "./marketplace";
 import { getChecksumAddress } from "starknet";
 import { MetadataHelper } from "@/helpers/metadata";
@@ -60,7 +60,7 @@ export const useMarketFilters = () => {
   const accounts = useMemo(() => {
     if (!balances || balances.length === 0) return [];
     const owners = balances
-      .filter((balance) => parseInt(balance.balance, 16) > 0)
+      .filter((balance) => Number.parseInt(balance.balance, 16) > 0)
       .map((balance) => `0x${BigInt(balance.account_address).toString(16)}`);
     return Array.from(new Set(owners));
   }, [balances, collectionAddress]);

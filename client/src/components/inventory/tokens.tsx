@@ -139,7 +139,7 @@ function Item({
     if (preset) {
       options.push(`preset=${preset}`);
     } else {
-      options.push(`preset=cartridge`);
+      options.push("preset=cartridge");
     }
     const path = `account/${username}/inventory/token/${token.metadata.address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
     controller.openProfileAt(path);

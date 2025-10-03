@@ -1,6 +1,6 @@
-import { type EditionModel } from "@cartridge/arcade";
+import type { EditionModel } from "@cartridge/arcade";
 import { useState, useCallback, useRef } from "react";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 import { MetadataHelper } from "@/helpers/metadata";
 
 export type FetcherStatus = "idle" | "loading" | "success" | "error";
@@ -56,7 +56,7 @@ export function useFetcherState(): FetcherStateBase;
 export function useFetcherState(includeRetry: false): FetcherStateBase;
 export function useFetcherState(includeRetry: true): FetcherStateWithRetry;
 export function useFetcherState(
-  includeRetry: boolean = false,
+  includeRetry = false,
 ): FetcherStateBase | FetcherStateWithRetry {
   const [status, setStatus] = useState<FetcherStatus>("idle");
   const [isLoading, setIsLoading] = useState(false);
@@ -138,7 +138,7 @@ export function useFetcherState(
 export async function fetchTokenImage(
   token: Token,
   project: string,
-  useUnsafe: boolean = false,
+  useUnsafe = false,
 ): Promise<string> {
   const getToriiImage = useUnsafe
     ? MetadataHelper.unsafeGetToriiImage
@@ -190,7 +190,7 @@ export async function withRetry<T>(
         throw error;
       }
 
-      const delay = baseDelay * Math.pow(2, attempt);
+      const delay = baseDelay * 2 ** attempt;
       await sleep(delay);
     }
   }
