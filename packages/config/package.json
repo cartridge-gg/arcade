@@ -7,7 +7,9 @@
     "lint": "biome lint --fix .",
     "lint:check": "biome lint .",
     "format": "biome format --fix .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "format:ts": "biome format --fix .",
+    "format:check:ts": "biome format ."
   },
   "files": ["tsup.web.config.ts"],
   "keywords": [],

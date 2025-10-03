@@ -6,6 +6,8 @@
     "build:scarb": "sozo build",
     "format": "scarb fmt",
     "format:check": "scarb fmt --check",
+    "format:cairo": "scarb fmt",
+    "format:check:cairo": "scarb fmt --check",
     "test": "sozo test"
   },
   "author": "",

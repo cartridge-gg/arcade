@@ -42,6 +42,8 @@
     "info:version": "npm pkg get version | xargs",
     "format": "prettier --log-level log --write \"**/*.{ts,js,md,yml,json}\"",
     "format:check": "prettier --log-level log --check \"**/*.{ts,js,md,yml,json}\"",
+    "format:ts": "prettier --log-level log --write \"**/*.{ts,js,md,yml,json}\"",
+    "format:check:ts": "prettier --log-level log --check \"**/*.{ts,js,md,yml,json}\"",
     "ts:check": "tsc --noEmit --resolveJsonModule --project tsconfig.eslint.json",
     "ts:coverage": "type-coverage --at-least 95",
     "ts:coverage:report": "typescript-coverage-report"

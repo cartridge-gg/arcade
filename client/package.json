@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "format": "biome format --fix src",
     "format:check": "biome format src",
+    "format:ts": "biome format --fix src",
+    "format:check:ts": "biome format src",
     "type:check": "tsc -b"
   },
   "dependencies": {

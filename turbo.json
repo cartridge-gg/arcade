@@ -26,6 +26,10 @@
 		},
 		"format:check": {},
 		"format": {},
+		"format:check:ts": {},
+		"format:ts": {},
+		"format:check:cairo": {},
+		"format:cairo": {},
 		"test": {},
 		"test:watch": {
 			"persistent": true,

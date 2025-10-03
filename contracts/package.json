@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "## Account 1",
   "main": "index.js",
+  "scripts": {
+    "format:cairo": "scarb fmt",
+    "format:check:cairo": "scarb fmt --check"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

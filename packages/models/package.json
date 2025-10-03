@@ -13,7 +13,9 @@
     "scripts": {
       "gen:types": "sozo build --profile mainnet --typescript --bindings-output src",
       "build:ts": "tsup",
-      "prepare": "pnpm build:ts"
+      "prepare": "pnpm build:ts",
+      "format:cairo": "scarb fmt",
+      "format:check:cairo": "scarb fmt --check"
     },
     "dependencies": {
         "starknet": "catalog:",
