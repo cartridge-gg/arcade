@@ -2,8 +2,8 @@ import { useContext, useMemo } from "react";
 import { type Token, TokenContext } from "../context/token";
 import { useProject } from "./project";
 import { useCreditBalance } from "@cartridge/ui/utils";
-import { useUsername } from "./account";
 import { useAddress } from "./address";
+import { useAccountByAddress } from "@/collections";
 
 /**
  * Custom hook to access the Token context and account information.
@@ -36,10 +36,10 @@ export const useTokens = () => {
     );
   }, [allTokens, edition]);
 
-  const { username } = useUsername({ address });
+  const { data: account } = useAccountByAddress(address);
 
   const creditBalance = useCreditBalance({
-    username,
+    username: account?.username,
     interval: 30000,
   });
 

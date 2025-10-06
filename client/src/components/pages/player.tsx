@@ -14,7 +14,6 @@ import {
 import { ActivityScene } from "../scenes/activity";
 import { ArcadeTabs } from "../modules";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useUsername, useUsernames } from "@/hooks/account";
 import { useAddress } from "@/hooks/address";
 import AchievementPlayerHeader from "../modules/player-header";
 import { UserAvatar } from "../user/avatar";
@@ -26,6 +25,7 @@ import { toast } from "sonner";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 import { PositionsScene } from "../scenes/positions";
+import { useAccountByAddress, useAccountsByAddresses } from "@/collections";
 
 export function PlayerPage() {
   const { address, isSelf, self } = useAddress();
@@ -126,9 +126,7 @@ export function PlayerPage() {
       return { follower, followerCount, followingCount, intersection };
     }, [follows, address, self]);
 
-  const { usernames: followerUsernames } = useUsernames({
-    addresses: intersection,
-  });
+  const { data: followerUsernames } = useAccountsByAddresses(intersection);
 
   const followers = useMemo(() => {
     return followerUsernames
@@ -136,11 +134,11 @@ export function PlayerPage() {
       .filter((name) => !!name) as string[];
   }, [followerUsernames]);
 
-  const { username } = useUsername({ address });
+  const { data: username } = useAccountByAddress(address);
   const name = useMemo(() => {
     return (
       usernames[address] ||
-      username ||
+      username?.username ||
       `0x${BigInt(address).toString(16)}`.slice(0, 9)
     );
   }, [usernames, address, username]);

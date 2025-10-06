@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import React, { useCallback, useMemo } from "react";
 import { UserAvatar } from "./avatar";
-import { useUsername } from "@/hooks/account";
 import { AchievementPlayerBadge, SparklesIcon } from "@cartridge/ui";
 import { usePlayerStats } from "@/hooks/achievements";
 import { joinPaths } from "@/helpers";
@@ -9,6 +8,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/sidebar";
 import { useAccount } from "@starknet-react/core";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useAccountByAddress } from "@/collections";
 
 export const UserCard = React.forwardRef<
   HTMLAnchorElement,
@@ -26,13 +26,18 @@ const UserCardInner = (
 ) => {
   const { className, address, ref, ...rest } = props;
 
-  const { username } = useUsername({ address });
+  const { data: username } = useAccountByAddress(address);
   const { location } = useRouterState();
   const { close } = useSidebar();
   const { trackEvent, events } = useAnalytics();
 
   const Icon = useMemo(() => {
-    return <UserAvatar username={username} className="h-full w-full" />;
+    return (
+      <UserAvatar
+        username={username?.username ?? ""}
+        className="h-full w-full"
+      />
+    );
   }, [username]);
 
   const { earnings: totalEarnings } = usePlayerStats(address);
@@ -40,7 +45,7 @@ const UserCardInner = (
   const target = useMemo(() => {
     if (!username && !address) return "/";
     let pathname = location.pathname;
-    const playerName = `${!username ? address?.toLowerCase() : username.toLowerCase()}`;
+    const playerName = `${!username?.username ? address?.toLowerCase() : username.username.toLowerCase()}`;
     pathname = pathname.replace(/\/collection\/[^/]+/, "");
     pathname = pathname.replace(/\/player\/[^/]+/, "");
     pathname = pathname.replace(/\/tab\/[^/]+/, "");
@@ -52,7 +57,7 @@ const UserCardInner = (
   const handleClick = useCallback(() => {
     trackEvent(events.AUTH_USER_CARD_CLICKED, {
       profile_address: address,
-      profile_username: username || undefined,
+      profile_username: username?.username,
       from_page: location.pathname,
       total_points: totalEarnings,
     });
@@ -93,7 +98,7 @@ const UserCardInner = (
             className="!w-10 !h-10"
           />
           <p className="text-foreground-100 text-lg/6 font-semibold">
-            {username}
+            {username?.username}
           </p>
         </div>
         <div className="flex items-center gap-1 p-3">

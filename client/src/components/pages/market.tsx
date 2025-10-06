@@ -16,18 +16,18 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 import arcade from "@/assets/arcade-logo.png";
-import { useCollection } from "@/hooks/market-collections";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useTokenContract } from "@/collections";
 
 const TABS_ORDER = ["activity", "items", "holders"] as TabValue[];
 
 export function MarketPage() {
   const { game, edition, tab, collection: collectionAddress } = useProject();
-  const { collection } = useCollection(collectionAddress || "", 1);
+  const collection = useTokenContract(collectionAddress ?? "");
 
   const props = useMemo(() => {
-    if (!collection || collection.length === 0) return {};
-    const token = collection[0];
+    if (!collection) return {};
+    const token = collection;
     return { name: token.name };
   }, [collection]);
 

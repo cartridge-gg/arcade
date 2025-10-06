@@ -1,9 +1,14 @@
-import type { MetadataAttribute } from "@/context/market-filters";
 import type { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
 
 const JWT =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI3ZjhjN2JlYy00OGIwLTQ4ODQtOTllMS1lY2U2NTk4YTNjZWQiLCJlbWFpbCI6ImJhbDdoYXphckBwcm90b24ubWUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiNTgxNjFkM2ZkYjNlOTE5MGVlNjUiLCJzY29wZWRLZXlTZWNyZXQiOiJhNjk1MjFjMjYwZWQ4ODA2YjdlYTg1YmU2OWFlMGE5MTE0ZmQ1YmIyOTJiYzJjM2FhYWVmZDgxZjU0ZmFlN2ExIiwiZXhwIjoxNzc4MDc3MDE3fQ.vNU3I0QnD-D-jZChENS5mTFYNGjppU56IJv38K8X7gQ";
+
+export type MetadataAttribute = {
+  trait_type: string;
+  value: string;
+  tokens: string[];
+};
 
 export const MetadataHelper = {
   async check(url: string): Promise<boolean> {

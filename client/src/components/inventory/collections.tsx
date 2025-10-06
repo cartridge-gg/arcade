@@ -10,11 +10,10 @@ import { useAddress } from "@/hooks/address";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useUsername } from "@/hooks/account";
 import { joinPaths, resizeImage } from "@/helpers";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { TAB_SEGMENTS } from "@/hooks/project";
-import type { EnrichedTokenContract } from "@/collections";
+import { useAccountByAddress, type EnrichedTokenContract } from "@/collections";
 import { useCollections } from "@/hooks/collections";
 import { getChecksumAddress } from "starknet";
 
@@ -100,7 +99,7 @@ function Item({
     return Object.values(tokenOrders).length;
   }, [orders, address]);
 
-  const { username } = useUsername({ address });
+  const { data: username } = useAccountByAddress(address);
 
   const { location } = useRouterState();
 
@@ -161,7 +160,7 @@ function Item({
       } else {
         options.push("preset=cartridge");
       }
-      const path = `account/${username}/inventory/${subpath}/${collection.contract_address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+      const path = `account/${username.username}/inventory/${subpath}/${collection.contract_address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
       controller.openProfileAt(path);
     }
   }, [
@@ -194,7 +193,7 @@ function Item({
     return (
       <Link
         to={target}
-        search={{ filter: username.toLowerCase() }}
+        search={{ filter: username?.username.toLowerCase() }}
         className="w-full group select-none"
         onClick={handleClick}
       >
