@@ -4,7 +4,9 @@ import { useMemo } from "react";
 import type { EditionModel } from "@cartridge/arcade";
 import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
-import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
+import { useMetadataFilters } from "@/hooks/use-metadata-filters";
+import { useMarketplaceTokensStore } from "@/store";
+import { DEFAULT_PROJECT } from "@/constants";
 
 export const Holders = ({
   edition,
@@ -19,11 +21,15 @@ export const Holders = ({
       address: collectionAddress,
     });
 
-  const {
-    filteredTokens,
-    activeFilters,
-    resetSelected: clearAllFilters,
-  } = useMetadataFiltersAdapter();
+  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
+  const tokens = getTokens(DEFAULT_PROJECT, collectionAddress ?? "");
+  const { filteredTokens, activeFilters, clearAllFilters } = useMetadataFilters(
+    {
+      tokens: tokens || [],
+      collectionAddress: collectionAddress ?? "",
+      enabled: !!collectionAddress && !!tokens,
+    },
+  );
 
   // const navigate = useNavigate();
   // const location = useLocation();

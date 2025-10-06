@@ -24,7 +24,7 @@ import type { OrderModel, SaleEvent } from "@cartridge/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
-import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
+import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -76,16 +76,47 @@ export function Items({
 
   // Use the adapter hook which includes Buy Now/Show All functionality
   const {
-    // tokens,
-    filteredTokens,
+    filteredTokens: metadataFilteredTokens,
     activeFilters,
-    resetSelected: clearAllFilters,
-  } = useMetadataFiltersAdapter();
+    clearAllFilters,
+    statusFilter,
+  } = useMetadataFilters({
+    tokens: tokens || [],
+    collectionAddress,
+    enabled: !!collectionAddress && !!tokens,
+  });
 
   // Get marketplace orders for this collection
   const collectionOrders = useMemo(() => {
     return getCollectionOrders(collectionAddress);
   }, [getCollectionOrders, collectionAddress]);
+
+  const getOrdersForToken = useCallback(
+    (rawTokenId?: string | bigint) => {
+      if (!rawTokenId) return [];
+
+      const candidates = new Set<string>();
+      const tokenIdString = rawTokenId.toString();
+      candidates.add(tokenIdString);
+
+      try {
+        const numericId = BigInt(tokenIdString).toString();
+        candidates.add(numericId);
+      } catch (error) {
+        // Ignore parse errors; fall back to original string
+      }
+
+      for (const candidate of candidates) {
+        const orders = collectionOrders?.[candidate];
+        if (orders?.length) {
+          return orders;
+        }
+      }
+
+      return [];
+    },
+    [collectionOrders],
+  );
 
   // Get collection info
   const {
@@ -102,16 +133,27 @@ export function Items({
   });
 
   // Apply search filtering on top of metadata filters
+  const statusFilteredTokens = useMemo(() => {
+    if (statusFilter === "all") {
+      return metadataFilteredTokens;
+    }
+
+    return metadataFilteredTokens.filter((token) => {
+      const tokenOrders = getOrdersForToken(token.token_id?.toString());
+      return tokenOrders.length > 0;
+    });
+  }, [statusFilter, metadataFilteredTokens, getOrdersForToken]);
+
   const searchFilteredTokens = useMemo(() => {
-    if (!search.trim()) return filteredTokens;
+    if (!search.trim()) return statusFilteredTokens;
 
     const searchLower = search.toLowerCase();
 
-    return filteredTokens.filter((token) => {
+    return statusFilteredTokens.filter((token) => {
       const tokenName = (token.metadata as any)?.name || token.name || "";
       return tokenName.toLowerCase().includes(searchLower);
     });
-  }, [filteredTokens, search]);
+  }, [statusFilteredTokens, search]);
 
   // Track search with debouncing
   useEffect(() => {
@@ -396,9 +438,7 @@ export function Items({
                   {rowTokens.map((token) => {
                     // Get orders for this specific token
                     const tokenId = token.token_id?.toString();
-                    const tokenOrders = tokenId
-                      ? collectionOrders?.[tokenId] || []
-                      : [];
+                    const tokenOrders = getOrdersForToken(tokenId);
                     const assetToken = {
                       ...token,
                       orders: tokenOrders,

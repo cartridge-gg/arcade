@@ -11,6 +11,7 @@ import type {
   UseMetadataFiltersInput,
   UseMetadataFiltersReturn,
   ActiveFilters,
+  StatusFilter,
 } from "@/types/metadata-filter.types";
 
 export function useMetadataFilters({
@@ -50,6 +51,8 @@ export function useMetadataFilters({
     clearFilters,
     updateAvailableFilters,
     getFilteredTokenIds,
+    setStatusFilter: storeSetStatusFilter,
+    getStatusFilter,
   } = useMetadataFilterStore();
 
   const collectionState = getCollectionState(collectionAddress);
@@ -92,6 +95,9 @@ export function useMetadataFilters({
   // Get current state
   const metadataIndex = collectionState?.metadataIndex || {};
   const activeFilters = collectionState?.activeFilters || {};
+  const precomputed = collectionState?.precomputed;
+  const statusFilter: StatusFilter =
+    collectionState?.statusFilter || getStatusFilter(collectionAddress);
 
   // Calculate filtered tokens
   const filteredTokens = useMemo(() => {
@@ -107,7 +113,7 @@ export function useMetadataFilters({
     return tokens.filter(
       (token) => token.token_id && idSet.has(token.token_id),
     );
-  }, [tokens, collectionAddress, enabled, getFilteredTokenIds]);
+  }, [tokens, collectionAddress, enabled, getFilteredTokenIds, activeFilters]);
 
   // Calculate available filters with counts
   const availableFilters = useMemo(() => {
@@ -122,7 +128,13 @@ export function useMetadataFilters({
     // Filters active, calculate filtered IDs directly to avoid dependency on filteredTokens
     const filteredIds = getFilteredTokenIds(collectionAddress);
     return calculateFilterCounts(metadataIndex, filteredIds);
-  }, [collectionAddress, enabled, getFilteredTokenIds]);
+  }, [
+    collectionAddress,
+    enabled,
+    getFilteredTokenIds,
+    metadataIndex,
+    activeFilters,
+  ]);
 
   // Update available filters in store - use useRef to prevent infinite loops
   const prevAvailableFilters = useRef(availableFilters);
@@ -187,15 +199,25 @@ export function useMetadataFilters({
     clearFilters(collectionAddress);
   }, [collectionAddress, enabled, clearFilters]);
 
+  const setStatusFilter = useCallback(
+    (status: StatusFilter) => {
+      storeSetStatusFilter(collectionAddress, status);
+    },
+    [collectionAddress, storeSetStatusFilter],
+  );
+
   // Check if results are empty
   const isEmpty =
     filteredTokens.length === 0 && Object.keys(activeFilters).length > 0;
 
   return {
     filteredTokens,
-    metadataIndex,
     activeFilters,
     availableFilters,
+    metadataIndex,
+    precomputed,
+    statusFilter,
+    setStatusFilter,
     setFilter,
     removeFilter,
     clearAllFilters,

@@ -255,6 +255,25 @@ describe('useMetadataFilters Hook', () => {
     });
   });
 
+  describe('status filter state', () => {
+    it('should expose and update statusFilter', () => {
+      const { result } = renderHook(() =>
+        useMetadataFilters({
+          tokens: createMockTokenCollection(),
+          collectionAddress: '0x123'
+        })
+      );
+
+      expect(result.current.statusFilter).toBe('all');
+
+      act(() => {
+        result.current.setStatusFilter('listed');
+      });
+
+      expect(result.current.statusFilter).toBe('listed');
+    });
+  });
+
   describe('status indicators', () => {
     it('should set isEmpty when no tokens match filters', () => {
       const { result } = renderHook(() =>

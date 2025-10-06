@@ -51,6 +51,13 @@ describe('Multiple Trait AND Logic Integration', () => {
         }
         return true;
       }),
+      activeFilters,
+      setFilter: (trait: string, value: string) => {
+        if (!activeFilters[trait]) {
+          activeFilters[trait] = new Set();
+        }
+        activeFilters[trait].add(value);
+      },
       metadataIndex: {
         'Rarity': {
           'Epic': ['2', '3']
@@ -59,17 +66,20 @@ describe('Multiple Trait AND Logic Integration', () => {
           'Gold': ['1', '3']
         }
       },
-      activeFilters,
       availableFilters: {
         'Rarity': { 'Epic': 2 },
         'Background': { 'Gold': 2 }
       },
-      setFilter: (trait: string, value: string) => {
-        if (!activeFilters[trait]) {
-          activeFilters[trait] = new Set();
-        }
-        activeFilters[trait].add(value);
+      precomputed: {
+        attributes: ['Rarity', 'Background'],
+        properties: {
+          Rarity: [{ property: 'Epic', order: 2 }],
+          Background: [{ property: 'Gold', order: 2 }]
+        },
+        allMetadata: []
       },
+      statusFilter: 'all',
+      setStatusFilter: jest.fn(),
       removeFilter: jest.fn(),
       clearAllFilters: jest.fn(),
       isLoading: false,
@@ -163,6 +173,18 @@ describe('Multiple Trait AND Logic Integration', () => {
           'Epic': 2
         }
       },
+      precomputed: {
+        attributes: ['Rarity'],
+        properties: {
+          Rarity: [
+            { property: 'Legendary', order: 2 },
+            { property: 'Epic', order: 2 }
+          ]
+        },
+        allMetadata: []
+      },
+      statusFilter: 'all',
+      setStatusFilter: jest.fn(),
       setFilter: (trait: string, value: string) => {
         if (!activeFilters[trait]) {
           activeFilters[trait] = new Set();
@@ -285,6 +307,9 @@ describe('Multiple Trait AND Logic Integration', () => {
       metadataIndex: {},
       activeFilters,
       availableFilters: {},
+      precomputed: { attributes: [], properties: {}, allMetadata: [] },
+      statusFilter: 'all',
+      setStatusFilter: jest.fn(),
       setFilter: jest.fn(),
       removeFilter: jest.fn(),
       clearAllFilters: () => {
@@ -302,10 +327,10 @@ describe('Multiple Trait AND Logic Integration', () => {
     );
 
     // Should show active filter indicator
-    expect(screen.getByText(/Clear All/i)).toBeInTheDocument();
+    expect(screen.getByText(/Clear Filters/i)).toBeInTheDocument();
 
     // Click clear all button
-    const clearButton = screen.getByText(/Clear All/i);
+    const clearButton = screen.getByText(/Clear Filters/i);
     fireEvent.click(clearButton);
 
     expect(mockClearAllFilters).toHaveBeenCalled();
@@ -319,7 +344,7 @@ describe('Multiple Trait AND Logic Integration', () => {
 
     // Filters should be cleared
     await waitFor(() => {
-      expect(screen.queryByText(/Clear All/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Clear Filters/i)).not.toBeInTheDocument();
     });
   });
 });

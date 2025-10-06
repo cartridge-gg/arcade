@@ -63,7 +63,10 @@ describe('URL Persistence Integration', () => {
         removeFilter: jest.fn(),
         clearAllFilters: jest.fn(),
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -103,7 +106,10 @@ describe('URL Persistence Integration', () => {
       removeFilter: jest.fn(),
       clearAllFilters: jest.fn(),
       isLoading: false,
-      isEmpty: false
+      isEmpty: false,
+      precomputed: { attributes: [], properties: {}, allMetadata: [] },
+      statusFilter: 'all',
+      setStatusFilter: jest.fn()
     }));
 
     render(
@@ -149,7 +155,10 @@ describe('URL Persistence Integration', () => {
         removeFilter: jest.fn(),
         clearAllFilters: jest.fn(),
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -195,7 +204,10 @@ describe('URL Persistence Integration', () => {
         removeFilter: jest.fn(),
         clearAllFilters: jest.fn(),
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -272,7 +284,10 @@ describe('URL Persistence Integration', () => {
           currentUrl = '/collection/0x123'; // Remove filters from URL
         },
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -294,7 +309,7 @@ describe('URL Persistence Integration', () => {
     });
 
     // Clear filters
-    const clearButton = screen.getByText(/Clear All/i);
+    const clearButton = screen.getByText(/Clear Filters/i);
     fireEvent.click(clearButton);
 
     currentUrl = '/collection/0x123';

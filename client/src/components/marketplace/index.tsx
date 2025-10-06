@@ -187,7 +187,7 @@ function Item({
       const gameName = game.name.replace(/ /g, "-").toLowerCase();
       pathname = joinPaths(pathname, `/game/${gameName}/collection/${address}`);
     } else {
-      pathname = joinPaths(pathname, `/collection/${address}`);
+      pathname = `/collection/${address}`;
     }
     return pathname || "/";
   }, [collectionAddress, location.pathname, game, edition]);

@@ -1,4 +1,3 @@
-import { useMetadataFiltersAdapter } from "@/hooks/use-metadata-filters-adapter";
 import {
   MarketplaceFilters,
   MarketplaceHeader,
@@ -12,22 +11,38 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useRouterState } from "@tanstack/react-router";
+import { useMetadataFilters } from "@/hooks/use-metadata-filters";
+import { useProject } from "@/hooks/project";
+import { useMarketplaceTokensStore } from "@/store";
+import { DEFAULT_PROJECT } from "@/constants";
 
 export const Filters = () => {
+  const { collection: collectionAddress } = useProject();
+  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
+  const tokens = getTokens(DEFAULT_PROJECT, collectionAddress ?? "");
+
   const {
-    active,
-    setActive,
-    filteredMetadata,
-    clearable,
-    addSelected,
-    isActive,
-    resetSelected,
-    precomputedAttributes,
-    precomputedProperties,
-  } = useMetadataFiltersAdapter();
+    activeFilters,
+    availableFilters,
+    clearAllFilters,
+    setFilter,
+    removeFilter,
+    precomputed,
+    statusFilter,
+    setStatusFilter,
+  } = useMetadataFilters({
+    tokens: tokens || [],
+    collectionAddress: collectionAddress ?? "",
+    enabled: !!collectionAddress && !!tokens,
+  });
+
+  const precomputedAttributes = precomputed?.attributes ?? [];
+  const precomputedProperties = precomputed?.properties ?? {};
   const [search, setSearch] = useState<{ [key: string]: string }>({});
   const { trackEvent, events } = useAnalytics();
   const { location } = useRouterState();
+
+  const hasActiveFilters = Object.keys(activeFilters).length > 0;
 
   // Build filtered properties with search and dynamic counts
   const getFilteredProperties = useMemo(() => {
@@ -47,16 +62,22 @@ export const Filters = () => {
         property: prop.property,
         order: prop.order,
         count:
-          filteredMetadata.find(
-            (m) => m.trait_type === attribute && m.value === prop.property,
-          )?.count || 0,
+          availableFilters[attribute]?.[prop.property] !== undefined
+            ? availableFilters[attribute][prop.property]
+            : 0,
       }));
     };
-  }, [precomputedProperties, filteredMetadata, search]);
+  }, [precomputedProperties, availableFilters, search]);
 
   const handleAddSelected = useCallback(
     (attribute: string, property: string, value: boolean) => {
-      addSelected(attribute, property, value);
+      const isAlreadyActive = activeFilters[attribute]?.has(property) ?? false;
+
+      if (value && !isAlreadyActive) {
+        setFilter(attribute, property);
+      } else if (!value && isAlreadyActive) {
+        removeFilter(attribute, property);
+      }
 
       // Track filter application
       trackEvent(events.MARKETPLACE_FILTER_APPLIED, {
@@ -66,13 +87,27 @@ export const Filters = () => {
         from_page: location.pathname,
       });
     },
-    [addSelected, trackEvent, events, location.pathname],
+    [
+      activeFilters,
+      setFilter,
+      removeFilter,
+      trackEvent,
+      events,
+      location.pathname,
+    ],
   );
 
   const clear = useCallback(() => {
-    resetSelected();
+    clearAllFilters();
     setSearch({});
-  }, [resetSelected, setSearch]);
+  }, [clearAllFilters, setSearch]);
+
+  const isActive = useCallback(
+    (attribute: string, property: string) => {
+      return activeFilters[attribute]?.has(property) ?? false;
+    },
+    [activeFilters],
+  );
 
   return (
     <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden">
@@ -80,17 +115,17 @@ export const Filters = () => {
       <div className="flex flex-col gap-2 w-fit">
         <MarketplaceRadialItem
           label="Buy Now"
-          active={active === 0}
-          onClick={() => setActive(0)}
+          active={statusFilter === "listed"}
+          onClick={() => setStatusFilter("listed")}
         />
         <MarketplaceRadialItem
           label="Show All"
-          active={active === 1}
-          onClick={() => setActive(1)}
+          active={statusFilter === "all"}
+          onClick={() => setStatusFilter("all")}
         />
       </div>
       <MarketplaceHeader label="Properties">
-        {clearable && <MarketplaceHeaderReset onClick={clear} />}
+        {hasActiveFilters && <MarketplaceHeaderReset onClick={clear} />}
       </MarketplaceHeader>
       <div
         className="h-full flex flex-col gap-2 overflow-y-scroll"

@@ -40,6 +40,40 @@ describe('Single Trait Filtering Integration', () => {
     const mockTokens = createMockTokenCollection();
 
     const currentFilters = {};
+    const baseState = {
+      metadataIndex: {
+        'Rarity': {
+          'Legendary': ['1', '6'],
+          'Epic': ['2', '3'],
+          'Common': ['4', '5']
+        }
+      },
+      availableFilters: {
+        'Rarity': {
+          'Legendary': 2,
+          'Epic': 2,
+          'Common': 2
+        }
+      },
+      precomputed: {
+        attributes: ['Rarity'],
+        properties: {
+          Rarity: [
+            { property: 'Legendary', order: 2 },
+            { property: 'Epic', order: 2 },
+            { property: 'Common', order: 2 }
+          ]
+        },
+        allMetadata: []
+      },
+      statusFilter: 'all' as const,
+      setStatusFilter: jest.fn(),
+      removeFilter: jest.fn(),
+      clearAllFilters: jest.fn(),
+      isLoading: false,
+      isEmpty: false
+    };
+
     mockUseMetadataFilters.mockImplementation(() => ({
       filteredTokens: mockTokens.filter(token => {
         if (!currentFilters.Rarity) return true;
@@ -48,31 +82,14 @@ describe('Single Trait Filtering Integration', () => {
         )?.value;
         return currentFilters.Rarity.has(tokenRarity);
       }),
-      metadataIndex: {
-        'Rarity': {
-          'Legendary': ['1', '6'],
-          'Epic': ['2', '3'],
-          'Common': ['4', '5']
-        }
-      },
       activeFilters: currentFilters,
-      availableFilters: {
-        'Rarity': {
-          'Legendary': 2,
-          'Epic': 2,
-          'Common': 2
-        }
-      },
       setFilter: (trait: string, value: string) => {
         if (!currentFilters[trait]) {
           currentFilters[trait] = new Set();
         }
         currentFilters[trait].add(value);
       },
-      removeFilter: jest.fn(),
-      clearAllFilters: jest.fn(),
-      isLoading: false,
-      isEmpty: false
+      ...baseState
     }));
 
     const { container } = render(
@@ -118,7 +135,10 @@ describe('Single Trait Filtering Integration', () => {
       removeFilter: jest.fn(),
       clearAllFilters: jest.fn(),
       isLoading: false,
-      isEmpty: false
+      isEmpty: false,
+      precomputed: { attributes: [], properties: {}, allMetadata: [] },
+      statusFilter: 'all',
+      setStatusFilter: jest.fn()
     }));
 
     render(

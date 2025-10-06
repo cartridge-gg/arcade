@@ -207,6 +207,20 @@ describe('Metadata Filter Store', () => {
     });
   });
 
+  describe('statusFilter', () => {
+    it('should default to "all" and update via setStatusFilter', () => {
+      const { result } = renderHook(() => useMetadataFilterStore());
+
+      expect(result.current.getStatusFilter('0x123')).toBe('all');
+
+      act(() => {
+        result.current.setStatusFilter('0x123', 'listed');
+      });
+
+      expect(result.current.getStatusFilter('0x123')).toBe('listed');
+    });
+  });
+
   describe('multiple collections', () => {
     it('should handle filters for multiple collections independently', () => {
       const { result } = renderHook(() => useMetadataFilterStore());

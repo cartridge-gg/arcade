@@ -1,6 +1,11 @@
 import { create } from "zustand";
-import type { MetadataFilterStore } from "@/types/metadata-filter.types";
+import type {
+  MetadataFilterStore,
+  StatusFilter,
+} from "@/types/metadata-filter.types";
 import { applyFilters, precomputeFilterData } from "@/utils/metadata-indexer";
+
+const DEFAULT_STATUS_FILTER: StatusFilter = "all";
 
 export const useMetadataFilterStore = create<MetadataFilterStore>(
   (set, get) => ({
@@ -21,6 +26,9 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
               state.collections[collectionAddress]?.activeFilters || {},
             availableFilters:
               state.collections[collectionAddress]?.availableFilters || {},
+            statusFilter:
+              state.collections[collectionAddress]?.statusFilter ||
+              DEFAULT_STATUS_FILTER,
             lastUpdated: Date.now(),
           },
         },
@@ -35,6 +43,7 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
             ...(state.collections[collectionAddress] || {
               metadataIndex: {},
               availableFilters: {},
+              statusFilter: DEFAULT_STATUS_FILTER,
               lastUpdated: Date.now(),
             }),
             activeFilters: filters,
@@ -55,6 +64,7 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
                 metadataIndex: {},
                 activeFilters: { [trait]: new Set([value]) },
                 availableFilters: {},
+                statusFilter: DEFAULT_STATUS_FILTER,
                 lastUpdated: Date.now(),
               },
             },
@@ -150,9 +160,29 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
             ...(state.collections[collectionAddress] || {
               metadataIndex: {},
               activeFilters: {},
+              statusFilter: DEFAULT_STATUS_FILTER,
               lastUpdated: Date.now(),
             }),
             availableFilters: filters,
+            lastUpdated: Date.now(),
+          },
+        },
+      })),
+
+    setStatusFilter: (collectionAddress, status) =>
+      set((state) => ({
+        collections: {
+          ...state.collections,
+          [collectionAddress]: {
+            ...(state.collections[collectionAddress] || {
+              metadataIndex: {},
+              activeFilters: {},
+              availableFilters: {},
+              precomputed: undefined,
+              lastUpdated: Date.now(),
+              statusFilter: DEFAULT_STATUS_FILTER,
+            }),
+            statusFilter: status,
             lastUpdated: Date.now(),
           },
         },
@@ -177,6 +207,11 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
         collection.metadataIndex,
         collection.activeFilters || {},
       );
+    },
+
+    getStatusFilter: (collectionAddress) => {
+      const collection = get().collections[collectionAddress];
+      return collection?.statusFilter || DEFAULT_STATUS_FILTER;
     },
   }),
 );

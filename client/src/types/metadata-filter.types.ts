@@ -49,6 +49,8 @@ export interface PrecomputedFilterData {
   }>;
 }
 
+export type StatusFilter = "all" | "listed";
+
 export interface FilterState {
   activeFilters: ActiveFilters;
   availableFilters: AvailableFilters;
@@ -58,6 +60,7 @@ export interface CollectionFilterState extends FilterState {
   metadataIndex: MetadataIndex;
   precomputed?: PrecomputedFilterData; // Optional for backward compatibility
   lastUpdated: number;
+  statusFilter: StatusFilter;
 }
 
 // Hook interfaces
@@ -71,13 +74,16 @@ export interface UseMetadataFiltersReturn {
   // State
   filteredTokens: Token[];
   metadataIndex: MetadataIndex;
+  precomputed?: PrecomputedFilterData;
   activeFilters: ActiveFilters;
   availableFilters: AvailableFilters;
+  statusFilter: StatusFilter;
 
   // Actions
   setFilter: (trait: string, value: string) => void;
   removeFilter: (trait: string, value?: string) => void;
   clearAllFilters: () => void;
+  setStatusFilter: (status: StatusFilter) => void;
 
   // Status
   isLoading: boolean;
@@ -108,6 +114,7 @@ export interface MetadataFilterStore {
     collectionAddress: string,
     filters: AvailableFilters,
   ) => void;
+  setStatusFilter: (collectionAddress: string, status: StatusFilter) => void;
 
   // Selectors
   getCollectionState: (
@@ -115,6 +122,7 @@ export interface MetadataFilterStore {
   ) => CollectionFilterState | undefined;
   getActiveFilters: (collectionAddress: string) => ActiveFilters;
   getFilteredTokenIds: (collectionAddress: string) => string[];
+  getStatusFilter: (collectionAddress: string) => StatusFilter;
 }
 
 // URL serialization
