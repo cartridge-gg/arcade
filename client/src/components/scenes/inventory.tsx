@@ -1,5 +1,5 @@
-import { Inventory } from "@/components/inventory";
+import { InventoryContainer } from "@/features/inventory";
 
 export const InventoryScene = () => {
-  return <Inventory />;
+  return <InventoryContainer />;
 };

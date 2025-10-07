@@ -266,7 +266,14 @@ export const parseFiltersFromURL: ParseFiltersFromURL = (urlParams) => {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
 
-      const values = valueString.split(",").map((v) => v.trim());
+      const values = valueString.split(",").map((v) => {
+        const trimmed = v.trim();
+        // Convert underscores back to spaces and capitalize each word
+        return trimmed
+          .split("_")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      });
 
       if (values.length > 0) {
         filters[trait] = new Set(values);

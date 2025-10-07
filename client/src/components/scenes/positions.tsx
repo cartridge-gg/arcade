@@ -1,5 +1,5 @@
-import { Positions } from "@/components/positions";
+import { PositionsContainer } from "@/features/positions";
 
 export const PositionsScene = () => {
-  return <Positions />;
+  return <PositionsContainer />;
 };

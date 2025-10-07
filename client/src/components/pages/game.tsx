@@ -8,7 +8,7 @@ import { ArcadeTabs } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
 import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
-import { Editions } from "../editions";
+import { EditionsContainer } from "@/features/editions";
 import arcade from "@/assets/arcade-logo.png";
 import { useProject, TAB_SEGMENTS } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
@@ -85,7 +85,7 @@ export function GamePage() {
               <p className="font-semibold text-xl/[24px] text-foreground-100 truncate">
                 {game?.name || "Dashboard"}
               </p>
-              <Editions />
+              <EditionsContainer />
             </div>
           </div>
           {game ? (

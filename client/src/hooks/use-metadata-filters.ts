@@ -58,24 +58,59 @@ export function useMetadataFilters({
   const collectionState = getCollectionState(collectionAddress);
 
   // Build metadata index when tokens change
-  useEffect(() => {
-    if (!enabled || !tokens || tokens.length === 0) return;
+  const isIndexBuilding = useRef(false);
+  const lastTokensLength = useRef(0);
+  const lastTokensHash = useRef('');
 
-    setIsLoading(true);
+  useEffect(() => {
+    if (!enabled || !tokens || tokens.length === 0) {
+      if (isIndexBuilding.current) {
+        setIsLoading(false);
+        isIndexBuilding.current = false;
+      }
+      lastTokensLength.current = 0;
+      lastTokensHash.current = '';
+      return;
+    }
+
+    // Create a simple hash to detect token changes without requiring stable array reference
+    const currentHash = `${tokens.length}-${tokens[0]?.token_id}-${tokens[tokens.length - 1]?.token_id}`;
+
+    // Skip if tokens haven't actually changed
+    if (
+      lastTokensLength.current === tokens.length &&
+      lastTokensHash.current === currentHash &&
+      isIndexBuilding.current === false
+    ) {
+      return;
+    }
+
+    lastTokensLength.current = tokens.length;
+    lastTokensHash.current = currentHash;
+
+    if (!isIndexBuilding.current) {
+      setIsLoading(true);
+      isIndexBuilding.current = true;
+    }
 
     // Use requestIdleCallback for large collections to avoid blocking UI
     const buildIndex = () => {
       const index = buildMetadataIndex(tokens);
       setMetadataIndex(collectionAddress, index);
       setIsLoading(false);
+      isIndexBuilding.current = false;
     };
 
     if (tokens.length > 1000 && "requestIdleCallback" in window) {
       const handle = window.requestIdleCallback(buildIndex);
-      return () => window.cancelIdleCallback(handle);
+      return () => {
+        window.cancelIdleCallback(handle);
+        isIndexBuilding.current = false;
+      };
     }
     buildIndex();
-  }, [tokens, collectionAddress, enabled, setMetadataIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tokens, collectionAddress, enabled]);
 
   // Initialize filters from URL on mount - use ref to track if already initialized
   const hasInitialized = useRef(false);
@@ -146,7 +181,8 @@ export function useMetadataFilters({
       prevAvailableFilters.current = availableFilters;
       updateAvailableFilters(collectionAddress, availableFilters);
     }
-  }, [availableFilters, collectionAddress, updateAvailableFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableFilters, collectionAddress]);
 
   // Update URL when filters change - use useRef to track previous value
   const prevActiveFilters = useRef<ActiveFilters>({});
@@ -181,7 +217,8 @@ export function useMetadataFilters({
       if (!enabled) return;
       toggleFilter(collectionAddress, trait, value);
     },
-    [collectionAddress, enabled, toggleFilter],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [collectionAddress, enabled],
   );
 
   // Action: Remove filter
@@ -190,20 +227,23 @@ export function useMetadataFilters({
       if (!enabled) return;
       storeRemoveFilter(collectionAddress, trait, value);
     },
-    [collectionAddress, enabled, storeRemoveFilter],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [collectionAddress, enabled],
   );
 
   // Action: Clear all filters
   const clearAllFilters = useCallback(() => {
     if (!enabled) return;
     clearFilters(collectionAddress);
-  }, [collectionAddress, enabled, clearFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collectionAddress, enabled]);
 
   const setStatusFilter = useCallback(
     (status: StatusFilter) => {
       storeSetStatusFilter(collectionAddress, status);
     },
-    [collectionAddress, storeSetStatusFilter],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [collectionAddress],
   );
 
   // Check if results are empty
