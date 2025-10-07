@@ -1,5 +1,5 @@
-import { Guilds } from "@/components/guilds";
+import { GuildsContainer } from "@/features/guilds";
 
 export const GuildsScene = () => {
-  return <Guilds />;
+  return <GuildsContainer />;
 };

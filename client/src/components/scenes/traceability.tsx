@@ -1,5 +1,5 @@
-import { Traceability } from "@/components/traceability";
+import { TraceabilityContainer } from "@/features/traceability";
 
 export const TraceabilityScene = () => {
-  return <Traceability />;
+  return <TraceabilityContainer />;
 };

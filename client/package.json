@@ -15,7 +15,11 @@
     "lint": "biome lint --fix .",
     "lint:check": "biome lint .",
     "lint:ts": "pnpm lint",
-    "lint:check:ts": "pnpm lint:check"
+    "lint:check:ts": "pnpm lint:check",
+    "test": "vitest run",
+    "test:ts": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@cartridge/arcade": "workspace:*",
@@ -41,8 +45,8 @@
     "@tanstack/react-db": "^0.1.9",
     "@tanstack/react-query": "^5.85.3",
     "@tanstack/react-query-persist-client": "^5.85.3",
-    "@tanstack/react-virtual": "^3.13.12",
     "@tanstack/react-router": "^1.131.8",
+    "@tanstack/react-virtual": "^3.13.12",
     "chart.js": "^4.4.8",
     "chartjs-plugin-zoom": "^2.2.0",
     "class-variance-authority": "^0.7.1",
@@ -78,13 +82,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@tanstack/react-router-devtools": "^1.131.8",
+    "@tanstack/router-plugin": "^1.131.8",
+    "@testing-library/react": "^16.3.0",
     "@types/lodash": "^4.17.13",
     "@types/node": "^20.7.4",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
-    "@tanstack/react-router-devtools": "^1.131.8",
-    "@tanstack/router-plugin": "^1.131.8",
     "autoprefixer": "^10.4.18",
     "eslint": "^9.12.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
@@ -95,7 +100,8 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
-    "vite-plugin-pwa": "^1.0.0"
+    "vite-plugin-pwa": "^1.0.0",
+    "vitest": "^3.2.4"
   },
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }
