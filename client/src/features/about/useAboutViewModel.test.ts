@@ -23,7 +23,9 @@ describe("useAboutViewModel", () => {
 
   it("exposes socials flag when provided", () => {
     const socials = { twitter: "https://twitter.com/test" };
-    const { result } = renderHook(() => useAboutViewModel({ edition, socials }));
+    const { result } = renderHook(() =>
+      useAboutViewModel({ edition, socials }),
+    );
     expect(result.current.hasSocials).toBe(true);
     expect(result.current.socials).toEqual(socials);
   });

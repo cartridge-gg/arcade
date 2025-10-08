@@ -15,7 +15,7 @@ import {
   type Item,
   type Player,
   type Event,
-} from "@/helpers/achievements";
+} from "@/lib/achievements";
 import { getChecksumAddress } from "starknet";
 import { useAddress } from "@/hooks/address";
 import { useArcade } from "@/hooks/arcade";

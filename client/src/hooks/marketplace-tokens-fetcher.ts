@@ -1,10 +1,10 @@
-import { fetchToriis } from "@cartridge/arcade";
+import { fetchToriis, type ClientCallbackParams } from "@cartridge/arcade";
 import type {
   AttributeFilter,
   Token,
   ToriiClient,
 } from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getChecksumAddress } from "starknet";
 import { useMarketplaceTokensStore } from "@/store";
 import { useTokenContract } from "@/collections";
@@ -13,6 +13,7 @@ import {
   fetchTokenImage,
   parseJsonSafe,
 } from "./fetcher-utils";
+import { DEFAULT_PROJECT } from "@/constants";
 
 type MarketTokensFetcherInput = {
   project: string[];
@@ -45,7 +46,7 @@ export function useMarketTokensFetcher({
   const hasInitializedRef = useRef(false);
   const prevFiltersRef = useRef<string>("");
 
-  const projectId = project[0] ?? "arcade-main";
+  const projectId = project[0] ?? DEFAULT_PROJECT;
 
   const normalizedAddress = (() => {
     if (!address) return "";
@@ -90,19 +91,26 @@ export function useMarketTokensFetcher({
     [projectId],
   );
 
+  const filtersKey = useMemo(
+    () =>
+      JSON.stringify(
+        Object.entries(attributeFilters)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([trait, values]) => [trait, [...values].sort()]),
+      ),
+    [attributeFilters],
+  );
+
   const fetchData = useCallback(
     async (currentCursor: string | undefined) => {
-      if (isFetchingRef.current) return;
       if (!projectId || !normalizedAddress) return;
       if (!address) return;
-
-      isFetchingRef.current = true;
 
       try {
         const tokens = await fetchToriis(
           project.length ? project : [projectId],
           {
-            client: async ({ client }) => {
+            client: async ({ client }: ClientCallbackParams) => {
               return client.getTokens({
                 contract_addresses: [address],
                 token_ids: [],
@@ -137,8 +145,6 @@ export function useMarketTokensFetcher({
         setCursor(nextCursorValue);
       } catch (error) {
         console.error("Error fetching marketplace tokens:", error);
-      } finally {
-        isFetchingRef.current = false;
       }
     },
     [
@@ -154,7 +160,6 @@ export function useMarketTokensFetcher({
 
   // Clear tokens and refetch when filters change
   useEffect(() => {
-    const filtersKey = JSON.stringify(attributeFilters);
     if (
       prevFiltersRef.current !== filtersKey &&
       prevFiltersRef.current !== ""
@@ -163,8 +168,9 @@ export function useMarketTokensFetcher({
       setCursor(undefined);
       hasInitializedRef.current = false;
     }
+
     prevFiltersRef.current = filtersKey;
-  }, [attributeFilters, projectId, address, clearTokens]);
+  }, [filtersKey, projectId, address, clearTokens]);
 
   useEffect(() => {
     if (!autoFetch) return;

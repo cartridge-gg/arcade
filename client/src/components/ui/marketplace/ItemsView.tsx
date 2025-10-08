@@ -1,4 +1,10 @@
-import type { CSSProperties, MouseEvent, RefObject } from "react";
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type RefObject,
+} from "react";
 import {
   Button,
   Checkbox,
@@ -20,6 +26,7 @@ export interface MarketplaceItemCardProps {
   id: string;
   title: string;
   image?: string | null;
+  placeholderImage?: string;
   listingCount: number;
   price: MarketplaceItemPriceInfo | null;
   lastSale: MarketplaceItemPriceInfo | null;
@@ -35,7 +42,7 @@ export interface MarketplaceItemCardProps {
 }
 
 export interface MarketplaceItemsRow {
-  key: number | string;
+  key: number | string | bigint;
   isLoaderRow: boolean;
   style: CSSProperties;
   items: MarketplaceItemCardProps[];
@@ -58,7 +65,10 @@ interface ItemsViewProps {
   onResetSelection: () => void;
   isConnected: boolean;
   onBuySelection: () => void;
-  loadingOverlay: { isLoading: boolean; progress?: number };
+  loadingOverlay: {
+    isLoading: boolean;
+    progress?: { completed: number; total: number };
+  };
 }
 
 export const ItemsView = ({
@@ -258,8 +268,47 @@ const MarketplaceItemCard = ({
   onBuy,
   onInspect,
   onConnect,
-  ...card
+  image,
+  placeholderImage,
+  title,
+  listingCount,
+  price,
+  lastSale,
 }: MarketplaceItemCardProps) => {
+  const fallbackImage = placeholderImage ?? image ?? "";
+  const [displayImage, setDisplayImage] = useState<string>(fallbackImage);
+
+  useEffect(() => {
+    const nextFallback = placeholderImage ?? "";
+
+    if (!image) {
+      setDisplayImage(nextFallback || "");
+      return;
+    }
+
+    if (nextFallback) {
+      setDisplayImage(nextFallback);
+    }
+
+    let isMounted = true;
+    const loader = new window.Image();
+    loader.onload = () => {
+      if (isMounted) {
+        setDisplayImage(image);
+      }
+    };
+    loader.onerror = () => {
+      if (isMounted) {
+        setDisplayImage(nextFallback || "");
+      }
+    };
+    loader.src = image;
+
+    return () => {
+      isMounted = false;
+    };
+  }, [image, placeholderImage]);
+
   const handleContainerClick = (event: MouseEvent<HTMLDivElement>) => {
     if (isConnected && selectionActive && selectable) {
       event.preventDefault();
@@ -286,9 +335,9 @@ const MarketplaceItemCard = ({
   return (
     <div className="w-full group select-none" onClick={handleContainerClick}>
       <CollectibleCard
-        title={card.title}
-        image={card.image ?? undefined}
-        listingCount={card.listingCount}
+        title={title}
+        image={displayImage}
+        listingCount={listingCount}
         onClick={handleCardClick}
         className={
           selectable || canOpen
@@ -296,8 +345,8 @@ const MarketplaceItemCard = ({
             : "cursor-default pointer-events-none"
         }
         onSelect={isConnected && selectable ? onToggleSelect : undefined}
-        price={card.price}
-        lastSale={card.lastSale}
+        price={price}
+        lastSale={lastSale}
         selectable={selectable}
         selected={selected}
       />

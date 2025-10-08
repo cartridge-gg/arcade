@@ -5,6 +5,8 @@ describe("useErrorsViewModel", () => {
   it("returns default messages", () => {
     const result = useErrorsViewModel();
     expect(result.messageTitle).toBe("Connect your Controller");
-    expect(result.messageSubtitle).toBe("Build and customize your own Dojo activity feed.");
+    expect(result.messageSubtitle).toBe(
+      "Build and customize your own Dojo activity feed.",
+    );
   });
 });

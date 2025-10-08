@@ -7,7 +7,11 @@ interface TraceabilityViewProps {
   icon: ComponentProps<typeof Empty>["icon"];
 }
 
-export const TraceabilityView = ({ className, title, icon }: TraceabilityViewProps) => {
+export const TraceabilityView = ({
+  className,
+  title,
+  icon,
+}: TraceabilityViewProps) => {
   return (
     <Empty
       title={title}

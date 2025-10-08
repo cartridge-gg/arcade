@@ -40,7 +40,7 @@ export function useGamesViewModel({
   isPWA: boolean;
 }): GamesViewModel {
   const { address } = useAccount();
-  const { games, editions } = useArcade();
+  const { games } = useArcade();
   const { game } = useProject();
   const { ownerships } = useOwnerships();
   const sidebar = useSidebar();

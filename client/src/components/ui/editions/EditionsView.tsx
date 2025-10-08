@@ -20,7 +20,9 @@ export const EditionsView = ({
   navigateToEdition,
   updateLocalEdition,
 }: EditionsViewProps & {
-  updateLocalEdition: (updater: (edition: EditionModel) => EditionModel) => void;
+  updateLocalEdition: (
+    updater: (edition: EditionModel) => EditionModel,
+  ) => void;
 }) => {
   if (!game || editions.length === 0) return null;
 
@@ -58,7 +60,11 @@ export const EditionsView = ({
           </div>
           <SelectContent className="bg-background-100">
             {selectedEdition && isEditionOwner && (
-              <Register key={selectedEdition.id} game={game} edition={selectedEdition} />
+              <Register
+                key={selectedEdition.id}
+                game={game}
+                edition={selectedEdition}
+              />
             )}
             {selectedEdition && isEditionOwner && (
               <Publish
@@ -66,7 +72,9 @@ export const EditionsView = ({
                 edition={selectedEdition}
                 action={selectedEdition.published ? "hide" : "publish"}
                 setPublished={(status) =>
-                  updateLocalEdition((curr) => ({ ...curr, published: status } as EditionModel))
+                  updateLocalEdition(
+                    (curr) => ({ ...curr, published: status }) as EditionModel,
+                  )
                 }
               />
             )}
@@ -76,7 +84,10 @@ export const EditionsView = ({
                 edition={selectedEdition}
                 action={selectedEdition.whitelisted ? "blacklist" : "whitelist"}
                 setWhitelisted={(status) =>
-                  updateLocalEdition((curr) => ({ ...curr, whitelisted: status } as EditionModel))
+                  updateLocalEdition(
+                    (curr) =>
+                      ({ ...curr, whitelisted: status }) as EditionModel,
+                  )
                 }
               />
             )}

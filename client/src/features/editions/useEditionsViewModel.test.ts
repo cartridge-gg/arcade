@@ -32,20 +32,21 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 describe("useEditionsViewModel", () => {
-  const createEdition = (overrides: Partial<EditionModel> = {}): EditionModel => ({
-    id: 1,
-    name: "Edition One",
-    certified: true,
-    whitelisted: true,
-    published: true,
-    gameId: 1,
-    description: "",
-    color: "#fff",
-    clone() {
-      return { ...this } as EditionModel;
-    },
-    ...overrides,
-  } as EditionModel);
+  const createEdition = (overrides: Partial<EditionModel> = {}): EditionModel =>
+    ({
+      id: 1,
+      name: "Edition One",
+      certified: true,
+      whitelisted: true,
+      published: true,
+      gameId: 1,
+      description: "",
+      color: "#fff",
+      clone() {
+        return { ...this } as EditionModel;
+      },
+      ...overrides,
+    }) as EditionModel;
 
   beforeEach(() => {
     vi.resetAllMocks();

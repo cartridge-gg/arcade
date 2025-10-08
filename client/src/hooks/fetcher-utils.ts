@@ -1,7 +1,7 @@
 import type { EditionModel } from "@cartridge/arcade";
 import { useState, useCallback, useRef } from "react";
 import type { Token, TokenContract } from "@dojoengine/torii-wasm";
-import { MetadataHelper } from "@/helpers/metadata";
+import { MetadataHelper } from "@/lib/metadata";
 
 export type FetcherStatus = "idle" | "loading" | "success" | "error";
 

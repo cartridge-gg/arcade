@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useProject } from "@/hooks/project";
 import { ActivityView } from "@/components/ui/activity/ActivityView";
 import { useActivityViewModel } from "./useActivityViewModel";

@@ -16,7 +16,8 @@ export interface ConnectionViewModel {
 
 export function useConnectionViewModel(): ConnectionViewModel {
   const { account, connector, isConnected } = useAccount();
-  const { connect, connectors, isLoading: isConnecting } = useConnect();
+  const { connect, connectors, status: connectStatus } = useConnect();
+  const isConnecting = connectStatus === "pending";
   const { disconnect } = useDisconnect();
   const { trackEvent, events } = useAnalytics();
 

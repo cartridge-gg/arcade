@@ -1,6 +1,6 @@
 import { cn } from "@cartridge/ui/utils";
 import type { HTMLAttributes, SVGProps } from "react";
-import { SidebarToggle } from "../sidebar-toggle";
+import { SidebarToggle } from "../../sidebar-toggle";
 import { useTheme } from "@/hooks/context";
 import { useDevice } from "@/hooks/device";
 

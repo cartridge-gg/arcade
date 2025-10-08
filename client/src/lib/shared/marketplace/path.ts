@@ -1,5 +1,5 @@
 import type { EditionModel, GameModel } from "@cartridge/arcade";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 
 const GAME_ROUTE_REGEX = /\/game\/[^/]+/;
 const EDITION_ROUTE_REGEX = /\/edition\/[^/]+/;

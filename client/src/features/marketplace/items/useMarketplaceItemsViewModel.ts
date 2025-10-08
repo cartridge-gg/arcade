@@ -58,7 +58,7 @@ const getEntrypoints = async (provider: RpcProvider, address: string) => {
     );
     if (interfaces.length > 0) {
       return interfaces.flatMap((element) =>
-        element.items.map((item) => item.name),
+        element.items.map((item: any) => item.name),
       );
     }
     const functions = code.abi.filter((element) => element.type === "function");
@@ -357,7 +357,7 @@ export function useMarketplaceItemsViewModel({
     collectionSupply,
     activeFilters,
     clearAllFilters,
-    isConnected,
+    isConnected: Boolean(isConnected),
     connectWallet,
     handleInspect,
     handlePurchase,

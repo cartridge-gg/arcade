@@ -34,7 +34,7 @@ export interface ActivityDateGroup {
 }
 
 export interface ActivityViewModel {
-  status: "loading" | "error" | "idle" | "success";
+  status: "loading" | "error" | "idle" | "success" | "empty";
   groups: ActivityDateGroup[];
   canLoadMore: boolean;
 }

@@ -2,11 +2,7 @@ import { useMemo } from "react";
 import { AchievementCard } from "@/components/ui/modules/achievement-card";
 import type { TrophiesViewModel } from "@/features/achievements/useAchievementsViewModel";
 
-export const TrophiesView = ({
-  groups,
-  softView,
-  enabled,
-}: TrophiesViewModel) => {
+export const TrophiesView = ({ groups, softView }: TrophiesViewModel) => {
   const orderedGroups = useMemo(() => {
     return [...groups].sort((a, b) =>
       a.name === "Hidden"

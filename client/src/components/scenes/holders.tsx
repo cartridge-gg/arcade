@@ -6,6 +6,9 @@ export const HoldersScene = () => {
   if (!edition) return;
   if (!collection) return;
   return (
-    <MarketplaceHoldersContainer edition={edition} collectionAddress={collection} />
+    <MarketplaceHoldersContainer
+      edition={edition}
+      collectionAddress={collection}
+    />
   );
 };

@@ -35,7 +35,7 @@ import {
   Socials,
 } from "@cartridge/arcade";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { MetadataHelper } from "@/helpers/metadata";
+import { MetadataHelper } from "@/lib/metadata";
 import { formSchema } from "./form";
 import ControllerAction from "../modules/controller-action";
 

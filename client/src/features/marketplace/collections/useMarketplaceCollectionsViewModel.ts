@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { getChecksumAddress } from "starknet";
 import {
   StatusType,
   type CollectionEditionModel,
@@ -16,12 +15,12 @@ import {
   useTokenContracts,
   type EnrichedTokenContract,
 } from "@/collections";
-import { resizeImage } from "@/helpers";
+import { resizeImage } from "@/lib/helpers";
 import {
   deriveBestPrice,
   deriveLatestSalePrice,
-} from "@/shared/marketplace/utils";
-import { buildMarketplaceTargetPath } from "@/shared/marketplace/path";
+} from "@/lib/shared/marketplace/utils";
+import { buildMarketplaceTargetPath } from "@/lib/shared/marketplace/path";
 
 export interface MarketplaceCollectionPriceInfo {
   value: string;
@@ -101,7 +100,7 @@ const buildMarketplaceItems = (
       game,
       edition,
     );
-    const totalCount = Number.parseInt(collection.total_supply);
+    const totalCount = Number.parseInt(collection.total_supply ?? "0");
 
     return {
       key: `${collection.project}-${collectionAddress}`,
@@ -148,8 +147,8 @@ export function useMarketplaceCollectionsViewModel({
       buildMarketplaceItems(filteredCollections as EnrichedTokenContract[], {
         orders,
         sales,
-        editions,
-        games,
+        editions: editions as any,
+        games: games as any,
         currentPathname,
       }),
     [filteredCollections, orders, sales, editions, games, currentPathname],

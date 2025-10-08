@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { UserAvatar } from "../user/avatar";
+import { UserAvatar } from "../../user/avatar";
 
 export interface LeaderboardUsernameProps {
   username: string;
