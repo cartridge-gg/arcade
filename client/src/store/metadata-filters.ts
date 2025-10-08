@@ -1,101 +1,82 @@
 import { create } from "zustand";
 import type {
+  ActiveFilters,
+  CollectionFilterState,
   MetadataFilterStore,
   StatusFilter,
 } from "@/types/metadata-filter.types";
-import { applyFilters, precomputeFilterData } from "@/utils/metadata-indexer";
 
 const DEFAULT_STATUS_FILTER: StatusFilter = "all";
+
+const cloneFilters = (filters: ActiveFilters): ActiveFilters => {
+  return Object.fromEntries(
+    Object.entries(filters).map(([trait, values]) => [trait, new Set(values)]),
+  );
+};
+
+const ensureCollection = (
+  collections: Record<string, CollectionFilterState>,
+  collectionAddress: string,
+): CollectionFilterState => {
+  return (
+    collections[collectionAddress] ?? {
+      activeFilters: {},
+      statusFilter: DEFAULT_STATUS_FILTER,
+    }
+  );
+};
 
 export const useMetadataFilterStore = create<MetadataFilterStore>(
   (set, get) => ({
     collections: {},
 
-    setMetadataIndex: (collectionAddress, index) => {
-      // Pre-compute filter data for performance
-      const precomputed = precomputeFilterData(index);
-
-      return set((state) => ({
-        collections: {
-          ...state.collections,
-          [collectionAddress]: {
-            ...(state.collections[collectionAddress] || {}),
-            metadataIndex: index,
-            precomputed, // Store pre-computed data
-            activeFilters:
-              state.collections[collectionAddress]?.activeFilters || {},
-            availableFilters:
-              state.collections[collectionAddress]?.availableFilters || {},
-            statusFilter:
-              state.collections[collectionAddress]?.statusFilter ||
-              DEFAULT_STATUS_FILTER,
-            lastUpdated: Date.now(),
+    replaceFilters: (collectionAddress, filters) =>
+      set((state) => {
+        const collection = ensureCollection(
+          state.collections,
+          collectionAddress,
+        );
+        return {
+          collections: {
+            ...state.collections,
+            [collectionAddress]: {
+              activeFilters: cloneFilters(filters),
+              statusFilter: collection.statusFilter,
+            },
           },
-        },
-      }));
-    },
-
-    setActiveFilters: (collectionAddress, filters) =>
-      set((state) => ({
-        collections: {
-          ...state.collections,
-          [collectionAddress]: {
-            ...(state.collections[collectionAddress] || {
-              metadataIndex: {},
-              availableFilters: {},
-              statusFilter: DEFAULT_STATUS_FILTER,
-              lastUpdated: Date.now(),
-            }),
-            activeFilters: filters,
-            lastUpdated: Date.now(),
-          },
-        },
-      })),
+        };
+      }),
 
     toggleFilter: (collectionAddress, trait, value) =>
       set((state) => {
-        const collection = state.collections[collectionAddress];
-        if (!collection) {
-          // Initialize collection if it doesn't exist
-          return {
-            collections: {
-              ...state.collections,
-              [collectionAddress]: {
-                metadataIndex: {},
-                activeFilters: { [trait]: new Set([value]) },
-                availableFilters: {},
-                statusFilter: DEFAULT_STATUS_FILTER,
-                lastUpdated: Date.now(),
-              },
-            },
-          };
-        }
+        const collection = ensureCollection(
+          state.collections,
+          collectionAddress,
+        );
+        const nextFilters = cloneFilters(collection.activeFilters);
+        const existing =
+          nextFilters[trait] !== undefined
+            ? new Set(nextFilters[trait])
+            : new Set<string>();
 
-        const currentFilters = { ...collection.activeFilters };
-
-        if (!currentFilters[trait]) {
-          currentFilters[trait] = new Set();
-        } else {
-          // Create a new Set to ensure immutability
-          currentFilters[trait] = new Set(currentFilters[trait]);
-        }
-
-        if (currentFilters[trait].has(value)) {
-          currentFilters[trait].delete(value);
-          if (currentFilters[trait].size === 0) {
-            delete currentFilters[trait];
+        if (existing.has(value)) {
+          existing.delete(value);
+          if (existing.size === 0) {
+            delete nextFilters[trait];
+          } else {
+            nextFilters[trait] = existing;
           }
         } else {
-          currentFilters[trait].add(value);
+          existing.add(value);
+          nextFilters[trait] = existing;
         }
 
         return {
           collections: {
             ...state.collections,
             [collectionAddress]: {
-              ...collection,
-              activeFilters: currentFilters,
-              lastUpdated: Date.now(),
+              activeFilters: nextFilters,
+              statusFilter: collection.statusFilter,
             },
           },
         };
@@ -106,20 +87,21 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
         const collection = state.collections[collectionAddress];
         if (!collection) return state;
 
-        const currentFilters = { ...collection.activeFilters };
+        const nextFilters = cloneFilters(collection.activeFilters);
 
-        if (!currentFilters[trait]) return state;
+        if (!nextFilters[trait]) {
+          return state;
+        }
 
         if (value === undefined) {
-          // Remove entire trait
-          delete currentFilters[trait];
+          delete nextFilters[trait];
         } else {
-          // Remove specific value
-          currentFilters[trait] = new Set(currentFilters[trait]);
-          currentFilters[trait].delete(value);
-
-          if (currentFilters[trait].size === 0) {
-            delete currentFilters[trait];
+          const values = new Set(nextFilters[trait]);
+          values.delete(value);
+          if (values.size === 0) {
+            delete nextFilters[trait];
+          } else {
+            nextFilters[trait] = values;
           }
         }
 
@@ -127,9 +109,8 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
           collections: {
             ...state.collections,
             [collectionAddress]: {
-              ...collection,
-              activeFilters: currentFilters,
-              lastUpdated: Date.now(),
+              activeFilters: nextFilters,
+              statusFilter: collection.statusFilter,
             },
           },
         };
@@ -144,74 +125,32 @@ export const useMetadataFilterStore = create<MetadataFilterStore>(
           collections: {
             ...state.collections,
             [collectionAddress]: {
-              ...collection,
               activeFilters: {},
-              lastUpdated: Date.now(),
+              statusFilter: collection.statusFilter,
             },
           },
         };
       }),
 
-    updateAvailableFilters: (collectionAddress, filters) =>
-      set((state) => ({
-        collections: {
-          ...state.collections,
-          [collectionAddress]: {
-            ...(state.collections[collectionAddress] || {
-              metadataIndex: {},
-              activeFilters: {},
-              statusFilter: DEFAULT_STATUS_FILTER,
-              lastUpdated: Date.now(),
-            }),
-            availableFilters: filters,
-            lastUpdated: Date.now(),
-          },
-        },
-      })),
-
     setStatusFilter: (collectionAddress, status) =>
-      set((state) => ({
-        collections: {
-          ...state.collections,
-          [collectionAddress]: {
-            ...(state.collections[collectionAddress] || {
-              metadataIndex: {},
-              activeFilters: {},
-              availableFilters: {},
-              precomputed: undefined,
-              lastUpdated: Date.now(),
-              statusFilter: DEFAULT_STATUS_FILTER,
-            }),
-            statusFilter: status,
-            lastUpdated: Date.now(),
+      set((state) => {
+        const collection = ensureCollection(
+          state.collections,
+          collectionAddress,
+        );
+        return {
+          collections: {
+            ...state.collections,
+            [collectionAddress]: {
+              activeFilters: cloneFilters(collection.activeFilters),
+              statusFilter: status,
+            },
           },
-        },
-      })),
+        };
+      }),
 
     getCollectionState: (collectionAddress) => {
       return get().collections[collectionAddress];
-    },
-
-    getActiveFilters: (collectionAddress) => {
-      const collection = get().collections[collectionAddress];
-      return collection?.activeFilters || {};
-    },
-
-    getFilteredTokenIds: (collectionAddress) => {
-      const collection = get().collections[collectionAddress];
-      if (!collection || !collection.metadataIndex) {
-        return [];
-      }
-
-      return applyFilters(
-        collection.metadataIndex,
-        collection.activeFilters || {},
-      );
-    },
-
-    getStatusFilter: (collectionAddress) => {
-      const collection = get().collections[collectionAddress];
-      return collection?.statusFilter || DEFAULT_STATUS_FILTER;
     },
   }),
 );

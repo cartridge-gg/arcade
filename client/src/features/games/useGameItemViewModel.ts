@@ -5,7 +5,7 @@ import { useOwnerships } from "@/hooks/ownerships";
 import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
 import { useSidebar } from "@/hooks/sidebar";
 import { useRouterState } from "@tanstack/react-router";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import type { GameModel } from "@cartridge/arcade";
 
@@ -83,14 +83,13 @@ export function useGameItemViewModel(
   }, [ownerAddress, address]);
 
   const access = useMemo(() => {
-    return accesses.find(
-      (entry) => BigInt(entry.address) === BigInt(address || "0x1"),
-    );
+    if (!address) return undefined;
+    return accesses.find((entry) => BigInt(entry.address) === BigInt(address));
   }, [accesses, address]);
 
   const isAdmin = useMemo(() => {
     if (!access) return false;
-    return access.role?.value === 1 || access.role?.value === 2;
+    return access.role?.value === "Member" || access.role?.value === "Admin";
   }, [access]);
 
   const active = useMemo(() => {

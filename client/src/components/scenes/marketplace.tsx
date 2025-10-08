@@ -8,5 +8,5 @@ export const MarketplaceScene = () => {
 
   if (!edition) return null;
 
-  return <MarketplaceCollectionsContainer edition={edition} />;
+  return <MarketplaceCollectionsContainer edition={edition} game={game} />;
 };

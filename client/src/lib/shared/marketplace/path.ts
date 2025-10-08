@@ -1,11 +1,12 @@
 import type { EditionModel, GameModel } from "@cartridge/arcade";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 
 const GAME_ROUTE_REGEX = /\/game\/[^/]+/;
 const EDITION_ROUTE_REGEX = /\/edition\/[^/]+/;
 const PLAYER_ROUTE_REGEX = /\/player\/[^/]+/;
 const TAB_ROUTE_REGEX = /\/tab\/[^/]+/;
 const COLLECTION_ROUTE_REGEX = /\/collection\/[^/]+/;
+const MARKETPLACE_ROUTE_REGEX = /\/(marketplace|portal)/;
 
 export const buildMarketplaceTargetPath = (
   basePathname: string,
@@ -15,11 +16,15 @@ export const buildMarketplaceTargetPath = (
 ) => {
   let pathname = basePathname;
 
+  const marketplaceMatch = pathname.match(/\/(marketplace|portal)/);
+  const marketplacePrefix = marketplaceMatch ? marketplaceMatch[0] : "";
+
   pathname = pathname.replace(GAME_ROUTE_REGEX, "");
   pathname = pathname.replace(EDITION_ROUTE_REGEX, "");
   pathname = pathname.replace(PLAYER_ROUTE_REGEX, "");
   pathname = pathname.replace(TAB_ROUTE_REGEX, "");
   pathname = pathname.replace(COLLECTION_ROUTE_REGEX, "");
+  pathname = pathname.replace(MARKETPLACE_ROUTE_REGEX, "");
 
   const address = collectionAddress.toLowerCase();
 
@@ -27,6 +32,7 @@ export const buildMarketplaceTargetPath = (
     const gameName = game.name.replace(/ /g, "-").toLowerCase();
     const editionName = edition.name.replace(/ /g, "-").toLowerCase();
     return joinPaths(
+      marketplacePrefix,
       pathname,
       `/game/${gameName}/edition/${editionName}/collection/${address}`,
     );
@@ -34,7 +40,11 @@ export const buildMarketplaceTargetPath = (
 
   if (game) {
     const gameName = game.name.replace(/ /g, "-").toLowerCase();
-    return joinPaths(pathname, `/game/${gameName}/collection/${address}`);
+    return joinPaths(
+      marketplacePrefix,
+      pathname,
+      `/game/${gameName}/collection/${address}`,
+    );
   }
 
   return `/collection/${address}`;

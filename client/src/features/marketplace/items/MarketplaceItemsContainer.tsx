@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { getChecksumAddress } from "starknet";
 import type { SaleEvent } from "@cartridge/arcade";
-import { resizeImage } from "@/helpers";
+import { resizeImage } from "@/lib/helpers";
+import placeholderImage from "@/assets/placeholder.svg";
 import {
   ItemsEmptyState,
   ItemsLoadingState,
@@ -18,7 +19,7 @@ import {
 import {
   formatPriceInfo,
   deriveLatestSalePriceForToken,
-} from "@/shared/marketplace/utils";
+} from "@/lib/shared/marketplace/utils";
 
 const ROW_HEIGHT = 218;
 const ITEMS_PER_ROW = 4;
@@ -90,10 +91,12 @@ const createItemView = (params: {
       asset.name ||
       "Untitled",
     image:
-      resizeImage(asset.image ?? collectionImage, 300, 300) ?? collectionImage,
+      resizeImage((asset as any).image ?? collectionImage, 300, 300) ??
+      collectionImage,
     listingCount: asset.orders.length,
     price: derivePrice(asset),
     lastSale: deriveLastSale(asset, salesByContract),
+    placeholderImage,
     selectable: isConnected && selectable,
     selected: isConnected && selected,
     canOpen: openable,
@@ -148,18 +151,18 @@ export const MarketplaceItemsContainer = ({
     overscan: 2,
   });
 
-  useEffect(() => {
-    const virtualItems = virtualizer.getVirtualItems();
-    const lastItem = virtualItems[virtualItems.length - 1];
-
-    if (!lastItem) return;
-
-    if (lastItem.index >= rowCount - 1 && hasMore && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [rowCount, hasMore, isFetchingNextPage, fetchNextPage, virtualizer]);
-
   const virtualItems = virtualizer.getVirtualItems();
+  const lastVisibleIndex =
+    virtualItems.length > 0 ? virtualItems[virtualItems.length - 1]?.index : -1;
+
+  useEffect(() => {
+    if (lastVisibleIndex < 0) return;
+    if (!hasMore || isFetchingNextPage) return;
+    if (rowCount === 0) return;
+    if (lastVisibleIndex < rowCount - 1) return;
+
+    fetchNextPage();
+  }, [lastVisibleIndex, rowCount, hasMore, isFetchingNextPage, fetchNextPage]);
 
   const salesByContract = useMemo(() => {
     return sales[getChecksumAddress(collectionAddress)] as
@@ -222,17 +225,18 @@ export const MarketplaceItemsContainer = ({
   const totalHeight = virtualizer.getTotalSize();
 
   const shouldShowLoading =
-    (rawTokens === undefined || rawTokens.length === 0) && status === "loading";
+    (rawTokens === undefined || rawTokens.length === 0) &&
+    ["idle", "loading"].includes(status);
 
   const shouldShowEmpty =
     rawTokens !== undefined && rawTokens.length === 0 && status !== "loading";
 
-  if (shouldShowEmpty) {
-    return <ItemsEmptyState />;
-  }
-
   if (shouldShowLoading) {
     return <ItemsLoadingState />;
+  }
+
+  if (shouldShowEmpty) {
+    return <ItemsEmptyState />;
   }
 
   return (

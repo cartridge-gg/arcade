@@ -40,7 +40,7 @@ export function useGamesViewModel({
   isPWA: boolean;
 }): GamesViewModel {
   const { address } = useAccount();
-  const { games, editions } = useArcade();
+  const { games } = useArcade();
   const { game } = useProject();
   const { ownerships } = useOwnerships();
   const sidebar = useSidebar();
@@ -51,9 +51,10 @@ export function useGamesViewModel({
       const ownerAddress = ownerships.find(
         (ownership) => ownership.tokenId === BigInt(currentGame.id),
       )?.accountAddress;
-      const isOwner = Boolean(
-        ownerAddress && BigInt(ownerAddress) === BigInt(address || "0x1"),
-      );
+      const isOwner =
+        ownerAddress !== undefined &&
+        address !== undefined &&
+        BigInt(ownerAddress) === BigInt(address);
 
       return {
         id: currentGame.id,

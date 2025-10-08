@@ -154,7 +154,7 @@ export function useInventoryTokensViewModel({
         amount: formatAmount(token.balance.amount, token.metadata.symbol),
         value: formatValue(token.balance.value),
         change: formatChange(token.balance.change),
-        isClickable: isSelf,
+        isClickable: Boolean(isSelf),
         onClick: isSelf
           ? () => handleTokenClick(token, editionForToken?.properties.preset)
           : undefined,

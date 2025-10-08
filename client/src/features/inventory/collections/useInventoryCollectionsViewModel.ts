@@ -8,7 +8,7 @@ import { useRouterState } from "@tanstack/react-router";
 import type ControllerConnector from "@cartridge/connector/controller";
 import { CollectionType } from "@/context/collection";
 import { getChecksumAddress } from "starknet";
-import { joinPaths, resizeImage } from "@/helpers";
+import { joinPaths, resizeImage } from "@/lib/helpers";
 import { TAB_SEGMENTS } from "@/hooks/project";
 import type { EnrichedTokenContract } from "@/collections";
 import { useAccountByAddress } from "@/collections";
@@ -154,7 +154,7 @@ export function useInventoryCollectionsViewModel({
           } else {
             options.push("preset=cartridge");
           }
-          const path = `account/${username.username}/inventory/${subpath}/${collection.contract_address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+          const path = `account/${username}/inventory/${subpath}/${collection.contract_address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
           controller.openProfileAt(path);
         }
       };

@@ -4,7 +4,7 @@ import { useArcade } from "@/hooks/arcade";
 import { useProject } from "@/hooks/project";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import type { EditionModel, GameModel } from "@cartridge/arcade";
 
 export interface EditionListItem {
@@ -25,7 +25,9 @@ export interface EditionsViewModel {
   isGameOwner: boolean;
   navigateToEdition: (edition: EditionModel) => void;
   setLocalEdition: (edition: EditionModel | null) => void;
-  updateLocalEdition: (updater: (edition: EditionModel) => EditionModel) => void;
+  updateLocalEdition: (
+    updater: (edition: EditionModel) => EditionModel,
+  ) => void;
 }
 
 export function useEditionsViewModel(): EditionsViewModel {
@@ -57,21 +59,26 @@ export function useEditionsViewModel(): EditionsViewModel {
 
   const gameOwner = useMemo(() => {
     if (!game || !address) return false;
-    const ownership = ownerships.find((item) => item.tokenId === BigInt(game.id));
+    const ownership = ownerships.find(
+      (item) => item.tokenId === BigInt(game.id),
+    );
     if (!ownership) return false;
     return BigInt(ownership.accountAddress) === BigInt(address);
   }, [game, ownerships, address]);
 
   const editionItems = useMemo(() => {
-    return gameEditions.map((item) => ({
-      id: item.id,
-      name: item.name,
-      certified: item.certified,
-      whitelisted: item.whitelisted,
-      published: item.published,
-      active: item.id === localEdition?.id,
-      edition: item,
-    } satisfies EditionListItem));
+    return gameEditions.map(
+      (item) =>
+        ({
+          id: item.id,
+          name: item.name,
+          certified: item.certified ?? false,
+          whitelisted: item.whitelisted,
+          published: item.published,
+          active: item.id === localEdition?.id,
+          edition: item,
+        }) satisfies EditionListItem,
+    );
   }, [gameEditions, localEdition?.id]);
 
   const navigateToEdition = useCallback(
@@ -91,19 +98,22 @@ export function useEditionsViewModel(): EditionsViewModel {
 
   const updateLocalEdition = useCallback(
     (updater: (edition: EditionModel) => EditionModel) => {
-      setLocalEdition((current) => (current ? updater(cloneEdition(current)) : current));
+      setLocalEdition((current) =>
+        current ? updater(cloneEdition(current)) : current,
+      );
     },
     [],
   );
 
   return {
-    game,
+    game: game ?? null,
     selectedEdition: localEdition,
     editions: editionItems,
     isEditionOwner: editionOwner,
     isGameOwner: gameOwner,
     navigateToEdition,
-    setLocalEdition: (value) => setLocalEdition(value ? cloneEdition(value) : null),
+    setLocalEdition: (value) =>
+      setLocalEdition(value ? cloneEdition(value) : null),
     updateLocalEdition,
   } satisfies EditionsViewModel;
 }

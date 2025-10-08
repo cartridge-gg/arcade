@@ -52,7 +52,11 @@ export function Template({ children }: TemplateProps) {
             <div className="lg:space-y-4 h-full flex flex-col">
               {!isMobile && <UserCard />}
               <div className="flex-1 overflow-hidden">
-                {!collection ? <GamesContainer /> : <MarketplaceFiltersContainer />}
+                {!collection ? (
+                  <GamesContainer />
+                ) : (
+                  <MarketplaceFiltersContainer />
+                )}
               </div>
             </div>
 

@@ -10,9 +10,9 @@ import { useAchievements } from "@/hooks/achievements";
 import { useArcade } from "@/hooks/arcade";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import banner from "@/assets/banner.png";
-import type { Item } from "@/helpers/achievements";
+import type { Item } from "@/lib/achievements";
 import type { AchievementSummaryProps } from "@/components/ui/modules/summary";
 
 export interface AchievementSummaryCardView {
@@ -30,7 +30,7 @@ export interface AchievementSummaryCardView {
 export interface TrophyShareView {
   website?: string;
   twitter?: string;
-  timestamp?: string;
+  timestamp?: number;
   points: number;
   difficulty: number;
   title: string;
@@ -58,7 +58,7 @@ export interface TrophyAchievementView {
     title: string;
     description?: string;
     tasks?: Item["tasks"];
-    timestamp?: string;
+    timestamp?: number;
   };
   share?: TrophyShareView;
   pin?: TrophyPinView;
@@ -168,7 +168,6 @@ export function useAchievementsViewModel({
   const summaryCards = useMemo(() => {
     return dataByProject.map(
       ({ edition: currentEdition, achievements: items, game: projectGame }) => {
-        const projectKey = currentEdition.config.project || "";
         const pinneds = items
           .filter(
             (item) =>
@@ -223,8 +222,16 @@ export function useAchievementsViewModel({
             ? undefined
             : () => {
                 let pathname = location.pathname;
-                const gameSegment = `${(projectGame.name || projectGame.id).toLowerCase().replace(/ /g, "-")}`;
-                const editionSegment = `${(currentEdition.name || currentEdition.id).toLowerCase().replace(/ /g, "-")}`;
+                const gameSegment = `${String(
+                  projectGame.name || projectGame.id,
+                )
+                  .toLowerCase()
+                  .replace(/ /g, "-")}`;
+                const editionSegment = `${String(
+                  currentEdition.name || currentEdition.id,
+                )
+                  .toLowerCase()
+                  .replace(/ /g, "-")}`;
                 pathname = pathname.replace(/\/game\/[^/]+/, "");
                 pathname = pathname.replace(/\/edition\/[^/]+/, "");
                 if (projectGame.id !== 0) {
@@ -399,7 +406,7 @@ export function useAchievementsViewModel({
             : a.name.localeCompare(b.name),
       );
 
-  return {
+    return {
       groups,
       softView: !isSelf,
       enabled,

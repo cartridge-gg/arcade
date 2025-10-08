@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 import { getChecksumAddress } from "starknet";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import { useAchievements } from "@/hooks/achievements";
 import { useArcade } from "@/hooks/arcade";
 import type { EditionModel } from "@cartridge/arcade";
@@ -149,7 +149,7 @@ export function useLeaderboardViewModel({
   }, []);
 
   return {
-    isConnected,
+    isConnected: Boolean(isConnected),
     isLoading,
     isError,
     allEntries: dataset.all,

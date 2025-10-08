@@ -10,7 +10,7 @@ interface HoldersViewProps {
   filteredOwnersCount: number;
   onClearFilters: () => void;
   isLoadingMore: boolean;
-  loadingProgress: number | undefined;
+  loadingProgress: { completed: number; total: number } | undefined;
 }
 
 export const HoldersView = ({

@@ -39,7 +39,10 @@ export const AboutMetrics = () => {
 
   const [activeTab, setActiveTab] = useState<"txs" | "players">("txs");
   const [isPanning, setIsPanning] = useState(false);
-  const [visibleRange, setVisibleRange] = useState<{ min: number; max: number } | null>(null);
+  const [visibleRange, setVisibleRange] = useState<{
+    min: number;
+    max: number;
+  } | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -129,7 +132,10 @@ export const AboutMetrics = () => {
   }, [allMetrics]);
 
   const chartData = useMemo(() => {
-    const dailyData = new Map<number, { date: Date; transactionCount: number; callerCount: number }>();
+    const dailyData = new Map<
+      number,
+      { date: Date; transactionCount: number; callerCount: number }
+    >();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -137,7 +143,9 @@ export const AboutMetrics = () => {
       metrics.data.forEach(({ date, transactionCount, callerCount }) => {
         const normalizedDate = new Date(date);
         normalizedDate.setHours(0, 0, 0, 0);
-        const diffDays = Math.round((today.getTime() - normalizedDate.getTime()) / (24 * 60 * 60 * 1000));
+        const diffDays = Math.round(
+          (today.getTime() - normalizedDate.getTime()) / (24 * 60 * 60 * 1000),
+        );
         if (diffDays >= 0 && diffDays <= 49) {
           dailyData.set(diffDays, {
             date: normalizedDate,
@@ -157,11 +165,18 @@ export const AboutMetrics = () => {
     const counts: number[] = [];
     for (let i = Math.min(49, mostRecent); i >= 0; i--) {
       const entry = dailyData.get(i);
-      const date = entry?.date ?? new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+      const date =
+        entry?.date ?? new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
       const month = date.getMonth() + 1;
       const day = date.getDate();
       labels.push(`${month}/${day}`);
-      counts.push(entry ? (activeTab === "txs" ? entry.transactionCount : entry.callerCount) : 0);
+      counts.push(
+        entry
+          ? activeTab === "txs"
+            ? entry.transactionCount
+            : entry.callerCount
+          : 0,
+      );
     }
 
     const pointBorderWidth = isMobile ? 1 : 2;
@@ -171,7 +186,8 @@ export const AboutMetrics = () => {
     const datasets: ChartDataset<"line", number[]>[] = [
       {
         fill: true,
-        label: activeTab === "txs" ? "Daily Transactions" : "Daily Active Players",
+        label:
+          activeTab === "txs" ? "Daily Transactions" : "Daily Active Players",
         data: counts,
         borderColor: "#2A2F2A",
         backgroundColor: "#212621",
@@ -199,7 +215,10 @@ export const AboutMetrics = () => {
     const visibleMin = visibleRange?.min ?? defaultMin;
     const visibleMax = visibleRange?.max ?? defaultMax;
 
-    const visibleData = (chartData.datasets[0].data as number[]).slice(visibleMin, visibleMax + 1);
+    const visibleData = (chartData.datasets[0].data as number[]).slice(
+      visibleMin,
+      visibleMax + 1,
+    );
     const maxValue = visibleData.length > 0 ? Math.max(...visibleData) : 0;
     const roundedMax = maxValue < 10 ? 10 : Math.ceil(maxValue);
     const stepSize = roundedMax / 2;
@@ -215,7 +234,9 @@ export const AboutMetrics = () => {
         mode: isPanning ? "nearest" : "index",
       },
       animation: isPanning ? false : { duration: 300 },
-      events: isPanning ? [] : ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
+      events: isPanning
+        ? []
+        : ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
       plugins: {
         zoom: {
           pan: {
@@ -253,7 +274,12 @@ export const AboutMetrics = () => {
       scales: {
         x: {
           grid: { display: false },
-          ticks: { maxRotation: 45, minRotation: 45, autoSkip: true, maxTicksLimit: 7 },
+          ticks: {
+            maxRotation: 45,
+            minRotation: 45,
+            autoSkip: true,
+            maxTicksLimit: 7,
+          },
           min: visibleMin,
           max: visibleMax,
         },

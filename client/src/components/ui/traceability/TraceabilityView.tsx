@@ -1,13 +1,23 @@
-import type { ComponentProps } from "react";
 import { cn, Empty } from "@cartridge/ui";
 
 interface TraceabilityViewProps {
   className?: string;
-  title: ComponentProps<typeof Empty>["title"];
-  icon: ComponentProps<typeof Empty>["icon"];
+  title?: string;
+  icon?:
+    | "activity"
+    | "achievement"
+    | "guild"
+    | "inventory"
+    | "discover"
+    | "leaderboard"
+    | "claim";
 }
 
-export const TraceabilityView = ({ className, title, icon }: TraceabilityViewProps) => {
+export const TraceabilityView = ({
+  className,
+  title,
+  icon,
+}: TraceabilityViewProps) => {
   return (
     <Empty
       title={title}

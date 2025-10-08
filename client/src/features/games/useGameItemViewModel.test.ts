@@ -110,4 +110,31 @@ describe("useGameItemViewModel", () => {
 
     expect(trackGameInteraction).toHaveBeenCalled();
   });
+
+  it("does not treat disconnected accounts as owners or admins", () => {
+    const game = createGame();
+    mockUseAccount.mockReturnValue({ address: undefined });
+    mockUseArcade.mockReturnValue({
+      accesses: [
+        {
+          address: "0x1",
+          role: { value: "Admin" },
+        },
+      ],
+      editions: [
+        {
+          id: 10,
+          gameId: 1,
+          config: { project: "proj" },
+        },
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useGameItemViewModel(game, { selectedGameId: 1 }),
+    );
+
+    expect(result.current.owner).toBe(false);
+    expect(result.current.admin).toBe(false);
+  });
 });

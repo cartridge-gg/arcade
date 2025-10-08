@@ -4,17 +4,17 @@ import { cn } from "@cartridge/ui/utils";
 import { LeaderboardScene } from "../scenes/leaderboard";
 import { useRouterState } from "@tanstack/react-router";
 import { Socials } from "@cartridge/arcade";
-import { ArcadeTabs } from "../modules";
+import { ArcadeTabs } from "../ui/modules/tabs";
 import { MarketplaceScene } from "../scenes/marketplace";
 import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
 import { EditionsContainer } from "@/features/editions";
 import arcade from "@/assets/arcade-logo.png";
 import { useProject, TAB_SEGMENTS } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import { useDevice } from "@/hooks/device";
 import { PredictScene } from "../scenes/predict";
-import { GameSocialWebsite } from "../modules/game-social";
+import { GameSocialWebsite } from "../ui/modules/game-social";
 
 export function GamePage() {
   const { game, edition, tab } = useProject();

@@ -1,8 +1,6 @@
 import { useMemo } from "react";
-import { getChecksumAddress } from "starknet";
 import {
   StatusType,
-  type CollectionEditionModel,
   type EditionModel,
   type GameModel,
   type OrderModel,
@@ -11,17 +9,15 @@ import {
 import { useMarketplace } from "@/hooks/marketplace";
 import {
   useCollectionEditions,
-  useEditions,
-  useGames,
   useTokenContracts,
   type EnrichedTokenContract,
 } from "@/collections";
-import { resizeImage } from "@/helpers";
+import { resizeImage } from "@/lib/helpers";
 import {
   deriveBestPrice,
   deriveLatestSalePrice,
-} from "@/shared/marketplace/utils";
-import { buildMarketplaceTargetPath } from "@/shared/marketplace/path";
+} from "@/lib/shared/marketplace/utils";
+import { buildMarketplaceTargetPath } from "@/lib/shared/marketplace/path";
 
 export interface MarketplaceCollectionPriceInfo {
   value: string;
@@ -41,6 +37,7 @@ export interface MarketplaceCollectionListItem {
 
 interface UseMarketplaceCollectionsViewModelArgs {
   edition?: EditionModel;
+  game?: GameModel;
   currentPathname: string;
 }
 
@@ -69,12 +66,12 @@ const buildMarketplaceItems = (
   options: {
     orders: ReturnType<typeof useMarketplace>["orders"];
     sales: ReturnType<typeof useMarketplace>["sales"];
-    editions: EditionModel[];
-    games: GameModel[];
     currentPathname: string;
+    edition: EditionModel | undefined;
+    game: GameModel | undefined;
   },
 ): MarketplaceCollectionListItem[] => {
-  const { orders, sales, editions, games, currentPathname } = options;
+  const { orders, sales, edition, game, currentPathname } = options;
 
   return collections.map((collection) => {
     const collectionAddress = collection.contract_address;
@@ -87,21 +84,13 @@ const buildMarketplaceItems = (
     );
     const price = deriveBestPrice(collectionOrders);
 
-    const edition =
-      editions.find((item) => item.config.project === collection.project) ||
-      null;
-
-    const game = edition
-      ? games.find((g) => g.id === edition.gameId) || null
-      : null;
-
     const target = buildMarketplaceTargetPath(
       currentPathname,
       collectionAddress,
-      game,
-      edition,
+      game ?? null,
+      edition ?? null,
     );
-    const totalCount = Number.parseInt(collection.total_supply);
+    const totalCount = Number.parseInt(collection.total_supply ?? "0");
 
     return {
       key: `${collection.project}-${collectionAddress}`,
@@ -118,10 +107,9 @@ const buildMarketplaceItems = (
 
 export function useMarketplaceCollectionsViewModel({
   edition,
+  game,
   currentPathname,
 }: UseMarketplaceCollectionsViewModelArgs): MarketplaceCollectionsViewModel {
-  const editions = useEditions();
-  const games = useGames();
   const collectionEditions = useCollectionEditions();
   const { data: allCollections, status } = useTokenContracts();
   const { orders, sales } = useMarketplace();
@@ -129,11 +117,8 @@ export function useMarketplaceCollectionsViewModel({
   const filteredCollections = useMemo(() => {
     if (!edition) return allCollections;
 
-    const typedCollectionEditions =
-      collectionEditions as CollectionEditionModel[];
-
     return allCollections.filter((collection) =>
-      typedCollectionEditions.some((collectionEdition) => {
+      collectionEditions.some((collectionEdition) => {
         return (
           BigInt(collectionEdition.collection) ===
             BigInt(collection.contract_address) &&
@@ -145,14 +130,14 @@ export function useMarketplaceCollectionsViewModel({
 
   const items = useMemo(
     () =>
-      buildMarketplaceItems(filteredCollections as EnrichedTokenContract[], {
+      buildMarketplaceItems(filteredCollections, {
         orders,
         sales,
-        editions,
-        games,
         currentPathname,
+        edition,
+        game,
       }),
-    [filteredCollections, orders, sales, editions, games, currentPathname],
+    [filteredCollections, orders, sales, currentPathname, edition, game],
   );
 
   const isLoading =

@@ -100,11 +100,11 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     (attribute: string, property: string, enabled: boolean) => {
       const isActive = activeFilters[attribute]?.has(property) ?? false;
 
-    if (enabled && !isActive) {
-      setFilter(attribute, property);
-    } else if (!enabled) {
-      removeFilter(attribute, property);
-    }
+      if (enabled && !isActive) {
+        setFilter(attribute, property);
+      } else if (!enabled) {
+        removeFilter(attribute, property);
+      }
 
       trackEvent(events.MARKETPLACE_FILTER_APPLIED, {
         filter_type: attribute,

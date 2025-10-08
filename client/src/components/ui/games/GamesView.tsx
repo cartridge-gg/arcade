@@ -20,7 +20,7 @@ import { UserCard } from "@/components/user/user-card";
 import { useGameItemViewModel } from "@/features/games/useGameItemViewModel";
 import type {
   GamesViewModel,
-  GamesListItem as GameListItemComponent,
+  GameListItem as GameListItemComponent,
 } from "@/features/games/useGamesViewModel";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";

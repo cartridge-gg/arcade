@@ -1,6 +1,9 @@
 import { useEditionsMap } from "@/collections";
 import { type Contract, useMarketplaceStore } from "@/store";
-import { fetchToriisStream } from "@cartridge/arcade";
+import {
+  fetchToriisStream,
+  type ClientCallbackParams,
+} from "@cartridge/arcade";
 import { useEffect, useCallback, useRef } from "react";
 import { getChecksumAddress } from "starknet";
 import type { Token } from "@dojoengine/torii-wasm";
@@ -62,7 +65,7 @@ export function useMarketCollectionFetcher({
           console.error("failed to parse json metadata for ", project);
         }
 
-        const image = await fetchTokenImage(c as Token, project, false);
+        const image = await fetchTokenImage(c as Token, project, true);
 
         collections[address] = {
           ...c,
@@ -90,7 +93,7 @@ export function useMarketCollectionFetcher({
       try {
         const limit = quickLoad ? 500 : 5000;
         const stream = fetchToriisStream(projects, {
-          client: async function* ({ client }) {
+          client: async function* ({ client }: ClientCallbackParams) {
             const contracts = await client.getTokenContracts({
               contract_addresses: [],
               contract_types: ["ERC721", "ERC1155"],
@@ -118,8 +121,7 @@ export function useMarketCollectionFetcher({
                 if (c.metadata === "" && t.metadata !== "") {
                   c.metadata = token.items[0].metadata;
                 }
-                // @ts-expect-error trust me i'm an engineer
-                c.token_id = token.items[0].token_id;
+                (c as any).token_id = token.items[0].token_id;
               }
             }
             yield contracts.items;

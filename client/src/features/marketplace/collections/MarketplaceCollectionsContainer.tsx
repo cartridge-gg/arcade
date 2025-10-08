@@ -1,4 +1,4 @@
-import type { EditionModel } from "@cartridge/arcade";
+import type { EditionModel, GameModel } from "@cartridge/arcade";
 import { useRouterState } from "@tanstack/react-router";
 import {
   CollectionsGrid,
@@ -9,14 +9,17 @@ import { useMarketplaceCollectionsViewModel } from "./useMarketplaceCollectionsV
 
 interface MarketplaceCollectionsContainerProps {
   edition?: EditionModel;
+  game?: GameModel;
 }
 
 export const MarketplaceCollectionsContainer = ({
   edition,
+  game,
 }: MarketplaceCollectionsContainerProps) => {
   const { location } = useRouterState();
   const { items, isLoading, isEmpty } = useMarketplaceCollectionsViewModel({
     edition,
+    game,
     currentPathname: location.pathname,
   });
 

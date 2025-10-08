@@ -27,7 +27,7 @@ import {
 } from "../form";
 import { Attributes, Properties, Socials } from "@cartridge/arcade";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { MetadataHelper } from "@/helpers/metadata";
+import { MetadataHelper } from "@/lib/metadata";
 import { formSchema } from "./register-form";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { toast } from "sonner";

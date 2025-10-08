@@ -10,7 +10,6 @@ export const MarketplaceFiltersContainer = () => {
     hasActiveFilters,
     setFilter,
     clearAllFilters,
-    searchValue,
     setSearchValue,
   } = useMarketplaceFiltersViewModel();
 

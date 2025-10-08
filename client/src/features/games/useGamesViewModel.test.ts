@@ -87,4 +87,12 @@ describe("useGamesViewModel", () => {
     );
     expect(result.current.selectedGameId).toBe(2);
   });
+
+  it("does not mark ownership when account is disconnected", () => {
+    mockUseAccount.mockReturnValue({ address: undefined });
+    const { result } = renderHook(() =>
+      useGamesViewModel({ isMobile: false, isPWA: false }),
+    );
+    expect(result.current.games[1].owner).toBe(false);
+  });
 });

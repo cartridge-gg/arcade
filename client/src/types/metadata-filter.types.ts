@@ -1,69 +1,22 @@
 import type { Token } from "@dojoengine/torii-wasm";
 
-// Core metadata structures
-export interface MetadataIndex {
-  [trait: string]: {
-    [value: string]: string[]; // Array of token IDs
-  };
-}
+export type StatusFilter = "all" | "listed";
 
-export interface TokenAttribute {
-  trait_type: string;
-  value: string | number;
-  display_type?: string;
-}
-
-export interface TokenMetadata {
-  name?: string;
-  image?: string;
-  attributes?: TokenAttribute[];
-}
-
-// Filter state management
-export interface ActiveFilters {
-  [trait: string]: Set<string>; // Selected values per trait
-}
-
-export interface AvailableFilters {
-  [trait: string]: {
-    [value: string]: number; // Count of tokens with this trait-value
-  };
-}
-
-// Pre-computed filter data for performance
-export interface PrecomputedProperty {
+export interface PrecomputedFilterProperty {
   property: string;
-  order: number; // Total count across all tokens
+  order: number;
+  count: number;
 }
 
 export interface PrecomputedFilterData {
-  attributes: string[]; // Sorted list of unique traits
-  properties: {
-    [trait: string]: PrecomputedProperty[]; // Sorted properties with counts
-  };
-  // Pre-computed metadata format for UI
-  allMetadata: Array<{
-    trait_type: string;
-    value: string;
-    tokens: Array<{ token_id: string }>;
-  }>;
+  attributes: string[];
+  properties: Record<string, PrecomputedFilterProperty[]>;
 }
 
-export type StatusFilter = "all" | "listed";
+export type ActiveFilters = Record<string, Set<string>>;
 
-export interface FilterState {
-  activeFilters: ActiveFilters;
-  availableFilters: AvailableFilters;
-}
+export type AvailableFilters = Record<string, Record<string, number>>;
 
-export interface CollectionFilterState extends FilterState {
-  metadataIndex: MetadataIndex;
-  precomputed?: PrecomputedFilterData; // Optional for backward compatibility
-  lastUpdated: number;
-  statusFilter: StatusFilter;
-}
-
-// Hook interfaces
 export interface UseMetadataFiltersInput {
   tokens: Token[];
   collectionAddress: string;
@@ -71,34 +24,27 @@ export interface UseMetadataFiltersInput {
 }
 
 export interface UseMetadataFiltersReturn {
-  // State
   filteredTokens: Token[];
-  metadataIndex: MetadataIndex;
-  precomputed?: PrecomputedFilterData;
   activeFilters: ActiveFilters;
   availableFilters: AvailableFilters;
+  precomputed: PrecomputedFilterData;
   statusFilter: StatusFilter;
-
-  // Actions
+  setStatusFilter: (status: StatusFilter) => void;
   setFilter: (trait: string, value: string) => void;
   removeFilter: (trait: string, value?: string) => void;
   clearAllFilters: () => void;
-  setStatusFilter: (status: StatusFilter) => void;
-
-  // Status
   isLoading: boolean;
   isEmpty: boolean;
 }
 
-// Store interface
-export interface MetadataFilterStore {
-  collections: {
-    [collectionAddress: string]: CollectionFilterState;
-  };
+export interface CollectionFilterState {
+  activeFilters: ActiveFilters;
+  statusFilter: StatusFilter;
+}
 
-  // Actions
-  setMetadataIndex: (collectionAddress: string, index: MetadataIndex) => void;
-  setActiveFilters: (collectionAddress: string, filters: ActiveFilters) => void;
+export interface MetadataFilterStore {
+  collections: Record<string, CollectionFilterState>;
+  replaceFilters: (collectionAddress: string, filters: ActiveFilters) => void;
   toggleFilter: (
     collectionAddress: string,
     trait: string,
@@ -110,40 +56,8 @@ export interface MetadataFilterStore {
     value?: string,
   ) => void;
   clearFilters: (collectionAddress: string) => void;
-  updateAvailableFilters: (
-    collectionAddress: string,
-    filters: AvailableFilters,
-  ) => void;
   setStatusFilter: (collectionAddress: string, status: StatusFilter) => void;
-
-  // Selectors
   getCollectionState: (
     collectionAddress: string,
   ) => CollectionFilterState | undefined;
-  getActiveFilters: (collectionAddress: string) => ActiveFilters;
-  getFilteredTokenIds: (collectionAddress: string) => string[];
-  getStatusFilter: (collectionAddress: string) => StatusFilter;
 }
-
-// URL serialization
-export interface FilterURLParams {
-  filters?: string; // Format: "trait1:value1,value2|trait2:value3"
-}
-
-// Utility function types
-export type BuildMetadataIndex = (tokens: Token[]) => MetadataIndex;
-export type UpdateMetadataIndex = (
-  existingIndex: MetadataIndex,
-  newTokens: Token[],
-) => MetadataIndex;
-export type ExtractTokenAttributes = (token: Token) => TokenAttribute[];
-export type CalculateFilterCounts = (
-  metadataIndex: MetadataIndex,
-  tokenIds?: string[],
-) => AvailableFilters;
-export type ApplyFilters = (
-  metadataIndex: MetadataIndex,
-  activeFilters: ActiveFilters,
-) => string[];
-export type SerializeFiltersToURL = (filters: ActiveFilters) => string;
-export type ParseFiltersFromURL = (urlParams: string) => ActiveFilters;

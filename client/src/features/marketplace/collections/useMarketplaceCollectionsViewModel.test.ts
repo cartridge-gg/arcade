@@ -1,11 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import {
   StatusType,
@@ -149,6 +142,7 @@ describe("useMarketplaceCollectionsViewModel", () => {
     const { result } = renderHook(() =>
       useMarketplaceCollectionsViewModel({
         edition: baseEdition,
+        game: baseGame,
         currentPathname: "/portal/game/Old Game/edition/Legacy/collection/prev",
       }),
     );

@@ -18,12 +18,21 @@ export const MetadataHelper = {
 
   extract: (tokens: Token[]) => {
     const newMetadata: { [key: string]: MetadataAttribute } = {};
-    tokens.forEach((token) => {
-      const metadata = token.metadata as unknown as {
-        attributes: { trait_type: string; value: string }[];
-      };
-      if (!metadata.attributes) return;
-      metadata.attributes.forEach((attribute) => {
+    for (const token of tokens) {
+      let metadata;
+      if (typeof token.metadata === "string") {
+        try {
+          metadata = JSON.parse(token.metadata);
+        } catch {
+          continue;
+        }
+      } else {
+        metadata = token.metadata;
+      }
+
+      if (!metadata?.attributes) continue;
+
+      for (const attribute of metadata.attributes) {
         const trait = attribute.trait_type;
         const value = attribute.value;
         const key = `${trait}-${value}`;
@@ -33,11 +42,12 @@ export const MetadataHelper = {
             value: value,
             tokens: [token.token_id || ""],
           };
-          return;
+        } else {
+          newMetadata[key].tokens.push(token.token_id || "");
         }
-        newMetadata[key].tokens.push(token.token_id || "");
-      });
-    });
+      }
+    }
+
     return Object.values(newMetadata);
   },
 
@@ -187,15 +197,21 @@ export const MetadataHelper = {
     const minified = data.replace(/\s+/g, " ").trim();
     return MetadataHelper.upload(minified);
   },
+
   getToriiContractImage: async (
     project: string,
+
     contractAddress: string,
   ): Promise<string | undefined> => {
     if (!contractAddress) return;
+
     const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/image`;
+
     // Fetch if the image exists
+
     try {
       const response = await fetch(toriiImage);
+
       if (response.ok) {
         return toriiImage;
       }
@@ -203,6 +219,7 @@ export const MetadataHelper = {
       console.error("Error fetching image:", error);
     }
   },
+
   getToriiImage: async (
     project: string,
     token: Token,

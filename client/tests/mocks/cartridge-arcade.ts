@@ -86,11 +86,10 @@ class OrderModel extends BaseModel {
     const status = (data.status as AnyRecord) ?? {};
     const value = status.value;
     this.status = {
-      value:
-        (typeof value === "string" &&
-          (Object.values(StatusType) as string[]).includes(value)
-          ? value
-          : StatusType.Placed) as (typeof StatusType)[keyof typeof StatusType],
+      value: (typeof value === "string" &&
+      (Object.values(StatusType) as string[]).includes(value)
+        ? value
+        : StatusType.Placed) as (typeof StatusType)[keyof typeof StatusType],
     };
   }
 }
@@ -107,6 +106,7 @@ class Socials {
   static merge(...sources: Array<AnyRecord | null | undefined>) {
     return sources.reduce<AnyRecord>((acc, source) => {
       if (!source) return acc;
+      // biome-ignore lint/performance/noAccumulatingSpread: this is a test file, we can disable linting for this usecase
       return { ...acc, ...source };
     }, {});
   }

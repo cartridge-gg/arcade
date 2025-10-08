@@ -43,7 +43,7 @@ export const InventoryTokensView = ({
           )}
           onClick={onToggle}
         >
-          <ToggleIcon size="xs" />
+          <ToggleIcon size="xs" variant="line" />
           <p className="text-sm font-medium">{toggleLabel}</p>
         </div>
       )}

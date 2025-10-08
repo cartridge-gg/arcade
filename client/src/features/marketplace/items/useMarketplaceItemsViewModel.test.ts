@@ -1,11 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  vi,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import type { Token } from "@dojoengine/torii-wasm";
 import type { OrderModel } from "@cartridge/arcade";

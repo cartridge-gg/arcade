@@ -18,14 +18,16 @@ interface AboutViewProps {
   };
 }
 
-export const AboutView = ({ edition, mediaItems, socials, details }: AboutViewProps) => {
+export const AboutView = ({ mediaItems, socials, details }: AboutViewProps) => {
   return (
     <div className="flex flex-col gap-4 py-3 lg:py-6">
       <AboutMedia items={mediaItems} />
 
       {socials && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs tracking-wider font-semibold text-foreground-400">Links</p>
+          <p className="text-xs tracking-wider font-semibold text-foreground-400">
+            Links
+          </p>
           <GameSocials socials={socials} />
         </div>
       )}
