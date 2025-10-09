@@ -28,11 +28,13 @@ export interface ArcadeTabProps extends VariantProps<typeof arcadeTabVariants> {
   active?: boolean;
   className?: string;
   onClick?: () => void;
+  disabled?: boolean;
+  suffix?: string;
 }
 
 export const ArcadeTab = React.forwardRef<HTMLButtonElement, ArcadeTabProps>(
   (
-    { Icon, value, label, active, className, variant, size, onClick, ...props },
+    { Icon, value, label, active, className, variant, size, onClick, disabled, ...props },
     ref,
   ) => {
     return (
@@ -40,10 +42,12 @@ export const ArcadeTab = React.forwardRef<HTMLButtonElement, ArcadeTabProps>(
         value={value}
         className={cn(
           "p-0 flex flex-col items-center cursor-pointer select-none transition-colors data-[state=active]:bg-transparent data-[state=active]:shadow-none  data-[state=active]:drop-shadow-none",
+          disabled && "opacity-50 cursor-not-allowed",
           className,
         )}
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
         ref={ref}
+        disabled={disabled}
         {...props}
       >
         <div
