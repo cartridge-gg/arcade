@@ -1,6 +1,6 @@
 import type { EditionModel } from "@cartridge/arcade";
 import { useState, useCallback, useRef } from "react";
-import type { Token } from "@dojoengine/torii-wasm";
+import type { Token, TokenContract } from "@dojoengine/torii-wasm";
 import { MetadataHelper } from "@/helpers/metadata";
 
 export type FetcherStatus = "idle" | "loading" | "success" | "error";
@@ -133,6 +133,20 @@ export function useFetcherState(
   }
 
   return base as FetcherStateBase;
+}
+
+export async function fetchContractImage(
+  token: TokenContract,
+  project: string,
+): Promise<string> {
+  const getToriiImage = MetadataHelper.getToriiContractImage;
+
+  const toriiImage = await getToriiImage(project, token.contract_address);
+  if (toriiImage) {
+    return toriiImage;
+  }
+
+  return "";
 }
 
 export async function fetchTokenImage(
