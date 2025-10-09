@@ -8,19 +8,6 @@ const __dirname = VPV_dirname(__filename);
 
 // api/ssr.ts
 var API_URL = process.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
-var ACTIVE_PROJECTS = [
-  { model: "", namespace: "dopewars", project: "dopewars" },
-  { model: "", namespace: "loot_survivor", project: "loot-survivor" },
-  { model: "", namespace: "underdark", project: "underdark" },
-  { model: "", namespace: "zkube", project: "zkube" },
-  { model: "", namespace: "blobert", project: "blobert" },
-  { model: "", namespace: "zdefender", project: "zdefender" },
-  { model: "", namespace: "realm", project: "realm" },
-  { model: "", namespace: "eternum", project: "eternum" },
-  { model: "", namespace: "ponziland", project: "ponziland" },
-  { model: "", namespace: "evolute_genesis", project: "evolute-genesis" },
-  { model: "", namespace: "pistols", project: "pistols" }
-];
 var ADDRESS_BY_USERNAME_QUERY = `
   query AddressByUsername($username: String!) {
     account(username: $username) {
@@ -29,59 +16,6 @@ var ADDRESS_BY_USERNAME_QUERY = `
           node {
             address
           }
-        }
-      }
-    }
-  }
-`;
-var PROGRESSIONS_QUERY = `
-  query Progressions($projects: [Project!]!, $playerId: String) {
-    playerAchievements(projects: $projects, playerId: $playerId) {
-      items {
-        meta {
-          project
-          model
-          namespace
-          count
-        }
-        achievements {
-          playerId
-          achievementId
-          points
-          taskId
-          taskTotal
-          total
-          completionTime
-        }
-      }
-    }
-  }
-`;
-var ACHIEVEMENTS_QUERY = `
-  query Achievements($projects: [Project!]!) {
-    achievements(projects: $projects) {
-      items {
-        meta {
-          project
-          model
-          namespace
-          count
-        }
-        achievements {
-          id
-          hidden
-          page
-          points
-          start
-          end
-          achievementGroup
-          icon
-          title
-          description
-          taskId
-          taskTotal
-          taskDescription
-          data
         }
       }
     }
@@ -103,19 +37,6 @@ function isValidAddress(address) {
   if (!address) return false;
   const cleaned = address.replace(/^0x/, "");
   return /^[0-9a-fA-F]{1,64}$/.test(cleaned);
-}
-function normalizeAddress(address) {
-  if (!address || typeof address !== "string") {
-    throw new Error("Invalid address: must be a non-empty string");
-  }
-  const cleaned = address.toLowerCase().replace(/^0x/, "");
-  if (!/^[0-9a-f]+$/.test(cleaned)) {
-    throw new Error(`Invalid address format: ${address}`);
-  }
-  if (cleaned.length > 64) {
-    throw new Error(`Address too long: ${address}`);
-  }
-  return cleaned.padStart(64, "0");
 }
 async function graphqlRequest(query, variables) {
   const controller = new AbortController();
@@ -147,57 +68,6 @@ async function graphqlRequest(query, variables) {
     }
     throw error;
   }
-}
-function computePlayerStats(address, progressionsData, achievementsData) {
-  let totalPoints = 0;
-  let totalCompleted = 0;
-  let totalAchievements = 0;
-  const gameStats = {};
-  let normalizedTargetAddress;
-  try {
-    normalizedTargetAddress = normalizeAddress(address);
-  } catch (error) {
-    console.error(`Failed to normalize address ${address}:`, error);
-    return { totalPoints: 0, totalCompleted: 0, totalAchievements: 0, gameStats: {} };
-  }
-  const achievementsByProject = /* @__PURE__ */ new Map();
-  for (const item of achievementsData.achievements.items) {
-    achievementsByProject.set(item.meta.project, item.achievements);
-  }
-  for (const item of progressionsData.playerAchievements.items) {
-    const project = item.meta.project;
-    const projectAchievements = achievementsByProject.get(project) || [];
-    const visibleAchievements = projectAchievements.filter((a) => !a.hidden);
-    const playerProgressions = item.achievements.filter((p) => {
-      try {
-        return normalizeAddress(p.playerId) === normalizedTargetAddress;
-      } catch {
-        return false;
-      }
-    });
-    const projectPoints = playerProgressions.reduce((sum, p) => sum + p.points, 0);
-    const completedAchievements = /* @__PURE__ */ new Set();
-    playerProgressions.forEach((p) => {
-      if (p.total >= p.taskTotal) {
-        completedAchievements.add(p.achievementId);
-      }
-    });
-    const completedCount = completedAchievements.size;
-    gameStats[project] = {
-      points: projectPoints,
-      completed: completedCount,
-      total: visibleAchievements.length
-    };
-    totalPoints += projectPoints;
-    totalCompleted += completedCount;
-    totalAchievements += visibleAchievements.length;
-  }
-  return {
-    totalPoints,
-    totalCompleted,
-    totalAchievements,
-    gameStats
-  };
 }
 function buildMetaTags(title, description, imageUrl, pageUrl) {
   const safeTitle = escapeHtml(title);
@@ -260,19 +130,13 @@ async function generateMetaTags(url) {
         }
         address = resolvedAddress;
       }
-      const projects = ACTIVE_PROJECTS;
-      const [progressionsData, achievementsData] = await Promise.all([
-        graphqlRequest(PROGRESSIONS_QUERY, { projects, playerId: address }),
-        graphqlRequest(ACHIEVEMENTS_QUERY, { projects })
-      ]);
-      const stats = computePlayerStats(address, progressionsData, achievementsData);
       title = `${usernameOrAddress} | Cartridge Arcade`;
-      description = `${stats.totalPoints.toLocaleString()} Points \u2022 ${stats.totalCompleted}/${stats.totalAchievements} Achievements`;
+      description = `View ${usernameOrAddress}'s profile on Cartridge Arcade`;
       const ogParams = new URLSearchParams({
         type: "profile",
         username: usernameOrAddress,
-        points: stats.totalPoints.toString(),
-        achievements: `${stats.totalCompleted}/${stats.totalAchievements}`
+        points: "0",
+        achievements: "0/0"
       });
       imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
     } else if (urlParts[0] === "game" && urlParts[1] && urlParts[2] === "player" && urlParts[3]) {
@@ -307,28 +171,16 @@ async function generateMetaTags(url) {
         }
         address = resolvedAddress;
       }
-      const projects = ACTIVE_PROJECTS;
-      const [progressionsData, achievementsData] = await Promise.all([
-        graphqlRequest(PROGRESSIONS_QUERY, { projects, playerId: address }),
-        graphqlRequest(ACHIEVEMENTS_QUERY, { projects })
-      ]);
-      const stats = computePlayerStats(address, progressionsData, achievementsData);
-      const gameStats = stats.gameStats[gameId];
-      if (gameStats) {
-        title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
-        description = `${gameStats.points.toLocaleString()} Points \u2022 ${gameStats.completed}/${gameStats.total} Achievements in ${gameId}`;
-        const ogParams = new URLSearchParams({
-          type: "game-profile",
-          username: usernameOrAddress,
-          game: gameId,
-          points: gameStats.points.toString(),
-          achievements: `${gameStats.completed}/${gameStats.total}`
-        });
-        imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
-      } else {
-        title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
-        description = `View ${usernameOrAddress}'s stats in ${gameId}`;
-      }
+      title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
+      description = `View ${usernameOrAddress}'s stats in ${gameId}`;
+      const ogParams = new URLSearchParams({
+        type: "game-profile",
+        username: usernameOrAddress,
+        game: gameId,
+        points: "0",
+        achievements: "0/0"
+      });
+      imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
     } else if (urlParts[0] === "game" && urlParts[1]) {
       const gameId = urlParts[1];
       title = `${gameId} - Cartridge Arcade`;
