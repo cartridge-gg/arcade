@@ -45,7 +45,7 @@ export const tokenContractsCollection = createCollection(
         },
       });
       contracts.push(...contract.items);
-      while (!!contract.next_cursor) {
+      while (contract.next_cursor) {
         try {
           contract = await client.getTokenContracts({
             contract_addresses: [],
