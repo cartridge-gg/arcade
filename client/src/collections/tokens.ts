@@ -33,18 +33,38 @@ export const tokenContractsCollection = createCollection(
         toriiUrl: `https://api.cartridge.gg/x/${DEFAULT_PROJECT}/torii`,
         worldAddress: "0x0",
       });
-      const contracts = await client.getTokenContracts({
+      const contracts: TokenContract[] = [];
+      let contract = await client.getTokenContracts({
         contract_addresses: [],
         contract_types: [],
         pagination: {
-          limit: 100,
+          limit: 5,
           cursor: undefined,
           direction: "Forward",
           order_by: [],
         },
       });
+      contracts.push(...contract.items);
+      while (!!contract.next_cursor) {
+        try {
+          contract = await client.getTokenContracts({
+            contract_addresses: [],
+            contract_types: [],
+            pagination: {
+              limit: 5,
+              cursor: contract.next_cursor,
+              direction: "Forward",
+              order_by: [],
+            },
+          });
+          contracts.push(...contract.items);
+        } catch (error) {
+          console.error("Error fetching token contracts:", error);
+          break;
+        }
+      }
       const data = await Promise.all(
-        contracts.items.map(async (contract) => {
+        contracts.map(async (contract) => {
           const token = await client.getTokens({
             contract_addresses: [contract.contract_address],
             token_ids: [],
@@ -101,6 +121,7 @@ export function useTokenContracts() {
       .orderBy(({ collections }) => collections.name)
       .select(({ collections }) => ({ ...collections })),
   );
+
   if (!data) {
     return { data: [], ...rest };
   }
