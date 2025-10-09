@@ -513,8 +513,6 @@ async function generateMetaTags(url: string): Promise<string> {
     }
   } catch (error) {
     console.error("Error generating meta tags:", error);
-    console.error("Error details:", error instanceof Error ? error.message : String(error));
-    console.error("Stack:", error instanceof Error ? error.stack : "No stack trace");
   }
 
   return buildMetaTags(title, description, imageUrl, pageUrl);
@@ -527,9 +525,6 @@ async function generateMetaTags(url: string): Promise<string> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const requestPath = (req.query.path as string) || req.url || "/";
-    console.log("SSR Handler - Request path:", requestPath);
-    console.log("SSR Handler - Query params:", req.query);
-    console.log("SSR Handler - URL:", req.url);
     const metaTags = await generateMetaTags(requestPath);
 
     const safeRequestPath = escapeHtml(requestPath);
