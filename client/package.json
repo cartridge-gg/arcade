@@ -36,6 +36,8 @@
     "@tanstack/react-query": "^5.85.3",
     "@tanstack/react-query-persist-client": "^5.85.3",
     "@tanstack/react-virtual": "^3.13.12",
+    "@vercel/node": "^5.3.24",
+    "@vercel/og": "^0.8.5",
     "chart.js": "^4.4.8",
     "chartjs-plugin-zoom": "^2.2.0",
     "class-variance-authority": "^0.7.1",
@@ -67,8 +69,7 @@
     "vite-plugin-wasm": "^3.3.0",
     "workbox-window": "^7.3.0",
     "zod": "^3.24.1",
-    "zustand": "^5.0.8",
-    "@vercel/node": "^5.3.24"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

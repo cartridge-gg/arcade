@@ -1,0 +1,33 @@
+{
+  "version": 3,
+  "routes": [
+    {
+      "src": "^/(?:(.+)/)?index(?:\\.html)?/?$",
+      "headers": {
+        "Location": "/$1"
+      },
+      "status": 308
+    },
+    {
+      "src": "^/(.*)\\.html/?$",
+      "headers": {
+        "Location": "/$1"
+      },
+      "status": 308
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/api/og$",
+      "dest": "/api/og",
+      "check": true
+    },
+    {
+      "src": "^/api/ssr$",
+      "dest": "/api/ssr",
+      "check": true
+    }
+  ],
+  "overrides": {}
+}
