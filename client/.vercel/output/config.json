@@ -27,6 +27,30 @@
       "src": "^/api/ssr$",
       "dest": "/api/ssr",
       "check": true
+    },
+    {
+      "src": "^/player/([^/]+)/tab/([^/]+)$",
+      "dest": "/api/ssr?path=/player/$1/tab/$2",
+      "check": true
+    },
+    {
+      "src": "^/player/([^/]+)$",
+      "dest": "/api/ssr?path=/player/$1",
+      "check": true
+    },
+    {
+      "src": "^/game/([^/]+)/player/([^/]+)$",
+      "dest": "/api/ssr?path=/game/$1/player/$2",
+      "check": true
+    },
+    {
+      "src": "^/game/([^/]+)$",
+      "dest": "/api/ssr?path=/game/$1",
+      "check": true
+    },
+    {
+      "src": "^/(.*)$",
+      "dest": "/$1"
     }
   ],
   "overrides": {}
