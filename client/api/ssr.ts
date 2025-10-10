@@ -46,7 +46,7 @@ const ADDRESS_BY_USERNAME_QUERY = `
 `;
 
 const PROGRESSIONS_QUERY = `
-  query Progressions($projects: [Project!]!, $playerId: String) {
+  query Progressions($projects: [ProjectInput!]!, $playerId: String!) {
     playerAchievements(projects: $projects, playerId: $playerId) {
       items {
         meta {
@@ -70,7 +70,7 @@ const PROGRESSIONS_QUERY = `
 `;
 
 const ACHIEVEMENTS_QUERY = `
-  query Achievements($projects: [Project!]!) {
+  query Achievements($projects: [ProjectInput!]!) {
     achievements(projects: $projects) {
       items {
         meta {
