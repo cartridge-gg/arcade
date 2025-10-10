@@ -46,8 +46,8 @@ const ADDRESS_BY_USERNAME_QUERY = `
 `;
 
 const PROGRESSIONS_QUERY = `
-  query Progressions($projects: [ProjectInput!]!, $playerId: String!) {
-    playerAchievements(projects: $projects, playerId: $playerId) {
+  query Progressions($projects: [Project!]!) {
+    playerAchievements(projects: $projects) {
       items {
         meta {
           project
@@ -70,7 +70,7 @@ const PROGRESSIONS_QUERY = `
 `;
 
 const ACHIEVEMENTS_QUERY = `
-  query Achievements($projects: [ProjectInput!]!) {
+  query Achievements($projects: [Project!]!) {
     achievements(projects: $projects) {
       items {
         meta {
@@ -405,7 +405,6 @@ async function generateMetaTags(url: string): Promise<string> {
       const [progressionsData, achievementsData] = await Promise.all([
         graphqlRequest<any>(PROGRESSIONS_QUERY, {
           projects: ACTIVE_PROJECTS,
-          playerId: address,
         }),
         graphqlRequest<any>(ACHIEVEMENTS_QUERY, {
           projects: ACTIVE_PROJECTS,
@@ -487,7 +486,6 @@ async function generateMetaTags(url: string): Promise<string> {
         const [progressionsData, achievementsData] = await Promise.all([
           graphqlRequest<any>(PROGRESSIONS_QUERY, {
             projects: [gameProject],
-            playerId: address,
           }),
           graphqlRequest<any>(ACHIEVEMENTS_QUERY, {
             projects: [gameProject],
