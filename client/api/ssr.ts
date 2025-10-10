@@ -401,17 +401,29 @@ async function generateMetaTags(url: string): Promise<string> {
         address = resolvedAddress;
       }
 
-      // Generate meta tags with placeholder values
-      // TODO: Implement caching or optimize GraphQL queries to fetch real data
-      title = `${usernameOrAddress} | Cartridge Arcade`;
-      description = `View ${usernameOrAddress}'s profile on Cartridge Arcade`;
+      // Fetch real player data from GraphQL API
+      const [progressionsData, achievementsData] = await Promise.all([
+        graphqlRequest<any>(PROGRESSIONS_QUERY, {
+          projects: ACTIVE_PROJECTS,
+          playerId: address,
+        }),
+        graphqlRequest<any>(ACHIEVEMENTS_QUERY, {
+          projects: ACTIVE_PROJECTS,
+        }),
+      ]);
 
-      // Generate OG image URL using local API with placeholder data
+      // Compute player statistics
+      const stats = computePlayerStats(address, progressionsData, achievementsData);
+
+      title = `${usernameOrAddress} | Cartridge Arcade`;
+      description = `${stats.totalPoints} points • ${stats.totalCompleted}/${stats.totalAchievements} achievements`;
+
+      // Generate OG image URL using local API with real player data
       const ogParams = new URLSearchParams({
         type: 'profile',
         username: usernameOrAddress,
-        points: '0',
-        achievements: '0/0',
+        points: stats.totalPoints.toString(),
+        achievements: `${stats.totalCompleted}/${stats.totalAchievements}`,
       });
       imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
     }
@@ -454,20 +466,53 @@ async function generateMetaTags(url: string): Promise<string> {
         address = resolvedAddress;
       }
 
-      // Generate meta tags with placeholder values
-      // TODO: Implement caching or optimize GraphQL queries to fetch real data
-      title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
-      description = `View ${usernameOrAddress}'s stats in ${gameId}`;
+      // Find the specific game project
+      const gameProject = ACTIVE_PROJECTS.find(p => p.project === gameId);
 
-      // Generate OG image URL using local API with placeholder data
-      const ogParams = new URLSearchParams({
-        type: 'game-profile',
-        username: usernameOrAddress,
-        game: gameId,
-        points: '0',
-        achievements: '0/0',
-      });
-      imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
+      if (!gameProject) {
+        // Game not found, use placeholder
+        title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
+        description = `View ${usernameOrAddress}'s stats in ${gameId}`;
+
+        const ogParams = new URLSearchParams({
+          type: 'game-profile',
+          username: usernameOrAddress,
+          game: gameId,
+          points: '0',
+          achievements: '0/0',
+        });
+        imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
+      } else {
+        // Fetch real player data for this specific game only
+        const [progressionsData, achievementsData] = await Promise.all([
+          graphqlRequest<any>(PROGRESSIONS_QUERY, {
+            projects: [gameProject],
+            playerId: address,
+          }),
+          graphqlRequest<any>(ACHIEVEMENTS_QUERY, {
+            projects: [gameProject],
+          }),
+        ]);
+
+        // Compute player statistics
+        const stats = computePlayerStats(address, progressionsData, achievementsData);
+
+        // Get game-specific stats
+        const gameStats = stats.gameStats[gameId] || { points: 0, completed: 0, total: 0 };
+
+        title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
+        description = `${gameStats.points} points • ${gameStats.completed}/${gameStats.total} achievements in ${gameId}`;
+
+        // Generate OG image URL using local API with real game-specific data
+        const ogParams = new URLSearchParams({
+          type: 'game-profile',
+          username: usernameOrAddress,
+          game: gameId,
+          points: gameStats.points.toString(),
+          achievements: `${gameStats.completed}/${gameStats.total}`,
+        });
+        imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
+      }
     }
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
