@@ -24,3 +24,5 @@ credentials.txt
 *.sln
 *.sw?
 *.tsbuildinfo
+.vercel
+bun.lock
