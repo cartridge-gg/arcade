@@ -12,7 +12,7 @@ import {
 import { useAchievements } from "@/hooks/achievements";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";
-import { getChainId } from "@/helpers";
+import { getChainId } from "@/lib/helpers";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";

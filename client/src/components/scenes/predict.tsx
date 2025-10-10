@@ -1,5 +1,5 @@
-import { Predict } from "../predict";
+import { PredictContainer } from "@/features/predict";
 
 export const PredictScene = () => {
-  return <Predict />;
+  return <PredictContainer />;
 };

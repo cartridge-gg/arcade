@@ -1,9 +1,14 @@
-import { Holders } from "@/components/holders";
+import { MarketplaceHoldersContainer } from "@/features/marketplace/holders";
 import { useProject } from "@/hooks/project";
 
 export const HoldersScene = () => {
   const { collection, edition } = useProject();
   if (!edition) return;
   if (!collection) return;
-  return <Holders edition={edition} collectionAddress={collection} />;
+  return (
+    <MarketplaceHoldersContainer
+      edition={edition}
+      collectionAddress={collection}
+    />
+  );
 };

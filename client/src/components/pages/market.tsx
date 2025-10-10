@@ -11,10 +11,10 @@ import {
   TimesIcon,
   VerifiedIcon,
 } from "@cartridge/ui";
-import { ArcadeTabs } from "../modules";
+import { ArcadeTabs } from "../ui/modules/tabs.tsx";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import arcade from "@/assets/arcade-logo.png";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useTokenContract } from "@/collections";

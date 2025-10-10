@@ -23,10 +23,6 @@ export async function sqlClient<T = any>(query: string): Promise<T[]> {
 
   const data: SQLResponse = await response.json();
 
-  if (!data.length) {
-    throw new Error("No data returned from SQL query");
-  }
-
   return data;
 }
 

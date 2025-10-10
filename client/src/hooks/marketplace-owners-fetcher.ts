@@ -1,5 +1,8 @@
 import { useEditionsMap } from "@/collections";
-import { fetchToriisStream } from "@cartridge/arcade";
+import {
+  fetchToriisStream,
+  type ClientCallbackParams,
+} from "@cartridge/arcade";
 import type { TokenBalance } from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getChecksumAddress } from "starknet";
@@ -244,7 +247,7 @@ export function useMarketOwnersFetcher({
       createController();
 
       const stream = fetchToriisStream(project, {
-        client: async function* ({ client }) {
+        client: async function* ({ client }: ClientCallbackParams) {
           let cursor =
             strategy === FetchStrategy.INCREMENTAL && loadingState?.lastCursor
               ? loadingState.lastCursor

@@ -1,4 +1,4 @@
-import { About } from "@/components/about";
+import { AboutContainer } from "@/features/about";
 import { useProject } from "@/hooks/project";
 import { Socials } from "@cartridge/arcade";
 import { useMemo } from "react";
@@ -12,5 +12,5 @@ export const AboutScene = () => {
 
   if (!edition) return null;
 
-  return <About edition={edition} socials={socials} />;
+  return <AboutContainer edition={edition} socials={socials} />;
 };

@@ -1,4 +1,4 @@
-import { Header } from "@/components/header";
+import { HeaderContainer } from "@/features/header";
 import { useEffect, useMemo, useState } from "react";
 import banner from "@/assets/banner.png";
 import { useTheme } from "@/hooks/context";
@@ -60,7 +60,7 @@ export const SceneLayout = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         <div className="w-full hidden lg:block lg:px-6 lg:py-5">
-          <Header />
+          <HeaderContainer />
         </div>
         {children}
       </div>
