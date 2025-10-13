@@ -417,14 +417,8 @@ async function generateMetaTags(url: string): Promise<string> {
       title = `${usernameOrAddress} | Cartridge Arcade`;
       description = `${stats.totalPoints} points • ${stats.totalCompleted}/${stats.totalAchievements} achievements`;
 
-      // Generate OG image URL using local API with real player data
-      const ogParams = new URLSearchParams({
-        type: 'profile',
-        username: usernameOrAddress,
-        points: stats.totalPoints.toString(),
-        avatar: 'https://play.cartridge.gg/preview.png',
-      });
-      imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
+      // Use static preview image (OG image generation moved to separate service)
+      imageUrl = 'https://play.cartridge.gg/preview.png';
     }
     // Game-specific player page: /game/:gameId/player/:username
     else if (urlParts[0] === "game" && urlParts[1] && urlParts[2] === "player" && urlParts[3]) {
@@ -473,14 +467,8 @@ async function generateMetaTags(url: string): Promise<string> {
         title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
         description = `View ${usernameOrAddress}'s stats in ${gameId}`;
 
-        const ogParams = new URLSearchParams({
-          type: 'game-profile',
-          username: usernameOrAddress,
-          game: gameId,
-          points: '0',
-          achievements: '0/0',
-        });
-        imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
+        // Use static preview image (OG image generation moved to separate service)
+        imageUrl = 'https://play.cartridge.gg/preview.png';
       } else {
         // Fetch real player data for this specific game only
         const [progressionsData, achievementsData] = await Promise.all([
@@ -501,15 +489,8 @@ async function generateMetaTags(url: string): Promise<string> {
         title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
         description = `${gameStats.points} points • ${gameStats.completed}/${gameStats.total} achievements in ${gameId}`;
 
-        // Generate OG image URL using local API with real game-specific data
-        const ogParams = new URLSearchParams({
-          type: 'game-profile',
-          username: usernameOrAddress,
-          game: gameId,
-          points: gameStats.points.toString(),
-          achievements: `${gameStats.completed}/${gameStats.total}`,
-        });
-        imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
+        // Use static preview image (OG image generation moved to separate service)
+        imageUrl = 'https://play.cartridge.gg/preview.png';
       }
     }
     // Game page: /game/:gameId
@@ -518,12 +499,8 @@ async function generateMetaTags(url: string): Promise<string> {
       title = `${gameId} - Cartridge Arcade`;
       description = `Play ${gameId} on Cartridge Arcade - Discover onchain gaming`;
 
-      // Generate OG image URL using local API
-      const ogParams = new URLSearchParams({
-        type: 'game',
-        game: gameId,
-      });
-      imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
+      // Use static preview image (OG image generation moved to separate service)
+      imageUrl = 'https://play.cartridge.gg/preview.png';
     }
   } catch (error) {
     console.error("Error generating meta tags:", error);
