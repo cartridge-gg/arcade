@@ -1,0 +1,137 @@
+#[starknet::component]
+pub mod RegistrableComponent {
+    // Dojo imports
+
+    use dojo::world::{IWorldDispatcherTrait, WorldStorage};
+    use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
+
+    // Internal imports
+
+    use starterpack::constants::{CONFIG_ID, MAX_PROTOCOL_FEE, MAX_REFERRAL_FEE};
+    use starterpack::events::pause::{StarterpackPaused, StarterpackResumed};
+    use starterpack::events::register::StarterpackRegistered;
+    use starterpack::models::config::ConfigTrait;
+    use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
+    use starterpack::store::StoreTrait;
+
+    // Storage
+
+    #[storage]
+    pub struct Storage {}
+
+    // Events
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    pub enum Event {}
+
+    #[generate_trait]
+    pub impl InternalImpl<
+        TContractState, +HasComponent<TContractState>,
+    > of InternalTrait<TContractState> {
+        fn register(
+            self: @ComponentState<TContractState>,
+            world: WorldStorage,
+            implementation: ContractAddress,
+            referral_percentage: u8,
+            reissuable: bool,
+            soulbound: bool,
+            price: u256,
+            payment_token: ContractAddress,
+        ) -> u32 {
+            // [Setup] Datastore
+            let mut store = StoreTrait::new(world);
+
+            // [Check] Referral percentage is valid
+            assert!(
+                referral_percentage <= MAX_REFERRAL_FEE,
+                "Starterpack: referral percentage too high"
+            );
+
+            // [Effect] Generate starterpack ID
+            let starterpack_id = world.dispatcher.uuid();
+
+            // [Effect] Create starterpack
+            let time = get_block_timestamp();
+            let owner = get_caller_address();
+            let starterpack = StarterpackTrait::new(
+                starterpack_id,
+                implementation,
+                owner,
+                referral_percentage,
+                reissuable,
+                soulbound,
+                price,
+                payment_token,
+                time,
+            );
+
+            // [Effect] Store starterpack
+            store.set_starterpack(@starterpack);
+
+            // [Event] Emit event
+            world
+                .emit_event(
+                    @StarterpackRegistered {
+                        starterpack_id,
+                        implementation,
+                        referral_percentage,
+                        reissuable,
+                        owner,
+                        time,
+                    }
+                );
+
+            starterpack_id
+        }
+
+        fn pause(
+            self: @ComponentState<TContractState>,
+            world: WorldStorage,
+            starterpack_id: u32,
+        ) {
+            // [Setup] Datastore
+            let mut store = StoreTrait::new(world);
+
+            // [Check] Caller is owner
+            let caller = get_caller_address();
+            let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_is_owner(caller);
+
+            // [Effect] Pause starterpack
+            starterpack.pause();
+
+            // [Effect] Store starterpack
+            store.set_starterpack(@starterpack);
+
+            // [Event] Emit event
+            let time = get_block_timestamp();
+            world.emit_event(@StarterpackPaused { starterpack_id, time });
+        }
+
+        fn resume(
+            self: @ComponentState<TContractState>,
+            world: WorldStorage,
+            starterpack_id: u32,
+        ) {
+            // [Setup] Datastore
+            let mut store = StoreTrait::new(world);
+
+            // [Check] Caller is owner
+            let caller = get_caller_address();
+            let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_is_owner(caller);
+
+            // [Effect] Resume starterpack
+            starterpack.resume();
+
+            // [Effect] Store starterpack
+            store.set_starterpack(@starterpack);
+
+            // [Event] Emit event
+            let time = get_block_timestamp();
+            world.emit_event(@StarterpackResumed { starterpack_id, time });
+        }
+    }
+}
+
