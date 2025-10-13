@@ -1,5 +1,4 @@
 import { ImageResponse } from "@vercel/og";
-import type { NextRequest } from "next/server";
 
 export const config = {
   runtime: "edge",
@@ -14,7 +13,7 @@ export const config = {
  * - Game-specific player profiles
  */
 
-export default async function handler(req: NextRequest) {
+export default async function handler(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
 
@@ -85,7 +84,6 @@ function generateProfileImage(
             right: 0,
             top: 0,
             bottom: 0,
-            height: "100%",
             objectFit: "cover",
             width: "50vw",
             height: "100vh",
@@ -211,7 +209,6 @@ function generateGameImage(game: string) {
             right: 0,
             top: 0,
             bottom: 0,
-            height: "100%",
             objectFit: "cover",
             width: "50vw",
             height: "100vh",
@@ -270,9 +267,10 @@ function generateGameImage(game: string) {
               style={{
                 color: "white",
                 fontSize: "28px",
+                textTransform: "uppercase",
               }}
             >
-              LOOT SURVIVOR
+              {game}
             </span>
           </p>
 
@@ -341,7 +339,6 @@ function generateGameProfileImage(
             right: 0,
             top: 0,
             bottom: 0,
-            height: "100%",
             objectFit: "cover",
             width: "50vw",
             height: "100vh",
