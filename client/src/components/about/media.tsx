@@ -76,7 +76,8 @@ export function Media({ items }: { items: string[] }) {
           <div
             className="absolute w-11 h-full z-10 right-0 pointer-events-none"
             style={{
-              background: `linear-gradient(to right, transparent 0%, transparent 50%, var(--background-100) 100%`,
+              background:
+                "linear-gradient(to right, transparent 0%, transparent 50%, var(--background-100) 100%",
             }}
           />
           <CarouselContent className="flex gap-4">

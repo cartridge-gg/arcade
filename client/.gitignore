@@ -26,3 +26,5 @@ credentials.txt
 *.tsbuildinfo
 .vercel
 bun.lock
+tsconfig.app.tsbuildinfo
+tsconfig.node.tsbuildinfo

@@ -3,7 +3,7 @@ import { describe, it, expect } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Items } from '@/components/items';
-import { EditionModel } from '@cartridge/arcade';
+import type { EditionModel } from '@cartridge/arcade';
 import { createMockTokenCollection } from '../setup/metadata-filter.setup';
 
 // Mock the hooks
@@ -39,15 +39,8 @@ describe('Single Trait Filtering Integration', () => {
     const mockUseMetadataFilters = require('@/hooks/use-metadata-filters').useMetadataFilters;
     const mockTokens = createMockTokenCollection();
 
-    let currentFilters = {};
-    mockUseMetadataFilters.mockImplementation(() => ({
-      filteredTokens: mockTokens.filter(token => {
-        if (!currentFilters['Rarity']) return true;
-        const tokenRarity = token.metadata?.attributes?.find(
-          attr => attr.trait_type === 'Rarity'
-        )?.value;
-        return currentFilters['Rarity'].has(tokenRarity);
-      }),
+    const currentFilters = {};
+    const baseState = {
       metadataIndex: {
         'Rarity': {
           'Legendary': ['1', '6'],
@@ -55,7 +48,6 @@ describe('Single Trait Filtering Integration', () => {
           'Common': ['4', '5']
         }
       },
-      activeFilters: currentFilters,
       availableFilters: {
         'Rarity': {
           'Legendary': 2,
@@ -63,16 +55,41 @@ describe('Single Trait Filtering Integration', () => {
           'Common': 2
         }
       },
+      precomputed: {
+        attributes: ['Rarity'],
+        properties: {
+          Rarity: [
+            { property: 'Legendary', order: 2 },
+            { property: 'Epic', order: 2 },
+            { property: 'Common', order: 2 }
+          ]
+        },
+        allMetadata: []
+      },
+      statusFilter: 'all' as const,
+      setStatusFilter: jest.fn(),
+      removeFilter: jest.fn(),
+      clearAllFilters: jest.fn(),
+      isLoading: false,
+      isEmpty: false
+    };
+
+    mockUseMetadataFilters.mockImplementation(() => ({
+      filteredTokens: mockTokens.filter(token => {
+        if (!currentFilters.Rarity) return true;
+        const tokenRarity = token.metadata?.attributes?.find(
+          attr => attr.trait_type === 'Rarity'
+        )?.value;
+        return currentFilters.Rarity.has(tokenRarity);
+      }),
+      activeFilters: currentFilters,
       setFilter: (trait: string, value: string) => {
         if (!currentFilters[trait]) {
           currentFilters[trait] = new Set();
         }
         currentFilters[trait].add(value);
       },
-      removeFilter: jest.fn(),
-      clearAllFilters: jest.fn(),
-      isLoading: false,
-      isEmpty: false
+      ...baseState
     }));
 
     const { container } = render(
@@ -118,7 +135,10 @@ describe('Single Trait Filtering Integration', () => {
       removeFilter: jest.fn(),
       clearAllFilters: jest.fn(),
       isLoading: false,
-      isEmpty: false
+      isEmpty: false,
+      precomputed: { attributes: [], properties: {}, allMetadata: [] },
+      statusFilter: 'all',
+      setStatusFilter: jest.fn()
     }));
 
     render(

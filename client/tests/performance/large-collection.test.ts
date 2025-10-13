@@ -28,7 +28,7 @@ describe('Performance Tests', () => {
       const initialTokens = createLargeTokenCollection(5000);
       const newTokens = createLargeTokenCollection(1000).map(t => ({
         ...t,
-        token_id: (5000 + parseInt(t.token_id)).toString()
+        token_id: (5000 + Number.parseInt(t.token_id)).toString()
       }));
 
       const initialIndex = buildMetadataIndex(initialTokens);
@@ -40,8 +40,8 @@ describe('Performance Tests', () => {
       const duration = endTime - startTime;
 
       expect(duration).toBeLessThan(100); // Less than 100ms
-      expect(updatedIndex['Rarity']['Common'].length).toBeGreaterThan(
-        initialIndex['Rarity']['Common'].length
+      expect(updatedIndex.Rarity.Common.length).toBeGreaterThan(
+        initialIndex.Rarity.Common.length
       );
     });
 
@@ -76,11 +76,11 @@ describe('Performance Tests', () => {
       const duration = endTime - startTime;
 
       expect(duration).toBeLessThan(100); // Less than 100ms
-      expect(counts['Rarity']).toBeDefined();
-      expect(counts['Background']).toBeDefined();
+      expect(counts.Rarity).toBeDefined();
+      expect(counts.Background).toBeDefined();
 
       // Verify counts are correct
-      const totalRarityCount = Object.values(counts['Rarity']).reduce(
+      const totalRarityCount = Object.values(counts.Rarity).reduce(
         (sum, count) => sum + count,
         0
       );
@@ -210,7 +210,7 @@ describe('Performance Tests', () => {
       for (let i = 0; i < numBatches; i++) {
         const newTokens = createLargeTokenCollection(batchSize).map(t => ({
           ...t,
-          token_id: (i * batchSize + parseInt(t.token_id)).toString()
+          token_id: (i * batchSize + Number.parseInt(t.token_id)).toString()
         }));
 
         const startTime = performance.now();

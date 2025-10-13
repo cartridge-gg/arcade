@@ -42,7 +42,7 @@ const getMetadataQuery = ({
             WHERE ${whereClause}
               AND token_id LIKE '0x${BigInt(contractAddress).toString(16)}:%'
             GROUP BY token_id
-            ${traits.length > 0 ? "HAVING COUNT(DISTINCT trait_name) = " + traits.length : ""}
+            ${traits.length > 0 ? `HAVING COUNT(DISTINCT trait_name) = ${traits.length}` : ""}
         )
         GROUP BY trait_name, trait_value
     ) ranked

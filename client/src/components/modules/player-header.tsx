@@ -126,13 +126,14 @@ const FollowerDescription = ({ followers }: { followers: string[] }) => {
     const names = followers.slice(0, 2);
     if (followers.length > 3) {
       return `Followed by ${names.join(", ")} and ${followers.length - 2} others you follow`;
-    } else if (followers.length === 3) {
-      return `Followed by ${names.join(", ")} and ${followers.length - 2} other you follow`;
-    } else if (followers.length > 0) {
-      return `Followed by ${names.join(" and ")}`;
-    } else {
-      return `Followed by no one you follow`;
     }
+    if (followers.length === 3) {
+      return `Followed by ${names.join(", ")} and ${followers.length - 2} other you follow`;
+    }
+    if (followers.length > 0) {
+      return `Followed by ${names.join(" and ")}`;
+    }
+    return "Followed by no one you follow";
   }, [followers]);
 
   return (

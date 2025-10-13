@@ -6,10 +6,12 @@ import process from "node:process";
 import mkcert from "vite-plugin-mkcert";
 import { VitePWA } from "vite-plugin-pwa";
 import vercel from "vite-plugin-vercel";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    tanstackRouter({ target: "react", autoCodeSplitting: true }),
     react(),
     wasm(),
     topLevelAwait(),

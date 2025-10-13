@@ -1,18 +1,23 @@
 import { createRoot } from "react-dom/client";
-import { SonnerToaster } from "@cartridge/ui";
-import { App } from "@/components/app";
-import { Provider } from "@/context";
-import { registerSW } from "virtual:pwa-register";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 import "./index.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Provider } from "./context";
+import { routeTree } from "./routeTree.gen";
 import {
   accountsCollection,
   gamesQuery,
   editionsQuery,
   tokenContractsCollection,
 } from "@/collections";
+import { StrictMode } from "react";
 
-registerSW();
+const router = createRouter({ routeTree });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 async function main() {
   // Preload essential collections
@@ -22,37 +27,12 @@ async function main() {
   await editionsQuery.preload();
 
   createRoot(document.getElementById("root")!).render(
-    <Provider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="player/:player" element={<App />}>
-            <Route path="tab/:tab" element={<App />} />
-          </Route>
-          <Route path="game/:game" element={<App />}>
-            <Route path="tab/:tab" element={<App />} />
-            <Route path="collection/:collection" element={<App />}>
-              <Route path="tab/:tab" element={<App />} />
-            </Route>
-            <Route path="player/:player" element={<App />}>
-              <Route path="tab/:tab" element={<App />} />
-            </Route>
-            <Route path="edition/:edition" element={<App />}>
-              <Route path="tab/:tab" element={<App />} />
-              <Route path="collection/:collection" element={<App />}>
-                <Route path="tab/:tab" element={<App />} />
-              </Route>
-              <Route path="tab/:tab" element={<App />} />
-            </Route>
-          </Route>
-          <Route path="tab/:tab" element={<App />} />
-          <Route path="collection/:collection" element={<App />}>
-            <Route path="tab/:tab" element={<App />} />
-          </Route>
-          <Route path="*" element={<App />} />
-        </Routes>
-        <SonnerToaster position="top-center" />
-      </BrowserRouter>
-    </Provider>,
+    <StrictMode>
+      <Provider>
+        <RouterProvider router={router} />
+      </Provider>
+      ,
+    </StrictMode>,
   );
 }
 

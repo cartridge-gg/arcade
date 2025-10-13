@@ -5,9 +5,9 @@
  * @param url - Optional RPC URL for the provider
  */
 import { NAMESPACE } from "../constants";
-import * as SystemProps from "./types";
+import type * as SystemProps from "./types";
 import { getContractByName } from "./helpers";
-import { AllowArray, Call } from "starknet";
+import type { AllowArray, Call } from "starknet";
 
 export class Registry {
   private manifest: any;
@@ -18,7 +18,9 @@ export class Registry {
     this.name = `${NAMESPACE}-Registry`;
   }
 
-  public register_game(props: SystemProps.RegistryRegisterGameProps): AllowArray<Call> {
+  public register_game(
+    props: SystemProps.RegistryRegisterGameProps,
+  ): AllowArray<Call> {
     const {
       worldAddress,
       namespace,
@@ -69,7 +71,9 @@ export class Registry {
     };
   }
 
-  public update_game(props: SystemProps.RegistryUpdateGameProps): AllowArray<Call> {
+  public update_game(
+    props: SystemProps.RegistryUpdateGameProps,
+  ): AllowArray<Call> {
     const {
       gameId,
       color,
@@ -106,7 +110,9 @@ export class Registry {
     };
   }
 
-  public publish_game(props: SystemProps.RegistryPublishGameProps): AllowArray<Call> {
+  public publish_game(
+    props: SystemProps.RegistryPublishGameProps,
+  ): AllowArray<Call> {
     const { gameId } = props;
     const entrypoint = "publish_game";
 
@@ -128,7 +134,9 @@ export class Registry {
     };
   }
 
-  public whitelist_game(props: SystemProps.RegistryWhitelistGameProps): AllowArray<Call> {
+  public whitelist_game(
+    props: SystemProps.RegistryWhitelistGameProps,
+  ): AllowArray<Call> {
     const { gameId } = props;
     const entrypoint = "whitelist_game";
 
@@ -139,7 +147,9 @@ export class Registry {
     };
   }
 
-  public blacklist_game(props: SystemProps.RegistryBlacklistGameProps): AllowArray<Call> {
+  public blacklist_game(
+    props: SystemProps.RegistryBlacklistGameProps,
+  ): AllowArray<Call> {
     const { gameId } = props;
     const entrypoint = "blacklist_game";
 
@@ -150,7 +160,9 @@ export class Registry {
     };
   }
 
-  public remove_game(props: SystemProps.RegistryRemoveGameProps): AllowArray<Call> {
+  public remove_game(
+    props: SystemProps.RegistryRemoveGameProps,
+  ): AllowArray<Call> {
     const { gameId } = props;
     const entrypoint = "remove_game";
 
@@ -161,7 +173,9 @@ export class Registry {
     };
   }
 
-  public register_edition(props: SystemProps.RegistryRegisterEditionProps): AllowArray<Call> {
+  public register_edition(
+    props: SystemProps.RegistryRegisterEditionProps,
+  ): AllowArray<Call> {
     const {
       worldAddress,
       namespace,
@@ -208,7 +222,9 @@ export class Registry {
     };
   }
 
-  public update_edition(props: SystemProps.RegistryUpdateEditionProps): AllowArray<Call> {
+  public update_edition(
+    props: SystemProps.RegistryUpdateEditionProps,
+  ): AllowArray<Call> {
     const {
       editionId,
       project,
@@ -251,7 +267,9 @@ export class Registry {
     };
   }
 
-  public prioritize_edition(props: SystemProps.RegistryPrioritizeEditionProps): AllowArray<Call> {
+  public prioritize_edition(
+    props: SystemProps.RegistryPrioritizeEditionProps,
+  ): AllowArray<Call> {
     const { editionId, priority } = props;
     const entrypoint = "prioritize_edition";
 
@@ -262,7 +280,9 @@ export class Registry {
     };
   }
 
-  public publish_edition(props: SystemProps.RegistryPublishEditionProps): AllowArray<Call> {
+  public publish_edition(
+    props: SystemProps.RegistryPublishEditionProps,
+  ): AllowArray<Call> {
     const { editionId } = props;
     const entrypoint = "publish_edition";
 
@@ -273,7 +293,9 @@ export class Registry {
     };
   }
 
-  public hide_edition(props: SystemProps.RegistryHideEditionProps): AllowArray<Call> {
+  public hide_edition(
+    props: SystemProps.RegistryHideEditionProps,
+  ): AllowArray<Call> {
     const { editionId } = props;
     const entrypoint = "hide_edition";
 
@@ -284,7 +306,9 @@ export class Registry {
     };
   }
 
-  public whitelist_edition(props: SystemProps.RegistryWhitelistEditionProps): AllowArray<Call> {
+  public whitelist_edition(
+    props: SystemProps.RegistryWhitelistEditionProps,
+  ): AllowArray<Call> {
     const { editionId } = props;
     const entrypoint = "whitelist_edition";
 
@@ -295,7 +319,9 @@ export class Registry {
     };
   }
 
-  public blacklist_edition(props: SystemProps.RegistryBlacklistEditionProps): AllowArray<Call> {
+  public blacklist_edition(
+    props: SystemProps.RegistryBlacklistEditionProps,
+  ): AllowArray<Call> {
     const { editionId } = props;
     const entrypoint = "blacklist_edition";
 
@@ -306,7 +332,9 @@ export class Registry {
     };
   }
 
-  public remove_edition(props: SystemProps.RegistryRemoveEditionProps): AllowArray<Call> {
+  public remove_edition(
+    props: SystemProps.RegistryRemoveEditionProps,
+  ): AllowArray<Call> {
     const { editionId } = props;
     const entrypoint = "remove_edition";
 

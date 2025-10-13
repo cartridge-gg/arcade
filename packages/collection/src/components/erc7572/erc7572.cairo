@@ -18,10 +18,7 @@ pub mod ERC7572Component {
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct ContractURIUpdated {
-        #[key]
-        pub contract_address: starknet::ContractAddress,
-    }
+    pub struct ContractURIUpdated {}
 
     #[embeddable_as(ERC7572Impl)]
     impl ERC7572<
@@ -63,8 +60,7 @@ pub mod ERC7572Component {
             // [Effect] Set the contract URI
             self.ERC7572_contract_uri.write(uri.clone());
             // [Event] Contract URI updated event
-            let contract_address = starknet::get_contract_address();
-            self.emit(ContractURIUpdated { contract_address });
+            self.emit(ContractURIUpdated {});
         }
     }
 }

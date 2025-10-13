@@ -1,4 +1,4 @@
-import { BigNumberish, ByteArray } from "starknet";
+import type { BigNumberish, ByteArray } from "starknet";
 
 export enum TransactionType {
   // Social
@@ -68,7 +68,7 @@ export interface SocialOpenAllianceProps {
   free: boolean;
 }
 
-export interface SocialCloseAllianceProps {}
+export type SocialCloseAllianceProps = Record<string, never>;
 
 export interface SocialCrownGuildProps {
   guildId: BigNumberish;
@@ -86,9 +86,9 @@ export interface SocialRequestAllianceProps {
   allianceId: BigNumberish;
 }
 
-export interface SocialCancelAllianceProps {}
+export type SocialCancelAllianceProps = Record<string, never>;
 
-export interface SocialLeaveAllianceProps {}
+export type SocialLeaveAllianceProps = Record<string, never>;
 
 export interface SocialCreateGuildProps {
   metadata: ByteArray;
@@ -99,7 +99,7 @@ export interface SocialOpenGuildProps {
   free: boolean;
 }
 
-export interface SocialCloseGuildProps {}
+export type SocialCloseGuildProps = Record<string, never>;
 
 export interface SocialCrownMemberProps {
   memberId: BigNumberish;
@@ -125,9 +125,9 @@ export interface SocialRequestGuildProps {
   guildId: BigNumberish;
 }
 
-export interface SocialCancelGuildProps {}
+export type SocialCancelGuildProps = Record<string, never>;
 
-export interface SocialLeaveGuildProps {}
+export type SocialLeaveGuildProps = Record<string, never>;
 
 export interface RegistryPinProps {
   achievementId: BigNumberish;

@@ -3,7 +3,7 @@ import { describe, it, expect } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Items } from '@/components/items';
-import { EditionModel } from '@cartridge/arcade';
+import type { EditionModel } from '@cartridge/arcade';
 import { createMockTokenCollection } from '../setup/metadata-filter.setup';
 
 jest.mock('@/hooks/marketplace-tokens-fetcher', () => ({
@@ -47,11 +47,11 @@ describe('URL Persistence Integration', () => {
       }
 
       const filtered = tokens.filter(token => {
-        if (!activeFilters['Rarity']) return true;
+        if (!activeFilters.Rarity) return true;
         const rarity = token.metadata?.attributes?.find(
           attr => attr.trait_type === 'Rarity'
         )?.value;
-        return activeFilters['Rarity'].has(rarity);
+        return activeFilters.Rarity.has(rarity);
       });
 
       return {
@@ -63,7 +63,10 @@ describe('URL Persistence Integration', () => {
         removeFilter: jest.fn(),
         clearAllFilters: jest.fn(),
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -103,7 +106,10 @@ describe('URL Persistence Integration', () => {
       removeFilter: jest.fn(),
       clearAllFilters: jest.fn(),
       isLoading: false,
-      isEmpty: false
+      isEmpty: false,
+      precomputed: { attributes: [], properties: {}, allMetadata: [] },
+      statusFilter: 'all',
+      setStatusFilter: jest.fn()
     }));
 
     render(
@@ -149,7 +155,10 @@ describe('URL Persistence Integration', () => {
         removeFilter: jest.fn(),
         clearAllFilters: jest.fn(),
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -195,7 +204,10 @@ describe('URL Persistence Integration', () => {
         removeFilter: jest.fn(),
         clearAllFilters: jest.fn(),
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -272,7 +284,10 @@ describe('URL Persistence Integration', () => {
           currentUrl = '/collection/0x123'; // Remove filters from URL
         },
         isLoading: false,
-        isEmpty: false
+        isEmpty: false,
+        precomputed: { attributes: [], properties: {}, allMetadata: [] },
+        statusFilter: 'all',
+        setStatusFilter: jest.fn()
       };
     });
 
@@ -294,7 +309,7 @@ describe('URL Persistence Integration', () => {
     });
 
     // Clear filters
-    const clearButton = screen.getByText(/Clear All/i);
+    const clearButton = screen.getByText(/Clear Filters/i);
     fireEvent.click(clearButton);
 
     currentUrl = '/collection/0x123';

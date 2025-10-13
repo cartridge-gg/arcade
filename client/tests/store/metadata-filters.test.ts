@@ -64,7 +64,7 @@ describe('Metadata Filter Store', () => {
       });
 
       const filters = result.current.getActiveFilters('0x123');
-      expect(filters['Rarity']).toContain('Legendary');
+      expect(filters.Rarity).toContain('Legendary');
     });
 
     it('should remove filter if present', () => {
@@ -79,7 +79,7 @@ describe('Metadata Filter Store', () => {
       });
 
       const filters = result.current.getActiveFilters('0x123');
-      expect(filters['Rarity']).not.toContain('Legendary');
+      expect(filters.Rarity).not.toContain('Legendary');
     });
 
     it('should handle multiple values for same trait', () => {
@@ -92,8 +92,8 @@ describe('Metadata Filter Store', () => {
       });
 
       const filters = result.current.getActiveFilters('0x123');
-      expect(filters['Rarity']).toContain('Legendary');
-      expect(filters['Rarity']).toContain('Epic');
+      expect(filters.Rarity).toContain('Legendary');
+      expect(filters.Rarity).toContain('Epic');
     });
   });
 
@@ -110,8 +110,8 @@ describe('Metadata Filter Store', () => {
       });
 
       const filters = result.current.getActiveFilters('0x123');
-      expect(filters['Rarity']).not.toContain('Legendary');
-      expect(filters['Rarity']).toContain('Epic');
+      expect(filters.Rarity).not.toContain('Legendary');
+      expect(filters.Rarity).toContain('Epic');
     });
 
     it('should remove entire trait if no value specified', () => {
@@ -127,8 +127,8 @@ describe('Metadata Filter Store', () => {
       });
 
       const filters = result.current.getActiveFilters('0x123');
-      expect(filters['Rarity']).toBeUndefined();
-      expect(filters['Background']).toContain('Gold');
+      expect(filters.Rarity).toBeUndefined();
+      expect(filters.Background).toContain('Gold');
     });
   });
 
@@ -207,6 +207,20 @@ describe('Metadata Filter Store', () => {
     });
   });
 
+  describe('statusFilter', () => {
+    it('should default to "all" and update via setStatusFilter', () => {
+      const { result } = renderHook(() => useMetadataFilterStore());
+
+      expect(result.current.getStatusFilter('0x123')).toBe('all');
+
+      act(() => {
+        result.current.setStatusFilter('0x123', 'listed');
+      });
+
+      expect(result.current.getStatusFilter('0x123')).toBe('listed');
+    });
+  });
+
   describe('multiple collections', () => {
     it('should handle filters for multiple collections independently', () => {
       const { result } = renderHook(() => useMetadataFilterStore());
@@ -221,9 +235,9 @@ describe('Metadata Filter Store', () => {
       const filters123 = result.current.getActiveFilters('0x123');
       const filters456 = result.current.getActiveFilters('0x456');
 
-      expect(filters123['Rarity']).toContain('Epic');
-      expect(filters456['Other']).toContain('Value');
-      expect(filters123['Other']).toBeUndefined();
+      expect(filters123.Rarity).toContain('Epic');
+      expect(filters456.Other).toContain('Value');
+      expect(filters123.Other).toBeUndefined();
     });
   });
 });

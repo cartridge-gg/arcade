@@ -6,8 +6,12 @@
   "scripts": {
     "lint": "biome lint --fix .",
     "lint:check": "biome lint .",
+    "lint:ts": "pnpm lint",
+    "lint:check:ts": "pnpm lint:check",
     "format": "biome format --fix .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "format:ts": "pnpm format",
+    "format:check:ts": "pnpm format:check"
   },
   "files": ["tsup.web.config.ts"],
   "keywords": [],

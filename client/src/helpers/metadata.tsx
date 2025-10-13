@@ -1,9 +1,14 @@
-import type { MetadataAttribute } from "@/context/market-filters";
 import type { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
 
 const JWT =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI3ZjhjN2JlYy00OGIwLTQ4ODQtOTllMS1lY2U2NTk4YTNjZWQiLCJlbWFpbCI6ImJhbDdoYXphckBwcm90b24ubWUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiNTgxNjFkM2ZkYjNlOTE5MGVlNjUiLCJzY29wZWRLZXlTZWNyZXQiOiJhNjk1MjFjMjYwZWQ4ODA2YjdlYTg1YmU2OWFlMGE5MTE0ZmQ1YmIyOTJiYzJjM2FhYWVmZDgxZjU0ZmFlN2ExIiwiZXhwIjoxNzc4MDc3MDE3fQ.vNU3I0QnD-D-jZChENS5mTFYNGjppU56IJv38K8X7gQ";
+
+export type MetadataAttribute = {
+  trait_type: string;
+  value: string;
+  tokens: string[];
+};
 
 export const MetadataHelper = {
   async check(url: string): Promise<boolean> {
@@ -182,13 +187,28 @@ export const MetadataHelper = {
     const minified = data.replace(/\s+/g, " ").trim();
     return MetadataHelper.upload(minified);
   },
-
+  getToriiContractImage: async (
+    project: string,
+    contractAddress: string,
+  ): Promise<string | undefined> => {
+    if (!contractAddress) return;
+    const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/image`;
+    // Fetch if the image exists
+    try {
+      const response = await fetch(toriiImage);
+      if (response.ok) {
+        return toriiImage;
+      }
+    } catch (error) {
+      console.error("Error fetching image:", error);
+    }
+  },
   getToriiImage: async (
     project: string,
     token: Token,
   ): Promise<string | undefined> => {
     if (!token.contract_address || !token.token_id) return;
-    const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
+    const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(token.contract_address)}/${addAddressPadding(token.token_id)}/image`;
     // Fetch if the image exists
     try {
       const response = await fetch(toriiImage);
@@ -204,7 +224,7 @@ export const MetadataHelper = {
     token: Token,
   ): Promise<string | undefined> => {
     if (!token.contract_address || !token.token_id) return;
-    return `https://api.cartridge.gg/x/${project}/torii/static/0x${BigInt(token.contract_address).toString(16)}/${addAddressPadding(token.token_id)}/image`;
+    return `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(token.contract_address)}/${addAddressPadding(token.token_id)}/image`;
   },
 
   getMetadataImage: async (token: Token): Promise<string | undefined> => {

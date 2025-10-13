@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { type Call } from "starknet";
+import type { Call } from "starknet";
 import ControllerAction from "../modules/controller-action";
 
 export function Prioritize({

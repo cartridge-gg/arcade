@@ -1,9 +1,9 @@
 import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { joinPaths, resizeImage } from "@/helpers";
 import type {
   CollectionEditionModel,
@@ -68,7 +68,7 @@ export const Marketplace = ({ edition }: { edition?: EditionModel }) => {
               collectionAddress={collection.contract_address}
               collectionName={collection.name}
               collectionImage={collection.image}
-              collectionTotalSupply={parseInt(collection.total_supply)}
+              collectionTotalSupply={Number.parseInt(collection.total_supply)}
               editions={editions as EditionModel[]}
               games={games as GameModel[]}
             />
@@ -98,8 +98,7 @@ function Item({
 }) {
   const { orders, sales } = useMarketplace();
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { location } = useRouterState();
 
   const listingCount = useMemo(() => {
     const collectionOrders = orders[collectionAddress];
@@ -169,7 +168,7 @@ function Item({
     return { game, edition };
   }, [collectionAddress, editions]);
 
-  const handleClick = useCallback(() => {
+  const target = useMemo(() => {
     let pathname = location.pathname;
     pathname = pathname.replace(/\/game\/[^/]+/, "");
     pathname = pathname.replace(/\/edition\/[^/]+/, "");
@@ -188,25 +187,24 @@ function Item({
       const gameName = game.name.replace(/ /g, "-").toLowerCase();
       pathname = joinPaths(pathname, `/game/${gameName}/collection/${address}`);
     } else {
-      pathname = joinPaths(pathname, `/collection/${address}`);
+      pathname = `/collection/${address}`;
     }
-    navigate(pathname || "/");
-  }, [collectionAddress, location, navigate, game, edition]);
+    return pathname || "/";
+  }, [collectionAddress, location.pathname, game, edition]);
 
   return (
-    <div className="w-full group select-none">
+    <Link to={target} className="w-full group select-none">
       <CollectibleCard
         title={collectionName}
         image={resizeImage(collectionImage, 300, 300) ?? collectionImage}
         totalCount={collectionTotalSupply as unknown as number}
         selectable={false}
         listingCount={listingCount}
-        onClick={handleClick}
         lastSale={lastSale ?? null}
         price={price ?? null}
         className={"cursor-pointer"}
       />
-    </div>
+    </Link>
   );
 }
 

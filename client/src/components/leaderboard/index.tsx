@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useRouterState } from "@tanstack/react-router";
 import { cn, Empty, LayoutContent, Skeleton, TabsContent } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useArcade } from "@/hooks/arcade";
@@ -29,7 +29,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     return [...addresses, getChecksumAddress(address)];
   }, [follows, address]);
 
-  const navigate = useNavigate();
+  const { location } = useRouterState();
 
   const gamePlayers = useMemo(() => {
     return players[edition?.config.project || ""] || [];
@@ -39,18 +39,18 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
     return achievements[edition?.config.project || ""] || [];
   }, [achievements, edition]);
 
-  const location = useLocation();
-  const handleClick = useCallback(
+  const getPlayerTarget = useCallback(
     (nameOrAddress: string) => {
-      // On click, we update the url param address to the address of the player
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/player\/[^/]+/, "");
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
+      const segments = location.pathname.split("/").filter(Boolean);
+      const playerIndex = segments.indexOf("player");
+      if (playerIndex !== -1) {
+        segments.splice(playerIndex);
+      }
       const player = nameOrAddress.toLowerCase();
-      pathname = joinPaths(pathname, `/player/${player}/tab/achievements`);
-      navigate(pathname || "/");
+      const targetSegments = [...segments, "player", player, "achievements"];
+      return joinPaths(...targetSegments) || "/";
     },
-    [location, navigate],
+    [location.pathname],
   );
 
   const gameData = useMemo(() => {
@@ -226,7 +226,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
                       points={item.points}
                       highlight={item.highlight}
                       following={item.following}
-                      onClick={() => handleClick(item.address)}
+                      to={getPlayerTarget(item.address)}
                     />
                   ))}
                 </div>
@@ -269,7 +269,7 @@ export function Leaderboard({ edition }: { edition?: EditionModel }) {
                       name={item.name}
                       points={item.points}
                       highlight={item.highlight}
-                      onClick={() => handleClick(item.address)}
+                      to={getPlayerTarget(item.address)}
                     />
                   ))}
                 </div>

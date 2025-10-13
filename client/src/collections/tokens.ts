@@ -8,10 +8,22 @@ import {
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { queryKeys } from "@/queries/keys";
 import { queryClient } from "@/queries";
-import { Token, TokenContract, ToriiClient } from "@dojoengine/torii-wasm";
+import {
+  type Token,
+  type TokenContract,
+  ToriiClient,
+} from "@dojoengine/torii-wasm";
 import { getChecksumAddress } from "starknet";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
-import { fetchTokenImage } from "@/hooks/fetcher-utils";
+import { fetchContractImage, fetchTokenImage } from "@/hooks/fetcher-utils";
+
+export type EnrichedTokenContract = TokenContract & {
+  totalSupply: bigint;
+  token_id: string | null;
+  project: string;
+  image: string;
+  contract_type: string;
+};
 
 export const tokenContractsCollection = createCollection(
   queryCollectionOptions({
@@ -21,18 +33,38 @@ export const tokenContractsCollection = createCollection(
         toriiUrl: `https://api.cartridge.gg/x/${DEFAULT_PROJECT}/torii`,
         worldAddress: "0x0",
       });
-      const contracts = await client.getTokenContracts({
+      const contracts: TokenContract[] = [];
+      let contract = await client.getTokenContracts({
         contract_addresses: [],
         contract_types: [],
         pagination: {
-          limit: 100,
+          limit: 5,
           cursor: undefined,
           direction: "Forward",
           order_by: [],
         },
       });
+      contracts.push(...contract.items);
+      while (contract.next_cursor) {
+        try {
+          contract = await client.getTokenContracts({
+            contract_addresses: [],
+            contract_types: [],
+            pagination: {
+              limit: 5,
+              cursor: contract.next_cursor,
+              direction: "Forward",
+              order_by: [],
+            },
+          });
+          contracts.push(...contract.items);
+        } catch (error) {
+          console.error("Error fetching token contracts:", error);
+          break;
+        }
+      }
       const data = await Promise.all(
-        contracts.items.map(async (contract) => {
+        contracts.map(async (contract) => {
           const token = await client.getTokens({
             contract_addresses: [contract.contract_address],
             token_ids: [],
@@ -54,11 +86,17 @@ export const tokenContractsCollection = createCollection(
             enrichedContract.token_id = token.items[0].token_id;
           }
 
-          const image = await fetchTokenImage(
-            enrichedContract as Token,
-            DEFAULT_PROJECT,
-            false,
-          );
+          let image = null;
+          if (!contract.metadata) {
+            image = await fetchTokenImage(
+              enrichedContract as Token,
+              DEFAULT_PROJECT,
+              false,
+            );
+          } else {
+            image = await fetchContractImage(contract, DEFAULT_PROJECT);
+          }
+          const contractType = (contract as any).contract_type ?? "ERC721";
           return {
             ...enrichedContract,
             contract_address: getChecksumAddress(contract.contract_address),
@@ -66,7 +104,8 @@ export const tokenContractsCollection = createCollection(
             totalSupply: BigInt(enrichedContract.total_supply ?? "0x0"),
             token_id: enrichedContract.token_id ?? null,
             project: DEFAULT_PROJECT,
-            image,
+            image: image,
+            contract_type: contractType as string,
           };
         }),
       );

@@ -31,9 +31,9 @@ describe('Metadata Indexer Utilities', () => {
       const index = buildMetadataIndex(tokens);
 
       expect(index['No Traits']).toBeDefined();
-      expect(index['No Traits']['true']).toContain('100');
-      expect(index['No Traits']['true']).toContain('101');
-      expect(index['No Traits']['true']).toContain('102');
+      expect(index['No Traits'].true).toContain('100');
+      expect(index['No Traits'].true).toContain('101');
+      expect(index['No Traits'].true).toContain('102');
     });
 
     it('should handle empty token array', () => {
@@ -54,9 +54,9 @@ describe('Metadata Indexer Utilities', () => {
 
       const updated = updateMetadataIndex(existingIndex, newTokens);
 
-      expect(updated['Rarity']['Mythic']).toEqual(['7']);
-      expect(updated['Background']['Rainbow']).toEqual(['7']);
-      expect(updated['Rarity']['Legendary']).toEqual(['1', '6']); // Unchanged
+      expect(updated.Rarity.Mythic).toEqual(['7']);
+      expect(updated.Background.Rainbow).toEqual(['7']);
+      expect(updated.Rarity.Legendary).toEqual(['1', '6']); // Unchanged
     });
 
     it('should merge tokens with existing trait values', () => {
@@ -66,7 +66,7 @@ describe('Metadata Indexer Utilities', () => {
       ];
 
       const updated = updateMetadataIndex(existingIndex, newTokens);
-      expect(updated['Rarity']['Epic']).toEqual(['1', '2']);
+      expect(updated.Rarity.Epic).toEqual(['1', '2']);
     });
   });
 
@@ -95,21 +95,21 @@ describe('Metadata Indexer Utilities', () => {
       const index = createExpectedMetadataIndex();
       const counts = calculateFilterCounts(index);
 
-      expect(counts['Rarity']['Legendary']).toBe(2);
-      expect(counts['Rarity']['Epic']).toBe(2);
-      expect(counts['Rarity']['Common']).toBe(2);
-      expect(counts['Background']['Gold']).toBe(2);
-      expect(counts['Background']['Blue']).toBe(2);
-      expect(counts['Background']['Green']).toBe(2);
+      expect(counts.Rarity.Legendary).toBe(2);
+      expect(counts.Rarity.Epic).toBe(2);
+      expect(counts.Rarity.Common).toBe(2);
+      expect(counts.Background.Gold).toBe(2);
+      expect(counts.Background.Blue).toBe(2);
+      expect(counts.Background.Green).toBe(2);
     });
 
     it('should calculate counts for specific token IDs', () => {
       const index = createExpectedMetadataIndex();
       const counts = calculateFilterCounts(index, ['1', '2', '3']);
 
-      expect(counts['Rarity']['Legendary']).toBe(1); // Only token 1
-      expect(counts['Rarity']['Epic']).toBe(2); // Tokens 2 and 3
-      expect(counts['Rarity']['Common']).toBe(0); // No common tokens in subset
+      expect(counts.Rarity.Legendary).toBe(1); // Only token 1
+      expect(counts.Rarity.Epic).toBe(2); // Tokens 2 and 3
+      expect(counts.Rarity.Common).toBe(0); // No common tokens in subset
     });
   });
 

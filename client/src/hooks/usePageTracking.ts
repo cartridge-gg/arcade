@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { useAnalytics } from "./useAnalytics";
+import { useRouterState } from "@tanstack/react-router";
 
 // Page name mapping for cleaner analytics
 const pageNameMap: Record<string, string> = {
@@ -16,7 +16,7 @@ const pageNameMap: Record<string, string> = {
 };
 
 export function usePageTracking() {
-  const location = useLocation();
+  const { location } = useRouterState();
   const { trackPageView } = useAnalytics();
 
   useEffect(() => {

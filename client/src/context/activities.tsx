@@ -172,7 +172,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
             (edition) => edition.config.project === item.meta.project,
           );
           const chainId = getChainId(edition?.config.rpc);
-          const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/0x${BigInt(transfer.contractAddress).toString(16)}/${addAddressPadding(transfer.tokenId)}/image`;
+          const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${addAddressPadding(transfer.tokenId)}/image`;
           const card: CardProps = {
             variant: "collectible",
             key: `${transfer.transactionHash}-${transfer.eventId}`,

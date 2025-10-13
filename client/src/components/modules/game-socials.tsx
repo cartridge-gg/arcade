@@ -135,7 +135,7 @@ const GameSocials = ({
                   </td>
                 ))}
                 {/* Fill empty cell if odd number of items - no border for empty cell */}
-                {row.length === 1 && <td className="p-0 w-1/2"></td>}
+                {row.length === 1 && <td className="p-0 w-1/2" />}
               </tr>
             ))}
           </tbody>

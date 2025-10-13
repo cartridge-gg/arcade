@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { TabsContent, Thumbnail, type TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { LeaderboardScene } from "../scenes/leaderboard";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useRouterState } from "@tanstack/react-router";
 import { Socials } from "@cartridge/arcade";
 import { ArcadeTabs } from "../modules";
 import { MarketplaceScene } from "../scenes/marketplace";
@@ -10,32 +10,35 @@ import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
 import { Editions } from "../editions";
 import arcade from "@/assets/arcade-logo.png";
-import { useProject } from "@/hooks/project";
+import { useProject, TAB_SEGMENTS } from "@/hooks/project";
 import { joinPaths } from "@/helpers";
 import { useDevice } from "@/hooks/device";
 import { PredictScene } from "../scenes/predict";
 import { GameSocialWebsite } from "../modules/game-social";
 
 export function GamePage() {
-  const { game, edition } = useProject();
-  const { tab } = useProject();
+  const { game, edition, tab } = useProject();
   const { isMobile } = useDevice();
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { location } = useRouterState();
   const handleClick = useCallback(
     (value: string) => {
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(pathname, `/tab/${value}`);
-      navigate(pathname || "/");
+      const segments = location.pathname.split("/").filter(Boolean);
+      const last = segments[segments.length - 1];
+      if (last === value) return;
+      if (TAB_SEGMENTS.includes(last as (typeof TAB_SEGMENTS)[number])) {
+        segments.pop();
+      }
+      segments.push(value as TabValue);
+      const target = joinPaths(...segments);
+      window.history.pushState({}, "", target || "/");
     },
-    [location, navigate],
+    [location.pathname],
   );
 
   const order: TabValue[] = useMemo(() => {
     const tabs: TabValue[] = game
-      ? ["marketplace", "leaderboard", "predict", "about"]
+      ? ["marketplace", "leaderboard", "guilds", "predict", "about"]
       : ["marketplace", "leaderboard", "predict"];
 
     if (process.env.NODE_ENV !== "development") {

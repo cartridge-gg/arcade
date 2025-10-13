@@ -16,8 +16,11 @@ export interface FetchToriiOptionsBase {
   pagination?: PaginationOptions;
 }
 
-export interface FetchToriiOptionsWithClient<TNative extends boolean = false> extends FetchToriiOptionsBase {
-  client: (params: ClientCallbackParams<TNative>) => Promise<any> | void | AsyncGenerator<any, void, unknown>;
+export interface FetchToriiOptionsWithClient<TNative extends boolean = false>
+  extends FetchToriiOptionsBase {
+  client: (
+    params: ClientCallbackParams<TNative>,
+  ) => Promise<any> | void | AsyncGenerator<any, void, unknown>;
   native?: TNative;
   sql?: never;
 }
@@ -28,7 +31,9 @@ export interface FetchToriiOptionsWithSQL extends FetchToriiOptionsBase {
   client?: never;
 }
 
-export type FetchToriiOptions = FetchToriiOptionsWithClient<boolean> | FetchToriiOptionsWithSQL;
+export type FetchToriiOptions =
+  | FetchToriiOptionsWithClient<boolean>
+  | FetchToriiOptionsWithSQL;
 
 export interface FetchToriiResult {
   data: any[];
@@ -66,7 +71,9 @@ async function fetchFromEndpoint(
       toriiUrl,
       worldAddress: "0x0",
     };
-    const client = options.native ? new ToriiGrpcClient(cfg) : await new ToriiClient(cfg);
+    const client = options.native
+      ? new ToriiGrpcClient(cfg)
+      : await new ToriiClient(cfg);
 
     try {
       return await options.client({
@@ -106,7 +113,10 @@ async function fetchFromEndpoint(
   throw new Error("Either 'client' or 'sql' must be provided in options");
 }
 
-export async function fetchToriis(endpoints: string[], options: FetchToriiOptions): Promise<FetchToriiResult> {
+export async function fetchToriis(
+  endpoints: string[],
+  options: FetchToriiOptions,
+): Promise<FetchToriiResult> {
   const abortController = new AbortController();
   const signal = abortController.signal;
 
@@ -117,10 +127,18 @@ export async function fetchToriis(endpoints: string[], options: FetchToriiOption
     const toriiUrl = getToriiUrl(endpoint);
 
     try {
-      const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
+      const result = await fetchFromEndpoint(
+        endpoint,
+        toriiUrl,
+        options,
+        signal,
+      );
       return { success: true as const, data: result, endpoint };
     } catch (error) {
-      const err = error instanceof Error ? error : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
+      const err =
+        error instanceof Error
+          ? error
+          : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
       return { success: false as const, error: err, endpoint };
     }
   });
@@ -143,7 +161,9 @@ export async function fetchToriis(endpoints: string[], options: FetchToriiOption
       continue;
     }
     const reason = response.reason as any;
-    errors.push(new Error(`Promise rejected: ${reason?.message || "Unknown error"}`));
+    errors.push(
+      new Error(`Promise rejected: ${reason?.message || "Unknown error"}`),
+    );
     failCount++;
   }
 
@@ -175,22 +195,35 @@ export async function* fetchToriisStream(
     const toriiUrl = getToriiUrl(endpoint);
 
     try {
-      const result = await fetchFromEndpoint(endpoint, toriiUrl, options, signal);
+      const result = await fetchFromEndpoint(
+        endpoint,
+        toriiUrl,
+        options,
+        signal,
+      );
       return { index, success: true as const, data: result, endpoint };
     } catch (error) {
-      const err = error instanceof Error ? error : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
+      const err =
+        error instanceof Error
+          ? error
+          : new Error(`Failed to fetch from ${endpoint}: ${String(error)}`);
       return { index, success: false as const, error: err, endpoint };
     }
   });
 
   let completed = 0;
-  const remainingIndices = new Set(Array.from({ length: totalEndpoints }, (_, i) => i));
+  const remainingIndices = new Set(
+    Array.from({ length: totalEndpoints }, (_, i) => i),
+  );
 
   // Process promises as they complete using Promise.race
   while (remainingIndices.size > 0) {
     // Create a map of active promises
     const activePromises = Array.from(remainingIndices).map((index) =>
-      pendingPromises[index].then((result) => ({ ...result, promiseIndex: index })),
+      pendingPromises[index].then((result) => ({
+        ...result,
+        promiseIndex: index,
+      })),
     );
 
     try {

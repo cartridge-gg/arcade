@@ -1,4 +1,4 @@
-import {
+import type {
   MetadataIndex,
   ActiveFilters,
   AvailableFilters,
@@ -27,10 +27,10 @@ export const buildMetadataIndex: BuildMetadataIndex = (tokens) => {
       if (!index["No Traits"]) {
         index["No Traits"] = {};
       }
-      if (!index["No Traits"]["true"]) {
-        index["No Traits"]["true"] = [];
+      if (!index["No Traits"].true) {
+        index["No Traits"].true = [];
       }
-      index["No Traits"]["true"].push(token.token_id || "");
+      index["No Traits"].true.push(token.token_id || "");
       continue;
     }
 
@@ -76,12 +76,12 @@ export const updateMetadataIndex: UpdateMetadataIndex = (
       if (!updatedIndex["No Traits"]) {
         updatedIndex["No Traits"] = {};
       }
-      if (!updatedIndex["No Traits"]["true"]) {
-        updatedIndex["No Traits"]["true"] = [];
+      if (!updatedIndex["No Traits"].true) {
+        updatedIndex["No Traits"].true = [];
       }
       const tokenId = token.token_id || "";
-      if (!updatedIndex["No Traits"]["true"].includes(tokenId)) {
-        updatedIndex["No Traits"]["true"].push(tokenId);
+      if (!updatedIndex["No Traits"].true.includes(tokenId)) {
+        updatedIndex["No Traits"].true.push(tokenId);
       }
       continue;
     }
@@ -126,7 +126,7 @@ export const extractTokenAttributes: ExtractTokenAttributes = (token) => {
   }
 
   return metadata.attributes.filter(
-    (attr: any) => attr && attr.trait_type && attr.value !== undefined,
+    (attr: any) => attr?.trait_type && attr.value !== undefined,
   );
 };
 

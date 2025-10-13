@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useCallback, useState, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
 import {
   buildMetadataIndex,
@@ -7,10 +7,11 @@ import {
   serializeFiltersToURL,
   parseFiltersFromURL,
 } from "@/utils/metadata-indexer";
-import {
+import type {
   UseMetadataFiltersInput,
   UseMetadataFiltersReturn,
   ActiveFilters,
+  StatusFilter,
 } from "@/types/metadata-filter.types";
 
 export function useMetadataFilters({
@@ -18,7 +19,27 @@ export function useMetadataFilters({
   collectionAddress,
   enabled = true,
 }: UseMetadataFiltersInput): UseMetadataFiltersReturn {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { location } = useRouterState();
+  const searchParams = useMemo(() => {
+    return new URLSearchParams(location.searchStr ?? "");
+  }, [location.searchStr]);
+  const setSearchParams = useCallback(
+    (params: URLSearchParams, options?: { replace?: boolean }) => {
+      const payload: Record<string, string> = {};
+      params.forEach((value, key) => {
+        if (value) {
+          payload[key] = value;
+        }
+      });
+      navigate({
+        to: location.pathname,
+        search: payload,
+        replace: options?.replace,
+      });
+    },
+    [navigate, location.pathname],
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -30,6 +51,8 @@ export function useMetadataFilters({
     clearFilters,
     updateAvailableFilters,
     getFilteredTokenIds,
+    setStatusFilter: storeSetStatusFilter,
+    getStatusFilter,
   } = useMetadataFilterStore();
 
   const collectionState = getCollectionState(collectionAddress);
@@ -50,9 +73,8 @@ export function useMetadataFilters({
     if (tokens.length > 1000 && "requestIdleCallback" in window) {
       const handle = window.requestIdleCallback(buildIndex);
       return () => window.cancelIdleCallback(handle);
-    } else {
-      buildIndex();
     }
+    buildIndex();
   }, [tokens, collectionAddress, enabled, setMetadataIndex]);
 
   // Initialize filters from URL on mount - use ref to track if already initialized
@@ -73,6 +95,9 @@ export function useMetadataFilters({
   // Get current state
   const metadataIndex = collectionState?.metadataIndex || {};
   const activeFilters = collectionState?.activeFilters || {};
+  const precomputed = collectionState?.precomputed;
+  const statusFilter: StatusFilter =
+    collectionState?.statusFilter || getStatusFilter(collectionAddress);
 
   // Calculate filtered tokens
   const filteredTokens = useMemo(() => {
@@ -88,7 +113,7 @@ export function useMetadataFilters({
     return tokens.filter(
       (token) => token.token_id && idSet.has(token.token_id),
     );
-  }, [tokens, collectionAddress, enabled, getFilteredTokenIds]);
+  }, [tokens, collectionAddress, enabled, getFilteredTokenIds, activeFilters]);
 
   // Calculate available filters with counts
   const availableFilters = useMemo(() => {
@@ -103,7 +128,13 @@ export function useMetadataFilters({
     // Filters active, calculate filtered IDs directly to avoid dependency on filteredTokens
     const filteredIds = getFilteredTokenIds(collectionAddress);
     return calculateFilterCounts(metadataIndex, filteredIds);
-  }, [collectionAddress, enabled, getFilteredTokenIds]);
+  }, [
+    collectionAddress,
+    enabled,
+    getFilteredTokenIds,
+    metadataIndex,
+    activeFilters,
+  ]);
 
   // Update available filters in store - use useRef to prevent infinite loops
   const prevAvailableFilters = useRef(availableFilters);
@@ -168,15 +199,25 @@ export function useMetadataFilters({
     clearFilters(collectionAddress);
   }, [collectionAddress, enabled, clearFilters]);
 
+  const setStatusFilter = useCallback(
+    (status: StatusFilter) => {
+      storeSetStatusFilter(collectionAddress, status);
+    },
+    [collectionAddress, storeSetStatusFilter],
+  );
+
   // Check if results are empty
   const isEmpty =
     filteredTokens.length === 0 && Object.keys(activeFilters).length > 0;
 
   return {
     filteredTokens,
-    metadataIndex,
     activeFilters,
     availableFilters,
+    metadataIndex,
+    precomputed,
+    statusFilter,
+    setStatusFilter,
     setFilter,
     removeFilter,
     clearAllFilters,

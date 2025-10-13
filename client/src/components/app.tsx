@@ -1,109 +1,21 @@
-import { Games } from "@/components/games";
-import { SceneLayout } from "@/components/scenes/layout";
 import { GamePage } from "./pages/game";
-import { useEffect } from "react";
 import { PlayerPage } from "./pages/player";
-import { cn } from "@cartridge/ui/utils";
-import { useSidebar } from "@/hooks/sidebar";
-import { Header } from "./header";
 import { useProject } from "@/hooks/project";
-import { ThemeProvider } from "@/context/theme";
-import { useArcade } from "@/hooks/arcade";
-import { useDevice } from "@/hooks/device";
 import { MarketPage } from "./pages/market";
-import { Filters } from "./filters";
-import { UserCard } from "./user/user-card";
 import { usePageTracking } from "@/hooks/usePageTracking";
-import { useAnalytics } from "@/hooks/useAnalytics";
 
 export function App() {
   // Initialize page tracking
   usePageTracking();
-  const { trackEvent, events } = useAnalytics();
-  const { isOpen, toggle, handleTouchMove, handleTouchStart } = useSidebar();
-  const { setPlayer } = useArcade();
   const { player, collection } = useProject();
 
-  const { isPWA, isMobile } = useDevice();
+  if (player) {
+    return <PlayerPage />;
+  }
 
-  useEffect(() => {
-    setPlayer(player);
-  }, [player, setPlayer]);
+  if (collection) {
+    return <MarketPage />;
+  }
 
-  const handleSidebarToggle = () => {
-    trackEvent(events.NAVIGATION_SIDEBAR_TOGGLED, {
-      action: isOpen ? "close" : "open",
-      is_mobile: isMobile,
-    });
-    toggle();
-  };
-
-  return (
-    <ThemeProvider defaultScheme="dark">
-      <SceneLayout>
-        <div
-          className={cn("h-full w-full overflow-y-scroll lg:px-0")}
-          style={{ scrollbarWidth: "none" }}
-        >
-          <div
-            className={cn(
-              "2xl:max-w-[1720px] w-full px-0 lg:px-6 lg:pb-6 2xl:pb-10 2xl:px-10 gap-3 lg:gap-6 2xl:gap-10 flex items-stretch m-auto h-full overflow-clip",
-              "transition-all duration-300 ease-in-out",
-            )}
-          >
-            <div
-              className={cn(
-                "absolute inset-0 bg-transparent z-10",
-                !isOpen && "hidden",
-              )}
-              onClick={handleSidebarToggle}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-            />
-
-            <div className="lg:space-y-4 h-full flex flex-col">
-              {!isMobile && <UserCard />}
-              <div className="flex-1 overflow-hidden">
-                {!collection ? <Games /> : <Filters />}
-              </div>
-            </div>
-
-            <div
-              className={cn(
-                "fixed lg:relative h-full w-full flex flex-col overflow-hidden px-0 lg:pb-0",
-                "transition-transform duration-300 ease-in-out",
-                isPWA ? "pb-[77px]" : "pb-[71px]",
-                isOpen
-                  ? "translate-x-[min(calc(100vw-64px),360px)]"
-                  : "translate-x-0",
-              )}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-            >
-              <div className="lg:hidden w-full p-3">
-                <Header />
-              </div>
-              <div
-                className={cn(
-                  "relative grow h-full flex flex-col rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100",
-                  player &&
-                    "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
-                )}
-              >
-                {!player ? (
-                  !collection ? (
-                    <GamePage />
-                  ) : (
-                    <MarketPage />
-                  )
-                ) : (
-                  <PlayerPage />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </SceneLayout>
-    </ThemeProvider>
-  );
+  return <GamePage />;
 }

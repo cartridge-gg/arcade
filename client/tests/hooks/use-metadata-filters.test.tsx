@@ -41,9 +41,9 @@ describe('useMetadataFilters Hook', () => {
         })
       );
 
-      expect(result.current.metadataIndex['Rarity']).toBeDefined();
-      expect(result.current.metadataIndex['Background']).toBeDefined();
-      expect(result.current.metadataIndex['Power']).toBeDefined();
+      expect(result.current.metadataIndex.Rarity).toBeDefined();
+      expect(result.current.metadataIndex.Background).toBeDefined();
+      expect(result.current.metadataIndex.Power).toBeDefined();
     });
 
     it('should calculate available filters with counts', () => {
@@ -54,9 +54,9 @@ describe('useMetadataFilters Hook', () => {
         })
       );
 
-      expect(result.current.availableFilters['Rarity']['Legendary']).toBe(2);
-      expect(result.current.availableFilters['Rarity']['Epic']).toBe(2);
-      expect(result.current.availableFilters['Background']['Gold']).toBe(2);
+      expect(result.current.availableFilters.Rarity.Legendary).toBe(2);
+      expect(result.current.availableFilters.Rarity.Epic).toBe(2);
+      expect(result.current.availableFilters.Background.Gold).toBe(2);
     });
 
     it('should initialize from URL parameters', () => {
@@ -69,7 +69,7 @@ describe('useMetadataFilters Hook', () => {
         })
       );
 
-      expect(result.current.activeFilters['Rarity']).toContain('Legendary');
+      expect(result.current.activeFilters.Rarity).toContain('Legendary');
       expect(result.current.filteredTokens).toHaveLength(2);
     });
 
@@ -101,7 +101,7 @@ describe('useMetadataFilters Hook', () => {
         result.current.setFilter('Rarity', 'Legendary');
       });
 
-      expect(result.current.activeFilters['Rarity']).toContain('Legendary');
+      expect(result.current.activeFilters.Rarity).toContain('Legendary');
       expect(result.current.filteredTokens).toHaveLength(2);
     });
 
@@ -137,8 +137,8 @@ describe('useMetadataFilters Hook', () => {
         result.current.setFilter('Rarity', 'Epic');
       });
 
-      expect(result.current.activeFilters['Rarity']).toContain('Legendary');
-      expect(result.current.activeFilters['Rarity']).toContain('Epic');
+      expect(result.current.activeFilters.Rarity).toContain('Legendary');
+      expect(result.current.activeFilters.Rarity).toContain('Epic');
       expect(result.current.filteredTokens).toHaveLength(4); // 2 Legendary + 2 Epic
     });
 
@@ -175,8 +175,8 @@ describe('useMetadataFilters Hook', () => {
         result.current.removeFilter('Rarity', 'Legendary');
       });
 
-      expect(result.current.activeFilters['Rarity']).not.toContain('Legendary');
-      expect(result.current.activeFilters['Rarity']).toContain('Epic');
+      expect(result.current.activeFilters.Rarity).not.toContain('Legendary');
+      expect(result.current.activeFilters.Rarity).toContain('Epic');
       expect(result.current.filteredTokens).toHaveLength(2); // Only Epic tokens
     });
 
@@ -194,8 +194,8 @@ describe('useMetadataFilters Hook', () => {
         result.current.removeFilter('Rarity');
       });
 
-      expect(result.current.activeFilters['Rarity']).toBeUndefined();
-      expect(result.current.activeFilters['Background']).toContain('Gold');
+      expect(result.current.activeFilters.Rarity).toBeUndefined();
+      expect(result.current.activeFilters.Background).toContain('Gold');
     });
 
     it('should update URL when filter is removed', () => {
@@ -252,6 +252,25 @@ describe('useMetadataFilters Hook', () => {
       expect(mockSetSearchParams).toHaveBeenLastCalledWith(
         expect.not.objectContaining({ filters: expect.anything() })
       );
+    });
+  });
+
+  describe('status filter state', () => {
+    it('should expose and update statusFilter', () => {
+      const { result } = renderHook(() =>
+        useMetadataFilters({
+          tokens: createMockTokenCollection(),
+          collectionAddress: '0x123'
+        })
+      );
+
+      expect(result.current.statusFilter).toBe('all');
+
+      act(() => {
+        result.current.setStatusFilter('listed');
+      });
+
+      expect(result.current.statusFilter).toBe('listed');
     });
   });
 
@@ -334,7 +353,7 @@ describe('useMetadataFilters Hook', () => {
         result.current.setFilter('Rarity', 'Epic');
       });
 
-      expect(result.current.activeFilters['Rarity']).toContain('Epic');
+      expect(result.current.activeFilters.Rarity).toContain('Epic');
 
       // Change collection address
       rerender({ address: '0x456' });

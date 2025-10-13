@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchToriis } from "@cartridge/arcade";
 import { CollectionType } from "@/context/collection";
+import { addAddressPadding } from "starknet";
 
 /**
  * Hook for fetching token balances from multiple Torii endpoints
@@ -32,7 +33,7 @@ function processTokensWithMetadata(
 
       processedTokens[checksumAddress] = {
         balance: {
-          amount: decimals > 0 ? balance / Math.pow(10, decimals) : balance,
+          amount: decimals > 0 ? balance / 10 ** decimals : balance,
           value: 0, // Will be calculated with price data
           change: 0, // Will be calculated with historical price data
         },
@@ -434,7 +435,7 @@ function getAssetImage(
   image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
   return (
     image ??
-    `https://api.cartridge.gg/x/${project}/torii/static/${metadata?.contract_address}/${firstNFT.token_id}/image`
+    `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(metadata?.contract_address ?? "0x0")}/${addAddressPadding(firstNFT.token_id ?? "0x0")}/image`
   );
 }
 

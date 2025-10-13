@@ -5,7 +5,7 @@ import {
   calculateFilterCounts,
   applyFilters
 } from '@/utils/metadata-indexer';
-import { Token } from '@dojoengine/torii-wasm';
+import type { Token } from '@dojoengine/torii-wasm';
 
 describe('Metadata Edge Cases', () => {
   describe('Malformed metadata handling', () => {
@@ -45,7 +45,7 @@ describe('Metadata Edge Cases', () => {
 
       const index = buildMetadataIndex([token]);
       // Should stringify the nested object
-      expect(index['Level1']).toBeDefined();
+      expect(index.Level1).toBeDefined();
     });
 
     it('should handle tokens with very long attribute values', () => {
@@ -61,7 +61,7 @@ describe('Metadata Edge Cases', () => {
       } as any;
 
       const index = buildMetadataIndex([token]);
-      expect(index['LongTrait'][longValue]).toEqual(['1']);
+      expect(index.LongTrait[longValue]).toEqual(['1']);
     });
 
     it('should handle special characters in trait names and values', () => {
@@ -104,13 +104,13 @@ describe('Metadata Edge Cases', () => {
       const index = buildMetadataIndex(tokens);
 
       // Null and undefined should be ignored
-      expect(index['NullValue']).toBeUndefined();
-      expect(index['UndefinedValue']).toBeUndefined();
+      expect(index.NullValue).toBeUndefined();
+      expect(index.UndefinedValue).toBeUndefined();
 
       // Empty string, zero, and false should be indexed
-      expect(index['EmptyString']['']).toEqual(['1']);
-      expect(index['Zero']['0']).toEqual(['1']);
-      expect(index['False']['false']).toEqual(['1']);
+      expect(index.EmptyString['']).toEqual(['1']);
+      expect(index.Zero['0']).toEqual(['1']);
+      expect(index.False.false).toEqual(['1']);
     });
 
     it('should handle duplicate token IDs gracefully', () => {
@@ -130,8 +130,8 @@ describe('Metadata Edge Cases', () => {
       const index = buildMetadataIndex(tokens);
 
       // Should not duplicate the token ID in the index
-      expect(index['Rarity']['Common']).toEqual(['1']);
-      expect(index['Rarity']['Common'].length).toBe(1);
+      expect(index.Rarity.Common).toEqual(['1']);
+      expect(index.Rarity.Common.length).toBe(1);
     });
   });
 
@@ -150,7 +150,7 @@ describe('Metadata Edge Cases', () => {
       const index = buildMetadataIndex(tokens);
 
       expect(Object.keys(index)).toHaveLength(1000);
-      expect(index['Trait500']['Value500']).toEqual(['500']);
+      expect(index.Trait500.Value500).toEqual(['500']);
     });
 
     it('should handle tokens with many attributes each', () => {
@@ -232,8 +232,8 @@ describe('Metadata Edge Cases', () => {
 
       const counts = calculateFilterCounts(index, ['2', '3']);
 
-      expect(counts['Trait1']['Value1']).toBe(2); // Only tokens 2 and 3
-      expect(counts['Trait2']['Value2']).toBe(2); // Only tokens 2 and 3
+      expect(counts.Trait1.Value1).toBe(2); // Only tokens 2 and 3
+      expect(counts.Trait2.Value2).toBe(2); // Only tokens 2 and 3
     });
 
     it('should handle count calculation with no matching tokens', () => {
@@ -243,7 +243,7 @@ describe('Metadata Edge Cases', () => {
 
       const counts = calculateFilterCounts(index, ['99', '100']);
 
-      expect(counts['Trait1']['Value1']).toBe(0);
+      expect(counts.Trait1.Value1).toBe(0);
     });
   });
 

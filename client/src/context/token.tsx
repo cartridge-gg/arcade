@@ -140,7 +140,7 @@ export function TokenProvider({ children }: { children: ReactNode }) {
   const tokenData = useMemo(
     () =>
       rpcData.map((token) => ({
-        balance: `${Number(token.balance.value) / Math.pow(10, token.meta.decimals || 0)}`,
+        balance: `${Number(token.balance.value) / 10 ** (token.meta.decimals || 0)}`,
         address: token.meta.address,
       })),
     [rpcData],
