@@ -4,6 +4,35 @@
 
 import type { RawProgression, PlayerStats } from "./types";
 import { API_URL, GAME_CONFIGS } from "./constants";
+import { ADDRESS_BY_USERNAME_QUERY } from "./queries";
+import { graphqlRequest } from "./graphql";
+
+/**
+ * Validate and resolve player username or address to a Starknet address
+ * Returns null if validation fails or user is not found
+ */
+export async function resolvePlayerAddress(usernameOrAddress: string): Promise<string | null> {
+  // Validate format
+  const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
+  if (isAddress) {
+    if (!isValidAddress(usernameOrAddress)) {
+      return null;
+    }
+    return usernameOrAddress;
+  }
+
+  if (!isValidUsername(usernameOrAddress)) {
+    return null;
+  }
+
+  // Resolve username to address
+  const data = await graphqlRequest<any>(ADDRESS_BY_USERNAME_QUERY, {
+    username: usernameOrAddress.toLowerCase(),
+  });
+
+  const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
+  return resolvedAddress || null;
+}
 
 /**
  * Escape HTML special characters to prevent XSS attacks

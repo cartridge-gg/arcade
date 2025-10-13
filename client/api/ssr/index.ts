@@ -1,15 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { ACTIVE_PROJECTS, GAME_CONFIGS } from "./constants";
 import { graphqlRequest } from "./graphql";
-import { ADDRESS_BY_USERNAME_QUERY, buildProgressionsQuery } from "./queries";
+import { buildProgressionsQuery } from "./queries";
 import {
   escapeHtml,
-  isValidAddress,
-  isValidUsername,
   computePlayerStats,
   buildMetaTags,
-  getAvatarVariant,
   buildGamePlayerOgImageUrl,
+  resolvePlayerAddress,
 } from "./utils";
 
 /**
@@ -20,33 +18,6 @@ import {
  *
  * All computation happens here - we only send final values to OG image service.
  */
-
-/**
- * Validate and resolve player username or address to a Starknet address
- * Returns null if validation fails or user is not found
- */
-async function resolvePlayerAddress(usernameOrAddress: string): Promise<string | null> {
-  // Validate format
-  const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
-  if (isAddress) {
-    if (!isValidAddress(usernameOrAddress)) {
-      return null;
-    }
-    return usernameOrAddress;
-  }
-
-  if (!isValidUsername(usernameOrAddress)) {
-    return null;
-  }
-
-  // Resolve username to address
-  const data = await graphqlRequest<any>(ADDRESS_BY_USERNAME_QUERY, {
-    username: usernameOrAddress.toLowerCase(),
-  });
-
-  const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
-  return resolvedAddress || null;
-}
 
 /**
  * Generate meta tags based on route
