@@ -553,10 +553,10 @@ async function generateMetaTags(url: string): Promise<string> {
           primaryColor: '#FBCB4A',
         });
 
-        // Add game icon URL if available
+        // Add game icon URL as 'image' parameter if available
         const gameIconUrl = GAME_ICONS[gameId];
         if (gameIconUrl) {
-          ogParams.set('gameImage', gameIconUrl);
+          ogParams.set('image', gameIconUrl);
         }
 
         imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
@@ -574,7 +574,7 @@ async function generateMetaTags(url: string): Promise<string> {
         const ogParams = new URLSearchParams({
           game: gameId,
           primaryColor: '#FBCB4A',
-          gameImage: gameIconUrl,
+          image: gameIconUrl,
         });
         imageUrl = `https://api.cartridge.gg/og/game?${ogParams.toString()}`;
       } else {
