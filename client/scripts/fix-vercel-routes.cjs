@@ -40,11 +40,24 @@ try {
   // Read existing config
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
-  // Find the index of the /api/ssr route
-  const ssrRouteIndex = config.routes.findIndex(r => r.src === "^/api/ssr$");
+  // Debug: log all API routes
+  console.log('📋 Available API routes:');
+  config.routes.forEach((r, i) => {
+    if (r.src && r.src.includes('/api/')) {
+      console.log(`   [${i}] ${r.src} -> ${r.dest || r.handle || 'N/A'}`);
+    }
+  });
+
+  // Find the index of the /api/ssr route (try both /api/ssr and /api/ssr/index)
+  let ssrRouteIndex = config.routes.findIndex(r => r.src === "^/api/ssr$");
 
   if (ssrRouteIndex === -1) {
-    console.error('❌ Could not find /api/ssr route in config.json');
+    // Try finding /api/ssr/index route
+    ssrRouteIndex = config.routes.findIndex(r => r.src === "^/api/ssr/index$");
+  }
+
+  if (ssrRouteIndex === -1) {
+    console.error('❌ Could not find /api/ssr or /api/ssr/index route in config.json');
     process.exit(1);
   }
 
