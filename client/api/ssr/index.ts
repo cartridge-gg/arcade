@@ -21,6 +21,34 @@ import {
  */
 
 /**
+ * Generate OG image URL for game-specific player profile
+ */
+function buildGamePlayerOgImageUrl(
+  usernameOrAddress: string,
+  gameId: string,
+  points: number
+): string {
+  const gameConfig = GAME_CONFIGS[gameId];
+  const ogParams = new URLSearchParams({
+    username: usernameOrAddress,
+    points: points.toString(),
+    game: gameId,
+    primaryColor: gameConfig?.color || '#2C250C',
+    avatarVariant: getAvatarVariant(usernameOrAddress),
+  });
+
+  // Add game cover image and icon URLs if available
+  if (gameConfig?.cover) {
+    ogParams.set('gameImage', gameConfig.cover);
+  }
+  if (gameConfig?.icon) {
+    ogParams.set('gameIcon', gameConfig.icon);
+  }
+
+  return `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
+}
+
+/**
  * Generate meta tags based on route
  * All computation happens here, only final values sent to OG image service
  */
@@ -41,14 +69,10 @@ async function generateMetaTags(url: string): Promise<string> {
       const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
       if (isAddress) {
         if (!isValidAddress(usernameOrAddress)) {
-          title = "Invalid Address - Cartridge Arcade";
-          description = "The requested address format is invalid";
           return buildMetaTags(title, description, imageUrl, pageUrl);
         }
       } else {
         if (!isValidUsername(usernameOrAddress)) {
-          title = "Invalid Username - Cartridge Arcade";
-          description = "The requested username contains invalid characters";
           return buildMetaTags(title, description, imageUrl, pageUrl);
         }
       }
@@ -64,8 +88,6 @@ async function generateMetaTags(url: string): Promise<string> {
 
         const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
         if (!resolvedAddress) {
-          title = `${usernameOrAddress} | Cartridge Arcade`;
-          description = "Player not found";
           return buildMetaTags(title, description, imageUrl, pageUrl);
         }
         address = resolvedAddress;
@@ -99,14 +121,10 @@ async function generateMetaTags(url: string): Promise<string> {
       const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
       if (isAddress) {
         if (!isValidAddress(usernameOrAddress)) {
-          title = `Invalid Address in ${gameId} - Cartridge Arcade`;
-          description = "The requested address format is invalid";
           return buildMetaTags(title, description, imageUrl, pageUrl);
         }
       } else {
         if (!isValidUsername(usernameOrAddress)) {
-          title = `Invalid Username in ${gameId} - Cartridge Arcade`;
-          description = "The requested username contains invalid characters";
           return buildMetaTags(title, description, imageUrl, pageUrl);
         }
       }
@@ -122,8 +140,6 @@ async function generateMetaTags(url: string): Promise<string> {
 
         const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
         if (!resolvedAddress) {
-          title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
-          description = "Player not found";
           return buildMetaTags(title, description, imageUrl, pageUrl);
         }
         address = resolvedAddress;
@@ -132,48 +148,24 @@ async function generateMetaTags(url: string): Promise<string> {
       // Find the specific game project
       const gameProject = ACTIVE_PROJECTS.find(p => p.project === gameId);
 
-      if (!gameProject) {
-        // Game not found, use placeholder
-        title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
-        description = `View ${usernameOrAddress}'s stats in ${gameId}`;
-
-        // Use static preview image (OG image generation moved to separate service)
-        imageUrl = 'https://play.cartridge.gg/preview.png';
-      } else {
-        // Fetch real player data for this specific game only (only progressions for points)
+      // Fetch player points for the game (0 if game not found in ACTIVE_PROJECTS)
+      let gamePoints = 0;
+      if (gameProject) {
         const query = buildProgressionsQuery([gameProject]);
         const progressionsData = await graphqlRequest<any>(query);
-
-        // Compute player statistics
         const stats = computePlayerStats(address, progressionsData, null);
-
-        // Get game-specific stats
         const gameStats = stats.gameStats[gameId] || { points: 0, completed: 0, total: 0 };
-        const gameConfig = GAME_CONFIGS[gameId];
-        const gameName = gameConfig?.name || gameId;
-
-        title = `${usernameOrAddress} in ${gameName} | Cartridge Arcade`;
-        description = `${gameStats.points} points in ${gameName}`;
-
-        // Generate dynamic OG image URL for game-specific page
-        const ogParams = new URLSearchParams({
-          username: usernameOrAddress,
-          points: gameStats.points.toString(),
-          game: gameId,
-          primaryColor: gameConfig?.color || '#2C250C',
-          avatarVariant: getAvatarVariant(usernameOrAddress),
-        });
-
-        // Add game cover image and icon URLs if available
-        if (gameConfig?.cover) {
-          ogParams.set('gameImage', gameConfig.cover);
-        }
-        if (gameConfig?.icon) {
-          ogParams.set('gameIcon', gameConfig.icon);
-        }
-
-        imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
+        gamePoints = gameStats.points;
       }
+
+      // Set title and description
+      const gameConfig = GAME_CONFIGS[gameId];
+      const gameName = gameConfig?.name || gameId;
+      title = `${usernameOrAddress} in ${gameName} | Cartridge Arcade`;
+      description = `${gamePoints} points in ${gameName}`;
+
+      // Generate dynamic OG image URL
+      imageUrl = buildGamePlayerOgImageUrl(usernameOrAddress, gameId, gamePoints);
     }
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
