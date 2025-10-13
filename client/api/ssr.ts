@@ -526,6 +526,7 @@ async function generateMetaTags(url: string): Promise<string> {
         points: stats.totalPoints.toString(),
         primaryColor: '#FBCB4A',
         avatarVariant: getAvatarVariant(usernameOrAddress),
+        avatarColor: '#FBCB4A', // Fill avatar SVG with primary color
       });
       imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
     }
@@ -599,6 +600,7 @@ async function generateMetaTags(url: string): Promise<string> {
           game: gameId,
           primaryColor: '#FBCB4A',
           avatarVariant: getAvatarVariant(usernameOrAddress),
+          avatarColor: '#FBCB4A', // Fill avatar SVG with primary color
         });
 
         // Add game cover image and icon URLs if available
