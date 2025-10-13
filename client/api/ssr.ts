@@ -175,37 +175,71 @@ async function graphqlRequest<T>(query: string, variables?: Record<string, unkno
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+  // LOG: Request details
+  console.log('[GraphQL Request]', {
+    url: `${API_URL}/query`,
+    queryPreview: query.substring(0, 200) + '...',
+    variables: JSON.stringify(variables, null, 2)
+  });
+
   try {
+    const requestBody = JSON.stringify({ query, variables });
+    console.log('[GraphQL Request Body]', {
+      bodyLength: requestBody.length,
+      body: requestBody.substring(0, 500) + '...'
+    });
+
     const response = await fetch(`${API_URL}/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables }),
+      body: requestBody,
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
+    // LOG: Response status
+    console.log('[GraphQL Response]', {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorBody = await response.text();
+      console.error('[GraphQL Error Response]', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody
+      });
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
     }
 
     const json: GraphQLResponse<T> = await response.json();
 
     if (json.errors && json.errors.length > 0) {
       const errorMessage = json.errors.map((e) => e.message).join(", ");
+      console.error('[GraphQL Errors]', json.errors);
       throw new Error(`GraphQL error: ${errorMessage}`);
     }
 
     if (!json.data) {
+      console.error('[GraphQL No Data]', json);
       throw new Error("No data returned from GraphQL query");
     }
+
+    console.log('[GraphQL Success]', {
+      dataKeys: Object.keys(json.data || {})
+    });
 
     return json.data;
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
+      console.error('[GraphQL Timeout]');
       throw new Error("GraphQL request timed out after 10 seconds");
     }
+    console.error('[GraphQL Request Failed]', error);
     throw error;
   }
 }
