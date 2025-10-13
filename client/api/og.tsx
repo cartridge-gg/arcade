@@ -22,6 +22,7 @@ export default async function handler(req: Request) {
     const game = searchParams.get("game");
     const points = searchParams.get("points");
     const avatar = searchParams.get("avatar");
+    const achievements = searchParams.get("achievements");
 
     // Validate required parameters based on type
     if (!type) {
