@@ -30,36 +30,70 @@ const ACTIVE_PROJECTS = [
   { model: "", namespace: "pistols", project: "pistols" },
 ];
 
-// Game icon URL mapping for OG images
-// Maps project IDs to their static icon URLs on CDN
-const GAME_ICONS: Record<string, string> = {
-  "dopewars": "https://static.cartridge.gg/presets/dope-wars/icon.png",
-  "loot-survivor": "https://static.cartridge.gg/presets/loot-survivor/icon.png",
-  "underdark": "https://static.cartridge.gg/presets/underdark/icon.png",
-  "zkube": "https://static.cartridge.gg/presets/zkube/icon.png",
-  "blobert": "https://static.cartridge.gg/presets/blob-arena-amma/icon.png",
-  "zdefender": "https://static.cartridge.gg/presets/zdefender/icon.png",
-  "realm": "https://static.cartridge.gg/presets/eternum/icon.svg",
-  "eternum": "https://static.cartridge.gg/presets/eternum/icon.svg",
-  "ponziland": "https://static.cartridge.gg/presets/ponziland/icon.svg",
-  "evolute-genesis": "https://static.cartridge.gg/presets/mage-duel/icon.png",
-  "pistols": "https://static.cartridge.gg/presets/pistols/icon.png",
-};
+// Game configuration for OG images
+// Contains all metadata needed for each game's OG image generation
+interface GameConfig {
+  icon: string;
+  cover: string;
+  color: string;
+}
 
-// Game cover/banner image URL mapping for OG images
-// Maps project IDs to their static cover image URLs on CDN
-const GAME_IMAGES: Record<string, string> = {
-  "dopewars": "https://static.cartridge.gg/presets/dope-wars/cover.png",
-  "loot-survivor": "https://static.cartridge.gg/presets/loot-survivor/cover.png",
-  "underdark": "https://static.cartridge.gg/presets/underdark/cover.png",
-  "zkube": "https://static.cartridge.gg/presets/zkube/cover.png",
-  "blobert": "https://static.cartridge.gg/presets/blob-arena-amma/cover.png",
-  "zdefender": "https://static.cartridge.gg/presets/zdefender/cover.png",
-  "realm": "https://static.cartridge.gg/presets/eternum/cover.png",
-  "eternum": "https://static.cartridge.gg/presets/eternum/cover.png",
-  "ponziland": "https://static.cartridge.gg/presets/ponziland/cover.png",
-  "evolute-genesis": "https://static.cartridge.gg/presets/mage-duel/cover.png",
-  "pistols": "https://static.cartridge.gg/presets/pistols/cover.png",
+const GAME_CONFIGS: Record<string, GameConfig> = {
+  "dopewars": {
+    icon: "https://static.cartridge.gg/presets/dope-wars/icon.png",
+    cover: "https://static.cartridge.gg/presets/dope-wars/cover.png",
+    color: "#11ED83",
+  },
+  "loot-survivor": {
+    icon: "https://static.cartridge.gg/presets/loot-survivor/icon.png",
+    cover: "https://static.cartridge.gg/presets/loot-survivor/cover.png",
+    color: "#33FF33",
+  },
+  "underdark": {
+    icon: "https://static.cartridge.gg/presets/underdark/icon.png",
+    cover: "https://static.cartridge.gg/presets/underdark/cover.png",
+    color: "#F59100",
+  },
+  "zkube": {
+    icon: "https://static.cartridge.gg/presets/zkube/icon.png",
+    cover: "https://static.cartridge.gg/presets/zkube/cover.png",
+    color: "#5bc3e6",
+  },
+  "blobert": {
+    icon: "https://static.cartridge.gg/presets/blob-arena-amma/icon.png",
+    cover: "https://static.cartridge.gg/presets/blob-arena-amma/cover.png",
+    color: "#D7B000",
+  },
+  "zdefender": {
+    icon: "https://static.cartridge.gg/presets/zdefender/icon.png",
+    cover: "https://static.cartridge.gg/presets/zdefender/cover.png",
+    color: "#F59100",
+  },
+  "realm": {
+    icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
+    cover: "https://static.cartridge.gg/presets/eternum/cover.png",
+    color: "#dc8b07",
+  },
+  "eternum": {
+    icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
+    cover: "https://static.cartridge.gg/presets/eternum/cover.png",
+    color: "#dc8b07",
+  },
+  "ponziland": {
+    icon: "https://static.cartridge.gg/presets/ponziland/icon.svg",
+    cover: "https://static.cartridge.gg/presets/ponziland/cover.png",
+    color: "#F38332",
+  },
+  "evolute-genesis": {
+    icon: "https://static.cartridge.gg/presets/mage-duel/icon.png",
+    cover: "https://static.cartridge.gg/presets/mage-duel/cover.png",
+    color: "#BD835B",
+  },
+  "pistols": {
+    icon: "https://static.cartridge.gg/presets/pistols/icon.png",
+    cover: "https://static.cartridge.gg/presets/pistols/cover.png",
+    color: "#EF9758",
+  },
 };
 
 // GraphQL Queries
@@ -593,22 +627,21 @@ async function generateMetaTags(url: string): Promise<string> {
         description = `${gameStats.points} points in ${gameId}`;
 
         // Generate dynamic OG image URL for game-specific page
+        const gameConfig = GAME_CONFIGS[gameId];
         const ogParams = new URLSearchParams({
           username: usernameOrAddress,
           points: gameStats.points.toString(),
           game: gameId,
-          primaryColor: '#FBCB4A',
+          primaryColor: gameConfig?.color || '#FBCB4A',
           avatarVariant: getAvatarVariant(usernameOrAddress),
         });
 
         // Add game cover image and icon URLs if available
-        const gameImageUrl = GAME_IMAGES[gameId];
-        const gameIconUrl = GAME_ICONS[gameId];
-        if (gameImageUrl) {
-          ogParams.set('gameImage', gameImageUrl);
+        if (gameConfig?.cover) {
+          ogParams.set('gameImage', gameConfig.cover);
         }
-        if (gameIconUrl) {
-          ogParams.set('gameIcon', gameIconUrl);
+        if (gameConfig?.icon) {
+          ogParams.set('gameIcon', gameConfig.icon);
         }
 
         imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
@@ -621,20 +654,19 @@ async function generateMetaTags(url: string): Promise<string> {
       description = `Play ${gameId} on Cartridge Arcade - Discover onchain gaming`;
 
       // Generate dynamic OG image URL for game page
-      const gameImageUrl = GAME_IMAGES[gameId];
-      const gameIconUrl = GAME_ICONS[gameId];
+      const gameConfig = GAME_CONFIGS[gameId];
 
-      if (gameImageUrl || gameIconUrl) {
+      if (gameConfig) {
         const ogParams = new URLSearchParams({
           game: gameId,
-          primaryColor: '#FBCB4A',
+          primaryColor: gameConfig.color,
         });
 
-        if (gameImageUrl) {
-          ogParams.set('gameImage', gameImageUrl);
+        if (gameConfig.cover) {
+          ogParams.set('gameImage', gameConfig.cover);
         }
-        if (gameIconUrl) {
-          ogParams.set('gameIcon', gameIconUrl);
+        if (gameConfig.icon) {
+          ogParams.set('gameIcon', gameConfig.icon);
         }
 
         imageUrl = `https://api.cartridge.gg/og/game?${ogParams.toString()}`;
