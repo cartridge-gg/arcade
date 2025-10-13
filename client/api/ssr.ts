@@ -30,6 +30,22 @@ const ACTIVE_PROJECTS = [
   { model: "", namespace: "pistols", project: "pistols" },
 ];
 
+// Game icon URL mapping for OG images
+// Maps project IDs to their static icon URLs on CDN
+const GAME_ICONS: Record<string, string> = {
+  "dopewars": "https://static.cartridge.gg/presets/dope-wars/icon.png",
+  "loot-survivor": "https://static.cartridge.gg/presets/loot-survivor/icon.png",
+  "underdark": "https://static.cartridge.gg/presets/underdark/icon.png",
+  "zkube": "https://static.cartridge.gg/presets/zkube/icon.png",
+  "blobert": "https://static.cartridge.gg/presets/blob-arena-amma/icon.png",
+  "zdefender": "https://static.cartridge.gg/presets/zdefender/icon.png",
+  "realm": "https://static.cartridge.gg/presets/eternum/icon.svg",
+  "eternum": "https://static.cartridge.gg/presets/eternum/icon.svg",
+  "ponziland": "https://static.cartridge.gg/presets/ponziland/icon.svg",
+  "evolute-genesis": "https://static.cartridge.gg/presets/mage-duel/icon.png",
+  "pistols": "https://static.cartridge.gg/presets/pistols/icon.png",
+};
+
 // GraphQL Queries
 const ADDRESS_BY_USERNAME_QUERY = `
   query AddressByUsername($username: String!) {
@@ -524,6 +540,13 @@ async function generateMetaTags(url: string): Promise<string> {
           game: gameId,
           primaryColor: '#FBCB4A',
         });
+
+        // Add game icon URL if available
+        const gameIconUrl = GAME_ICONS[gameId];
+        if (gameIconUrl) {
+          ogParams.set('gameImage', gameIconUrl);
+        }
+
         imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
       }
     }
