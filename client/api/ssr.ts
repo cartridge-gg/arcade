@@ -446,8 +446,13 @@ async function generateMetaTags(url: string): Promise<string> {
       title = `${usernameOrAddress} | Cartridge Arcade`;
       description = `${stats.totalPoints} points`;
 
-      // Use static preview image (OG image generation moved to separate service)
-      imageUrl = 'https://play.cartridge.gg/preview.png';
+      // Generate dynamic OG image URL
+      const ogParams = new URLSearchParams({
+        username: usernameOrAddress,
+        points: stats.totalPoints.toString(),
+        primaryColor: '#FBCB4A',
+      });
+      imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
     }
     // Game-specific player page: /game/:gameId/player/:username
     else if (urlParts[0] === "game" && urlParts[1] && urlParts[2] === "player" && urlParts[3]) {
@@ -512,8 +517,14 @@ async function generateMetaTags(url: string): Promise<string> {
         title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
         description = `${gameStats.points} points in ${gameId}`;
 
-        // Use static preview image (OG image generation moved to separate service)
-        imageUrl = 'https://play.cartridge.gg/preview.png';
+        // Generate dynamic OG image URL for game-specific page
+        const ogParams = new URLSearchParams({
+          username: usernameOrAddress,
+          points: gameStats.points.toString(),
+          game: gameId,
+          primaryColor: '#FBCB4A',
+        });
+        imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
       }
     }
     // Game page: /game/:gameId
