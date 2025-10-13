@@ -519,7 +519,7 @@ async function generateMetaTags(url: string): Promise<string> {
   const pageUrl = `${BASE_URL}${url}`;
 
   try {
-    // Profile page: /player/:username
+    // Profile page: /player/:username (with optional /tab/:tabName)
     if (urlParts[0] === "player" && urlParts[1]) {
       const usernameOrAddress = urlParts[1];
 
@@ -536,10 +536,18 @@ async function generateMetaTags(url: string): Promise<string> {
       // Compute player statistics
       const stats = computePlayerStats(address, progressionsData);
 
-      title = `${usernameOrAddress} | Cartridge Arcade`;
-      description = `${stats.totalPoints} points`;
+      // Customize title/description based on tab (if present)
+      if (urlParts[2] === "tab" && urlParts[3]) {
+        const tabName = urlParts[3];
+        const tabDisplayName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+        title = `${usernameOrAddress} - ${tabDisplayName} | Cartridge Arcade`;
+        description = `View ${usernameOrAddress}'s ${tabDisplayName.toLowerCase()} on Cartridge Arcade`;
+      } else {
+        title = `${usernameOrAddress} | Cartridge Arcade`;
+        description = `${stats.totalPoints} points`;
+      }
 
-      // Generate dynamic OG image URL
+      // Generate dynamic OG image URL (same for all player pages regardless of tab)
       imageUrl = buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
     }
     // Game-specific player page: /game/:gameId/player/:username
@@ -574,29 +582,6 @@ async function generateMetaTags(url: string): Promise<string> {
 
       // Generate dynamic OG image URL
       imageUrl = buildPlayerOgImageUrl(usernameOrAddress, gamePoints, gameId);
-    }
-    // Player's tab page: /player/:username/tab/:tabName
-    else if (urlParts[0] === "player" && urlParts[1] && urlParts[2] === "tab" && urlParts[3]) {
-      const usernameOrAddress = urlParts[1];
-      const tabName = urlParts[3];
-      const tabDisplayName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-
-      title = `${usernameOrAddress} - ${tabDisplayName} | Cartridge Arcade`;
-      description = `View ${usernameOrAddress}'s ${tabDisplayName.toLowerCase()} on Cartridge Arcade`;
-
-      // Validate and resolve to address
-      const address = await resolvePlayerAddress(usernameOrAddress);
-      if (!address) {
-        return buildMetaTags(title, description, imageUrl, pageUrl);
-      }
-
-      // Fetch player data for OG image
-      const query = buildProgressionsQuery(ACTIVE_PROJECTS);
-      const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query);
-      const stats = computePlayerStats(address, progressionsData);
-
-      // Generate OG image with player's total points
-      imageUrl = buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
     }
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
