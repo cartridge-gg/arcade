@@ -453,7 +453,7 @@ function buildPlayerOgImageUrl(
   const ogParams = new URLSearchParams({
     username: usernameOrAddress,
     points: points.toString(),
-    primaryColor: '#2C250C',
+    primaryColor: '#FFD546',
     avatarVariant: getAvatarVariant(usernameOrAddress),
   });
 
