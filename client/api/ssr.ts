@@ -588,6 +588,7 @@ async function generateMetaTags(url: string): Promise<string> {
       if (gameConfig) {
         const ogParams = new URLSearchParams({
           game: gameId,
+          displayName: gameConfig.name,
           primaryColor: gameConfig.color,
         });
 
