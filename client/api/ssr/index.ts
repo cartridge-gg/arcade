@@ -9,6 +9,7 @@ import {
   computePlayerStats,
   buildMetaTags,
   getAvatarVariant,
+  buildGamePlayerOgImageUrl,
 } from "./utils";
 
 /**
@@ -21,31 +22,30 @@ import {
  */
 
 /**
- * Generate OG image URL for game-specific player profile
+ * Validate and resolve player username or address to a Starknet address
+ * Returns null if validation fails or user is not found
  */
-function buildGamePlayerOgImageUrl(
-  usernameOrAddress: string,
-  gameId: string,
-  points: number
-): string {
-  const gameConfig = GAME_CONFIGS[gameId];
-  const ogParams = new URLSearchParams({
-    username: usernameOrAddress,
-    points: points.toString(),
-    game: gameId,
-    primaryColor: gameConfig?.color || '#2C250C',
-    avatarVariant: getAvatarVariant(usernameOrAddress),
+async function resolvePlayerAddress(usernameOrAddress: string): Promise<string | null> {
+  // Validate format
+  const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
+  if (isAddress) {
+    if (!isValidAddress(usernameOrAddress)) {
+      return null;
+    }
+    return usernameOrAddress;
+  }
+
+  if (!isValidUsername(usernameOrAddress)) {
+    return null;
+  }
+
+  // Resolve username to address
+  const data = await graphqlRequest<any>(ADDRESS_BY_USERNAME_QUERY, {
+    username: usernameOrAddress.toLowerCase(),
   });
 
-  // Add game cover image and icon URLs if available
-  if (gameConfig?.cover) {
-    ogParams.set('gameImage', gameConfig.cover);
-  }
-  if (gameConfig?.icon) {
-    ogParams.set('gameIcon', gameConfig.icon);
-  }
-
-  return `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
+  const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
+  return resolvedAddress || null;
 }
 
 /**
@@ -65,32 +65,10 @@ async function generateMetaTags(url: string): Promise<string> {
     if (urlParts[0] === "player" && urlParts[1]) {
       const usernameOrAddress = urlParts[1];
 
-      // Validate format
-      const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
-      if (isAddress) {
-        if (!isValidAddress(usernameOrAddress)) {
-          return buildMetaTags(title, description, imageUrl, pageUrl);
-        }
-      } else {
-        if (!isValidUsername(usernameOrAddress)) {
-          return buildMetaTags(title, description, imageUrl, pageUrl);
-        }
-      }
-
-      // Resolve username to address
-      let address: string;
-      if (isAddress) {
-        address = usernameOrAddress;
-      } else {
-        const data = await graphqlRequest<any>(ADDRESS_BY_USERNAME_QUERY, {
-          username: usernameOrAddress.toLowerCase(),
-        });
-
-        const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
-        if (!resolvedAddress) {
-          return buildMetaTags(title, description, imageUrl, pageUrl);
-        }
-        address = resolvedAddress;
+      // Validate and resolve to address
+      const address = await resolvePlayerAddress(usernameOrAddress);
+      if (!address) {
+        return buildMetaTags(title, description, imageUrl, pageUrl);
       }
 
       // Fetch real player data from GraphQL API (only progressions for points)
@@ -117,32 +95,10 @@ async function generateMetaTags(url: string): Promise<string> {
       const gameId = urlParts[1];
       const usernameOrAddress = urlParts[3];
 
-      // Validate format
-      const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
-      if (isAddress) {
-        if (!isValidAddress(usernameOrAddress)) {
-          return buildMetaTags(title, description, imageUrl, pageUrl);
-        }
-      } else {
-        if (!isValidUsername(usernameOrAddress)) {
-          return buildMetaTags(title, description, imageUrl, pageUrl);
-        }
-      }
-
-      // Resolve username to address
-      let address: string;
-      if (isAddress) {
-        address = usernameOrAddress;
-      } else {
-        const data = await graphqlRequest<any>(ADDRESS_BY_USERNAME_QUERY, {
-          username: usernameOrAddress.toLowerCase(),
-        });
-
-        const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
-        if (!resolvedAddress) {
-          return buildMetaTags(title, description, imageUrl, pageUrl);
-        }
-        address = resolvedAddress;
+      // Validate and resolve to address
+      const address = await resolvePlayerAddress(usernameOrAddress);
+      if (!address) {
+        return buildMetaTags(title, description, imageUrl, pageUrl);
       }
 
       // Find the specific game project

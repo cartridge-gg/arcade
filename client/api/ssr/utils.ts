@@ -3,6 +3,7 @@
  */
 
 import type { RawProgression, PlayerStats } from "./types";
+import { API_URL, GAME_CONFIGS } from "./constants";
 
 /**
  * Escape HTML special characters to prevent XSS attacks
@@ -152,6 +153,34 @@ export function computePlayerStats(
     totalAchievements,
     gameStats,
   };
+}
+
+/**
+ * Generate OG image URL for game-specific player profile
+ */
+export function buildGamePlayerOgImageUrl(
+  usernameOrAddress: string,
+  gameId: string,
+  points: number
+): string {
+  const gameConfig = GAME_CONFIGS[gameId];
+  const ogParams = new URLSearchParams({
+    username: usernameOrAddress,
+    points: points.toString(),
+    game: gameId,
+    primaryColor: gameConfig?.color || '#2C250C',
+    avatarVariant: getAvatarVariant(usernameOrAddress),
+  });
+
+  // Add game cover image and icon URLs if available
+  if (gameConfig?.cover) {
+    ogParams.set('gameImage', gameConfig.cover);
+  }
+  if (gameConfig?.icon) {
+    ogParams.set('gameIcon', gameConfig.icon);
+  }
+
+  return `${API_URL}/og/profile?${ogParams.toString()}`;
 }
 
 /**
