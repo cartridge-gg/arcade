@@ -287,14 +287,35 @@ function computePlayerStats(
     return { totalPoints: 0, totalCompleted: 0, totalAchievements: 0, gameStats: {} };
   }
 
+  console.log('[DEBUG] Target address:', {
+    original: address,
+    normalized: normalizedTargetAddress
+  });
+  console.log('[DEBUG] Total projects in response:', progressionsData.playerAchievements.items.length);
+
   // Process each project's progressions
   for (const item of progressionsData.playerAchievements.items) {
     const project = item.meta.project;
 
+    console.log('[DEBUG] Processing project:', {
+      project,
+      totalAchievements: item.achievements.length,
+      samplePlayerIds: item.achievements.slice(0, 3).map((a: RawProgression) => a.playerId)
+    });
+
     // Get player's progressions for this project
     const playerProgressions = item.achievements.filter((p: RawProgression) => {
       try {
-        return normalizeAddress(p.playerId) === normalizedTargetAddress;
+        const normalized = normalizeAddress(p.playerId);
+        const matches = normalized === normalizedTargetAddress;
+        if (matches) {
+          console.log('[DEBUG] Found matching achievement:', {
+            playerId: p.playerId,
+            normalized,
+            points: p.points
+          });
+        }
+        return matches;
       } catch {
         return false;
       }
@@ -302,6 +323,12 @@ function computePlayerStats(
 
     // Calculate points only (achievements not needed for SSR meta tags)
     const projectPoints = playerProgressions.reduce((sum: number, p: RawProgression) => sum + p.points, 0);
+
+    console.log('[DEBUG] Project stats:', {
+      project,
+      matchedAchievements: playerProgressions.length,
+      points: projectPoints
+    });
 
     // Store per-game stats (only points matter for SSR)
     gameStats[project] = {
@@ -312,6 +339,11 @@ function computePlayerStats(
 
     totalPoints += projectPoints;
   }
+
+  console.log('[DEBUG] Final totals:', {
+    totalPoints,
+    gamesWithPoints: Object.entries(gameStats).filter(([_, stats]) => stats.points > 0).length
+  });
 
   return {
     totalPoints,
