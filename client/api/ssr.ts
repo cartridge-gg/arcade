@@ -7,6 +7,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
  */
 
 const API_URL = process.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
+const BASE_URL = "https://play.cartridge.gg";
 
 // Active game projects for achievement queries
 const ACTIVE_PROJECTS = [
@@ -129,13 +130,35 @@ interface RawProgression {
 
 interface PlayerStats {
   totalPoints: number;
-  totalCompleted: number;
-  totalAchievements: number;
   gameStats: Record<string, {
     points: number;
-    completed: number;
-    total: number;
   }>;
+}
+
+interface GraphQLAccountResponse {
+  account?: {
+    controllers?: {
+      edges?: Array<{
+        node?: {
+          address?: string;
+        };
+      }>;
+    };
+  };
+}
+
+interface GraphQLProgressionsResponse {
+  playerAchievements: {
+    items: Array<{
+      meta: {
+        project: string;
+        model: string;
+        namespace: string;
+        count: number;
+      };
+      achievements: RawProgression[];
+    }>;
+  };
 }
 
 /**
@@ -270,7 +293,7 @@ async function resolvePlayerAddress(usernameOrAddress: string): Promise<string |
   }
 
   // Resolve username to address
-  const data = await graphqlRequest<any>(ADDRESS_BY_USERNAME_QUERY, {
+  const data = await graphqlRequest<GraphQLAccountResponse>(ADDRESS_BY_USERNAME_QUERY, {
     username: usernameOrAddress.toLowerCase(),
   });
 
@@ -374,20 +397,17 @@ function getAvatarVariant(username: string): string {
  */
 function computePlayerStats(
   address: string,
-  progressionsData: any,
-  achievementsData: any | null
+  progressionsData: GraphQLProgressionsResponse,
 ): PlayerStats {
   let totalPoints = 0;
-  let totalCompleted = 0;
-  let totalAchievements = 0;
-  const gameStats: Record<string, { points: number; completed: number; total: number }> = {};
+  const gameStats: Record<string, { points: number }> = {};
 
   // Normalize target address once
   let normalizedTargetAddress: string;
   try {
     normalizedTargetAddress = normalizeAddress(address);
   } catch {
-    return { totalPoints: 0, totalCompleted: 0, totalAchievements: 0, gameStats: {} };
+    return { totalPoints: 0, gameStats: {} };
   }
 
   // Process each project's progressions
@@ -404,14 +424,12 @@ function computePlayerStats(
       }
     });
 
-    // Calculate points only (achievements not needed for SSR meta tags)
+    // Calculate points
     const projectPoints = playerProgressions.reduce((sum: number, p: RawProgression) => sum + p.points, 0);
 
-    // Store per-game stats (only points matter for SSR)
+    // Store per-game stats
     gameStats[project] = {
       points: projectPoints,
-      completed: 0,
-      total: 0,
     };
 
     totalPoints += projectPoints;
@@ -419,35 +437,40 @@ function computePlayerStats(
 
   return {
     totalPoints,
-    totalCompleted,
-    totalAchievements,
     gameStats,
   };
 }
 
 /**
- * Generate OG image URL for game-specific player profile
+ * Generate OG image URL for player profile (general or game-specific)
+ * @param gameId - Optional game ID for game-specific profile
  */
-function buildGamePlayerOgImageUrl(
+function buildPlayerOgImageUrl(
   usernameOrAddress: string,
-  gameId: string,
-  points: number
+  points: number,
+  gameId?: string
 ): string {
-  const gameConfig = GAME_CONFIGS[gameId];
   const ogParams = new URLSearchParams({
     username: usernameOrAddress,
     points: points.toString(),
-    game: gameId,
-    primaryColor: gameConfig?.color || '#2C250C',
+    primaryColor: '#2C250C',
     avatarVariant: getAvatarVariant(usernameOrAddress),
   });
 
-  // Add game cover image and icon URLs if available
-  if (gameConfig?.cover) {
-    ogParams.set('gameImage', gameConfig.cover);
-  }
-  if (gameConfig?.icon) {
-    ogParams.set('gameIcon', gameConfig.icon);
+  // Add game-specific parameters if gameId is provided
+  if (gameId) {
+    const gameConfig = GAME_CONFIGS[gameId];
+    ogParams.set('game', gameId);
+
+    if (gameConfig?.color) {
+      ogParams.set('primaryColor', gameConfig.color);
+    }
+    if (gameConfig?.cover) {
+      ogParams.set('gameImage', gameConfig.cover);
+    }
+    if (gameConfig?.icon) {
+      ogParams.set('gameIcon', gameConfig.icon);
+    }
   }
 
   return `${API_URL}/og/profile?${ogParams.toString()}`;
@@ -492,8 +515,8 @@ async function generateMetaTags(url: string): Promise<string> {
 
   let title = "Cartridge Arcade";
   let description = "Discover, Play and Compete in Onchain Games";
-  let imageUrl = "https://play.cartridge.gg/preview.png";
-  const pageUrl = `https://play.cartridge.gg${url}`;
+  let imageUrl = `${BASE_URL}/preview.png`;
+  const pageUrl = `${BASE_URL}${url}`;
 
   try {
     // Profile page: /player/:username
@@ -508,22 +531,16 @@ async function generateMetaTags(url: string): Promise<string> {
 
       // Fetch real player data from GraphQL API (only progressions for points)
       const query = buildProgressionsQuery(ACTIVE_PROJECTS);
-      const progressionsData = await graphqlRequest<any>(query);
+      const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query);
 
       // Compute player statistics
-      const stats = computePlayerStats(address, progressionsData, null);
+      const stats = computePlayerStats(address, progressionsData);
 
       title = `${usernameOrAddress} | Cartridge Arcade`;
       description = `${stats.totalPoints} points`;
 
       // Generate dynamic OG image URL
-      const ogParams = new URLSearchParams({
-        username: usernameOrAddress,
-        points: stats.totalPoints.toString(),
-        primaryColor: '#2C250C',
-        avatarVariant: getAvatarVariant(usernameOrAddress),
-      });
-      imageUrl = `${API_URL}/og/profile?${ogParams.toString()}`;
+      imageUrl = buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
     }
     // Game-specific player page: /game/:gameId/player/:username
     else if (urlParts[0] === "game" && urlParts[1] && urlParts[2] === "player" && urlParts[3]) {
@@ -543,9 +560,9 @@ async function generateMetaTags(url: string): Promise<string> {
       let gamePoints = 0;
       if (gameProject) {
         const query = buildProgressionsQuery([gameProject]);
-        const progressionsData = await graphqlRequest<any>(query);
-        const stats = computePlayerStats(address, progressionsData, null);
-        const gameStats = stats.gameStats[gameId] || { points: 0, completed: 0, total: 0 };
+        const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query);
+        const stats = computePlayerStats(address, progressionsData);
+        const gameStats = stats.gameStats[gameId] || { points: 0 };
         gamePoints = gameStats.points;
       }
 
@@ -556,7 +573,30 @@ async function generateMetaTags(url: string): Promise<string> {
       description = `${gamePoints} points in ${gameName}`;
 
       // Generate dynamic OG image URL
-      imageUrl = buildGamePlayerOgImageUrl(usernameOrAddress, gameId, gamePoints);
+      imageUrl = buildPlayerOgImageUrl(usernameOrAddress, gamePoints, gameId);
+    }
+    // Player's tab page: /player/:username/tab/:tabName
+    else if (urlParts[0] === "player" && urlParts[1] && urlParts[2] === "tab" && urlParts[3]) {
+      const usernameOrAddress = urlParts[1];
+      const tabName = urlParts[3];
+      const tabDisplayName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
+
+      title = `${usernameOrAddress} - ${tabDisplayName} | Cartridge Arcade`;
+      description = `View ${usernameOrAddress}'s ${tabDisplayName.toLowerCase()} on Cartridge Arcade`;
+
+      // Validate and resolve to address
+      const address = await resolvePlayerAddress(usernameOrAddress);
+      if (!address) {
+        return buildMetaTags(title, description, imageUrl, pageUrl);
+      }
+
+      // Fetch player data for OG image
+      const query = buildProgressionsQuery(ACTIVE_PROJECTS);
+      const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query);
+      const stats = computePlayerStats(address, progressionsData);
+
+      // Generate OG image with player's total points
+      imageUrl = buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
     }
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
@@ -584,7 +624,7 @@ async function generateMetaTags(url: string): Promise<string> {
         imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
       } else {
         // Fallback to static preview if game not found
-        imageUrl = 'https://play.cartridge.gg/preview.png';
+        imageUrl = `${BASE_URL}/preview.png`;
       }
     }
   } catch {
@@ -599,7 +639,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const requestPath = (req.query.path as string) || req.url || "/";
     const metaTags = await generateMetaTags(requestPath);
 
-    const safeRequestPath = escapeHtml(requestPath);
+    const safeRequestPathHtml = escapeHtml(requestPath);
+    const safeRequestPathUrl = escapeUrl(requestPath);
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -607,12 +648,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cartridge Arcade</title>
   ${metaTags}
-  <meta http-equiv="refresh" content="0;url=${safeRequestPath}">
+  <meta http-equiv="refresh" content="0;url=${safeRequestPathUrl}">
 </head>
 <body>
-  <script>window.location.href = "${safeRequestPath}";</script>
+  <script>window.location.href = "${safeRequestPathUrl}";</script>
   <noscript>
-    <p>Redirecting to <a href="${safeRequestPath}">Cartridge Arcade</a>...</p>
+    <p>Redirecting to <a href="${safeRequestPathUrl}">Cartridge Arcade</a>...</p>
   </noscript>
 </body>
 </html>`;
