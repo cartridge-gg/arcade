@@ -45,29 +45,36 @@ const ADDRESS_BY_USERNAME_QUERY = `
   }
 `;
 
-const PROGRESSIONS_QUERY = `
-  query Progressions($projects: [ProjectInput!]!, $playerId: String!) {
-    playerAchievements(projects: $projects, playerId: $playerId) {
-      items {
-        meta {
-          project
-          model
-          namespace
-          count
-        }
-        achievements {
-          playerId
-          achievementId
-          points
-          taskId
-          taskTotal
-          total
-          completionTime
+// Note: This query builder function creates the query with inline playerId
+// because the API doesn't support playerId as a GraphQL variable
+function buildProgressionsQuery(projects: Project[], playerId: string): string {
+  return `
+    query PlayerAchievements {
+      playerAchievements(
+        projects: ${JSON.stringify(projects)}
+        playerId: "${playerId}"
+      ) {
+        items {
+          meta {
+            project
+            model
+            namespace
+            count
+          }
+          achievements {
+            playerId
+            achievementId
+            points
+            taskId
+            taskTotal
+            total
+            completionTime
+          }
         }
       }
     }
-  }
-`;
+  `;
+}
 
 // =============================================================================
 // TYPES
@@ -385,10 +392,8 @@ async function generateMetaTags(url: string): Promise<string> {
       }
 
       // Fetch real player data from GraphQL API (only progressions for points)
-      const progressionsData = await graphqlRequest<any>(PROGRESSIONS_QUERY, {
-        projects: ACTIVE_PROJECTS,
-        playerId: address,
-      });
+      const query = buildProgressionsQuery(ACTIVE_PROJECTS, address);
+      const progressionsData = await graphqlRequest<any>(query);
 
       // Compute player statistics
       const stats = computePlayerStats(address, progressionsData, null);
@@ -450,10 +455,8 @@ async function generateMetaTags(url: string): Promise<string> {
         imageUrl = 'https://play.cartridge.gg/preview.png';
       } else {
         // Fetch real player data for this specific game only (only progressions for points)
-        const progressionsData = await graphqlRequest<any>(PROGRESSIONS_QUERY, {
-          projects: [gameProject],
-          playerId: address,
-        });
+        const query = buildProgressionsQuery([gameProject], address);
+        const progressionsData = await graphqlRequest<any>(query);
 
         // Compute player statistics
         const stats = computePlayerStats(address, progressionsData, null);
