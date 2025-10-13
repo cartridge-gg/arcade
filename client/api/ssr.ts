@@ -69,37 +69,6 @@ const PROGRESSIONS_QUERY = `
   }
 `;
 
-const ACHIEVEMENTS_QUERY = `
-  query Achievements($projects: [Project!]!) {
-    achievements(projects: $projects) {
-      items {
-        meta {
-          project
-          model
-          namespace
-          count
-        }
-        achievements {
-          id
-          hidden
-          page
-          points
-          start
-          end
-          achievementGroup
-          icon
-          title
-          description
-          taskId
-          taskTotal
-          taskDescription
-          data
-        }
-      }
-    }
-  }
-`;
-
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -248,7 +217,7 @@ async function graphqlRequest<T>(query: string, variables?: Record<string, unkno
 function computePlayerStats(
   address: string,
   progressionsData: any,
-  achievementsData: any
+  achievementsData: any | null
 ): PlayerStats {
   let totalPoints = 0;
   let totalCompleted = 0;
@@ -264,17 +233,9 @@ function computePlayerStats(
     return { totalPoints: 0, totalCompleted: 0, totalAchievements: 0, gameStats: {} };
   }
 
-  // Create map of achievements by project
-  const achievementsByProject = new Map<string, RawAchievement[]>();
-  for (const item of achievementsData.achievements.items) {
-    achievementsByProject.set(item.meta.project, item.achievements);
-  }
-
   // Process each project's progressions
   for (const item of progressionsData.playerAchievements.items) {
     const project = item.meta.project;
-    const projectAchievements = achievementsByProject.get(project) || [];
-    const visibleAchievements = projectAchievements.filter((a: RawAchievement) => !a.hidden);
 
     // Get player's progressions for this project
     const playerProgressions = item.achievements.filter((p: RawProgression) => {
@@ -285,29 +246,17 @@ function computePlayerStats(
       }
     });
 
-    // Calculate points and completion
+    // Calculate points only (achievements not needed for SSR meta tags)
     const projectPoints = playerProgressions.reduce((sum: number, p: RawProgression) => sum + p.points, 0);
 
-    // Count completed achievements
-    const completedAchievements = new Set<string>();
-    playerProgressions.forEach((p: RawProgression) => {
-      if (p.total >= p.taskTotal) {
-        completedAchievements.add(p.achievementId);
-      }
-    });
-
-    const completedCount = completedAchievements.size;
-
-    // Store per-game stats
+    // Store per-game stats (only points matter for SSR)
     gameStats[project] = {
       points: projectPoints,
-      completed: completedCount,
-      total: visibleAchievements.length,
+      completed: 0,
+      total: 0,
     };
 
     totalPoints += projectPoints;
-    totalCompleted += completedCount;
-    totalAchievements += visibleAchievements.length;
   }
 
   return {
@@ -401,19 +350,14 @@ async function generateMetaTags(url: string): Promise<string> {
         address = resolvedAddress;
       }
 
-      // Fetch real player data from GraphQL API
-      const [progressionsData, achievementsData] = await Promise.all([
-        graphqlRequest<any>(PROGRESSIONS_QUERY, {
-          projects: ACTIVE_PROJECTS,
-          playerId: address,
-        }),
-        graphqlRequest<any>(ACHIEVEMENTS_QUERY, {
-          projects: ACTIVE_PROJECTS,
-        }),
-      ]);
+      // Fetch real player data from GraphQL API (only progressions for points)
+      const progressionsData = await graphqlRequest<any>(PROGRESSIONS_QUERY, {
+        projects: ACTIVE_PROJECTS,
+        playerId: address,
+      });
 
       // Compute player statistics
-      const stats = computePlayerStats(address, progressionsData, achievementsData);
+      const stats = computePlayerStats(address, progressionsData, null);
 
       title = `${usernameOrAddress} | Cartridge Arcade`;
       description = `${stats.totalPoints} points`;
@@ -471,19 +415,14 @@ async function generateMetaTags(url: string): Promise<string> {
         // Use static preview image (OG image generation moved to separate service)
         imageUrl = 'https://play.cartridge.gg/preview.png';
       } else {
-        // Fetch real player data for this specific game only
-        const [progressionsData, achievementsData] = await Promise.all([
-          graphqlRequest<any>(PROGRESSIONS_QUERY, {
-            projects: [gameProject],
-            playerId: address,
-          }),
-          graphqlRequest<any>(ACHIEVEMENTS_QUERY, {
-            projects: [gameProject],
-          }),
-        ]);
+        // Fetch real player data for this specific game only (only progressions for points)
+        const progressionsData = await graphqlRequest<any>(PROGRESSIONS_QUERY, {
+          projects: [gameProject],
+          playerId: address,
+        });
 
         // Compute player statistics
-        const stats = computePlayerStats(address, progressionsData, achievementsData);
+        const stats = computePlayerStats(address, progressionsData, null);
 
         // Get game-specific stats
         const gameStats = stats.gameStats[gameId] || { points: 0, completed: 0, total: 0 };
