@@ -62,7 +62,8 @@ export const Registry = {
     const clauses = new ClauseBuilder().keys(keys, []);
     return new ToriiQueryBuilder<SchemaType>()
       .withClause(clauses.build())
-      .includeHashedKeys();
+      .includeHashedKeys()
+      .withLimit(1000);
   },
 
   fetchEntities: async (
