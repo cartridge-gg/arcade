@@ -45,13 +45,26 @@ const ADDRESS_BY_USERNAME_QUERY = `
   }
 `;
 
-// Note: This query builder function creates the query with inline playerId
-// because the API doesn't support playerId as a GraphQL variable
+/**
+ * Format projects array to GraphQL input syntax (not JSON)
+ * GraphQL requires unquoted keys: { model: "", namespace: "..." }
+ * JSON would be wrong: {"model":"","namespace":"..."}
+ */
+function formatProjectsForGraphQL(projects: Project[]): string {
+  return projects
+    .map(p => `{ model: "${p.model}", namespace: "${p.namespace}", project: "${p.project}" }`)
+    .join(', ');
+}
+
+/**
+ * Build progressions query with inline arguments
+ * The API doesn't support playerId as a GraphQL variable
+ */
 function buildProgressionsQuery(projects: Project[], playerId: string): string {
   return `
     query PlayerAchievements {
       playerAchievements(
-        projects: ${JSON.stringify(projects)}
+        projects: [${formatProjectsForGraphQL(projects)}]
         playerId: "${playerId}"
       ) {
         items {
