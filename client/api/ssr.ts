@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import gamesDataRaw from "../src/components/games/data.json";
 
 /**
  * Vercel Serverless Function for dynamic meta tags with real player data
@@ -15,26 +14,6 @@ import gamesDataRaw from "../src/components/games/data.json";
 // =============================================================================
 
 const API_URL = process.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
-
-// Type the imported JSON data
-const gamesData = gamesDataRaw as Record<string, {
-  worldAddress: string;
-  namespace: string;
-  project: string;
-  rpc: string;
-  policies: string;
-  color: string;
-  preset: string;
-  name: string;
-  description: string;
-  image: string;
-  banner: string;
-  cover: string;
-  website: string;
-  github: string;
-  videos: string[];
-  images: string[];
-}>;
 
 // Active game projects for achievement queries
 const ACTIVE_PROJECTS = [
@@ -60,48 +39,74 @@ interface GameConfig {
   color: string;    // Primary brand color
 }
 
-/**
- * Map ACTIVE_PROJECTS game IDs to data.json keys
- * Some game IDs don't match the JSON keys exactly
- */
-const GAME_ID_TO_JSON_KEY: Record<string, string> = {
-  "dopewars": "arcade-dopewars",
-  "loot-survivor": "lootsurvivor",
-  "underdark": "budokan-mainnet-2",
-  "zkube": "zkube-v1-mainnet",
-  "blobert": "arcade-blobarena-mainnet",
-  "zdefender": "budokan-mainnet-2", // Uses Dark Shuffle preset
-  "realm": "eternum-mainnet-0",
-  "eternum": "arcade-eternum-1",
-  "ponziland": "arcade-ponziland",
-  "evolute-genesis": "evolute-duel-arcade",
-  "pistols": "pistols-mainnet",
+const GAME_CONFIGS: Record<string, GameConfig> = {
+  "dopewars": {
+    name: "Dope Wars",
+    icon: "https://static.cartridge.gg/presets/dope-wars/icon.png",
+    cover: "https://static.cartridge.gg/presets/dope-wars/cover.png",
+    color: "#11ED83",
+  },
+  "loot-survivor": {
+    name: "Loot Survivor",
+    icon: "https://static.cartridge.gg/presets/loot-survivor/icon.png",
+    cover: "https://static.cartridge.gg/presets/loot-survivor/cover.png",
+    color: "#33FF33",
+  },
+  "underdark": {
+    name: "Dark Shuffle",
+    icon: "https://static.cartridge.gg/presets/underdark/icon.png",
+    cover: "https://static.cartridge.gg/presets/underdark/cover.png",
+    color: "#F59100",
+  },
+  "zkube": {
+    name: "zKube",
+    icon: "https://static.cartridge.gg/presets/zkube/icon.png",
+    cover: "https://static.cartridge.gg/presets/zkube/cover.png",
+    color: "#5bc3e6",
+  },
+  "blobert": {
+    name: "Blob Arena",
+    icon: "https://static.cartridge.gg/presets/blob-arena-amma/icon.png",
+    cover: "https://static.cartridge.gg/presets/blob-arena-amma/cover.png",
+    color: "#D7B000",
+  },
+  "zdefender": {
+    name: "zDefender",
+    icon: "https://static.cartridge.gg/presets/zdefender/icon.png",
+    cover: "https://static.cartridge.gg/presets/zdefender/cover.png",
+    color: "#F59100",
+  },
+  "realm": {
+    name: "Eternum",
+    icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
+    cover: "https://static.cartridge.gg/presets/eternum/cover.png",
+    color: "#dc8b07",
+  },
+  "eternum": {
+    name: "Eternum",
+    icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
+    cover: "https://static.cartridge.gg/presets/eternum/cover.png",
+    color: "#dc8b07",
+  },
+  "ponziland": {
+    name: "Ponziland",
+    icon: "https://static.cartridge.gg/presets/ponziland/icon.svg",
+    cover: "https://static.cartridge.gg/presets/ponziland/cover.png",
+    color: "#F38332",
+  },
+  "evolute-genesis": {
+    name: "Mage Duel",
+    icon: "https://static.cartridge.gg/presets/mage-duel/icon.png",
+    cover: "https://static.cartridge.gg/presets/mage-duel/cover.png",
+    color: "#BD835B",
+  },
+  "pistols": {
+    name: "Pistols at Dawn",
+    icon: "https://static.cartridge.gg/presets/pistols/icon.png",
+    cover: "https://static.cartridge.gg/presets/pistols/cover.png",
+    color: "#EF9758",
+  },
 };
-
-/**
- * Get game configuration from data.json
- * Returns null if game not found
- */
-function getGameConfig(gameId: string): GameConfig | null {
-  const jsonKey = GAME_ID_TO_JSON_KEY[gameId];
-  console.log('[getGameConfig]', { gameId, jsonKey, hasData: !!gamesData[jsonKey] });
-
-  if (!jsonKey || !gamesData[jsonKey]) {
-    console.log('[getGameConfig] Returning null - game not found');
-    return null;
-  }
-
-  const gameData = gamesData[jsonKey];
-  const config = {
-    name: gameId === "pistols" ? "Pistols at Dawn" : gameData.name,
-    icon: gameData.image,
-    cover: gameData.cover,
-    color: gameData.color,
-  };
-
-  console.log('[getGameConfig] Returning config:', config);
-  return config;
-}
 
 // GraphQL Queries
 const ADDRESS_BY_USERNAME_QUERY = `
@@ -629,7 +634,7 @@ async function generateMetaTags(url: string): Promise<string> {
 
         // Get game-specific stats
         const gameStats = stats.gameStats[gameId] || { points: 0, completed: 0, total: 0 };
-        const gameConfig = getGameConfig(gameId);
+        const gameConfig = GAME_CONFIGS[gameId];
         const gameName = gameConfig?.name || gameId;
 
         title = `${usernameOrAddress} in ${gameName} | Cartridge Arcade`;
@@ -658,7 +663,7 @@ async function generateMetaTags(url: string): Promise<string> {
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
       const gameId = urlParts[1];
-      const gameConfig = getGameConfig(gameId);
+      const gameConfig = GAME_CONFIGS[gameId];
       const gameName = gameConfig?.name || gameId;
 
       title = `${gameName} - Cartridge Arcade`;
