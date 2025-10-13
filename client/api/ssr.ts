@@ -46,6 +46,22 @@ const GAME_ICONS: Record<string, string> = {
   "pistols": "https://static.cartridge.gg/presets/pistols/icon.png",
 };
 
+// Game cover/banner image URL mapping for OG images
+// Maps project IDs to their static cover image URLs on CDN
+const GAME_IMAGES: Record<string, string> = {
+  "dopewars": "https://static.cartridge.gg/presets/dope-wars/cover.png",
+  "loot-survivor": "https://static.cartridge.gg/presets/loot-survivor/cover.png",
+  "underdark": "https://static.cartridge.gg/presets/underdark/cover.png",
+  "zkube": "https://static.cartridge.gg/presets/zkube/cover.png",
+  "blobert": "https://static.cartridge.gg/presets/blob-arena-amma/cover.png",
+  "zdefender": "https://static.cartridge.gg/presets/zdefender/cover.png",
+  "realm": "https://static.cartridge.gg/presets/eternum/cover.png",
+  "eternum": "https://static.cartridge.gg/presets/eternum/cover.png",
+  "ponziland": "https://static.cartridge.gg/presets/ponziland/cover.png",
+  "evolute-genesis": "https://static.cartridge.gg/presets/mage-duel/cover.png",
+  "pistols": "https://static.cartridge.gg/presets/pistols/cover.png",
+};
+
 // GraphQL Queries
 const ADDRESS_BY_USERNAME_QUERY = `
   query AddressByUsername($username: String!) {
@@ -553,10 +569,13 @@ async function generateMetaTags(url: string): Promise<string> {
           primaryColor: '#FBCB4A',
         });
 
-        // Add game icon URL as both gameImage and gameIcon parameters if available
+        // Add game cover image and icon URLs if available
+        const gameImageUrl = GAME_IMAGES[gameId];
         const gameIconUrl = GAME_ICONS[gameId];
+        if (gameImageUrl) {
+          ogParams.set('gameImage', gameImageUrl);
+        }
         if (gameIconUrl) {
-          ogParams.set('gameImage', gameIconUrl);
           ogParams.set('gameIcon', gameIconUrl);
         }
 
@@ -570,14 +589,22 @@ async function generateMetaTags(url: string): Promise<string> {
       description = `Play ${gameId} on Cartridge Arcade - Discover onchain gaming`;
 
       // Generate dynamic OG image URL for game page
+      const gameImageUrl = GAME_IMAGES[gameId];
       const gameIconUrl = GAME_ICONS[gameId];
-      if (gameIconUrl) {
+
+      if (gameImageUrl || gameIconUrl) {
         const ogParams = new URLSearchParams({
           game: gameId,
           primaryColor: '#FBCB4A',
-          gameImage: gameIconUrl,
-          gameIcon: gameIconUrl,
         });
+
+        if (gameImageUrl) {
+          ogParams.set('gameImage', gameImageUrl);
+        }
+        if (gameIconUrl) {
+          ogParams.set('gameIcon', gameIconUrl);
+        }
+
         imageUrl = `https://api.cartridge.gg/og/game?${ogParams.toString()}`;
       } else {
         // Fallback to static preview if game not found
