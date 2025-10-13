@@ -1,14 +1,14 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { ACTIVE_PROJECTS, GAME_CONFIGS } from "./constants";
-import { graphqlRequest } from "./graphql";
-import { buildProgressionsQuery } from "./queries";
+import { ACTIVE_PROJECTS, GAME_CONFIGS } from "../../lib/ssr/constants";
+import { graphqlRequest } from "../../lib/ssr/graphql";
+import { buildProgressionsQuery } from "../../lib/ssr/queries";
 import {
   escapeHtml,
   computePlayerStats,
   buildMetaTags,
   buildGamePlayerOgImageUrl,
   resolvePlayerAddress,
-} from "./utils";
+} from "../../lib/ssr/utils";
 
 /**
  * Vercel Serverless Function for dynamic meta tags with real player data
