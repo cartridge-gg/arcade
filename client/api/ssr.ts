@@ -263,17 +263,6 @@ function getAvatarVariant(username: string): string {
 }
 
 /**
- * Get Olmech avatar icon URL from static CDN
- * Returns the SVG URL for the avatar variant
- */
-function getAvatarIconUrl(username: string): string {
-  const variant = getAvatarVariant(username);
-  // Map variant names to CDN paths
-  // These are the Olmech avatar SVGs hosted on static.cartridge.gg
-  return `https://static.cartridge.gg/avatars/olmech-${variant}.svg`;
-}
-
-/**
  * Make a GraphQL request to the Cartridge API
  */
 async function graphqlRequest<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
@@ -536,7 +525,7 @@ async function generateMetaTags(url: string): Promise<string> {
         username: usernameOrAddress,
         points: stats.totalPoints.toString(),
         primaryColor: '#FBCB4A',
-        avatar: getAvatarIconUrl(usernameOrAddress),
+        avatarVariant: getAvatarVariant(usernameOrAddress),
       });
       imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
     }
@@ -609,7 +598,7 @@ async function generateMetaTags(url: string): Promise<string> {
           points: gameStats.points.toString(),
           game: gameId,
           primaryColor: '#FBCB4A',
-          avatar: getAvatarIconUrl(usernameOrAddress),
+          avatarVariant: getAvatarVariant(usernameOrAddress),
         });
 
         // Add game cover image and icon URLs if available
