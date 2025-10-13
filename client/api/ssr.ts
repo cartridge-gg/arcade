@@ -570,7 +570,7 @@ async function generateMetaTags(url: string): Promise<string> {
       const ogParams = new URLSearchParams({
         username: usernameOrAddress,
         points: stats.totalPoints.toString(),
-        primaryColor: '#FBCB4A',
+        primaryColor: '#2C250C',
         avatarVariant: getAvatarVariant(usernameOrAddress),
       });
       imageUrl = `https://api.cartridge.gg/og/profile?${ogParams.toString()}`;
@@ -645,7 +645,7 @@ async function generateMetaTags(url: string): Promise<string> {
           username: usernameOrAddress,
           points: gameStats.points.toString(),
           game: gameId,
-          primaryColor: gameConfig?.color || '#FBCB4A',
+          primaryColor: gameConfig?.color || '#2C250C',
           avatarVariant: getAvatarVariant(usernameOrAddress),
         });
 
