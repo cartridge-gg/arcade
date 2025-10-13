@@ -422,7 +422,7 @@ async function generateMetaTags(url: string): Promise<string> {
         type: 'profile',
         username: usernameOrAddress,
         points: stats.totalPoints.toString(),
-        achievements: `${stats.totalCompleted}/${stats.totalAchievements}`,
+        avatar: 'https://play.cartridge.gg/preview.png',
       });
       imageUrl = `https://play.cartridge.gg/api/og?${ogParams.toString()}`;
     }

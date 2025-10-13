@@ -21,7 +21,7 @@ export default async function handler(req: Request) {
     const username = searchParams.get("username");
     const game = searchParams.get("game");
     const points = searchParams.get("points");
-    const achievements = searchParams.get("achievements");
+    const avatar = searchParams.get("avatar");
 
     // Validate required parameters based on type
     if (!type) {
@@ -33,7 +33,7 @@ export default async function handler(req: Request) {
       return generateProfileImage(
         username || "",
         points || "0",
-        achievements || "0/0"
+        avatar || "https://play.cartridge.gg/preview.png"
       );
     } else if (type === "game") {
       return generateGameImage(game || "");
@@ -59,7 +59,7 @@ export default async function handler(req: Request) {
 function generateProfileImage(
   username: string,
   points: string,
-  achievements: string
+  avatar: string
 ) {
   return new ImageResponse(
     (
@@ -122,7 +122,7 @@ function generateProfileImage(
             }}
           >
             <img
-              src="https://picsum.photos/200/300"
+              src={avatar}
               style={{
                 borderRadius: 12,
               }}
@@ -143,9 +143,10 @@ function generateProfileImage(
               style={{
                 color: "white",
                 fontSize: "28px",
+                textTransform: "uppercase",
               }}
             >
-              LOOT SURVIVOR
+              {username}
             </span>
           </p>
 
@@ -169,7 +170,7 @@ function generateProfileImage(
                 fontSize: "12px",
               }}
             >
-              12 POINTS
+              {points} POINTS
             </span>
           </div>
         </div>
