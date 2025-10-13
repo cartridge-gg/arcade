@@ -166,6 +166,18 @@ function escapeHtml(unsafe: string): string {
 }
 
 /**
+ * Escape URL for HTML attributes without breaking query parameters
+ * Only escapes dangerous characters that could break out of attributes
+ */
+function escapeUrl(url: string): string {
+  return url
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/**
  * Validate username format
  */
 function isValidUsername(username: string): boolean {
@@ -379,8 +391,8 @@ function computePlayerStats(
 function buildMetaTags(title: string, description: string, imageUrl: string, pageUrl: string): string {
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
-  const safeImageUrl = escapeHtml(imageUrl);
-  const safePageUrl = escapeHtml(pageUrl);
+  const safeImageUrl = escapeUrl(imageUrl);
+  const safePageUrl = escapeUrl(pageUrl);
 
   return `
     <!-- Open Graph / Facebook -->
