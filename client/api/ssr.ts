@@ -416,7 +416,7 @@ async function generateMetaTags(url: string): Promise<string> {
       const stats = computePlayerStats(address, progressionsData, achievementsData);
 
       title = `${usernameOrAddress} | Cartridge Arcade`;
-      description = `${stats.totalPoints} points • ${stats.totalCompleted}/${stats.totalAchievements} achievements`;
+      description = `${stats.totalPoints} points`;
 
       // Use static preview image (OG image generation moved to separate service)
       imageUrl = 'https://play.cartridge.gg/preview.png';
@@ -489,7 +489,7 @@ async function generateMetaTags(url: string): Promise<string> {
         const gameStats = stats.gameStats[gameId] || { points: 0, completed: 0, total: 0 };
 
         title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
-        description = `${gameStats.points} points • ${gameStats.completed}/${gameStats.total} achievements in ${gameId}`;
+        description = `${gameStats.points} points in ${gameId}`;
 
         // Use static preview image (OG image generation moved to separate service)
         imageUrl = 'https://play.cartridge.gg/preview.png';
