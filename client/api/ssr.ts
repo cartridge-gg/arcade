@@ -57,15 +57,15 @@ function formatProjectsForGraphQL(projects: Project[]): string {
 }
 
 /**
- * Build progressions query with inline arguments
- * The API doesn't support playerId as a GraphQL variable
+ * Build progressions query
+ * Note: The API returns achievements for ALL players in the projects.
+ * We filter by playerId client-side in computePlayerStats()
  */
-function buildProgressionsQuery(projects: Project[], playerId: string): string {
+function buildProgressionsQuery(projects: Project[]): string {
   return `
     query PlayerAchievements {
       playerAchievements(
         projects: [${formatProjectsForGraphQL(projects)}]
-        playerId: "${playerId}"
       ) {
         items {
           meta {
@@ -405,7 +405,7 @@ async function generateMetaTags(url: string): Promise<string> {
       }
 
       // Fetch real player data from GraphQL API (only progressions for points)
-      const query = buildProgressionsQuery(ACTIVE_PROJECTS, address);
+      const query = buildProgressionsQuery(ACTIVE_PROJECTS);
       const progressionsData = await graphqlRequest<any>(query);
 
       // Compute player statistics
@@ -468,7 +468,7 @@ async function generateMetaTags(url: string): Promise<string> {
         imageUrl = 'https://play.cartridge.gg/preview.png';
       } else {
         // Fetch real player data for this specific game only (only progressions for points)
-        const query = buildProgressionsQuery([gameProject], address);
+        const query = buildProgressionsQuery([gameProject]);
         const progressionsData = await graphqlRequest<any>(query);
 
         // Compute player statistics
