@@ -536,18 +536,10 @@ async function generateMetaTags(url: string): Promise<string> {
       // Compute player statistics
       const stats = computePlayerStats(address, progressionsData);
 
-      // Customize title/description based on tab (if present)
-      if (urlParts[2] === "tab" && urlParts[3]) {
-        const tabName = urlParts[3];
-        const tabDisplayName = tabName.charAt(0).toUpperCase() + tabName.slice(1);
-        title = `${usernameOrAddress} - ${tabDisplayName} | Cartridge Arcade`;
-        description = `View ${usernameOrAddress}'s ${tabDisplayName.toLowerCase()} on Cartridge Arcade`;
-      } else {
-        title = `${usernameOrAddress} | Cartridge Arcade`;
-        description = `${stats.totalPoints} points`;
-      }
+      title = `${usernameOrAddress} | Cartridge Arcade`;
+      description = `${stats.totalPoints} points`;
 
-      // Generate dynamic OG image URL (same for all player pages regardless of tab)
+      // Generate dynamic OG image URL
       imageUrl = buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
     }
     // Game-specific player page: /game/:gameId/player/:username
@@ -624,7 +616,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const requestPath = (req.query.path as string) || req.url || "/";
     const metaTags = await generateMetaTags(requestPath);
 
-    const safeRequestPathHtml = escapeHtml(requestPath);
     const safeRequestPathUrl = escapeUrl(requestPath);
     const html = `<!DOCTYPE html>
 <html lang="en">
