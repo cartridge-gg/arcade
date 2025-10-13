@@ -556,8 +556,19 @@ async function generateMetaTags(url: string): Promise<string> {
       title = `${gameId} - Cartridge Arcade`;
       description = `Play ${gameId} on Cartridge Arcade - Discover onchain gaming`;
 
-      // Use static preview image (OG image generation moved to separate service)
-      imageUrl = 'https://play.cartridge.gg/preview.png';
+      // Generate dynamic OG image URL for game page
+      const gameIconUrl = GAME_ICONS[gameId];
+      if (gameIconUrl) {
+        const ogParams = new URLSearchParams({
+          game: gameId,
+          primaryColor: '#FBCB4A',
+          gameImage: gameIconUrl,
+        });
+        imageUrl = `https://api.cartridge.gg/og/game?${ogParams.toString()}`;
+      } else {
+        // Fallback to static preview if game not found
+        imageUrl = 'https://play.cartridge.gg/preview.png';
+      }
     }
   } catch (error) {
     console.error("Error generating meta tags:", error);
