@@ -84,19 +84,23 @@ const GAME_ID_TO_JSON_KEY: Record<string, string> = {
  */
 function getGameConfig(gameId: string): GameConfig | null {
   const jsonKey = GAME_ID_TO_JSON_KEY[gameId];
+  console.log('[getGameConfig]', { gameId, jsonKey, hasData: !!gamesData[jsonKey] });
+
   if (!jsonKey || !gamesData[jsonKey]) {
+    console.log('[getGameConfig] Returning null - game not found');
     return null;
   }
 
   const gameData = gamesData[jsonKey];
-
-  // Return formatted config for OG image generation
-  return {
+  const config = {
     name: gameId === "pistols" ? "Pistols at Dawn" : gameData.name,
     icon: gameData.image,
     cover: gameData.cover,
     color: gameData.color,
   };
+
+  console.log('[getGameConfig] Returning config:', config);
+  return config;
 }
 
 // GraphQL Queries
