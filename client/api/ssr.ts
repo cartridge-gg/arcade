@@ -192,14 +192,6 @@ interface RawProgression {
   completionTime: string;
 }
 
-interface RawAchievement {
-  id: string;
-  hidden: boolean;
-  points: number;
-  taskId: string;
-  taskTotal: number;
-}
-
 interface PlayerStats {
   totalPoints: number;
   totalCompleted: number;
@@ -315,43 +307,18 @@ async function graphqlRequest<T>(query: string, variables?: Record<string, unkno
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-  // LOG: Request details
-  console.log('[GraphQL Request]', {
-    url: `${API_URL}/query`,
-    queryPreview: query.substring(0, 200) + '...',
-    variables: JSON.stringify(variables, null, 2)
-  });
-
   try {
-    const requestBody = JSON.stringify({ query, variables });
-    console.log('[GraphQL Request Body]', {
-      bodyLength: requestBody.length,
-      body: requestBody.substring(0, 500) + '...'
-    });
-
     const response = await fetch(`${API_URL}/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: requestBody,
+      body: JSON.stringify({ query, variables }),
       signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
 
-    // LOG: Response status
-    console.log('[GraphQL Response]', {
-      status: response.status,
-      statusText: response.statusText,
-      headers: Object.fromEntries(response.headers.entries())
-    });
-
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error('[GraphQL Error Response]', {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorBody
-      });
       throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
     }
 
@@ -359,27 +326,19 @@ async function graphqlRequest<T>(query: string, variables?: Record<string, unkno
 
     if (json.errors && json.errors.length > 0) {
       const errorMessage = json.errors.map((e) => e.message).join(", ");
-      console.error('[GraphQL Errors]', json.errors);
       throw new Error(`GraphQL error: ${errorMessage}`);
     }
 
     if (!json.data) {
-      console.error('[GraphQL No Data]', json);
       throw new Error("No data returned from GraphQL query");
     }
-
-    console.log('[GraphQL Success]', {
-      dataKeys: Object.keys(json.data || {})
-    });
 
     return json.data;
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
-      console.error('[GraphQL Timeout]');
       throw new Error("GraphQL request timed out after 10 seconds");
     }
-    console.error('[GraphQL Request Failed]', error);
     throw error;
   }
 }
@@ -402,40 +361,19 @@ function computePlayerStats(
   let normalizedTargetAddress: string;
   try {
     normalizedTargetAddress = normalizeAddress(address);
-  } catch (error) {
-    console.error(`Failed to normalize address ${address}:`, error);
+  } catch {
     return { totalPoints: 0, totalCompleted: 0, totalAchievements: 0, gameStats: {} };
   }
-
-  console.log('[DEBUG] Target address:', {
-    original: address,
-    normalized: normalizedTargetAddress
-  });
-  console.log('[DEBUG] Total projects in response:', progressionsData.playerAchievements.items.length);
 
   // Process each project's progressions
   for (const item of progressionsData.playerAchievements.items) {
     const project = item.meta.project;
 
-    console.log('[DEBUG] Processing project:', {
-      project,
-      totalAchievements: item.achievements.length,
-      samplePlayerIds: item.achievements.slice(0, 3).map((a: RawProgression) => a.playerId)
-    });
-
     // Get player's progressions for this project
     const playerProgressions = item.achievements.filter((p: RawProgression) => {
       try {
         const normalized = normalizeAddress(p.playerId);
-        const matches = normalized === normalizedTargetAddress;
-        if (matches) {
-          console.log('[DEBUG] Found matching achievement:', {
-            playerId: p.playerId,
-            normalized,
-            points: p.points
-          });
-        }
-        return matches;
+        return normalized === normalizedTargetAddress;
       } catch {
         return false;
       }
@@ -443,12 +381,6 @@ function computePlayerStats(
 
     // Calculate points only (achievements not needed for SSR meta tags)
     const projectPoints = playerProgressions.reduce((sum: number, p: RawProgression) => sum + p.points, 0);
-
-    console.log('[DEBUG] Project stats:', {
-      project,
-      matchedAchievements: playerProgressions.length,
-      points: projectPoints
-    });
 
     // Store per-game stats (only points matter for SSR)
     gameStats[project] = {
@@ -459,11 +391,6 @@ function computePlayerStats(
 
     totalPoints += projectPoints;
   }
-
-  console.log('[DEBUG] Final totals:', {
-    totalPoints,
-    gamesWithPoints: Object.entries(gameStats).filter(([_, stats]) => stats.points > 0).length
-  });
 
   return {
     totalPoints,
@@ -690,8 +617,8 @@ async function generateMetaTags(url: string): Promise<string> {
         imageUrl = 'https://play.cartridge.gg/preview.png';
       }
     }
-  } catch (error) {
-    console.error("Error generating meta tags:", error);
+  } catch {
+    // Silently fall back to default meta tags on error
   }
 
   return buildMetaTags(title, description, imageUrl, pageUrl);
@@ -727,8 +654,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Content-Type", "text/html");
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");
     res.status(200).send(html);
-  } catch (error) {
-    console.error("SSR handler error:", error);
+  } catch {
     res.status(500).send("Internal Server Error");
   }
 }
