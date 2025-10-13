@@ -33,63 +33,75 @@ const ACTIVE_PROJECTS = [
 // Game configuration for OG images
 // Contains all metadata needed for each game's OG image generation
 interface GameConfig {
-  icon: string;
-  cover: string;
-  color: string;
+  name: string;     // Display name for the game
+  icon: string;     // Icon/logo URL
+  cover: string;    // Cover/banner image URL
+  color: string;    // Primary brand color
 }
 
 const GAME_CONFIGS: Record<string, GameConfig> = {
   "dopewars": {
+    name: "Dope Wars",
     icon: "https://static.cartridge.gg/presets/dope-wars/icon.png",
     cover: "https://static.cartridge.gg/presets/dope-wars/cover.png",
     color: "#11ED83",
   },
   "loot-survivor": {
+    name: "Loot Survivor",
     icon: "https://static.cartridge.gg/presets/loot-survivor/icon.png",
     cover: "https://static.cartridge.gg/presets/loot-survivor/cover.png",
     color: "#33FF33",
   },
   "underdark": {
+    name: "Dark Shuffle",
     icon: "https://static.cartridge.gg/presets/underdark/icon.png",
     cover: "https://static.cartridge.gg/presets/underdark/cover.png",
     color: "#F59100",
   },
   "zkube": {
+    name: "zKube",
     icon: "https://static.cartridge.gg/presets/zkube/icon.png",
     cover: "https://static.cartridge.gg/presets/zkube/cover.png",
     color: "#5bc3e6",
   },
   "blobert": {
+    name: "Blob Arena",
     icon: "https://static.cartridge.gg/presets/blob-arena-amma/icon.png",
     cover: "https://static.cartridge.gg/presets/blob-arena-amma/cover.png",
     color: "#D7B000",
   },
   "zdefender": {
+    name: "zDefender",
     icon: "https://static.cartridge.gg/presets/zdefender/icon.png",
     cover: "https://static.cartridge.gg/presets/zdefender/cover.png",
     color: "#F59100",
   },
   "realm": {
+    name: "Eternum",
     icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
     cover: "https://static.cartridge.gg/presets/eternum/cover.png",
     color: "#dc8b07",
   },
   "eternum": {
+    name: "Eternum",
     icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
     cover: "https://static.cartridge.gg/presets/eternum/cover.png",
     color: "#dc8b07",
   },
   "ponziland": {
+    name: "Ponziland",
     icon: "https://static.cartridge.gg/presets/ponziland/icon.svg",
     cover: "https://static.cartridge.gg/presets/ponziland/cover.png",
     color: "#F38332",
   },
   "evolute-genesis": {
+    name: "Mage Duel",
     icon: "https://static.cartridge.gg/presets/mage-duel/icon.png",
     cover: "https://static.cartridge.gg/presets/mage-duel/cover.png",
     color: "#BD835B",
   },
   "pistols": {
+    name: "Pistols at Dawn",
     icon: "https://static.cartridge.gg/presets/pistols/icon.png",
     cover: "https://static.cartridge.gg/presets/pistols/cover.png",
     color: "#EF9758",
@@ -622,12 +634,12 @@ async function generateMetaTags(url: string): Promise<string> {
 
         // Get game-specific stats
         const gameStats = stats.gameStats[gameId] || { points: 0, completed: 0, total: 0 };
+        const gameName = gameConfig?.name || gameId;
 
-        title = `${usernameOrAddress} in ${gameId} | Cartridge Arcade`;
-        description = `${gameStats.points} points in ${gameId}`;
+        title = `${usernameOrAddress} in ${gameName} | Cartridge Arcade`;
+        description = `${gameStats.points} points in ${gameName}`;
 
         // Generate dynamic OG image URL for game-specific page
-        const gameConfig = GAME_CONFIGS[gameId];
         const ogParams = new URLSearchParams({
           username: usernameOrAddress,
           points: gameStats.points.toString(),
@@ -650,11 +662,13 @@ async function generateMetaTags(url: string): Promise<string> {
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
       const gameId = urlParts[1];
-      title = `${gameId} - Cartridge Arcade`;
-      description = `Play ${gameId} on Cartridge Arcade - Discover onchain gaming`;
+      const gameConfig = GAME_CONFIGS[gameId];
+      const gameName = gameConfig?.name || gameId;
+
+      title = `${gameName} - Cartridge Arcade`;
+      description = `Play ${gameName} on Cartridge Arcade - Discover onchain gaming`;
 
       // Generate dynamic OG image URL for game page
-      const gameConfig = GAME_CONFIGS[gameId];
 
       if (gameConfig) {
         const ogParams = new URLSearchParams({
