@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import fs from "fs";
 import path from "path";
+import { type ByteArray, byteArray, hash } from "starknet";
 
 /**
  * ============================================================================
@@ -10,24 +11,12 @@ import path from "path";
 
 const API_URL = process.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg";
 const BASE_URL = "https://play.cartridge.gg";
+const TORII_URL = "https://api.cartridge.gg/x/arcade-main/torii/graphql";
 
-// Active game projects for achievement queries
-// model values are computed using getSelectorFromTag(namespace, "TrophyProgression")
-// These match the actual projects used by the client (from src/components/games/data.json)
-const ACTIVE_PROJECTS = [
-  { model: "0x2190dba87ac0c88110db0598becd5f99855ad898c2ee1a990bd1433b7012253", namespace: "ls_0_0_8", project: "arcade-ls2" },
-  { model: "0x198e5fb446b41882f55a08f8baaba4387f41637ca140b0084459ce5338f617d", namespace: "s1_eternum", project: "arcade-eternum-s1" },
-  { model: "0x66deddfae96c058e621e0b4e76a5b6796ae7eb7b4b5372b5c7757ab6feff232", namespace: "zkube_budo_v1_1_0", project: "arcade-zkube-v2" },
-  { model: "0x6da79ec4f8ef62f705b565aeb2b23d04a449fce4c32af8ad209eb20e310b08a", namespace: "dopewars", project: "arcade-dopewars" },
-  { model: "0x528aee6e1c2ad2e0f603b1bfe15e3aefc1ded821cd118e5eab5092b704c79b0", namespace: "pistols", project: "arcade-pistols" },
-  { model: "0x620cf10a34caaf302accd82358cb9b55b9efa1345f8e09a6afbc7feb4a9a9b0", namespace: "ds_v1_2_0", project: "arcade-darkshuffle" },
-  { model: "0x1222d9cbbe8171b953a10a4b76a5d8b9e64ae40f2aeb0912713af4b98b90b2f", namespace: "achievements", project: "arcade-blobarena" },
-  { model: "0x4f4e617e4862d0202900c8503ac0ad4c5e6a7c14d033bf36c177e5852368bd3", namespace: "ponzi_land", project: "arcade-ponziland-nft" },
-  { model: "0x31287b860bda95c8f615b73030945b93c746a3b4dacb9e3a927f2c6ac867aad", namespace: "ls_0_0_1", project: "arcade-ls1" },
-  { model: "0x5a8f3fedb72efc9d358b86574cf362f8ed1ec12a02ca9f276e6190f49191217", namespace: "s0_eternum", project: "arcade-eternum-s0" },
-  { model: "0x17b14454c7075d73430699a7e57cfb3aaa40a094fcf81c2afac7fa95667c8ec", namespace: "zkube", project: "arcade-zkube-v1" },
-  { model: "0x1215b009b1e284bcf009a2dbe724e201ade476fd23970382198ad3af48fc92e", namespace: "dragark", project: "arcade-dragark" },
-];
+// Cache for active projects (refreshed every 5 minutes)
+let cachedActiveProjects: Project[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Game configuration for OG images
 interface GameConfig {
@@ -216,6 +205,26 @@ const ProgressionsDocument = `
     `;
 
 /**
+ * Query to fetch active editions from Arcade Registry via Torii
+ * Fetch up to 100 editions to ensure we get all active ones
+ */
+const EDITIONS_QUERY = `
+  query {
+    arcadeEditionModels(first: 100) {
+      edges {
+        node {
+          namespace
+          config
+          whitelisted
+          published
+          priority
+        }
+      }
+    }
+  }
+`;
+
+/**
  * ============================================================================
  * GRAPHQL CLIENT
  * ============================================================================
@@ -268,6 +277,147 @@ async function graphqlRequest<T>(query: string, variables?: Record<string, unkno
  * UTILITY FUNCTIONS
  * ============================================================================
  */
+
+/**
+ * Serializes a ByteArray to a bigint array (from models/index.ts)
+ */
+function serializeByteArray(byteArray: ByteArray): bigint[] {
+  const result: bigint[] = [
+    BigInt(byteArray.data.length),
+    ...byteArray.data.map((word) => BigInt(word.toString())),
+    BigInt(byteArray.pending_word),
+    BigInt(byteArray.pending_word_len),
+  ];
+  return result;
+}
+
+/**
+ * Poseidon hash of a string representated as a ByteArray (from models/index.ts)
+ */
+function computeByteArrayHash(str: string): string {
+  const bytes = byteArray.byteArrayFromString(str);
+  return hash.computePoseidonHashOnElements(serializeByteArray(bytes));
+}
+
+/**
+ * Computes dojo selector from namespace and event name (from models/index.ts)
+ */
+function getSelectorFromTag(namespace: string, event: string): string {
+  return hash.computePoseidonHashOnElements([
+    computeByteArrayHash(namespace),
+    computeByteArrayHash(event),
+  ]);
+}
+
+/**
+ * Decode hex-encoded felt252 string (namespace) to ASCII
+ */
+function decodeFelt252(hex: string): string {
+  // Remove 0x prefix if present
+  const cleaned = hex.replace(/^0x/, '');
+  // Convert hex to string
+  let result = '';
+  for (let i = 0; i < cleaned.length; i += 2) {
+    const byte = parseInt(cleaned.substr(i, 2), 16);
+    if (byte > 0) {
+      result += String.fromCharCode(byte);
+    }
+  }
+  return result;
+}
+
+/**
+ * Fetch active editions from Arcade Registry and compute project list
+ */
+async function getActiveProjects(): Promise<Project[]> {
+  // Check cache validity
+  const now = Date.now();
+  if (cachedActiveProjects && now - cacheTimestamp < CACHE_TTL) {
+    return cachedActiveProjects;
+  }
+
+  try {
+    // Query Torii GraphQL endpoint for editions
+    const response = await fetch(TORII_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: EDITIONS_QUERY }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Torii request failed: ${response.status}`);
+    }
+
+    const json: GraphQLResponse<{
+      arcadeEditionModels: {
+        edges: Array<{
+          node: {
+            namespace: string;  // hex-encoded felt252
+            config: string;     // JSON string
+            whitelisted: boolean;
+            published: boolean;
+            priority: number;
+          };
+        }>;
+      };
+    }> = await response.json();
+
+    if (json.errors) {
+      throw new Error(`Torii GraphQL error: ${json.errors.map(e => e.message).join(", ")}`);
+    }
+
+    if (!json.data?.arcadeEditionModels?.edges) {
+      throw new Error("No edition data returned from Torii");
+    }
+
+    // Filter and process editions
+    const activeEditions = json.data.arcadeEditionModels.edges
+      .map(edge => edge.node)
+      .filter(node => node.whitelisted && node.published)
+      .sort((a, b) => b.priority - a.priority);
+
+    // Compute projects with model hashes
+    const projects: Project[] = activeEditions
+      .map(edition => {
+        try {
+          // Decode namespace from hex
+          const namespace = decodeFelt252(edition.namespace);
+
+          // Parse config JSON to get project name
+          const config = JSON.parse(edition.config) as { project: string };
+          const project = config.project;
+
+          // Compute model hash
+          const model = getSelectorFromTag(namespace, "TrophyProgression");
+
+          return {
+            model,
+            namespace,
+            project,
+          };
+        } catch (error) {
+          return null;
+        }
+      })
+      .filter((p): p is Project => p !== null);
+
+    // Update cache
+    cachedActiveProjects = projects;
+    cacheTimestamp = now;
+
+    return projects;
+  } catch (error) {
+    // If we have stale cached data, use it as fallback
+    if (cachedActiveProjects) {
+      return cachedActiveProjects;
+    }
+
+    // Ultimate fallback: return empty array (will result in 0 points)
+    return [];
+  }
+}
 
 /**
  * Validate and resolve player username or address to a Starknet address
@@ -388,6 +538,7 @@ function getAvatarVariant(username: string): string {
 
 /**
  * Compute player statistics from raw data
+ * This matches the client logic: only count achievements where ALL tasks are completed
  */
 function computePlayerStats(
   address: string,
@@ -400,35 +551,44 @@ function computePlayerStats(
   let normalizedTargetAddress: string;
   try {
     normalizedTargetAddress = normalizeAddress(address);
-    console.log(`[SSR Debug] Normalized target address: ${normalizedTargetAddress}`);
   } catch (error) {
-    console.error(`[SSR Debug] Failed to normalize address: ${address}`, error);
     return { totalPoints: 0, gameStats: {} };
   }
 
   // Process each project's progressions
   for (const item of progressionsData.playerAchievements.items) {
     const project = item.meta.project;
-    console.log(`[SSR Debug] Processing project: ${project}, achievements count: ${item.achievements.length}`);
 
     // Get player's progressions for this project
     const playerProgressions = item.achievements.filter((p: RawProgression) => {
       try {
         const normalized = normalizeAddress(p.playerId);
-        const matches = normalized === normalizedTargetAddress;
-        if (matches) {
-          console.log(`[SSR Debug] Found matching progression for ${project}: ${p.points} points`);
-        }
-        return matches;
+        return normalized === normalizedTargetAddress;
       } catch {
         return false;
       }
     });
 
-    console.log(`[SSR Debug] Found ${playerProgressions.length} matching progressions for ${project}`);
+    // Group progressions by achievementId to check completion
+    const achievementGroups = new Map<string, RawProgression[]>();
+    playerProgressions.forEach(p => {
+      if (!achievementGroups.has(p.achievementId)) {
+        achievementGroups.set(p.achievementId, []);
+      }
+      achievementGroups.get(p.achievementId)!.push(p);
+    });
 
-    // Calculate points
-    const projectPoints = playerProgressions.reduce((sum: number, p: RawProgression) => sum + p.points, 0);
+    // Calculate points - only count completed achievements
+    // An achievement is complete when ALL its tasks have total >= taskTotal
+    let projectPoints = 0;
+    achievementGroups.forEach((tasks) => {
+      const allTasksComplete = tasks.every(task => task.total >= task.taskTotal);
+      if (allTasksComplete) {
+        // Use the points from the first task (they should all have the same points value)
+        const achievementPoints = tasks[0].points;
+        projectPoints += achievementPoints;
+      }
+    });
 
     // Store per-game stats
     gameStats[project] = {
@@ -532,21 +692,16 @@ async function generateMetaTags(url: string): Promise<string> {
         return buildMetaTags(title, description, imageUrl, pageUrl);
       }
 
+      // Fetch active projects dynamically
+      const activeProjects = await getActiveProjects();
+
       // Fetch real player data from GraphQL API (only progressions for points)
       const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(ProgressionsDocument, {
-        projects: ACTIVE_PROJECTS
+        projects: activeProjects
       });
-      console.log(`[SSR Debug] Received ${progressionsData.playerAchievements.items.length} project results`);
-
-      // Debug logging
-      console.log(`[SSR Debug] Username: ${usernameOrAddress}, Address: ${address}`);
-      console.log(`[SSR Debug] Total achievements returned: ${progressionsData.playerAchievements.items.reduce((sum, item) => sum + item.achievements.length, 0)}`);
 
       // Compute player statistics
       const stats = computePlayerStats(address, progressionsData);
-
-      console.log(`[SSR Debug] Computed total points: ${stats.totalPoints}`);
-      console.log(`[SSR Debug] Game stats:`, JSON.stringify(stats.gameStats));
 
       title = `${usernameOrAddress} | Cartridge Arcade`;
       description = `${stats.totalPoints} points`;
@@ -565,17 +720,20 @@ async function generateMetaTags(url: string): Promise<string> {
         return buildMetaTags(title, description, imageUrl, pageUrl);
       }
 
-      // Find the specific game project
-      const gameProject = ACTIVE_PROJECTS.find(p => p.project === gameId);
+      // Fetch active projects dynamically
+      const activeProjects = await getActiveProjects();
 
-      // Fetch player points for the game (0 if game not found in ACTIVE_PROJECTS)
+      // Find the specific game project
+      const gameProject = activeProjects.find(p => p.project === gameId);
+
+      // Fetch player points for the game (0 if game not found in active projects)
       let gamePoints = 0;
       if (gameProject) {
         const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(ProgressionsDocument, {
           projects: [gameProject]
         });
         const stats = computePlayerStats(address, progressionsData);
-        const gameStats = stats.gameStats[gameId] || { points: 0 };
+        const gameStats = stats.gameStats[gameProject.project] || { points: 0 };
         gamePoints = gameStats.points;
       }
 
