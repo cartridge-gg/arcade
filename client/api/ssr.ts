@@ -22,83 +22,6 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 let cachedGames: GameData[] | null = null;
 let gamesCacheTimestamp = 0;
 
-// Game configuration for OG images
-interface GameConfig {
-  name: string;
-  icon: string;
-  cover: string;
-  color: string;
-}
-
-const GAME_CONFIGS: Record<string, GameConfig> = {
-  "dopewars": {
-    name: "Dope Wars",
-    icon: "https://static.cartridge.gg/presets/dope-wars/icon.png",
-    cover: "https://static.cartridge.gg/presets/dope-wars/cover.png",
-    color: "#11ED83",
-  },
-  "loot-survivor": {
-    name: "Loot Survivor",
-    icon: "https://static.cartridge.gg/presets/loot-survivor/icon.png",
-    cover: "https://static.cartridge.gg/presets/loot-survivor/cover.png",
-    color: "#33FF33",
-  },
-  "underdark": {
-    name: "Dark Shuffle",
-    icon: "https://static.cartridge.gg/presets/underdark/icon.png",
-    cover: "https://static.cartridge.gg/presets/underdark/cover.png",
-    color: "#F59100",
-  },
-  "zkube": {
-    name: "zKube",
-    icon: "https://static.cartridge.gg/presets/zkube/icon.png",
-    cover: "https://static.cartridge.gg/presets/zkube/cover.png",
-    color: "#5bc3e6",
-  },
-  "blobert": {
-    name: "Blob Arena",
-    icon: "https://static.cartridge.gg/presets/blob-arena-amma/icon.png",
-    cover: "https://static.cartridge.gg/presets/blob-arena-amma/cover.png",
-    color: "#D7B000",
-  },
-  "zdefender": {
-    name: "zDefender",
-    icon: "https://static.cartridge.gg/presets/zdefender/icon.png",
-    cover: "https://static.cartridge.gg/presets/zdefender/cover.png",
-    color: "#F59100",
-  },
-  "realm": {
-    name: "Eternum",
-    icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
-    cover: "https://static.cartridge.gg/presets/eternum/cover.png",
-    color: "#dc8b07",
-  },
-  "eternum": {
-    name: "Eternum",
-    icon: "https://static.cartridge.gg/presets/eternum/icon.svg",
-    cover: "https://static.cartridge.gg/presets/eternum/cover.png",
-    color: "#dc8b07",
-  },
-  "ponziland": {
-    name: "Ponziland",
-    icon: "https://static.cartridge.gg/presets/ponziland/icon.svg",
-    cover: "https://static.cartridge.gg/presets/ponziland/cover.png",
-    color: "#F38332",
-  },
-  "evolute-genesis": {
-    name: "Mage Duel",
-    icon: "https://static.cartridge.gg/presets/mage-duel/icon.png",
-    cover: "https://static.cartridge.gg/presets/mage-duel/cover.png",
-    color: "#BD835B",
-  },
-  "pistols": {
-    name: "Pistols at Dawn",
-    icon: "https://static.cartridge.gg/presets/pistols/icon.png",
-    cover: "https://static.cartridge.gg/presets/pistols/cover.png",
-    color: "#EF9758",
-  },
-};
-
 /**
  * ============================================================================
  * TYPES
@@ -773,12 +696,14 @@ function buildCollectionOgImageUrl(metadata: CollectionMetadata): string {
 /**
  * Generate OG image URL for player profile (general or game-specific)
  * @param gameId - Optional game ID for game-specific profile
+ * @param gameData - Optional game data for game-specific profile
  */
-function buildPlayerOgImageUrl(
+async function buildPlayerOgImageUrl(
   usernameOrAddress: string,
   points: number,
-  gameId?: string
-): string {
+  gameId?: string,
+  gameData?: GameData | null
+): Promise<string> {
   const ogParams = new URLSearchParams({
     username: usernameOrAddress,
     points: points.toString(),
@@ -788,17 +713,21 @@ function buildPlayerOgImageUrl(
 
   // Add game-specific parameters if gameId is provided
   if (gameId) {
-    const gameConfig = GAME_CONFIGS[gameId];
     ogParams.set('game', gameId);
 
-    if (gameConfig?.color) {
-      ogParams.set('primaryColor', gameConfig.color);
-    }
-    if (gameConfig?.cover) {
-      ogParams.set('gameImage', gameConfig.cover);
-    }
-    if (gameConfig?.icon) {
-      ogParams.set('gameIcon', gameConfig.icon);
+    // Use provided gameData or fetch it
+    const data = gameData !== undefined ? gameData : await findGameByIdentifier(gameId);
+
+    if (data) {
+      if (data.color) {
+        ogParams.set('primaryColor', data.color);
+      }
+      if (data.cover) {
+        ogParams.set('gameImage', data.cover);
+      }
+      if (data.image) {
+        ogParams.set('gameIcon', data.image);
+      }
     }
   }
 
@@ -873,7 +802,7 @@ async function generateMetaTags(url: string): Promise<string> {
       description = `${stats.totalPoints} points in arcade`;
 
       // Generate dynamic OG image URL
-      imageUrl = buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
+      imageUrl = await buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
     }
     // Game-specific player page: /game/:gameId/player/:username
     else if (urlParts[0] === "game" && urlParts[1] && urlParts[2] === "player" && urlParts[3]) {
@@ -885,6 +814,9 @@ async function generateMetaTags(url: string): Promise<string> {
       if (!address) {
         return buildMetaTags(title, description, imageUrl, pageUrl);
       }
+
+      // Fetch game data from onchain
+      const gameData = await findGameByIdentifier(gameId);
 
       // Fetch active projects dynamically
       const activeProjects = await getActiveProjects();
@@ -907,14 +839,13 @@ async function generateMetaTags(url: string): Promise<string> {
         gamePoints = gameStats.points;
       }
 
-      // Set title and description
-      const gameConfig = GAME_CONFIGS[gameId];
-      const gameName = gameConfig?.name || gameId;
+      // Set title and description using onchain game name
+      const gameName = gameData?.name || gameId;
       title = `${usernameOrAddress} in ${gameName} | Cartridge Arcade`;
       description = `${gamePoints} points in ${gameName}`;
 
-      // Generate dynamic OG image URL
-      imageUrl = buildPlayerOgImageUrl(usernameOrAddress, gamePoints, gameId);
+      // Generate dynamic OG image URL with game data
+      imageUrl = await buildPlayerOgImageUrl(usernameOrAddress, gamePoints, gameId, gameData);
     }
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
@@ -922,9 +853,6 @@ async function generateMetaTags(url: string): Promise<string> {
 
       // Fetch game data from onchain
       const gameData = await findGameByIdentifier(gameId);
-
-      // Fallback to GAME_CONFIGS if onchain data not available
-      const gameConfig = GAME_CONFIGS[gameId];
 
       if (gameData) {
         // Use onchain data
@@ -946,30 +874,6 @@ async function generateMetaTags(url: string): Promise<string> {
         }
 
         imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
-      } else if (gameConfig) {
-        // Fallback to static config
-        title = `${gameConfig.name} - Cartridge Arcade`;
-        description = `Play ${gameConfig.name} on Cartridge Arcade - Discover onchain gaming`;
-
-        const ogParams = new URLSearchParams({
-          game: gameId,
-          displayName: gameConfig.name,
-          primaryColor: gameConfig.color,
-        });
-
-        if (gameConfig.cover) {
-          ogParams.set('gameImage', gameConfig.cover);
-        }
-        if (gameConfig.icon) {
-          ogParams.set('gameIcon', gameConfig.icon);
-        }
-
-        imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
-      } else {
-        // No data found
-        title = "Cartridge Arcade";
-        description = "Discover, Play and Compete in Onchain Games";
-        imageUrl = `${BASE_URL}/preview.png`;
       }
     }
     // Collection marketplace page: /collection/:contractAddress
