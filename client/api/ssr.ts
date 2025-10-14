@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import fs from "fs";
 import path from "path";
-import { ProgressionsDocument } from "@cartridge/ui/utils/api/cartridge";
+import { ProgressionsDocument } from "@cartridge/ui/utils/api/cartridge/generated";
 
 /**
  * ============================================================================
