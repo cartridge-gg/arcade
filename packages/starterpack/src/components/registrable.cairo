@@ -82,7 +82,7 @@ pub mod RegistrableComponent {
 
         fn pause(
             self: @ComponentState<TContractState>,
-            world: WorldStorage,
+            mut world: WorldStorage,
             starterpack_id: u32,
         ) {
             let mut store = StoreTrait::new(world);
@@ -101,7 +101,7 @@ pub mod RegistrableComponent {
 
         fn resume(
             self: @ComponentState<TContractState>,
-            world: WorldStorage,
+            mut world: WorldStorage,
             starterpack_id: u32,
         ) {
             let mut store = StoreTrait::new(world);

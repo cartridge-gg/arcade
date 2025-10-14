@@ -41,7 +41,7 @@ pub mod IssuableComponent {
     > of InternalTrait<TContractState> {
         fn issue(
             self: @ComponentState<TContractState>,
-            world: WorldStorage,
+            mut world: WorldStorage,
             recipient: ContractAddress,
             starterpack_id: u32,
             referrer: Option<ContractAddress>,
