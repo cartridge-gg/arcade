@@ -619,24 +619,57 @@ async function generateMetaTags(url: string): Promise<string> {
   return buildMetaTags(title, description, imageUrl, pageUrl);
 }
 
+// Cache the base HTML at module load time
+let cachedBaseHtml: string | null = null;
+
+async function loadBaseHtml(host: string): Promise<string> {
+  if (cachedBaseHtml) {
+    return cachedBaseHtml;
+  }
+
+  // In Vercel, static files and serverless functions are separate
+  // We need to fetch the index.html from the static CDN
+  const indexUrl = `https://${host}/index.html`;
+
+  try {
+    const response = await fetch(indexUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch index.html: ${response.status}`);
+    }
+    cachedBaseHtml = await response.text();
+    return cachedBaseHtml;
+  } catch (fetchError) {
+    // Fallback: try reading from filesystem (local development)
+    const localPaths = [
+      path.join(process.cwd(), "dist/index.html"),
+      path.join(process.cwd(), ".vercel/output/static/index.html"),
+    ];
+
+    for (const filePath of localPaths) {
+      try {
+        cachedBaseHtml = fs.readFileSync(filePath, "utf-8");
+        return cachedBaseHtml;
+      } catch {
+        continue;
+      }
+    }
+
+    throw new Error(
+      `Could not load index.html from ${indexUrl} or local filesystem`
+    );
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const requestPath = (req.query.path as string) || req.url || "/";
+    const host = req.headers.host || "play.cartridge.gg";
 
     // Generate dynamic meta tags based on the route
     const metaTags = await generateMetaTags(requestPath);
 
-    // Read the built index.html from the static output
-    const indexPath = path.join(process.cwd(), ".vercel/output/static/index.html");
-    let baseHtml: string;
-
-    try {
-      baseHtml = fs.readFileSync(indexPath, "utf-8");
-    } catch (error) {
-      // Fallback if the file doesn't exist (local development)
-      const distIndexPath = path.join(process.cwd(), "dist/index.html");
-      baseHtml = fs.readFileSync(distIndexPath, "utf-8");
-    }
+    // Load the base HTML (uses cache after first load)
+    const baseHtml = await loadBaseHtml(host);
 
     // Inject the dynamic meta tags into the <head> section
     // This replaces the closing </head> tag with meta tags + </head>
@@ -650,6 +683,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).send(modifiedHtml);
   } catch (error) {
     console.error("SSR Error:", error);
-    res.status(500).send("Internal Server Error");
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    res.status(500).send(`Internal Server Error: ${errorMessage}`);
   }
 }
