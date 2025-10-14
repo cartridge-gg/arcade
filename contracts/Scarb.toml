@@ -58,3 +58,6 @@ build-external-contracts = [
     "social::models::index::m_Member",
     "social::events::index::e_Follow",
 ]
+
+[tool.scarb]
+allow-prebuilt-plugins = ["dojo_cairo_macros"]
