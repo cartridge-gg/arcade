@@ -39,19 +39,15 @@ pub mod RegistrableComponent {
             price: u256,
             payment_token: ContractAddress,
         ) -> u32 {
-            // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
-            // [Check] Referral percentage is valid
             assert!(
                 referral_percentage <= MAX_REFERRAL_FEE,
                 "Starterpack: referral percentage too high"
             );
 
-            // [Effect] Generate starterpack ID
             let starterpack_id = world.dispatcher.uuid();
 
-            // [Effect] Create starterpack
             let time = get_block_timestamp();
             let owner = get_caller_address();
             let starterpack = StarterpackTrait::new(
@@ -66,10 +62,8 @@ pub mod RegistrableComponent {
                 time,
             );
 
-            // [Effect] Store starterpack
             store.set_starterpack(@starterpack);
 
-            // [Event] Emit event
             world
                 .emit_event(
                     @StarterpackRegistered {
@@ -90,21 +84,16 @@ pub mod RegistrableComponent {
             world: WorldStorage,
             starterpack_id: u32,
         ) {
-            // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
-            // [Check] Caller is owner
             let caller = get_caller_address();
             let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_is_owner(caller);
 
-            // [Effect] Pause starterpack
             starterpack.pause();
 
-            // [Effect] Store starterpack
             store.set_starterpack(@starterpack);
 
-            // [Event] Emit event
             let time = get_block_timestamp();
             world.emit_event(@StarterpackPaused { starterpack_id, time });
         }
@@ -114,21 +103,16 @@ pub mod RegistrableComponent {
             world: WorldStorage,
             starterpack_id: u32,
         ) {
-            // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
-            // [Check] Caller is owner
             let caller = get_caller_address();
             let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_is_owner(caller);
 
-            // [Effect] Resume starterpack
             starterpack.resume();
 
-            // [Effect] Store starterpack
             store.set_starterpack(@starterpack);
 
-            // [Event] Emit event
             let time = get_block_timestamp();
             world.emit_event(@StarterpackResumed { starterpack_id, time });
         }

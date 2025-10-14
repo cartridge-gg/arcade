@@ -44,20 +44,16 @@ pub mod IssuableComponent {
             referrer: Option<ContractAddress>,
             referrer_group: Option<felt252>,
         ) {
-            // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
-            // [Check] Starterpack exists and is active
             let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_is_active();
 
-            // [Check] If not reissuable, recipient hasn't already been issued this starterpack
             if !starterpack.reissuable {
                 let issuance = store.get_issuance(starterpack_id, recipient);
                 issuance.assert_not_issued();
             }
 
-            // [Effect] Process payment using stored price and token
             let payer = get_caller_address();
             let base_price = starterpack.price;
             let payment_token = starterpack.payment_token;
@@ -100,13 +96,11 @@ pub mod IssuableComponent {
                 }
             }
 
-            // [Effect] Call implementation contract to mint assets
             let implementation_dispatcher = IStarterpackImplementationDispatcher {
                 contract_address: starterpack.implementation,
             };
             implementation_dispatcher.on_issue(recipient, starterpack_id);
 
-            // [Effect] Create issuance record
             let time = get_block_timestamp();
             let issuance = IssuanceTrait::new(
                 starterpack_id,
@@ -115,14 +109,11 @@ pub mod IssuableComponent {
                 time,
             );
 
-            // [Effect] Update starterpack stats
             starterpack.issue();
 
-            // [Effect] Store entities
             store.set_starterpack(@starterpack);
             store.set_issuance(@issuance);
 
-            // [Event] Emit event with total amount paid (base price + protocol fee)
             let config = store.get_config(CONFIG_ID);
             let total_amount = base_price + config.protocol_fee_amount(base_price);
             world

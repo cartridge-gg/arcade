@@ -100,44 +100,34 @@ pub mod Starterpack {
         fn initialize(
             ref self: ContractState, protocol_fee: u8, fee_receiver: ContractAddress,
         ) {
-            // [Setup] Datastore
             let mut store: Store = StoreTrait::new(self.world_storage());
 
-            // [Check] Config doesn't already exist
             let existing_config = store.get_config(CONFIG_ID);
             assert!(existing_config.id == 0, "Starterpack: already initialized");
 
-            // [Check] Valid parameters
             assert!(protocol_fee <= MAX_PROTOCOL_FEE, "Starterpack: fee too high");
             assert!(fee_receiver.is_non_zero(), "Starterpack: invalid receiver");
 
-            // [Effect] Create and store config
             let config = ConfigTrait::new(CONFIG_ID, protocol_fee, fee_receiver);
             store.set_config(@config);
         }
 
         fn set_protocol_fee(ref self: ContractState, fee_percentage: u8) {
-            // [Setup] Datastore
             let mut store: Store = StoreTrait::new(self.world_storage());
 
-            // [Check] Config exists
             let mut config = store.get_config(CONFIG_ID);
             config.assert_does_exist();
 
-            // [Effect] Update config
             config.set_protocol_fee(fee_percentage);
             store.set_config(@config);
         }
         
         fn set_fee_receiver(ref self: ContractState, receiver: ContractAddress) {
-            // [Setup] Datastore
             let mut store: Store = StoreTrait::new(self.world_storage());
 
-            // [Check] Config exists
             let mut config = store.get_config(CONFIG_ID);
             config.assert_does_exist();
 
-            // [Effect] Update config
             config.set_fee_receiver(receiver);
             store.set_config(@config);
         }
