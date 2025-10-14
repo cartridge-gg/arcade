@@ -7,17 +7,9 @@ use starterpack::models::index::Issuance;
 #[generate_trait]
 pub impl IssuanceImpl of IssuanceTrait {
     fn new(
-        starterpack_id: u32,
-        recipient: starknet::ContractAddress,
-        soulbound: bool,
-        time: u64,
+        starterpack_id: u32, recipient: starknet::ContractAddress, soulbound: bool, time: u64,
     ) -> Issuance {
-        Issuance {
-            starterpack_id,
-            recipient,
-            soulbound,
-            issued_at: time,
-        }
+        Issuance { starterpack_id, recipient, soulbound, issued_at: time }
     }
 }
 

@@ -1,6 +1,6 @@
 pub mod constants;
-pub mod store;
 pub mod interface;
+pub mod store;
 
 pub mod types {
     pub mod status;
@@ -11,10 +11,10 @@ pub mod events {
 }
 
 pub mod models {
-    pub mod index;
     pub mod config;
-    pub mod starterpack;
+    pub mod index;
     pub mod issuance;
+    pub mod starterpack;
 }
 
 pub mod components {

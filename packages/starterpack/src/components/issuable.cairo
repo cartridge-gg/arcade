@@ -4,24 +4,24 @@ pub mod IssuableComponent {
 
     use dojo::event::EventStorage;
     use dojo::world::WorldStorage;
-    use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // External imports
 
     use openzeppelin_token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use starterpack::interface::{
-        IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
-    };
+    use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // Internal imports
 
     use starterpack::constants::{CONFIG_ID, FEE_DENOMINATOR};
     use starterpack::events::index::StarterpackIssued;
+    use starterpack::interface::{
+        IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
+    };
     use starterpack::models::config::ConfigTrait;
     use starterpack::models::issuance::{IssuanceAssert, IssuanceTrait};
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
     use starterpack::store::{
-        StoreTrait, ConfigStoreTrait, IssuanceStoreTrait, StarterpackStoreTrait
+        ConfigStoreTrait, IssuanceStoreTrait, StarterpackStoreTrait, StoreTrait,
     };
 
     // Storage
@@ -61,20 +61,20 @@ pub mod IssuableComponent {
             let base_price = starterpack.price;
             let payment_token = starterpack.payment_token;
             let soulbound = starterpack.soulbound;
-            
+
             // Skip payment if base price is zero
             if base_price > 0 {
                 let token_dispatcher = IERC20Dispatcher { contract_address: payment_token };
-                
+
                 // Get global config for protocol fee
                 let config = store.get_config(CONFIG_ID);
-                
+
                 // Calculate referral fee if referrer exists (included in base price)
                 let referral_fee_amount = if let Option::Some(ref_addr) = referrer {
                     let ref_fee = base_price
                         * starterpack.referral_percentage.into()
                         / FEE_DENOMINATOR.into();
-                    
+
                     // Transfer referral fee
                     if ref_fee > 0 {
                         token_dispatcher.transfer_from(payer, ref_addr, ref_fee);
@@ -83,15 +83,15 @@ pub mod IssuableComponent {
                 } else {
                     0
                 };
-                
+
                 // Calculate protocol fee (added on top of base price)
                 let protocol_fee_amount = config.protocol_fee_amount(base_price);
-                
+
                 // Transfer protocol fee
                 if protocol_fee_amount > 0 {
                     token_dispatcher.transfer_from(payer, config.fee_receiver, protocol_fee_amount);
                 }
-                
+
                 // Calculate and transfer owner payment (base price minus referral fee)
                 let owner_payment = base_price - referral_fee_amount;
                 if owner_payment > 0 {
@@ -105,12 +105,7 @@ pub mod IssuableComponent {
             implementation_dispatcher.on_issue(recipient, starterpack_id);
 
             let time = get_block_timestamp();
-            let issuance = IssuanceTrait::new(
-                starterpack_id,
-                recipient,
-                soulbound,
-                time,
-            );
+            let issuance = IssuanceTrait::new(starterpack_id, recipient, soulbound, time);
 
             starterpack.issue();
 
@@ -130,7 +125,7 @@ pub mod IssuableComponent {
                         referrer,
                         referrer_group,
                         time,
-                    }
+                    },
                 );
         }
     }

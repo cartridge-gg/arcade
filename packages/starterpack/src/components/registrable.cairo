@@ -9,11 +9,9 @@ pub mod RegistrableComponent {
     // Internal imports
 
     use starterpack::constants::MAX_REFERRAL_FEE;
-    use starterpack::events::index::{
-        StarterpackPaused, StarterpackRegistered, StarterpackResumed
-    };
+    use starterpack::events::index::{StarterpackPaused, StarterpackRegistered, StarterpackResumed};
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
-    use starterpack::store::{StoreTrait, StarterpackStoreTrait};
+    use starterpack::store::{StarterpackStoreTrait, StoreTrait};
 
     // Storage
 
@@ -47,7 +45,7 @@ pub mod RegistrableComponent {
 
             assert!(
                 referral_percentage <= MAX_REFERRAL_FEE,
-                "Starterpack: referral percentage too high"
+                "Starterpack: referral percentage too high",
             );
 
             let starterpack_id = world.dispatcher.uuid();
@@ -80,16 +78,14 @@ pub mod RegistrableComponent {
                         description,
                         image_uri,
                         time,
-                    }
+                    },
                 );
 
             starterpack_id
         }
 
         fn pause(
-            self: @ComponentState<TContractState>,
-            mut world: WorldStorage,
-            starterpack_id: u32,
+            self: @ComponentState<TContractState>, mut world: WorldStorage, starterpack_id: u32,
         ) {
             let mut store = StoreTrait::new(world);
 
@@ -106,9 +102,7 @@ pub mod RegistrableComponent {
         }
 
         fn resume(
-            self: @ComponentState<TContractState>,
-            mut world: WorldStorage,
-            starterpack_id: u32,
+            self: @ComponentState<TContractState>, mut world: WorldStorage, starterpack_id: u32,
         ) {
             let mut store = StoreTrait::new(world);
 
