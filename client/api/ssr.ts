@@ -13,18 +13,20 @@ const BASE_URL = "https://play.cartridge.gg";
 
 // Active game projects for achievement queries
 // model values are computed using getSelectorFromTag(namespace, "TrophyProgression")
+// These match the actual projects used by the client (from src/components/games/data.json)
 const ACTIVE_PROJECTS = [
-  { model: "0x6da79ec4f8ef62f705b565aeb2b23d04a449fce4c32af8ad209eb20e310b08a", namespace: "dopewars", project: "dopewars" },
-  { model: "0x60e7986933b6656ba01ede5768ac1f977c8ef59764b1768bb2ae99d271d482c", namespace: "loot_survivor", project: "loot-survivor" },
-  { model: "0x30c5d476fa08a9d8d4eef9be58e0919a08ce704018e36e69a241c4491f69328", namespace: "underdark", project: "underdark" },
-  { model: "0x17b14454c7075d73430699a7e57cfb3aaa40a094fcf81c2afac7fa95667c8ec", namespace: "zkube", project: "zkube" },
-  { model: "0x71ed03cbed577a37491af53b52f8236d0c50b41625524a4ce18c165c0e6f6c5", namespace: "blobert", project: "blobert" },
-  { model: "0x5dd8d1a662dda67eed60a03006ae403002f56c018b00e780e3c64b99565e092", namespace: "zdefender", project: "zdefender" },
-  { model: "0x58ec1a76866d1729715d419c349ef3f6e52bc0143686f9bf5d70a2d9e5f795d", namespace: "realm", project: "realm" },
-  { model: "0x56f72fcd0717bb8a4c5dc9c145eed7190c3c64b8441ee921c2cbdb82947e177", namespace: "eternum", project: "eternum" },
-  { model: "0x9067246f597a4078ad871414e3b36731795588ca82d3b6009275b93aadc5f8", namespace: "ponziland", project: "ponziland" },
-  { model: "0x4b42469e55a435a09f495a4a662cd28528dff9f0352953a34962c3d6fb4b3d7", namespace: "evolute_genesis", project: "evolute-genesis" },
-  { model: "0x528aee6e1c2ad2e0f603b1bfe15e3aefc1ded821cd118e5eab5092b704c79b0", namespace: "pistols", project: "pistols" },
+  { model: "0x2190dba87ac0c88110db0598becd5f99855ad898c2ee1a990bd1433b7012253", namespace: "ls_0_0_8", project: "arcade-ls2" },
+  { model: "0x198e5fb446b41882f55a08f8baaba4387f41637ca140b0084459ce5338f617d", namespace: "s1_eternum", project: "arcade-eternum-s1" },
+  { model: "0x66deddfae96c058e621e0b4e76a5b6796ae7eb7b4b5372b5c7757ab6feff232", namespace: "zkube_budo_v1_1_0", project: "arcade-zkube-v2" },
+  { model: "0x6da79ec4f8ef62f705b565aeb2b23d04a449fce4c32af8ad209eb20e310b08a", namespace: "dopewars", project: "arcade-dopewars" },
+  { model: "0x528aee6e1c2ad2e0f603b1bfe15e3aefc1ded821cd118e5eab5092b704c79b0", namespace: "pistols", project: "arcade-pistols" },
+  { model: "0x620cf10a34caaf302accd82358cb9b55b9efa1345f8e09a6afbc7feb4a9a9b0", namespace: "ds_v1_2_0", project: "arcade-darkshuffle" },
+  { model: "0x1222d9cbbe8171b953a10a4b76a5d8b9e64ae40f2aeb0912713af4b98b90b2f", namespace: "achievements", project: "arcade-blobarena" },
+  { model: "0x4f4e617e4862d0202900c8503ac0ad4c5e6a7c14d033bf36c177e5852368bd3", namespace: "ponzi_land", project: "arcade-ponziland-nft" },
+  { model: "0x31287b860bda95c8f615b73030945b93c746a3b4dacb9e3a927f2c6ac867aad", namespace: "ls_0_0_1", project: "arcade-ls1" },
+  { model: "0x5a8f3fedb72efc9d358b86574cf362f8ed1ec12a02ca9f276e6190f49191217", namespace: "s0_eternum", project: "arcade-eternum-s0" },
+  { model: "0x17b14454c7075d73430699a7e57cfb3aaa40a094fcf81c2afac7fa95667c8ec", namespace: "zkube", project: "arcade-zkube-v1" },
+  { model: "0x1215b009b1e284bcf009a2dbe724e201ade476fd23970382198ad3af48fc92e", namespace: "dragark", project: "arcade-dragark" },
 ];
 
 // Game configuration for OG images
