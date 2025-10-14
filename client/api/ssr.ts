@@ -700,6 +700,13 @@ function buildCollectionOgImageUrl(metadata: CollectionMetadata): string {
 }
 
 /**
+ * Convert icon URL to cover URL by replacing /icon. with /cover.
+ */
+function getCoverUrlFromIcon(iconUrl: string): string {
+  return iconUrl.replace(/\/icon\.(png|svg|jpg|jpeg|webp)/, '/cover.$1');
+}
+
+/**
  * Generate OG image URL for player profile (general or game-specific)
  * @param gameId - Optional game ID for game-specific profile
  * @param gameData - Optional game data for game-specific profile
@@ -728,10 +735,11 @@ async function buildPlayerOgImageUrl(
       if (data.color) {
         ogParams.set('primaryColor', data.color);
       }
-      // Use image for both gameImage (background) and gameIcon (logo)
       if (data.image) {
-        ogParams.set('gameImage', data.image);
+        // Use icon for gameIcon
         ogParams.set('gameIcon', data.image);
+        // Convert icon URL to cover URL for gameImage (background)
+        ogParams.set('gameImage', getCoverUrlFromIcon(data.image));
       }
     }
   }
@@ -871,10 +879,11 @@ async function generateMetaTags(url: string): Promise<string> {
           primaryColor: gameData.color || "#FFD546",
         });
 
-        // Use image for both gameImage (background) and gameIcon (logo)
         if (gameData.image) {
-          ogParams.set('gameImage', gameData.image);
+          // Use icon for gameIcon
           ogParams.set('gameIcon', gameData.image);
+          // Convert icon URL to cover URL for gameImage (background)
+          ogParams.set('gameImage', getCoverUrlFromIcon(gameData.image));
         }
 
         imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
