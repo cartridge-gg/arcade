@@ -49,6 +49,7 @@ export const queryKeys = {
 
   tokens: {
     all: ["tokens"] as const,
+    collections: ["tokens", "collections"],
     balance: (address: string, token?: string) =>
       token
         ? ([...queryKeys.tokens.all, "balance", address, token] as const)
@@ -62,6 +63,20 @@ export const queryKeys = {
     profile: (address: string) =>
       [...queryKeys.users.all, "profile", address] as const,
     accounts: () => [...queryKeys.users.all, "accounts"] as const,
+  },
+
+  metadata: {
+    all: ["metadata"] as const,
+    traits: (
+      contractAddress: string,
+      traits: { name: string; value: string }[],
+    ) =>
+      [
+        ...queryKeys.metadata.all,
+        "traits",
+        contractAddress,
+        traits.map((t) => `${t.name}-${t.value}`).join("-"),
+      ] as const,
   },
 
   discovery: {

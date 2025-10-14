@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
-import { getToriiVersion, parseToriiVersion, type VersionFetcher, type ToriiVersionResponse } from "./torii-version";
+import {
+  getToriiVersion,
+  parseToriiVersion,
+  type VersionFetcher,
+  type ToriiVersionResponse,
+} from "./torii-version";
 
 describe("parseToriiVersion", () => {
   it("should parse standard semver", () => {
@@ -159,9 +164,9 @@ describe("getToriiVersion", () => {
       success: true,
     } as ToriiVersionResponse);
 
-    await expect(getToriiVersion("http://localhost:8080", mockFetcher)).rejects.toThrow(
-      "Invalid service: expected 'torii', got 'other-service'",
-    );
+    await expect(
+      getToriiVersion("http://localhost:8080", mockFetcher),
+    ).rejects.toThrow("Invalid service: expected 'torii', got 'other-service'");
   });
 
   it("should throw error when success is false", async () => {
@@ -171,15 +176,19 @@ describe("getToriiVersion", () => {
       success: false,
     } as ToriiVersionResponse);
 
-    await expect(getToriiVersion("http://localhost:8080", mockFetcher)).rejects.toThrow(
-      "Torii service response indicates failure",
-    );
+    await expect(
+      getToriiVersion("http://localhost:8080", mockFetcher),
+    ).rejects.toThrow("Torii service response indicates failure");
   });
 
   it("should propagate fetcher errors", async () => {
-    const mockFetcher: VersionFetcher = vi.fn().mockRejectedValue(new Error("Network error"));
+    const mockFetcher: VersionFetcher = vi
+      .fn()
+      .mockRejectedValue(new Error("Network error"));
 
-    await expect(getToriiVersion("http://localhost:8080", mockFetcher)).rejects.toThrow("Network error");
+    await expect(
+      getToriiVersion("http://localhost:8080", mockFetcher),
+    ).rejects.toThrow("Network error");
   });
 
   it("should throw error for invalid version format", async () => {
@@ -189,8 +198,8 @@ describe("getToriiVersion", () => {
       success: true,
     } as ToriiVersionResponse);
 
-    await expect(getToriiVersion("http://localhost:8080", mockFetcher)).rejects.toThrow(
-      "Invalid semver format: invalid-version",
-    );
+    await expect(
+      getToriiVersion("http://localhost:8080", mockFetcher),
+    ).rejects.toThrow("Invalid semver format: invalid-version");
   });
 });

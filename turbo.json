@@ -24,9 +24,19 @@
 		"lint": {
 			"dependsOn": ["^lint", "^build:scarb"]
 		},
+		"lint:check:ts": {},
+		"lint:ts": {},
+		"lint:check:cairo": {},
+		"lint:cairo": {},
 		"format:check": {},
 		"format": {},
+		"format:check:ts": {},
+		"format:ts": {},
+		"format:check:cairo": {},
+		"format:cairo": {},
 		"test": {},
+		"test:ts": {},
+		"test:cairo": {},
 		"test:watch": {
 			"persistent": true,
 			"cache": false

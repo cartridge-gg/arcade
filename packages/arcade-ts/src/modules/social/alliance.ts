@@ -1,6 +1,6 @@
 import { NAMESPACE } from "../../constants";
 import type { SchemaType } from "../../bindings";
-import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
+import { MemberClause, type ParsedEntity } from "@dojoengine/sdk";
 import { Properties, Socials } from "../../classes";
 
 const MODEL_NAME = "Alliance";
@@ -34,11 +34,27 @@ export class AllianceModel {
     const guildCount = Number(model.guild_count);
     const metadata = Properties.from(model.metadata);
     const socials = Socials.from(model.socials);
-    return new AllianceModel(identifier, id, open, free, guildCount, metadata, socials);
+    return new AllianceModel(
+      identifier,
+      id,
+      open,
+      free,
+      guildCount,
+      metadata,
+      socials,
+    );
   }
 
   static default(identifier: string) {
-    return new AllianceModel(identifier, 0, false, false, 0, Properties.default(), Socials.default());
+    return new AllianceModel(
+      identifier,
+      0,
+      false,
+      false,
+      0,
+      Properties.default(),
+      Socials.default(),
+    );
   }
 
   static isType(model: AllianceModel) {
@@ -52,7 +68,10 @@ export class AllianceModel {
 
 export const Alliance = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return AllianceModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
+    return AllianceModel.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME],
+    );
   },
 
   getModelName: () => {
@@ -60,18 +79,59 @@ export const Alliance = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${Alliance.getModelName()}`, "id", "Neq", "0x0");
+    return MemberClause(
+      `${NAMESPACE}-${Alliance.getModelName()}`,
+      "id",
+      "Neq",
+      "0x0",
+    );
   },
 
   getMethods: () => [
-    { name: "create_alliance", entrypoint: "create_alliance", description: "Create an alliance." },
-    { name: "open_alliance", entrypoint: "open_alliance", description: "Open an alliance." },
-    { name: "close_alliance", entrypoint: "close_alliance", description: "Close an alliance." },
-    { name: "crown_guild", entrypoint: "crown_guild", description: "Crown a guild to lead the alliance." },
-    { name: "hire_guild", entrypoint: "hire_guild", description: "Hire a guild in the alliance." },
-    { name: "fire_guild", entrypoint: "fire_guild", description: "Fire a guild from the alliance." },
-    { name: "request_alliance", entrypoint: "request_alliance", description: "Request to join an alliance." },
-    { name: "cancel_alliance", entrypoint: "cancel_alliance", description: "Cancel a request to join an alliance." },
-    { name: "leave_alliance", entrypoint: "leave_alliance", description: "Leave an alliance." },
+    {
+      name: "create_alliance",
+      entrypoint: "create_alliance",
+      description: "Create an alliance.",
+    },
+    {
+      name: "open_alliance",
+      entrypoint: "open_alliance",
+      description: "Open an alliance.",
+    },
+    {
+      name: "close_alliance",
+      entrypoint: "close_alliance",
+      description: "Close an alliance.",
+    },
+    {
+      name: "crown_guild",
+      entrypoint: "crown_guild",
+      description: "Crown a guild to lead the alliance.",
+    },
+    {
+      name: "hire_guild",
+      entrypoint: "hire_guild",
+      description: "Hire a guild in the alliance.",
+    },
+    {
+      name: "fire_guild",
+      entrypoint: "fire_guild",
+      description: "Fire a guild from the alliance.",
+    },
+    {
+      name: "request_alliance",
+      entrypoint: "request_alliance",
+      description: "Request to join an alliance.",
+    },
+    {
+      name: "cancel_alliance",
+      entrypoint: "cancel_alliance",
+      description: "Cancel a request to join an alliance.",
+    },
+    {
+      name: "leave_alliance",
+      entrypoint: "leave_alliance",
+      description: "Leave an alliance.",
+    },
   ],
 };

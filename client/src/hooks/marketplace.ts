@@ -1,8 +1,9 @@
 import { useCallback, useContext, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useRouterState, useSearch } from "@tanstack/react-router";
 import { getChecksumAddress } from "starknet";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
 import { ArcadeContext } from "@/context";
+import { parseRouteParams } from "./project";
 
 /**
  * Custom hook to access the Marketplace context and account information.
@@ -23,7 +24,20 @@ export const useMarketplace = () => {
     );
   }
 
-  const { address: contractAddress, tokenId } = useParams();
+  const routerState = useRouterState();
+  const search = useSearch({ strict: false });
+  const params = useMemo(
+    () => parseRouteParams(routerState.location.pathname),
+    [routerState.location.pathname],
+  );
+
+  const contractAddress = params.collection;
+  const tokenId = useMemo(() => {
+    if (params.token) return params.token;
+    if (!search) return undefined;
+    const value = (search as Record<string, unknown>).token;
+    return typeof value === "string" ? value : undefined;
+  }, [params.token, search]);
   const {
     chainId,
     provider,

@@ -1,6 +1,6 @@
 import { init } from "@dojoengine/sdk";
-import { SchemaType } from "../bindings";
-import { constants, shortString } from "starknet";
+import type { SchemaType } from "../bindings";
+import { type constants, shortString } from "starknet";
 
 import { configs } from "../configs";
 

@@ -44,11 +44,27 @@ export class BookModel {
     const counter = Number(model.counter);
     const fee_num = Number(model.fee_num);
     const fee_receiver = getChecksumAddress(model.fee_receiver);
-    return new BookModel(identifier, id, version, paused, counter, fee_num, fee_receiver);
+    return new BookModel(
+      identifier,
+      id,
+      version,
+      paused,
+      counter,
+      fee_num,
+      fee_receiver,
+    );
   }
 
   static default(identifier: string) {
-    return new BookModel(identifier, 0, 0, false, 0, 0, getChecksumAddress("0x0"));
+    return new BookModel(
+      identifier,
+      0,
+      0,
+      false,
+      0,
+      0,
+      getChecksumAddress("0x0"),
+    );
   }
 
   static isType(model: MarketplaceModel): boolean {
@@ -74,7 +90,10 @@ export class BookModel {
 
 export const Book = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return BookModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME] as BookInterface);
+    return BookModel.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME] as BookInterface,
+    );
   },
 
   getModelName: () => {

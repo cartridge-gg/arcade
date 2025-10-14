@@ -12,7 +12,7 @@ import {
 import { useAchievements } from "@/hooks/achievements";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";
-import { getChainId } from "@/helpers";
+import { getChainId } from "@/lib/helpers";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -172,7 +172,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
             (edition) => edition.config.project === item.meta.project,
           );
           const chainId = getChainId(edition?.config.rpc);
-          const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/0x${BigInt(transfer.contractAddress).toString(16)}/${addAddressPadding(transfer.tokenId)}/image`;
+          const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${addAddressPadding(transfer.tokenId)}/image`;
           const card: CardProps = {
             variant: "collectible",
             key: `${transfer.transactionHash}-${transfer.eventId}`,

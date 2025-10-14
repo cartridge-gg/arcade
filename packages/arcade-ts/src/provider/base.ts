@@ -1,10 +1,19 @@
 import { DojoProvider } from "@dojoengine/core";
 import type { ToriiClient } from "@dojoengine/torii-client";
-import type { Account, AccountInterface, AllowArray, Call, constants, GetTransactionReceiptResponse } from "starknet";
+import type {
+  Account,
+  AccountInterface,
+  AllowArray,
+  Call,
+  constants,
+  GetTransactionReceiptResponse,
+} from "starknet";
 
 import { configs } from "../configs";
 
-type Constructor<TArgs extends any[] = any[], TInstance = object> = new (...args: TArgs) => TInstance;
+type Constructor<TArgs extends any[] = any[], TInstance = object> = new (
+  ...args: TArgs
+) => TInstance;
 
 type ToriiClientCtor = Constructor<
   [
@@ -27,11 +36,41 @@ interface InvokeContext {
   entrypoint?: string;
 }
 
-export class BaseProvider extends DojoProvider {
+type WithoutIndexSignature<T> = {
+  [K in keyof T as K extends string
+    ? string extends K
+      ? never
+      : K
+    : K extends number
+      ? number extends K
+        ? never
+        : K
+      : K extends symbol
+        ? symbol extends K
+          ? never
+          : K
+        : K]: T[K];
+};
+
+type DojoProviderInstanceLike = WithoutIndexSignature<
+  InstanceType<typeof DojoProvider>
+>;
+
+type DojoProviderConstructorLike = new (
+  ...args: ConstructorParameters<typeof DojoProvider>
+) => DojoProviderInstanceLike;
+
+const DojoProviderBaseCtor =
+  DojoProvider as unknown as DojoProviderConstructorLike;
+
+export class BaseProvider extends DojoProviderBaseCtor {
   protected readonly namespace: string;
   protected readonly toriiCtor: ToriiClientCtor;
 
-  constructor(chainId: constants.StarknetChainId, { namespace, torii }: BaseProviderOptions) {
+  constructor(
+    chainId: constants.StarknetChainId,
+    { namespace, torii }: BaseProviderOptions,
+  ) {
     const config = configs[chainId];
 
     if (!config) {
@@ -56,11 +95,18 @@ export class BaseProvider extends DojoProvider {
     });
   }
 
-  protected onTransactionReverted(_receipt: GetTransactionReceiptResponse): void {}
+  protected onTransactionReverted(
+    _receipt: GetTransactionReceiptResponse,
+  ): void {}
 
-  protected onInvokeCompleted(_receipt: GetTransactionReceiptResponse, _context?: InvokeContext): void {}
+  protected onInvokeCompleted(
+    _receipt: GetTransactionReceiptResponse,
+    _context?: InvokeContext,
+  ): void {}
 
-  async process(transactionHash: string): Promise<GetTransactionReceiptResponse> {
+  async process(
+    transactionHash: string,
+  ): Promise<GetTransactionReceiptResponse> {
     let receipt: GetTransactionReceiptResponse;
 
     try {
@@ -74,7 +120,9 @@ export class BaseProvider extends DojoProvider {
 
     if (receipt.isReverted()) {
       this.onTransactionReverted(receipt);
-      throw new Error(`Transaction failed with reason: ${receipt.value.revert_reason}`);
+      throw new Error(
+        `Transaction failed with reason: ${receipt.value.revert_reason}`,
+      );
     }
 
     return receipt;

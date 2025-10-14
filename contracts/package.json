@@ -1,8 +1,19 @@
 {
-  "name": "sandbox",
+  "name": "@cartridge/contracts",
   "version": "1.0.0",
-  "description": "## Account 1",
+  "description": "Arcade contracts",
   "main": "index.js",
+  "scripts": {
+    "build:scarb": "sozo build",
+    "format": "scarb fmt",
+    "format:check": "scarb fmt --check",
+    "format:cairo": "pnpm format",
+    "format:check:cairo": "pnpm format:check",
+    "lint:cairo": "echo 'No Cairo linting available'",
+    "lint:check:cairo": "echo 'No Cairo linting available'",
+    "test": "sozo test",
+    "test:cairo": "pnpm test"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

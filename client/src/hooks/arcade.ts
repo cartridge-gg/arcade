@@ -99,7 +99,7 @@ export const useArcade = () => {
         );
         if (!editionOwnership) return edition;
         edition.certified =
-          gameOwnership.accountAddress == editionOwnership.accountAddress;
+          gameOwnership.accountAddress === editionOwnership.accountAddress;
         return edition.clone();
       });
   }, [editions, games, ownerships, admin, address]);

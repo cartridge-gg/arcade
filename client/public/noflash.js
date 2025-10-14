@@ -1,4 +1,4 @@
-(function () {
+(() => {
   const storageKey = "vite-ui-colorScheme";
   const classNameDark = "dark";
   const params = new URL(document.location).searchParams;

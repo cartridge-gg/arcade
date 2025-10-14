@@ -1,5 +1,5 @@
-import { DojoProvider, DojoCall } from "@dojoengine/core";
-import { Account, AccountInterface, BigNumberish } from "starknet";
+import type { DojoProvider, DojoCall } from "@dojoengine/core";
+import type { Account, AccountInterface, BigNumberish } from "starknet";
 
 export function setupWorld(provider: DojoProvider) {
   const build_Marketplace_cancel_calldata = (
@@ -45,7 +45,16 @@ export function setupWorld(provider: DojoProvider) {
     return {
       contractName: "Marketplace",
       entrypoint: "execute",
-      calldata: [orderId, collection, tokenId, assetId, quantity, royalties, clientFee, clientReceiver],
+      calldata: [
+        orderId,
+        collection,
+        tokenId,
+        assetId,
+        quantity,
+        royalties,
+        clientFee,
+        clientReceiver,
+      ],
     };
   };
 
@@ -81,7 +90,9 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const build_Marketplace_getValidities_calldata = (orders: Array<[BigNumberish, string, BigNumberish]>): DojoCall => {
+  const build_Marketplace_getValidities_calldata = (
+    orders: Array<[BigNumberish, string, BigNumberish]>,
+  ): DojoCall => {
     return {
       contractName: "Marketplace",
       entrypoint: "get_validities",
@@ -89,9 +100,14 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Marketplace_getValidities = async (orders: Array<[BigNumberish, string, BigNumberish]>) => {
+  const Marketplace_getValidities = async (
+    orders: Array<[BigNumberish, string, BigNumberish]>,
+  ) => {
     try {
-      return await provider.call("ARCADE", build_Marketplace_getValidities_calldata(orders));
+      return await provider.call(
+        "ARCADE",
+        build_Marketplace_getValidities_calldata(orders),
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -110,16 +126,26 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Marketplace_getValidity = async (orderId: BigNumberish, collection: string, tokenId: BigNumberish) => {
+  const Marketplace_getValidity = async (
+    orderId: BigNumberish,
+    collection: string,
+    tokenId: BigNumberish,
+  ) => {
     try {
-      return await provider.call("ARCADE", build_Marketplace_getValidity_calldata(orderId, collection, tokenId));
+      return await provider.call(
+        "ARCADE",
+        build_Marketplace_getValidity_calldata(orderId, collection, tokenId),
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Marketplace_grantRole_calldata = (account: string, roleId: BigNumberish): DojoCall => {
+  const build_Marketplace_grantRole_calldata = (
+    account: string,
+    roleId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Marketplace",
       entrypoint: "grant_role",
@@ -133,7 +159,11 @@ export function setupWorld(provider: DojoProvider) {
     roleId: BigNumberish,
   ) => {
     try {
-      return await provider.execute(snAccount, build_Marketplace_grantRole_calldata(account, roleId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Marketplace_grantRole_calldata(account, roleId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -165,7 +195,13 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.execute(
         snAccount,
-        build_Marketplace_intent_calldata(collection, quantity, price, currency, expiration),
+        build_Marketplace_intent_calldata(
+          collection,
+          quantity,
+          price,
+          currency,
+          expiration,
+        ),
         "ARCADE",
       );
     } catch (error) {
@@ -186,7 +222,15 @@ export function setupWorld(provider: DojoProvider) {
     return {
       contractName: "Marketplace",
       entrypoint: "list",
-      calldata: [collection, tokenId, quantity, price, currency, expiration, royalties],
+      calldata: [
+        collection,
+        tokenId,
+        quantity,
+        price,
+        currency,
+        expiration,
+        royalties,
+      ],
     };
   };
 
@@ -203,7 +247,15 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.execute(
         snAccount,
-        build_Marketplace_list_calldata(collection, tokenId, quantity, price, currency, expiration, royalties),
+        build_Marketplace_list_calldata(
+          collection,
+          tokenId,
+          quantity,
+          price,
+          currency,
+          expiration,
+          royalties,
+        ),
         "ARCADE",
       );
     } catch (error) {
@@ -239,7 +291,14 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.execute(
         snAccount,
-        build_Marketplace_offer_calldata(collection, tokenId, quantity, price, currency, expiration),
+        build_Marketplace_offer_calldata(
+          collection,
+          tokenId,
+          quantity,
+          price,
+          currency,
+          expiration,
+        ),
         "ARCADE",
       );
     } catch (error) {
@@ -258,7 +317,11 @@ export function setupWorld(provider: DojoProvider) {
 
   const Marketplace_pause = async (snAccount: Account | AccountInterface) => {
     try {
-      return await provider.execute(snAccount, build_Marketplace_pause_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Marketplace_pause_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -305,7 +368,11 @@ export function setupWorld(provider: DojoProvider) {
 
   const Marketplace_resume = async (snAccount: Account | AccountInterface) => {
     try {
-      return await provider.execute(snAccount, build_Marketplace_resume_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Marketplace_resume_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -320,16 +387,26 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Marketplace_revokeRole = async (snAccount: Account | AccountInterface, account: string) => {
+  const Marketplace_revokeRole = async (
+    snAccount: Account | AccountInterface,
+    account: string,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Marketplace_revokeRole_calldata(account), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Marketplace_revokeRole_calldata(account),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Marketplace_setFee_calldata = (feeNum: BigNumberish, feeReceiver: string): DojoCall => {
+  const build_Marketplace_setFee_calldata = (
+    feeNum: BigNumberish,
+    feeReceiver: string,
+  ): DojoCall => {
     return {
       contractName: "Marketplace",
       entrypoint: "set_fee",
@@ -343,14 +420,20 @@ export function setupWorld(provider: DojoProvider) {
     feeReceiver: string,
   ) => {
     try {
-      return await provider.execute(snAccount, build_Marketplace_setFee_calldata(feeNum, feeReceiver), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Marketplace_setFee_calldata(feeNum, feeReceiver),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Marketplace_setRoyalties_calldata = (enabled: boolean): DojoCall => {
+  const build_Marketplace_setRoyalties_calldata = (
+    enabled: boolean,
+  ): DojoCall => {
     return {
       contractName: "Marketplace",
       entrypoint: "set_royalties",
@@ -358,9 +441,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Marketplace_setRoyalties = async (snAccount: Account | AccountInterface, enabled: boolean) => {
+  const Marketplace_setRoyalties = async (
+    snAccount: Account | AccountInterface,
+    enabled: boolean,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Marketplace_setRoyalties_calldata(enabled), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Marketplace_setRoyalties_calldata(enabled),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -386,7 +476,10 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.execute(
         snAccount,
-        build_Registry_associateCollection_calldata(collectionAddress, editionId),
+        build_Registry_associateCollection_calldata(
+          collectionAddress,
+          editionId,
+        ),
         "ARCADE",
       );
     } catch (error) {
@@ -395,7 +488,9 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const build_Registry_blacklistEdition_calldata = (editionId: BigNumberish): DojoCall => {
+  const build_Registry_blacklistEdition_calldata = (
+    editionId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "blacklist_edition",
@@ -403,16 +498,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_blacklistEdition = async (snAccount: Account | AccountInterface, editionId: BigNumberish) => {
+  const Registry_blacklistEdition = async (
+    snAccount: Account | AccountInterface,
+    editionId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_blacklistEdition_calldata(editionId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_blacklistEdition_calldata(editionId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_blacklistGame_calldata = (gameId: BigNumberish): DojoCall => {
+  const build_Registry_blacklistGame_calldata = (
+    gameId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "blacklist_game",
@@ -420,9 +524,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_blacklistGame = async (snAccount: Account | AccountInterface, gameId: BigNumberish) => {
+  const Registry_blacklistGame = async (
+    snAccount: Account | AccountInterface,
+    gameId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_blacklistGame_calldata(gameId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_blacklistGame_calldata(gameId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -448,7 +559,10 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.execute(
         snAccount,
-        build_Registry_dissociateCollection_calldata(collectionAddress, editionId),
+        build_Registry_dissociateCollection_calldata(
+          collectionAddress,
+          editionId,
+        ),
         "ARCADE",
       );
     } catch (error) {
@@ -457,7 +571,10 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const build_Registry_grant_calldata = (account: string, roleId: BigNumberish): DojoCall => {
+  const build_Registry_grant_calldata = (
+    account: string,
+    roleId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "grant",
@@ -465,16 +582,26 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_grant = async (snAccount: Account | AccountInterface, account: string, roleId: BigNumberish) => {
+  const Registry_grant = async (
+    snAccount: Account | AccountInterface,
+    account: string,
+    roleId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_grant_calldata(account, roleId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_grant_calldata(account, roleId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_hideEdition_calldata = (editionId: BigNumberish): DojoCall => {
+  const build_Registry_hideEdition_calldata = (
+    editionId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "hide_edition",
@@ -482,9 +609,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_hideEdition = async (snAccount: Account | AccountInterface, editionId: BigNumberish) => {
+  const Registry_hideEdition = async (
+    snAccount: Account | AccountInterface,
+    editionId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_hideEdition_calldata(editionId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_hideEdition_calldata(editionId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -499,16 +633,26 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_hideGame = async (snAccount: Account | AccountInterface, gameId: BigNumberish) => {
+  const Registry_hideGame = async (
+    snAccount: Account | AccountInterface,
+    gameId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_hideGame_calldata(gameId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_hideGame_calldata(gameId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_prioritizeEdition_calldata = (editionId: BigNumberish, priority: BigNumberish): DojoCall => {
+  const build_Registry_prioritizeEdition_calldata = (
+    editionId: BigNumberish,
+    priority: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "prioritize_edition",
@@ -533,7 +677,9 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const build_Registry_publishEdition_calldata = (editionId: BigNumberish): DojoCall => {
+  const build_Registry_publishEdition_calldata = (
+    editionId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "publish_edition",
@@ -541,16 +687,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_publishEdition = async (snAccount: Account | AccountInterface, editionId: BigNumberish) => {
+  const Registry_publishEdition = async (
+    snAccount: Account | AccountInterface,
+    editionId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_publishEdition_calldata(editionId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_publishEdition_calldata(editionId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_publishGame_calldata = (gameId: BigNumberish): DojoCall => {
+  const build_Registry_publishGame_calldata = (
+    gameId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "publish_game",
@@ -558,16 +713,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_publishGame = async (snAccount: Account | AccountInterface, gameId: BigNumberish) => {
+  const Registry_publishGame = async (
+    snAccount: Account | AccountInterface,
+    gameId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_publishGame_calldata(gameId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_publishGame_calldata(gameId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_registerCollection_calldata = (collectionAddress: string): DojoCall => {
+  const build_Registry_registerCollection_calldata = (
+    collectionAddress: string,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "register_collection",
@@ -575,9 +739,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_registerCollection = async (snAccount: Account | AccountInterface, collectionAddress: string) => {
+  const Registry_registerCollection = async (
+    snAccount: Account | AccountInterface,
+    collectionAddress: string,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_registerCollection_calldata(collectionAddress), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_registerCollection_calldata(collectionAddress),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -780,7 +951,9 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const build_Registry_removeEdition_calldata = (editionId: BigNumberish): DojoCall => {
+  const build_Registry_removeEdition_calldata = (
+    editionId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "remove_edition",
@@ -788,16 +961,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_removeEdition = async (snAccount: Account | AccountInterface, editionId: BigNumberish) => {
+  const Registry_removeEdition = async (
+    snAccount: Account | AccountInterface,
+    editionId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_removeEdition_calldata(editionId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_removeEdition_calldata(editionId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_removeGame_calldata = (gameId: BigNumberish): DojoCall => {
+  const build_Registry_removeGame_calldata = (
+    gameId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "remove_game",
@@ -805,9 +987,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_removeGame = async (snAccount: Account | AccountInterface, gameId: BigNumberish) => {
+  const Registry_removeGame = async (
+    snAccount: Account | AccountInterface,
+    gameId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_removeGame_calldata(gameId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_removeGame_calldata(gameId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -822,16 +1011,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_revoke = async (snAccount: Account | AccountInterface, account: string) => {
+  const Registry_revoke = async (
+    snAccount: Account | AccountInterface,
+    account: string,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_revoke_calldata(account), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_revoke_calldata(account),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_tokenUri_calldata = (tokenId: BigNumberish): DojoCall => {
+  const build_Registry_tokenUri_calldata = (
+    tokenId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "token_uri",
@@ -841,7 +1039,10 @@ export function setupWorld(provider: DojoProvider) {
 
   const Registry_tokenUri = async (tokenId: BigNumberish) => {
     try {
-      return await provider.call("ARCADE", build_Registry_tokenUri_calldata(tokenId));
+      return await provider.call(
+        "ARCADE",
+        build_Registry_tokenUri_calldata(tokenId),
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1008,7 +1209,9 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const build_Registry_whitelistEdition_calldata = (editionId: BigNumberish): DojoCall => {
+  const build_Registry_whitelistEdition_calldata = (
+    editionId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "whitelist_edition",
@@ -1016,16 +1219,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_whitelistEdition = async (snAccount: Account | AccountInterface, editionId: BigNumberish) => {
+  const Registry_whitelistEdition = async (
+    snAccount: Account | AccountInterface,
+    editionId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_whitelistEdition_calldata(editionId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_whitelistEdition_calldata(editionId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Registry_whitelistGame_calldata = (gameId: BigNumberish): DojoCall => {
+  const build_Registry_whitelistGame_calldata = (
+    gameId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Registry",
       entrypoint: "whitelist_game",
@@ -1033,16 +1245,27 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Registry_whitelistGame = async (snAccount: Account | AccountInterface, gameId: BigNumberish) => {
+  const Registry_whitelistGame = async (
+    snAccount: Account | AccountInterface,
+    gameId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Registry_whitelistGame_calldata(gameId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Registry_whitelistGame_calldata(gameId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Slot_deploy_calldata = (service: BigNumberish, project: BigNumberish, tier: BigNumberish): DojoCall => {
+  const build_Slot_deploy_calldata = (
+    service: BigNumberish,
+    project: BigNumberish,
+    tier: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Slot",
       entrypoint: "deploy",
@@ -1057,14 +1280,21 @@ export function setupWorld(provider: DojoProvider) {
     tier: BigNumberish,
   ) => {
     try {
-      return await provider.execute(snAccount, build_Slot_deploy_calldata(service, project, tier), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Slot_deploy_calldata(service, project, tier),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Slot_fire_calldata = (project: BigNumberish, accountId: BigNumberish): DojoCall => {
+  const build_Slot_fire_calldata = (
+    project: BigNumberish,
+    accountId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Slot",
       entrypoint: "fire",
@@ -1072,16 +1302,28 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Slot_fire = async (snAccount: Account | AccountInterface, project: BigNumberish, accountId: BigNumberish) => {
+  const Slot_fire = async (
+    snAccount: Account | AccountInterface,
+    project: BigNumberish,
+    accountId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Slot_fire_calldata(project, accountId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Slot_fire_calldata(project, accountId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Slot_hire_calldata = (project: BigNumberish, accountId: BigNumberish, role: BigNumberish): DojoCall => {
+  const build_Slot_hire_calldata = (
+    project: BigNumberish,
+    accountId: BigNumberish,
+    role: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Slot",
       entrypoint: "hire",
@@ -1096,14 +1338,21 @@ export function setupWorld(provider: DojoProvider) {
     role: BigNumberish,
   ) => {
     try {
-      return await provider.execute(snAccount, build_Slot_hire_calldata(project, accountId, role), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Slot_hire_calldata(project, accountId, role),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Slot_remove_calldata = (service: BigNumberish, project: BigNumberish): DojoCall => {
+  const build_Slot_remove_calldata = (
+    service: BigNumberish,
+    project: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Slot",
       entrypoint: "remove",
@@ -1111,9 +1360,17 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Slot_remove = async (snAccount: Account | AccountInterface, service: BigNumberish, project: BigNumberish) => {
+  const Slot_remove = async (
+    snAccount: Account | AccountInterface,
+    service: BigNumberish,
+    project: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Slot_remove_calldata(service, project), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Slot_remove_calldata(service, project),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1128,9 +1385,15 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_cancelAlliance = async (snAccount: Account | AccountInterface) => {
+  const Social_cancelAlliance = async (
+    snAccount: Account | AccountInterface,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_cancelAlliance_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_cancelAlliance_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1147,7 +1410,11 @@ export function setupWorld(provider: DojoProvider) {
 
   const Social_cancelGuild = async (snAccount: Account | AccountInterface) => {
     try {
-      return await provider.execute(snAccount, build_Social_cancelGuild_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_cancelGuild_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1162,9 +1429,15 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_closeAlliance = async (snAccount: Account | AccountInterface) => {
+  const Social_closeAlliance = async (
+    snAccount: Account | AccountInterface,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_closeAlliance_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_closeAlliance_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1181,14 +1454,21 @@ export function setupWorld(provider: DojoProvider) {
 
   const Social_closeGuild = async (snAccount: Account | AccountInterface) => {
     try {
-      return await provider.execute(snAccount, build_Social_closeGuild_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_closeGuild_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_createAlliance_calldata = (metadata: string, socials: string): DojoCall => {
+  const build_Social_createAlliance_calldata = (
+    metadata: string,
+    socials: string,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "create_alliance",
@@ -1196,16 +1476,27 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_createAlliance = async (snAccount: Account | AccountInterface, metadata: string, socials: string) => {
+  const Social_createAlliance = async (
+    snAccount: Account | AccountInterface,
+    metadata: string,
+    socials: string,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_createAlliance_calldata(metadata, socials), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_createAlliance_calldata(metadata, socials),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_createGuild_calldata = (metadata: string, socials: string): DojoCall => {
+  const build_Social_createGuild_calldata = (
+    metadata: string,
+    socials: string,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "create_guild",
@@ -1213,16 +1504,26 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_createGuild = async (snAccount: Account | AccountInterface, metadata: string, socials: string) => {
+  const Social_createGuild = async (
+    snAccount: Account | AccountInterface,
+    metadata: string,
+    socials: string,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_createGuild_calldata(metadata, socials), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_createGuild_calldata(metadata, socials),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_crownGuild_calldata = (guildId: BigNumberish): DojoCall => {
+  const build_Social_crownGuild_calldata = (
+    guildId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "crown_guild",
@@ -1230,16 +1531,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_crownGuild = async (snAccount: Account | AccountInterface, guildId: BigNumberish) => {
+  const Social_crownGuild = async (
+    snAccount: Account | AccountInterface,
+    guildId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_crownGuild_calldata(guildId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_crownGuild_calldata(guildId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_crownMember_calldata = (memberId: BigNumberish): DojoCall => {
+  const build_Social_crownMember_calldata = (
+    memberId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "crown_member",
@@ -1247,16 +1557,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_crownMember = async (snAccount: Account | AccountInterface, memberId: BigNumberish) => {
+  const Social_crownMember = async (
+    snAccount: Account | AccountInterface,
+    memberId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_crownMember_calldata(memberId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_crownMember_calldata(memberId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_demoteMember_calldata = (memberId: BigNumberish): DojoCall => {
+  const build_Social_demoteMember_calldata = (
+    memberId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "demote_member",
@@ -1264,9 +1583,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_demoteMember = async (snAccount: Account | AccountInterface, memberId: BigNumberish) => {
+  const Social_demoteMember = async (
+    snAccount: Account | AccountInterface,
+    memberId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_demoteMember_calldata(memberId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_demoteMember_calldata(memberId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1281,16 +1607,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_fireGuild = async (snAccount: Account | AccountInterface, guildId: BigNumberish) => {
+  const Social_fireGuild = async (
+    snAccount: Account | AccountInterface,
+    guildId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_fireGuild_calldata(guildId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_fireGuild_calldata(guildId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_fireMember_calldata = (memberId: BigNumberish): DojoCall => {
+  const build_Social_fireMember_calldata = (
+    memberId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "fire_member",
@@ -1298,9 +1633,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_fireMember = async (snAccount: Account | AccountInterface, memberId: BigNumberish) => {
+  const Social_fireMember = async (
+    snAccount: Account | AccountInterface,
+    memberId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_fireMember_calldata(memberId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_fireMember_calldata(memberId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1315,9 +1657,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_follow = async (snAccount: Account | AccountInterface, target: BigNumberish) => {
+  const Social_follow = async (
+    snAccount: Account | AccountInterface,
+    target: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_follow_calldata(target), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_follow_calldata(target),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1332,16 +1681,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_hireGuild = async (snAccount: Account | AccountInterface, guildId: BigNumberish) => {
+  const Social_hireGuild = async (
+    snAccount: Account | AccountInterface,
+    guildId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_hireGuild_calldata(guildId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_hireGuild_calldata(guildId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_hireMember_calldata = (memberId: BigNumberish): DojoCall => {
+  const build_Social_hireMember_calldata = (
+    memberId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "hire_member",
@@ -1349,9 +1707,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_hireMember = async (snAccount: Account | AccountInterface, memberId: BigNumberish) => {
+  const Social_hireMember = async (
+    snAccount: Account | AccountInterface,
+    memberId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_hireMember_calldata(memberId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_hireMember_calldata(memberId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1366,9 +1731,15 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_leaveAlliance = async (snAccount: Account | AccountInterface) => {
+  const Social_leaveAlliance = async (
+    snAccount: Account | AccountInterface,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_leaveAlliance_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_leaveAlliance_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1385,7 +1756,11 @@ export function setupWorld(provider: DojoProvider) {
 
   const Social_leaveGuild = async (snAccount: Account | AccountInterface) => {
     try {
-      return await provider.execute(snAccount, build_Social_leaveGuild_calldata(), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_leaveGuild_calldata(),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1400,9 +1775,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_openAlliance = async (snAccount: Account | AccountInterface, free: boolean) => {
+  const Social_openAlliance = async (
+    snAccount: Account | AccountInterface,
+    free: boolean,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_openAlliance_calldata(free), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_openAlliance_calldata(free),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1417,9 +1799,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_openGuild = async (snAccount: Account | AccountInterface, free: boolean) => {
+  const Social_openGuild = async (
+    snAccount: Account | AccountInterface,
+    free: boolean,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_openGuild_calldata(free), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_openGuild_calldata(free),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1434,16 +1823,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_pin = async (snAccount: Account | AccountInterface, achievementId: BigNumberish) => {
+  const Social_pin = async (
+    snAccount: Account | AccountInterface,
+    achievementId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_pin_calldata(achievementId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_pin_calldata(achievementId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_promoteMember_calldata = (memberId: BigNumberish): DojoCall => {
+  const build_Social_promoteMember_calldata = (
+    memberId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "promote_member",
@@ -1451,16 +1849,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_promoteMember = async (snAccount: Account | AccountInterface, memberId: BigNumberish) => {
+  const Social_promoteMember = async (
+    snAccount: Account | AccountInterface,
+    memberId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_promoteMember_calldata(memberId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_promoteMember_calldata(memberId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_requestAlliance_calldata = (allianceId: BigNumberish): DojoCall => {
+  const build_Social_requestAlliance_calldata = (
+    allianceId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "request_alliance",
@@ -1468,16 +1875,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_requestAlliance = async (snAccount: Account | AccountInterface, allianceId: BigNumberish) => {
+  const Social_requestAlliance = async (
+    snAccount: Account | AccountInterface,
+    allianceId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_requestAlliance_calldata(allianceId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_requestAlliance_calldata(allianceId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_requestGuild_calldata = (guildId: BigNumberish): DojoCall => {
+  const build_Social_requestGuild_calldata = (
+    guildId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "request_guild",
@@ -1485,9 +1901,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_requestGuild = async (snAccount: Account | AccountInterface, guildId: BigNumberish) => {
+  const Social_requestGuild = async (
+    snAccount: Account | AccountInterface,
+    guildId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_requestGuild_calldata(guildId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_requestGuild_calldata(guildId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1502,16 +1925,25 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_unfollow = async (snAccount: Account | AccountInterface, target: BigNumberish) => {
+  const Social_unfollow = async (
+    snAccount: Account | AccountInterface,
+    target: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_unfollow_calldata(target), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_unfollow_calldata(target),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
     }
   };
 
-  const build_Social_unpin_calldata = (achievementId: BigNumberish): DojoCall => {
+  const build_Social_unpin_calldata = (
+    achievementId: BigNumberish,
+  ): DojoCall => {
     return {
       contractName: "Social",
       entrypoint: "unpin",
@@ -1519,9 +1951,16 @@ export function setupWorld(provider: DojoProvider) {
     };
   };
 
-  const Social_unpin = async (snAccount: Account | AccountInterface, achievementId: BigNumberish) => {
+  const Social_unpin = async (
+    snAccount: Account | AccountInterface,
+    achievementId: BigNumberish,
+  ) => {
     try {
-      return await provider.execute(snAccount, build_Social_unpin_calldata(achievementId), "ARCADE");
+      return await provider.execute(
+        snAccount,
+        build_Social_unpin_calldata(achievementId),
+        "ARCADE",
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -1561,13 +2000,15 @@ export function setupWorld(provider: DojoProvider) {
     },
     Registry: {
       associateCollection: Registry_associateCollection,
-      buildAssociateCollectionCalldata: build_Registry_associateCollection_calldata,
+      buildAssociateCollectionCalldata:
+        build_Registry_associateCollection_calldata,
       blacklistEdition: Registry_blacklistEdition,
       buildBlacklistEditionCalldata: build_Registry_blacklistEdition_calldata,
       blacklistGame: Registry_blacklistGame,
       buildBlacklistGameCalldata: build_Registry_blacklistGame_calldata,
       dissociateCollection: Registry_dissociateCollection,
-      buildDissociateCollectionCalldata: build_Registry_dissociateCollection_calldata,
+      buildDissociateCollectionCalldata:
+        build_Registry_dissociateCollection_calldata,
       grant: Registry_grant,
       buildGrantCalldata: build_Registry_grant_calldata,
       hideEdition: Registry_hideEdition,
@@ -1581,7 +2022,8 @@ export function setupWorld(provider: DojoProvider) {
       publishGame: Registry_publishGame,
       buildPublishGameCalldata: build_Registry_publishGame_calldata,
       registerCollection: Registry_registerCollection,
-      buildRegisterCollectionCalldata: build_Registry_registerCollection_calldata,
+      buildRegisterCollectionCalldata:
+        build_Registry_registerCollection_calldata,
       registerEdition: Registry_registerEdition,
       buildRegisterEditionCalldata: build_Registry_registerEdition_calldata,
       registerGame: Registry_registerGame,

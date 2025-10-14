@@ -4,9 +4,9 @@
  * @param manifest - The manifest containing contract addresses and ABIs
  */
 import { NAMESPACE } from "../constants";
-import * as SystemProps from "./types";
+import type * as SystemProps from "./types";
 import { getContractByName } from "./helpers";
-import { AllowArray, Call } from "starknet";
+import type { AllowArray, Call } from "starknet";
 
 export class Slot {
   private manifest: any;

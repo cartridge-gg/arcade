@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { fetchToriis } from "@cartridge/arcade";
+import { fetchToriis, type ClientCallbackParams } from "@cartridge/arcade";
 import { CollectionType } from "@/context/collection";
+import { addAddressPadding } from "starknet";
 
 /**
  * Hook for fetching token balances from multiple Torii endpoints
@@ -32,7 +33,7 @@ function processTokensWithMetadata(
 
       processedTokens[checksumAddress] = {
         balance: {
-          amount: decimals > 0 ? balance / Math.pow(10, decimals) : balance,
+          amount: decimals > 0 ? balance / 10 ** decimals : balance,
           value: 0, // Will be calculated with price data
           change: 0, // Will be calculated with historical price data
         },
@@ -229,7 +230,7 @@ export function useTokenFetcher(
 
     try {
       const result = await fetchToriis(projects, {
-        client: async ({ client }) => {
+        client: async ({ client }: ClientCallbackParams) => {
           let iterate = true;
           let next_cursor = undefined;
           const allTokensWithMetadata: TokenWithMetadata[] = [];
@@ -289,7 +290,7 @@ export function useTokenFetcher(
 
       if (result.data && Array.isArray(result.data)) {
         // Process tokens from all projects
-        result.data.forEach((projectTokens, projectIndex) => {
+        result.data.forEach((projectTokens: any, projectIndex: number) => {
           if (Array.isArray(projectTokens)) {
             const projectProcessedTokens = processTokensWithMetadata(
               projectTokens,
@@ -434,7 +435,7 @@ function getAssetImage(
   image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
   return (
     image ??
-    `https://api.cartridge.gg/x/${project}/torii/static/${metadata?.contract_address}/${firstNFT.token_id}/image`
+    `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(metadata?.contract_address ?? "0x0")}/${addAddressPadding(firstNFT.token_id ?? "0x0")}/image`
   );
 }
 
@@ -475,7 +476,7 @@ export function useCollectibles(
 
     try {
       const result = await fetchToriis(projects, {
-        client: async ({ client }) => {
+        client: async ({ client }: ClientCallbackParams) => {
           let iterate = true;
           let next_cursor = undefined;
           const allNFTs: TokenWithMetadata[] = [];
@@ -537,7 +538,7 @@ export function useCollectibles(
 
       if (result.data && Array.isArray(result.data)) {
         // Process NFTs from all projects
-        result.data.forEach((projectNFTs, projectIndex) => {
+        result.data.forEach((projectNFTs: any, projectIndex: number) => {
           if (Array.isArray(projectNFTs)) {
             // Aggregate NFTs by collection
             const collectionMap = aggregateNFTsByCollection(projectNFTs);

@@ -57,7 +57,7 @@ export function OwnershipsProvider({ children }: { children: ReactNode }) {
                 };
               });
             })
-            .filter((item) => BigInt(item.balance) != 0n) || [];
+            .filter((item) => BigInt(item.balance) !== 0n) || [];
         setOwnerships(newOwnerships);
       },
     },

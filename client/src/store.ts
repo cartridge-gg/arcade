@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 
 export type Contract = {
   project: string;
@@ -237,11 +237,11 @@ export const useMarketplaceTokensStore = create<
       const loadingState = { ...state.loadingState };
       const key = `${project}_${address}`;
 
-      if (tokens[project] && tokens[project][address]) {
+      if (tokens[project]?.[address]) {
         delete tokens[project][address];
       }
 
-      if (owners[project] && owners[project][address]) {
+      if (owners[project]?.[address]) {
         delete owners[project][address];
       }
 

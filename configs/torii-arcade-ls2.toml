@@ -7,8 +7,10 @@ polling_interval = 500
 world_block = 0
 pending = true
 transactions = true
-namespaces = ["ls_0_0_8"]
+namespaces = ["ls_0_0_8", "ls_0_0_9"]
 contracts = [
+    "ERC20:0x42dd777885ad2c116be96d4d634abc90a26a790ffb5871e037dd5ae7d2ec86b",   # Survivor
+    "ERC20:0x035f581b050a39958b7188ab5c75daaa1f9d3571a0c032203038c898663f31f8",  # Tickets
     "ERC721:0x036017E69D21D6D8c13E266EaBB73ef1f1D02722D86BDcAbe5f168f8e549d3cD", # Games
     "ERC721:0x046da8955829adf2bda310099a0063451923f02e648cf25a1203aac6335cf0e4", # Beasts
     "ERC721:0x027838dea749f41c6f8a44fcfa791788e6101080c1b3cd646a361f653ad10e2d", # Golden token

@@ -3,3 +3,6 @@ export { queryKeys } from "./keys";
 export { graphqlClient, createGraphQLQueryFn } from "./graphql-client";
 export type { GraphQLError, GraphQLResponse } from "./graphql-client";
 export type { QueryKey } from "./keys";
+export { sqlClient, createSQLQueryFn } from "./sql-client";
+export type { SQLError, SQLResponse } from "./sql-client";
+export { useMetadata } from "./metadata";

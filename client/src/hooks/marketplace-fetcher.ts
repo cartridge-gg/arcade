@@ -1,9 +1,12 @@
 import { useEditionsMap } from "@/collections";
-import { Contract, useMarketplaceStore } from "@/store";
-import { fetchToriisStream } from "@cartridge/arcade";
+import { type Contract, useMarketplaceStore } from "@/store";
+import {
+  fetchToriisStream,
+  type ClientCallbackParams,
+} from "@cartridge/arcade";
 import { useEffect, useCallback, useRef } from "react";
 import { getChecksumAddress } from "starknet";
-import { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@dojoengine/torii-wasm";
 import {
   useFetcherState,
   fetchTokenImage,
@@ -45,7 +48,7 @@ export function useMarketCollectionFetcher({
       const collections: { [address: string]: Contract } = {};
 
       for (const c of contracts) {
-        if (BLACKLISTS.includes(BigInt(c.contract_address))) {
+        if (BLACKLISTS.includes(getChecksumAddress(c.contract_address))) {
           continue;
         }
         const address = getChecksumAddress(c.contract_address);
@@ -62,7 +65,7 @@ export function useMarketCollectionFetcher({
           console.error("failed to parse json metadata for ", project);
         }
 
-        const image = await fetchTokenImage(c as Token, project, false);
+        const image = await fetchTokenImage(c as Token, project, true);
 
         collections[address] = {
           ...c,
@@ -82,7 +85,7 @@ export function useMarketCollectionFetcher({
   );
 
   const fetchData = useCallback(
-    async (quickLoad: boolean = false) => {
+    async (quickLoad = false) => {
       if (projects.length === 0) return;
 
       startLoading();
@@ -90,19 +93,17 @@ export function useMarketCollectionFetcher({
       try {
         const limit = quickLoad ? 500 : 5000;
         const stream = fetchToriisStream(projects, {
-          client: async function* ({ client }) {
+          client: async function* ({ client }: ClientCallbackParams) {
             const contracts = await client.getTokenContracts({
               contract_addresses: [],
               contract_types: ["ERC721", "ERC1155"],
-              account_addresses: [],
-              token_ids: [],
               pagination: {
                 limit,
                 cursor: undefined,
                 direction: "Forward",
                 order_by: [],
               },
-            });
+            } as any);
             for (const c of contracts.items) {
               const token = await client.getTokens({
                 contract_addresses: [c.contract_address],
@@ -120,8 +121,7 @@ export function useMarketCollectionFetcher({
                 if (c.metadata === "" && t.metadata !== "") {
                   c.metadata = token.items[0].metadata;
                 }
-                // @ts-expect-error trust me i'm an engineer
-                c.token_id = token.items[0].token_id;
+                (c as any).token_id = token.items[0].token_id;
               }
             }
             yield contracts.items;
