@@ -485,25 +485,33 @@ async function findGameByIdentifier(gameId: string): Promise<GameData | null> {
  * Validate and resolve player username or address to a Starknet address
  */
 async function resolvePlayerAddress(usernameOrAddress: string): Promise<string | null> {
+  console.log("resolvePlayerAddress called with:", usernameOrAddress);
   // Validate format
   const isAddress = usernameOrAddress.match(/^0x[0-9a-fA-F]+$/);
   if (isAddress) {
+    console.log("Detected as address");
     if (!isValidAddress(usernameOrAddress)) {
+      console.log("Invalid address format");
       return null;
     }
     return usernameOrAddress;
   }
 
+  console.log("Treating as username, validating...");
   if (!isValidUsername(usernameOrAddress)) {
+    console.log("Invalid username");
     return null;
   }
 
+  console.log("Username valid, resolving to address...");
   // Resolve username to address
   const data = await graphqlRequest<GraphQLAccountResponse>(ADDRESS_BY_USERNAME_QUERY, {
     username: usernameOrAddress.toLowerCase(),
   });
 
+  console.log("GraphQL response:", JSON.stringify(data, null, 2));
   const resolvedAddress = data.account?.controllers?.edges?.[0]?.node?.address;
+  console.log("Resolved address:", resolvedAddress);
   return resolvedAddress || null;
 }
 
@@ -535,12 +543,13 @@ function escapeUrl(url: string): string {
  * Must not contain: spaces, underscores, or HTML special characters
  */
 function isValidUsername(username: string): boolean {
+  console.log("isValidUsername", username);
   if (!username || username.length === 0 || username.length > 31) {
     return false;
   }
   // Check for disallowed characters: HTML special chars, spaces, and underscores
   if (username.includes('<') || username.includes('>') || username.includes('"') || username.includes("'") ||
-      username.includes(' ') || username.includes('_')) {
+    username.includes(' ') || username.includes('_')) {
     return false;
   }
   return true;
