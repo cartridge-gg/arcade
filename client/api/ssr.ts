@@ -532,12 +532,15 @@ function escapeUrl(url: string): string {
 
 /**
  * Validate username format
+ * Must not contain: spaces, underscores, or HTML special characters
  */
 function isValidUsername(username: string): boolean {
   if (!username || username.length === 0 || username.length > 31) {
     return false;
   }
-  if (username.includes('<') || username.includes('>') || username.includes('"') || username.includes("'")) {
+  // Check for disallowed characters: HTML special chars, spaces, and underscores
+  if (username.includes('<') || username.includes('>') || username.includes('"') || username.includes("'") ||
+      username.includes(' ') || username.includes('_')) {
     return false;
   }
   return true;
