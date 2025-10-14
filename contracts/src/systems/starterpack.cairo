@@ -61,33 +61,93 @@ pub trait IStarterpack<TContractState> {
 pub mod Starterpack {
     use super::{StarterPackMetadata, StarterpackQuote, IAdministration, IStarterpack};
     use starknet::ContractAddress;
-    use starterpack::models::config::ConfigTrait;
+    use starterpack::constants::{CONFIG_ID, MAX_PROTOCOL_FEE};
+    use starterpack::models::config::{Config, ConfigTrait, ConfigAssertTrait};
+    use starterpack::store::{Store, StoreTrait, ConfigStoreTrait};
+
+    // Component imports
+    use starterpack::components::issuable::IssuableComponent;
+    use starterpack::components::registrable::RegistrableComponent;
+
+    // Components
+    component!(path: IssuableComponent, storage: issuable, event: IssuableEvent);
+    impl IssuableImpl = IssuableComponent::InternalImpl<ContractState>;
+    component!(path: RegistrableComponent, storage: registrable, event: RegistrableEvent);
+    impl RegistrableImpl = RegistrableComponent::InternalImpl<ContractState>;
 
     #[storage]
-    struct Storage {}
+    struct Storage {
+        #[substorage(v0)]
+        issuable: IssuableComponent::Storage,
+        #[substorage(v0)]
+        registrable: RegistrableComponent::Storage,
+    }
+
+    // Events
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        #[flat]
+        IssuableEvent: IssuableComponent::Event,
+        #[flat]
+        RegistrableEvent: RegistrableComponent::Event,
+    }
 
     #[abi(embed_v0)]
     impl AdministrationImpl of IAdministration<ContractState> {
         fn initialize(
             ref self: ContractState, protocol_fee: u8, fee_receiver: ContractAddress,
         ) {
-            // TODO: Initialize config model
+            // [Setup] Datastore
+            let mut store: Store = StoreTrait::new(self.world_default());
+
+            // [Check] Config doesn't already exist
+            let existing_config = store.get_config(CONFIG_ID);
+            assert!(existing_config.id == 0, "Starterpack: already initialized");
+
+            // [Check] Valid parameters
+            assert!(protocol_fee <= MAX_PROTOCOL_FEE, "Starterpack: fee too high");
+            assert!(fee_receiver.is_non_zero(), "Starterpack: invalid receiver");
+
+            // [Effect] Create and store config
+            let config = ConfigTrait::new(CONFIG_ID, protocol_fee, fee_receiver);
+            store.set_config(@config);
         }
 
         fn set_protocol_fee(ref self: ContractState, fee_percentage: u8) {
-            // TODO: Update config model
+            // [Setup] Datastore
+            let mut store: Store = StoreTrait::new(self.world_default());
+
+            // [Check] Config exists
+            let mut config = store.get_config(CONFIG_ID);
+            config.assert_does_exist();
+
+            // [Effect] Update config
+            config.set_protocol_fee(fee_percentage);
+            store.set_config(@config);
         }
         
         fn set_fee_receiver(ref self: ContractState, receiver: ContractAddress) {
-            // TODO: Update config model
+            // [Setup] Datastore
+            let mut store: Store = StoreTrait::new(self.world_default());
+
+            // [Check] Config exists
+            let mut config = store.get_config(CONFIG_ID);
+            config.assert_does_exist();
+
+            // [Effect] Update config
+            config.set_fee_receiver(receiver);
+            store.set_config(@config);
         }
 
         fn pause(ref self: ContractState, starterpack_id: u32) {
-            // TODO: Call registrable component
+            let world = self.world_default();
+            self.registrable.pause(world, starterpack_id);
         }
 
         fn resume(ref self: ContractState, starterpack_id: u32) {
-            // TODO: Call registrable component
+            let world = self.world_default();
+            self.registrable.resume(world, starterpack_id);
         }
     }
 
@@ -132,9 +192,13 @@ pub mod Starterpack {
         }
 
         fn register(ref self: ContractState, implementation: ContractAddress, referral_percentage: u8, reissuable: bool, soulbound: bool, price: u256, payment_token: ContractAddress, metadata: StarterPackMetadata) -> u32 {
+            let world = self.world_default();
+            self.registrable.register(world, implementation, referral_percentage, reissuable, soulbound, price, payment_token)
         }
 
         fn issue(ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, referrer: Option<ContractAddress>, referrer_group: Option<felt252>) {
+            let world = self.world_default();
+            self.issuable.issue(world, recipient, starterpack_id, referrer, referrer_group);
         }
     }
 }
