@@ -37,4 +37,4 @@ sort-module-level-items = true
 [profile.mainnet]
 
 [tool.scarb]
-allow-prebuilt-plugins = ["snforge_std"]
+allow-prebuilt-plugins = ["dojo_cairo_macros"]
