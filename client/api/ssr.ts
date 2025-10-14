@@ -461,7 +461,7 @@ async function getGames(): Promise<GameData[]> {
 
 /**
  * Find game by identifier (gameId from URL)
- * Matches by hex ID or by name (with spaces replaced by dashes)
+ * Matches by hex ID or by name (with spaces/dashes removed)
  * Same logic as client-side useProject hook
  */
 async function findGameByIdentifier(gameId: string): Promise<GameData | null> {
@@ -471,11 +471,20 @@ async function findGameByIdentifier(gameId: string): Promise<GameData | null> {
     return null;
   }
 
-  // Try to find game by ID or by name
+  // Normalize the gameId for matching (remove spaces and dashes)
+  const normalizedGameId = gameId.toLowerCase().replace(/[\s-]/g, "");
+
+  // Try to find game by ID or by normalized name
   const game = games.find(
-    (candidate) =>
-      candidate.id === gameId ||
-      candidate.name.toLowerCase().replace(/ /g, "-") === gameId.toLowerCase(),
+    (candidate) => {
+      // Match by hex ID
+      if (candidate.id === gameId) {
+        return true;
+      }
+      // Match by normalized name (remove spaces and dashes)
+      const normalizedName = candidate.name.toLowerCase().replace(/[\s-]/g, "");
+      return normalizedName === normalizedGameId;
+    }
   );
 
   return game || null;
