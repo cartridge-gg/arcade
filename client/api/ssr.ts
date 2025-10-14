@@ -194,12 +194,15 @@ function formatProjectsForGraphQL(projects: Project[]): string {
 
 /**
  * Build progressions query
+ * @param projects - List of game projects to query
+ * @param playerId - Optional player address to filter by
  */
-function buildProgressionsQuery(projects: Project[]): string {
+function buildProgressionsQuery(projects: Project[], playerId?: string): string {
+  const playerIdParam = playerId ? `, playerId: "${playerId}"` : '';
   return `
     query PlayerAchievements {
       playerAchievements(
-        projects: [${formatProjectsForGraphQL(projects)}]
+        projects: [${formatProjectsForGraphQL(projects)}]${playerIdParam}
       ) {
         items {
           meta {
@@ -541,7 +544,8 @@ async function generateMetaTags(url: string): Promise<string> {
       }
 
       // Fetch real player data from GraphQL API (only progressions for points)
-      const query = buildProgressionsQuery(ACTIVE_PROJECTS);
+      const query = buildProgressionsQuery(ACTIVE_PROJECTS, address);
+      console.log(`[SSR Debug] GraphQL Query:`, query.substring(0, 300));
       const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query);
 
       // Debug logging
@@ -577,7 +581,7 @@ async function generateMetaTags(url: string): Promise<string> {
       // Fetch player points for the game (0 if game not found in ACTIVE_PROJECTS)
       let gamePoints = 0;
       if (gameProject) {
-        const query = buildProgressionsQuery([gameProject]);
+        const query = buildProgressionsQuery([gameProject], address);
         const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query);
         const stats = computePlayerStats(address, progressionsData);
         const gameStats = stats.gameStats[gameId] || { points: 0 };
