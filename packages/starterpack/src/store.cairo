@@ -6,7 +6,7 @@ use starknet::ContractAddress;
 
 // Internal imports
 
-use starterpack::models::index::{Config, Issuance, Starterpack};
+use starterpack::models::index::{Config, Issuance, Moderator, Starterpack};
 
 // Store trait
 
@@ -22,6 +22,19 @@ pub impl StoreImpl of StoreTrait {
 #[derive(Copy, Drop)]
 pub struct Store {
     world: WorldStorage,
+}
+
+// Moderator getters/setters
+
+#[generate_trait]
+pub impl ModeratorStoreImpl of ModeratorStoreTrait {
+    fn moderator(ref self: Store, address: felt252) -> Moderator {
+        self.world.read_model(address)
+    }
+
+    fn set_moderator(ref self: Store, moderator: @Moderator) {
+        self.world.write_model(moderator);
+    }
 }
 
 // Config getters/setters

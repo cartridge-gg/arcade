@@ -5,6 +5,14 @@ use starterpack::types::status::Status;
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
+pub struct Moderator {
+    #[key]
+    pub address: felt252,
+    pub role: u8,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
 pub struct Config {
     #[key]
     pub id: u32,

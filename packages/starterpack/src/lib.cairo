@@ -3,6 +3,7 @@ pub mod interface;
 pub mod store;
 
 pub mod types {
+    pub mod role;
     pub mod status;
 }
 
@@ -14,10 +15,12 @@ pub mod models {
     pub mod config;
     pub mod index;
     pub mod issuance;
+    pub mod moderator;
     pub mod starterpack;
 }
 
 pub mod components {
     pub mod issuable;
+    pub mod manageable;
     pub mod registrable;
 }

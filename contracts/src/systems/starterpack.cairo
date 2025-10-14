@@ -19,8 +19,13 @@ pub struct StarterpackQuote {
 #[starknet::interface]
 pub trait IAdministration<TContractState> {
     fn initialize(
-        ref self: TContractState, protocol_fee: u8, fee_receiver: ContractAddress,
+        ref self: TContractState,
+        protocol_fee: u8,
+        fee_receiver: ContractAddress,
+        owner: ContractAddress,
     );
+    fn grant_role(ref self: TContractState, account: ContractAddress, role_id: u8);
+    fn revoke_role(ref self: TContractState, account: ContractAddress);
     fn set_protocol_fee(ref self: TContractState, fee_percentage: u8);
     fn set_fee_receiver(ref self: TContractState, receiver: ContractAddress);
 }
@@ -72,21 +77,22 @@ pub trait IStarterpack<TContractState> {
 #[dojo::contract]
 pub mod Starterpack {
     use super::{StarterPackMetadata, StarterpackQuote, IAdministration, IStarterpack};
-    use core::num::traits::Zero;
     use starknet::ContractAddress;
     use dojo::world::WorldStorage;
     use arcade::constants::NAMESPACE;
-    use starterpack::constants::{CONFIG_ID, MAX_PROTOCOL_FEE};
-    use starterpack::models::config::{ConfigTrait, ConfigAssertTrait};
-    use starterpack::store::{Store, StoreTrait, ConfigStoreTrait, StarterpackStoreTrait};
+    use starterpack::constants::CONFIG_ID;
+    use starterpack::store::{StoreTrait, ConfigStoreTrait, StarterpackStoreTrait};
 
     // Component imports
     use starterpack::components::issuable::IssuableComponent;
+    use starterpack::components::manageable::ManageableComponent;
     use starterpack::components::registrable::RegistrableComponent;
 
     // Components
     component!(path: IssuableComponent, storage: issuable, event: IssuableEvent);
     impl IssuableImpl = IssuableComponent::InternalImpl<ContractState>;
+    component!(path: ManageableComponent, storage: manageable, event: ManageableEvent);
+    impl ManageableImpl = ManageableComponent::InternalImpl<ContractState>;
     component!(path: RegistrableComponent, storage: registrable, event: RegistrableEvent);
     impl RegistrableImpl = RegistrableComponent::InternalImpl<ContractState>;
 
@@ -94,6 +100,8 @@ pub mod Starterpack {
     struct Storage {
         #[substorage(v0)]
         issuable: IssuableComponent::Storage,
+        #[substorage(v0)]
+        manageable: ManageableComponent::Storage,
         #[substorage(v0)]
         registrable: RegistrableComponent::Storage,
     }
@@ -105,44 +113,41 @@ pub mod Starterpack {
         #[flat]
         IssuableEvent: IssuableComponent::Event,
         #[flat]
+        ManageableEvent: ManageableComponent::Event,
+        #[flat]
         RegistrableEvent: RegistrableComponent::Event,
     }
 
     #[abi(embed_v0)]
     impl AdministrationImpl of IAdministration<ContractState> {
         fn initialize(
-            ref self: ContractState, protocol_fee: u8, fee_receiver: ContractAddress,
+            ref self: ContractState,
+            protocol_fee: u8,
+            fee_receiver: ContractAddress,
+            owner: ContractAddress,
         ) {
-            let mut store: Store = StoreTrait::new(self.world_storage());
+            let world = self.world_storage();
+            self.manageable.initialize(world, protocol_fee, fee_receiver, owner);
+        }
 
-            let existing_config = store.get_config(CONFIG_ID);
-            assert!(existing_config.id == 0, "Starterpack: already initialized");
+        fn grant_role(ref self: ContractState, account: ContractAddress, role_id: u8) {
+            let world = self.world_storage();
+            self.manageable.grant_role(world, account, role_id);
+        }
 
-            assert!(protocol_fee <= MAX_PROTOCOL_FEE, "Starterpack: fee too high");
-            assert!(fee_receiver.is_non_zero(), "Starterpack: invalid receiver");
-
-            let config = ConfigTrait::new(CONFIG_ID, protocol_fee, fee_receiver);
-            store.set_config(@config);
+        fn revoke_role(ref self: ContractState, account: ContractAddress) {
+            let world = self.world_storage();
+            self.manageable.revoke_role(world, account);
         }
 
         fn set_protocol_fee(ref self: ContractState, fee_percentage: u8) {
-            let mut store: Store = StoreTrait::new(self.world_storage());
-
-            let mut config = store.get_config(CONFIG_ID);
-            config.assert_does_exist();
-
-            config.set_protocol_fee(fee_percentage);
-            store.set_config(@config);
+            let world = self.world_storage();
+            self.manageable.set_protocol_fee(world, fee_percentage);
         }
-        
+
         fn set_fee_receiver(ref self: ContractState, receiver: ContractAddress) {
-            let mut store: Store = StoreTrait::new(self.world_storage());
-
-            let mut config = store.get_config(CONFIG_ID);
-            config.assert_does_exist();
-
-            config.set_fee_receiver(receiver);
-            store.set_config(@config);
+            let world = self.world_storage();
+            self.manageable.set_fee_receiver(world, receiver);
         }
     }
 
