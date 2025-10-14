@@ -17,6 +17,22 @@ pub struct StarterpackRegistered {
     pub time: u64,
 }
 
+#[derive(Drop, Serde)]
+#[dojo::event]
+pub struct StarterpackUpdated {
+    #[key]
+    pub starterpack_id: u32,
+    pub implementation: ContractAddress,
+    pub referral_percentage: u8,
+    pub reissuable: bool,
+    pub price: u256,
+    pub payment_token: ContractAddress,
+    pub name: ByteArray,
+    pub description: ByteArray,
+    pub image_uri: ByteArray,
+    pub time: u64,
+}
+
 #[derive(Copy, Drop, Serde)]
 #[dojo::event]
 pub struct StarterpackIssued {

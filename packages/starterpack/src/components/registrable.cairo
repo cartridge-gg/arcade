@@ -9,7 +9,9 @@ pub mod RegistrableComponent {
     // Internal imports
 
     use starterpack::constants::MAX_REFERRAL_FEE;
-    use starterpack::events::index::{StarterpackPaused, StarterpackRegistered, StarterpackResumed};
+    use starterpack::events::index::{
+        StarterpackPaused, StarterpackRegistered, StarterpackResumed, StarterpackUpdated
+    };
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
     use starterpack::store::{StarterpackStoreTrait, StoreTrait};
 
@@ -82,6 +84,62 @@ pub mod RegistrableComponent {
                 );
 
             starterpack_id
+        }
+
+        fn update(
+            self: @ComponentState<TContractState>,
+            mut world: WorldStorage,
+            starterpack_id: u32,
+            implementation: ContractAddress,
+            referral_percentage: u8,
+            reissuable: bool,
+            price: u256,
+            payment_token: ContractAddress,
+            name: ByteArray,
+            description: ByteArray,
+            image_uri: ByteArray,
+        ) {
+            // [Setup] Datastore
+            let mut store = StoreTrait::new(world);
+
+            // [Check] Caller is owner
+            let caller = get_caller_address();
+            let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_is_owner(caller);
+
+            // [Check] Referral percentage is valid
+            assert!(
+                referral_percentage <= MAX_REFERRAL_FEE,
+                "Starterpack: referral percentage too high",
+            );
+
+            // [Effect] Update starterpack fields
+            starterpack.implementation = implementation;
+            starterpack.referral_percentage = referral_percentage;
+            starterpack.reissuable = reissuable;
+            starterpack.price = price;
+            starterpack.payment_token = payment_token;
+
+            // [Effect] Store updated starterpack
+            store.set_starterpack(@starterpack);
+
+            // [Event] Emit event
+            let time = get_block_timestamp();
+            world
+                .emit_event(
+                    @StarterpackUpdated {
+                        starterpack_id,
+                        implementation,
+                        referral_percentage,
+                        reissuable,
+                        price,
+                        payment_token,
+                        name,
+                        description,
+                        image_uri,
+                        time,
+                    },
+                );
         }
 
         fn pause(

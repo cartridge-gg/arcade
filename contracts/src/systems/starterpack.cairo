@@ -23,8 +23,6 @@ pub trait IAdministration<TContractState> {
     );
     fn set_protocol_fee(ref self: TContractState, fee_percentage: u8);
     fn set_fee_receiver(ref self: TContractState, receiver: ContractAddress);
-    fn pause(ref self: TContractState, starterpack_id: u32);
-    fn resume(ref self: TContractState, starterpack_id: u32);
 }
 
 
@@ -45,6 +43,21 @@ pub trait IStarterpack<TContractState> {
         payment_token: ContractAddress,
         metadata: StarterPackMetadata,
     ) -> u32; // returns starterpack_id
+
+    fn update(
+        ref self: TContractState,
+        starterpack_id: u32,
+        implementation: ContractAddress,
+        referral_percentage: u8,
+        reissuable: bool,
+        price: u256,
+        payment_token: ContractAddress,
+        metadata: StarterPackMetadata,
+    );
+
+    fn pause(ref self: TContractState, starterpack_id: u32);
+
+    fn resume(ref self: TContractState, starterpack_id: u32);
 
     fn issue(
         ref self: TContractState,
@@ -132,16 +145,6 @@ pub mod Starterpack {
             config.set_fee_receiver(receiver);
             store.set_config(@config);
         }
-
-        fn pause(ref self: ContractState, starterpack_id: u32) {
-            let world = self.world_storage();
-            self.registrable.pause(world, starterpack_id);
-        }
-
-        fn resume(ref self: ContractState, starterpack_id: u32) {
-            let world = self.world_storage();
-            self.registrable.resume(world, starterpack_id);
-        }
     }
 
     #[abi(embed_v0)]
@@ -199,6 +202,41 @@ pub mod Starterpack {
                 metadata.description,
                 metadata.image_uri,
             )
+        }
+
+        fn update(
+            ref self: ContractState,
+            starterpack_id: u32,
+            implementation: ContractAddress,
+            referral_percentage: u8,
+            reissuable: bool,
+            price: u256,
+            payment_token: ContractAddress,
+            metadata: StarterPackMetadata,
+        ) {
+            let world = self.world_storage();
+            self.registrable.update(
+                world,
+                starterpack_id,
+                implementation,
+                referral_percentage,
+                reissuable,
+                price,
+                payment_token,
+                metadata.name,
+                metadata.description,
+                metadata.image_uri,
+            );
+        }
+
+        fn pause(ref self: ContractState, starterpack_id: u32) {
+            let world = self.world_storage();
+            self.registrable.pause(world, starterpack_id);
+        }
+
+        fn resume(ref self: ContractState, starterpack_id: u32) {
+            let world = self.world_storage();
+            self.registrable.resume(world, starterpack_id);
         }
 
         fn issue(ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, referrer: Option<ContractAddress>, referrer_group: Option<felt252>) {
