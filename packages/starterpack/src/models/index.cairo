@@ -21,7 +21,6 @@ pub struct Starterpack {
     pub owner: ContractAddress,
     pub referral_percentage: u8,
     pub reissuable: bool,
-    pub soulbound: bool,
     pub price: u256,
     pub payment_token: ContractAddress,
     pub status: Status,
@@ -36,6 +35,5 @@ pub struct Issuance {
     pub starterpack_id: u32,
     #[key]
     pub recipient: ContractAddress,
-    pub soulbound: bool,
     pub issued_at: u64,
 }

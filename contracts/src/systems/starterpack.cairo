@@ -38,7 +38,6 @@ pub trait IStarterpack<TContractState> {
         implementation: ContractAddress,
         referral_percentage: u8,
         reissuable: bool,
-        soulbound: bool,
         price: u256,
         payment_token: ContractAddress,
         metadata: StarterPackMetadata,
@@ -188,14 +187,13 @@ pub mod Starterpack {
             }
         }
 
-        fn register(ref self: ContractState, implementation: ContractAddress, referral_percentage: u8, reissuable: bool, soulbound: bool, price: u256, payment_token: ContractAddress, metadata: StarterPackMetadata) -> u32 {
+        fn register(ref self: ContractState, implementation: ContractAddress, referral_percentage: u8, reissuable: bool, price: u256, payment_token: ContractAddress, metadata: StarterPackMetadata) -> u32 {
             let world = self.world_storage();
             self.registrable.register(
                 world,
                 implementation,
                 referral_percentage,
                 reissuable,
-                soulbound,
                 price,
                 payment_token,
                 metadata.name,

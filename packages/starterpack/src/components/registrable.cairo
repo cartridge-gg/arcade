@@ -10,7 +10,7 @@ pub mod RegistrableComponent {
 
     use starterpack::constants::MAX_REFERRAL_FEE;
     use starterpack::events::index::{
-        StarterpackPaused, StarterpackRegistered, StarterpackResumed, StarterpackUpdated
+        StarterpackPaused, StarterpackRegistered, StarterpackResumed, StarterpackUpdated,
     };
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
     use starterpack::store::{StarterpackStoreTrait, StoreTrait};
@@ -36,7 +36,6 @@ pub mod RegistrableComponent {
             implementation: ContractAddress,
             referral_percentage: u8,
             reissuable: bool,
-            soulbound: bool,
             price: u256,
             payment_token: ContractAddress,
             name: ByteArray,
@@ -60,7 +59,6 @@ pub mod RegistrableComponent {
                 owner,
                 referral_percentage,
                 reissuable,
-                soulbound,
                 price,
                 payment_token,
                 time,

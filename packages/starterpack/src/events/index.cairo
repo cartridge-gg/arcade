@@ -40,7 +40,6 @@ pub struct StarterpackIssued {
     pub recipient: ContractAddress,
     #[key]
     pub starterpack_id: u32,
-    pub soulbound: bool,
     pub payment_token: ContractAddress,
     pub amount: u256,
     pub referrer: Option<ContractAddress>,

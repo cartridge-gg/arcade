@@ -60,7 +60,6 @@ pub mod IssuableComponent {
             let payer = get_caller_address();
             let base_price = starterpack.price;
             let payment_token = starterpack.payment_token;
-            let soulbound = starterpack.soulbound;
 
             // Skip payment if base price is zero
             if base_price > 0 {
@@ -105,7 +104,7 @@ pub mod IssuableComponent {
             implementation_dispatcher.on_issue(recipient, starterpack_id);
 
             let time = get_block_timestamp();
-            let issuance = IssuanceTrait::new(starterpack_id, recipient, soulbound, time);
+            let issuance = IssuanceTrait::new(starterpack_id, recipient, time);
 
             starterpack.issue();
 
@@ -119,7 +118,6 @@ pub mod IssuableComponent {
                     @StarterpackIssued {
                         recipient,
                         starterpack_id,
-                        soulbound,
                         payment_token,
                         amount: total_amount,
                         referrer,
