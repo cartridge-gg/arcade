@@ -39,6 +39,9 @@ pub mod RegistrableComponent {
             soulbound: bool,
             price: u256,
             payment_token: ContractAddress,
+            name: ByteArray,
+            description: ByteArray,
+            image_uri: ByteArray,
         ) -> u32 {
             let mut store = StoreTrait::new(world);
 
@@ -73,6 +76,9 @@ pub mod RegistrableComponent {
                         referral_percentage,
                         reissuable,
                         owner,
+                        name,
+                        description,
+                        image_uri,
                         time,
                     }
                 );

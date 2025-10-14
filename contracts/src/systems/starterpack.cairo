@@ -187,7 +187,18 @@ pub mod Starterpack {
 
         fn register(ref self: ContractState, implementation: ContractAddress, referral_percentage: u8, reissuable: bool, soulbound: bool, price: u256, payment_token: ContractAddress, metadata: StarterPackMetadata) -> u32 {
             let world = self.world_storage();
-            self.registrable.register(world, implementation, referral_percentage, reissuable, soulbound, price, payment_token)
+            self.registrable.register(
+                world,
+                implementation,
+                referral_percentage,
+                reissuable,
+                soulbound,
+                price,
+                payment_token,
+                metadata.name,
+                metadata.description,
+                metadata.image_uri,
+            )
         }
 
         fn issue(ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, referrer: Option<ContractAddress>, referrer_group: Option<felt252>) {

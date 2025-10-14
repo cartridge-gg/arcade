@@ -2,7 +2,7 @@
 
 use starknet::ContractAddress;
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Drop, Serde)]
 #[dojo::event]
 pub struct StarterpackRegistered {
     #[key]
@@ -11,6 +11,9 @@ pub struct StarterpackRegistered {
     pub referral_percentage: u8,
     pub reissuable: bool,
     pub owner: ContractAddress,
+    pub name: ByteArray,
+    pub description: ByteArray,
+    pub image_uri: ByteArray,
     pub time: u64,
 }
 
