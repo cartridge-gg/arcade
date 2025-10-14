@@ -724,7 +724,11 @@ async function generateMetaTags(url: string): Promise<string> {
       const activeProjects = await getActiveProjects();
 
       // Find the specific game project
-      const gameProject = activeProjects.find(p => p.project === gameId);
+      // Try exact match first, then try with "arcade-" prefix
+      let gameProject = activeProjects.find(p => p.project === gameId);
+      if (!gameProject) {
+        gameProject = activeProjects.find(p => p.project === `arcade-${gameId}`);
+      }
 
       // Fetch player points for the game (0 if game not found in active projects)
       let gamePoints = 0;
