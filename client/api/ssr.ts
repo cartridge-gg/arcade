@@ -12,18 +12,19 @@ const API_URL = process.env.VITE_CARTRIDGE_API_URL || "https://api.cartridge.gg"
 const BASE_URL = "https://play.cartridge.gg";
 
 // Active game projects for achievement queries
+// model values are computed using getSelectorFromTag(namespace, "TrophyProgression")
 const ACTIVE_PROJECTS = [
-  { model: "", namespace: "dopewars", project: "dopewars" },
-  { model: "", namespace: "loot_survivor", project: "loot-survivor" },
-  { model: "", namespace: "underdark", project: "underdark" },
-  { model: "", namespace: "zkube", project: "zkube" },
-  { model: "", namespace: "blobert", project: "blobert" },
-  { model: "", namespace: "zdefender", project: "zdefender" },
-  { model: "", namespace: "realm", project: "realm" },
-  { model: "", namespace: "eternum", project: "eternum" },
-  { model: "", namespace: "ponziland", project: "ponziland" },
-  { model: "", namespace: "evolute_genesis", project: "evolute-genesis" },
-  { model: "", namespace: "pistols", project: "pistols" },
+  { model: "0x6da79ec4f8ef62f705b565aeb2b23d04a449fce4c32af8ad209eb20e310b08a", namespace: "dopewars", project: "dopewars" },
+  { model: "0x60e7986933b6656ba01ede5768ac1f977c8ef59764b1768bb2ae99d271d482c", namespace: "loot_survivor", project: "loot-survivor" },
+  { model: "0x30c5d476fa08a9d8d4eef9be58e0919a08ce704018e36e69a241c4491f69328", namespace: "underdark", project: "underdark" },
+  { model: "0x17b14454c7075d73430699a7e57cfb3aaa40a094fcf81c2afac7fa95667c8ec", namespace: "zkube", project: "zkube" },
+  { model: "0x71ed03cbed577a37491af53b52f8236d0c50b41625524a4ce18c165c0e6f6c5", namespace: "blobert", project: "blobert" },
+  { model: "0x5dd8d1a662dda67eed60a03006ae403002f56c018b00e780e3c64b99565e092", namespace: "zdefender", project: "zdefender" },
+  { model: "0x58ec1a76866d1729715d419c349ef3f6e52bc0143686f9bf5d70a2d9e5f795d", namespace: "realm", project: "realm" },
+  { model: "0x56f72fcd0717bb8a4c5dc9c145eed7190c3c64b8441ee921c2cbdb82947e177", namespace: "eternum", project: "eternum" },
+  { model: "0x9067246f597a4078ad871414e3b36731795588ca82d3b6009275b93aadc5f8", namespace: "ponziland", project: "ponziland" },
+  { model: "0x4b42469e55a435a09f495a4a662cd28528dff9f0352953a34962c3d6fb4b3d7", namespace: "evolute_genesis", project: "evolute-genesis" },
+  { model: "0x528aee6e1c2ad2e0f603b1bfe15e3aefc1ded821cd118e5eab5092b704c79b0", namespace: "pistols", project: "pistols" },
 ];
 
 // Game configuration for OG images
