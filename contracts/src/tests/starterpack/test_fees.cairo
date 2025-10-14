@@ -1,9 +1,9 @@
 // Internal imports
 
 use arcade::systems::starterpack::{
-    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata
+    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata,
 };
-use arcade::tests::setup::setup::{OWNER, RECEIVER, PLAYER, spawn};
+use arcade::tests::setup::setup::{OWNER, PLAYER, RECEIVER, spawn};
 use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
 use starterpack::constants::FEE_DENOMINATOR;
@@ -18,18 +18,16 @@ const SPENDER_INITIAL_BALANCE: u256 = 10_000_000_000_000_000_000; // 10 tokens
 // Tests
 
 #[test]
-fn test_fees_distribution_no_referrer() {
+fn test_sp_fees_distribution_no_referrer() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register]
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -45,12 +43,12 @@ fn test_fees_distribution_no_referrer() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Record] Initial balances
     let spender_initial = systems.erc20.balance_of(context.spender);
     let creator_initial = systems.erc20.balance_of(context.creator);
     let receiver_initial = systems.erc20.balance_of(RECEIVER());
-    
+
     // [Issue] Without referrer
     testing::set_contract_address(context.spender);
     let protocol_fee_amount = PRICE * PROTOCOL_FEE.into() / FEE_DENOMINATOR.into();
@@ -64,39 +62,37 @@ fn test_fees_distribution_no_referrer() {
             referrer: Option::None,
             referrer_group: Option::None,
         );
-    
+
     // [Assert] Fee distribution
     // Spender paid: base price (1 token) + protocol fee (0.05 token) = 1.05 tokens
     assert_eq!(
-        systems.erc20.balance_of(context.spender), spender_initial - total_cost, "Spender balance"
+        systems.erc20.balance_of(context.spender), spender_initial - total_cost, "Spender balance",
     );
-    
+
     // Creator received: full base price (1 token)
     assert_eq!(
-        systems.erc20.balance_of(context.creator), creator_initial + PRICE, "Creator balance"
+        systems.erc20.balance_of(context.creator), creator_initial + PRICE, "Creator balance",
     );
-    
+
     // Protocol receiver got: 0.05 tokens
     assert_eq!(
         systems.erc20.balance_of(RECEIVER()),
         receiver_initial + protocol_fee_amount,
-        "Protocol receiver balance"
+        "Protocol receiver balance",
     );
 }
 
 #[test]
-fn test_fees_distribution_with_referrer() {
+fn test_sp_fees_distribution_with_referrer() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register]
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -112,13 +108,13 @@ fn test_fees_distribution_with_referrer() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Record] Initial balances
     let spender_initial = systems.erc20.balance_of(context.spender);
     let creator_initial = systems.erc20.balance_of(context.creator);
     let receiver_initial = systems.erc20.balance_of(RECEIVER());
     let referrer_initial = systems.erc20.balance_of(context.holder);
-    
+
     // [Issue] With referrer
     testing::set_contract_address(context.spender);
     let protocol_fee_amount = PRICE * PROTOCOL_FEE.into() / FEE_DENOMINATOR.into();
@@ -133,48 +129,46 @@ fn test_fees_distribution_with_referrer() {
             referrer: Option::Some(context.holder),
             referrer_group: Option::None,
         );
-    
+
     // [Assert] Fee distribution
     // Spender paid: base price (1 token) + protocol fee (0.05 token) = 1.05 tokens
     assert_eq!(
-        systems.erc20.balance_of(context.spender), spender_initial - total_cost, "Spender balance"
+        systems.erc20.balance_of(context.spender), spender_initial - total_cost, "Spender balance",
     );
-    
+
     // Referrer received: 10% of base price = 0.1 tokens
     assert_eq!(
         systems.erc20.balance_of(context.holder),
         referrer_initial + referral_fee_amount,
-        "Referrer balance"
+        "Referrer balance",
     );
-    
+
     // Creator received: base price minus referral fee = 1 - 0.1 = 0.9 tokens
     assert_eq!(
         systems.erc20.balance_of(context.creator),
         creator_initial + (PRICE - referral_fee_amount),
-        "Creator balance"
+        "Creator balance",
     );
-    
+
     // Protocol receiver got: 0.05 tokens
     assert_eq!(
         systems.erc20.balance_of(RECEIVER()),
         receiver_initial + protocol_fee_amount,
-        "Protocol receiver balance"
+        "Protocol receiver balance",
     );
 }
 
 #[test]
-fn test_quote_calculation() {
+fn test_sp_quote_calculation() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register]
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -190,7 +184,7 @@ fn test_quote_calculation() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Quote] Without referrer
     let quote_no_ref = systems.starterpack.quote(starterpack_id, false);
     assert_eq!(quote_no_ref.base_price, PRICE);
@@ -198,33 +192,29 @@ fn test_quote_calculation() {
     assert_eq!(quote_no_ref.protocol_fee, PRICE * PROTOCOL_FEE.into() / FEE_DENOMINATOR.into());
     assert_eq!(quote_no_ref.total_cost, PRICE + quote_no_ref.protocol_fee);
     assert_eq!(quote_no_ref.payment_token, systems.erc20.contract_address);
-    
+
     // [Quote] With referrer
     let quote_with_ref = systems.starterpack.quote(starterpack_id, true);
     assert_eq!(quote_with_ref.base_price, PRICE);
     assert_eq!(
-        quote_with_ref.referral_fee, PRICE * REFERRAL_PERCENTAGE.into() / FEE_DENOMINATOR.into()
+        quote_with_ref.referral_fee, PRICE * REFERRAL_PERCENTAGE.into() / FEE_DENOMINATOR.into(),
     );
-    assert_eq!(
-        quote_with_ref.protocol_fee, PRICE * PROTOCOL_FEE.into() / FEE_DENOMINATOR.into()
-    );
+    assert_eq!(quote_with_ref.protocol_fee, PRICE * PROTOCOL_FEE.into() / FEE_DENOMINATOR.into());
     assert_eq!(quote_with_ref.total_cost, PRICE + quote_with_ref.protocol_fee);
     assert_eq!(quote_with_ref.payment_token, systems.erc20.contract_address);
 }
 
 #[test]
-fn test_free_starterpack() {
+fn test_sp_free() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register] Free starterpack (price = 0)
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -240,10 +230,10 @@ fn test_free_starterpack() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Record] Initial balance
     let spender_initial = systems.erc20.balance_of(context.spender);
-    
+
     // [Issue] Free starterpack
     testing::set_contract_address(context.spender);
     systems
@@ -254,7 +244,7 @@ fn test_free_starterpack() {
             referrer: Option::None,
             referrer_group: Option::None,
         );
-    
+
     // [Assert] No payment made
     assert_eq!(systems.erc20.balance_of(context.spender), spender_initial, "No payment for free");
 }

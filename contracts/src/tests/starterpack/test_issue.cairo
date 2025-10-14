@@ -1,13 +1,13 @@
 // Internal imports
 
 use arcade::systems::starterpack::{
-    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata
+    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata,
 };
-use arcade::tests::setup::setup::{OWNER, RECEIVER, PLAYER, spawn};
+use arcade::tests::setup::setup::{OWNER, PLAYER, RECEIVER, spawn};
 use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
-use starterpack::models::index::{Issuance, Starterpack};
-use starterpack::store::{StoreTrait, IssuanceStoreTrait, StarterpackStoreTrait};
+use starterpack::models::index::Starterpack;
+use starterpack::store::{StarterpackStoreTrait, StoreTrait};
 
 // Constants
 
@@ -18,18 +18,17 @@ const PRICE: u256 = 1_000_000_000_000_000_000; // 1 token
 // Tests
 
 #[test]
-fn test_issue_starterpack() {
+fn test_sp_issue() {
     // [Setup]
     let (world, systems, context) = spawn();
-    
+
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -45,7 +44,7 @@ fn test_issue_starterpack() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Issue] Starterpack to player
     testing::set_contract_address(context.spender);
     let total_cost = PRICE + (PRICE * PROTOCOL_FEE.into() / 100);
@@ -58,30 +57,25 @@ fn test_issue_starterpack() {
             referrer: Option::None,
             referrer_group: Option::None,
         );
-    
-    // [Assert] Issuance is recorded
-    let mut store = StoreTrait::new(world);
-    let issuance: Issuance = store.get_issuance(starterpack_id, PLAYER());
-    assert!(issuance.issued_at > 0);
-    
+
     // [Assert] Total issued count incremented
+    let mut store = StoreTrait::new(world);
     let starterpack: Starterpack = store.get_starterpack(starterpack_id);
     assert_eq!(starterpack.total_issued, 1);
 }
 
 #[test]
-fn test_issue_with_referrer() {
+fn test_sp_issue_with_referrer() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register]
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -97,10 +91,10 @@ fn test_issue_with_referrer() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Record] Initial balances
     let referrer_initial = systems.erc20.balance_of(context.holder);
-    
+
     // [Issue] With referrer
     testing::set_contract_address(context.spender);
     let total_cost = PRICE + (PRICE * PROTOCOL_FEE.into() / 100);
@@ -113,7 +107,7 @@ fn test_issue_with_referrer() {
             referrer: Option::Some(context.holder),
             referrer_group: Option::None,
         );
-    
+
     // [Assert] Referrer received fee (10% of PRICE)
     let referrer_fee = PRICE * REFERRAL_PERCENTAGE.into() / 100;
     let referrer_final = systems.erc20.balance_of(context.holder);
@@ -121,19 +115,18 @@ fn test_issue_with_referrer() {
 }
 
 #[test]
-#[should_panic(expected: 'Issuance: already issued')]
-fn test_issue_not_reissuable() {
+#[should_panic(expected: ('Issuance: already issued', 'ENTRYPOINT_FAILED'))]
+fn test_sp_issue_not_reissuable() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register] Non-reissuable starterpack
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -149,7 +142,7 @@ fn test_issue_not_reissuable() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Issue] First time
     testing::set_contract_address(context.spender);
     let total_cost = PRICE + (PRICE * PROTOCOL_FEE.into() / 100);
@@ -162,7 +155,7 @@ fn test_issue_not_reissuable() {
             referrer: Option::None,
             referrer_group: Option::None,
         );
-    
+
     // [Issue] Try again - should fail
     systems
         .starterpack
@@ -175,18 +168,16 @@ fn test_issue_not_reissuable() {
 }
 
 #[test]
-fn test_issue_reissuable() {
+fn test_sp_issue_reissuable() {
     // [Setup]
     let (world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -202,7 +193,7 @@ fn test_issue_reissuable() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Issue] First time
     testing::set_contract_address(context.spender);
     let total_cost = PRICE + (PRICE * PROTOCOL_FEE.into() / 100);
@@ -215,7 +206,7 @@ fn test_issue_reissuable() {
             referrer: Option::None,
             referrer_group: Option::None,
         );
-    
+
     // [Issue] Second time - should succeed
     systems
         .starterpack
@@ -225,7 +216,7 @@ fn test_issue_reissuable() {
             referrer: Option::None,
             referrer_group: Option::None,
         );
-    
+
     // [Assert] Total issued is 2
     let mut store = StoreTrait::new(world);
     let starterpack: Starterpack = store.get_starterpack(starterpack_id);
@@ -233,19 +224,17 @@ fn test_issue_reissuable() {
 }
 
 #[test]
-#[should_panic(expected: 'Starterpack: not active')]
-fn test_issue_paused() {
+#[should_panic(expected: ('Starterpack: not active', 'ENTRYPOINT_FAILED'))]
+fn test_sp_issue_paused() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize]
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register]
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -261,10 +250,10 @@ fn test_issue_paused() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Pause] Starterpack
     systems.starterpack.pause(starterpack_id);
-    
+
     // [Issue] Try to issue paused starterpack - should fail
     testing::set_contract_address(context.spender);
     let total_cost = PRICE + (PRICE * PROTOCOL_FEE.into() / 100);

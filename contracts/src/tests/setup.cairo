@@ -11,7 +11,7 @@ pub mod setup {
     use arcade::systems::registry::{IRegistryDispatcher, Registry};
     use arcade::systems::slot::{ISlotDispatcher, Slot};
     use arcade::systems::social::{ISocialDispatcher, Social};
-    use arcade::systems::starterpack::{IStarterpackDispatcher, Starterpack};
+    use arcade::systems::starterpack::{IStarterpackDispatcher, StarterpackSystem};
     use arcade::systems::wallet::{IWalletDispatcher, Wallet};
     use arcade::tests::mocks::account::Account;
     use arcade::tests::mocks::collection::Collection;
@@ -41,11 +41,11 @@ pub mod setup {
     use registry::models::index as registry_models;
     use social::events::index as social_events;
     use social::models::index as social_models;
-    use starterpack::events::index as starterpack_events;
-    use starterpack::models::index as starterpack_models;
     use starknet::syscalls::deploy_syscall;
     use starknet::testing::set_contract_address;
     use starknet::{ContractAddress, SyscallResultTrait};
+    use starterpack::events::index as starterpack_events;
+    use starterpack::models::index as starterpack_models;
 
     // Constant
 
@@ -76,7 +76,6 @@ pub mod setup {
     pub fn PLAYER() -> ContractAddress {
         'PLAYER'.try_into().unwrap()
     }
-
     use arcade::systems::starterpack::IAdministrationDispatcher;
 
     #[derive(Copy, Drop)]
@@ -148,7 +147,7 @@ pub mod setup {
                 TestResource::Contract(Social::TEST_CLASS_HASH),
                 TestResource::Contract(Wallet::TEST_CLASS_HASH),
                 TestResource::Contract(Marketplace::TEST_CLASS_HASH),
-                TestResource::Contract(Starterpack::TEST_CLASS_HASH),
+                TestResource::Contract(StarterpackSystem::TEST_CLASS_HASH),
             ]
                 .span(),
         }
@@ -173,7 +172,7 @@ pub mod setup {
             ContractDefTrait::new(@NAMESPACE(), @"Marketplace")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(array![0x1, 0x1F4, receiver.into(), OWNER().into()].span()),
-            ContractDefTrait::new(@NAMESPACE(), @"Starterpack")
+            ContractDefTrait::new(@NAMESPACE(), @"StarterpackSystem")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(array![].span()),
         ]
@@ -247,7 +246,7 @@ pub mod setup {
         let (social_address, _) = world.dns(@"Social").unwrap();
         let (wallet_address, _) = world.dns(@"Wallet").unwrap();
         let (marketplace_address, _) = world.dns(@"Marketplace").unwrap();
-        let (starterpack_address, _) = world.dns(@"Starterpack").unwrap();
+        let (starterpack_address, _) = world.dns(@"StarterpackSystem").unwrap();
         let starterpack_impl = setup_starterpack_impl();
         let systems = Systems {
             registry: IRegistryDispatcher { contract_address: registry_address },
