@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import fs from "fs";
 import path from "path";
+import { ProgressionsDocument } from "@cartridge/ui/utils/api/cartridge";
 
 /**
  * ============================================================================
@@ -183,45 +184,6 @@ const ADDRESS_BY_USERNAME_QUERY = `
   }
 `;
 
-/**
- * Format projects array to GraphQL input syntax (not JSON)
- */
-function formatProjectsForGraphQL(projects: Project[]): string {
-  return projects
-    .map(p => `{ model: "${p.model}", namespace: "${p.namespace}", project: "${p.project}" }`)
-    .join(', ');
-}
-
-/**
- * Build progressions query
- * Note: This query returns ALL achievements for ALL players in the specified projects.
- * Filtering by playerId must be done client-side by matching the playerId field.
- */
-function buildProgressionsQuery(projects: Project[]): string {
-  return `
-    query Progressions($projects: [Project!]!) {
-      playerAchievements(projects: $projects) {
-        items {
-          meta {
-            project
-            model
-            namespace
-            count
-          }
-          achievements {
-            playerId
-            achievementId
-            points
-            taskId
-            taskTotal
-            total
-            completionTime
-          }
-        }
-      }
-    }
-  `;
-}
 
 /**
  * ============================================================================
@@ -541,8 +503,7 @@ async function generateMetaTags(url: string): Promise<string> {
       }
 
       // Fetch real player data from GraphQL API (only progressions for points)
-      const query = buildProgressionsQuery(ACTIVE_PROJECTS);
-      const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query, {
+      const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(ProgressionsDocument, {
         projects: ACTIVE_PROJECTS
       });
       console.log(`[SSR Debug] Received ${progressionsData.playerAchievements.items.length} project results`);
@@ -580,8 +541,7 @@ async function generateMetaTags(url: string): Promise<string> {
       // Fetch player points for the game (0 if game not found in ACTIVE_PROJECTS)
       let gamePoints = 0;
       if (gameProject) {
-        const query = buildProgressionsQuery([gameProject]);
-        const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query, {
+        const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(ProgressionsDocument, {
           projects: [gameProject]
         });
         const stats = computePlayerStats(address, progressionsData);
