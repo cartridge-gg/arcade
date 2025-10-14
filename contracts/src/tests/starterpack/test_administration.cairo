@@ -6,7 +6,7 @@ use starknet::testing;
 use starterpack::constants::CONFIG_ID;
 use starterpack::models::index::Config;
 use starterpack::store::{StoreTrait, ConfigStoreTrait};
-use starterpack::types::role::Role;
+use models::rbac::types::role::Role;
 
 // Constants
 

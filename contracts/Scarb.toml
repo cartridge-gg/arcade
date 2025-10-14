@@ -17,6 +17,7 @@ achievement = { path = ".." }
 starterpack = { path = ".." }
 collection = { path = ".." }
 controller = { path = ".." }
+models = { path = ".." }
 orderbook = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
@@ -38,7 +39,6 @@ build-external-contracts = [
     "controller::models::index::m_Account",
     "controller::models::index::m_Controller",
     "controller::models::index::m_Signer",
-    "orderbook::models::index::m_Moderator",
     "orderbook::models::index::m_Book",
     "orderbook::models::index::m_Order",
     "orderbook::models::index::m_MetadataAttribute",
@@ -59,7 +59,6 @@ build-external-contracts = [
     "social::models::index::m_Guild",
     "social::models::index::m_Member",
     "social::events::index::e_Follow",
-    "starterpack::models::index::m_Moderator",
     "starterpack::models::index::m_Config",
     "starterpack::models::index::m_Starterpack",
     "starterpack::models::index::m_Issuance",
@@ -68,4 +67,5 @@ build-external-contracts = [
     "starterpack::events::index::e_StarterpackIssued",
     "starterpack::events::index::e_StarterpackPaused",
     "starterpack::events::index::e_StarterpackResumed",
+    "models::rbac::models::index::m_Moderator",
 ]

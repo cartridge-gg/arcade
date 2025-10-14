@@ -1,7 +1,7 @@
 // Internal imports
 
-pub use orderbook::models::index::Moderator;
-use orderbook::types::role::Role;
+pub use models::rbac::models::index::Moderator;
+use models::rbac::types::role::Role;
 
 // Errors
 

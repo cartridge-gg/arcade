@@ -5,6 +5,10 @@
 use dojo::event::EventStorage;
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
+
+// Re-export shared RBAC types
+pub use models::rbac::models::index::Moderator;
+pub use models::rbac::store::ModeratorStoreTrait;
 use orderbook::events::listing::ListingTrait;
 use orderbook::events::offer::OfferTrait;
 use orderbook::events::sale::SaleTrait;
@@ -12,7 +16,6 @@ use orderbook::models::book::Book;
 
 // Models imports
 
-use orderbook::models::moderator::Moderator;
 use orderbook::models::order::Order;
 
 
@@ -33,11 +36,6 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn moderator(self: Store, address: felt252) -> Moderator {
-        self.world.read_model(address)
-    }
-
-    #[inline]
     fn book(self: Store, id: u32) -> Book {
         self.world.read_model(id)
     }
@@ -45,11 +43,6 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn order(self: Store, id: u32, collection: felt252, token_id: u256) -> Order {
         self.world.read_model((id, collection, token_id))
-    }
-
-    #[inline]
-    fn set_moderator(ref self: Store, moderator: @Moderator) {
-        self.world.write_model(moderator);
     }
 
     #[inline]
