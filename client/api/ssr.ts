@@ -704,7 +704,7 @@ async function generateMetaTags(url: string): Promise<string> {
       const stats = computePlayerStats(address, progressionsData);
 
       title = `${usernameOrAddress} | Cartridge Arcade`;
-      description = `${stats.totalPoints} points on arcade`;
+      description = `${stats.totalPoints} points in arcade`;
 
       // Generate dynamic OG image URL
       imageUrl = buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
