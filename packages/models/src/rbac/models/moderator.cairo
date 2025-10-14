@@ -1,7 +1,7 @@
 // Internal imports
 
-pub use orderbook::models::index::Moderator;
-use orderbook::types::role::Role;
+pub use models::rbac::models::index::Moderator;
+use models::rbac::types::role::Role;
 
 // Errors
 
@@ -49,7 +49,7 @@ pub impl ModeratorImpl of ModeratorTrait {
 }
 
 #[generate_trait]
-pub impl ModeratorAssert of AssertTrait {
+pub impl ModeratorAssert of ModeratorAssertTrait {
     #[inline]
     fn assert_valid_address(address: felt252) {
         assert(address != 0, errors::MODERATOR_INVALID_ADDRESS);
@@ -76,48 +76,3 @@ pub impl ModeratorAssert of AssertTrait {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    // Local imports
-
-    use super::{Moderator, ModeratorAssert, ModeratorTrait, Role};
-
-    // Constants
-
-    const CALLER: felt252 = 'CALLER';
-
-    #[test]
-    fn test_access_grant() {
-        let mut access = Moderator { address: CALLER, role: Role::None.into() };
-        access.grant(Role::Owner);
-        assert_eq!(access.role, Role::Owner.into());
-    }
-
-    #[test]
-    fn test_access_revoke() {
-        let mut access = Moderator { address: CALLER, role: Role::Owner.into() };
-        access.revoke();
-        assert_eq!(access.role, Role::None.into());
-    }
-
-    #[test]
-    #[should_panic(expected: ('Moderator: not allowed',))]
-    fn test_access_revert_not_allowed() {
-        let access = Moderator { address: CALLER, role: Role::None.into() };
-        access.assert_is_allowed(Role::Owner);
-    }
-
-    #[test]
-    #[should_panic(expected: ('Moderator: not grantable',))]
-    fn test_access_grant_revert_not_grantable() {
-        let mut access = Moderator { address: CALLER, role: Role::Owner.into() };
-        access.assert_is_grantable(Role::Admin);
-    }
-
-    #[test]
-    #[should_panic(expected: ('Moderator: not revokable',))]
-    fn test_access_revoke_revert_not_revokable() {
-        let mut access = Moderator { address: CALLER, role: Role::None.into() };
-        access.assert_is_revokable(Role::None);
-    }
-}

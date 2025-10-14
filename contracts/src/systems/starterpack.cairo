@@ -81,6 +81,7 @@ pub mod Starterpack {
     use dojo::world::WorldStorage;
     use arcade::constants::NAMESPACE;
     use starterpack::constants::CONFIG_ID;
+    use starterpack::models::config::ConfigTrait;
     use starterpack::store::{StoreTrait, ConfigStoreTrait, StarterpackStoreTrait};
 
     // Component imports
