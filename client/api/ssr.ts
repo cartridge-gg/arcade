@@ -18,6 +18,10 @@ let cachedActiveProjects: Project[] | null = null;
 let cacheTimestamp = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Cache for games list (refreshed every 5 minutes)
+let cachedGames: GameData[] | null = null;
+let gamesCacheTimestamp = 0;
+
 // Game configuration for OG images
 interface GameConfig {
   name: string;
@@ -155,6 +159,23 @@ interface GraphQLProgressionsResponse {
   };
 }
 
+interface CollectionMetadata {
+  name: string;
+  imageUrl: string;
+  color?: string;
+}
+
+interface GameData {
+  id: string;
+  name: string;
+  description: string;
+  published: boolean;
+  whitelisted: boolean;
+  color: string;
+  image: string;
+  external_url: string;
+}
+
 /**
  * ============================================================================
  * GRAPHQL QUERIES
@@ -218,6 +239,29 @@ const EDITIONS_QUERY = `
           whitelisted
           published
           priority
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * Query to fetch all games from Arcade Registry via Torii
+ * Games contain metadata including name, description, image, color
+ */
+const GAMES_QUERY = `
+  query {
+    arcadeGameModels(first: 50) {
+      edges {
+        node {
+          id
+          name
+          description
+          published
+          whitelisted
+          color
+          image
+          external_url
         }
       }
     }
@@ -420,6 +464,98 @@ async function getActiveProjects(): Promise<Project[]> {
 }
 
 /**
+ * Fetch all games from Arcade Registry via Torii
+ */
+async function getGames(): Promise<GameData[]> {
+  // Check cache validity
+  const now = Date.now();
+  if (cachedGames && now - gamesCacheTimestamp < CACHE_TTL) {
+    return cachedGames;
+  }
+
+  try {
+    // Query Torii GraphQL endpoint for games
+    const response = await fetch(TORII_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: GAMES_QUERY }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Torii request failed: ${response.status}`);
+    }
+
+    const json: GraphQLResponse<{
+      arcadeGameModels: {
+        edges: Array<{
+          node: {
+            id: string;
+            name: string;
+            description: string;
+            published: boolean;
+            whitelisted: boolean;
+            color: string;
+            image: string;
+            external_url: string;
+          };
+        }>;
+      };
+    }> = await response.json();
+
+    if (json.errors) {
+      throw new Error(`Torii GraphQL error: ${json.errors.map(e => e.message).join(", ")}`);
+    }
+
+    if (!json.data?.arcadeGameModels?.edges) {
+      throw new Error("No game data returned from Torii");
+    }
+
+    // Filter and process games - only return published and whitelisted games
+    const games: GameData[] = json.data.arcadeGameModels.edges
+      .map(edge => edge.node)
+      .filter(node => node.published && node.whitelisted);
+
+    // Update cache
+    cachedGames = games;
+    gamesCacheTimestamp = now;
+
+    return games;
+  } catch (error) {
+    // If we have stale cached data, use it as fallback
+    if (cachedGames) {
+      return cachedGames;
+    }
+
+    // Ultimate fallback: return empty array
+    return [];
+  }
+}
+
+/**
+ * Find game by identifier (gameId from URL)
+ * Matches by hex ID or by name (with spaces replaced by dashes)
+ * Same logic as client-side useProject hook
+ */
+async function findGameByIdentifier(gameId: string): Promise<GameData | null> {
+  const games = await getGames();
+
+  if (games.length === 0) {
+    return null;
+  }
+
+  // Try to find game by ID or by name
+  const game = games.find(
+    (candidate) =>
+      candidate.id === gameId ||
+      candidate.name.toLowerCase().replace(/ /g, "-") === gameId.toLowerCase(),
+  );
+
+  return game || null;
+}
+
+/**
  * Validate and resolve player username or address to a Starknet address
  */
 async function resolvePlayerAddress(usernameOrAddress: string): Promise<string | null> {
@@ -605,6 +741,33 @@ function computePlayerStats(
 }
 
 /**
+ * Get collection cover image URL from Torii static endpoint
+ * Same approach as client-side MetadataHelper.getToriiContractImage
+ */
+function getCollectionImageUrl(contractAddress: string, project: string = "arcade-main"): string {
+  const padded = contractAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+  const paddedAddress = `0x${padded}`;
+  return `https://api.cartridge.gg/x/${project}/torii/static/${paddedAddress}/image`;
+}
+
+/**
+ * Build OG image URL for collection marketplace
+ */
+function buildCollectionOgImageUrl(metadata: CollectionMetadata): string {
+  const ogParams = new URLSearchParams({
+    collection: metadata.name,
+    collectionImage: metadata.imageUrl,
+  });
+
+  // Add color if available
+  if (metadata.color) {
+    ogParams.set('primaryColor', metadata.color);
+  }
+
+  return `${API_URL}/og/collection?${ogParams.toString()}`;
+}
+
+/**
  * Generate OG image URL for player profile (general or game-specific)
  * @param gameId - Optional game ID for game-specific profile
  */
@@ -753,19 +916,36 @@ async function generateMetaTags(url: string): Promise<string> {
     // Game page: /game/:gameId
     else if (urlParts[0] === "game" && urlParts[1]) {
       const gameId = urlParts[1];
+
+      // Fetch game data from onchain
+      const gameData = await findGameByIdentifier(gameId);
+
+      // Fallback to GAME_CONFIGS if onchain data not available
       const gameConfig = GAME_CONFIGS[gameId];
-      const gameName = gameConfig?.name || gameId;
 
-      if (gameConfig) {
-        title = `${gameName} - Cartridge Arcade`;
-        description = `Play ${gameName} on Cartridge Arcade - Discover onchain gaming`;
-      } else {
-        title = "Cartridge Arcade";
-        description = "Discover, Play and Compete in Onchain Games";
-      }
+      if (gameData) {
+        // Use onchain data
+        title = `${gameData.name} - Cartridge Arcade`;
+        description = gameData.description || `Play ${gameData.name} on Cartridge Arcade - Discover onchain gaming`;
 
-      // Generate dynamic OG image URL for game page
-      if (gameConfig) {
+        // Generate dynamic OG image URL using onchain metadata
+        const ogParams = new URLSearchParams({
+          game: gameId,
+          displayName: gameData.name,
+          primaryColor: gameData.color || "#FFD546",
+        });
+
+        if (gameData.image) {
+          ogParams.set('gameImage', gameData.image);
+          ogParams.set('gameIcon', gameData.image);
+        }
+
+        imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
+      } else if (gameConfig) {
+        // Fallback to static config
+        title = `${gameConfig.name} - Cartridge Arcade`;
+        description = `Play ${gameConfig.name} on Cartridge Arcade - Discover onchain gaming`;
+
         const ogParams = new URLSearchParams({
           game: gameId,
           displayName: gameConfig.name,
@@ -781,9 +961,31 @@ async function generateMetaTags(url: string): Promise<string> {
 
         imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
       } else {
-        // Fallback to static preview if game not found
+        // No data found
+        title = "Cartridge Arcade";
+        description = "Discover, Play and Compete in Onchain Games";
         imageUrl = `${BASE_URL}/preview.png`;
       }
+    }
+    // Collection marketplace page: /collection/:contractAddress
+    else if (urlParts[0] === "collection" && urlParts[1]) {
+      const contractAddress = urlParts[1];
+
+      // Validate contract address format
+      if (!isValidAddress(contractAddress)) {
+        return buildMetaTags(title, description, imageUrl, pageUrl);
+      }
+
+      // Use generic title/description since we can't easily query Torii GraphQL for collection name
+      title = "Collection Marketplace | Cartridge Arcade";
+      description = "Browse and trade NFT items on Cartridge Arcade Marketplace";
+
+      // Build OG image URL using Torii static image
+      const collectionImageUrl = getCollectionImageUrl(contractAddress);
+      imageUrl = buildCollectionOgImageUrl({
+        name: "Collection",
+        imageUrl: collectionImageUrl,
+      });
     }
   } catch {
     // Silently fall back to default meta tags on error

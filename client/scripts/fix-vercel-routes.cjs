@@ -15,6 +15,11 @@ const configPath = path.join(__dirname, '../.vercel/output/config.json');
 // Routes to add
 const ssrRoutes = [
   {
+    src: "^/collection/([^/]+)$",
+    dest: "/api/ssr?path=/collection/$1",
+    check: true
+  },
+  {
     src: "^/player/([^/]+)/tab/([^/]+)$",
     dest: "/api/ssr?path=/player/$1/tab/$2",
     check: true
@@ -76,7 +81,7 @@ try {
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
   console.log('✅ Added SSR route rewrites to .vercel/output/config.json');
-  console.log(`   Added ${ssrRoutes.length} routes for player/game pages`);
+  console.log(`   Added ${ssrRoutes.length} routes for collection/player/game pages`);
 
 } catch (error) {
   console.error('❌ Error updating config.json:', error.message);
