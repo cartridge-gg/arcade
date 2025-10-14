@@ -75,7 +75,7 @@ pub trait IStarterpack<TContractState> {
 
 
 #[dojo::contract]
-pub mod Starterpack {
+pub mod StarterpackSystem {
     use super::{StarterPackMetadata, StarterpackQuote, IAdministration, IStarterpack};
     use starknet::ContractAddress;
     use dojo::world::WorldStorage;
