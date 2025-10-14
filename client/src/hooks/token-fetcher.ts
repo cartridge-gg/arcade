@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchToriis } from "@cartridge/arcade";
+import { fetchToriis, type ClientCallbackParams } from "@cartridge/arcade";
 import { CollectionType } from "@/context/collection";
 import { addAddressPadding } from "starknet";
 
@@ -230,7 +230,7 @@ export function useTokenFetcher(
 
     try {
       const result = await fetchToriis(projects, {
-        client: async ({ client }) => {
+        client: async ({ client }: ClientCallbackParams) => {
           let iterate = true;
           let next_cursor = undefined;
           const allTokensWithMetadata: TokenWithMetadata[] = [];
@@ -290,7 +290,7 @@ export function useTokenFetcher(
 
       if (result.data && Array.isArray(result.data)) {
         // Process tokens from all projects
-        result.data.forEach((projectTokens, projectIndex) => {
+        result.data.forEach((projectTokens: any, projectIndex: number) => {
           if (Array.isArray(projectTokens)) {
             const projectProcessedTokens = processTokensWithMetadata(
               projectTokens,
@@ -476,7 +476,7 @@ export function useCollectibles(
 
     try {
       const result = await fetchToriis(projects, {
-        client: async ({ client }) => {
+        client: async ({ client }: ClientCallbackParams) => {
           let iterate = true;
           let next_cursor = undefined;
           const allNFTs: TokenWithMetadata[] = [];
@@ -538,7 +538,7 @@ export function useCollectibles(
 
       if (result.data && Array.isArray(result.data)) {
         // Process NFTs from all projects
-        result.data.forEach((projectNFTs, projectIndex) => {
+        result.data.forEach((projectNFTs: any, projectIndex: number) => {
           if (Array.isArray(projectNFTs)) {
             // Aggregate NFTs by collection
             const collectionMap = aggregateNFTsByCollection(projectNFTs);

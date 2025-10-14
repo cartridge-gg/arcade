@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { UserAvatar } from "./avatar";
 import { AchievementPlayerBadge, SparklesIcon } from "@cartridge/ui";
 import { usePlayerStats } from "@/hooks/achievements";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/sidebar";
 import { useAccount } from "@starknet-react/core";

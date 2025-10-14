@@ -1,5 +1,5 @@
-import { Activity } from "@/components/activity";
+import { ActivityContainer } from "@/features/activity";
 
 export const ActivityScene = () => {
-  return <Activity />;
+  return <ActivityContainer />;
 };

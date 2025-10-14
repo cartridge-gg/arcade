@@ -216,7 +216,9 @@ export const collectionEditionsQuery = createCollection(
       q
         .from({ item: arcadeRegistryCollection })
         .where(({ item }) => eq(item.type, "collectionEdition"))
-        .select(({ item }) => ({ ...item.data })),
+        .select(({ item }) => ({
+          ...(item.data as unknown as CollectionEditionModel),
+        })),
     getKey: (item) => item.identifier,
   }),
 );
@@ -295,13 +297,15 @@ export function useEditionsMap() {
   return editionsMap;
 }
 
-export function useCollectionEditions() {
+export function useCollectionEditions(): CollectionEditionModel[] {
   const { data } = useLiveQuery((q) =>
     q
       .from({ collectionEditions: collectionEditionsQuery })
-      .select(({ collectionEditions }) => ({ ...collectionEditions })),
+      .select(({ collectionEditions }) => ({
+        ...collectionEditions,
+      })),
   );
-  return data || [];
+  return (data as CollectionEditionModel[]) || [];
 }
 
 export function useAccesses() {

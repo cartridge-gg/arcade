@@ -7,6 +7,11 @@ import mkcert from "vite-plugin-mkcert";
 import { VitePWA } from "vite-plugin-pwa";
 import vercel from "vite-plugin-vercel";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
+
+const resolveFromRoot = (path: string) =>
+  resolve(fileURLToPath(new URL(".", import.meta.url)), path);
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -60,7 +65,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": "/src",
+      "@": resolveFromRoot("src"),
     },
   },
   root: "./",
