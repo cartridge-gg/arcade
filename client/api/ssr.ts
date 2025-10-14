@@ -408,23 +408,32 @@ function computePlayerStats(
   let normalizedTargetAddress: string;
   try {
     normalizedTargetAddress = normalizeAddress(address);
-  } catch {
+    console.log(`[SSR Debug] Normalized target address: ${normalizedTargetAddress}`);
+  } catch (error) {
+    console.error(`[SSR Debug] Failed to normalize address: ${address}`, error);
     return { totalPoints: 0, gameStats: {} };
   }
 
   // Process each project's progressions
   for (const item of progressionsData.playerAchievements.items) {
     const project = item.meta.project;
+    console.log(`[SSR Debug] Processing project: ${project}, achievements count: ${item.achievements.length}`);
 
     // Get player's progressions for this project
     const playerProgressions = item.achievements.filter((p: RawProgression) => {
       try {
         const normalized = normalizeAddress(p.playerId);
-        return normalized === normalizedTargetAddress;
+        const matches = normalized === normalizedTargetAddress;
+        if (matches) {
+          console.log(`[SSR Debug] Found matching progression for ${project}: ${p.points} points`);
+        }
+        return matches;
       } catch {
         return false;
       }
     });
+
+    console.log(`[SSR Debug] Found ${playerProgressions.length} matching progressions for ${project}`);
 
     // Calculate points
     const projectPoints = playerProgressions.reduce((sum: number, p: RawProgression) => sum + p.points, 0);
@@ -535,8 +544,15 @@ async function generateMetaTags(url: string): Promise<string> {
       const query = buildProgressionsQuery(ACTIVE_PROJECTS);
       const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(query);
 
+      // Debug logging
+      console.log(`[SSR Debug] Username: ${usernameOrAddress}, Address: ${address}`);
+      console.log(`[SSR Debug] Total achievements returned: ${progressionsData.playerAchievements.items.reduce((sum, item) => sum + item.achievements.length, 0)}`);
+
       // Compute player statistics
       const stats = computePlayerStats(address, progressionsData);
+
+      console.log(`[SSR Debug] Computed total points: ${stats.totalPoints}`);
+      console.log(`[SSR Debug] Game stats:`, JSON.stringify(stats.gameStats));
 
       title = `${usernameOrAddress} | Cartridge Arcade`;
       description = `${stats.totalPoints} points`;
