@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { type ByteArray, byteArray, hash } from "starknet";
 
 /**
@@ -285,7 +285,7 @@ function decodeFelt252(hex: string): string {
   // Convert hex to string
   let result = '';
   for (let i = 0; i < cleaned.length; i += 2) {
-    const byte = parseInt(cleaned.substr(i, 2), 16);
+    const byte = Number.parseInt(cleaned.substr(i, 2), 16);
     if (byte > 0) {
       result += String.fromCharCode(byte);
     }
@@ -598,7 +598,6 @@ function getAvatarVariant(username: string): string {
       return "seven";
     case 7:
       return "five";
-    case 0:
     default:
       return "one";
   }
@@ -676,7 +675,7 @@ function computePlayerStats(
  * Get collection cover image URL from Torii static endpoint
  * Same approach as client-side MetadataHelper.getToriiContractImage
  */
-function getCollectionImageUrl(contractAddress: string, project: string = "arcade-main"): string {
+function getCollectionImageUrl(contractAddress: string, project = "arcade-main"): string {
   const padded = contractAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
   const paddedAddress = `0x${padded}`;
   return `https://api.cartridge.gg/x/${project}/torii/static/${paddedAddress}/image`;
@@ -947,7 +946,7 @@ async function loadBaseHtml(host: string): Promise<string> {
         cachedBaseHtml = fs.readFileSync(filePath, "utf-8");
         return cachedBaseHtml;
       } catch {
-        continue;
+        // Try next path
       }
     }
 
