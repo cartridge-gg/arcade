@@ -27,7 +27,7 @@ pub impl StarterpackImpl of StarterpackTrait {
             soulbound,
             price,
             payment_token,
-            status: Status::Active.into(),
+            status: Status::Active,
             total_issued: 0,
             created_at: time,
         }
@@ -38,15 +38,18 @@ pub impl StarterpackImpl of StarterpackTrait {
     }
 
     fn pause(ref self: Starterpack) {
-        self.status = Status::Paused.into();
+        self.status = Status::Paused;
     }
 
     fn resume(ref self: Starterpack) {
-        self.status = Status::Active.into();
+        self.status = Status::Active;
     }
 
     fn is_active(self: @Starterpack) -> bool {
-        *self.status == Status::Active.into()
+        match *self.status {
+            Status::Active => true,
+            _ => false,
+        }
     }
 
     fn is_owner(self: @Starterpack, address: starknet::ContractAddress) -> bool {
@@ -59,10 +62,10 @@ pub impl StarterpackImpl of StarterpackTrait {
 #[generate_trait]
 pub impl StarterpackAssert of StarterpackAssertTrait {
     fn assert_is_active(self: @Starterpack) {
-        assert!(
-            *self.status == Status::Active.into(),
-            "Starterpack: not active"
-        );
+        match *self.status {
+            Status::Active => {},
+            _ => panic!("Starterpack: not active"),
+        }
     }
 
     fn assert_is_owner(self: @Starterpack, address: starknet::ContractAddress) {

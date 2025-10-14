@@ -1,6 +1,7 @@
 //! Models
 
 use starknet::ContractAddress;
+use starterpack::types::status::Status;
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
@@ -23,7 +24,7 @@ pub struct Starterpack {
     pub soulbound: bool,
     pub price: u256,
     pub payment_token: ContractAddress,
-    pub status: u8,
+    pub status: Status,
     pub total_issued: u64,
     pub created_at: u64,
 }

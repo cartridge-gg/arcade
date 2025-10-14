@@ -1,8 +1,8 @@
 // Types
 
-#[derive(Copy, Drop, Serde, Introspect)]
+#[derive(Copy, Drop, Serde, Introspect, DojoStore, Default)]
 pub enum Status {
-    None,
+    #[default]
     Active,
     Paused,
 }
@@ -12,7 +12,6 @@ pub enum Status {
 impl IntoStatusFelt252 of Into<Status, felt252> {
     fn into(self: Status) -> felt252 {
         match self {
-            Status::None => 'NONE',
             Status::Active => 'ACTIVE',
             Status::Paused => 'PAUSED',
         }
@@ -22,10 +21,8 @@ impl IntoStatusFelt252 of Into<Status, felt252> {
 impl IntoStatusU8 of Into<Status, u8> {
     fn into(self: Status) -> u8 {
         match self {
-            Status::None => 0,
-            Status::Active => 1,
-            Status::Paused => 2,
+            Status::Active => 0,
+            Status::Paused => 1,
         }
     }
 }
-
