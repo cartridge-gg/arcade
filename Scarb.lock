@@ -20,6 +20,7 @@ dependencies = [
  "dojo",
  "dojo_cairo_macros",
  "dojo_cairo_test",
+ "models",
  "openzeppelin_access",
  "openzeppelin_account",
  "openzeppelin_introspection",
@@ -148,6 +149,7 @@ dependencies = [
  "dojo",
  "dojo_cairo_macros",
  "dojo_cairo_test",
+ "models",
  "openzeppelin_introspection",
  "openzeppelin_token",
 ]

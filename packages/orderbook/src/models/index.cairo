@@ -1,12 +1,7 @@
 //! Models
 
-#[derive(Copy, Drop, Serde)]
-#[dojo::model]
-pub struct Moderator {
-    #[key]
-    pub address: felt252,
-    pub role: u8,
-}
+// Re-export shared RBAC Moderator model
+pub use models::rbac::models::index::Moderator;
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]

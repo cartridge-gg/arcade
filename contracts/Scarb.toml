@@ -16,6 +16,7 @@ starknet.workspace = true
 achievement = { path = ".." }
 collection = { path = ".." }
 controller = { path = ".." }
+models = { path = ".." }
 orderbook = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
@@ -37,7 +38,6 @@ build-external-contracts = [
     "controller::models::index::m_Account",
     "controller::models::index::m_Controller",
     "controller::models::index::m_Signer",
-    "orderbook::models::index::m_Moderator",
     "orderbook::models::index::m_Book",
     "orderbook::models::index::m_Order",
     "orderbook::models::index::m_MetadataAttribute",
@@ -58,4 +58,5 @@ build-external-contracts = [
     "social::models::index::m_Guild",
     "social::models::index::m_Member",
     "social::events::index::e_Follow",
+    "models::rbac::models::index::m_Moderator",
 ]
