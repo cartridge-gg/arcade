@@ -1,4 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import fs from "fs";
+import path from "path";
 
 /**
  * ============================================================================
@@ -620,30 +622,34 @@ async function generateMetaTags(url: string): Promise<string> {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const requestPath = (req.query.path as string) || req.url || "/";
+
+    // Generate dynamic meta tags based on the route
     const metaTags = await generateMetaTags(requestPath);
 
-    const safeRequestPathUrl = escapeUrl(requestPath);
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cartridge Arcade</title>
-  ${metaTags}
-  <meta http-equiv="refresh" content="0;url=${safeRequestPathUrl}">
-</head>
-<body>
-  <script>window.location.href = "${safeRequestPathUrl}";</script>
-  <noscript>
-    <p>Redirecting to <a href="${safeRequestPathUrl}">Cartridge Arcade</a>...</p>
-  </noscript>
-</body>
-</html>`;
+    // Read the built index.html from the static output
+    const indexPath = path.join(process.cwd(), ".vercel/output/static/index.html");
+    let baseHtml: string;
+
+    try {
+      baseHtml = fs.readFileSync(indexPath, "utf-8");
+    } catch (error) {
+      // Fallback if the file doesn't exist (local development)
+      const distIndexPath = path.join(process.cwd(), "dist/index.html");
+      baseHtml = fs.readFileSync(distIndexPath, "utf-8");
+    }
+
+    // Inject the dynamic meta tags into the <head> section
+    // This replaces the closing </head> tag with meta tags + </head>
+    const modifiedHtml = baseHtml.replace(
+      "</head>",
+      `  ${metaTags}\n  </head>`
+    );
 
     res.setHeader("Content-Type", "text/html");
     res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");
-    res.status(200).send(html);
-  } catch {
+    res.status(200).send(modifiedHtml);
+  } catch (error) {
+    console.error("SSR Error:", error);
     res.status(500).send("Internal Server Error");
   }
 }
