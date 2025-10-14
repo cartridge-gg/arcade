@@ -35,3 +35,6 @@ cairo_test = "2.12.2"
 sort-module-level-items = true
 
 [profile.mainnet]
+
+[tool.scarb]
+allow-prebuilt-plugins = ["dojo_cairo_macros"]
