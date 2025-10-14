@@ -2,6 +2,7 @@
 members = [
   "contracts",
   "packages/achievement",
+  "packages/starterpack",
   "packages/collection",
   "packages/controller",
   "packages/orderbook",

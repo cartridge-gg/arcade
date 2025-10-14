@@ -1,19 +1,6 @@
-// Dojo imports
+// Internal imports
 
-use starknet::ContractAddress;
-
-// Models
-
-#[derive(Copy, Drop, Serde)]
-#[dojo::model]
-pub struct Issuance {
-    #[key]
-    pub starterpack_id: u32,
-    #[key]
-    pub recipient: ContractAddress,
-    pub soulbound: bool,
-    pub issued_at: u64,
-}
+use starterpack::models::index::Issuance;
 
 // Traits
 
@@ -21,7 +8,7 @@ pub struct Issuance {
 pub impl IssuanceImpl of IssuanceTrait {
     fn new(
         starterpack_id: u32,
-        recipient: ContractAddress,
+        recipient: starknet::ContractAddress,
         soulbound: bool,
         time: u64,
     ) -> Issuance {
@@ -39,7 +26,6 @@ pub impl IssuanceImpl of IssuanceTrait {
 #[generate_trait]
 pub impl IssuanceAssert of IssuanceAssertTrait {
     fn assert_not_issued(self: @Issuance) {
-        assert!(*self.issued_at == 0, "Issuance: already issued to recipient");
+        assert!(*self.issued_at == 0, "Issuance: already issued");
     }
 }
-

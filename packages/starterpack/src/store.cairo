@@ -1,12 +1,12 @@
 // Dojo imports
 
+use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
+use starknet::ContractAddress;
 
 // Internal imports
 
-use starterpack::models::config::Config;
-use starterpack::models::issuance::Issuance;
-use starterpack::models::starterpack::Starterpack;
+use starterpack::models::index::{Config, Issuance, Starterpack};
 
 // Store trait
 
@@ -27,7 +27,7 @@ pub struct Store {
 // Config getters/setters
 
 #[generate_trait]
-impl ConfigStoreImpl of ConfigStoreTrait {
+pub impl ConfigStoreImpl of ConfigStoreTrait {
     fn get_config(ref self: Store, id: u32) -> Config {
         self.world.read_model(id)
     }
@@ -40,7 +40,7 @@ impl ConfigStoreImpl of ConfigStoreTrait {
 // Starterpack getters/setters
 
 #[generate_trait]
-impl StarterpackStoreImpl of StarterpackStoreTrait {
+pub impl StarterpackStoreImpl of StarterpackStoreTrait {
     fn get_starterpack(ref self: Store, starterpack_id: u32) -> Starterpack {
         self.world.read_model(starterpack_id)
     }
@@ -53,7 +53,7 @@ impl StarterpackStoreImpl of StarterpackStoreTrait {
 // Issuance getters/setters
 
 #[generate_trait]
-impl IssuanceStoreImpl of IssuanceStoreTrait {
+pub impl IssuanceStoreImpl of IssuanceStoreTrait {
     fn get_issuance(ref self: Store, starterpack_id: u32, recipient: ContractAddress) -> Issuance {
         self.world.read_model((starterpack_id, recipient))
     }

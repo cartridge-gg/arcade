@@ -2,17 +2,18 @@
 pub mod RegistrableComponent {
     // Dojo imports
 
+    use dojo::event::EventStorage;
     use dojo::world::{IWorldDispatcherTrait, WorldStorage};
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // Internal imports
 
-    use starterpack::constants::{CONFIG_ID, MAX_PROTOCOL_FEE, MAX_REFERRAL_FEE};
-    use starterpack::events::pause::{StarterpackPaused, StarterpackResumed};
-    use starterpack::events::register::StarterpackRegistered;
-    use starterpack::models::config::ConfigTrait;
+    use starterpack::constants::MAX_REFERRAL_FEE;
+    use starterpack::events::index::{
+        StarterpackPaused, StarterpackRegistered, StarterpackResumed
+    };
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
-    use starterpack::store::StoreTrait;
+    use starterpack::store::{StoreTrait, StarterpackStoreTrait};
 
     // Storage
 
@@ -31,7 +32,7 @@ pub mod RegistrableComponent {
     > of InternalTrait<TContractState> {
         fn register(
             self: @ComponentState<TContractState>,
-            world: WorldStorage,
+            mut world: WorldStorage,
             implementation: ContractAddress,
             referral_percentage: u8,
             reissuable: bool,

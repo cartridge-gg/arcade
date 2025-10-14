@@ -2,7 +2,8 @@
 pub mod IssuableComponent {
     // Dojo imports
 
-    use dojo::world::{IWorldDispatcherTrait, WorldStorage};
+    use dojo::event::EventStorage;
+    use dojo::world::WorldStorage;
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // External imports
@@ -15,11 +16,13 @@ pub mod IssuableComponent {
     // Internal imports
 
     use starterpack::constants::{CONFIG_ID, FEE_DENOMINATOR};
-    use starterpack::events::issue::StarterpackIssued;
+    use starterpack::events::index::StarterpackIssued;
     use starterpack::models::config::ConfigTrait;
     use starterpack::models::issuance::{IssuanceAssert, IssuanceTrait};
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
-    use starterpack::store::StoreTrait;
+    use starterpack::store::{
+        StoreTrait, ConfigStoreTrait, IssuanceStoreTrait, StarterpackStoreTrait
+    };
 
     // Storage
 

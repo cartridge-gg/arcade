@@ -1,6 +1,6 @@
 // Types
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Copy, Drop, Serde, Introspect)]
 pub enum Status {
     None,
     Active,

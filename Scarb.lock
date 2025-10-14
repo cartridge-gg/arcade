@@ -185,3 +185,13 @@ dependencies = [
  "dojo_cairo_test",
  "registry",
 ]
+
+[[package]]
+name = "starterpack"
+version = "0.0.0"
+dependencies = [
+ "dojo",
+ "dojo_cairo_macros",
+ "dojo_cairo_test",
+ "openzeppelin_token",
+]

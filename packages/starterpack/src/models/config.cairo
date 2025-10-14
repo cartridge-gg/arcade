@@ -1,27 +1,17 @@
-// Dojo imports
+// Core imports
 
-use starknet::ContractAddress;
+use core::num::traits::Zero;
 
 // Internal imports
 
 use starterpack::constants::{FEE_DENOMINATOR, MAX_PROTOCOL_FEE};
-
-// Models
-
-#[derive(Copy, Drop, Serde)]
-#[dojo::model]
-pub struct Config {
-    #[key]
-    pub id: u32,
-    pub protocol_fee: u8,
-    pub fee_receiver: ContractAddress,
-}
+use starterpack::models::index::Config;
 
 // Traits
 
 #[generate_trait]
 pub impl ConfigImpl of ConfigTrait {
-    fn new(id: u32, protocol_fee: u8, fee_receiver: ContractAddress) -> Config {
+    fn new(id: u32, protocol_fee: u8, fee_receiver: starknet::ContractAddress) -> Config {
         Config { id, protocol_fee, fee_receiver }
     }
 
@@ -34,7 +24,7 @@ pub impl ConfigImpl of ConfigTrait {
         self.protocol_fee = fee_percentage;
     }
 
-    fn set_fee_receiver(ref self: Config, receiver: ContractAddress) {
+    fn set_fee_receiver(ref self: Config, receiver: starknet::ContractAddress) {
         assert!(receiver.is_non_zero(), "Config: invalid receiver");
         self.fee_receiver = receiver;
     }
@@ -48,4 +38,3 @@ pub impl ConfigAssert of ConfigAssertTrait {
         assert!(*self.id != 0, "Config: does not exist");
     }
 }
-

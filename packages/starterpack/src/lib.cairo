@@ -7,16 +7,14 @@ pub mod types {
 }
 
 pub mod events {
-    pub mod register;
-    pub mod issue;
-    pub mod pause;
     pub mod index;
 }
 
 pub mod models {
+    pub mod index;
+    pub mod config;
     pub mod starterpack;
     pub mod issuance;
-    pub mod index;
 }
 
 pub mod components {
