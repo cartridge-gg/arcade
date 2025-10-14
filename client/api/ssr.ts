@@ -95,8 +95,7 @@ interface GameData {
   published: boolean;
   whitelisted: boolean;
   color: string;
-  image: string;      // Icon image URL
-  cover: string;      // Cover image URL
+  image: string;      // Icon/cover image URL
   external_url: string;
 }
 
@@ -171,7 +170,7 @@ const EDITIONS_QUERY = `
 
 /**
  * Query to fetch all games from Arcade Registry via Torii
- * Games contain metadata including name, description, image (icon), cover, color
+ * Games contain metadata including name, description, image, color
  */
 const GAMES_QUERY = `
   query {
@@ -185,7 +184,6 @@ const GAMES_QUERY = `
           whitelisted
           color
           image
-          cover
           external_url
         }
       }
@@ -423,7 +421,6 @@ async function getGames(): Promise<GameData[]> {
             whitelisted: boolean;
             color: string;
             image: string;
-            cover: string;
             external_url: string;
           };
         }>;
@@ -731,10 +728,9 @@ async function buildPlayerOgImageUrl(
       if (data.color) {
         ogParams.set('primaryColor', data.color);
       }
-      if (data.cover) {
-        ogParams.set('gameImage', data.cover);
-      }
+      // Use image for both gameImage (background) and gameIcon (logo)
       if (data.image) {
+        ogParams.set('gameImage', data.image);
         ogParams.set('gameIcon', data.image);
       }
     }
@@ -875,10 +871,9 @@ async function generateMetaTags(url: string): Promise<string> {
           primaryColor: gameData.color || "#FFD546",
         });
 
-        if (gameData.cover) {
-          ogParams.set('gameImage', gameData.cover);
-        }
+        // Use image for both gameImage (background) and gameIcon (logo)
         if (gameData.image) {
+          ogParams.set('gameImage', gameData.image);
           ogParams.set('gameIcon', gameData.image);
         }
 
