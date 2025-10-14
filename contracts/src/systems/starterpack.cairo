@@ -61,6 +61,8 @@ pub trait IStarterpack<TContractState> {
 pub mod Starterpack {
     use super::{StarterPackMetadata, StarterpackQuote, IAdministration, IStarterpack};
     use starknet::ContractAddress;
+    use dojo::world::WorldStorage;
+    use arcade::constants::NAMESPACE;
     use starterpack::constants::{CONFIG_ID, MAX_PROTOCOL_FEE};
     use starterpack::models::config::{Config, ConfigTrait, ConfigAssertTrait};
     use starterpack::store::{Store, StoreTrait, ConfigStoreTrait};
@@ -99,7 +101,7 @@ pub mod Starterpack {
             ref self: ContractState, protocol_fee: u8, fee_receiver: ContractAddress,
         ) {
             // [Setup] Datastore
-            let mut store: Store = StoreTrait::new(self.world_default());
+            let mut store: Store = StoreTrait::new(self.world_storage());
 
             // [Check] Config doesn't already exist
             let existing_config = store.get_config(CONFIG_ID);
@@ -116,7 +118,7 @@ pub mod Starterpack {
 
         fn set_protocol_fee(ref self: ContractState, fee_percentage: u8) {
             // [Setup] Datastore
-            let mut store: Store = StoreTrait::new(self.world_default());
+            let mut store: Store = StoreTrait::new(self.world_storage());
 
             // [Check] Config exists
             let mut config = store.get_config(CONFIG_ID);
@@ -129,7 +131,7 @@ pub mod Starterpack {
         
         fn set_fee_receiver(ref self: ContractState, receiver: ContractAddress) {
             // [Setup] Datastore
-            let mut store: Store = StoreTrait::new(self.world_default());
+            let mut store: Store = StoreTrait::new(self.world_storage());
 
             // [Check] Config exists
             let mut config = store.get_config(CONFIG_ID);
@@ -141,12 +143,12 @@ pub mod Starterpack {
         }
 
         fn pause(ref self: ContractState, starterpack_id: u32) {
-            let world = self.world_default();
+            let world = self.world_storage();
             self.registrable.pause(world, starterpack_id);
         }
 
         fn resume(ref self: ContractState, starterpack_id: u32) {
-            let world = self.world_default();
+            let world = self.world_storage();
             self.registrable.resume(world, starterpack_id);
         }
     }
@@ -158,7 +160,7 @@ pub mod Starterpack {
             starterpack_id: u32,
             has_referrer: bool,
         ) -> StarterpackQuote {
-            let world = self.world_default();
+            let world = self.world_storage();
             
             // Get starterpack details
             let starterpack = starterpack::store::StoreTrait::new(world).get_starterpack(starterpack_id);
@@ -192,13 +194,20 @@ pub mod Starterpack {
         }
 
         fn register(ref self: ContractState, implementation: ContractAddress, referral_percentage: u8, reissuable: bool, soulbound: bool, price: u256, payment_token: ContractAddress, metadata: StarterPackMetadata) -> u32 {
-            let world = self.world_default();
+            let world = self.world_storage();
             self.registrable.register(world, implementation, referral_percentage, reissuable, soulbound, price, payment_token)
         }
 
         fn issue(ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, referrer: Option<ContractAddress>, referrer_group: Option<felt252>) {
-            let world = self.world_default();
+            let world = self.world_storage();
             self.issuable.issue(world, recipient, starterpack_id, referrer, referrer_group);
+        }
+    }
+
+    #[generate_trait]
+    impl Private of PrivateTrait {
+        fn world_storage(self: @ContractState) -> WorldStorage {
+            self.world(@NAMESPACE())
         }
     }
 }
