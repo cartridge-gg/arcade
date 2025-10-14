@@ -581,8 +581,13 @@ async function generateMetaTags(url: string): Promise<string> {
       const gameConfig = GAME_CONFIGS[gameId];
       const gameName = gameConfig?.name || gameId;
 
-      title = `${gameName} - Cartridge Arcade`;
-      description = `Play ${gameName} on Cartridge Arcade - Discover onchain gaming`;
+      if (gameConfig) {
+        title = `${gameName} - Cartridge Arcade`;
+        description = `Play ${gameName} on Cartridge Arcade - Discover onchain gaming`;
+      } else {
+        title = "Cartridge Arcade";
+        description = "Discover, Play and Compete in Onchain Games";
+      }
 
       // Generate dynamic OG image URL for game page
       if (gameConfig) {
