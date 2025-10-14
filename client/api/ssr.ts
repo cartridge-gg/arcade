@@ -771,29 +771,39 @@ async function generateMetaTags(url: string): Promise<string> {
     // Profile page: /player/:username (with optional /tab/:tabName)
     if (urlParts[0] === "player" && urlParts[1]) {
       const usernameOrAddress = urlParts[1];
+      console.log("Processing player page for:", usernameOrAddress);
 
       // Validate and resolve to address
       const address = await resolvePlayerAddress(usernameOrAddress);
+      console.log("Address after resolution:", address);
       if (!address) {
+        console.log("No address found, returning default meta tags");
         return buildMetaTags(title, description, imageUrl, pageUrl);
       }
 
       // Fetch active projects dynamically
+      console.log("Fetching active projects...");
       const activeProjects = await getActiveProjects();
+      console.log("Active projects count:", activeProjects.length);
 
       // Fetch real player data from GraphQL API (only progressions for points)
+      console.log("Fetching progressions data...");
       const progressionsData = await graphqlRequest<GraphQLProgressionsResponse>(ProgressionsDocument, {
         projects: activeProjects
       });
+      console.log("Progressions data items:", progressionsData.playerAchievements.items.length);
 
       // Compute player statistics
+      console.log("Computing player stats...");
       const stats = computePlayerStats(address, progressionsData);
+      console.log("Player stats:", JSON.stringify(stats, null, 2));
 
       title = `${usernameOrAddress} | Cartridge Arcade`;
       description = `${stats.totalPoints} points in arcade`;
 
       // Generate dynamic OG image URL
       imageUrl = await buildPlayerOgImageUrl(usernameOrAddress, stats.totalPoints);
+      console.log("Generated meta tags - title:", title, "description:", description);
     }
     // Game-specific player page: /game/:gameId/player/:username
     else if (urlParts[0] === "game" && urlParts[1] && urlParts[2] === "player" && urlParts[3]) {
@@ -867,10 +877,16 @@ async function generateMetaTags(url: string): Promise<string> {
         imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
       }
     }
-  } catch {
-    // Silently fall back to default meta tags on error
+  } catch (error) {
+    // Log error and fall back to default meta tags
+    console.error("Error generating meta tags:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
   }
 
+  console.log("Returning meta tags - title:", title, "description:", description);
   return buildMetaTags(title, description, imageUrl, pageUrl);
 }
 
