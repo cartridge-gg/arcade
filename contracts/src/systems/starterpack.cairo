@@ -60,12 +60,13 @@ pub trait IStarterpack<TContractState> {
 #[dojo::contract]
 pub mod Starterpack {
     use super::{StarterPackMetadata, StarterpackQuote, IAdministration, IStarterpack};
+    use core::num::traits::Zero;
     use starknet::ContractAddress;
     use dojo::world::WorldStorage;
     use arcade::constants::NAMESPACE;
     use starterpack::constants::{CONFIG_ID, MAX_PROTOCOL_FEE};
-    use starterpack::models::config::{Config, ConfigTrait, ConfigAssertTrait};
-    use starterpack::store::{Store, StoreTrait, ConfigStoreTrait};
+    use starterpack::models::config::{ConfigTrait, ConfigAssertTrait};
+    use starterpack::store::{Store, StoreTrait, ConfigStoreTrait, StarterpackStoreTrait};
 
     // Component imports
     use starterpack::components::issuable::IssuableComponent;
@@ -151,12 +152,13 @@ pub mod Starterpack {
             has_referrer: bool,
         ) -> StarterpackQuote {
             let world = self.world_storage();
+            let mut store = StoreTrait::new(world);
             
             // Get starterpack details
-            let starterpack = starterpack::store::StoreTrait::new(world).get_starterpack(starterpack_id);
+            let starterpack = store.get_starterpack(starterpack_id);
             
             // Get config for protocol fee
-            let config = starterpack::store::StoreTrait::new(world).get_config(starterpack::constants::CONFIG_ID);
+            let config = store.get_config(CONFIG_ID);
             
             let base_price = starterpack.price;
             let payment_token = starterpack.payment_token;

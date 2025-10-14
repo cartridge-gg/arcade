@@ -29,6 +29,7 @@ dependencies = [
  "provider",
  "registry",
  "social",
+ "starterpack",
 ]
 
 [[package]]
