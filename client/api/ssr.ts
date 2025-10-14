@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import fs from "fs";
 import path from "path";
-import { ProgressionsDocument } from "@cartridge/ui/utils/api/cartridge/generated";
 
 /**
  * ============================================================================
@@ -184,6 +183,34 @@ const ADDRESS_BY_USERNAME_QUERY = `
   }
 `;
 
+/**
+ * Progressions query - copied from @cartridge/ui library
+ * This query returns ALL achievements for ALL players in the specified projects.
+ * Filtering by playerId must be done client-side by matching the playerId field.
+ */
+const ProgressionsDocument = `
+    query Progressions($projects: [Project!]!) {
+  playerAchievements(projects: $projects) {
+    items {
+      meta {
+        project
+        model
+        namespace
+        count
+      }
+      achievements {
+        playerId
+        achievementId
+        points
+        taskId
+        taskTotal
+        total
+        completionTime
+      }
+    }
+  }
+}
+    `;
 
 /**
  * ============================================================================
