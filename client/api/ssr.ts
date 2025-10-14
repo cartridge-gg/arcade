@@ -534,7 +534,7 @@ function escapeUrl(url: string): string {
  * Validate username format
  */
 function isValidUsername(username: string): boolean {
-  if (!username || username.length === 0 || username.length > 100) {
+  if (!username || username.length === 0 || username.length > 31) {
     return false;
   }
   if (username.includes('<') || username.includes('>') || username.includes('"') || username.includes("'")) {
