@@ -82,12 +82,6 @@ interface GraphQLProgressionsResponse {
   };
 }
 
-interface CollectionMetadata {
-  name: string;
-  imageUrl: string;
-  color?: string;
-}
-
 interface GameData {
   id: string;
   name: string;
@@ -672,33 +666,6 @@ function computePlayerStats(
 }
 
 /**
- * Get collection cover image URL from Torii static endpoint
- * Same approach as client-side MetadataHelper.getToriiContractImage
- */
-function getCollectionImageUrl(contractAddress: string, project = "arcade-main"): string {
-  const padded = contractAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
-  const paddedAddress = `0x${padded}`;
-  return `https://api.cartridge.gg/x/${project}/torii/static/${paddedAddress}/image`;
-}
-
-/**
- * Build OG image URL for collection marketplace
- */
-function buildCollectionOgImageUrl(metadata: CollectionMetadata): string {
-  const ogParams = new URLSearchParams({
-    collection: metadata.name,
-    collectionImage: metadata.imageUrl,
-  });
-
-  // Add color if available
-  if (metadata.color) {
-    ogParams.set('primaryColor', metadata.color);
-  }
-
-  return `${API_URL}/og/collection?${ogParams.toString()}`;
-}
-
-/**
  * Convert icon URL to cover URL by replacing /icon. with /cover.
  */
 function getCoverUrlFromIcon(iconUrl: string): string {
@@ -887,26 +854,6 @@ async function generateMetaTags(url: string): Promise<string> {
 
         imageUrl = `${API_URL}/og/game?${ogParams.toString()}`;
       }
-    }
-    // Collection marketplace page: /collection/:contractAddress
-    else if (urlParts[0] === "collection" && urlParts[1]) {
-      const contractAddress = urlParts[1];
-
-      // Validate contract address format
-      if (!isValidAddress(contractAddress)) {
-        return buildMetaTags(title, description, imageUrl, pageUrl);
-      }
-
-      // Use generic title/description since we can't easily query Torii GraphQL for collection name
-      title = "Collection Marketplace | Cartridge Arcade";
-      description = "Browse and trade NFT items on Cartridge Arcade Marketplace";
-
-      // Build OG image URL using Torii static image
-      const collectionImageUrl = getCollectionImageUrl(contractAddress);
-      imageUrl = buildCollectionOgImageUrl({
-        name: "Collection",
-        imageUrl: collectionImageUrl,
-      });
     }
   } catch {
     // Silently fall back to default meta tags on error
