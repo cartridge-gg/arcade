@@ -6,11 +6,11 @@ use starterpack::types::role::Role;
 // Errors
 
 pub mod errors {
-    pub const MODERATOR_INVALID_ADDRESS: felt252 = 'Moderator: invalid address';
-    pub const MODERATOR_INVALID_ROLE: felt252 = 'Moderator: invalid role';
-    pub const MODERATOR_NOT_ALLOWED: felt252 = 'Moderator: not allowed';
-    pub const MODERATOR_NOT_GRANTABLE: felt252 = 'Moderator: not grantable';
-    pub const MODERATOR_NOT_REVOKABLE: felt252 = 'Moderator: not revokable';
+    pub const MODERATOR_INVALID_ADDRESS: felt252 = 'SP Moderator: invalid address';
+    pub const MODERATOR_INVALID_ROLE: felt252 = 'SP Moderator: invalid role';
+    pub const MODERATOR_NOT_ALLOWED: felt252 = 'SP Moderator: not allowed';
+    pub const MODERATOR_NOT_GRANTABLE: felt252 = 'SP Moderator: not grantable';
+    pub const MODERATOR_NOT_REVOKABLE: felt252 = 'SP Moderator: not revokable';
 }
 
 #[generate_trait]

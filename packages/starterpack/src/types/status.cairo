@@ -1,6 +1,6 @@
 // Types
 
-#[derive(Copy, Drop, Serde, Introspect, DojoStore, Default)]
+#[derive(Copy, Drop, Serde, Introspect, DojoStore, Default, PartialEq, Debug)]
 pub enum Status {
     #[default]
     Active,

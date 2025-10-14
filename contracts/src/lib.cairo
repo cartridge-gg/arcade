@@ -21,6 +21,7 @@ mod tests {
         pub mod erc20;
         pub mod erc721;
         pub mod register;
+        pub mod starterpack_impl;
     }
 
     pub mod registry {
@@ -48,5 +49,13 @@ mod tests {
             mod test_offer_execute;
             mod test_offer_remove;
         }
+    }
+
+    pub mod starterpack {
+        mod test_administration;
+        mod test_fees;
+        mod test_issue;
+        mod test_register;
+        mod test_update_pause;
     }
 }
