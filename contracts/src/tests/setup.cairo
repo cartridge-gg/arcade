@@ -132,6 +132,8 @@ pub mod setup {
                 TestResource::Model(starterpack_models::m_Config::TEST_CLASS_HASH),
                 TestResource::Model(starterpack_models::m_Starterpack::TEST_CLASS_HASH),
                 TestResource::Model(starterpack_models::m_Issuance::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_ReferralReward::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_GroupReward::TEST_CLASS_HASH),
                 TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH),
                 TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Listing::TEST_CLASS_HASH),

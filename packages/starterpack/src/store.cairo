@@ -10,7 +10,7 @@ pub use models::rbac::store::ModeratorStoreTrait;
 
 // Internal imports
 
-use starterpack::models::index::{Config, Issuance, Starterpack};
+use starterpack::models::index::{Config, Issuance, Starterpack, ReferralReward, GroupReward};
 
 // Store trait
 
@@ -64,6 +64,32 @@ pub impl IssuanceStoreImpl of IssuanceStoreTrait {
 
     fn set_issuance(ref self: Store, issuance: @Issuance) {
         self.world.write_model(issuance);
+    }
+}
+
+// ReferralReward getters/setters
+
+#[generate_trait]
+pub impl ReferralRewardStoreImpl of ReferralRewardStoreTrait {
+    fn get_referral_reward(self: Store, referrer: ContractAddress) -> ReferralReward {
+        self.world.read_model(referrer)
+    }
+
+    fn set_referral_reward(ref self: Store, referral_reward: @ReferralReward) {
+        self.world.write_model(referral_reward);
+    }
+}
+
+// GroupReward getters/setters
+
+#[generate_trait]
+pub impl GroupRewardStoreImpl of GroupRewardStoreTrait {
+    fn get_group_reward(self: Store, group: felt252) -> GroupReward {
+        self.world.read_model(group)
+    }
+
+    fn set_group_reward(ref self: Store, group_reward: @GroupReward) {
+        self.world.write_model(group_reward);
     }
 }
 

@@ -37,3 +37,21 @@ pub struct Issuance {
     pub recipient: ContractAddress,
     pub issued_at: u64,
 }
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
+pub struct ReferralReward {
+    #[key]
+    pub referrer: ContractAddress,
+    pub total_fees: u256,
+    pub total_referrals: u64,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::model]
+pub struct GroupReward {
+    #[key]
+    pub group: felt252,
+    pub total_fees: u256,
+    pub total_referrals: u64,
+}
