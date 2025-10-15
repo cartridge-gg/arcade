@@ -2,6 +2,12 @@
 
 use starterpack::models::index::Issuance;
 
+// Errors
+
+pub mod errors {
+    pub const ISSUANCE_ALREADY_ISSUED: felt252 = 'Issuance: already issued';
+}
+
 // Traits
 
 #[generate_trait]
@@ -16,6 +22,6 @@ pub impl IssuanceImpl of IssuanceTrait {
 #[generate_trait]
 pub impl IssuanceAssert of IssuanceAssertTrait {
     fn assert_not_issued(self: @Issuance) {
-        assert!(*self.issued_at == 0, "Issuance: already issued");
+        assert(*self.issued_at == 0, errors::ISSUANCE_ALREADY_ISSUED);
     }
 }

@@ -20,8 +20,11 @@ pub mod IssuableComponent {
     use starterpack::models::config::ConfigTrait;
     use starterpack::models::issuance::{IssuanceAssert, IssuanceTrait};
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
+    use starterpack::models::referral_reward::ReferralRewardTrait;
+    use starterpack::models::group_reward::GroupRewardTrait;
     use starterpack::store::{
         ConfigStoreTrait, IssuanceStoreTrait, StarterpackStoreTrait, StoreTrait,
+        ReferralRewardStoreTrait, GroupRewardStoreTrait,
     };
 
     // Storage
@@ -77,6 +80,24 @@ pub mod IssuableComponent {
                     // Transfer referral fee
                     if ref_fee > 0 {
                         token_dispatcher.transfer_from(payer, ref_addr, ref_fee);
+
+                        // Track referral reward for individual referrer
+                        let mut referral_reward = store.get_referral_reward(ref_addr);
+                        if referral_reward.total_referrals == 0 {
+                            referral_reward = ReferralRewardTrait::new(ref_addr);
+                        }
+                        referral_reward.add_referral(ref_fee);
+                        store.set_referral_reward(@referral_reward);
+
+                        // Track group reward if referrer_group exists
+                        if let Option::Some(group_id) = referrer_group {
+                            let mut group_reward = store.get_group_reward(group_id);
+                            if group_reward.total_referrals == 0 {
+                                group_reward = GroupRewardTrait::new(group_id);
+                            }
+                            group_reward.add_referral(ref_fee);
+                            store.set_group_reward(@group_reward);
+                        }
                     }
                     ref_fee
                 } else {

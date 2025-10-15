@@ -13,7 +13,7 @@ pub mod StarterpackImplementation {
 
     #[abi(embed_v0)]
     impl StarterpackImplementationImpl of starterpack::interface::IStarterpackImplementation<
-        ContractState
+        ContractState,
     > {
         fn on_issue(ref self: ContractState, recipient: ContractAddress, starterpack_id: u32) {
             // Mark as issued
@@ -25,7 +25,9 @@ pub mod StarterpackImplementation {
     #[abi(per_item)]
     impl HelperImpl of HelperTrait {
         #[external(v0)]
-        fn is_issued(self: @ContractState, recipient: ContractAddress, starterpack_id: u32) -> bool {
+        fn is_issued(
+            self: @ContractState, recipient: ContractAddress, starterpack_id: u32,
+        ) -> bool {
             self.issued.read((recipient, starterpack_id))
         }
     }

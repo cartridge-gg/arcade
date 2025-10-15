@@ -5,8 +5,8 @@ pub mod systems {
     pub mod registry;
     pub mod slot;
     pub mod social;
-    pub mod wallet;
     pub mod starterpack;
+    pub mod wallet;
 }
 
 #[cfg(test)]

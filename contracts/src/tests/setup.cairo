@@ -41,11 +41,11 @@ pub mod setup {
     use registry::models::index as registry_models;
     use social::events::index as social_events;
     use social::models::index as social_models;
-    use starterpack::events::index as starterpack_events;
-    use starterpack::models::index as starterpack_models;
     use starknet::syscalls::deploy_syscall;
     use starknet::testing::set_contract_address;
     use starknet::{ContractAddress, SyscallResultTrait};
+    use starterpack::events::index as starterpack_events;
+    use starterpack::models::index as starterpack_models;
 
     // Constant
 
@@ -76,7 +76,6 @@ pub mod setup {
     pub fn PLAYER() -> ContractAddress {
         'PLAYER'.try_into().unwrap()
     }
-
     use arcade::systems::starterpack::IAdministrationDispatcher;
 
     #[derive(Copy, Drop)]
@@ -133,6 +132,8 @@ pub mod setup {
                 TestResource::Model(starterpack_models::m_Config::TEST_CLASS_HASH),
                 TestResource::Model(starterpack_models::m_Starterpack::TEST_CLASS_HASH),
                 TestResource::Model(starterpack_models::m_Issuance::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_ReferralReward::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_GroupReward::TEST_CLASS_HASH),
                 TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH),
                 TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Listing::TEST_CLASS_HASH),

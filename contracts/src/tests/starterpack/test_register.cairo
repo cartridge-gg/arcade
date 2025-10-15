@@ -1,12 +1,12 @@
 // Internal imports
 
 use arcade::systems::starterpack::{
-    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata
+    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata,
 };
 use arcade::tests::setup::setup::{OWNER, RECEIVER, spawn};
 use starknet::testing;
 use starterpack::models::index::Starterpack;
-use starterpack::store::{StoreTrait, StarterpackStoreTrait};
+use starterpack::store::{StarterpackStoreTrait, StoreTrait};
 use starterpack::types::status::Status;
 
 // Constants
@@ -18,18 +18,16 @@ const PRICE: u256 = 1_000_000_000_000_000_000; // 1 token
 // Tests
 
 #[test]
-fn test_register_starterpack() {
+fn test_sp_register() {
     // [Setup]
     let (world, systems, context) = spawn();
-    
+
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
@@ -37,7 +35,7 @@ fn test_register_starterpack() {
         description: "A test starterpack for new players",
         image_uri: "https://example.com/image.png",
     };
-    
+
     let starterpack_id = systems
         .starterpack
         .register(
@@ -48,7 +46,7 @@ fn test_register_starterpack() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata,
         );
-    
+
     // [Assert] Starterpack is created
     let mut store = StoreTrait::new(world);
     let starterpack: Starterpack = store.get_starterpack(starterpack_id);
@@ -64,25 +62,23 @@ fn test_register_starterpack() {
 }
 
 #[test]
-#[should_panic(expected: 'Starterpack: referral percentage too high')]
-fn test_register_invalid_referral_percentage() {
+#[should_panic(expected: ('Starterpack: referral too high', 'ENTRYPOINT_FAILED'))]
+fn test_sp_register_invalid_referral_percentage() {
     // [Setup]
     let (_world, systems, context) = spawn();
-    
+
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register] With invalid referral percentage (>50%)
     testing::set_contract_address(context.creator);
     let metadata = StarterPackMetadata {
         name: "Test Starterpack", description: "Test", image_uri: "https://example.com/image.png",
     };
-    
+
     systems
         .starterpack
         .register(
@@ -96,18 +92,16 @@ fn test_register_invalid_referral_percentage() {
 }
 
 #[test]
-fn test_register_multiple_starterpacks() {
+fn test_sp_register_multiple_starterpacks() {
     // [Setup]
     let (world, systems, context) = spawn();
-    
+
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
     systems
         .starterpack_admin
-        .initialize(
-            protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER(),
-        );
-    
+        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
+
     // [Register] First starterpack
     testing::set_contract_address(context.creator);
     let metadata1 = StarterPackMetadata {
@@ -123,7 +117,7 @@ fn test_register_multiple_starterpacks() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata1,
         );
-    
+
     // [Register] Second starterpack
     let metadata2 = StarterPackMetadata {
         name: "Starterpack 2", description: "Second", image_uri: "https://example.com/2.png",
@@ -138,7 +132,7 @@ fn test_register_multiple_starterpacks() {
             payment_token: systems.erc20.contract_address,
             metadata: metadata2,
         );
-    
+
     // [Assert] Both starterpacks exist and are different
     assert_ne!(id1, id2);
     let mut store = StoreTrait::new(world);

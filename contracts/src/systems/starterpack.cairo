@@ -33,11 +33,7 @@ pub trait IAdministration<TContractState> {
 
 #[starknet::interface]
 pub trait IStarterpack<TContractState> {
-    fn quote(
-        self: @TContractState,
-        starterpack_id: u32,
-        has_referrer: bool,
-    ) -> StarterpackQuote;
+    fn quote(self: @TContractState, starterpack_id: u32, has_referrer: bool) -> StarterpackQuote;
     fn register(
         ref self: TContractState,
         implementation: ContractAddress,
@@ -68,26 +64,25 @@ pub trait IStarterpack<TContractState> {
         recipient: ContractAddress,
         starterpack_id: u32,
         referrer: Option<ContractAddress>,
-        referrer_group: Option<felt252>
+        referrer_group: Option<felt252>,
     );
 }
 
 
-
 #[dojo::contract]
 pub mod StarterpackSystem {
-    use super::{StarterPackMetadata, StarterpackQuote, IAdministration, IStarterpack};
     use starknet::ContractAddress;
-    use dojo::world::WorldStorage;
     use arcade::constants::NAMESPACE;
-    use starterpack::constants::CONFIG_ID;
-    use starterpack::models::config::ConfigTrait;
-    use starterpack::store::{StoreTrait, ConfigStoreTrait, StarterpackStoreTrait};
+    use dojo::world::WorldStorage;
 
     // Component imports
     use starterpack::components::issuable::IssuableComponent;
     use starterpack::components::manageable::ManageableComponent;
     use starterpack::components::registrable::RegistrableComponent;
+    use starterpack::constants::CONFIG_ID;
+    use starterpack::models::config::ConfigTrait;
+    use starterpack::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
+    use super::{IAdministration, IStarterpack, StarterPackMetadata, StarterpackQuote};
 
     // Components
     component!(path: IssuableComponent, storage: issuable, event: IssuableEvent);
@@ -155,57 +150,61 @@ pub mod StarterpackSystem {
     #[abi(embed_v0)]
     impl StarterpackImpl of IStarterpack<ContractState> {
         fn quote(
-            self: @ContractState,
-            starterpack_id: u32,
-            has_referrer: bool,
+            self: @ContractState, starterpack_id: u32, has_referrer: bool,
         ) -> StarterpackQuote {
             let world = self.world_storage();
             let mut store = StoreTrait::new(world);
-            
+
             // Get starterpack details
             let starterpack = store.get_starterpack(starterpack_id);
-            
+
             // Get config for protocol fee
             let config = store.get_config(CONFIG_ID);
-            
+
             let base_price = starterpack.price;
             let payment_token = starterpack.payment_token;
-            
+
             // Calculate referral fee if has_referrer
             let referral_fee = if has_referrer {
-                base_price * starterpack.referral_percentage.into() / starterpack::constants::FEE_DENOMINATOR.into()
+                base_price
+                    * starterpack.referral_percentage.into()
+                    / starterpack::constants::FEE_DENOMINATOR.into()
             } else {
                 0
             };
-            
+
             // Calculate protocol fee (added on top of base price)
             let protocol_fee = config.protocol_fee_amount(base_price);
-            
+
             // Total cost = base price + protocol fee
             let total_cost = base_price + protocol_fee;
-            
-            StarterpackQuote {
-                base_price,
-                referral_fee,
-                protocol_fee,
-                total_cost,
-                payment_token,
-            }
+
+            StarterpackQuote { base_price, referral_fee, protocol_fee, total_cost, payment_token }
         }
 
-        fn register(ref self: ContractState, implementation: ContractAddress, referral_percentage: u8, reissuable: bool, price: u256, payment_token: ContractAddress, metadata: StarterPackMetadata) -> u32 {
+        fn register(
+            ref self: ContractState,
+            implementation: ContractAddress,
+            referral_percentage: u8,
+            reissuable: bool,
+            price: u256,
+            payment_token: ContractAddress,
+            metadata: StarterPackMetadata,
+        ) -> u32 {
             let world = self.world_storage();
-            self.registrable.register(
-                world,
-                implementation,
-                referral_percentage,
-                reissuable,
-                price,
-                payment_token,
-                metadata.name,
-                metadata.description,
-                metadata.image_uri,
-            )
+            self
+                .registrable
+                .register(
+                    world,
+                    implementation,
+                    referral_percentage,
+                    reissuable,
+                    price,
+                    payment_token,
+                    metadata.name,
+                    metadata.description,
+                    metadata.image_uri,
+                )
         }
 
         fn update(
@@ -219,18 +218,20 @@ pub mod StarterpackSystem {
             metadata: StarterPackMetadata,
         ) {
             let world = self.world_storage();
-            self.registrable.update(
-                world,
-                starterpack_id,
-                implementation,
-                referral_percentage,
-                reissuable,
-                price,
-                payment_token,
-                metadata.name,
-                metadata.description,
-                metadata.image_uri,
-            );
+            self
+                .registrable
+                .update(
+                    world,
+                    starterpack_id,
+                    implementation,
+                    referral_percentage,
+                    reissuable,
+                    price,
+                    payment_token,
+                    metadata.name,
+                    metadata.description,
+                    metadata.image_uri,
+                );
         }
 
         fn pause(ref self: ContractState, starterpack_id: u32) {
@@ -243,7 +244,13 @@ pub mod StarterpackSystem {
             self.registrable.resume(world, starterpack_id);
         }
 
-        fn issue(ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, referrer: Option<ContractAddress>, referrer_group: Option<felt252>) {
+        fn issue(
+            ref self: ContractState,
+            recipient: ContractAddress,
+            starterpack_id: u32,
+            referrer: Option<ContractAddress>,
+            referrer_group: Option<felt252>,
+        ) {
             let world = self.world_storage();
             self.issuable.issue(world, recipient, starterpack_id, referrer, referrer_group);
         }

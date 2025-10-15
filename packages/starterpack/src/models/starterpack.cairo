@@ -3,6 +3,13 @@
 use starterpack::models::index::Starterpack;
 use starterpack::types::status::Status;
 
+// Errors
+
+pub mod errors {
+    pub const STARTERPACK_NOT_ACTIVE: felt252 = 'Starterpack: not active';
+    pub const STARTERPACK_NOT_OWNER: felt252 = 'Starterpack: not owner';
+}
+
 // Traits
 
 #[generate_trait]
@@ -60,13 +67,10 @@ pub impl StarterpackImpl of StarterpackTrait {
 #[generate_trait]
 pub impl StarterpackAssert of StarterpackAssertTrait {
     fn assert_is_active(self: @Starterpack) {
-        match *self.status {
-            Status::Active => {},
-            _ => panic!("Starterpack: not active"),
-        }
+        assert(*self.status == Status::Active, errors::STARTERPACK_NOT_ACTIVE);
     }
 
     fn assert_is_owner(self: @Starterpack, address: starknet::ContractAddress) {
-        assert!(*self.owner == address, "Starterpack: not owner");
+        assert(*self.owner == address, errors::STARTERPACK_NOT_OWNER);
     }
 }
