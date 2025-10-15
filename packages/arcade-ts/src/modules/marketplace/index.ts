@@ -94,7 +94,8 @@ export const Marketplace = {
     return new ToriiQueryBuilder<SchemaType>()
       .withClause(clauses.build())
       .withEntityModels(keys)
-      .includeHashedKeys();
+      .includeHashedKeys()
+      .withLimit(1000);
   },
 
   fetchEntities: async (

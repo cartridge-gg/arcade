@@ -1,6 +1,7 @@
 import { queryKeys } from "@/queries/keys";
 import { sqlClient } from "@/queries";
 import { useQuery } from "react-query";
+import { addAddressPadding } from "starknet";
 
 export type Metadata = {
   traitName: string;
@@ -40,7 +41,7 @@ const getMetadataQuery = ({
             SELECT token_id
             FROM token_attributes
             WHERE ${whereClause}
-              AND token_id LIKE '0x${BigInt(contractAddress).toString(16)}:%'
+              AND token_id LIKE '${addAddressPadding(contractAddress)}:%'
             GROUP BY token_id
             ${traits.length > 0 ? `HAVING COUNT(DISTINCT trait_name) = ${traits.length}` : ""}
         )
@@ -74,7 +75,12 @@ export const getMetadataQueryOptions = ({
 export const useMetadata = ({
   contractAddress,
   traits,
-}: { contractAddress: string; traits: { name: string; value: string }[] }) => {
+  enabled = true,
+}: {
+  contractAddress: string;
+  traits: { name: string; value: string }[];
+  enabled?: boolean;
+}) => {
   return useQuery({
     queryKey: [
       "torii-metadata",
@@ -82,8 +88,8 @@ export const useMetadata = ({
       traits.map((t) => `${t.name}-${t.value}`).join("-"),
     ],
     queryFn: async () => {
+      const query = getMetadataQuery({ contractAddress, traits });
       try {
-        const query = getMetadataQuery({ contractAddress, traits });
         const data = await sqlClient<MetadataResponse>(query);
         return data.map((meta) => ({
           traitName: meta.trait_name,
@@ -92,9 +98,10 @@ export const useMetadata = ({
         }));
       } catch (error) {
         console.error("Error fetching metadata:", error);
-        return "";
+        return [];
       }
     },
-    enabled: !!contractAddress,
+    refetchOnWindowFocus: false,
+    enabled: enabled && !!contractAddress,
   });
 };

@@ -11,7 +11,6 @@ sierra-replace-ids = true
 openzeppelin_introspection.workspace = true
 openzeppelin_token.workspace = true
 dojo.workspace = true
-dojo_cairo_macros.workspace = true
 starknet.workspace = true
 achievement = { path = ".." }
 starterpack = { path = ".." }
@@ -71,3 +70,6 @@ build-external-contracts = [
     "starterpack::events::index::e_StarterpackResumed",
     "models::rbac::models::index::m_Moderator",
 ]
+
+[tool.scarb]
+allow-prebuilt-plugins = ["dojo_cairo_macros"]
