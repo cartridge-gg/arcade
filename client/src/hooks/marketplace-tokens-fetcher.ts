@@ -1,19 +1,15 @@
-import { fetchToriis, type ClientCallbackParams } from "@cartridge/arcade";
-import type {
-  AttributeFilter,
-  Token,
-  ToriiClient,
-} from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Token } from "@dojoengine/torii-wasm";
 import { getChecksumAddress } from "starknet";
+import {
+  useMarketplaceCollectionTokens,
+  type UseMarketplaceQueryResult,
+} from "@cartridge/arcade/marketplace/react";
+import type { FetchCollectionTokensResult } from "@cartridge/arcade/marketplace";
+import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
 import { useTokenContract } from "@/collections";
-import {
-  useFetcherState,
-  fetchTokenImage,
-  parseJsonSafe,
-} from "./fetcher-utils";
-import { DEFAULT_PROJECT } from "@/constants";
+import { fetchTokenImage } from "./fetcher-utils";
 
 type MarketTokensFetcherInput = {
   project: string[];
@@ -24,37 +20,26 @@ type MarketTokensFetcherInput = {
 
 const LIMIT = 100;
 
-type TokenPage = Awaited<ReturnType<ToriiClient["getTokens"]>>;
+type CollectionTokensQuery =
+  UseMarketplaceQueryResult<FetchCollectionTokensResult>;
 
 export function useMarketTokensFetcher({
   project,
   address,
   autoFetch = true,
-  attributeFilters = {},
 }: MarketTokensFetcherInput) {
-  const {
-    status,
-    isLoading,
-    isError,
-    errorMessage,
-    loadingProgress,
-    retryCount,
-    startLoading,
-    setStatus,
-    setIsLoading,
-    setIsError,
-    setErrorMessage,
-    resetState,
-  } = useFetcherState(true);
+  const addTokens = useMarketplaceTokensStore((state) => state.addTokens);
+  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
+  const clearTokens = useMarketplaceTokensStore((state) => state.clearTokens);
 
   const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const isFetchingRef = useRef(false);
-  const hasInitializedRef = useRef(false);
-  const prevFiltersRef = useRef<string>("");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const prevAddressRef = useRef<string | null>(null);
 
   const projectId = project[0] ?? DEFAULT_PROJECT;
 
-  const normalizedAddress = (() => {
+  const normalizedAddress = useMemo(() => {
     if (!address) return "";
     try {
       return getChecksumAddress(address);
@@ -68,167 +53,120 @@ export function useMarketTokensFetcher({
       );
       return "";
     }
-  })();
+  }, [address]);
 
   const collection = useTokenContract(normalizedAddress);
 
-  const addTokens = useMarketplaceTokensStore((state) => state.addTokens);
-  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
-  const clearTokens = useMarketplaceTokensStore((state) => state.clearTokens);
+  const queryOptions = useMemo(() => {
+    return {
+      address: normalizedAddress,
+      projects: project.length > 0 ? project : undefined,
+      cursors: cursor ? { [projectId]: cursor } : undefined,
+      limit: LIMIT,
+      fetchImages: true,
+      defaultProjectId: projectId,
+    };
+  }, [normalizedAddress, project, projectId, cursor]);
 
-  const processTokens = useCallback(
-    async (tokens: Token[]) => {
-      const data: Token[] = [];
+  const enabled =
+    autoFetch &&
+    Boolean(projectId) &&
+    normalizedAddress.length > 0 &&
+    collection !== null &&
+    collection !== undefined;
 
-      for (const token of tokens) {
-        const metadata = parseJsonSafe(token.metadata, token.metadata);
-        const image = await fetchTokenImage(token, projectId, true);
+  const { data, status, error, isFetching }: CollectionTokensQuery =
+    useMarketplaceCollectionTokens(queryOptions, enabled);
 
-        data.push({
-          ...token,
-          contract_address: getChecksumAddress(token.contract_address),
-          metadata,
-          image,
-        } as Token);
-      }
+  const projectError = useMemo(() => {
+    if (!data) return null;
+    return data.errors.find((entry) => entry.projectId === projectId) ?? null;
+  }, [data, projectId]);
 
-      return data;
-    },
-    [projectId],
-  );
-
-  const filtersKey = useMemo(
-    () =>
-      JSON.stringify(
-        Object.entries(attributeFilters)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([trait, values]) => [trait, [...values].sort()]),
-      ),
-    [attributeFilters],
-  );
-
-  const fetchData = useCallback(
-    async (currentCursor: string | undefined) => {
-      if (!projectId || !normalizedAddress) return;
-      if (!address) return;
-      if (isFetchingRef.current) return;
-
-      isFetchingRef.current = true;
-      startLoading();
-
-      try {
-        const tokens = await fetchToriis(
-          project.length ? project : [projectId],
-          {
-            client: async ({ client }: ClientCallbackParams) => {
-              return client.getTokens({
-                contract_addresses: [address],
-                token_ids: [],
-                attribute_filters: Object.entries(attributeFilters).flatMap(
-                  ([trait_type, trait_value]) =>
-                    [...trait_value].map((v: string) => ({
-                      trait_name: trait_type,
-                      trait_value: v,
-                    })),
-                ) as AttributeFilter[],
-                pagination: {
-                  limit: LIMIT,
-                  cursor: currentCursor,
-                  direction: "Forward",
-                  order_by: [],
-                },
-              });
-            },
-          },
-        );
-
-        const pages = tokens.data as TokenPage[];
-        let nextCursorValue: string | undefined;
-
-        for (const res of pages) {
-          nextCursorValue = res.next_cursor;
-          addTokens(projectId, {
-            [address]: await processTokens(res.items),
-          });
-        }
-
-        setStatus("success");
-        setIsLoading(false);
-        setIsError(false);
-        setErrorMessage(null);
-        setCursor(nextCursorValue);
-      } catch (error) {
-        console.error("Error fetching marketplace tokens:", error);
-        setStatus("error");
-        setIsLoading(false);
-        setIsError(true);
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch marketplace tokens",
-        );
-      } finally {
-        isFetchingRef.current = false;
-      }
-    },
-    [
-      address,
-      addTokens,
-      processTokens,
-      project,
-      projectId,
-      normalizedAddress,
-      attributeFilters,
-      setStatus,
-      setIsLoading,
-      setIsError,
-      setErrorMessage,
-      startLoading,
-    ],
-  );
-
-  // Clear tokens and refetch when filters change
   useEffect(() => {
-    if (
-      prevFiltersRef.current !== filtersKey &&
-      prevFiltersRef.current !== ""
-    ) {
-      clearTokens(projectId, address);
-      setCursor(undefined);
-      hasInitializedRef.current = false;
-      resetState();
+    if (!data || projectError) {
+      if (projectError) {
+        setIsFetchingNextPage(false);
+      }
+      return;
+    }
+    const page = data.pages.find((p) => p.projectId === projectId);
+    if (!page) {
+      setNextCursor(null);
+      return;
     }
 
-    prevFiltersRef.current = filtersKey;
-  }, [filtersKey, projectId, address, clearTokens, resetState]);
+    setNextCursor(page.nextCursor);
+    setIsFetchingNextPage(false);
+
+    if (!page.tokens.length) return;
+
+    (async () => {
+      const enriched = await Promise.all(
+        page.tokens.map(async (token) => {
+          const image = await fetchTokenImage(token as Token, projectId, true);
+          return { ...token, image };
+        }),
+      );
+
+      addTokens(projectId, {
+        [address]: enriched as Token[],
+      });
+    })().catch((err) => {
+      console.error("Failed to enrich marketplace tokens", err);
+    });
+  }, [data, projectError, projectId, address, addTokens]);
 
   useEffect(() => {
-    if (!autoFetch) return;
-    if (hasInitializedRef.current) return;
-    if (!projectId || !normalizedAddress) return;
-    if (collection === null) return;
+    if (!enabled) {
+      setCursor(undefined);
+      setNextCursor(null);
+      setIsFetchingNextPage(false);
+    }
+  }, [enabled]);
 
-    hasInitializedRef.current = true;
-    void fetchData(undefined);
-  }, [autoFetch, collection, fetchData, normalizedAddress, projectId]);
+  useEffect(() => {
+    if (!normalizedAddress) return;
+    if (!address) return;
+    const checksumAddress = normalizedAddress;
+    if (prevAddressRef.current === checksumAddress) return;
+
+    prevAddressRef.current = checksumAddress;
+    clearTokens(projectId, address);
+    setCursor(undefined);
+    setNextCursor(null);
+    setIsFetchingNextPage(false);
+  }, [address, normalizedAddress, projectId, clearTokens]);
+
+  useEffect(() => {
+    if (projectError || status === "error") {
+      setIsFetchingNextPage(false);
+    }
+  }, [status, projectError]);
 
   const fetchNextPage = useCallback(() => {
-    if (!cursor) return;
-    void fetchData(cursor);
-  }, [cursor, fetchData]);
+    if (!nextCursor) return;
+    setIsFetchingNextPage(true);
+    setCursor(nextCursor);
+  }, [nextCursor]);
+
+  const tokens = getTokens(projectId, address);
+
+  const effectiveStatus = projectError ? "error" : status;
+  const effectiveError = projectError?.error ?? error ?? null;
 
   return {
     collection,
-    tokens: getTokens(projectId, address),
+    tokens,
     owners: [],
-    status,
-    isLoading,
-    isError,
-    errorMessage,
-    loadingProgress,
-    retryCount,
-    hasMore: Boolean(cursor),
-    isFetchingNextPage: isFetchingRef.current,
+    status: effectiveStatus,
+    isLoading: effectiveStatus === "loading" && !isFetchingNextPage,
+    isError: effectiveStatus === "error",
+    errorMessage: effectiveError ? effectiveError.message : null,
+    loadingProgress: undefined,
+    retryCount: 0,
+    hasMore: Boolean(nextCursor),
+    isFetchingNextPage: isFetchingNextPage || (isFetching && Boolean(cursor)),
     fetchNextPage,
   };
 }

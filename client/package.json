@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/fix-vercel-routes.cjs",
+    "build": "tsc -b && vite build",
     "preview": "vite preview",
     "format": "biome format --fix src",
     "format:check": "biome format src",

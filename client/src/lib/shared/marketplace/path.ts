@@ -16,9 +16,6 @@ export const buildMarketplaceTargetPath = (
 ) => {
   let pathname = basePathname;
 
-  const marketplaceMatch = pathname.match(/\/(marketplace|portal)/);
-  const marketplacePrefix = marketplaceMatch ? marketplaceMatch[0] : "";
-
   pathname = pathname.replace(GAME_ROUTE_REGEX, "");
   pathname = pathname.replace(EDITION_ROUTE_REGEX, "");
   pathname = pathname.replace(PLAYER_ROUTE_REGEX, "");
@@ -32,7 +29,6 @@ export const buildMarketplaceTargetPath = (
     const gameName = game.name.replace(/ /g, "-").toLowerCase();
     const editionName = edition.name.replace(/ /g, "-").toLowerCase();
     return joinPaths(
-      marketplacePrefix,
       pathname,
       `/game/${gameName}/edition/${editionName}/collection/${address}`,
     );
@@ -40,11 +36,7 @@ export const buildMarketplaceTargetPath = (
 
   if (game) {
     const gameName = game.name.replace(/ /g, "-").toLowerCase();
-    return joinPaths(
-      marketplacePrefix,
-      pathname,
-      `/game/${gameName}/collection/${address}`,
-    );
+    return joinPaths(pathname, `/game/${gameName}/collection/${address}`);
   }
 
   return `/collection/${address}`;

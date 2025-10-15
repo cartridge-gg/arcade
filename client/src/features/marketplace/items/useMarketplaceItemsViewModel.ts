@@ -123,6 +123,8 @@ export function useMarketplaceItemsViewModel({
     [collectionOrders],
   );
 
+  const defaultProjects = useMemo(() => [DEFAULT_PROJECT], []);
+
   const {
     collection,
     status,
@@ -131,7 +133,7 @@ export function useMarketplaceItemsViewModel({
     isFetchingNextPage,
     fetchNextPage,
   } = useMarketTokensFetcher({
-    project: [DEFAULT_PROJECT],
+    project: defaultProjects,
     address: collectionAddress,
     attributeFilters: activeFilters,
   });

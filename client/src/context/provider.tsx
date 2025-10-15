@@ -14,6 +14,9 @@ import { PostHogProvider } from "./posthog";
 import { SidebarProvider } from "./sidebar";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { queryClient, persister } from "../queries";
+import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
+import { constants } from "starknet";
+import { DEFAULT_PROJECT } from "@/constants";
 
 export function Provider({ children }: PropsWithChildren) {
   const qc = new QueryClient();
@@ -29,23 +32,30 @@ export function Provider({ children }: PropsWithChildren) {
         >
           <IndexerAPIProvider credentials="omit">
             <QueryClientProvider client={qc}>
-              <ArcadeProvider>
-                <StarknetProvider>
-                  <OwnershipsProvider>
-                    <CollectionProvider>
-                      <TokenProvider>
-                        <AchievementProvider>
-                          <ActivitiesProvider>
-                            <MetricsProvider>
-                              <SidebarProvider>{children}</SidebarProvider>
-                            </MetricsProvider>
-                          </ActivitiesProvider>
-                        </AchievementProvider>
-                      </TokenProvider>
-                    </CollectionProvider>
-                  </OwnershipsProvider>
-                </StarknetProvider>
-              </ArcadeProvider>
+              <MarketplaceClientProvider
+                config={{
+                  chainId: constants.StarknetChainId.SN_MAIN,
+                  defaultProject: DEFAULT_PROJECT,
+                }}
+              >
+                <ArcadeProvider>
+                  <StarknetProvider>
+                    <OwnershipsProvider>
+                      <CollectionProvider>
+                        <TokenProvider>
+                          <AchievementProvider>
+                            <ActivitiesProvider>
+                              <MetricsProvider>
+                                <SidebarProvider>{children}</SidebarProvider>
+                              </MetricsProvider>
+                            </ActivitiesProvider>
+                          </AchievementProvider>
+                        </TokenProvider>
+                      </CollectionProvider>
+                    </OwnershipsProvider>
+                  </StarknetProvider>
+                </ArcadeProvider>
+              </MarketplaceClientProvider>
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>

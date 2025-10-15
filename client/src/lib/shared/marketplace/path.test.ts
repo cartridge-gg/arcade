@@ -14,13 +14,12 @@ describe("buildMarketplaceTargetPath", () => {
   } as unknown as EditionModel;
 
   it("replaces existing route segments and appends the target collection", () => {
-    const basePath =
-      "/marketplace/game/old-entry/edition/main/player/0xabc/tab/items";
+    const basePath = "/game/old-entry/edition/main/player/0xabc/tab/items";
 
     const target = buildMarketplaceTargetPath(basePath, "0xABC", game, edition);
 
     expect(target).toBe(
-      "/marketplace/game/new-game/edition/special-edition/collection/0xabc",
+      "/game/new-game/edition/special-edition/collection/0xabc",
     );
   });
 

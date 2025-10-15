@@ -167,9 +167,7 @@ describe("useMarketplaceCollectionsViewModel", () => {
       value: "2",
       image: "https://tokens.example/logo.png",
     });
-    expect(item.href).toBe(
-      "/portal/game/my-game/edition/season-one/collection/0x1",
-    );
+    expect(item.href).toBe("/game/my-game/edition/season-one/collection/0x1");
   });
 
   it("marks collection list as empty when edition filter excludes all collections", () => {

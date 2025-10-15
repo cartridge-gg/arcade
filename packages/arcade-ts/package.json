@@ -21,6 +21,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./marketplace": {
+      "types": "./dist/marketplace/index.d.ts",
+      "import": "./dist/marketplace/index.mjs",
+      "require": "./dist/marketplace/index.js"
+    },
+    "./marketplace/react": {
+      "types": "./dist/marketplace/react.d.ts",
+      "import": "./dist/marketplace/react.mjs",
+      "require": "./dist/marketplace/react.js"
     }
   },
   "scripts": {
@@ -63,6 +73,9 @@
     "eventemitter3": "^5.0.1",
     "starknet": "catalog:"
   },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0-0"
+  },
   "devDependencies": {
     "@types/node": "^20.11.10",
     "@types/react": "^19.0.3",
@@ -73,7 +86,8 @@
     "typedoc": "^0.27.0",
     "typedoc-plugin-markdown": "^4.4.1",
     "typescript": "catalog:",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "react": "^18.2.0"
   },
   "importSort": {
     ".js, .jsx, .ts, .tsx": {
