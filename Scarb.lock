@@ -18,6 +18,7 @@ dependencies = [
  "controller",
  "dojo",
  "dojo_cairo_test",
+ "models",
  "openzeppelin_access",
  "openzeppelin_account",
  "openzeppelin_introspection",
@@ -143,6 +144,7 @@ version = "0.0.0"
 dependencies = [
  "dojo",
  "dojo_cairo_test",
+ "models",
  "openzeppelin_introspection",
  "openzeppelin_token",
 ]

@@ -29,6 +29,7 @@ pub mod setup {
         ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
         spawn_test_world,
     };
+    use models::rbac::models::index as rbac_models;
     use openzeppelin_token::erc1155::interface::IERC1155Dispatcher;
     use openzeppelin_token::erc20::interface::IERC20Dispatcher;
     use openzeppelin_token::erc721::interface::IERC721Dispatcher;
@@ -116,7 +117,7 @@ pub mod setup {
                 TestResource::Model(social_models::m_Alliance::TEST_CLASS_HASH),
                 TestResource::Model(social_models::m_Guild::TEST_CLASS_HASH),
                 TestResource::Model(social_models::m_Member::TEST_CLASS_HASH),
-                TestResource::Model(orderbook_models::m_Moderator::TEST_CLASS_HASH),
+                TestResource::Model(rbac_models::m_Moderator::TEST_CLASS_HASH),
                 TestResource::Model(orderbook_models::m_Book::TEST_CLASS_HASH),
                 TestResource::Model(orderbook_models::m_Order::TEST_CLASS_HASH),
                 TestResource::Model(orderbook_models::m_MetadataAttribute::TEST_CLASS_HASH),

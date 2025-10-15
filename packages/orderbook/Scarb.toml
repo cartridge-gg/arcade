@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+models = { path = "../models" }
 dojo.workspace = true
 openzeppelin_introspection.workspace = true
 openzeppelin_token.workspace = true

@@ -32,3 +32,4 @@ pub impl IntoU8Role of core::traits::Into<u8, Role> {
         }
     }
 }
+
