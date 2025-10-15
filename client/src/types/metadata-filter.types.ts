@@ -1,21 +1,19 @@
+import type {
+  ActiveFilters,
+  AvailableFilters,
+  PrecomputedFilterData,
+  PrecomputedFilterProperty,
+} from "@cartridge/arcade/marketplace";
 import type { Token } from "@dojoengine/torii-wasm";
 
+export type {
+  ActiveFilters,
+  AvailableFilters,
+  PrecomputedFilterData,
+  PrecomputedFilterProperty,
+};
+
 export type StatusFilter = "all" | "listed";
-
-export interface PrecomputedFilterProperty {
-  property: string;
-  order: number;
-  count: number;
-}
-
-export interface PrecomputedFilterData {
-  attributes: string[];
-  properties: Record<string, PrecomputedFilterProperty[]>;
-}
-
-export type ActiveFilters = Record<string, Set<string>>;
-
-export type AvailableFilters = Record<string, Record<string, number>>;
 
 export interface UseMetadataFiltersInput {
   tokens: Token[];
