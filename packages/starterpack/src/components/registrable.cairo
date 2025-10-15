@@ -44,10 +44,7 @@ pub mod RegistrableComponent {
         ) -> u32 {
             let mut store = StoreTrait::new(world);
 
-            assert(
-                referral_percentage <= MAX_REFERRAL_FEE,
-                'Starterpack: referral too high',
-            );
+            assert(referral_percentage <= MAX_REFERRAL_FEE, 'Starterpack: referral too high');
 
             let starterpack_id = world.dispatcher.uuid();
 
@@ -106,10 +103,7 @@ pub mod RegistrableComponent {
             starterpack.assert_is_owner(caller);
 
             // [Check] Referral percentage is valid
-            assert(
-                referral_percentage <= MAX_REFERRAL_FEE,
-                'Starterpack: referral too high',
-            );
+            assert(referral_percentage <= MAX_REFERRAL_FEE, 'Starterpack: referral too high');
 
             // [Effect] Update starterpack fields
             starterpack.implementation = implementation;

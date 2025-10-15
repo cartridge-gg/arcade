@@ -18,13 +18,13 @@ pub mod IssuableComponent {
         IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
     };
     use starterpack::models::config::ConfigTrait;
-    use starterpack::models::issuance::{IssuanceAssert, IssuanceTrait};
-    use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
-    use starterpack::models::referral_reward::ReferralRewardTrait;
     use starterpack::models::group_reward::GroupRewardTrait;
+    use starterpack::models::issuance::{IssuanceAssert, IssuanceTrait};
+    use starterpack::models::referral_reward::ReferralRewardTrait;
+    use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
     use starterpack::store::{
-        ConfigStoreTrait, IssuanceStoreTrait, StarterpackStoreTrait, StoreTrait,
-        ReferralRewardStoreTrait, GroupRewardStoreTrait,
+        ConfigStoreTrait, GroupRewardStoreTrait, IssuanceStoreTrait, ReferralRewardStoreTrait,
+        StarterpackStoreTrait, StoreTrait,
     };
 
     // Storage

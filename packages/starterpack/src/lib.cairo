@@ -12,11 +12,11 @@ pub mod events {
 
 pub mod models {
     pub mod config;
+    pub mod group_reward;
     pub mod index;
     pub mod issuance;
-    pub mod starterpack;
     pub mod referral_reward;
-    pub mod group_reward;
+    pub mod starterpack;
 }
 
 pub mod components {

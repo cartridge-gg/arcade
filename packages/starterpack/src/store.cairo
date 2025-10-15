@@ -2,15 +2,15 @@
 
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
-use starknet::ContractAddress;
 
 // Re-export shared RBAC types
 pub use models::rbac::models::index::Moderator;
 pub use models::rbac::store::ModeratorStoreTrait;
+use starknet::ContractAddress;
 
 // Internal imports
 
-use starterpack::models::index::{Config, Issuance, Starterpack, ReferralReward, GroupReward};
+use starterpack::models::index::{Config, GroupReward, Issuance, ReferralReward, Starterpack};
 
 // Store trait
 

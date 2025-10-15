@@ -3,18 +3,18 @@ pub mod ManageableComponent {
     // Dojo imports
 
     use dojo::world::WorldStorage;
+
+    // Shared RBAC imports
+    use models::rbac::models::moderator::{ModeratorAssert, ModeratorTrait};
+    use models::rbac::store::ModeratorStoreTrait;
+    use models::rbac::types::role::Role;
     use starknet::ContractAddress;
 
     // Internal imports
 
     use starterpack::constants::CONFIG_ID;
-    use starterpack::models::config::{ConfigAssert, ConfigTrait, ConfigAssertTrait};
+    use starterpack::models::config::{ConfigAssert, ConfigAssertTrait, ConfigTrait};
     use starterpack::store::{ConfigStoreTrait, StoreTrait};
-    
-    // Shared RBAC imports
-    use models::rbac::models::moderator::{ModeratorAssert, ModeratorTrait};
-    use models::rbac::store::ModeratorStoreTrait;
-    use models::rbac::types::role::Role;
 
     // Storage
 
@@ -41,7 +41,7 @@ pub mod ManageableComponent {
             // [Effect] Initialize moderator
             let moderator = ModeratorTrait::new(owner.into(), Role::Owner);
             ModeratorStoreTrait::set_moderator(world, @moderator);
-            
+
             // [Effect] Initialize config
             let mut store = StoreTrait::new(world);
             let config = ConfigTrait::new(CONFIG_ID, protocol_fee, fee_receiver);
@@ -68,7 +68,9 @@ pub mod ManageableComponent {
         }
 
         fn revoke_role(
-            self: @ComponentState<TContractState>, mut world: WorldStorage, account: ContractAddress,
+            self: @ComponentState<TContractState>,
+            mut world: WorldStorage,
+            account: ContractAddress,
         ) {
             // [Check] Caller is allowed
             let caller_address: felt252 = starknet::get_caller_address().into();
@@ -98,9 +100,7 @@ pub mod ManageableComponent {
         }
 
         fn set_fee_receiver(
-            self: @ComponentState<TContractState>,
-            world: WorldStorage,
-            receiver: ContractAddress,
+            self: @ComponentState<TContractState>, world: WorldStorage, receiver: ContractAddress,
         ) {
             // [Check] Caller is allowed
             let caller_address: felt252 = starknet::get_caller_address().into();
