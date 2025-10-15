@@ -12,10 +12,10 @@ import {
   UserCheckIcon,
 } from "@cartridge/ui";
 import { ActivityScene } from "../scenes/activity";
-import { ArcadeTabs } from "../modules";
+import { ArcadeTabs } from "../ui/modules/tabs";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useAddress } from "@/hooks/address";
-import AchievementPlayerHeader from "../modules/player-header";
+import AchievementPlayerHeader from "../ui/modules/player-header";
 import { UserAvatar } from "../user/avatar";
 import { useAccount } from "@starknet-react/core";
 import { useArcade } from "@/hooks/arcade";
@@ -23,7 +23,7 @@ import type ControllerConnector from "@cartridge/connector/controller";
 import { getChecksumAddress } from "starknet";
 import { toast } from "sonner";
 import { useProject } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
+import { joinPaths } from "@/lib/helpers";
 import { PositionsScene } from "../scenes/positions";
 import { useAccountByAddress, useAccountsByAddresses } from "@/collections";
 

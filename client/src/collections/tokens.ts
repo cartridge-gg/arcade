@@ -91,7 +91,7 @@ export const tokenContractsCollection = createCollection(
             image = await fetchTokenImage(
               enrichedContract as Token,
               DEFAULT_PROJECT,
-              false,
+              true,
             );
           } else {
             image = await fetchContractImage(contract, DEFAULT_PROJECT);

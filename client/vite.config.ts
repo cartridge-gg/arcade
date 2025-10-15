@@ -4,7 +4,14 @@ import react from "@vitejs/plugin-react-swc";
 import topLevelAwait from "vite-plugin-top-level-await";
 import process from "node:process";
 import mkcert from "vite-plugin-mkcert";
+import { VitePWA } from "vite-plugin-pwa";
+import vercel from "vite-plugin-vercel";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
+
+const resolveFromRoot = (path: string) =>
+  resolve(fileURLToPath(new URL(".", import.meta.url)), path);
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,13 +21,51 @@ export default defineConfig({
     wasm(),
     topLevelAwait(),
     mkcert(),
+    vercel(),
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["favicon.svg", "favicon.ico", "robots.txt"],
+      workbox: {
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
+        mode: "development",
+      },
+      manifest: {
+        name: "Arcade",
+        short_name: "Arcade",
+        description:
+          "Arcade is a gaming platform to browse through games and players.",
+        theme_color: "#FBCB4A",
+        background_color: "#161A17",
+        display: "standalone",
+        orientation: "portrait",
+        start_url: "/",
+        icons: [
+          {
+            src: "icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
+            src: "icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+        ],
+      },
+    }),
   ],
   server: {
     port: process.env.NODE_ENV === "development" ? 3003 : undefined,
   },
   resolve: {
     alias: {
-      "@": "/src",
+      "@": resolveFromRoot("src"),
     },
   },
   root: "./",
@@ -38,4 +83,19 @@ export default defineConfig({
     },
   },
   publicDir: "public",
+  // SSR Configuration
+  ssr: {
+    noExternal: [
+      "@cartridge/arcade",
+      "@cartridge/connector",
+      "@cartridge/controller",
+      "@cartridge/penpal",
+      "@cartridge/presets",
+      "@dojoengine/sdk",
+      "@dojoengine/torii-wasm",
+      "@starknet-react/chains",
+      "@starknet-react/core",
+    ],
+    external: ["@cartridge/ui", "posthog-js"],
+  },
 });

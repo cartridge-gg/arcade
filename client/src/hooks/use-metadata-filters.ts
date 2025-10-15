@@ -1,18 +1,163 @@
-import { useEffect, useMemo, useCallback, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
+import { useMetadata } from "@/queries";
 import {
-  buildMetadataIndex,
-  calculateFilterCounts,
-  serializeFiltersToURL,
   parseFiltersFromURL,
-} from "@/utils/metadata-indexer";
+  serializeFiltersToURL,
+} from "@/utils/marketplace-filters";
 import type {
+  ActiveFilters,
+  AvailableFilters,
+  PrecomputedFilterData,
+  StatusFilter,
   UseMetadataFiltersInput,
   UseMetadataFiltersReturn,
-  ActiveFilters,
-  StatusFilter,
 } from "@/types/metadata-filter.types";
+
+const DEFAULT_STATUS_FILTER: StatusFilter = "all";
+
+const tokenMatchesFilters = (
+  token: UseMetadataFiltersInput["tokens"][number],
+  activeFilters: ActiveFilters,
+) => {
+  const entries = Object.entries(activeFilters);
+  if (entries.length === 0) {
+    return true;
+  }
+
+  const metadata =
+    typeof token.metadata === "string"
+      ? (() => {
+          try {
+            return JSON.parse(token.metadata as unknown as string);
+          } catch {
+            return null;
+          }
+        })()
+      : token.metadata;
+
+  const attributes = Array.isArray((metadata as any)?.attributes)
+    ? (metadata as any).attributes
+    : [];
+
+  if (!attributes.length) {
+    return false;
+  }
+
+  const traitMap = new Map<string, Set<string>>();
+
+  for (const attribute of attributes) {
+    if (
+      !attribute ||
+      !attribute.trait_type ||
+      attribute.value === undefined ||
+      attribute.value === null
+    ) {
+      continue;
+    }
+
+    const trait = attribute.trait_type as string;
+    const value = String(attribute.value);
+
+    if (!traitMap.has(trait)) {
+      traitMap.set(trait, new Set());
+    }
+
+    traitMap.get(trait)!.add(value);
+  }
+
+  for (const [trait, values] of entries) {
+    const availableValues = traitMap.get(trait);
+    if (!availableValues) {
+      return false;
+    }
+
+    let matches = false;
+    for (const value of values) {
+      if (availableValues.has(value)) {
+        matches = true;
+        break;
+      }
+    }
+
+    if (!matches) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const buildAvailableFilters = (
+  metadata: Array<{ traitName: string; traitValue: string; count: number }>,
+  activeFilters: ActiveFilters,
+): AvailableFilters => {
+  const result: AvailableFilters = {};
+
+  for (const entry of metadata) {
+    const trait = entry.traitName;
+    const value = entry.traitValue;
+
+    if (!trait || value === undefined || value === null) continue;
+
+    if (!result[trait]) {
+      result[trait] = {};
+    }
+
+    result[trait][value] = entry.count;
+  }
+
+  for (const [trait, values] of Object.entries(activeFilters)) {
+    if (!result[trait]) {
+      result[trait] = {};
+    }
+
+    for (const value of values) {
+      if (result[trait][value] === undefined) {
+        result[trait][value] = 0;
+      }
+    }
+  }
+
+  return result;
+};
+
+const buildPrecomputed = (
+  availableFilters: AvailableFilters,
+): PrecomputedFilterData => {
+  const attributes = Object.keys(availableFilters).sort((a, b) =>
+    a.localeCompare(b),
+  );
+
+  const properties = attributes.reduce<PrecomputedFilterData["properties"]>(
+    (acc, attribute) => {
+      const entries = Object.entries(availableFilters[attribute] ?? {}).map(
+        ([value, count]) => ({
+          property: value,
+          order: count,
+          count,
+        }),
+      );
+
+      entries.sort((a, b) => {
+        if (b.order !== a.order) {
+          return b.order - a.order;
+        }
+        return a.property.localeCompare(b.property);
+      });
+
+      acc[attribute] = entries;
+      return acc;
+    },
+    {},
+  );
+
+  return {
+    attributes,
+    properties,
+  };
+};
 
 export function useMetadataFilters({
   tokens,
@@ -21,183 +166,150 @@ export function useMetadataFilters({
 }: UseMetadataFiltersInput): UseMetadataFiltersReturn {
   const navigate = useNavigate();
   const { location } = useRouterState();
-  const searchParams = useMemo(() => {
-    return new URLSearchParams(location.searchStr ?? "");
-  }, [location.searchStr]);
-  const setSearchParams = useCallback(
-    (params: URLSearchParams, options?: { replace?: boolean }) => {
-      const payload: Record<string, string> = {};
-      params.forEach((value, key) => {
-        if (value) {
-          payload[key] = value;
-        }
-      });
-      navigate({
-        to: location.pathname,
-        search: payload,
-        replace: options?.replace,
-      });
-    },
-    [navigate, location.pathname],
+  const searchParams = useMemo(
+    () => new URLSearchParams(location.searchStr ?? ""),
+    [location.searchStr],
   );
-  const [isLoading, setIsLoading] = useState(false);
 
   const {
-    getCollectionState,
-    setMetadataIndex,
-    setActiveFilters,
+    collections,
+    replaceFilters,
     toggleFilter,
     removeFilter: storeRemoveFilter,
     clearFilters,
-    updateAvailableFilters,
-    getFilteredTokenIds,
     setStatusFilter: storeSetStatusFilter,
-    getStatusFilter,
   } = useMetadataFilterStore();
 
-  const collectionState = getCollectionState(collectionAddress);
+  const collectionState = collections[collectionAddress];
+  const activeFilters = collectionState?.activeFilters ?? {};
+  const statusFilter = collectionState?.statusFilter ?? DEFAULT_STATUS_FILTER;
 
-  // Build metadata index when tokens change
-  useEffect(() => {
-    if (!enabled || !tokens || tokens.length === 0) return;
-
-    setIsLoading(true);
-
-    // Use requestIdleCallback for large collections to avoid blocking UI
-    const buildIndex = () => {
-      const index = buildMetadataIndex(tokens);
-      setMetadataIndex(collectionAddress, index);
-      setIsLoading(false);
-    };
-
-    if (tokens.length > 1000 && "requestIdleCallback" in window) {
-      const handle = window.requestIdleCallback(buildIndex);
-      return () => window.cancelIdleCallback(handle);
-    }
-    buildIndex();
-  }, [tokens, collectionAddress, enabled, setMetadataIndex]);
-
-  // Initialize filters from URL on mount - use ref to track if already initialized
-  const hasInitialized = useRef(false);
+  const hasSyncedFromURL = useRef(false);
 
   useEffect(() => {
-    if (!enabled || hasInitialized.current) return;
+    if (!enabled || hasSyncedFromURL.current) return;
 
     const filterParam = searchParams.get("filters");
+
     if (filterParam) {
       const parsedFilters = parseFiltersFromURL(filterParam);
-      setActiveFilters(collectionAddress, parsedFilters);
+      replaceFilters(collectionAddress, parsedFilters);
+    } else if (!collectionState) {
+      replaceFilters(collectionAddress, {});
     }
-    hasInitialized.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionAddress, enabled]); // Only on mount/collection change - intentionally omit other deps
 
-  // Get current state
-  const metadataIndex = collectionState?.metadataIndex || {};
-  const activeFilters = collectionState?.activeFilters || {};
-  const precomputed = collectionState?.precomputed;
-  const statusFilter: StatusFilter =
-    collectionState?.statusFilter || getStatusFilter(collectionAddress);
+    hasSyncedFromURL.current = true;
+  }, [
+    collectionAddress,
+    collectionState,
+    enabled,
+    replaceFilters,
+    searchParams,
+  ]);
 
-  // Calculate filtered tokens
+  const prevSerializedFilters = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (!hasSyncedFromURL.current) return;
+
+    const serialized = serializeFiltersToURL(activeFilters);
+    if (prevSerializedFilters.current === serialized) return;
+
+    prevSerializedFilters.current = serialized;
+
+    const nextParams = new URLSearchParams(location.searchStr ?? "");
+
+    if (serialized) {
+      nextParams.set("filters", serialized);
+    } else {
+      nextParams.delete("filters");
+    }
+
+    const payload: Record<string, string> = {};
+    nextParams.forEach((value, key) => {
+      if (value) {
+        payload[key] = value;
+      }
+    });
+
+    navigate({
+      to: location.pathname,
+      search: payload,
+      replace: true,
+    });
+  }, [activeFilters, enabled, navigate, location.pathname, location.searchStr]);
+
+  const selectedTraits = useMemo(() => {
+    return Object.entries(activeFilters).flatMap(([trait, values]) =>
+      Array.from(values).map((value) => ({ name: trait, value })),
+    );
+  }, [activeFilters]);
+
+  const metadataQuery = useMetadata({
+    contractAddress: collectionAddress,
+    traits: selectedTraits,
+    enabled: enabled && !!collectionAddress,
+  });
+
+  const metadata = Array.isArray(metadataQuery.data) ? metadataQuery.data : [];
+
+  const availableFilters = useMemo(
+    () => buildAvailableFilters(metadata, activeFilters),
+    [metadata, activeFilters],
+  );
+
+  const precomputed = useMemo(
+    () => buildPrecomputed(availableFilters),
+    [availableFilters],
+  );
+
   const filteredTokens = useMemo(() => {
-    if (!enabled || !tokens) return tokens || [];
-
-    const filteredIds = getFilteredTokenIds(collectionAddress);
-    if (filteredIds.length === 0 && Object.keys(activeFilters).length === 0) {
-      // No filters active, return all tokens
+    if (!enabled) {
       return tokens;
     }
 
-    const idSet = new Set(filteredIds);
-    return tokens.filter(
-      (token) => token.token_id && idSet.has(token.token_id),
-    );
-  }, [tokens, collectionAddress, enabled, getFilteredTokenIds, activeFilters]);
-
-  // Calculate available filters with counts
-  const availableFilters = useMemo(() => {
-    if (!enabled || Object.keys(metadataIndex).length === 0) {
-      return {};
+    if (!tokens || tokens.length === 0) {
+      return tokens;
     }
 
     if (Object.keys(activeFilters).length === 0) {
-      // No filters active, show counts for all tokens
-      return calculateFilterCounts(metadataIndex);
+      return tokens;
     }
-    // Filters active, calculate filtered IDs directly to avoid dependency on filteredTokens
-    const filteredIds = getFilteredTokenIds(collectionAddress);
-    return calculateFilterCounts(metadataIndex, filteredIds);
-  }, [
-    collectionAddress,
-    enabled,
-    getFilteredTokenIds,
-    metadataIndex,
-    activeFilters,
-  ]);
 
-  // Update available filters in store - use useRef to prevent infinite loops
-  const prevAvailableFilters = useRef(availableFilters);
-  useEffect(() => {
-    if (
-      JSON.stringify(prevAvailableFilters.current) !==
-      JSON.stringify(availableFilters)
-    ) {
-      prevAvailableFilters.current = availableFilters;
-      updateAvailableFilters(collectionAddress, availableFilters);
-    }
-  }, [availableFilters, collectionAddress, updateAvailableFilters]);
+    return tokens.filter((token) => tokenMatchesFilters(token, activeFilters));
+  }, [tokens, activeFilters, enabled]);
 
-  // Update URL when filters change - use useRef to track previous value
-  const prevActiveFilters = useRef<ActiveFilters>({});
-  useEffect(() => {
-    if (!enabled) return;
-
-    const currentFilterParam = searchParams.get("filters");
-    const newFilterParam = serializeFiltersToURL(activeFilters);
-
-    // Only update if filters actually changed (not just reference)
-    if (
-      JSON.stringify(prevActiveFilters.current) !==
-      JSON.stringify(activeFilters)
-    ) {
-      prevActiveFilters.current = activeFilters;
-
-      if (currentFilterParam !== newFilterParam) {
-        if (newFilterParam) {
-          searchParams.set("filters", newFilterParam);
-        } else {
-          searchParams.delete("filters");
-        }
-        setSearchParams(searchParams, { replace: true });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFilters, enabled]);
-
-  // Action: Set filter
   const setFilter = useCallback(
     (trait: string, value: string) => {
       if (!enabled) return;
+      if (activeFilters[trait]?.has(value)) return;
       toggleFilter(collectionAddress, trait, value);
     },
-    [collectionAddress, enabled, toggleFilter],
+    [activeFilters, collectionAddress, enabled, toggleFilter],
   );
 
-  // Action: Remove filter
   const removeFilter = useCallback(
     (trait: string, value?: string) => {
       if (!enabled) return;
+      if (!activeFilters[trait]) return;
+
+      if (value === undefined) {
+        if (activeFilters[trait].size === 0) return;
+        storeRemoveFilter(collectionAddress, trait);
+        return;
+      }
+
+      if (!activeFilters[trait].has(value)) return;
       storeRemoveFilter(collectionAddress, trait, value);
     },
-    [collectionAddress, enabled, storeRemoveFilter],
+    [activeFilters, collectionAddress, enabled, storeRemoveFilter],
   );
 
-  // Action: Clear all filters
   const clearAllFilters = useCallback(() => {
     if (!enabled) return;
     clearFilters(collectionAddress);
-  }, [collectionAddress, enabled, clearFilters]);
+  }, [clearFilters, collectionAddress, enabled]);
 
   const setStatusFilter = useCallback(
     (status: StatusFilter) => {
@@ -206,15 +318,15 @@ export function useMetadataFilters({
     [collectionAddress, storeSetStatusFilter],
   );
 
-  // Check if results are empty
   const isEmpty =
     filteredTokens.length === 0 && Object.keys(activeFilters).length > 0;
+
+  const isLoading = metadataQuery.isLoading || metadataQuery.isFetching;
 
   return {
     filteredTokens,
     activeFilters,
     availableFilters,
-    metadataIndex,
     precomputed,
     statusFilter,
     setStatusFilter,

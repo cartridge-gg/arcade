@@ -1,14 +1,14 @@
 import { type ReactNode, useEffect } from "react";
-import { Games } from "@/components/games";
+import { GamesContainer } from "@/features/games";
+import { MarketplaceFiltersContainer } from "@/features/marketplace/filters";
+import { HeaderContainer } from "@/features/header";
 import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
-import { Header } from "./header";
 import { useProject } from "@/hooks/project";
 import { ThemeProvider } from "@/context/theme";
 import { useArcade } from "@/hooks/arcade";
 import { useDevice } from "@/hooks/device";
-import { Filters } from "./filters";
 import { UserCard } from "./user/user-card";
 
 interface TemplateProps {
@@ -52,7 +52,11 @@ export function Template({ children }: TemplateProps) {
             <div className="lg:space-y-4 h-full flex flex-col">
               {!isMobile && <UserCard />}
               <div className="flex-1 overflow-hidden">
-                {!collection ? <Games /> : <Filters />}
+                {!collection ? (
+                  <GamesContainer />
+                ) : (
+                  <MarketplaceFiltersContainer />
+                )}
               </div>
             </div>
 
@@ -69,7 +73,7 @@ export function Template({ children }: TemplateProps) {
               onTouchMove={handleTouchMove}
             >
               <div className="lg:hidden w-full p-3">
-                <Header />
+                <HeaderContainer />
               </div>
               <div
                 className={cn(

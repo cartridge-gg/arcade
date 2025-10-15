@@ -7,7 +7,13 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["tsconfig*.json", "dist/**", "node_modules/**", "public/**"]
+    "ignore": [
+      "tsconfig*.json",
+      "dist/**",
+      "node_modules/**",
+      "public/**",
+      "src/*.gen.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
