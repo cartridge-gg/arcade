@@ -11,7 +11,7 @@ pub mod setup {
     use arcade::systems::registry::{IRegistryDispatcher, Registry};
     use arcade::systems::slot::{ISlotDispatcher, Slot};
     use arcade::systems::social::{ISocialDispatcher, Social};
-    use arcade::systems::starterpack::{IStarterpackDispatcher, StarterpackSystem};
+    use arcade::systems::starterpack::{IStarterpackRegistryDispatcher, StarterpackRegistry};
     use arcade::systems::wallet::{IWalletDispatcher, Wallet};
     use arcade::tests::mocks::account::Account;
     use arcade::tests::mocks::collection::Collection;
@@ -85,7 +85,7 @@ pub mod setup {
         pub social: ISocialDispatcher,
         pub wallet: IWalletDispatcher,
         pub marketplace: IMarketplaceDispatcher,
-        pub starterpack: IStarterpackDispatcher,
+        pub starterpack: IStarterpackRegistryDispatcher,
         pub starterpack_admin: IAdministrationDispatcher,
         pub starterpack_impl: ContractAddress,
         pub erc20: IERC20Dispatcher,
@@ -149,7 +149,7 @@ pub mod setup {
                 TestResource::Contract(Social::TEST_CLASS_HASH),
                 TestResource::Contract(Wallet::TEST_CLASS_HASH),
                 TestResource::Contract(Marketplace::TEST_CLASS_HASH),
-                TestResource::Contract(StarterpackSystem::TEST_CLASS_HASH),
+                TestResource::Contract(StarterpackRegistry::TEST_CLASS_HASH),
             ]
                 .span(),
         }
@@ -174,7 +174,7 @@ pub mod setup {
             ContractDefTrait::new(@NAMESPACE(), @"Marketplace")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(array![0x1, 0x1F4, receiver.into(), OWNER().into()].span()),
-            ContractDefTrait::new(@NAMESPACE(), @"StarterpackSystem")
+            ContractDefTrait::new(@NAMESPACE(), @"StarterpackRegistry")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(array![].span()),
         ]
@@ -248,7 +248,7 @@ pub mod setup {
         let (social_address, _) = world.dns(@"Social").unwrap();
         let (wallet_address, _) = world.dns(@"Wallet").unwrap();
         let (marketplace_address, _) = world.dns(@"Marketplace").unwrap();
-        let (starterpack_address, _) = world.dns(@"StarterpackSystem").unwrap();
+        let (starterpack_address, _) = world.dns(@"StarterpackRegistry").unwrap();
         let starterpack_impl = setup_starterpack_impl();
         let systems = Systems {
             registry: IRegistryDispatcher { contract_address: registry_address },
@@ -256,7 +256,7 @@ pub mod setup {
             social: ISocialDispatcher { contract_address: social_address },
             wallet: IWalletDispatcher { contract_address: wallet_address },
             marketplace: IMarketplaceDispatcher { contract_address: marketplace_address },
-            starterpack: IStarterpackDispatcher { contract_address: starterpack_address },
+            starterpack: IStarterpackRegistryDispatcher { contract_address: starterpack_address },
             starterpack_admin: IAdministrationDispatcher { contract_address: starterpack_address },
             starterpack_impl: starterpack_impl,
             erc20: setup_erc20(context.spender),

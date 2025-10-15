@@ -1,7 +1,7 @@
 // Internal imports
 
 use arcade::systems::starterpack::{
-    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata,
+    IAdministrationDispatcherTrait, IStarterpackRegistryDispatcherTrait, StarterPackMetadata,
 };
 use arcade::tests::setup::setup::{OWNER, RECEIVER, spawn};
 use starknet::testing;

@@ -32,7 +32,7 @@ pub trait IAdministration<TContractState> {
 
 
 #[starknet::interface]
-pub trait IStarterpack<TContractState> {
+pub trait IStarterpackRegistry<TContractState> {
     fn quote(self: @TContractState, starterpack_id: u32, has_referrer: bool) -> StarterpackQuote;
     fn register(
         ref self: TContractState,
@@ -70,10 +70,10 @@ pub trait IStarterpack<TContractState> {
 
 
 #[dojo::contract]
-pub mod StarterpackSystem {
-    use starknet::ContractAddress;
+pub mod StarterpackRegistry {
     use arcade::constants::NAMESPACE;
     use dojo::world::WorldStorage;
+    use starknet::ContractAddress;
 
     // Component imports
     use starterpack::components::issuable::IssuableComponent;
@@ -82,7 +82,7 @@ pub mod StarterpackSystem {
     use starterpack::constants::CONFIG_ID;
     use starterpack::models::config::ConfigTrait;
     use starterpack::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
-    use super::{IAdministration, IStarterpack, StarterPackMetadata, StarterpackQuote};
+    use super::{IAdministration, IStarterpackRegistry, StarterPackMetadata, StarterpackQuote};
 
     // Components
     component!(path: IssuableComponent, storage: issuable, event: IssuableEvent);
@@ -148,7 +148,7 @@ pub mod StarterpackSystem {
     }
 
     #[abi(embed_v0)]
-    impl StarterpackImpl of IStarterpack<ContractState> {
+    impl StarterpackImpl of IStarterpackRegistry<ContractState> {
         fn quote(
             self: @ContractState, starterpack_id: u32, has_referrer: bool,
         ) -> StarterpackQuote {

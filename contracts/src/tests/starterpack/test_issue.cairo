@@ -1,7 +1,7 @@
 // Internal imports
 
 use arcade::systems::starterpack::{
-    IAdministrationDispatcherTrait, IStarterpackDispatcherTrait, StarterPackMetadata,
+    IAdministrationDispatcherTrait, IStarterpackRegistryDispatcherTrait, StarterPackMetadata,
 };
 use arcade::tests::setup::setup::{OWNER, PLAYER, RECEIVER, spawn};
 use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
