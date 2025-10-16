@@ -1,7 +1,7 @@
 // Internal imports
 
 use arcade::systems::starterpack::{IStarterpackRegistryDispatcherTrait, StarterPackMetadata};
-use arcade::tests::setup::setup::{OWNER, PLAYER, RECEIVER, spawn};
+use arcade::tests::setup::setup::{OWNER, PLAYER, spawn};
 use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
 use starterpack::constants::FEE_DENOMINATOR;
@@ -42,7 +42,7 @@ fn test_sp_fees_distribution_no_referrer() {
     // [Record] Initial balances
     let spender_initial = systems.erc20.balance_of(context.spender);
     let creator_initial = systems.erc20.balance_of(context.creator);
-    let receiver_initial = systems.erc20.balance_of(RECEIVER());
+    let receiver_initial = systems.erc20.balance_of(context.receiver);
 
     // [Issue] Without referrer
     testing::set_contract_address(context.spender);
@@ -104,7 +104,7 @@ fn test_sp_fees_distribution_with_referrer() {
     // [Record] Initial balances
     let spender_initial = systems.erc20.balance_of(context.spender);
     let creator_initial = systems.erc20.balance_of(context.creator);
-    let receiver_initial = systems.erc20.balance_of(RECEIVER());
+    let receiver_initial = systems.erc20.balance_of(context.receiver);
     let referrer_initial = systems.erc20.balance_of(context.holder);
 
     // [Issue] With referrer
