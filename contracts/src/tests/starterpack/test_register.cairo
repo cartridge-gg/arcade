@@ -1,9 +1,9 @@
 // Internal imports
 
 use arcade::systems::starterpack::{
-    IAdministrationDispatcherTrait, IStarterpackRegistryDispatcherTrait, StarterPackMetadata,
+    IStarterpackRegistryDispatcherTrait, StarterPackMetadata,
 };
-use arcade::tests::setup::setup::{OWNER, RECEIVER, spawn};
+use arcade::tests::setup::setup::{OWNER, spawn};
 use starknet::testing;
 use starterpack::models::index::Starterpack;
 use starterpack::store::{StarterpackStoreTrait, StoreTrait};
@@ -24,9 +24,6 @@ fn test_sp_register() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
@@ -69,9 +66,6 @@ fn test_sp_register_invalid_referral_percentage() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] With invalid referral percentage (>50%)
     testing::set_contract_address(context.creator);
@@ -98,9 +92,6 @@ fn test_sp_register_multiple_starterpacks() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] First starterpack
     testing::set_contract_address(context.creator);

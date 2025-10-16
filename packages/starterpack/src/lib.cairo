@@ -20,6 +20,7 @@ pub mod models {
 }
 
 pub mod components {
+    pub mod initializable;
     pub mod issuable;
     pub mod manageable;
     pub mod registrable;

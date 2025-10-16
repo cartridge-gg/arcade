@@ -176,7 +176,7 @@ pub mod setup {
                 .with_init_calldata(array![0x1, 0x1F4, receiver.into(), OWNER().into()].span()),
             ContractDefTrait::new(@NAMESPACE(), @"StarterpackRegistry")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
-                .with_init_calldata(array![].span()),
+                .with_init_calldata(array![5, receiver.into(), OWNER().into()].span()), // protocol_fee=5%, fee_receiver, owner
         ]
             .span()
     }

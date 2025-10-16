@@ -18,12 +18,6 @@ pub struct StarterpackQuote {
 
 #[starknet::interface]
 pub trait IAdministration<TContractState> {
-    fn initialize(
-        ref self: TContractState,
-        protocol_fee: u8,
-        fee_receiver: ContractAddress,
-        owner: ContractAddress,
-    );
     fn grant_role(ref self: TContractState, account: ContractAddress, role_id: u8);
     fn revoke_role(ref self: TContractState, account: ContractAddress);
     fn set_protocol_fee(ref self: TContractState, fee_percentage: u8);
@@ -76,6 +70,7 @@ pub mod StarterpackRegistry {
     use starknet::ContractAddress;
 
     // Component imports
+    use starterpack::components::initializable::InitializableComponent;
     use starterpack::components::issuable::IssuableComponent;
     use starterpack::components::manageable::ManageableComponent;
     use starterpack::components::registrable::RegistrableComponent;
@@ -85,6 +80,8 @@ pub mod StarterpackRegistry {
     use super::{IAdministration, IStarterpackRegistry, StarterPackMetadata, StarterpackQuote};
 
     // Components
+    component!(path: InitializableComponent, storage: initializable, event: InitializableEvent);
+    impl InitializableImpl = InitializableComponent::InternalImpl<ContractState>;
     component!(path: IssuableComponent, storage: issuable, event: IssuableEvent);
     impl IssuableImpl = IssuableComponent::InternalImpl<ContractState>;
     component!(path: ManageableComponent, storage: manageable, event: ManageableEvent);
@@ -94,6 +91,8 @@ pub mod StarterpackRegistry {
 
     #[storage]
     struct Storage {
+        #[substorage(v0)]
+        initializable: InitializableComponent::Storage,
         #[substorage(v0)]
         issuable: IssuableComponent::Storage,
         #[substorage(v0)]
@@ -107,6 +106,8 @@ pub mod StarterpackRegistry {
     #[derive(Drop, starknet::Event)]
     enum Event {
         #[flat]
+        InitializableEvent: InitializableComponent::Event,
+        #[flat]
         IssuableEvent: IssuableComponent::Event,
         #[flat]
         ManageableEvent: ManageableComponent::Event,
@@ -114,18 +115,18 @@ pub mod StarterpackRegistry {
         RegistrableEvent: RegistrableComponent::Event,
     }
 
+    // Constructor
+    fn dojo_init(
+        ref self: ContractState,
+        protocol_fee: u8,
+        fee_receiver: ContractAddress,
+        owner: ContractAddress,
+    ) {
+        self.initializable.initialize(self.world_storage(), protocol_fee, fee_receiver, owner);
+    }
+
     #[abi(embed_v0)]
     impl AdministrationImpl of IAdministration<ContractState> {
-        fn initialize(
-            ref self: ContractState,
-            protocol_fee: u8,
-            fee_receiver: ContractAddress,
-            owner: ContractAddress,
-        ) {
-            let world = self.world_storage();
-            self.manageable.initialize(world, protocol_fee, fee_receiver, owner);
-        }
-
         fn grant_role(ref self: ContractState, account: ContractAddress, role_id: u8) {
             let world = self.world_storage();
             self.manageable.grant_role(world, account, role_id);

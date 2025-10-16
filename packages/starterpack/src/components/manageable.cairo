@@ -31,23 +31,6 @@ pub mod ManageableComponent {
     pub impl InternalImpl<
         TContractState, +HasComponent<TContractState>,
     > of InternalTrait<TContractState> {
-        fn initialize(
-            self: @ComponentState<TContractState>,
-            mut world: WorldStorage,
-            protocol_fee: u8,
-            fee_receiver: ContractAddress,
-            owner: ContractAddress,
-        ) {
-            // [Effect] Initialize moderator
-            let moderator = ModeratorTrait::new(owner.into(), Role::Owner);
-            ModeratorStoreTrait::set_moderator(world, @moderator);
-
-            // [Effect] Initialize config
-            let mut store = StoreTrait::new(world);
-            let config = ConfigTrait::new(CONFIG_ID, protocol_fee, fee_receiver);
-            store.set_config(@config);
-        }
-
         fn grant_role(
             self: @ComponentState<TContractState>,
             mut world: WorldStorage,

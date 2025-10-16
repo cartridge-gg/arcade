@@ -1,9 +1,9 @@
 // Internal imports
 
 use arcade::systems::starterpack::{
-    IAdministrationDispatcherTrait, IStarterpackRegistryDispatcherTrait, StarterPackMetadata,
+    IStarterpackRegistryDispatcherTrait, StarterPackMetadata,
 };
-use arcade::tests::setup::setup::{OWNER, PLAYER, RECEIVER, spawn};
+use arcade::tests::setup::setup::{OWNER, PLAYER, spawn};
 use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
 use starterpack::models::index::{GroupReward, ReferralReward, Starterpack};
@@ -26,10 +26,6 @@ fn test_sp_issue() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
-    testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
@@ -73,10 +69,6 @@ fn test_sp_issue_with_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -125,9 +117,6 @@ fn test_sp_issue_not_reissuable() {
     // [Initialize]
     testing::set_contract_address(OWNER());
     testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] Non-reissuable starterpack
     testing::set_contract_address(context.creator);
@@ -176,9 +165,6 @@ fn test_sp_issue_reissuable() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
@@ -233,9 +219,6 @@ fn test_sp_issue_paused() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -277,10 +260,6 @@ fn test_sp_referral_reward_tracking() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -328,10 +307,6 @@ fn test_sp_group_reward_tracking() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -380,10 +355,6 @@ fn test_sp_multiple_referrals_accumulation() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
@@ -440,10 +411,6 @@ fn test_sp_group_multiple_referrals_accumulation() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
@@ -509,10 +476,6 @@ fn test_sp_no_referral_tracking_without_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
-    testing::set_block_timestamp(1);
-    systems
-        .starterpack_admin
-        .initialize(protocol_fee: PROTOCOL_FEE, fee_receiver: RECEIVER(), owner: OWNER());
 
     // [Register]
     testing::set_contract_address(context.creator);
