@@ -22,6 +22,38 @@
     <script defer src="/fontawesome/js/solid.min.js"></script>
     <script defer src="/fontawesome/js/thin.min.js"></script>
     <script src="/noflash.js"></script>
+
+    <script>
+      window.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        { passive: false },
+      );
+
+      window.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        { passive: false },
+      );
+
+      window.addEventListener(
+        "touchend",
+        (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        { passive: false },
+      );
+    </script>
   </head>
   <body class="h-screen bg-background text-foreground">
     <div id="root"></div>
