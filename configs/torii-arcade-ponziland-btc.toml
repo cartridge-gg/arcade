@@ -1,0 +1,7 @@
+world_address = "0x04479801e8674c839115bc6270b9bde0d3288cc974cc8c3c03e615c44038c0ce"
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+
+[indexing]
+allowed_origins = ["*"]
+pending = true
+transactions = true
