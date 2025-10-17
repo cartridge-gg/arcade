@@ -15,6 +15,7 @@ import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as GuildsRouteImport } from './routes/guilds'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StarterpackStarterpackIdRouteImport } from './routes/starterpack/$starterpackId'
 import { Route as PlayerPlayerRouteImport } from './routes/player/$player'
 import { Route as GameGameRouteImport } from './routes/game/$game'
 import { Route as CollectionCollectionRouteImport } from './routes/collection/$collection'
@@ -79,6 +80,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StarterpackStarterpackIdRoute =
+  StarterpackStarterpackIdRouteImport.update({
+    id: '/starterpack/$starterpackId',
+    path: '/starterpack/$starterpackId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PlayerPlayerRoute = PlayerPlayerRouteImport.update({
   id: '/player/$player',
   path: '/player/$player',
@@ -276,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/collection/$collection': typeof CollectionCollectionRouteWithChildren
   '/game/$game': typeof GameGameRouteWithChildren
   '/player/$player': typeof PlayerPlayerRouteWithChildren
+  '/starterpack/$starterpackId': typeof StarterpackStarterpackIdRoute
   '/collection/$collection/activity': typeof CollectionCollectionActivityRoute
   '/collection/$collection/holders': typeof CollectionCollectionHoldersRoute
   '/collection/$collection/items': typeof CollectionCollectionItemsRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/collection/$collection': typeof CollectionCollectionRouteWithChildren
   '/game/$game': typeof GameGameRouteWithChildren
   '/player/$player': typeof PlayerPlayerRouteWithChildren
+  '/starterpack/$starterpackId': typeof StarterpackStarterpackIdRoute
   '/collection/$collection/activity': typeof CollectionCollectionActivityRoute
   '/collection/$collection/holders': typeof CollectionCollectionHoldersRoute
   '/collection/$collection/items': typeof CollectionCollectionItemsRoute
@@ -359,6 +368,7 @@ export interface FileRoutesById {
   '/collection/$collection': typeof CollectionCollectionRouteWithChildren
   '/game/$game': typeof GameGameRouteWithChildren
   '/player/$player': typeof PlayerPlayerRouteWithChildren
+  '/starterpack/$starterpackId': typeof StarterpackStarterpackIdRoute
   '/collection/$collection/activity': typeof CollectionCollectionActivityRoute
   '/collection/$collection/holders': typeof CollectionCollectionHoldersRoute
   '/collection/$collection/items': typeof CollectionCollectionItemsRoute
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/collection/$collection'
     | '/game/$game'
     | '/player/$player'
+    | '/starterpack/$starterpackId'
     | '/collection/$collection/activity'
     | '/collection/$collection/holders'
     | '/collection/$collection/items'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/collection/$collection'
     | '/game/$game'
     | '/player/$player'
+    | '/starterpack/$starterpackId'
     | '/collection/$collection/activity'
     | '/collection/$collection/holders'
     | '/collection/$collection/items'
@@ -484,6 +496,7 @@ export interface FileRouteTypes {
     | '/collection/$collection'
     | '/game/$game'
     | '/player/$player'
+    | '/starterpack/$starterpackId'
     | '/collection/$collection/activity'
     | '/collection/$collection/holders'
     | '/collection/$collection/items'
@@ -526,6 +539,7 @@ export interface RootRouteChildren {
   CollectionCollectionRoute: typeof CollectionCollectionRouteWithChildren
   GameGameRoute: typeof GameGameRouteWithChildren
   PlayerPlayerRoute: typeof PlayerPlayerRouteWithChildren
+  StarterpackStarterpackIdRoute: typeof StarterpackStarterpackIdRoute
   GameGamePlayerPlayerRoute: typeof GameGamePlayerPlayerRouteWithChildren
   GameGameEditionEditionCollectionCollectionRoute: typeof GameGameEditionEditionCollectionCollectionRouteWithChildren
 }
@@ -572,6 +586,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/starterpack/$starterpackId': {
+      id: '/starterpack/$starterpackId'
+      path: '/starterpack/$starterpackId'
+      fullPath: '/starterpack/$starterpackId'
+      preLoaderRoute: typeof StarterpackStarterpackIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/player/$player': {
@@ -945,6 +966,7 @@ const rootRouteChildren: RootRouteChildren = {
   CollectionCollectionRoute: CollectionCollectionRouteWithChildren,
   GameGameRoute: GameGameRouteWithChildren,
   PlayerPlayerRoute: PlayerPlayerRouteWithChildren,
+  StarterpackStarterpackIdRoute: StarterpackStarterpackIdRoute,
   GameGamePlayerPlayerRoute: GameGamePlayerPlayerRouteWithChildren,
   GameGameEditionEditionCollectionCollectionRoute:
     GameGameEditionEditionCollectionCollectionRouteWithChildren,

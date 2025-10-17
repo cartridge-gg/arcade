@@ -3,11 +3,19 @@ import { PlayerPage } from "./pages/player";
 import { useProject } from "@/hooks/project";
 import { MarketPage } from "./pages/market";
 import { usePageTracking } from "@/hooks/usePageTracking";
+import { StarterpackClaimPage } from "./pages/starterpack-claim";
 
 export function App() {
   // Initialize page tracking
   usePageTracking();
-  const { player, collection } = useProject();
+  const { player, collection, starterpackId } = useProject();
+
+  console.log("App render - starterpackId:", starterpackId, "player:", player, "collection:", collection);
+
+  if (starterpackId) {
+    console.log("Rendering StarterpackClaimPage");
+    return <StarterpackClaimPage />;
+  }
 
   if (player) {
     return <PlayerPage />;
