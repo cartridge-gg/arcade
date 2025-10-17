@@ -1,6 +1,6 @@
 import { NAMESPACE } from "../../constants";
 import type { SchemaType } from "../../bindings";
-import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
+import { MemberClause, type ParsedEntity } from "@dojoengine/sdk";
 import { getChecksumAddress } from "starknet";
 
 const MODEL_NAME = "Member";
@@ -46,7 +46,10 @@ export class MemberModel {
 
 export const Member = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return MemberModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
+    return MemberModel.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME],
+    );
   },
 
   getModelName: () => {
@@ -54,7 +57,12 @@ export const Member = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${Member.getModelName()}`, "id", "Neq", "0x0");
+    return MemberClause(
+      `${NAMESPACE}-${Member.getModelName()}`,
+      "id",
+      "Neq",
+      "0x0",
+    );
   },
 
   getMethods: () => [],

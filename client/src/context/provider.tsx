@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ArcadeProvider } from "./arcade";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
+import { ArcadeProvider } from "./arcade";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
 import { AchievementProvider } from "./achievement";
 import { StarknetProvider } from "./starknet";
@@ -12,10 +12,11 @@ import { MetricsProvider } from "./metrics";
 import { OwnershipsProvider } from "./ownerships";
 import { PostHogProvider } from "./posthog";
 import { SidebarProvider } from "./sidebar";
-import { MarketCollectionProvider } from "./market-collection";
-import { MarketFiltersProvider } from "./market-filters";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { queryClient, persister } from "../queries";
+import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
+import { constants } from "starknet";
+import { DEFAULT_PROJECT } from "@/constants";
 
 export function Provider({ children }: PropsWithChildren) {
   const qc = new QueryClient();
@@ -31,8 +32,13 @@ export function Provider({ children }: PropsWithChildren) {
         >
           <IndexerAPIProvider credentials="omit">
             <QueryClientProvider client={qc}>
-              <ArcadeProvider>
-                <MarketCollectionProvider>
+              <MarketplaceClientProvider
+                config={{
+                  chainId: constants.StarknetChainId.SN_MAIN,
+                  defaultProject: DEFAULT_PROJECT,
+                }}
+              >
+                <ArcadeProvider>
                   <StarknetProvider>
                     <OwnershipsProvider>
                       <CollectionProvider>
@@ -40,9 +46,7 @@ export function Provider({ children }: PropsWithChildren) {
                           <AchievementProvider>
                             <ActivitiesProvider>
                               <MetricsProvider>
-                                <MarketFiltersProvider>
-                                  <SidebarProvider>{children}</SidebarProvider>
-                                </MarketFiltersProvider>
+                                <SidebarProvider>{children}</SidebarProvider>
                               </MetricsProvider>
                             </ActivitiesProvider>
                           </AchievementProvider>
@@ -50,8 +54,8 @@ export function Provider({ children }: PropsWithChildren) {
                       </CollectionProvider>
                     </OwnershipsProvider>
                   </StarknetProvider>
-                </MarketCollectionProvider>
-              </ArcadeProvider>
+                </ArcadeProvider>
+              </MarketplaceClientProvider>
             </QueryClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>

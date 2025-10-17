@@ -1,7 +1,7 @@
 import { NAMESPACE } from "../../constants";
 import { getChecksumAddress } from "starknet";
 import type { SchemaType } from "../../bindings";
-import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
+import { MemberClause, type ParsedEntity } from "@dojoengine/sdk";
 
 const MODEL_NAME = "CollectionEdition";
 
@@ -41,13 +41,21 @@ export class CollectionEditionModel {
   }
 
   clone(): CollectionEditionModel {
-    return new CollectionEditionModel(this.identifier, this.collection, this.edition, this.active);
+    return new CollectionEditionModel(
+      this.identifier,
+      this.collection,
+      this.edition,
+      this.active,
+    );
   }
 }
 
 export const CollectionEdition = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return CollectionEditionModel.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
+    return CollectionEditionModel.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME],
+    );
   },
 
   getModelName: () => {
@@ -55,7 +63,12 @@ export const CollectionEdition = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${CollectionEdition.getModelName()}`, "collection", "Neq", "0x0");
+    return MemberClause(
+      `${NAMESPACE}-${CollectionEdition.getModelName()}`,
+      "collection",
+      "Neq",
+      "0x0",
+    );
   },
 
   getMethods: () => [],

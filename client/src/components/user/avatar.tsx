@@ -31,7 +31,6 @@ export const UserAvatar = ({
         return "seven";
       case 7:
         return "five";
-      case 0:
       default:
         return "one";
     }

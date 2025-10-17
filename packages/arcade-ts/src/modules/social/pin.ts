@@ -1,7 +1,7 @@
 import { NAMESPACE } from "../../constants";
 import { getChecksumAddress } from "starknet";
 import type { SchemaType } from "../../bindings";
-import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
+import { MemberClause, type ParsedEntity } from "@dojoengine/sdk";
 
 const MODEL_NAME = "TrophyPinning";
 
@@ -43,7 +43,10 @@ export class PinEvent {
 
 export const Pin = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return PinEvent.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
+    return PinEvent.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME],
+    );
   },
 
   getModelName: () => {
@@ -51,11 +54,20 @@ export const Pin = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${Pin.getModelName()}`, "player_id", "Neq", "0x0");
+    return MemberClause(
+      `${NAMESPACE}-${Pin.getModelName()}`,
+      "player_id",
+      "Neq",
+      "0x0",
+    );
   },
 
   getMethods: () => [
     { name: "pin", entrypoint: "pin", description: "Pin an achievement." },
-    { name: "unpin", entrypoint: "unpin", description: "Unpin an achievement." },
+    {
+      name: "unpin",
+      entrypoint: "unpin",
+      description: "Unpin an achievement.",
+    },
   ],
 };

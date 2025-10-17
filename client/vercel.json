@@ -1,4 +1,6 @@
 {
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
   "git": {
     "deploymentEnabled": true
   },
@@ -54,6 +56,22 @@
     {
       "source": "/ingest/:path(.*)",
       "destination": "https://us.i.posthog.com/:path*"
+    },
+    {
+      "source": "/player/:username/tab/:tab",
+      "destination": "/api/ssr?path=/player/:username/tab/:tab"
+    },
+    {
+      "source": "/player/:username",
+      "destination": "/api/ssr?path=/player/:username"
+    },
+    {
+      "source": "/game/:gameId/player/:username",
+      "destination": "/api/ssr?path=/game/:gameId/player/:username"
+    },
+    {
+      "source": "/game/:gameId",
+      "destination": "/api/ssr?path=/game/:gameId"
     },
     {
       "source": "/(.*)",

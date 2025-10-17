@@ -7,7 +7,9 @@
  * @throws Error if contract not found
  */
 export const getContractByName = (manifest: any, name: string) => {
-  const contract = manifest.contracts.find((contract: any) => contract.tag === name);
+  const contract = manifest.contracts.find(
+    (contract: any) => contract.tag === name,
+  );
   if (!contract) {
     throw new Error(`Contract ${name} not found in manifest`);
   }

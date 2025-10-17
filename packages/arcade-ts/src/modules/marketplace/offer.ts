@@ -47,13 +47,21 @@ export class OfferEvent {
   }
 
   clone(): OfferEvent {
-    return new OfferEvent(this.identifier, this.id, this.order.clone(), this.time);
+    return new OfferEvent(
+      this.identifier,
+      this.id,
+      this.order.clone(),
+      this.time,
+    );
   }
 }
 
 export const Offer = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return OfferEvent.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME] as OfferInterface);
+    return OfferEvent.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME] as OfferInterface,
+    );
   },
 
   getModelName: () => {

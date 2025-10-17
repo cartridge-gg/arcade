@@ -3,7 +3,6 @@ pub mod store;
 
 pub mod types {
     pub mod category;
-    pub mod role;
     pub mod status;
 }
 
@@ -17,7 +16,6 @@ pub mod events {
 pub mod models {
     pub mod book;
     pub mod index;
-    pub mod moderator;
     pub mod order;
 }
 

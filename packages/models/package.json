@@ -13,7 +13,12 @@
     "scripts": {
       "gen:types": "sozo build --profile mainnet --typescript --bindings-output src",
       "build:ts": "tsup",
-      "prepare": "pnpm build:ts"
+      "format": "scarb fmt",
+      "format:check": "scarb fmt --check",
+      "format:cairo": "pnpm format",
+      "format:check:cairo": "pnpm format:check",
+      "lint:cairo": "echo 'No Cairo linting available'",
+      "lint:check:cairo": "echo 'No Cairo linting available'"
     },
     "dependencies": {
         "starknet": "catalog:",

@@ -24,6 +24,11 @@ default = "ARCADE"
     "0x03F7F4E5a23A712787F0C100f02934c4A88606B7F0C880c2FD43e817E6275d83", # Fee receiver
     "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b", # Owner
 ]
+"ARCADE-StarterpackRegistry" = [
+    "0x0",                                                                # 0% protocol fee
+    "0x03F7F4E5a23A712787F0C100f02934c4A88606B7F0C880c2FD43e817E6275d83", # fee_receiver
+    "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b", # owner
+]
 
 [writers]
 "ARCADE" = [
@@ -31,10 +36,11 @@ default = "ARCADE"
     "ARCADE-Social",
     "ARCADE-Wallet",
     "ARCADE-Marketplace",
+    "ARCADE-StarterpackRegistry",
 ]
 
 [owners]
-"ARCADE" = ["ARCADE-Registry"]
+"ARCADE" = ["ARCADE-Registry", "ARCADE-StarterpackRegistry"]
 
 [env]
 rpc_url = "https://api.cartridge.gg/x/starknet/mainnet"

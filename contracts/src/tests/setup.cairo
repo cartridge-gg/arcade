@@ -11,12 +11,14 @@ pub mod setup {
     use arcade::systems::registry::{IRegistryDispatcher, Registry};
     use arcade::systems::slot::{ISlotDispatcher, Slot};
     use arcade::systems::social::{ISocialDispatcher, Social};
+    use arcade::systems::starterpack::{IStarterpackRegistryDispatcher, StarterpackRegistry};
     use arcade::systems::wallet::{IWalletDispatcher, Wallet};
     use arcade::tests::mocks::account::Account;
     use arcade::tests::mocks::collection::Collection;
     use arcade::tests::mocks::erc1155::ERC1155;
     use arcade::tests::mocks::erc20::ERC20;
     use arcade::tests::mocks::erc721::ERC721;
+    use arcade::tests::mocks::starterpack_impl::StarterpackImplementation;
 
     // External imports
 
@@ -29,6 +31,7 @@ pub mod setup {
         ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
         spawn_test_world,
     };
+    use models::rbac::models::index as rbac_models;
     use openzeppelin_token::erc1155::interface::IERC1155Dispatcher;
     use openzeppelin_token::erc20::interface::IERC20Dispatcher;
     use openzeppelin_token::erc721::interface::IERC721Dispatcher;
@@ -41,6 +44,8 @@ pub mod setup {
     use starknet::syscalls::deploy_syscall;
     use starknet::testing::set_contract_address;
     use starknet::{ContractAddress, SyscallResultTrait};
+    use starterpack::events::index as starterpack_events;
+    use starterpack::models::index as starterpack_models;
 
     // Constant
 
@@ -71,6 +76,7 @@ pub mod setup {
     pub fn PLAYER() -> ContractAddress {
         'PLAYER'.try_into().unwrap()
     }
+    use arcade::systems::starterpack::IAdministrationDispatcher;
 
     #[derive(Copy, Drop)]
     pub struct Systems {
@@ -79,6 +85,9 @@ pub mod setup {
         pub social: ISocialDispatcher,
         pub wallet: IWalletDispatcher,
         pub marketplace: IMarketplaceDispatcher,
+        pub starterpack: IStarterpackRegistryDispatcher,
+        pub starterpack_admin: IAdministrationDispatcher,
+        pub starterpack_impl: ContractAddress,
         pub erc20: IERC20Dispatcher,
         pub erc721: IERC721Dispatcher,
         pub erc1155: IERC1155Dispatcher,
@@ -116,20 +125,31 @@ pub mod setup {
                 TestResource::Model(social_models::m_Alliance::TEST_CLASS_HASH),
                 TestResource::Model(social_models::m_Guild::TEST_CLASS_HASH),
                 TestResource::Model(social_models::m_Member::TEST_CLASS_HASH),
-                TestResource::Model(orderbook_models::m_Moderator::TEST_CLASS_HASH),
+                TestResource::Model(rbac_models::m_Moderator::TEST_CLASS_HASH),
                 TestResource::Model(orderbook_models::m_Book::TEST_CLASS_HASH),
                 TestResource::Model(orderbook_models::m_Order::TEST_CLASS_HASH),
                 TestResource::Model(orderbook_models::m_MetadataAttribute::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_Config::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_Starterpack::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_Issuance::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_ReferralReward::TEST_CLASS_HASH),
+                TestResource::Model(starterpack_models::m_GroupReward::TEST_CLASS_HASH),
                 TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH),
                 TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Listing::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Sale::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Offer::TEST_CLASS_HASH),
+                TestResource::Event(starterpack_events::e_StarterpackRegistered::TEST_CLASS_HASH),
+                TestResource::Event(starterpack_events::e_StarterpackUpdated::TEST_CLASS_HASH),
+                TestResource::Event(starterpack_events::e_StarterpackIssued::TEST_CLASS_HASH),
+                TestResource::Event(starterpack_events::e_StarterpackPaused::TEST_CLASS_HASH),
+                TestResource::Event(starterpack_events::e_StarterpackResumed::TEST_CLASS_HASH),
                 TestResource::Contract(Registry::TEST_CLASS_HASH),
                 TestResource::Contract(Slot::TEST_CLASS_HASH),
                 TestResource::Contract(Social::TEST_CLASS_HASH),
                 TestResource::Contract(Wallet::TEST_CLASS_HASH),
                 TestResource::Contract(Marketplace::TEST_CLASS_HASH),
+                TestResource::Contract(StarterpackRegistry::TEST_CLASS_HASH),
             ]
                 .span(),
         }
@@ -154,6 +174,11 @@ pub mod setup {
             ContractDefTrait::new(@NAMESPACE(), @"Marketplace")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
                 .with_init_calldata(array![0x1, 0x1F4, receiver.into(), OWNER().into()].span()),
+            ContractDefTrait::new(@NAMESPACE(), @"StarterpackRegistry")
+                .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span())
+                .with_init_calldata(
+                    array![5, receiver.into(), OWNER().into()].span(),
+                ) // protocol_fee=5%, fee_receiver, owner
         ]
             .span()
     }
@@ -225,12 +250,17 @@ pub mod setup {
         let (social_address, _) = world.dns(@"Social").unwrap();
         let (wallet_address, _) = world.dns(@"Wallet").unwrap();
         let (marketplace_address, _) = world.dns(@"Marketplace").unwrap();
+        let (starterpack_address, _) = world.dns(@"StarterpackRegistry").unwrap();
+        let starterpack_impl = setup_starterpack_impl();
         let systems = Systems {
             registry: IRegistryDispatcher { contract_address: registry_address },
             slot: ISlotDispatcher { contract_address: slot_address },
             social: ISocialDispatcher { contract_address: social_address },
             wallet: IWalletDispatcher { contract_address: wallet_address },
             marketplace: IMarketplaceDispatcher { contract_address: marketplace_address },
+            starterpack: IStarterpackRegistryDispatcher { contract_address: starterpack_address },
+            starterpack_admin: IAdministrationDispatcher { contract_address: starterpack_address },
+            starterpack_impl: starterpack_impl,
             erc20: setup_erc20(context.spender),
             erc721: setup_erc721(context.holder, context.creator),
             erc1155: setup_erc1155(context.holder, context.creator),
@@ -238,5 +268,16 @@ pub mod setup {
 
         // [Return]
         (world, systems, context)
+    }
+
+    fn setup_starterpack_impl() -> ContractAddress {
+        let (impl_address, _) = deploy_syscall(
+            class_hash: StarterpackImplementation::TEST_CLASS_HASH.try_into().unwrap(),
+            contract_address_salt: 'STARTERPACK_IMPL',
+            calldata: [].span(),
+            deploy_from_zero: false,
+        )
+            .unwrap_syscall();
+        impl_address
     }
 }

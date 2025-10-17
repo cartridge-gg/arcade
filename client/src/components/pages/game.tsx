@@ -2,40 +2,43 @@ import { useCallback, useMemo } from "react";
 import { TabsContent, Thumbnail, type TabValue } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { LeaderboardScene } from "../scenes/leaderboard";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useRouterState } from "@tanstack/react-router";
 import { Socials } from "@cartridge/arcade";
-import { ArcadeTabs } from "../modules";
+import { ArcadeTabs } from "../ui/modules/tabs";
 import { MarketplaceScene } from "../scenes/marketplace";
 import { GuildsScene } from "../scenes/guild";
 import { AboutScene } from "../scenes/about";
-import { Editions } from "../editions";
+import { EditionsContainer } from "@/features/editions";
 import arcade from "@/assets/arcade-logo.png";
-import { useProject } from "@/hooks/project";
-import { joinPaths } from "@/helpers";
+import { useProject, TAB_SEGMENTS } from "@/hooks/project";
+import { joinPaths } from "@/lib/helpers";
 import { useDevice } from "@/hooks/device";
 import { PredictScene } from "../scenes/predict";
-import { GameSocialWebsite } from "../modules/game-social";
+import { GameSocialWebsite } from "../ui/modules/game-social";
 
 export function GamePage() {
-  const { game, edition } = useProject();
-  const { tab } = useProject();
+  const { game, edition, tab } = useProject();
   const { isMobile } = useDevice();
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { location } = useRouterState();
   const handleClick = useCallback(
     (value: string) => {
-      let pathname = location.pathname;
-      pathname = pathname.replace(/\/tab\/[^/]+/, "");
-      pathname = joinPaths(pathname, `/tab/${value}`);
-      navigate(pathname || "/");
+      const segments = location.pathname.split("/").filter(Boolean);
+      const last = segments[segments.length - 1];
+      if (last === value) return;
+      if (TAB_SEGMENTS.includes(last as (typeof TAB_SEGMENTS)[number])) {
+        segments.pop();
+      }
+      segments.push(value as TabValue);
+      const target = joinPaths(...segments);
+      window.history.pushState({}, "", target || "/");
     },
-    [location, navigate]
+    [location.pathname],
   );
 
   const order: TabValue[] = useMemo(() => {
     const tabs: TabValue[] = game
-      ? ["marketplace", "leaderboard", "predict", "about"]
+      ? ["marketplace", "leaderboard", "guilds", "predict", "about"]
       : ["marketplace", "leaderboard", "predict"];
 
     if (process.env.NODE_ENV !== "development") {
@@ -63,14 +66,14 @@ export function GamePage() {
       <div
         className={cn(
           "lg:h-[88px] w-full flex flex-col gap-4 lg:p-6 lg:pb-0 border-b border-background-200 lg:border-none",
-          isDashboard ? "p-0" : "p-4"
+          isDashboard ? "p-0" : "p-4",
         )}
       >
         <div className="flex items-start justify-between">
           <div
             className={cn(
               "flex gap-4 items-center overflow-hidden",
-              isDashboard && isMobile && "hidden"
+              isDashboard && isMobile && "hidden",
             )}
           >
             <Thumbnail
@@ -82,7 +85,7 @@ export function GamePage() {
               <p className="font-semibold text-xl/[24px] text-foreground-100 truncate">
                 {game?.name || "Dashboard"}
               </p>
-              <Editions />
+              <EditionsContainer />
             </div>
           </div>
           {game ? (

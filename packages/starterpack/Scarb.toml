@@ -1,0 +1,16 @@
+[package]
+name = "starterpack"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+dojo.workspace = true
+models = { path = "../models" }
+openzeppelin_token.workspace = true
+starknet.workspace = true
+
+[dev-dependencies]
+dojo_cairo_test.workspace = true
+cairo_test.workspace = true
+
+[lib]

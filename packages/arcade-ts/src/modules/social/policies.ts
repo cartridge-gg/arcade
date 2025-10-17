@@ -1,4 +1,4 @@
-import { constants } from "starknet";
+import type { constants } from "starknet";
 import { configs } from "../../configs";
 import { NAMESPACE } from "../../constants";
 import { getContractByName } from "../../provider/helpers";
@@ -7,7 +7,7 @@ import { Follow } from "./follow";
 import { Member } from "./member";
 import { Guild } from "./guild";
 import { Alliance } from "./alliance";
-import { DefaultSocialOptions, SocialOptions } from "./options";
+import { DefaultSocialOptions, type SocialOptions } from "./options";
 
 const CONTRACT_NAME = "Social";
 const CONTRACT_TAG = `${NAMESPACE}-${CONTRACT_NAME}`;

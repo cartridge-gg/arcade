@@ -1,7 +1,7 @@
 import { NAMESPACE } from "../../constants";
 import { getChecksumAddress } from "starknet";
 import type { SchemaType } from "../../bindings";
-import { MemberClause, ParsedEntity } from "@dojoengine/sdk";
+import { MemberClause, type ParsedEntity } from "@dojoengine/sdk";
 
 const MODEL_NAME = "Follow";
 
@@ -43,7 +43,10 @@ export class FollowEvent {
 
 export const Follow = {
   parse: (entity: ParsedEntity<SchemaType>) => {
-    return FollowEvent.from(entity.entityId, entity.models[NAMESPACE]?.[MODEL_NAME]);
+    return FollowEvent.from(
+      entity.entityId,
+      entity.models[NAMESPACE]?.[MODEL_NAME],
+    );
   },
 
   getModelName: () => {
@@ -51,11 +54,24 @@ export const Follow = {
   },
 
   getClause: () => {
-    return MemberClause(`${NAMESPACE}-${Follow.getModelName()}`, "follower", "Neq", "0x0");
+    return MemberClause(
+      `${NAMESPACE}-${Follow.getModelName()}`,
+      "follower",
+      "Neq",
+      "0x0",
+    );
   },
 
   getMethods: () => [
-    { name: "follow", entrypoint: "follow", description: "Follow another player." },
-    { name: "unfollow", entrypoint: "unfollow", description: "Unfollow a player." },
+    {
+      name: "follow",
+      entrypoint: "follow",
+      description: "Follow another player.",
+    },
+    {
+      name: "unfollow",
+      entrypoint: "unfollow",
+      description: "Unfollow a player.",
+    },
   ],
 };

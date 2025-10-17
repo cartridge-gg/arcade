@@ -1,4 +1,4 @@
-import { byteArray, ByteArray } from "starknet";
+import { byteArray, type ByteArray } from "starknet";
 
 interface PropertiesOptions {
   preset?: string;

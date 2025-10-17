@@ -25,7 +25,8 @@ export interface SemVer {
 export function parseSemVer(version: string): SemVer {
   const cleanVersion = version.startsWith("v") ? version.slice(1) : version;
 
-  const semverRegex = /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?(?:\+([a-zA-Z0-9.-]+))?$/;
+  const semverRegex =
+    /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?(?:\+([a-zA-Z0-9.-]+))?$/;
   const match = cleanVersion.match(semverRegex);
 
   if (!match) {

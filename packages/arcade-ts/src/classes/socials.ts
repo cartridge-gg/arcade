@@ -1,4 +1,4 @@
-import { ByteArray, byteArray } from "starknet";
+import { type ByteArray, byteArray } from "starknet";
 
 interface SocialsOptions {
   discord?: string;

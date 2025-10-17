@@ -6,13 +6,16 @@ pub mod ManageableComponent {
 
     use dojo::world::WorldStorage;
 
+    // Shared RBAC imports
+    use models::rbac::models::moderator::{ModeratorAssert, ModeratorTrait};
+    use models::rbac::store::ModeratorStoreTrait;
+    use models::rbac::types::role::Role;
+
     // Internal imports
 
     use orderbook::constants::BOOK_ID;
     use orderbook::models::book::{BookAssert, BookTrait};
-    use orderbook::models::moderator::{ModeratorAssert, ModeratorTrait};
     use orderbook::store::StoreTrait;
-    use orderbook::types::role::Role;
     use starknet::ContractAddress;
 
     // Constants
@@ -36,16 +39,16 @@ pub mod ManageableComponent {
     > of InternalTrait<TContractState> {
         fn initialize(
             self: @ComponentState<TContractState>,
-            world: WorldStorage,
+            mut world: WorldStorage,
             royalties: bool,
             fee_num: u32,
             fee_receiver: ContractAddress,
             owner: ContractAddress,
         ) {
             // [Effect] Initialize moderator
-            let mut store = StoreTrait::new(world);
             let moderator = ModeratorTrait::new(owner.into(), Role::Owner);
-            store.set_moderator(@moderator);
+            ModeratorStoreTrait::set_moderator(world, @moderator);
+
             // [Effect] Initialize book
             let mut store = StoreTrait::new(world);
             let book = BookTrait::new(BOOK_ID, royalties, fee_num, fee_receiver.into());
@@ -54,44 +57,47 @@ pub mod ManageableComponent {
 
         fn grant_role(
             self: @ComponentState<TContractState>,
-            world: WorldStorage,
+            mut world: WorldStorage,
             account: ContractAddress,
             role_id: u8,
         ) {
-            // [Setup] Datastore
-            let mut store = StoreTrait::new(world);
             // [Check] Caller is allowed
-            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            let caller_address: felt252 = starknet::get_caller_address().into();
+            let caller_moderator = ModeratorStoreTrait::moderator(world, caller_address);
             let role: Role = role_id.into();
             caller_moderator.assert_is_allowed(role);
             // [Effect] Grant role
-            let mut moderator = store.moderator(account.into());
+            let account_address: felt252 = account.into();
+            let mut moderator = ModeratorStoreTrait::moderator(world, account_address);
             moderator.grant(role);
             // [Effect] Store moderator
-            store.set_moderator(@moderator);
+            ModeratorStoreTrait::set_moderator(world, @moderator);
         }
 
         fn revoke_role(
-            self: @ComponentState<TContractState>, world: WorldStorage, account: ContractAddress,
+            self: @ComponentState<TContractState>,
+            mut world: WorldStorage,
+            account: ContractAddress,
         ) {
-            // [Setup] Datastore
-            let mut store = StoreTrait::new(world);
             // [Check] Caller is allowed
-            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            let caller_address: felt252 = starknet::get_caller_address().into();
+            let caller_moderator = ModeratorStoreTrait::moderator(world, caller_address);
             caller_moderator.assert_is_allowed(Role::Owner);
-            // [Effect] Grant role
-            let mut moderator = store.moderator(account.into());
+            // [Effect] Revoke role
+            let account_address: felt252 = account.into();
+            let mut moderator = ModeratorStoreTrait::moderator(world, account_address);
             moderator.revoke();
             // [Effect] Store moderator
-            store.set_moderator(@moderator);
+            ModeratorStoreTrait::set_moderator(world, @moderator);
         }
 
         fn pause(self: @ComponentState<TContractState>, world: WorldStorage) {
             // [Check] Caller is allowed
-            let mut store = StoreTrait::new(world);
-            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            let caller_address: felt252 = starknet::get_caller_address().into();
+            let caller_moderator = ModeratorStoreTrait::moderator(world, caller_address);
             caller_moderator.assert_is_allowed(Role::Admin);
             // [Effect] Pause component
+            let mut store = StoreTrait::new(world);
             let mut book = store.book(BOOK_ID);
             book.pause();
             // [Update] Book
@@ -100,10 +106,11 @@ pub mod ManageableComponent {
 
         fn resume(self: @ComponentState<TContractState>, world: WorldStorage) {
             // [Check] Caller is allowed
-            let mut store = StoreTrait::new(world);
-            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            let caller_address: felt252 = starknet::get_caller_address().into();
+            let caller_moderator = ModeratorStoreTrait::moderator(world, caller_address);
             caller_moderator.assert_is_allowed(Role::Admin);
             // [Effect] Resume component
+            let mut store = StoreTrait::new(world);
             let mut book = store.book(BOOK_ID);
             book.resume();
             // [Update] Book
@@ -117,10 +124,11 @@ pub mod ManageableComponent {
             fee_receiver: ContractAddress,
         ) {
             // [Check] Caller is allowed
-            let mut store = StoreTrait::new(world);
-            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            let caller_address: felt252 = starknet::get_caller_address().into();
+            let caller_moderator = ModeratorStoreTrait::moderator(world, caller_address);
             caller_moderator.assert_is_allowed(Role::Owner);
             // [Effect] Set fee
+            let mut store = StoreTrait::new(world);
             let mut book = store.book(BOOK_ID);
             book.set_fee(fee_num, fee_receiver.into());
             // [Update] Book
@@ -131,10 +139,11 @@ pub mod ManageableComponent {
             self: @ComponentState<TContractState>, world: WorldStorage, enabled: bool,
         ) {
             // [Check] Caller is allowed
-            let mut store = StoreTrait::new(world);
-            let caller_moderator = store.moderator(starknet::get_caller_address().into());
+            let caller_address: felt252 = starknet::get_caller_address().into();
+            let caller_moderator = ModeratorStoreTrait::moderator(world, caller_address);
             caller_moderator.assert_is_allowed(Role::Owner);
             // [Effect] Set royalties
+            let mut store = StoreTrait::new(world);
             let mut book = store.book(BOOK_ID);
             book.set_royalties(enabled);
             // [Update] Book

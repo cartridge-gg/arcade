@@ -5,14 +5,23 @@ import topLevelAwait from "vite-plugin-top-level-await";
 import process from "node:process";
 import mkcert from "vite-plugin-mkcert";
 import { VitePWA } from "vite-plugin-pwa";
+import vercel from "vite-plugin-vercel";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
+
+const resolveFromRoot = (path: string) =>
+  resolve(fileURLToPath(new URL(".", import.meta.url)), path);
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    tanstackRouter({ target: "react", autoCodeSplitting: true }),
     react(),
     wasm(),
     topLevelAwait(),
     mkcert(),
+    vercel(),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "favicon.ico", "robots.txt"],
@@ -56,8 +65,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": "/src",
+      "@": resolveFromRoot("src"),
     },
+    dedupe: ["react", "react-dom"],
   },
   root: "./",
   build: {
@@ -74,4 +84,19 @@ export default defineConfig({
     },
   },
   publicDir: "public",
+  // SSR Configuration
+  ssr: {
+    noExternal: [
+      "@cartridge/arcade",
+      "@cartridge/connector",
+      "@cartridge/controller",
+      "@cartridge/penpal",
+      "@cartridge/presets",
+      "@dojoengine/sdk",
+      "@dojoengine/torii-wasm",
+      "@starknet-react/chains",
+      "@starknet-react/core",
+    ],
+    external: ["@cartridge/ui", "posthog-js"],
+  },
 });

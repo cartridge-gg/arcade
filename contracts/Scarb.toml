@@ -11,11 +11,12 @@ sierra-replace-ids = true
 openzeppelin_introspection.workspace = true
 openzeppelin_token.workspace = true
 dojo.workspace = true
-dojo_cairo_macros.workspace = true
 starknet.workspace = true
 achievement = { path = ".." }
+starterpack = { path = ".." }
 collection = { path = ".." }
 controller = { path = ".." }
+models = { path = ".." }
 orderbook = { path = ".." }
 provider = { path = ".." }
 registry = { path = ".." }
@@ -37,7 +38,6 @@ build-external-contracts = [
     "controller::models::index::m_Account",
     "controller::models::index::m_Controller",
     "controller::models::index::m_Signer",
-    "orderbook::models::index::m_Moderator",
     "orderbook::models::index::m_Book",
     "orderbook::models::index::m_Order",
     "orderbook::models::index::m_MetadataAttribute",
@@ -58,4 +58,18 @@ build-external-contracts = [
     "social::models::index::m_Guild",
     "social::models::index::m_Member",
     "social::events::index::e_Follow",
+    "starterpack::models::index::m_Config",
+    "starterpack::models::index::m_Starterpack",
+    "starterpack::models::index::m_Issuance",
+    "starterpack::models::index::m_ReferralReward",
+    "starterpack::models::index::m_GroupReward",
+    "starterpack::events::index::e_StarterpackRegistered",
+    "starterpack::events::index::e_StarterpackUpdated",
+    "starterpack::events::index::e_StarterpackIssued",
+    "starterpack::events::index::e_StarterpackPaused",
+    "starterpack::events::index::e_StarterpackResumed",
+    "models::rbac::models::index::m_Moderator",
 ]
+
+[tool.scarb]
+allow-prebuilt-plugins = ["dojo_cairo_macros"]
