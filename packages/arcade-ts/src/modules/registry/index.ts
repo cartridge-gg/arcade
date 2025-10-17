@@ -52,16 +52,17 @@ export const Registry = {
     );
   },
 
-  getEntityQuery: (options: RegistryOptions = DefaultRegistryOptions) => {
+  getEntityQuery: (_options: RegistryOptions = DefaultRegistryOptions) => {
     const keys: `${string}-${string}`[] = [];
-    if (options.access) keys.push(`${NAMESPACE}-${Access.getModelName()}`);
-    if (options.game) keys.push(`${NAMESPACE}-${Game.getModelName()}`);
-    if (options.edition) keys.push(`${NAMESPACE}-${Edition.getModelName()}`);
-    if (options.collectionEdition)
-      keys.push(`${NAMESPACE}-${CollectionEdition.getModelName()}`);
+    // if (options.access) keys.push(`${NAMESPACE}-${Access.getModelName()}`);
+    // if (options.game) keys.push(`${NAMESPACE}-${Game.getModelName()}`);
+    // if (options.edition) keys.push(`${NAMESPACE}-${Edition.getModelName()}`);
+    // if (options.collectionEdition)
+    //   keys.push(`${NAMESPACE}-${CollectionEdition.getModelName()}`);
     const clauses = new ClauseBuilder().keys(keys, []);
     return new ToriiQueryBuilder<SchemaType>()
       .withClause(clauses.build())
+      .withEntityModels(keys)
       .includeHashedKeys()
       .withLimit(1000);
   },
