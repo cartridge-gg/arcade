@@ -32,9 +32,9 @@ pub mod setup {
         spawn_test_world,
     };
     use models::rbac::models::index as rbac_models;
-    use openzeppelin_token::erc1155::interface::IERC1155Dispatcher;
-    use openzeppelin_token::erc20::interface::IERC20Dispatcher;
-    use openzeppelin_token::erc721::interface::IERC721Dispatcher;
+    use openzeppelin::token::erc1155::interface::IERC1155Dispatcher;
+    use openzeppelin::token::erc20::interface::IERC20Dispatcher;
+    use openzeppelin::token::erc721::interface::IERC721Dispatcher;
     use orderbook::events::index as orderbook_events;
     use orderbook::models::index as orderbook_models;
     use provider::models::index as provider_models;

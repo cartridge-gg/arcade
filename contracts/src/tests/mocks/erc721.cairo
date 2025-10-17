@@ -1,8 +1,8 @@
 #[starknet::contract]
 pub mod ERC721 {
-    use openzeppelin_introspection::src5::SRC5Component;
-    use openzeppelin_token::common::erc2981::ERC2981Component;
-    use openzeppelin_token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
+    use openzeppelin::introspection::src5::SRC5Component;
+    use openzeppelin::token::common::erc2981::ERC2981Component;
+    use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
 
     const TOKEN_ID: u256 = 1;
 
