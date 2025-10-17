@@ -13,12 +13,10 @@ members = [
 ]
 description = "Dojo achievement library"
 homepage = "https://github.com/cartridge-gg/arcade/"
-cairo-version = "2.12.2"
 
 [workspace.package]
 version = "0.0.0"
 edition = "2024_07"
-cairo-version = "2.12.2"
 
 [workspace.dependencies]
 dojo = "1.7.1"
