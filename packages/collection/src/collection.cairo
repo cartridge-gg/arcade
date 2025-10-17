@@ -5,12 +5,12 @@ pub mod Collection {
     use collection::components::mintable::mintable::MintableComponent;
     use collection::interface::{CollectionTrait, MinterDispatcher, MinterDispatcherTrait};
     use collection::types::contract_metadata::ContractMetadata;
-    use openzeppelin_access::ownable::OwnableComponent;
-    use openzeppelin_introspection::src5::SRC5Component;
-    use openzeppelin_token::erc721::interface::IERC721Metadata;
-    use openzeppelin_token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
-    use openzeppelin_upgrades::UpgradeableComponent;
-    use openzeppelin_upgrades::interface::IUpgradeable;
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::introspection::src5::SRC5Component;
+    use openzeppelin::token::erc721::interface::IERC721Metadata;
+    use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
+    use openzeppelin::upgrades::UpgradeableComponent;
+    use openzeppelin::upgrades::interface::IUpgradeable;
     use starknet::ContractAddress;
 
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);

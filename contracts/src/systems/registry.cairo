@@ -123,9 +123,9 @@ pub mod Registry {
 
     // External imports
 
-    use openzeppelin_introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
-    use openzeppelin_token::erc1155::interface::IERC1155_ID;
-    use openzeppelin_token::erc721::interface::IERC721_ID;
+    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
+    use openzeppelin::token::erc1155::interface::IERC1155_ID;
+    use openzeppelin::token::erc721::interface::IERC721_ID;
 
     // Component imports
 

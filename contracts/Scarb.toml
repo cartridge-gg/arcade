@@ -8,8 +8,7 @@ version = "0.0.0"
 sierra-replace-ids = true
 
 [dependencies]
-openzeppelin_introspection.workspace = true
-openzeppelin_token.workspace = true
+openzeppelin.workspace = true
 dojo.workspace = true
 starknet.workspace = true
 achievement = { path = ".." }
@@ -23,11 +22,6 @@ registry = { path = ".." }
 social = { path = ".." }
 
 [dev-dependencies]
-openzeppelin_access.workspace = true
-openzeppelin_account.workspace = true
-openzeppelin_introspection.workspace = true
-openzeppelin_token.workspace = true
-openzeppelin_upgrades.workspace = true
 dojo_cairo_test.workspace = true
 cairo_test.workspace = true
 

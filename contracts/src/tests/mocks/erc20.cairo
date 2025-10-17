@@ -1,6 +1,6 @@
 #[starknet::contract]
 pub mod ERC20 {
-    use openzeppelin_token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
+    use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
 
     const AMOUNT: u256 = 10_000_000_000_000_000_000; // 10 ETH
 

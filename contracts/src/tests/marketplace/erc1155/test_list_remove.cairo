@@ -4,8 +4,8 @@
 
 use arcade::systems::marketplace::IMarketplaceDispatcherTrait;
 use arcade::tests::setup::setup::spawn;
-use openzeppelin_token::erc1155::interface::IERC1155DispatcherTrait;
-use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
+use openzeppelin::token::erc1155::interface::IERC1155DispatcherTrait;
+use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
 use orderbook::models::order::OrderAssert;
 
 // Package imports

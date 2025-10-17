@@ -2,8 +2,8 @@
 pub mod MintableComponent {
     use collection::components::mintable::interface;
     use core::num::traits::Zero;
-    use openzeppelin_access::ownable::OwnableComponent;
-    use openzeppelin_access::ownable::OwnableComponent::InternalImpl as OwnableInternalImpl;
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::access::ownable::OwnableComponent::InternalImpl as OwnableInternalImpl;
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     use starknet::{ContractAddress, get_caller_address};
 

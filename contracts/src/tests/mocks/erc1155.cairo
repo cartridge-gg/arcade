@@ -1,9 +1,9 @@
 #[starknet::contract]
 pub mod ERC1155 {
     use core::num::traits::Zero;
-    use openzeppelin_introspection::src5::SRC5Component;
-    use openzeppelin_token::common::erc2981::ERC2981Component;
-    use openzeppelin_token::erc1155::{ERC1155Component, ERC1155HooksEmptyImpl};
+    use openzeppelin::introspection::src5::SRC5Component;
+    use openzeppelin::token::common::erc2981::ERC2981Component;
+    use openzeppelin::token::erc1155::{ERC1155Component, ERC1155HooksEmptyImpl};
 
     const TOKEN_ID: u256 = 1;
     const QUANTITY: u256 = 10;

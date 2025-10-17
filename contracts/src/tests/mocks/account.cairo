@@ -7,8 +7,8 @@
 /// contracts. Supports outside execution by implementing SRC9.
 #[starknet::contract(account)]
 pub mod Account {
-    use openzeppelin_account::AccountComponent;
-    use openzeppelin_introspection::src5::SRC5Component;
+    use openzeppelin::account::AccountComponent;
+    use openzeppelin::introspection::src5::SRC5Component;
 
     component!(path: AccountComponent, storage: account, event: AccountEvent);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
