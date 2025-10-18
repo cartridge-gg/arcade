@@ -27,7 +27,9 @@ pub trait IAdministration<TContractState> {
 
 #[starknet::interface]
 pub trait IStarterpackRegistry<TContractState> {
-    fn quote(self: @TContractState, starterpack_id: u32, has_referrer: bool) -> StarterpackQuote;
+    fn quote(
+        self: @TContractState, starterpack_id: u32, quantity: u32, has_referrer: bool,
+    ) -> StarterpackQuote;
     fn register(
         ref self: TContractState,
         implementation: ContractAddress,
@@ -57,6 +59,7 @@ pub trait IStarterpackRegistry<TContractState> {
         ref self: TContractState,
         recipient: ContractAddress,
         starterpack_id: u32,
+        quantity: u32,
         referrer: Option<ContractAddress>,
         referrer_group: Option<felt252>,
     );
@@ -151,7 +154,7 @@ pub mod StarterpackRegistry {
     #[abi(embed_v0)]
     impl StarterpackImpl of IStarterpackRegistry<ContractState> {
         fn quote(
-            self: @ContractState, starterpack_id: u32, has_referrer: bool,
+            self: @ContractState, starterpack_id: u32, quantity: u32, has_referrer: bool,
         ) -> StarterpackQuote {
             let world = self.world_storage();
             let mut store = StoreTrait::new(world);
@@ -162,10 +165,11 @@ pub mod StarterpackRegistry {
             // Get config for protocol fee
             let config = store.get_config(CONFIG_ID);
 
-            let base_price = starterpack.price;
+            let unit_price = starterpack.price;
+            let base_price = unit_price * quantity.into();
             let payment_token = starterpack.payment_token;
 
-            // Calculate referral fee if has_referrer
+            // Calculate referral fee if has_referrer (per unit, then multiplied by quantity)
             let referral_fee = if has_referrer {
                 base_price
                     * starterpack.referral_percentage.into()
@@ -249,11 +253,14 @@ pub mod StarterpackRegistry {
             ref self: ContractState,
             recipient: ContractAddress,
             starterpack_id: u32,
+            quantity: u32,
             referrer: Option<ContractAddress>,
             referrer_group: Option<felt252>,
         ) {
             let world = self.world_storage();
-            self.issuable.issue(world, recipient, starterpack_id, referrer, referrer_group);
+            self
+                .issuable
+                .issue(world, recipient, starterpack_id, quantity, referrer, referrer_group);
         }
     }
 

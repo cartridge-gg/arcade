@@ -8,6 +8,7 @@ use starterpack::types::status::Status;
 pub mod errors {
     pub const STARTERPACK_NOT_ACTIVE: felt252 = 'Starterpack: not active';
     pub const STARTERPACK_NOT_OWNER: felt252 = 'Starterpack: not owner';
+    pub const STARTERPACK_QUANTITY_EXCEEDS_LIMIT: felt252 = 'Starterpack: quantity > 1';
 }
 
 // Traits
@@ -38,8 +39,8 @@ pub impl StarterpackImpl of StarterpackTrait {
         }
     }
 
-    fn issue(ref self: Starterpack) {
-        self.total_issued += 1;
+    fn issue(ref self: Starterpack, quantity: u32) {
+        self.total_issued += quantity.into();
     }
 
     fn pause(ref self: Starterpack) {
@@ -72,5 +73,11 @@ pub impl StarterpackAssert of StarterpackAssertTrait {
 
     fn assert_is_owner(self: @Starterpack, address: starknet::ContractAddress) {
         assert(*self.owner == address, errors::STARTERPACK_NOT_OWNER);
+    }
+
+    fn assert_quantity_allowed(self: @Starterpack, quantity: u32) {
+        if !*self.reissuable {
+            assert(quantity == 1, errors::STARTERPACK_QUANTITY_EXCEEDS_LIMIT);
+        }
     }
 }
