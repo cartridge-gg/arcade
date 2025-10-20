@@ -112,13 +112,6 @@ export function useClaimViewModel() {
       // Mock transaction delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      console.log("Claim transaction:", {
-        starterpackId,
-        recipient: address,
-        referrer: attribution.referrer,
-        referrerGroup: attribution.referrerGroup,
-      });
-
       setClaimState({
         isLoading: false,
         error: null,

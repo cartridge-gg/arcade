@@ -62,7 +62,6 @@ export function captureAttribution(searchParams: URLSearchParams): boolean {
     // Check if we already have valid attribution (first-touch model)
     const existing = getAttribution();
     if (existing) {
-      console.log("Existing attribution found, skipping capture (first-touch model)");
       return false;
     }
 
@@ -83,7 +82,6 @@ export function captureAttribution(searchParams: URLSearchParams): boolean {
     };
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(attribution));
-    console.log("Referral attribution captured:", attribution);
     return true;
   } catch (error) {
     console.error("Error capturing referral attribution:", error);
