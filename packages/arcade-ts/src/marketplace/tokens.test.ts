@@ -20,7 +20,7 @@ describe("fetchCollectionTokens", () => {
     mockFetchToriis.mockReset();
   });
 
-  it("fetches and normalizes tokens per project", async () => {
+  it("fetches and normalizes tokens", async () => {
     mockFetchToriis.mockResolvedValueOnce({
       data: [
         {
@@ -37,9 +37,9 @@ describe("fetchCollectionTokens", () => {
     const result = await fetchCollectionTokens({
       address:
         "0x04f51290f2b0e16524084c27890711c7a955eb276cffec185d6f24f2a620b15f",
-      projects: ["projectA"],
+      project: "projectA",
       attributeFilters: { rarity: new Set(["legendary"]) },
-      cursors: { projectA: "cursor1" },
+      cursor: "cursor1",
       limit: 50,
       resolveTokenImage,
     });
@@ -75,31 +75,25 @@ describe("fetchCollectionTokens", () => {
       }),
     );
 
-    expect(result.errors).toHaveLength(0);
-    expect(result.pages).toHaveLength(1);
-    const [page] = result.pages;
-    expect(page.projectId).toBe("projectA");
-    expect(page.nextCursor).toBe("next");
-    expect(page.tokens).toHaveLength(1);
-    expect(page.tokens[0].image).toBe("https://image.example");
+    expect(result.error).toBeNull();
+    expect(result.page).not.toBeNull();
+    expect(result.page?.nextCursor).toBe("next");
+    expect(result.page?.tokens).toHaveLength(1);
+    expect(result.page?.tokens[0].image).toBe("https://image.example");
     expect(resolveTokenImage).toHaveBeenCalled();
   });
 
-  it("captures errors per project", async () => {
+  it("captures errors", async () => {
     mockFetchToriis.mockRejectedValueOnce(new Error("network error"));
 
     const result = await fetchCollectionTokens({
       address:
         "0x04f51290f2b0e16524084c27890711c7a955eb276cffec185d6f24f2a620b15f",
-      projects: ["projectA"],
+      project: "projectA",
     });
 
-    expect(result.pages).toHaveLength(0);
-    expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]).toEqual(
-      expect.objectContaining({
-        projectId: "projectA",
-      }),
-    );
+    expect(result.page).toBeNull();
+    expect(result.error?.error).toBeInstanceOf(Error);
+    expect(result.error?.error.message).toBe("network error");
   });
 });

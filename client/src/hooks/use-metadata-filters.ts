@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  buildAvailableFilters,
+  buildPrecomputedFilters,
+  filterTokensByMetadata,
+  flattenActiveFilters,
+} from "@cartridge/arcade/marketplace";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
 import { useMetadata } from "@/queries";
 import {
@@ -7,157 +13,12 @@ import {
   serializeFiltersToURL,
 } from "@/utils/marketplace-filters";
 import type {
-  ActiveFilters,
-  AvailableFilters,
-  PrecomputedFilterData,
   StatusFilter,
   UseMetadataFiltersInput,
   UseMetadataFiltersReturn,
 } from "@/types/metadata-filter.types";
 
 const DEFAULT_STATUS_FILTER: StatusFilter = "all";
-
-const tokenMatchesFilters = (
-  token: UseMetadataFiltersInput["tokens"][number],
-  activeFilters: ActiveFilters,
-) => {
-  const entries = Object.entries(activeFilters);
-  if (entries.length === 0) {
-    return true;
-  }
-
-  const metadata =
-    typeof token.metadata === "string"
-      ? (() => {
-          try {
-            return JSON.parse(token.metadata as unknown as string);
-          } catch {
-            return null;
-          }
-        })()
-      : token.metadata;
-
-  const attributes = Array.isArray((metadata as any)?.attributes)
-    ? (metadata as any).attributes
-    : [];
-
-  if (!attributes.length) {
-    return false;
-  }
-
-  const traitMap = new Map<string, Set<string>>();
-
-  for (const attribute of attributes) {
-    if (
-      !attribute ||
-      !attribute.trait_type ||
-      attribute.value === undefined ||
-      attribute.value === null
-    ) {
-      continue;
-    }
-
-    const trait = attribute.trait_type as string;
-    const value = String(attribute.value);
-
-    if (!traitMap.has(trait)) {
-      traitMap.set(trait, new Set());
-    }
-
-    traitMap.get(trait)!.add(value);
-  }
-
-  for (const [trait, values] of entries) {
-    const availableValues = traitMap.get(trait);
-    if (!availableValues) {
-      return false;
-    }
-
-    let matches = false;
-    for (const value of values) {
-      if (availableValues.has(value)) {
-        matches = true;
-        break;
-      }
-    }
-
-    if (!matches) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-const buildAvailableFilters = (
-  metadata: Array<{ traitName: string; traitValue: string; count: number }>,
-  activeFilters: ActiveFilters,
-): AvailableFilters => {
-  const result: AvailableFilters = {};
-
-  for (const entry of metadata) {
-    const trait = entry.traitName;
-    const value = entry.traitValue;
-
-    if (!trait || value === undefined || value === null) continue;
-
-    if (!result[trait]) {
-      result[trait] = {};
-    }
-
-    result[trait][value] = entry.count;
-  }
-
-  for (const [trait, values] of Object.entries(activeFilters)) {
-    if (!result[trait]) {
-      result[trait] = {};
-    }
-
-    for (const value of values) {
-      if (result[trait][value] === undefined) {
-        result[trait][value] = 0;
-      }
-    }
-  }
-
-  return result;
-};
-
-const buildPrecomputed = (
-  availableFilters: AvailableFilters,
-): PrecomputedFilterData => {
-  const attributes = Object.keys(availableFilters).sort((a, b) =>
-    a.localeCompare(b),
-  );
-
-  const properties = attributes.reduce<PrecomputedFilterData["properties"]>(
-    (acc, attribute) => {
-      const entries = Object.entries(availableFilters[attribute] ?? {}).map(
-        ([value, count]) => ({
-          property: value,
-          order: count,
-          count,
-        }),
-      );
-
-      entries.sort((a, b) => {
-        if (b.order !== a.order) {
-          return b.order - a.order;
-        }
-        return a.property.localeCompare(b.property);
-      });
-
-      acc[attribute] = entries;
-      return acc;
-    },
-    {},
-  );
-
-  return {
-    attributes,
-    properties,
-  };
-};
 
 export function useMetadataFilters({
   tokens,
@@ -240,11 +101,10 @@ export function useMetadataFilters({
     });
   }, [activeFilters, enabled, navigate, location.pathname, location.searchStr]);
 
-  const selectedTraits = useMemo(() => {
-    return Object.entries(activeFilters).flatMap(([trait, values]) =>
-      Array.from(values).map((value) => ({ name: trait, value })),
-    );
-  }, [activeFilters]);
+  const selectedTraits = useMemo(
+    () => flattenActiveFilters(activeFilters),
+    [activeFilters],
+  );
 
   const metadataQuery = useMetadata({
     contractAddress: collectionAddress,
@@ -259,10 +119,9 @@ export function useMetadataFilters({
     [metadata, activeFilters],
   );
 
-  const precomputed = useMemo(
-    () => buildPrecomputed(availableFilters),
-    [availableFilters],
-  );
+  const precomputed = useMemo(() => {
+    return buildPrecomputedFilters(availableFilters);
+  }, [availableFilters]);
 
   const filteredTokens = useMemo(() => {
     if (!enabled) {
@@ -277,7 +136,7 @@ export function useMetadataFilters({
       return tokens;
     }
 
-    return tokens.filter((token) => tokenMatchesFilters(token, activeFilters));
+    return filterTokensByMetadata(tokens, activeFilters);
   }, [tokens, activeFilters, enabled]);
 
   const setFilter = useCallback(

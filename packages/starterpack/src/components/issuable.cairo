@@ -47,6 +47,7 @@ pub mod IssuableComponent {
             mut world: WorldStorage,
             recipient: ContractAddress,
             starterpack_id: u32,
+            quantity: u32,
             referrer: Option<ContractAddress>,
             referrer_group: Option<felt252>,
         ) {
@@ -54,6 +55,7 @@ pub mod IssuableComponent {
 
             let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_is_active();
+            starterpack.assert_quantity_allowed(quantity);
 
             if !starterpack.reissuable {
                 let issuance = store.get_issuance(starterpack_id, recipient);
@@ -61,7 +63,8 @@ pub mod IssuableComponent {
             }
 
             let payer = get_caller_address();
-            let base_price = starterpack.price;
+            let unit_price = starterpack.price;
+            let base_price = unit_price * quantity.into();
             let payment_token = starterpack.payment_token;
 
             // Skip payment if base price is zero
@@ -122,12 +125,12 @@ pub mod IssuableComponent {
             let implementation_dispatcher = IStarterpackImplementationDispatcher {
                 contract_address: starterpack.implementation,
             };
-            implementation_dispatcher.on_issue(recipient, starterpack_id);
+            implementation_dispatcher.on_issue(recipient, starterpack_id, quantity);
 
             let time = get_block_timestamp();
             let issuance = IssuanceTrait::new(starterpack_id, recipient, time);
 
-            starterpack.issue();
+            starterpack.issue(quantity);
 
             store.set_starterpack(@starterpack);
             store.set_issuance(@issuance);
@@ -141,6 +144,7 @@ pub mod IssuableComponent {
                         starterpack_id,
                         payment_token,
                         amount: total_amount,
+                        quantity,
                         referrer,
                         referrer_group,
                         time,

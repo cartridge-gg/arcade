@@ -14,6 +14,7 @@
 html,
 body {
   overflow: hidden;
+  touch-action: manipulation;
 }
 
 @layer base {

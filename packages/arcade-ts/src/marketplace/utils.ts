@@ -2,7 +2,7 @@ import type {
   AttributeFilter,
   Token,
   TokenContract,
-} from "@dojoengine/torii-wasm";
+} from "@dojoengine/torii-wasm/types";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import type {
   AttributeFilterInput,

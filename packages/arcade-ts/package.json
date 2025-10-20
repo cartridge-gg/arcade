@@ -65,10 +65,10 @@
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",
   "dependencies": {
     "@dojoengine/core": "catalog:",
+    "@dojoengine/grpc": "catalog:",
     "@dojoengine/sdk": "catalog:",
     "@dojoengine/torii-client": "catalog:",
     "@dojoengine/torii-wasm": "catalog:",
-    "@dojoengine/grpc": "catalog:",
     "@starknet-io/types-js": "^0.9.1",
     "eventemitter3": "^5.0.1",
     "starknet": "catalog:"
@@ -77,17 +77,20 @@
     "react": "^18.0.0 || ^19.0.0-0"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^20.11.10",
     "@types/react": "^19.0.3",
     "@vitest/ui": "^3.2.4",
     "husky": "^9.1.7",
     "prettier": "^3.4.2",
+    "react": "^18.2.0",
     "tsup": "catalog:",
     "typedoc": "^0.27.0",
     "typedoc-plugin-markdown": "^4.4.1",
     "typescript": "catalog:",
-    "vitest": "^3.2.4",
-    "react": "^18.2.0"
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^3.2.4"
   },
   "importSort": {
     ".js, .jsx, .ts, .tsx": {

@@ -1,4 +1,4 @@
-import type { Token, TokenContract } from "@dojoengine/torii-wasm";
+import type { Token, TokenContract } from "@dojoengine/torii-wasm/types";
 import type { constants } from "starknet";
 import type { OrderModel } from "../modules/marketplace";
 
@@ -30,20 +30,18 @@ export interface NormalizedToken extends Token {
 }
 
 export interface CollectionTokensPage {
-  projectId: string;
   tokens: NormalizedToken[];
   nextCursor: string | null;
 }
 
 export interface CollectionTokensError {
-  projectId: string;
   error: Error;
 }
 
 export interface FetchCollectionTokensOptions {
   address: string;
-  projects?: string[];
-  cursors?: Record<string, string | null | undefined>;
+  project?: string;
+  cursor?: string | null | undefined;
   attributeFilters?: AttributeFilterInput;
   tokenIds?: string[];
   limit?: number;
@@ -53,8 +51,8 @@ export interface FetchCollectionTokensOptions {
 }
 
 export interface FetchCollectionTokensResult {
-  pages: CollectionTokensPage[];
-  errors: CollectionTokensError[];
+  page: CollectionTokensPage | null;
+  error: CollectionTokensError | null;
 }
 
 export interface NormalizedCollection {

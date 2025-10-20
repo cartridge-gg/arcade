@@ -6,7 +6,10 @@ import {
 } from "@dojoengine/sdk";
 import type { constants } from "starknet";
 import { addAddressPadding, getChecksumAddress } from "starknet";
-import type { ToriiClient, Token as ToriiToken } from "@dojoengine/torii-wasm";
+import type {
+  ToriiClient,
+  Token as ToriiToken,
+} from "@dojoengine/torii-wasm/types";
 import {
   fetchToriis,
   type ClientCallbackParams,
@@ -298,9 +301,9 @@ export async function createMarketplaceClient(
     } = options;
 
     const projectId = ensureProjectId(projectOverride, defaultProject);
-    const { pages, errors } = await fetchCollectionTokens({
+    const { page, error } = await fetchCollectionTokens({
       address: collection,
-      projects: [projectId],
+      project: projectId,
       tokenIds: [tokenId],
       limit: 1,
       fetchImages,
@@ -308,12 +311,10 @@ export async function createMarketplaceClient(
       defaultProjectId: defaultProject,
     });
 
-    const projectError = errors.find((error) => error.projectId === projectId);
-    if (projectError) {
-      throw projectError.error;
+    if (error) {
+      throw error.error;
     }
 
-    const page = pages.find((p) => p.projectId === projectId);
     const token = page?.tokens[0];
     if (!token) return null;
 
@@ -342,7 +343,7 @@ export async function createMarketplaceClient(
     listCollectionTokens: (options) =>
       fetchCollectionTokens({
         ...options,
-        projects: options.projects ?? [defaultProject],
+        project: options.project ?? defaultProject,
         resolveTokenImage: resolveTokenImage ?? defaultResolveTokenImage,
         defaultProjectId: defaultProject,
       }),

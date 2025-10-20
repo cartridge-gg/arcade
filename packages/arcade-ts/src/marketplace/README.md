@@ -21,7 +21,21 @@ The client surfaces the following high-level methods:
 
 Each method accepts strongly typed options so consumers can opt into pagination, attribute filters, or custom image
 resolvers without re-implementing Torii plumbing. When no resolver is provided the client automatically serves assets
-from Torii's static endpoints.
+from Torii's static endpoints. Paginated token calls intentionally hide the underlying Torii project identifiers—each
+page contains only the token list and the next cursor so that most consumers can treat Arcade as a single data source.
+
+## Trait metadata helpers
+
+For experiences that need to render trait pickers or pre-computed metadata, the module also exports standalone
+utilities:
+
+- `fetchCollectionTraitMetadata` loads raw trait counts for a collection (across one or many projects).
+- `aggregateTraitMetadata` merges the per-project response into a single list.
+- `buildAvailableFilters` and `buildPrecomputedFilters` transform the counts into UI-ready structures.
+- `filterTokensByMetadata` applies an `ActiveFilters` map to an in-memory token list.
+
+These helpers mirror the logic used in our in-house client so teams can re-use the same filtering behaviour without
+duplicating SQL or token-matching code.
 
 ## Configuration
 
@@ -43,8 +57,8 @@ const client = await createMarketplaceClient({
 ## Error handling
 
 All data methods throw when the underlying Torii fetch fails. For the paginated `listCollectionTokens` call the result
-contains a `pages` array and an `errors` array so you can present per-project failures while still rendering successful
-responses. Fetch helpers rely on `getChecksumAddress` internally to ensure consistent casing.
+includes a single `page` payload alongside an optional `error`, so consumers can inspect failures without juggling
+project identifiers. Fetch helpers rely on `getChecksumAddress` internally to ensure consistent casing.
 
 ## React integration
 
@@ -74,7 +88,7 @@ function Dashboard() {
   if (status === "loading") return <Spinner />;
   if (status === "error") return <ErrorView error={error} onRetry={refresh} />;
 
-  const tokens = data?.pages.flatMap((page) => page.tokens) ?? [];
+  const tokens = data?.page?.tokens ?? [];
   return <TokensList tokens={tokens} />;
 }
 ```
@@ -87,7 +101,7 @@ The React module also ships dedicated hooks, each of which re-fetches automatica
 | Hook | Returns |
 | --- | --- |
 | `useMarketplaceCollection` | A single collection summary. |
-| `useMarketplaceCollectionTokens` | Token pages, including per-project errors. |
+| `useMarketplaceCollectionTokens` | Token page plus cursor/error helpers. |
 | `useMarketplaceCollectionOrders` | Orders filtered by collection/token/status. |
 | `useMarketplaceCollectionListings` | Active listings for a collection/token. |
 | `useMarketplaceToken` | Token snapshot with related orders and listings. |

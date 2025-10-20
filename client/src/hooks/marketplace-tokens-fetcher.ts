@@ -27,6 +27,7 @@ export function useMarketTokensFetcher({
   project,
   address,
   autoFetch = true,
+  attributeFilters,
 }: MarketTokensFetcherInput) {
   const addTokens = useMarketplaceTokensStore((state) => state.addTokens);
   const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
@@ -60,13 +61,14 @@ export function useMarketTokensFetcher({
   const queryOptions = useMemo(() => {
     return {
       address: normalizedAddress,
-      projects: project.length > 0 ? project : undefined,
-      cursors: cursor ? { [projectId]: cursor } : undefined,
+      project: projectId,
+      cursor,
+      attributeFilters,
       limit: LIMIT,
       fetchImages: true,
       defaultProjectId: projectId,
     };
-  }, [normalizedAddress, project, projectId, cursor]);
+  }, [normalizedAddress, projectId, cursor, attributeFilters]);
 
   const enabled =
     autoFetch &&
@@ -80,8 +82,8 @@ export function useMarketTokensFetcher({
 
   const projectError = useMemo(() => {
     if (!data) return null;
-    return data.errors.find((entry) => entry.projectId === projectId) ?? null;
-  }, [data, projectId]);
+    return data.error;
+  }, [data]);
 
   useEffect(() => {
     if (!data || projectError) {
@@ -90,7 +92,8 @@ export function useMarketTokensFetcher({
       }
       return;
     }
-    const page = data.pages.find((p) => p.projectId === projectId);
+
+    const page = data.page;
     if (!page) {
       setNextCursor(null);
       return;

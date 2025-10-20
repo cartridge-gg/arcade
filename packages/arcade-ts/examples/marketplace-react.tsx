@@ -21,7 +21,7 @@ function TokensPreview() {
     );
   }
 
-  const tokens = data?.pages.flatMap((page) => page.tokens) ?? [];
+  const tokens = data?.page?.tokens ?? [];
   return <p>Fetched {tokens.length} tokens</p>;
 }
 

@@ -1,107 +1,85 @@
-import { queryKeys } from "@/queries/keys";
-import { sqlClient } from "@/queries";
 import { useQuery } from "react-query";
-import { addAddressPadding } from "starknet";
+import {
+  aggregateTraitMetadata,
+  fetchCollectionTraitMetadata,
+  type TraitMetadataRow,
+  type TraitSelection,
+} from "@cartridge/arcade/marketplace";
+import { queryKeys } from "@/queries/keys";
 
-export type Metadata = {
-  traitName: string;
-  traitValue: string;
-  count: number;
-};
+export type Metadata = TraitMetadataRow;
 
-type MetadataResponse = {
-  count: number;
-  trait_name: string;
-  trait_value: string;
-};
+interface MetadataQueryOptions {
+  contractAddress: string;
+  traits: TraitSelection[];
+  projects?: string[];
+}
 
-const getMetadataQuery = ({
+const metadataQueryFn = async ({
   contractAddress,
   traits,
-}: { contractAddress: string; traits: { name: string; value: string }[] }) => {
-  const whereClause =
-    traits
-      .map(
-        (trait) =>
-          `(trait_name LIKE '${trait.name}' AND trait_value LIKE '${trait.value}')`,
-      )
-      .join(" OR ") || "1 = 1";
-  return `SELECT
-        trait_name,
-        trait_value,
-        count
-    FROM (
-        SELECT
-            trait_name,
-            trait_value,
-            COUNT(*) AS count,
-            ROW_NUMBER() OVER (PARTITION BY trait_value ORDER BY COUNT(*) DESC) AS rn
-        FROM token_attributes
-        WHERE token_id IN (
-            SELECT token_id
-            FROM token_attributes
-            WHERE ${whereClause}
-              AND token_id LIKE '${addAddressPadding(contractAddress)}:%'
-            GROUP BY token_id
-            ${traits.length > 0 ? `HAVING COUNT(DISTINCT trait_name) = ${traits.length}` : ""}
-        )
-        GROUP BY trait_name, trait_value
-    ) ranked
-    WHERE rn = 1
-    ORDER BY trait_value, trait_name;
-  `;
+  projects,
+}: MetadataQueryOptions): Promise<Metadata[]> => {
+  if (!contractAddress) {
+    return [];
+  }
+
+  try {
+    const result = await fetchCollectionTraitMetadata({
+      address: contractAddress,
+      traits,
+      projects,
+    });
+
+    if (result.errors.length > 0) {
+      console.warn(
+        "Failed to fetch metadata for some projects:",
+        result.errors.map((error) => ({
+          projectId: error.projectId,
+          message: error.error.message,
+        })),
+      );
+    }
+
+    return aggregateTraitMetadata(result.pages);
+  } catch (error) {
+    console.error("Error fetching metadata:", error);
+    return [];
+  }
 };
 
 export const getMetadataQueryOptions = ({
   contractAddress,
   traits,
-}: { contractAddress: string; traits: { name: string; value: string }[] }) => {
+  projects,
+}: MetadataQueryOptions) => {
   return {
-    queryKey: queryKeys.metadata.traits(contractAddress, traits),
-    queryFn: async () => {
-      const data = await sqlClient<MetadataResponse>(
-        getMetadataQuery({ contractAddress, traits }),
-      );
-
-      return data.map((meta) => ({
-        traitName: meta.trait_name,
-        traitValue: meta.trait_value,
-        count: meta.count,
-      }));
-    },
+    queryKey: [
+      ...queryKeys.metadata.traits(contractAddress, traits),
+      projects?.slice().sort().join(",") ?? "default",
+    ] as const,
+    queryFn: () =>
+      metadataQueryFn({
+        contractAddress,
+        traits,
+        projects,
+      }),
   };
 };
 
 export const useMetadata = ({
   contractAddress,
   traits,
+  projects,
   enabled = true,
-}: {
-  contractAddress: string;
-  traits: { name: string; value: string }[];
-  enabled?: boolean;
-}) => {
+}: MetadataQueryOptions & { enabled?: boolean }) => {
   return useQuery({
-    queryKey: [
-      "torii-metadata",
+    ...getMetadataQueryOptions({
       contractAddress,
-      traits.map((t) => `${t.name}-${t.value}`).join("-"),
-    ],
-    queryFn: async () => {
-      const query = getMetadataQuery({ contractAddress, traits });
-      try {
-        const data = await sqlClient<MetadataResponse>(query);
-        return data.map((meta) => ({
-          traitName: meta.trait_name,
-          traitValue: meta.trait_value,
-          count: meta.count,
-        }));
-      } catch (error) {
-        console.error("Error fetching metadata:", error);
-        return [];
-      }
-    },
-    refetchOnWindowFocus: false,
+      traits,
+      projects,
+    }),
     enabled: enabled && !!contractAddress,
+    refetchOnWindowFocus: false,
   });
 };

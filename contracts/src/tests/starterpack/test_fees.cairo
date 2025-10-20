@@ -54,6 +54,7 @@ fn test_sp_fees_distribution_no_referrer() {
         .issue(
             recipient: PLAYER(),
             starterpack_id: starterpack_id,
+            quantity: 1,
             referrer: Option::None,
             referrer_group: Option::None,
         );
@@ -118,6 +119,7 @@ fn test_sp_fees_distribution_with_referrer() {
         .issue(
             recipient: PLAYER(),
             starterpack_id: starterpack_id,
+            quantity: 1,
             referrer: Option::Some(context.holder),
             referrer_group: Option::None,
         );
@@ -175,7 +177,7 @@ fn test_sp_quote_calculation() {
         );
 
     // [Quote] Without referrer
-    let quote_no_ref = systems.starterpack.quote(starterpack_id, false);
+    let quote_no_ref = systems.starterpack.quote(starterpack_id, 1, false);
     assert_eq!(quote_no_ref.base_price, PRICE);
     assert_eq!(quote_no_ref.referral_fee, 0);
     assert_eq!(quote_no_ref.protocol_fee, PRICE * PROTOCOL_FEE.into() / FEE_DENOMINATOR.into());
@@ -183,7 +185,7 @@ fn test_sp_quote_calculation() {
     assert_eq!(quote_no_ref.payment_token, systems.erc20.contract_address);
 
     // [Quote] With referrer
-    let quote_with_ref = systems.starterpack.quote(starterpack_id, true);
+    let quote_with_ref = systems.starterpack.quote(starterpack_id, 1, true);
     assert_eq!(quote_with_ref.base_price, PRICE);
     assert_eq!(
         quote_with_ref.referral_fee, PRICE * REFERRAL_PERCENTAGE.into() / FEE_DENOMINATOR.into(),
@@ -227,6 +229,7 @@ fn test_sp_free() {
         .issue(
             recipient: PLAYER(),
             starterpack_id: starterpack_id,
+            quantity: 1,
             referrer: Option::None,
             referrer_group: Option::None,
         );
@@ -234,4 +237,3 @@ fn test_sp_free() {
     // [Assert] No payment made
     assert_eq!(systems.erc20.balance_of(context.spender), spender_initial, "No payment for free");
 }
-
