@@ -10,10 +10,7 @@ export function App() {
   usePageTracking();
   const { player, collection, starterpackId } = useProject();
 
-  console.log("App render - starterpackId:", starterpackId, "player:", player, "collection:", collection);
-
   if (starterpackId) {
-    console.log("Rendering StarterpackClaimPage");
     return <StarterpackClaimPage />;
   }
 
