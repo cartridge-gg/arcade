@@ -26,6 +26,7 @@ interface RouteParams {
   collection?: string;
   tab?: string;
   token?: string;
+  starterpack?: string;
 }
 
 export const parseRouteParams = (pathname: string): RouteParams => {
@@ -67,6 +68,12 @@ export const parseRouteParams = (pathname: string): RouteParams => {
           index += 1;
         }
         break;
+      case "starterpack":
+        if (next) {
+          params.starterpack = next;
+          index += 1;
+        }
+        break;
       default:
         if (!params.tab && TAB_SEGMENTS.includes(segment as any)) {
           params.tab = segment;
@@ -92,6 +99,7 @@ export const useProject = () => {
     edition: editionParam,
     player: playerParam,
     collection: collectionParam,
+    starterpack: starterpackParam,
     tab,
   } = useMemo(
     () => parseRouteParams(routerState.location.pathname),
@@ -177,6 +185,13 @@ export const useProject = () => {
     return undefined;
   }, [playerData, playerParam]);
 
+  const starterpackId = useMemo(() => {
+    if (!starterpackParam) return undefined;
+    // Parse starterpack ID as number
+    const id = Number.parseInt(starterpackParam, 10);
+    return Number.isNaN(id) ? undefined : starterpackParam;
+  }, [starterpackParam]);
+
   return {
     game,
     edition,
@@ -184,5 +199,6 @@ export const useProject = () => {
     filter,
     collection,
     tab,
+    starterpackId,
   };
 };
