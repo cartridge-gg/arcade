@@ -1,15 +1,9 @@
-import "@types/jest";
-
 declare module "vite-plugin-wasm" {
-  const wasm: () => {
-    name: string;
-  };
+  const wasm: (...args: any[]) => any;
   export default wasm;
 }
 
 declare module "vite-plugin-top-level-await" {
-  const topLevelAwait: () => {
-    name: string;
-  };
+  const topLevelAwait: (...args: any[]) => any;
   export default topLevelAwait;
 }

@@ -18,7 +18,7 @@ async function main() {
 
   console.log("Collection summary", collection);
 
-  const { pages } = await client.listCollectionTokens({
+  const { page } = await client.listCollectionTokens({
     address:
       "0x04f51290f2b0e16524084c27890711c7a955eb276cffec185d6f24f2a620b15f",
     limit: 25,
@@ -27,7 +27,8 @@ async function main() {
     },
   });
 
-  console.log(`Fetched ${pages.flatMap((page) => page.tokens).length} tokens`);
+  const tokenCount = page?.tokens.length ?? 0;
+  console.log(`Fetched ${tokenCount} tokens`);
 
   const listingOptions: CollectionListingsOptions = {
     collection:

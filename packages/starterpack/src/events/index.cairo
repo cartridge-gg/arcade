@@ -42,6 +42,7 @@ pub struct StarterpackIssued {
     pub starterpack_id: u32,
     pub payment_token: ContractAddress,
     pub amount: u256,
+    pub quantity: u32,
     pub referrer: Option<ContractAddress>,
     pub referrer_group: Option<felt252>,
     pub time: u64,

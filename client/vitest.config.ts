@@ -31,29 +31,57 @@ export default defineConfig({
     setupFiles: [resolveFromRoot("tests/setup/test-setup.ts")],
   },
   resolve: {
-    alias: {
-      "@cartridge/ui/utils/api/cartridge": resolveFromRoot(
-        "tests/mocks/cartridge-ui-api-cartridge.ts",
-      ),
-      "@cartridge/ui/utils/api/indexer": resolveFromRoot(
-        "tests/mocks/cartridge-ui-api-indexer.ts",
-      ),
-      "@cartridge/ui/utils": resolveFromRoot(
-        "tests/mocks/cartridge-ui-utils.ts",
-      ),
-      "@dojoengine/torii-wasm": resolveFromRoot("tests/mocks/torii-wasm.ts"),
-      "@dojoengine/torii-wasm/pkg/web/dojo_c.js": resolveFromRoot(
-        "tests/mocks/torii-wasm-pkg.ts",
-      ),
-      "@dojoengine/torii-wasm/pkg/web/dojo_c_bg.js": resolveFromRoot(
-        "tests/mocks/torii-wasm-pkg.ts",
-      ),
-      "@dojoengine/torii-wasm/pkg/web/dojo_c_bg.wasm": resolveFromRoot(
-        "tests/mocks/torii-wasm-pkg.ts",
-      ),
-      "@": resolveFromRoot("src"),
-      "@cartridge/ui": resolveFromRoot("tests/mocks/cartridge-ui.ts"),
-      "@cartridge/arcade": resolveFromRoot("tests/mocks/cartridge-arcade.ts"),
-    },
+    alias: [
+      {
+        find: "@cartridge/ui/utils/api/cartridge",
+        replacement: resolveFromRoot(
+          "tests/mocks/cartridge-ui-api-cartridge.ts",
+        ),
+      },
+      {
+        find: "@cartridge/ui/utils/api/indexer",
+        replacement: resolveFromRoot(
+          "tests/mocks/cartridge-ui-api-indexer.ts",
+        ),
+      },
+      {
+        find: "@cartridge/ui/utils",
+        replacement: resolveFromRoot("tests/mocks/cartridge-ui-utils.ts"),
+      },
+      {
+        find: /^@dojoengine\/torii-wasm\/pkg\/web\/dojo_c\.js$/,
+        replacement: resolveFromRoot("tests/mocks/torii-wasm-pkg.ts"),
+      },
+      {
+        find: /^@dojoengine\/torii-wasm\/pkg\/web\/dojo_c_bg\.js$/,
+        replacement: resolveFromRoot("tests/mocks/torii-wasm-pkg.ts"),
+      },
+      {
+        find: /^@dojoengine\/torii-wasm\/pkg\/web\/dojo_c_bg\.wasm$/,
+        replacement: resolveFromRoot("tests/mocks/torii-wasm-pkg.ts"),
+      },
+      {
+        find: /^@dojoengine\/torii-wasm$/,
+        replacement: resolveFromRoot("tests/mocks/torii-wasm.ts"),
+      },
+      {
+        find: "@",
+        replacement: resolveFromRoot("src"),
+      },
+      {
+        find: "@cartridge/ui",
+        replacement: resolveFromRoot("tests/mocks/cartridge-ui.ts"),
+      },
+      {
+        find: /^@cartridge\/arcade\/marketplace$/,
+        replacement: resolveFromRoot(
+          "tests/mocks/cartridge-arcade-marketplace.ts",
+        ),
+      },
+      {
+        find: /^@cartridge\/arcade$/,
+        replacement: resolveFromRoot("tests/mocks/cartridge-arcade.ts"),
+      },
+    ],
   },
 });

@@ -69,6 +69,88 @@ const READY_STATE: ProviderState = {
   error: null,
 };
 
+const hasOwn = Object.prototype.hasOwnProperty;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== "object") return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) {
+    return true;
+  }
+
+  if (typeof a !== typeof b || a == null || b == null) {
+    return false;
+  }
+
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  if (a instanceof Date && b instanceof Date) {
+    return a.getTime() === b.getTime();
+  }
+
+  if (a instanceof Set && b instanceof Set) {
+    if (a.size !== b.size) return false;
+    for (const item of a) {
+      if (!b.has(item)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  if (a instanceof Map && b instanceof Map) {
+    if (a.size !== b.size) return false;
+    for (const [key, value] of a) {
+      if (!b.has(key)) {
+        return false;
+      }
+      if (!deepEqual(value, b.get(key))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  if (isPlainObject(a) && isPlainObject(b)) {
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) {
+      return false;
+    }
+    for (const key of keysA) {
+      if (!hasOwn.call(b, key)) {
+        return false;
+      }
+      if (!deepEqual((a as Record<string, unknown>)[key], b[key])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
+
+function useStableValue<T>(value: T): T {
+  const ref = useRef(value);
+  if (!deepEqual(value, ref.current)) {
+    ref.current = value;
+  }
+  return ref.current;
+}
+
 export function MarketplaceClientProvider(
   props: MarketplaceClientProviderProps,
 ) {
@@ -252,19 +334,14 @@ export function useMarketplaceCollection(
   options: CollectionSummaryOptions,
   enabled = true,
 ): UseMarketplaceQueryResult<NormalizedCollection | null> {
-  const normalizedOptions = useMemo(
-    () => ({
-      ...options,
-    }),
-    [options],
-  );
+  const stableOptions = useStableValue(options);
 
   const request = useCallback(
-    (client: MarketplaceClient) => client.getCollection(normalizedOptions),
-    [normalizedOptions],
+    (client: MarketplaceClient) => client.getCollection(stableOptions),
+    [stableOptions],
   );
 
-  const shouldFetch = enabled && Boolean(options.address);
+  const shouldFetch = enabled && Boolean(stableOptions.address);
 
   return useMarketplaceClientQuery(request, shouldFetch);
 }
@@ -273,20 +350,14 @@ export function useMarketplaceCollectionTokens(
   options: FetchCollectionTokensOptions,
   enabled = true,
 ): UseMarketplaceQueryResult<FetchCollectionTokensResult> {
-  const normalizedOptions = useMemo(
-    () => ({
-      ...options,
-    }),
-    [options],
-  );
+  const stableOptions = useStableValue(options);
 
   const request = useCallback(
-    (client: MarketplaceClient) =>
-      client.listCollectionTokens(normalizedOptions),
-    [normalizedOptions],
+    (client: MarketplaceClient) => client.listCollectionTokens(stableOptions),
+    [stableOptions],
   );
 
-  const shouldFetch = enabled && Boolean(options.address);
+  const shouldFetch = enabled && Boolean(stableOptions.address);
   return useMarketplaceClientQuery(request, shouldFetch);
 }
 
@@ -294,20 +365,14 @@ export function useMarketplaceCollectionOrders(
   options: CollectionOrdersOptions,
   enabled = true,
 ): UseMarketplaceQueryResult<OrderModel[]> {
-  const normalizedOptions = useMemo(
-    () => ({
-      ...options,
-    }),
-    [options],
-  );
+  const stableOptions = useStableValue(options);
 
   const request = useCallback(
-    (client: MarketplaceClient) =>
-      client.getCollectionOrders(normalizedOptions),
-    [normalizedOptions],
+    (client: MarketplaceClient) => client.getCollectionOrders(stableOptions),
+    [stableOptions],
   );
 
-  const shouldFetch = enabled && Boolean(options.collection);
+  const shouldFetch = enabled && Boolean(stableOptions.collection);
   return useMarketplaceClientQuery(request, shouldFetch);
 }
 
@@ -315,20 +380,14 @@ export function useMarketplaceCollectionListings(
   options: CollectionListingsOptions,
   enabled = true,
 ): UseMarketplaceQueryResult<OrderModel[]> {
-  const normalizedOptions = useMemo(
-    () => ({
-      ...options,
-    }),
-    [options],
-  );
+  const stableOptions = useStableValue(options);
 
   const request = useCallback(
-    (client: MarketplaceClient) =>
-      client.listCollectionListings(normalizedOptions),
-    [normalizedOptions],
+    (client: MarketplaceClient) => client.listCollectionListings(stableOptions),
+    [stableOptions],
   );
 
-  const shouldFetch = enabled && Boolean(options.collection);
+  const shouldFetch = enabled && Boolean(stableOptions.collection);
   return useMarketplaceClientQuery(request, shouldFetch);
 }
 
@@ -336,19 +395,16 @@ export function useMarketplaceToken(
   options: TokenDetailsOptions,
   enabled = true,
 ): UseMarketplaceQueryResult<TokenDetails | null> {
-  const normalizedOptions = useMemo(
-    () => ({
-      ...options,
-    }),
-    [options],
-  );
+  const stableOptions = useStableValue(options);
 
   const request = useCallback(
-    (client: MarketplaceClient) => client.getToken(normalizedOptions),
-    [normalizedOptions],
+    (client: MarketplaceClient) => client.getToken(stableOptions),
+    [stableOptions],
   );
 
   const shouldFetch =
-    enabled && Boolean(options.collection) && Boolean(options.tokenId);
+    enabled &&
+    Boolean(stableOptions.collection) &&
+    Boolean(stableOptions.tokenId);
   return useMarketplaceClientQuery(request, shouldFetch);
 }

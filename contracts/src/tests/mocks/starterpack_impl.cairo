@@ -15,8 +15,10 @@ pub mod StarterpackImplementation {
     impl StarterpackImplementationImpl of starterpack::interface::IStarterpackImplementation<
         ContractState,
     > {
-        fn on_issue(ref self: ContractState, recipient: ContractAddress, starterpack_id: u32) {
-            // Mark as issued
+        fn on_issue(
+            ref self: ContractState, recipient: ContractAddress, starterpack_id: u32, quantity: u32,
+        ) {
+            // Mark as issued (quantity is available for custom logic in real implementations)
             self.issued.write((recipient, starterpack_id), true);
         }
     }

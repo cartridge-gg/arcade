@@ -22,7 +22,7 @@ import {
 import type { SchemaType } from "../../bindings";
 import { NAMESPACE } from "../../constants";
 import { MarketplaceOptions, DefaultMarketplaceOptions } from "./options";
-import type { Token, ToriiClient } from "@dojoengine/torii-wasm";
+import type { Token, ToriiClient } from "@dojoengine/torii-wasm/types";
 
 export type { Token, ToriiClient };
 export * from "./policies";
