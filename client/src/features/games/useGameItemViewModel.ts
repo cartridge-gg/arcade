@@ -8,6 +8,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/lib/helpers";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import type { GameModel } from "@cartridge/arcade";
+import { DASHBOARD_ALLOWED_ROUTES } from "../navigation";
 
 export interface GameItemViewModel {
   id: number;
@@ -116,6 +117,22 @@ export function useGameItemViewModel(
     if (hasPlayer) {
       targetSegments.push(...playerPath);
     }
+
+    // Allow toggle on games click
+    const target = joinPaths(...targetSegments);
+    if (location.pathname.startsWith(target)) {
+      const withoutGame = location.pathname;
+      const pathnameParts = location.pathname.split("/");
+      if (
+        !DASHBOARD_ALLOWED_ROUTES.includes(
+          pathnameParts[pathnameParts.length - 1],
+        )
+      ) {
+        return "/";
+      }
+      return withoutGame.replace(target, "");
+    }
+
     return joinPaths(...targetSegments);
   }, [location.pathname, game]);
 
