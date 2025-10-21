@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   CardListContent,
   DotsIcon,
-  Input,
-  SearchIcon,
   Select,
   SelectContent,
   useMediaQuery,
@@ -12,6 +10,7 @@ import { Link } from "@tanstack/react-router";
 import { cn } from "@cartridge/ui/utils";
 import ArcadeGameSelect from "@/components/ui/modules/game-select";
 import ArcadeMenuButton from "@/components/ui/modules/menu-button";
+import { SearchInput } from "@/components/ui/modules/search-input";
 import { Register } from "./register";
 import { Update } from "./update";
 import { Publish } from "./publish";
@@ -56,7 +55,7 @@ export const GamesView = ({
     >
       {showUserCard && <UserCard className="bg-background-100 -mb-px" />}
       <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
-        <GameSearch search={search} setSearch={setSearch} />
+        <SearchInput value={search} onChange={setSearch} placeholder="Search" />
         <div className="flex flex-col gap-1 grow overflow-hidden">
           <CardListContent
             className="p-0 pb-4 overflow-y-auto"
@@ -80,35 +79,6 @@ export const GamesView = ({
       >
         <Register />
       </div>
-    </div>
-  );
-};
-
-const GameSearch = ({
-  search,
-  setSearch,
-}: {
-  search: string;
-  setSearch: (value: string) => void;
-}) => {
-  const [focus, setFocus] = useState(false);
-
-  return (
-    <div className="relative">
-      <Input
-        className="pr-9 bg-spacer-100 hover:bg-spacer-100 focus-visible:bg-spacer-100"
-        type="text"
-        placeholder="Search"
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        onFocus={() => setFocus(true)}
-        onBlur={() => setFocus(false)}
-      />
-      <SearchIcon
-        data-focused={focus}
-        data-content={search.length > 0 && !focus}
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-400 transition-colors duration-100 data-[content=true]:text-foreground-300 data-[focused=true]:text-foreground-100"
-      />
     </div>
   );
 };
