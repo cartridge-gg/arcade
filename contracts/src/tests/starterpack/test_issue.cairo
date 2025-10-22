@@ -27,7 +27,7 @@ fn test_sp_issue() {
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -69,7 +69,7 @@ fn test_sp_issue_with_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -116,7 +116,7 @@ fn test_sp_issue_not_reissuable() {
 
     // [Register] Non-reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -164,7 +164,7 @@ fn test_sp_issue_reissuable() {
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -218,7 +218,7 @@ fn test_sp_issue_paused() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -258,7 +258,7 @@ fn test_sp_referral_reward_tracking() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -304,7 +304,7 @@ fn test_sp_group_reward_tracking() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -351,7 +351,7 @@ fn test_sp_multiple_referrals_accumulation() {
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -407,7 +407,7 @@ fn test_sp_group_multiple_referrals_accumulation() {
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -472,7 +472,7 @@ fn test_sp_no_referral_tracking_without_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -516,7 +516,7 @@ fn test_sp_issue_with_quantity() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -560,7 +560,7 @@ fn test_sp_quote_with_quantity() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -597,7 +597,7 @@ fn test_sp_quote_with_quantity_and_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -635,7 +635,7 @@ fn test_sp_issue_quantity_with_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -698,7 +698,7 @@ fn test_sp_issue_quantity_group_rewards() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -748,7 +748,7 @@ fn test_sp_issue_quantity_exceeds_limit_non_reissuable() {
 
     // [Register] Non-reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\"}";
+    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
