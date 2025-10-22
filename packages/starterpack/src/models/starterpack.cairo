@@ -9,6 +9,7 @@ pub mod errors {
     pub const STARTERPACK_NOT_ACTIVE: felt252 = 'Starterpack: not active';
     pub const STARTERPACK_NOT_OWNER: felt252 = 'Starterpack: not owner';
     pub const STARTERPACK_QUANTITY_EXCEEDS_LIMIT: felt252 = 'Starterpack: quantity > 1';
+    pub const STARTERPACK_SUPPLY_EXCEEDED: felt252 = 'Starterpack: supply exceeded';
 }
 
 // Traits
@@ -78,6 +79,17 @@ pub impl StarterpackAssert of StarterpackAssertTrait {
     fn assert_quantity_allowed(self: @Starterpack, quantity: u32) {
         if !*self.reissuable {
             assert(quantity == 1, errors::STARTERPACK_QUANTITY_EXCEEDS_LIMIT);
+        }
+    }
+
+    fn assert_supply_available(self: @Starterpack, quantity: u32) {
+        let implementation = starterpack::interface::IStarterpackImplementationDispatcher {
+            contract_address: *self.implementation,
+        };
+        
+        if let Option::Some(supply_limit) = implementation.supply(*self.starterpack_id) {
+            let new_total = *self.total_issued + quantity.into();
+            assert(new_total <= supply_limit.into(), errors::STARTERPACK_SUPPLY_EXCEEDED);
         }
     }
 }
