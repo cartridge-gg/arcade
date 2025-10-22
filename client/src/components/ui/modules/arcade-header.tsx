@@ -3,12 +3,16 @@ import type { HTMLAttributes, SVGProps } from "react";
 import { SidebarToggle } from "../../sidebar-toggle";
 import { useTheme } from "@/hooks/context";
 import { useDevice } from "@/hooks/device";
+import { Link } from "@tanstack/react-router";
 
-export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> {}
+export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> {
+  onLogoClick: () => void;
+}
 
 export const ArcadeHeader = ({
   children,
   onClick,
+  onLogoClick,
   ...props
 }: ArcadeHeaderProps) => {
   const { isMobile } = useDevice();
@@ -26,17 +30,18 @@ export const ArcadeHeader = ({
           <SidebarToggle />
         </div>
       ) : (
-        <div
-          className={cn(
-            "flex items-center justify-center gap-2 text-primary w-auto",
-            onClick && "cursor-pointer",
-          )}
-          onClick={onClick}
-        >
-          <ArcadeIcon className="h-5" />
-          <ArcadeIconText className="h-5" />
-        </div>
+        <Link to="/" onClick={onLogoClick}>
+          <div
+            className={cn(
+              "flex items-center justify-center gap-2 text-primary w-auto",
+            )}
+          >
+            <ArcadeIcon className="h-5" />
+            <ArcadeIconText className="h-5" />
+          </div>
+        </Link>
       )}
+
       <div className="grow flex justify-end items-center gap-2 select-none">
         {children}
       </div>

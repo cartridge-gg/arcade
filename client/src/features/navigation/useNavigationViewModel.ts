@@ -1,5 +1,4 @@
 import { useAccountByAddress } from "@/collections/users";
-import { useArcade } from "@/hooks/arcade";
 import { TAB_SEGMENTS, parseRouteParams, useProject } from "@/hooks/project";
 import { joinPaths } from "@/lib/helpers";
 import {
@@ -30,7 +29,7 @@ export const DASHBOARD_ALLOWED_ROUTES = [DEFAULT_TAB, "leaderboard", "predict"];
 
 export type TabItem = {
   name: string;
-  icon: HTMLElement;
+  icon: typeof ChestIcon;
   tab: TabValue;
   href: string;
 };
@@ -69,7 +68,7 @@ const TabValueDisplayMap = (tab: TabValue) => {
 function getTabHref(
   routerStatus: ReturnType<typeof useRouterState>,
   tab: TabValue,
-  _item: TabItem | null,
+  _item: { name: string; icon: typeof ChestIcon } | null,
 ): string {
   const pathname =
     routerStatus.location?.pathname ??
@@ -110,19 +109,16 @@ export function useNavigationViewModel(): NavigationViewModel {
     const loggedOutAvailableTabs: TabValue[] = game
       ? [DEFAULT_TAB, "leaderboard", "guilds", "predict", "about"]
       : [DEFAULT_TAB, "leaderboard", "predict"];
-    const loggedInAvailableTabs = game
+    const loggedInAvailableTabs: TabValue[] = game
       ? [DEFAULT_TAB, "leaderboard", "guilds", "inventory", "predict", "about"]
       : [DEFAULT_TAB, "leaderboard", "inventory", "predict"];
 
-    const availableTabs = isLoggedIn
+    let availableTabs: TabValue[] = isLoggedIn
       ? loggedInAvailableTabs
       : loggedOutAvailableTabs;
 
     if (process.env.NODE_ENV !== "development") {
-      const predictIndex = availableTabs.indexOf("predict");
-      if (predictIndex !== -1) {
-        availableTabs.splice(predictIndex, 1);
-      }
+      availableTabs = availableTabs.filter((t) => t !== "predict");
     }
 
     return availableTabs

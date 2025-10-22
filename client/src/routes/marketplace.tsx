@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GamePage } from "@/components/pages/game";
+import { MarketplaceScene } from "@/components/scenes/marketplace";
 
 export const Route = createFileRoute("/marketplace")({
-  component: GamePage,
+  component: MarketplaceScene,
 });

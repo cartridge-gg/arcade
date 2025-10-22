@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MarketPage } from "@/components/pages/market";
+import { HoldersScene } from "@/components/scenes/holders";
 
 export const Route = createFileRoute("/collection/$collection/holders")({
   validateSearch: (search: Record<string, unknown>) => ({
     filter: search.filter as string | undefined,
   }),
-  component: MarketPage,
+  component: HoldersScene,
 });

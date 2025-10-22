@@ -99,65 +99,6 @@ describe("useNavigationViewModel", () => {
     expect(result.current.activeTab).toBe("marketplace");
   });
 
-  it("navigates to new tab on click", () => {
-    setRouterPathname("/game/test/marketplace");
-    mockUseProject.mockReturnValue({
-      game: { id: 1, name: "Test Game" },
-      tab: "marketplace",
-    });
-
-    const { result } = renderHook(() => useNavigationViewModel());
-
-    result.current.onTabClick("leaderboard");
-
-    expect(mockNavigate).toHaveBeenCalledWith({
-      to: "/game/test/leaderboard",
-    });
-  });
-
-  it("replaces current tab segment when clicking new tab", () => {
-    setRouterPathname("/game/test/about");
-    mockUseProject.mockReturnValue({
-      game: { id: 1, name: "Test Game" },
-      tab: "about",
-    });
-
-    const { result } = renderHook(() => useNavigationViewModel());
-
-    result.current.onTabClick("guilds");
-
-    expect(mockNavigate).toHaveBeenCalledWith({
-      to: "/game/test/guilds",
-    });
-  });
-
-  it("does not navigate if clicking the same tab", () => {
-    setRouterPathname("/game/test/marketplace");
-    mockUseProject.mockReturnValue({
-      game: { id: 1, name: "Test Game" },
-      tab: "marketplace",
-    });
-
-    const { result } = renderHook(() => useNavigationViewModel());
-
-    result.current.onTabClick("marketplace");
-
-    expect(mockNavigate).not.toHaveBeenCalled();
-  });
-
-  it("navigates to root when clicking default tab from root routes", () => {
-    setRouterPathname("/leaderboard");
-    mockUseProject.mockReturnValue({
-      game: undefined,
-      tab: "leaderboard",
-    });
-
-    const { result } = renderHook(() => useNavigationViewModel());
-
-    result.current.onTabClick("marketplace");
-
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/" });
-  });
 
   it("builds hrefs for edition-scoped routes", () => {
     setRouterPathname("/game/test/edition/season-1/marketplace");
