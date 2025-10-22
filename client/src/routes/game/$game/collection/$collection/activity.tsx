@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MarketPage } from "@/components/pages/market";
+import { TraceabilityScene } from "@/components/scenes/traceability";
 
 export const Route = createFileRoute(
   "/game/$game/collection/$collection/activity",
@@ -7,5 +7,5 @@ export const Route = createFileRoute(
   validateSearch: (search: Record<string, unknown>) => ({
     filter: search.filter as string | undefined,
   }),
-  component: MarketPage,
+  component: TraceabilityScene,
 });

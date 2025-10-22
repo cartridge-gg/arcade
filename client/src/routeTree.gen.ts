@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PredictRouteImport } from './routes/predict'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as GuildsRouteImport } from './routes/guilds'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -62,6 +63,11 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryRoute = InventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuildsRoute = GuildsRouteImport.update({
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/guilds': typeof GuildsRoute
+  '/inventory': typeof InventoryRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/predict': typeof PredictRoute
@@ -311,6 +318,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/guilds': typeof GuildsRoute
+  '/inventory': typeof InventoryRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/predict': typeof PredictRoute
@@ -353,6 +361,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/guilds': typeof GuildsRoute
+  '/inventory': typeof InventoryRoute
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/predict': typeof PredictRoute
@@ -396,6 +405,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/guilds'
+    | '/inventory'
     | '/leaderboard'
     | '/marketplace'
     | '/predict'
@@ -437,6 +447,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/guilds'
+    | '/inventory'
     | '/leaderboard'
     | '/marketplace'
     | '/predict'
@@ -478,6 +489,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/guilds'
+    | '/inventory'
     | '/leaderboard'
     | '/marketplace'
     | '/predict'
@@ -520,6 +532,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   GuildsRoute: typeof GuildsRoute
+  InventoryRoute: typeof InventoryRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MarketplaceRoute: typeof MarketplaceRoute
   PredictRoute: typeof PredictRoute
@@ -551,6 +564,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory': {
+      id: '/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof InventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guilds': {
@@ -939,6 +959,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   GuildsRoute: GuildsRoute,
+  InventoryRoute: InventoryRoute,
   LeaderboardRoute: LeaderboardRoute,
   MarketplaceRoute: MarketplaceRoute,
   PredictRoute: PredictRoute,
