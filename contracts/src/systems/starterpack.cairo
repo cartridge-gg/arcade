@@ -81,6 +81,9 @@ pub mod StarterpackRegistry {
     use starterpack::components::manageable::ManageableComponent;
     use starterpack::components::registrable::RegistrableComponent;
     use starterpack::constants::CONFIG_ID;
+    use starterpack::interface::{
+        IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
+    };
     use starterpack::models::config::ConfigTrait;
     use starterpack::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
     use super::{IAdministration, IStarterpackRegistry, StarterPackMetadata, StarterpackQuote};
@@ -195,7 +198,7 @@ pub mod StarterpackRegistry {
             let store = StoreTrait::new(world);
 
             let starterpack = store.get_starterpack(starterpack_id);
-            let implementation = starterpack::interface::IStarterpackImplementationDispatcher {
+            let implementation = IStarterpackImplementationDispatcher {
                 contract_address: starterpack.implementation,
             };
 
