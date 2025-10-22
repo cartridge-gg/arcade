@@ -35,9 +35,7 @@ cairo_test = "2.12.2"
 [workspace.tool.fmt]
 sort-module-level-items = true
 
-[profile.dev]
 [profile.mainnet]
-[profile.internal]
 
 [tool.scarb]
 allow-prebuilt-plugins = ["dojo_cairo_macros"]

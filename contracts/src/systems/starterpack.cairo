@@ -24,9 +24,7 @@ pub trait IStarterpackRegistry<TContractState> {
         self: @TContractState, starterpack_id: u32, quantity: u32, has_referrer: bool,
     ) -> StarterpackQuote;
 
-    fn metadata(
-        self: @TContractState, starterpack_id: u32,
-    ) -> ByteArray;
+    fn metadata(self: @TContractState, starterpack_id: u32) -> ByteArray;
 
     fn register(
         ref self: TContractState,
@@ -48,11 +46,7 @@ pub trait IStarterpackRegistry<TContractState> {
         payment_token: ContractAddress,
     );
 
-    fn update_metadata(
-        ref self: TContractState,
-        starterpack_id: u32,
-        metadata: ByteArray,
-    );
+    fn update_metadata(ref self: TContractState, starterpack_id: u32, metadata: ByteArray);
 
     fn pause(ref self: TContractState, starterpack_id: u32);
 
@@ -190,9 +184,7 @@ pub mod StarterpackRegistry {
             StarterpackQuote { base_price, referral_fee, protocol_fee, total_cost, payment_token }
         }
 
-        fn metadata(
-            self: @ContractState, starterpack_id: u32,
-        ) -> ByteArray {
+        fn metadata(self: @ContractState, starterpack_id: u32) -> ByteArray {
             let world = self.world_storage();
             let mut store = StoreTrait::new(world);
             let starterpack = store.get_starterpack(starterpack_id);
@@ -245,11 +237,7 @@ pub mod StarterpackRegistry {
                 );
         }
 
-        fn update_metadata(
-            ref self: ContractState,
-            starterpack_id: u32,
-            metadata: ByteArray,
-        ) {
+        fn update_metadata(ref self: ContractState, starterpack_id: u32, metadata: ByteArray) {
             let world = self.world_storage();
             self.registrable.update_metadata(world, starterpack_id, metadata);
         }

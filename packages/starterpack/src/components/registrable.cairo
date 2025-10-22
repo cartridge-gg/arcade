@@ -99,13 +99,8 @@ pub mod RegistrableComponent {
             assert(referral_percentage <= MAX_REFERRAL_FEE, 'Starterpack: referral too high');
 
             // [Effect] Update starterpack fields
-            starterpack.update(
-                implementation,
-                referral_percentage,
-                reissuable,
-                price,
-                payment_token,
-            );
+            starterpack
+                .update(implementation, referral_percentage, reissuable, price, payment_token);
 
             // [Effect] Store updated starterpack
             store.set_starterpack(@starterpack);

@@ -25,7 +25,8 @@ fn test_sp_update() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata =
+        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -70,7 +71,8 @@ fn test_sp_update_unauthorized() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata =
+        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -106,7 +108,8 @@ fn test_sp_pause_resume() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata =
+        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -145,7 +148,8 @@ fn test_sp_pause_unauthorized() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata =
+        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -173,7 +177,8 @@ fn test_sp_resume_unauthorized() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata = "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata =
+        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
