@@ -48,13 +48,15 @@ pub impl StarterpackImpl of StarterpackTrait {
         reissuable: bool,
         price: u256,
         payment_token: starknet::ContractAddress,
-        metadata: ByteArray,
     ) {
         self.implementation = implementation;
         self.referral_percentage = referral_percentage;
         self.reissuable = reissuable;
         self.price = price;
         self.payment_token = payment_token;
+    }
+
+    fn update_metadata(ref self: Starterpack, metadata: ByteArray) {
         self.metadata = metadata;
     }
 

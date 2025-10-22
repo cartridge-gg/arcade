@@ -86,7 +86,6 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: ByteArray,
         ) {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
@@ -106,7 +105,6 @@ pub mod RegistrableComponent {
                 reissuable,
                 price,
                 payment_token,
-                metadata,
             );
 
             // [Effect] Store updated starterpack
@@ -126,6 +124,27 @@ pub mod RegistrableComponent {
                         time,
                     },
                 );
+        }
+
+        fn update_metadata(
+            self: @ComponentState<TContractState>,
+            mut world: WorldStorage,
+            starterpack_id: u32,
+            metadata: ByteArray,
+        ) {
+            // [Setup] Datastore
+            let mut store = StoreTrait::new(world);
+
+            // [Check] Caller is owner
+            let caller = get_caller_address();
+            let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_is_owner(caller);
+
+            // [Effect] Update metadata
+            starterpack.update_metadata(metadata);
+
+            // [Effect] Store updated starterpack
+            store.set_starterpack(@starterpack);
         }
 
         fn pause(

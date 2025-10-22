@@ -23,6 +23,11 @@ pub trait IStarterpackRegistry<TContractState> {
     fn quote(
         self: @TContractState, starterpack_id: u32, quantity: u32, has_referrer: bool,
     ) -> StarterpackQuote;
+
+    fn metadata(
+        self: @TContractState, starterpack_id: u32,
+    ) -> ByteArray;
+
     fn register(
         ref self: TContractState,
         implementation: ContractAddress,
@@ -41,6 +46,11 @@ pub trait IStarterpackRegistry<TContractState> {
         reissuable: bool,
         price: u256,
         payment_token: ContractAddress,
+    );
+
+    fn update_metadata(
+        ref self: TContractState,
+        starterpack_id: u32,
         metadata: ByteArray,
     );
 
@@ -73,7 +83,7 @@ pub mod StarterpackRegistry {
     use starterpack::constants::CONFIG_ID;
     use starterpack::models::config::ConfigTrait;
     use starterpack::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
-    use super::{IAdministration, IStarterpackRegistry, StarterPackMetadata, StarterpackQuote};
+    use super::{IAdministration, IStarterpackRegistry, StarterpackQuote};
 
     // Components
     component!(path: InitializableComponent, storage: initializable, event: InitializableEvent);
@@ -180,6 +190,15 @@ pub mod StarterpackRegistry {
             StarterpackQuote { base_price, referral_fee, protocol_fee, total_cost, payment_token }
         }
 
+        fn metadata(
+            self: @ContractState, starterpack_id: u32,
+        ) -> ByteArray {
+            let world = self.world_storage();
+            let mut store = StoreTrait::new(world);
+            let starterpack = store.get_starterpack(starterpack_id);
+            starterpack.metadata
+        }
+
         fn register(
             ref self: ContractState,
             implementation: ContractAddress,
@@ -211,7 +230,6 @@ pub mod StarterpackRegistry {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: ByteArray,
         ) {
             let world = self.world_storage();
             self
@@ -224,8 +242,16 @@ pub mod StarterpackRegistry {
                     reissuable,
                     price,
                     payment_token,
-                    metadata,
                 );
+        }
+
+        fn update_metadata(
+            ref self: ContractState,
+            starterpack_id: u32,
+            metadata: ByteArray,
+        ) {
+            let world = self.world_storage();
+            self.registrable.update_metadata(world, starterpack_id, metadata);
         }
 
         fn pause(ref self: ContractState, starterpack_id: u32) {
