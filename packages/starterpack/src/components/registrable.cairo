@@ -38,9 +38,7 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            name: ByteArray,
-            description: ByteArray,
-            image_uri: ByteArray,
+            metadata: ByteArray,
         ) -> u32 {
             let mut store = StoreTrait::new(world);
 
@@ -58,6 +56,7 @@ pub mod RegistrableComponent {
                 reissuable,
                 price,
                 payment_token,
+                metadata,
                 time,
             );
 
@@ -71,9 +70,6 @@ pub mod RegistrableComponent {
                         referral_percentage,
                         reissuable,
                         owner,
-                        name,
-                        description,
-                        image_uri,
                         time,
                     },
                 );
@@ -90,9 +86,7 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            name: ByteArray,
-            description: ByteArray,
-            image_uri: ByteArray,
+            metadata: ByteArray,
         ) {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
@@ -106,11 +100,14 @@ pub mod RegistrableComponent {
             assert(referral_percentage <= MAX_REFERRAL_FEE, 'Starterpack: referral too high');
 
             // [Effect] Update starterpack fields
-            starterpack.implementation = implementation;
-            starterpack.referral_percentage = referral_percentage;
-            starterpack.reissuable = reissuable;
-            starterpack.price = price;
-            starterpack.payment_token = payment_token;
+            starterpack.update(
+                implementation,
+                referral_percentage,
+                reissuable,
+                price,
+                payment_token,
+                metadata,
+            );
 
             // [Effect] Store updated starterpack
             store.set_starterpack(@starterpack);
@@ -126,9 +123,6 @@ pub mod RegistrableComponent {
                         reissuable,
                         price,
                         payment_token,
-                        name,
-                        description,
-                        image_uri,
                         time,
                     },
                 );

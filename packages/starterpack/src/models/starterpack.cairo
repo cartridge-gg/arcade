@@ -23,6 +23,7 @@ pub impl StarterpackImpl of StarterpackTrait {
         reissuable: bool,
         price: u256,
         payment_token: starknet::ContractAddress,
+        metadata: ByteArray,
         time: u64,
     ) -> Starterpack {
         Starterpack {
@@ -36,7 +37,25 @@ pub impl StarterpackImpl of StarterpackTrait {
             status: Status::Active,
             total_issued: 0,
             created_at: time,
+            metadata,
         }
+    }
+
+    fn update(
+        ref self: Starterpack,
+        implementation: starknet::ContractAddress,
+        referral_percentage: u8,
+        reissuable: bool,
+        price: u256,
+        payment_token: starknet::ContractAddress,
+        metadata: ByteArray,
+    ) {
+        self.implementation = implementation;
+        self.referral_percentage = referral_percentage;
+        self.reissuable = reissuable;
+        self.price = price;
+        self.payment_token = payment_token;
+        self.metadata = metadata;
     }
 
     fn issue(ref self: Starterpack, quantity: u32) {

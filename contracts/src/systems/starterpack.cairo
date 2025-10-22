@@ -1,13 +1,6 @@
 use starknet::ContractAddress;
 
 #[derive(Drop, Serde)]
-pub struct StarterPackMetadata {
-    pub name: ByteArray,
-    pub description: ByteArray,
-    pub image_uri: ByteArray,
-}
-
-#[derive(Drop, Serde)]
 pub struct StarterpackQuote {
     pub base_price: u256,
     pub referral_fee: u256,
@@ -37,7 +30,7 @@ pub trait IStarterpackRegistry<TContractState> {
         reissuable: bool,
         price: u256,
         payment_token: ContractAddress,
-        metadata: StarterPackMetadata,
+        metadata: ByteArray,
     ) -> u32; // returns starterpack_id
 
     fn update(
@@ -48,7 +41,7 @@ pub trait IStarterpackRegistry<TContractState> {
         reissuable: bool,
         price: u256,
         payment_token: ContractAddress,
-        metadata: StarterPackMetadata,
+        metadata: ByteArray,
     );
 
     fn pause(ref self: TContractState, starterpack_id: u32);
@@ -194,7 +187,7 @@ pub mod StarterpackRegistry {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: StarterPackMetadata,
+            metadata: ByteArray,
         ) -> u32 {
             let world = self.world_storage();
             self
@@ -206,9 +199,7 @@ pub mod StarterpackRegistry {
                     reissuable,
                     price,
                     payment_token,
-                    metadata.name,
-                    metadata.description,
-                    metadata.image_uri,
+                    metadata,
                 )
         }
 
@@ -220,7 +211,7 @@ pub mod StarterpackRegistry {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: StarterPackMetadata,
+            metadata: ByteArray,
         ) {
             let world = self.world_storage();
             self
@@ -233,9 +224,7 @@ pub mod StarterpackRegistry {
                     reissuable,
                     price,
                     payment_token,
-                    metadata.name,
-                    metadata.description,
-                    metadata.image_uri,
+                    metadata,
                 );
         }
 
