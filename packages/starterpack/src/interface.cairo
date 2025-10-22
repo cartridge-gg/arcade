@@ -9,5 +9,10 @@ pub trait IStarterpackImplementation<TContractState> {
     fn on_issue(
         ref self: TContractState, recipient: ContractAddress, starterpack_id: u32, quantity: u32,
     );
+
+    /// Returns the supply limit for this starterpack
+    /// @param starterpack_id The ID of the starterpack
+    /// @return Option<u32> Some(limit) if there is a supply limit, None if unlimited
+    fn supply(self: @TContractState, starterpack_id: u32) -> Option<u32>;
 }
 

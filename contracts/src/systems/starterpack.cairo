@@ -30,6 +30,9 @@ pub trait IStarterpackRegistry<TContractState> {
     fn quote(
         self: @TContractState, starterpack_id: u32, quantity: u32, has_referrer: bool,
     ) -> StarterpackQuote;
+
+    fn supply(self: @TContractState, starterpack_id: u32) -> Option<u32>;
+
     fn register(
         ref self: TContractState,
         implementation: ContractAddress,
@@ -185,6 +188,18 @@ pub mod StarterpackRegistry {
             let total_cost = base_price + protocol_fee;
 
             StarterpackQuote { base_price, referral_fee, protocol_fee, total_cost, payment_token }
+        }
+
+        fn supply(self: @ContractState, starterpack_id: u32) -> Option<u32> {
+            let world = self.world_storage();
+            let store = StoreTrait::new(world);
+
+            let starterpack = store.get_starterpack(starterpack_id);
+            let implementation = starterpack::interface::IStarterpackImplementationDispatcher {
+                contract_address: starterpack.implementation,
+            };
+
+            implementation.supply(starterpack_id)
         }
 
         fn register(
