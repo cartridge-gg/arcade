@@ -121,6 +121,7 @@ pub mod RegistrableComponent {
                         reissuable,
                         price,
                         payment_token,
+                        metadata: starterpack.metadata.clone(),
                         time,
                     },
                 );
@@ -141,10 +142,26 @@ pub mod RegistrableComponent {
             starterpack.assert_is_owner(caller);
 
             // [Effect] Update metadata
-            starterpack.update_metadata(metadata);
+            starterpack.update_metadata(metadata.clone());
 
             // [Effect] Store updated starterpack
             store.set_starterpack(@starterpack);
+
+            // [Event] Emit event
+            let time = get_block_timestamp();
+            world
+                .emit_event(
+                    @StarterpackUpdated {
+                        starterpack_id: starterpack.starterpack_id,
+                        implementation: starterpack.implementation,
+                        referral_percentage: starterpack.referral_percentage,
+                        reissuable: starterpack.reissuable,
+                        price: starterpack.price,
+                        payment_token: starterpack.payment_token,
+                        metadata,
+                        time,
+                    },
+                );
         }
 
         fn pause(

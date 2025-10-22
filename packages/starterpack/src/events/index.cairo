@@ -24,6 +24,7 @@ pub struct StarterpackUpdated {
     pub reissuable: bool,
     pub price: u256,
     pub payment_token: ContractAddress,
+    pub metadata: ByteArray,
     pub time: u64,
 }
 
