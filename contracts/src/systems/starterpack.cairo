@@ -25,7 +25,7 @@ pub trait IStarterpackRegistry<TContractState> {
     ) -> StarterpackQuote;
 
     fn supply(self: @TContractState, starterpack_id: u32) -> Option<u32>;
-    
+
     fn metadata(self: @TContractState, starterpack_id: u32) -> ByteArray;
 
     fn register(
@@ -200,7 +200,7 @@ pub mod StarterpackRegistry {
 
             implementation.supply(starterpack_id)
         }
-        
+
         fn metadata(self: @ContractState, starterpack_id: u32) -> ByteArray {
             let world = self.world_storage();
             let mut store = StoreTrait::new(world);
