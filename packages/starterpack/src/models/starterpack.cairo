@@ -86,7 +86,7 @@ pub impl StarterpackAssert of StarterpackAssertTrait {
         let implementation = starterpack::interface::IStarterpackImplementationDispatcher {
             contract_address: *self.implementation,
         };
-        
+
         if let Option::Some(supply_limit) = implementation.supply(*self.starterpack_id) {
             let new_total: u64 = *self.total_issued + quantity.into();
             let limit: u64 = supply_limit.into();
