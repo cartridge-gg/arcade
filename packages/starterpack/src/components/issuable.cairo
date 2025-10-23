@@ -56,6 +56,7 @@ pub mod IssuableComponent {
             let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_is_active();
             starterpack.assert_quantity_allowed(quantity);
+            starterpack.assert_supply_available(quantity);
 
             if !starterpack.reissuable {
                 let issuance = store.get_issuance(starterpack_id, recipient);

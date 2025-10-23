@@ -21,6 +21,12 @@ pub mod StarterpackImplementation {
             // Mark as issued (quantity is available for custom logic in real implementations)
             self.issued.write((recipient, starterpack_id), true);
         }
+
+        fn supply(self: @ContractState, starterpack_id: u32) -> Option<u32> {
+            // Mock returns None (unlimited supply) by default
+            // Real implementations can return Some(limit) for limited supply
+            Option::None
+        }
     }
 
     #[generate_trait]

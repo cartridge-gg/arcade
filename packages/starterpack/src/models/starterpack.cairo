@@ -1,5 +1,8 @@
 // Internal imports
 
+use starterpack::interface::{
+    IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
+};
 use starterpack::models::index::Starterpack;
 use starterpack::types::status::Status;
 
@@ -9,6 +12,7 @@ pub mod errors {
     pub const STARTERPACK_NOT_ACTIVE: felt252 = 'Starterpack: not active';
     pub const STARTERPACK_NOT_OWNER: felt252 = 'Starterpack: not owner';
     pub const STARTERPACK_QUANTITY_EXCEEDS_LIMIT: felt252 = 'Starterpack: quantity > 1';
+    pub const STARTERPACK_SUPPLY_EXCEEDED: felt252 = 'Starterpack: supply exceeded';
 }
 
 // Traits
@@ -23,6 +27,7 @@ pub impl StarterpackImpl of StarterpackTrait {
         reissuable: bool,
         price: u256,
         payment_token: starknet::ContractAddress,
+        metadata: ByteArray,
         time: u64,
     ) -> Starterpack {
         Starterpack {
@@ -36,7 +41,27 @@ pub impl StarterpackImpl of StarterpackTrait {
             status: Status::Active,
             total_issued: 0,
             created_at: time,
+            metadata,
         }
+    }
+
+    fn update(
+        ref self: Starterpack,
+        implementation: starknet::ContractAddress,
+        referral_percentage: u8,
+        reissuable: bool,
+        price: u256,
+        payment_token: starknet::ContractAddress,
+    ) {
+        self.implementation = implementation;
+        self.referral_percentage = referral_percentage;
+        self.reissuable = reissuable;
+        self.price = price;
+        self.payment_token = payment_token;
+    }
+
+    fn update_metadata(ref self: Starterpack, metadata: ByteArray) {
+        self.metadata = metadata;
     }
 
     fn issue(ref self: Starterpack, quantity: u32) {
@@ -78,6 +103,17 @@ pub impl StarterpackAssert of StarterpackAssertTrait {
     fn assert_quantity_allowed(self: @Starterpack, quantity: u32) {
         if !*self.reissuable {
             assert(quantity == 1, errors::STARTERPACK_QUANTITY_EXCEEDS_LIMIT);
+        }
+    }
+
+    fn assert_supply_available(self: @Starterpack, quantity: u32) {
+        let implementation = IStarterpackImplementationDispatcher {
+            contract_address: *self.implementation,
+        };
+
+        if let Option::Some(supply_limit) = implementation.supply(*self.starterpack_id) {
+            let new_total: u64 = *self.total_issued + quantity.into();
+            assert(new_total <= supply_limit.into(), errors::STARTERPACK_SUPPLY_EXCEEDED);
         }
     }
 }
