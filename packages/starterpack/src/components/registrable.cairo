@@ -38,9 +38,7 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            name: ByteArray,
-            description: ByteArray,
-            image_uri: ByteArray,
+            metadata: ByteArray,
         ) -> u32 {
             let mut store = StoreTrait::new(world);
 
@@ -58,6 +56,7 @@ pub mod RegistrableComponent {
                 reissuable,
                 price,
                 payment_token,
+                metadata,
                 time,
             );
 
@@ -71,9 +70,6 @@ pub mod RegistrableComponent {
                         referral_percentage,
                         reissuable,
                         owner,
-                        name,
-                        description,
-                        image_uri,
                         time,
                     },
                 );
@@ -90,9 +86,6 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            name: ByteArray,
-            description: ByteArray,
-            image_uri: ByteArray,
         ) {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
@@ -106,11 +99,8 @@ pub mod RegistrableComponent {
             assert(referral_percentage <= MAX_REFERRAL_FEE, 'Starterpack: referral too high');
 
             // [Effect] Update starterpack fields
-            starterpack.implementation = implementation;
-            starterpack.referral_percentage = referral_percentage;
-            starterpack.reissuable = reissuable;
-            starterpack.price = price;
-            starterpack.payment_token = payment_token;
+            starterpack
+                .update(implementation, referral_percentage, reissuable, price, payment_token);
 
             // [Effect] Store updated starterpack
             store.set_starterpack(@starterpack);
@@ -126,9 +116,44 @@ pub mod RegistrableComponent {
                         reissuable,
                         price,
                         payment_token,
-                        name,
-                        description,
-                        image_uri,
+                        metadata: starterpack.metadata.clone(),
+                        time,
+                    },
+                );
+        }
+
+        fn update_metadata(
+            self: @ComponentState<TContractState>,
+            mut world: WorldStorage,
+            starterpack_id: u32,
+            metadata: ByteArray,
+        ) {
+            // [Setup] Datastore
+            let mut store = StoreTrait::new(world);
+
+            // [Check] Caller is owner
+            let caller = get_caller_address();
+            let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_is_owner(caller);
+
+            // [Effect] Update metadata
+            starterpack.update_metadata(metadata.clone());
+
+            // [Effect] Store updated starterpack
+            store.set_starterpack(@starterpack);
+
+            // [Event] Emit event
+            let time = get_block_timestamp();
+            world
+                .emit_event(
+                    @StarterpackUpdated {
+                        starterpack_id: starterpack.starterpack_id,
+                        implementation: starterpack.implementation,
+                        referral_percentage: starterpack.referral_percentage,
+                        reissuable: starterpack.reissuable,
+                        price: starterpack.price,
+                        payment_token: starterpack.payment_token,
+                        metadata,
                         time,
                     },
                 );

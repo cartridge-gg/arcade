@@ -12,7 +12,7 @@ pub struct Config {
     pub fee_receiver: ContractAddress,
 }
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Clone, Drop, Serde)]
 #[dojo::model]
 pub struct Starterpack {
     #[key]
@@ -26,6 +26,7 @@ pub struct Starterpack {
     pub status: Status,
     pub total_issued: u64,
     pub created_at: u64,
+    pub metadata: ByteArray,
 }
 
 #[derive(Copy, Drop, Serde)]
