@@ -88,8 +88,9 @@ pub impl StarterpackAssert of StarterpackAssertTrait {
         };
         
         if let Option::Some(supply_limit) = implementation.supply(*self.starterpack_id) {
-            let new_total = *self.total_issued + quantity.into();
-            assert(new_total <= supply_limit.into(), errors::STARTERPACK_SUPPLY_EXCEEDED);
+            let new_total: u64 = *self.total_issued + quantity.into();
+            let limit: u64 = supply_limit.into();
+            assert(new_total <= limit, errors::STARTERPACK_SUPPLY_EXCEEDED);
         }
     }
 }
