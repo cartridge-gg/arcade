@@ -1,5 +1,9 @@
 import { useAccountByAddress } from "@/collections/users";
-import { type TAB_SEGMENTS, parseRouteParams, useProject } from "@/hooks/project";
+import {
+  type TAB_SEGMENTS,
+  parseRouteParams,
+  useProject,
+} from "@/hooks/project";
 import { joinPaths } from "@/lib/helpers";
 import {
   ChestIcon,

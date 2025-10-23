@@ -1,8 +1,6 @@
-import { createContext, useState, type ReactNode, useMemo } from "react";
-import {
-  type MetricsProject,
-  useMetricsQuery,
-} from "@cartridge/ui/utils/api/cartridge";
+import { createContext, type ReactNode, useMemo } from "react";
+import { useMetricsQuery } from "@/queries";
+import type { MetricsProject } from "@cartridge/ui/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
 
 export type Metrics = {
@@ -16,14 +14,13 @@ export type Metrics = {
 
 export type MetricsContextType = {
   metrics: Metrics[];
-  status: "success" | "error" | "idle" | "loading";
+  status: "success" | "error" | "pending";
 };
 
 export const MetricsContext = createContext<MetricsContextType | null>(null);
 
 export function MetricsProvider({ children }: { children: ReactNode }) {
   const { editions } = useArcade();
-  const [metrics, setMetrics] = useState<Metrics[]>([]);
 
   const projects: MetricsProject[] = useMemo(() => {
     return editions.map((edition) => ({
@@ -31,34 +28,7 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
     }));
   }, [editions]);
 
-  const { status } = useMetricsQuery(
-    {
-      projects: projects,
-    },
-    {
-      queryKey: ["Metricss", projects],
-      enabled: projects.length > 0,
-      refetchOnWindowFocus: false,
-      onSuccess: ({ metrics }) => {
-        const newMetrics: { [key: string]: Metrics } = {};
-        metrics?.items.forEach((item) => {
-          const project = item.meta.project;
-          const data = item.metrics.map((metric) => {
-            const date = new Date(metric.transactionDate);
-            date.setHours(0, 0, 0, 0);
-            return {
-              date,
-              transactionCount: metric.transactionCount,
-              callerCount: metric.callerCount,
-            };
-          });
-          if (data.length === 0) return;
-          newMetrics[`${project}`] = { project, data };
-        });
-        setMetrics(Object.values(newMetrics));
-      },
-    },
-  );
+  const { data: metrics = [], status } = useMetricsQuery(projects);
 
   return (
     <MetricsContext.Provider

@@ -194,6 +194,22 @@ export const editionsQuery = createCollection(
     getKey: (item) => item.identifier,
   }),
 );
+export function useActivitiesEditions(address: string) {
+  const { data: editions } = useLiveQuery((q) =>
+    q
+      .from({ editions: editionsQuery })
+      .select(({ editions }) => ({ ...editions })),
+  );
+  return useMemo(() => {
+    return editions.map((edition) => {
+      return {
+        project: edition.config.project,
+        address: `0x${BigInt(address ?? "0x0").toString(16)}`,
+        limit: 0,
+      };
+    });
+  }, [editions, address]);
+}
 
 export const editionsWithGames = createCollection(
   liveQueryCollectionOptions({

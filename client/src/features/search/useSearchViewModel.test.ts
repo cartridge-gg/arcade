@@ -4,7 +4,9 @@ import { useSearchViewModel } from "./useSearchViewModel";
 
 describe("useSearchViewModel", () => {
   it("returns initial state with default disabled value", () => {
-    const { result } = renderHook(() => useSearchViewModel({ disabled: false }));
+    const { result } = renderHook(() =>
+      useSearchViewModel({ disabled: false }),
+    );
 
     expect(result.current.disabled).toBe(false);
     expect(result.current.searchValue).toBe("");
@@ -18,7 +20,9 @@ describe("useSearchViewModel", () => {
   });
 
   it("updates search value when onSearchChange is called", () => {
-    const { result } = renderHook(() => useSearchViewModel({ disabled: false }));
+    const { result } = renderHook(() =>
+      useSearchViewModel({ disabled: false }),
+    );
 
     act(() => {
       result.current.onSearchChange("test query");
@@ -28,7 +32,9 @@ describe("useSearchViewModel", () => {
   });
 
   it("maintains stable onSearchChange callback reference", () => {
-    const { result, rerender } = renderHook(() => useSearchViewModel({ disabled: false }));
+    const { result, rerender } = renderHook(() =>
+      useSearchViewModel({ disabled: false }),
+    );
 
     const firstCallback = result.current.onSearchChange;
     rerender();

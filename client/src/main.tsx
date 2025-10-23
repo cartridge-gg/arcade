@@ -10,8 +10,15 @@ import {
   tokenContractsCollection,
 } from "@/collections";
 import { StrictMode } from "react";
+import { RouterPending } from "./components/router/RouterPending";
+import { progressionsCollection, trophiesCollection } from "./collections";
 
-const router = createRouter({ routeTree });
+const router = createRouter({
+  routeTree,
+  defaultPendingComponent: RouterPending,
+  defaultPendingMs: 200,
+  defaultPreload: "intent",
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -25,13 +32,14 @@ async function main() {
   accountsCollection.preload();
   await gamesQuery.preload();
   await editionsQuery.preload();
+  trophiesCollection.preload();
+  progressionsCollection.preload();
 
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <Provider>
         <RouterProvider router={router} />
       </Provider>
-      ,
     </StrictMode>,
   );
 }

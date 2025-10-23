@@ -12,9 +12,8 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/hooks/project", async () => {
-  const actual = await vi.importActual<typeof import("@/hooks/project")>(
-    "@/hooks/project",
-  );
+  const actual =
+    await vi.importActual<typeof import("@/hooks/project")>("@/hooks/project");
   return {
     ...actual,
     useProject: () => mockUseProject(),
@@ -99,7 +98,6 @@ describe("useNavigationViewModel", () => {
     expect(result.current.activeTab).toBe("marketplace");
   });
 
-
   it("builds hrefs for edition-scoped routes", () => {
     setRouterPathname("/game/test/edition/season-1/marketplace");
     mockUseProject.mockReturnValue({
@@ -110,9 +108,9 @@ describe("useNavigationViewModel", () => {
     const { result } = renderHook(() => useNavigationViewModel());
 
     const tabs = result.current.tabs;
-    expect(
-      tabs.find((item) => item.tab === "leaderboard")?.href,
-    ).toBe("/game/test/edition/season-1/leaderboard");
+    expect(tabs.find((item) => item.tab === "leaderboard")?.href).toBe(
+      "/game/test/edition/season-1/leaderboard",
+    );
     expect(tabs.find((item) => item.tab === "guilds")?.href).toBe(
       "/game/test/edition/season-1/guilds",
     );
