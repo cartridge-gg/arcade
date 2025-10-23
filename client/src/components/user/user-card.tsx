@@ -3,7 +3,6 @@ import React, { useCallback, useMemo } from "react";
 import { UserAvatar } from "./avatar";
 import { AchievementPlayerBadge, SparklesIcon } from "@cartridge/ui";
 import { usePlayerStats } from "@/hooks/achievements";
-import { joinPaths } from "@/lib/helpers";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/sidebar";
 import { useAccount } from "@starknet-react/core";
@@ -44,14 +43,20 @@ const UserCardInner = (
 
   const target = useMemo(() => {
     if (!username && !address) return "/";
-    let pathname = location.pathname;
     const playerName = `${!username?.username ? address?.toLowerCase() : username.username.toLowerCase()}`;
-    pathname = pathname.replace(/\/collection\/[^/]+/, "");
-    pathname = pathname.replace(/\/player\/[^/]+/, "");
-    pathname = pathname.replace(/\/tab\/[^/]+/, "");
-    pathname = pathname.replace(/\/edition\/[^/]+/, "");
-    pathname = joinPaths(pathname, `/player/${playerName}`);
-    return pathname;
+    const pathname = location.pathname;
+
+    const editionMatch = pathname.match(/^\/game\/([^/]+)\/edition\/([^/]+)/);
+    if (editionMatch) {
+      return `/game/${editionMatch[1]}/edition/${editionMatch[2]}/player/${playerName}`;
+    }
+
+    const gameMatch = pathname.match(/^\/game\/([^/]+)/);
+    if (gameMatch) {
+      return `/game/${gameMatch[1]}/player/${playerName}`;
+    }
+
+    return `/player/${playerName}`;
   }, [username, address, location.pathname]);
 
   const handleClick = useCallback(() => {
