@@ -1,5 +1,8 @@
 // Internal imports
 
+use starterpack::interface::{
+    IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
+};
 use starterpack::models::index::Starterpack;
 use starterpack::types::status::Status;
 
@@ -83,14 +86,13 @@ pub impl StarterpackAssert of StarterpackAssertTrait {
     }
 
     fn assert_supply_available(self: @Starterpack, quantity: u32) {
-        let implementation = starterpack::interface::IStarterpackImplementationDispatcher {
+        let implementation = IStarterpackImplementationDispatcher {
             contract_address: *self.implementation,
         };
 
         if let Option::Some(supply_limit) = implementation.supply(*self.starterpack_id) {
             let new_total: u64 = *self.total_issued + quantity.into();
-            let limit: u64 = supply_limit.into();
-            assert(new_total <= limit, errors::STARTERPACK_SUPPLY_EXCEEDED);
+            assert(new_total <= supply_limit.into(), errors::STARTERPACK_SUPPLY_EXCEEDED);
         }
     }
 }
