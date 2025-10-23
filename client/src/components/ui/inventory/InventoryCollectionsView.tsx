@@ -16,7 +16,7 @@ export const InventoryCollectionsView = ({
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none">
+    <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 lg:gap-4 place-items-center select-none">
       {collectionCards.map((card) => (
         <InventoryCollectionCard key={card.id} card={card} />
       ))}

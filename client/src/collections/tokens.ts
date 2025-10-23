@@ -133,13 +133,19 @@ export function useTokenContracts() {
   return { data, ...rest };
 }
 
+// This hook is returning
+// - TokenContract
+// - null if not found
+// - undefined while loading
 export function useTokenContract(address: string) {
-  const { data } = useLiveQuery((q) =>
+  const { data, status } = useLiveQuery((q) =>
     q
       .from({ collections: tokenContractsCollection })
       .where(({ collections }) => eq(collections.contract_address, address))
       .select(({ collections }) => ({ ...collections })),
   );
-  if (data.length === 1) return data[0];
+
+  if (data.length === 1 && "ready" === status) return data[0];
+  if (status === "loading") return undefined;
   return null;
 }

@@ -1,5 +1,4 @@
 export function GamePage() {
-
   return (
     <>
       {/* <GameHeader */}

@@ -71,13 +71,13 @@ describe("useGamesViewModel", () => {
     });
   });
 
-  it("returns games list with All Games entry", () => {
+  it("returns games list", () => {
     const { result } = renderHook(() =>
       useGamesViewModel({ isMobile: false, isPWA: false }),
     );
-    expect(result.current.games).toHaveLength(2);
-    expect(result.current.games[0].id).toBe(0);
-    expect(result.current.games[1].owner).toBe(true);
+    expect(result.current.games).toHaveLength(1);
+    expect(result.current.games[0].id).toBe(1);
+    expect(result.current.games[0].owner).toBe(true);
   });
 
   it("marks selected game id", () => {
@@ -93,6 +93,6 @@ describe("useGamesViewModel", () => {
     const { result } = renderHook(() =>
       useGamesViewModel({ isMobile: false, isPWA: false }),
     );
-    expect(result.current.games[1].owner).toBe(false);
+    expect(result.current.games[0].owner).toBe(false);
   });
 });

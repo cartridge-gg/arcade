@@ -44,7 +44,7 @@ export const LeaderboardView = ({
   return (
     <LayoutContent className="select-none h-full overflow-clip p-0">
       <div
-        className="p-0 pt-3 lg:pt-6 mt-0 h-full overflow-y-scroll"
+        className="p-0 mt-0 h-full overflow-y-scroll"
         style={{ scrollbarWidth: "none" }}
       >
         <ArcadeSubTabs tabs={["all", "following"]} className="mb-3 lg:mb-4">

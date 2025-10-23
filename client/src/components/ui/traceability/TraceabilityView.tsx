@@ -19,10 +19,6 @@ export const TraceabilityView = ({
   icon,
 }: TraceabilityViewProps) => {
   return (
-    <Empty
-      title={title}
-      icon={icon}
-      className={cn("h-full py-3 lg:py-6", className)}
-    />
+    <Empty title={title} icon={icon} className={cn("h-full", className)} />
   );
 };

@@ -7,11 +7,13 @@ export const NotificationsView = ({
   unreadCount,
   onNotificationClick,
 }: NotificationsViewModel) => {
+  if (disabled) return null;
   return (
     <div className="relative">
       <button
         disabled={disabled}
         className="relative p-2 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        type="button"
       >
         <span className="text-lg">
           <BellIcon variant="solid" />

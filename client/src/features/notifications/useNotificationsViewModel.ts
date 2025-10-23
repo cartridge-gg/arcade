@@ -7,7 +7,9 @@ export interface NotificationsViewModel {
   onNotificationClick: (id: string) => void;
 }
 
-export function useNotificationsViewModel(disabled = false): NotificationsViewModel {
+export function useNotificationsViewModel(
+  disabled = false,
+): NotificationsViewModel {
   const [notifications] = useState<Array<{ id: string; message: string }>>([]);
   const [unreadCount] = useState(0);
 

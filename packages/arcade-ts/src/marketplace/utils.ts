@@ -179,6 +179,7 @@ async function fetchToriiStatic(url: string): Promise<string | undefined> {
 export async function defaultResolveTokenImage(
   token: Token,
   context: { projectId: string },
+  fetchImage = false,
 ): Promise<string | undefined> {
   const { projectId } = context;
   if (!token.contract_address || !token.token_id) {
@@ -186,7 +187,7 @@ export async function defaultResolveTokenImage(
   }
 
   const url = `https://api.cartridge.gg/x/${projectId}/torii/static/${addAddressPadding(token.contract_address)}/${addAddressPadding(token.token_id)}/image`;
-  return fetchToriiStatic(url);
+  return fetchImage ? fetchToriiStatic(url) : url;
 }
 
 export async function defaultResolveContractImage(

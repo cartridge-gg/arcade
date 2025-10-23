@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
-import { useArcade } from "@/hooks/arcade";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useProject } from "@/hooks/project";
 import { useSidebar } from "@/hooks/sidebar";
 import type { GameModel } from "@cartridge/arcade";
+import { useArcade } from "@/hooks/arcade";
 
 export interface GameListItem {
   id: number;
@@ -41,6 +41,7 @@ export function useGamesViewModel({
 }): GamesViewModel {
   const { address } = useAccount();
   const { games } = useArcade();
+  // const games = useGames();
   const { game } = useProject();
   const { ownerships } = useOwnerships();
   const sidebar = useSidebar();
@@ -71,23 +72,8 @@ export function useGamesViewModel({
     });
   }, [games, ownerships, address, selectedGameId]);
 
-  const listItems = useMemo(() => {
-    const allGamesEntry: GameListItem = {
-      id: 0,
-      name: "All Games",
-      icon: "",
-      cover: undefined,
-      active: selectedGameId === 0,
-      owner: false,
-      whitelisted: true,
-      published: true,
-    };
-
-    return [allGamesEntry, ...gameItems];
-  }, [gameItems, selectedGameId]);
-
   return {
-    games: listItems,
+    games: gameItems as GameListItem[],
     selectedGameId,
     isMobile,
     isPWA,

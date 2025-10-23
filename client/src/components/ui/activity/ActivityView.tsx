@@ -39,7 +39,7 @@ export const ActivityView = ({
   }
 
   return (
-    <LayoutContent className="gap-y-6 select-none h-full overflow-y-scroll p-0 py-3 lg:py-6">
+    <LayoutContent className="gap-y-6 select-none h-full overflow-y-scroll p-0 ">
       {groups.map(({ date, events }) => (
         <div className="flex flex-col gap-2" key={date}>
           <p className="py-3 text-xs font-semibold text-foreground-400 tracking-wider">
@@ -67,7 +67,7 @@ export const ActivityView = ({
 
 const ActivityLoadingState = () => {
   return (
-    <div className="flex flex-col gap-4 py-3 lg:py-6 h-full overflow-hidden">
+    <div className="flex flex-col gap-4 p-3 h-full overflow-hidden">
       <Skeleton className="w-1/5 h-4 py-4 rounded" />
       <div className="flex flex-col gap-2">
         {Array.from({ length: 20 }).map((_, index) => (
@@ -83,7 +83,7 @@ const ActivityEmptyState = () => {
     <Empty
       title="No activity available"
       icon="activity"
-      className="h-full py-3 lg:py-6"
+      className="h-full p-3"
     />
   );
 };

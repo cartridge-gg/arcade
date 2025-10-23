@@ -91,7 +91,7 @@ export const ItemsView = ({
   loadingOverlay,
 }: ItemsViewProps) => {
   return (
-    <div className="p-6 flex flex-col gap-4 h-full w-full overflow-hidden">
+    <div className="flex flex-col gap-4 h-full w-full overflow-hidden">
       <div className="min-h-10 w-full flex justify-between items-center relative">
         <div className="flex items-center gap-4">
           <SelectionSummary
@@ -172,8 +172,6 @@ const SelectionSummary = ({
   filteredCount,
   totalTokensCount,
   collectionSupply,
-  hasActiveFilters,
-  onClearFilters,
   onResetSelection,
 }: {
   isConnected: boolean;
@@ -213,15 +211,6 @@ const SelectionSummary = ({
             tokensCount={totalTokensCount}
             filteredTokensCount={filteredCount}
           />
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              onClick={onClearFilters}
-              className="ml-2 text-xs"
-            >
-              Clear Filters
-            </Button>
-          )}
         </>
       )}
     </div>
@@ -373,7 +362,7 @@ const CollectionCount = ({
 
 export const ItemsLoadingState = () => {
   return (
-    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full p-6">
+    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full">
       <div className="flex justify-between items-center">
         <Skeleton className="min-h-10 w-1/5" />
         <Skeleton className="min-h-10 w-1/3" />
@@ -389,10 +378,6 @@ export const ItemsLoadingState = () => {
 
 export const ItemsEmptyState = () => {
   return (
-    <Empty
-      title="No related collections"
-      icon="inventory"
-      className="h-full p-6"
-    />
+    <Empty title="No related collections" icon="inventory" className="h-full" />
   );
 };

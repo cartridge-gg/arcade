@@ -48,7 +48,7 @@ export const GamesView = ({
         "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
         (isMobile || isViewMobile) && "fixed z-50 top-0 left-0",
         sidebar.isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        "transition-transform duration-300 ease-in-out",
+        "transition-all duration-300 ease-in-out",
       )}
       onTouchStart={sidebar.handleTouchStart}
       onTouchMove={sidebar.handleTouchMove}

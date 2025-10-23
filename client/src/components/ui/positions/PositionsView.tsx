@@ -6,7 +6,7 @@ export const PositionsView = ({ positions }: PositionsViewModel) => {
   if (positions.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 py-3 lg:py-6">
+    <div className="flex flex-col gap-3">
       <ColumnLabels />
       {positions.map((position, index) => (
         <PositionCard key={index} {...position} />

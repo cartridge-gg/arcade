@@ -18,6 +18,10 @@ export const queryKeys = {
       [...queryKeys.achievements.all, "progress", address, project] as const,
   },
 
+  progressions: {
+    all: ["progressions", "all"] as const,
+  },
+
   activities: {
     all: ["activities"] as const,
     transfers: (address?: string) =>
@@ -28,6 +32,22 @@ export const queryKeys = {
       editions
         ? ([...queryKeys.activities.all, "events", editions] as const)
         : ([...queryKeys.activities.all, "events"] as const),
+    address: (projects: string[], address: string) =>
+      [
+        ...queryKeys.activities.all,
+        "projects",
+        projects.join(","),
+        address,
+      ] as const,
+  },
+  prices: {
+    addresses: (addresses: string[]) =>
+      ["prices", addresses.join(",")] as const,
+    periodAndAddresses: (addresses: string[], start: string, end: string) =>
+      ["prices", addresses.join(","), start, end] as const,
+    credits: (address: string) =>
+      ["prices", "credits", "address", address] as const,
+    balance: (address: string) => ["prices", "balance", address] as const,
   },
 
   marketplace: {
@@ -100,6 +120,13 @@ export const queryKeys = {
   torii: {
     all: ["torii"] as const,
     client: (rpc: string) => [...queryKeys.torii.all, "client", rpc] as const,
+  },
+  ownerships: {
+    arcade: ["arcade-game", "ownerships"] as const,
+  },
+  metrics: {
+    projects: (projects: string[]) =>
+      ["metrics", "projects", projects.join(",")] as const,
   },
 } as const;
 

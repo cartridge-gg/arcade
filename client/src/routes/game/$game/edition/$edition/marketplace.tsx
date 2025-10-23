@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LeaderboardScene } from "@/components/scenes/leaderboard";
+import { MarketplaceScene } from "@/components/scenes/marketplace";
 
 export const Route = createFileRoute(
   "/game/$game/edition/$edition/marketplace",
 )({
-  component: LeaderboardScene,
+  component: MarketplaceScene,
 });

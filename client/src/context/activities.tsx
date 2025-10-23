@@ -1,9 +1,6 @@
 import { createContext, type ReactNode, useMemo } from "react";
-import {
-  useActivitiesQuery,
-  useTransfersQuery,
-} from "@cartridge/ui/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
+import { useTransfersQuery, useActivitiesQuery } from "@/queries";
 import {
   addAddressPadding,
   type constants,
@@ -52,45 +49,15 @@ export const ActivitiesContext = createContext<ActivitiesContextType | null>(
 export function ActivitiesProvider({ children }: { children: ReactNode }) {
   const { games, editions, player: address } = useArcade();
 
-  const projects = useMemo(() => {
-    return editions.map((edition) => {
-      return {
-        project: edition.config.project,
-        address: `0x${BigInt(address ?? "0x0").toString(16)}`,
-        limit: 0,
-      };
-    });
-  }, [editions, address]);
-
   const { achievements } = useAchievements();
 
-  const { data: transfers, status: transfersStatus } = useTransfersQuery(
-    {
-      projects: projects.map((project) => ({
-        ...project,
-        date: "",
-      })),
-    },
-    {
-      queryKey: ["transfers", address, projects],
-      enabled: !!address && projects.length > 0,
-      refetchOnWindowFocus: false,
-    },
-  );
+  const { data: transfers, status: transfersStatus } = useTransfersQuery();
 
-  const { data: transactions, status: transactionsStatus } = useActivitiesQuery(
-    {
-      projects: projects,
-    },
-    {
-      queryKey: ["activities", address, projects],
-      enabled: !!address && projects.length > 0,
-      refetchOnWindowFocus: false,
-    },
-  );
+  const { data: transactions, status: transactionsStatus } =
+    useActivitiesQuery();
 
   const status = useMemo(() => {
-    return transfersStatus === "loading" || transactionsStatus === "loading"
+    return transfersStatus === "pending" || transactionsStatus === "pending"
       ? "loading"
       : transfersStatus === "error" || transactionsStatus === "error"
         ? "error"

@@ -7,6 +7,7 @@ export const SearchView = ({
   placeholder,
   onSearchChange,
 }: SearchViewModel) => {
+  if (disabled) return null;
   return (
     <div className="w-1/6">
       <SearchInput

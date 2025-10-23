@@ -40,7 +40,7 @@ export const AchievementsView = ({
           className="p-0 mt-0 overflow-y-scroll"
           style={{ scrollbarWidth: "none" }}
         >
-          <div className="flex flex-col gap-3 lg:gap-4 py-3 lg:py-6">
+          <div className="flex flex-col gap-3 lg:gap-4 py-3">
             <AchievementsSummaries summaryCards={summaryCards} />
             {showTrophies && trophies && <TrophiesView {...trophies} />}
           </div>
@@ -53,7 +53,7 @@ export const AchievementsView = ({
 const AchievementsLoadingState = ({ multi }: { multi?: boolean }) => {
   if (multi) {
     return (
-      <div className="flex flex-col gap-y-3 lg:gap-y-4 overflow-hidden h-full py-3 lg:py-6">
+      <div className="flex flex-col gap-y-3 lg:gap-y-4 overflow-hidden h-full py-3">
         {Array.from({ length: 10 }).map((_, index) => (
           <Skeleton key={index} className="min-h-[99px] w-full rounded" />
         ))}
@@ -61,7 +61,7 @@ const AchievementsLoadingState = ({ multi }: { multi?: boolean }) => {
     );
   }
   return (
-    <div className="flex flex-col gap-y-3 lg:gap-y-4 overflow-hidden h-full py-3 lg:py-6">
+    <div className="flex flex-col gap-y-3 lg:gap-y-4 overflow-hidden h-full py-3">
       <Skeleton className="min-h-[97px] lg:min-h-10 w-full rounded" />
       {Array.from({ length: 10 }).map((_, index) => (
         <Skeleton key={index} className="min-h-[177px] w-full rounded" />
@@ -75,7 +75,7 @@ const AchievementsEmptyState = () => {
     <Empty
       title="No achievements exist for this game."
       icon="achievement"
-      className="h-full py-3 lg:py-6"
+      className="h-full py-3"
     />
   );
 };

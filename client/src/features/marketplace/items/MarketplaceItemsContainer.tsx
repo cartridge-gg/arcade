@@ -225,11 +225,15 @@ export const MarketplaceItemsContainer = ({
   const totalHeight = virtualizer.getTotalSize();
 
   const shouldShowLoading =
+    (collection !== null || collection === undefined) &&
     (rawTokens === undefined || rawTokens.length === 0) &&
     ["idle", "loading"].includes(status);
 
   const shouldShowEmpty =
-    rawTokens !== undefined && rawTokens.length === 0 && status !== "loading";
+    null === collection &&
+    rawTokens !== undefined &&
+    rawTokens.length === 0 &&
+    ["idle", "error", "success"].includes(status);
 
   if (shouldShowLoading) {
     return <ItemsLoadingState />;

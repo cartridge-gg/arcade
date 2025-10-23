@@ -1,2 +1,2 @@
 export * from "./NavigationContainer";
-export * from "./useNavigationViewModel";
+export * from "./useNavigationContext";

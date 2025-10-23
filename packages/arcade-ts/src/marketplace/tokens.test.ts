@@ -41,6 +41,7 @@ describe("fetchCollectionTokens", () => {
       attributeFilters: { rarity: new Set(["legendary"]) },
       cursor: "cursor1",
       limit: 50,
+      fetchImages: true,
       resolveTokenImage,
     });
 

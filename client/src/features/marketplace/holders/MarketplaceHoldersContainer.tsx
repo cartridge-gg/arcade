@@ -39,7 +39,7 @@ export const MarketplaceHoldersContainer = ({
     return (
       <Empty
         title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`}
-        className="h-full py-6"
+        className="h-full py-3"
       />
     );
   }

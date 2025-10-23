@@ -308,7 +308,7 @@ export const AboutMetrics = () => {
           <MetricTab
             label="Daily Transactions"
             value={
-              status === "loading"
+              status === "pending"
                 ? "0"
                 : Math.round(latestDailyTxs).toLocaleString()
             }
@@ -321,7 +321,7 @@ export const AboutMetrics = () => {
           <MetricTab
             label="Daily Active Players"
             value={
-              status === "loading"
+              status === "pending"
                 ? "0"
                 : Math.round(latestDailyPlayers).toLocaleString()
             }

@@ -20,7 +20,7 @@ interface AboutViewProps {
 
 export const AboutView = ({ mediaItems, socials, details }: AboutViewProps) => {
   return (
-    <div className="flex flex-col gap-4 py-3 lg:py-6">
+    <div className="flex flex-col gap-4 py-3">
       <AboutMedia items={mediaItems} />
 
       {socials && (

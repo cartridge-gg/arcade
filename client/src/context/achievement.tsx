@@ -5,10 +5,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { TROPHY, PROGRESS } from "@/constants";
-import { Trophy, Progress } from "@/models";
-import { useProgressions } from "@/hooks/progressions";
-import { useTrophies } from "@/hooks/trophies";
+import { useProgressions, useTrophies } from "@/collections";
 import {
   AchievementHelper,
   type AchievementData,
@@ -18,7 +15,6 @@ import {
 } from "@/lib/achievements";
 import { getChecksumAddress } from "starknet";
 import { useAddress } from "@/hooks/address";
-import { useArcade } from "@/hooks/arcade";
 import { useAccounts } from "@/collections";
 
 type AchievementContextType = {
@@ -43,45 +39,18 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
     {},
   );
 
-  const { editions } = useArcade();
   const { address } = useAddress();
 
-  const trophiesProps = useMemo(
-    () =>
-      editions.map((edition) => ({
-        project: edition.config.project,
-        namespace: edition.namespace,
-        name: TROPHY,
-      })),
-    [editions],
-  );
-  const progressProps = useMemo(
-    () =>
-      editions.map((edition) => ({
-        project: edition.config.project,
-        namespace: edition.namespace,
-        name: PROGRESS,
-      })),
-    [editions],
-  );
-
   const {
-    trophies,
+    data: trophies,
     isLoading: trophiesLoading,
     isError: trophiesError,
-  } = useTrophies({
-    props: trophiesProps,
-    parser: Trophy.parse,
-  });
-
+  } = useTrophies();
   const {
-    progressions,
+    data: progressions,
     isLoading: progressionsLoading,
     isError: progressionsError,
-  } = useProgressions({
-    props: progressProps,
-    parser: Progress.parse,
-  });
+  } = useProgressions();
 
   // Compute achievements and players
   useEffect(() => {
@@ -138,11 +107,11 @@ export function AchievementProvider({ children }: { children: ReactNode }) {
 
   const usernamesData = useMemo(() => {
     const data: { [key: string]: string | undefined } = {};
-    addresses.forEach((address) => {
+    for (const address of addresses) {
       data[getChecksumAddress(address)] = usernames.find(
         (username) => BigInt(username.address || "0x0") === BigInt(address),
       )?.username;
-    });
+    }
     return data;
   }, [usernames, addresses]);
 

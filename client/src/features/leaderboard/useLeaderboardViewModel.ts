@@ -1,10 +1,11 @@
 import { useCallback, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 import { getChecksumAddress } from "starknet";
-import { joinPaths } from "@/lib/helpers";
 import { useAchievements } from "@/hooks/achievements";
 import { useArcade } from "@/hooks/arcade";
 import type { EditionModel } from "@cartridge/arcade";
+import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
+import { useRouterState } from "@tanstack/react-router";
 
 export interface LeaderboardPin {
   id: string;
@@ -58,7 +59,8 @@ export function useLeaderboardViewModel({
 
   const { achievements, globals, players, usernames, isLoading, isError } =
     useAchievements();
-  const { pins, follows } = useArcade();
+  const { pins, follows, games, editions } = useArcade();
+  const { location } = useRouterState();
 
   const followingSet = useMemo(() => {
     if (!normalizedAddress) return new Set<string>();
@@ -143,10 +145,23 @@ export function useLeaderboardViewModel({
 
   const dataset = edition ? gameData : globalData;
 
-  const getPlayerTarget = useCallback((nameOrAddress: string) => {
-    const player = nameOrAddress.toLowerCase();
-    return joinPaths("player", player, "achievements");
-  }, []);
+  const navManager = useMemo(
+    () =>
+      new NavigationContextManager({
+        pathname: location.pathname,
+        games,
+        editions,
+        isLoggedIn: Boolean(isConnected),
+      }),
+    [location.pathname, games, editions, isConnected],
+  );
+
+  const getPlayerTarget = useCallback(
+    (nameOrAddress: string) => {
+      return navManager.generatePlayerHref(nameOrAddress, "achievements");
+    },
+    [navManager],
+  );
 
   return {
     isConnected: Boolean(isConnected),

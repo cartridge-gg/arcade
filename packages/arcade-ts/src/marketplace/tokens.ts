@@ -42,7 +42,7 @@ export async function fetchCollectionTokens(
     attributeFilters,
     tokenIds,
     limit = DEFAULT_LIMIT,
-    fetchImages = true,
+    fetchImages = false,
     resolveTokenImage,
   } = options;
 

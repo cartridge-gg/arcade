@@ -160,11 +160,11 @@ describe("useMarketplaceCollectionsViewModel", () => {
     expect(item.totalCount).toBe(12);
     expect(item.listingCount).toBe(2);
     expect(item.lastSale).toEqual({
-      value: "5",
+      value: "5.0000",
       image: "https://tokens.example/logo.png",
     });
     expect(item.price).toEqual({
-      value: "2",
+      value: "2.0000",
       image: "https://tokens.example/logo.png",
     });
     expect(item.href).toBe("/game/my-game/edition/season-one/collection/0x1");

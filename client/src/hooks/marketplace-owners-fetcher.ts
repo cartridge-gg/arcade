@@ -22,6 +22,7 @@ type MarketOwnersFetcherInput = {
 };
 
 const MAX_RETRY_ATTEMPTS = 3;
+const LIMIT = 1000;
 const RETRY_BASE_DELAY = 1000;
 const POLL_INTERVAL = 30000; // 30 seconds
 const CACHE_DURATION = 30000; // 30 seconds
@@ -266,8 +267,7 @@ export function useMarketOwnersFetcher({
               account_addresses: [],
               token_ids: [],
               pagination: {
-                // limit: strategy === FetchStrategy.CHECK_NEW ? 10 : LIMIT,
-                limit: 100000,
+                limit: strategy === FetchStrategy.CHECK_NEW ? 10 : LIMIT,
                 cursor: cursor,
                 direction: "Forward",
                 order_by: [],

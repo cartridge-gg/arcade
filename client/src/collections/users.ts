@@ -1,4 +1,4 @@
-import { createCollection, useLiveQuery } from "@tanstack/react-db";
+import { createCollection, eq, or, useLiveQuery } from "@tanstack/react-db";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { graphqlClient } from "@/queries/graphql-client";
 import { queryKeys } from "@/queries/keys";
@@ -55,7 +55,7 @@ export const accountsQueryOptions = {
     const data = await graphqlClient<AccountNamesResponse>(ACCOUNT_NAMES_QUERY);
 
     const accounts: Account[] = [];
-    data.accounts?.edges?.forEach((edge) => {
+    for (const edge of data.accounts.edges) {
       const controllerAddress =
         edge.node.controllers?.edges?.[0]?.node?.address;
       if (controllerAddress) {
@@ -64,7 +64,7 @@ export const accountsQueryOptions = {
           username: edge.node.username,
         });
       }
-    });
+    }
 
     return accounts;
   },
@@ -83,21 +83,75 @@ export const useAccounts = () => {
   const accounts = query.state ? Array.from(query.state.values()) : [];
   const accountsMap = useMemo(() => {
     const map = new Map();
-    accounts.forEach((a) => map.set(a.address, a.username));
+    for (const a of accounts) {
+      map.set(a.address, a.username);
+    }
     return map;
   }, [accounts]);
   return { ...query, data: accountsMap };
 };
 
-export const useAccountByAddress = (address: string | undefined) => {
-  const query = useLiveQuery(accountsCollection);
-  const account =
-    query.state && address
-      ? Array.from(query.state.values()).find(
-          (a: Account) => a.address === getChecksumAddress(address),
+export const useAccount = (identifier: string | undefined) => {
+  const checksumedAddress = useMemo(() => {
+    try {
+      return getChecksumAddress(identifier ?? "0x0");
+    } catch (_err) {
+      return identifier;
+    }
+  }, [identifier]);
+
+  const { data, ...rest } = useLiveQuery(
+    (q) =>
+      q
+        .from({ user: accountsCollection })
+        .where(({ user }) =>
+          or(
+            eq(user.address, checksumedAddress),
+            eq(user.username, identifier),
+          ),
         )
-      : undefined;
-  return { ...query, data: account };
+        .select(({ user }) => ({ ...user })),
+    [identifier, checksumedAddress],
+  );
+  if (!data || data.length < 1) {
+    return { data: null, ...rest };
+  }
+
+  return { data: data[0], ...rest };
+};
+
+export const useAccountByAddress = (address: string | undefined) => {
+  const { data, ...rest } = useLiveQuery(
+    (q) =>
+      q
+        .from({ user: accountsCollection })
+        .where(({ user }) =>
+          eq(user.address, getChecksumAddress(address ?? "0x0")),
+        )
+        .select(({ user }) => ({ ...user })),
+    [address],
+  );
+
+  if (!data || data.length < 1) {
+    return { data: null, ...rest };
+  }
+
+  return { data: data[0], ...rest };
+};
+export const useAccountByUsername = (username: string | undefined) => {
+  const { data, ...rest } = useLiveQuery(
+    (q) =>
+      q
+        .from({ user: accountsCollection })
+        .where(({ user }) => eq(user.username, username))
+        .select(({ user }) => ({ ...user })),
+    [username],
+  );
+  if (!data || data.length < 1) {
+    return { data: null, ...rest };
+  }
+
+  return { data: data[0], ...rest };
 };
 
 export const useAccountsByAddresses = (addresses: string[]) => {

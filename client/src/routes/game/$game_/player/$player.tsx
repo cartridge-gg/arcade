@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { InventoryScene } from "@/components/scenes/inventory";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/game/$game_/player/$player")({
-  component: InventoryScene,
+  component: Outlet,
 });

@@ -1,7 +1,7 @@
 import { NavigationView } from "@/components/ui/navigation/NavigationView";
-import { useNavigationViewModel } from "./useNavigationViewModel";
+import { useNavigationContext } from "./useNavigationContext";
 
 export const NavigationContainer = () => {
-  const viewModel = useNavigationViewModel();
+  const viewModel = useNavigationContext();
   return <NavigationView {...viewModel} />;
 };

@@ -1,4 +1,3 @@
-import { useQuery } from "react-query";
 import {
   aggregateTraitMetadata,
   fetchCollectionTraitMetadata,
@@ -6,6 +5,7 @@ import {
   type TraitSelection,
 } from "@cartridge/arcade/marketplace";
 import { queryKeys } from "@/queries/keys";
+import { useQuery } from "@tanstack/react-query";
 
 export type Metadata = TraitMetadataRow;
 

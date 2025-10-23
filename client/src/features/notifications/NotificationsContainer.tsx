@@ -2,6 +2,6 @@ import { NotificationsView } from "@/components/ui/notifications/NotificationsVi
 import { useNotificationsViewModel } from "./useNotificationsViewModel";
 
 export const NotificationsContainer = () => {
-  const viewModel = useNotificationsViewModel();
+  const viewModel = useNotificationsViewModel(true);
   return <NotificationsView {...viewModel} />;
 };

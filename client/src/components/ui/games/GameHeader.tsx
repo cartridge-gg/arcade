@@ -25,40 +25,42 @@ export function GameHeader({
   return (
     <div
       className={cn(
-        "w-full flex flex-col gap-4 lg:p-4 border border-primary rounded-lg bg-background-200",
+        "w-full flex flex-col gap-4 lg:p-4  lg:border lg:border-primary lg:rounded-lg bg-background-125 order-1 lg:order-1",
         isDashboard ? "p-0" : "p-4",
       )}
     >
-      <div className="flex items-start justify-between">
-        <div
-          className={cn(
-            "flex gap-4 items-center overflow-hidden",
-            isDashboard && isMobile && "hidden",
-          )}
-        >
-          <Thumbnail
-            icon={edition?.properties.icon || game?.properties.icon || arcade}
-            size="xl"
-            className="min-w-16 min-h-16"
-          />
-          <div className="flex flex-col gap-2 overflow-hidden">
-            <p className="font-semibold text-xl/[24px] text-foreground-100 truncate">
-              {game?.name || "Dashboard"}
-            </p>
-            <EditionsContainer />
+      <div className="flex flex-col gap-4 border border-primary rounded-lg p-4 lg:border-none lg:p-0">
+        <div className="flex items-start justify-between">
+          <div
+            className={cn(
+              "flex gap-4 items-center overflow-hidden",
+              isDashboard && isMobile && "hidden",
+            )}
+          >
+            <Thumbnail
+              icon={edition?.properties.icon || game?.properties.icon || arcade}
+              size="xl"
+              className="min-w-16 min-h-16"
+            />
+            <div className="flex flex-col gap-2 overflow-hidden">
+              <p className="font-semibold text-xl/[24px] text-foreground-100 truncate">
+                {game?.name || "Dashboard"}
+              </p>
+              <EditionsContainer />
+            </div>
           </div>
+          {game ? (
+            <div className=" hidden lg:block">
+              <GameSocialWebsite website={socials?.website || ""} label />
+            </div>
+          ) : null}
         </div>
         {game ? (
-          <div className=" hidden lg:block">
+          <div className="block lg:hidden">
             <GameSocialWebsite website={socials?.website || ""} label />
           </div>
         ) : null}
       </div>
-      {game ? (
-        <div className="block lg:hidden">
-          <GameSocialWebsite website={socials?.website || ""} label />
-        </div>
-      ) : null}
     </div>
   );
 }

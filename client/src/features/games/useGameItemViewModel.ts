@@ -128,7 +128,7 @@ export function useGameItemViewModel(
           pathnameParts[pathnameParts.length - 1],
         )
       ) {
-        return "/";
+        return hasPlayer ? joinPaths(...playerPath) : "/";
       }
       return withoutGame.replace(target, "");
     }

@@ -12,6 +12,7 @@ export const formatPriceInfo = (
   currencyAddress: string,
   rawValue: number,
   fallbackDecimals = 0,
+  roundingDecimals = 4,
 ): MarketplacePriceInfo => {
   const checksumCurrency = getChecksumAddress(currencyAddress);
   const metadata = erc20Metadata.find(
@@ -23,7 +24,7 @@ export const formatPriceInfo = (
   const normalizedValue = rawValue / 10 ** decimals;
 
   return {
-    value: normalizedValue.toString(),
+    value: normalizedValue.toFixed(roundingDecimals),
     image,
   };
 };

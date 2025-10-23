@@ -21,7 +21,7 @@ export const InventoryContainer = () => {
   });
 
   return (
-    <div className="w-full flex flex-col gap-4 py-3 lg:py-6 rounded">
+    <div className="w-full flex flex-col gap-4 rounded">
       <InventoryTokensView {...tokensViewModel} />
       <InventoryCollectionsView {...collectionsViewModel} />
     </div>

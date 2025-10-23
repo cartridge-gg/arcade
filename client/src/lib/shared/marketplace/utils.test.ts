@@ -46,7 +46,7 @@ describe("shared marketplace utils", () => {
     it("uses metadata decimals and logo when available", () => {
       const info = formatPriceInfo("0x1", 1_000_000);
       expect(info).toEqual({
-        value: "1",
+        value: "1.0000",
         image: "https://example.com/usdc.png",
       });
     });
@@ -54,7 +54,7 @@ describe("shared marketplace utils", () => {
     it("falls back to generated blockie and provided decimals", () => {
       const info = formatPriceInfo("0x2", 500, 2);
       expect(info).toEqual({
-        value: "5",
+        value: "5.0000",
         image: "blockie:0x2",
       });
     });
@@ -68,7 +68,7 @@ describe("shared marketplace utils", () => {
       };
 
       const price = deriveBestPrice(orders);
-      expect(price?.value).toBe("0.9");
+      expect(price?.value).toBe("0.9000");
     });
 
     it("handles nullish collections", () => {
@@ -85,7 +85,7 @@ describe("shared marketplace utils", () => {
         },
       };
       const price = deriveLatestSalePrice(sales);
-      expect(price?.value).toBe("0.6");
+      expect(price?.value).toBe("0.6000");
     });
 
     it("returns null when no sales exist", () => {
@@ -103,7 +103,7 @@ describe("shared marketplace utils", () => {
         }),
       };
       const price = deriveLatestSalePriceForToken(sales);
-      expect(price?.value).toBe("1.5");
+      expect(price?.value).toBe("1.5000");
     });
 
     it("returns null when token sales are missing", () => {
