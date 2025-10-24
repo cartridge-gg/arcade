@@ -18,7 +18,7 @@ interface ArcadeGameSelectProps
 }
 
 export const arcadeGameSelectVariants = cva(
-  "select-none h-10 flex gap-3 justify-start items-center p-2 gap-2 cursor-pointer data-[active=true]:cursor-default",
+  "select-none h-10 flex gap-3 justify-start items-center p-2 gap-2 cursor-pointer",
 );
 
 export const ArcadeGameSelect = ({

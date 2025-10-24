@@ -34,7 +34,7 @@ export interface InventoryTokensViewModel {
 interface UseInventoryTokensViewModelArgs {
   tokens: Token[];
   credits: Token;
-  status: "loading" | "error" | "idle" | "success";
+  status: "success" | "error" | "pending";
 }
 
 const formatAmount = (amount: number, symbol: string) => {
@@ -178,7 +178,7 @@ export function useInventoryTokensViewModel({
   }, [filteredTokens.length, isExpanded, trackEvent, events]);
 
   return {
-    isLoading: status === "loading",
+    isLoading: status === "pending",
     creditsCard,
     tokenCards,
     canToggle,

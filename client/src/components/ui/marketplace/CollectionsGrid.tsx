@@ -24,7 +24,7 @@ export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
 
   return (
     <div
-      className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
+      className="py-6 grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 lg:gap-4 place-items-center select-none overflow-y-scroll"
       style={{ scrollbarWidth: "none" }}
     >
       {items.map((item) => (
@@ -52,10 +52,11 @@ export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
 export const CollectionsGridLoadingState = () => {
   return (
     <div>
-      <div className="py-6 grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 place-items-center select-none">
+      <div className="py-6 grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 lg:gap-4 place-items-center select-none">
         <Skeleton className="w-full h-[164px] rounded" />
         <Skeleton className="w-full h-[164px] rounded" />
         <Skeleton className="hidden lg:block w-full h-[164px] rounded" />
+        <Skeleton className="hidden 2xl:block w-full h-[164px] rounded" />
       </div>
       <FloatingLoadingSpinner
         isLoading={true}

@@ -1,5 +1,4 @@
 import type { PropsWithChildren } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { CartridgeAPIProvider } from "@cartridge/ui/utils/api/cartridge";
 import { ArcadeProvider } from "./arcade";
 import { IndexerAPIProvider } from "@cartridge/ui/utils/api/indexer";
@@ -19,8 +18,6 @@ import { constants } from "starknet";
 import { DEFAULT_PROJECT } from "@/constants";
 
 export function Provider({ children }: PropsWithChildren) {
-  const qc = new QueryClient();
-
   return (
     <PersistQueryClientProvider
       client={queryClient}
@@ -31,32 +28,30 @@ export function Provider({ children }: PropsWithChildren) {
           url={`${import.meta.env.VITE_CARTRIDGE_API_URL}/query`}
         >
           <IndexerAPIProvider credentials="omit">
-            <QueryClientProvider client={qc}>
-              <MarketplaceClientProvider
-                config={{
-                  chainId: constants.StarknetChainId.SN_MAIN,
-                  defaultProject: DEFAULT_PROJECT,
-                }}
-              >
-                <ArcadeProvider>
-                  <StarknetProvider>
-                    <OwnershipsProvider>
-                      <CollectionProvider>
-                        <TokenProvider>
-                          <AchievementProvider>
-                            <ActivitiesProvider>
-                              <MetricsProvider>
-                                <SidebarProvider>{children}</SidebarProvider>
-                              </MetricsProvider>
-                            </ActivitiesProvider>
-                          </AchievementProvider>
-                        </TokenProvider>
-                      </CollectionProvider>
-                    </OwnershipsProvider>
-                  </StarknetProvider>
-                </ArcadeProvider>
-              </MarketplaceClientProvider>
-            </QueryClientProvider>
+            <MarketplaceClientProvider
+              config={{
+                chainId: constants.StarknetChainId.SN_MAIN,
+                defaultProject: DEFAULT_PROJECT,
+              }}
+            >
+              <ArcadeProvider>
+                <StarknetProvider>
+                  <OwnershipsProvider>
+                    <CollectionProvider>
+                      <TokenProvider>
+                        <AchievementProvider>
+                          <ActivitiesProvider>
+                            <MetricsProvider>
+                              <SidebarProvider>{children}</SidebarProvider>
+                            </MetricsProvider>
+                          </ActivitiesProvider>
+                        </AchievementProvider>
+                      </TokenProvider>
+                    </CollectionProvider>
+                  </OwnershipsProvider>
+                </StarknetProvider>
+              </ArcadeProvider>
+            </MarketplaceClientProvider>
           </IndexerAPIProvider>
         </CartridgeAPIProvider>
       </PostHogProvider>

@@ -1,9 +1,9 @@
 import { useContext, useMemo } from "react";
 import { type Token, TokenContext } from "../context/token";
 import { useProject } from "./project";
-import { useCreditBalance } from "@cartridge/ui/utils";
 import { useAddress } from "./address";
 import { useAccountByAddress } from "@/collections";
+import { useCreditsBalance } from "@/queries";
 
 /**
  * Custom hook to access the Token context and account information.
@@ -38,22 +38,23 @@ export const useTokens = () => {
 
   const { data: account } = useAccountByAddress(address);
 
-  const creditBalance = useCreditBalance({
-    username: account?.username,
-    interval: 30000,
-  });
+  const { data: creditBalance = { balance: { value: 0 } } } = useCreditsBalance(
+    {
+      username: account?.username,
+    },
+  );
 
   const credits: Token = useMemo(() => {
     return {
       balance: {
-        amount: Number(creditBalance.balance.value) / 10 ** 6,
+        amount: Number(creditBalance.amount) / 10 ** creditBalance.decimals,
         value: 0,
         change: 0,
       },
       metadata: {
         name: "Credits",
         symbol: "Credits",
-        decimals: 6,
+        decimals: creditBalance.decimals,
         address: "credit",
         image: "https://static.cartridge.gg/presets/credit/icon.svg",
       },

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlayerPage } from "@/components/pages/player";
+import { AchievementScene } from "@/components/scenes/achievement";
 
 export const Route = createFileRoute("/player/$player/achievements")({
-  component: PlayerPage,
+  component: AchievementScene,
 });

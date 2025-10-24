@@ -10,7 +10,7 @@ export const queryClient = new QueryClient({
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
-      refetchOnMount: true,
+      refetchOnMount: (query) => query.state.dataUpdateCount === 0,
     },
     mutations: {
       retry: 2,

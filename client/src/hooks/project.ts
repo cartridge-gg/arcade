@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useArcade } from "./arcade";
-import { useAddressByUsernameQuery } from "@cartridge/ui/utils/api/cartridge";
 import { getChecksumAddress } from "starknet";
 import { useRouterState, useSearch } from "@tanstack/react-router";
+import { useAccount } from "@/collections";
+import { useAccount as useSnReactAccount } from "@starknet-react/core";
 
 export const TAB_SEGMENTS = [
   "inventory",
@@ -86,6 +87,7 @@ export const useProject = () => {
   const { games, editions } = useArcade();
   const routerState = useRouterState();
   const search = useSearch({ strict: false });
+  const { address: loggedInAddress } = useSnReactAccount();
 
   const {
     game: gameParam,
@@ -104,14 +106,8 @@ export const useProject = () => {
     return typeof value === "string" ? value : undefined;
   }, [search]);
 
-  const { data: playerData } = useAddressByUsernameQuery(
-    {
-      username: playerParam?.toLowerCase() || "",
-    },
-    {
-      enabled: !!playerParam && !playerParam.match(/^0x[0-9a-fA-F]+$/),
-      refetchOnWindowFocus: false,
-    },
+  const { data: playerData } = useAccount(
+    playerParam?.toLowerCase() ?? loggedInAddress ?? "",
   );
 
   const game = useMemo(() => {
@@ -165,7 +161,7 @@ export const useProject = () => {
       }
     }
 
-    const address = playerData?.account?.controllers?.edges?.[0]?.node?.address;
+    const address = playerData?.address;
     if (address) {
       try {
         return getChecksumAddress(address);
