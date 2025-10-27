@@ -1,5 +1,6 @@
-// Mock Starterpack Implementation for testing
-// Simulates a simple implementation that tracks issued starterpacks
+// Starterpack Implementation
+// Provides a simple implementation that tracks issued starterpacks
+// Used both as a compiled contract artifact and as a mock in tests
 
 #[starknet::contract]
 pub mod StarterpackImplementation {

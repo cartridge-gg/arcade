@@ -1,4 +1,5 @@
 pub mod constants;
+pub mod starterpack_impl;
 
 pub mod systems {
     pub mod marketplace;
@@ -21,7 +22,8 @@ mod tests {
         pub mod erc20;
         pub mod erc721;
         pub mod register;
-        pub mod starterpack_impl;
+        // Re-export top-level starterpack_impl for tests
+        pub use super::super::starterpack_impl;
     }
 
     pub mod registry {
