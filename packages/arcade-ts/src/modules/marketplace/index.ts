@@ -57,6 +57,8 @@ export type WithCount<T> = T & { count: number };
 export type Collection = Record<string, WithCount<Token>>;
 export type Collections = Record<string, Collection>;
 
+const ENTITIES_LIMIT = 10_000;
+
 export const Marketplace = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubEntities: undefined as (() => void) | undefined,
@@ -95,7 +97,7 @@ export const Marketplace = {
       .withClause(clauses.build())
       .withEntityModels(keys)
       .includeHashedKeys()
-      .withLimit(1000);
+      .withLimit(ENTITIES_LIMIT);
   },
 
   fetchEntities: async (

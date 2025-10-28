@@ -35,6 +35,8 @@ export type RegistryModel =
   | EditionModel
   | CollectionEditionModel;
 
+const ENTITIES_LIMIT = 10_000;
+
 export const Registry = {
   sdk: undefined as SDK<SchemaType> | undefined,
   unsubEntities: undefined as (() => void) | undefined,
@@ -64,7 +66,7 @@ export const Registry = {
       .withClause(clauses.build())
       .withEntityModels(keys)
       .includeHashedKeys()
-      .withLimit(1000);
+      .withLimit(ENTITIES_LIMIT);
   },
 
   fetchEntities: async (
