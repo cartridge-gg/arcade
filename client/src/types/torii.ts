@@ -1,9 +1,3 @@
-export class ToriiClient {
-  async getTokens(): Promise<{ items: unknown[]; next_cursor?: string }> {
-    return { items: [], next_cursor: undefined };
-  }
-}
-
 export interface Token {
   contract_address: string;
   token_id: string | undefined;

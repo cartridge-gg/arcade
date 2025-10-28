@@ -28,6 +28,7 @@ const DEFAULT_LIMIT = 100;
 const normalizeTokenIdsForQuery = (tokenIds?: string[]): string[] => {
   if (!tokenIds || tokenIds.length === 0) return [];
   return tokenIds
+    .map(addAddressPadding)
     .map((id) => (id.startsWith("0x") ? id.slice(2) : id))
     .filter((id) => id.length > 0);
 };

@@ -102,9 +102,7 @@ export const HoldersHeader = () => {
 };
 
 export const HoldersEmptyState = () => {
-  return (
-    <Empty title="No holders" icon="guild" className="h-full py-3 lg:py-6" />
-  );
+  return <Empty title="No holders" icon="guild" className="h-full" />;
 };
 
 export const HoldersFilteredEmptyState = ({
@@ -137,7 +135,7 @@ export const HoldersFilteredEmptyState = ({
 
 export const HoldersLoadingState = () => {
   return (
-    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full py-6">
+    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full">
       <HoldersHeader />
       <div className="flex flex-col gap-px h-full rounded overflow-hidden">
         {Array.from({ length: 20 }).map((_, index) => (

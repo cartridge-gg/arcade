@@ -7,9 +7,36 @@ import topLevelAwait from "vite-plugin-top-level-await";
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 const resolveFromRoot = (path: string) => resolve(rootDir, path);
 
-export default defineConfig({
-  plugins: [wasm(), topLevelAwait()],
+const wasmMockPlugin = () => ({
+  name: "wasm-mock",
+  enforce: "pre" as const,
+  resolveId(id: string) {
+    if (id.endsWith(".wasm") || id.includes("dojo_c_bg.wasm")) {
+      console.log("WASM MOCK PLUGIN: Intercepting", id);
+      return "\0wasm-stub";
+    }
+    return null;
+  },
+  load(id: string) {
+    if (id === "\0wasm-stub") {
+      return "export default {}; export const __wbindgen_start = () => {};";
+    }
+    return null;
+  },
+});
+
+export default defineConfig(({ mode }) => ({
+  plugins:
+    mode === "test"
+      ? [wasmMockPlugin(), topLevelAwait()]
+      : [wasm(), topLevelAwait()],
+  server: {
+    fs: {
+      allow: [rootDir, resolve(rootDir, "../node_modules")],
+    },
+  },
   test: {
+    pool: "forks",
     environment: "jsdom",
     globals: true,
     coverage: {
@@ -24,7 +51,7 @@ export default defineConfig({
     deps: {
       optimizer: {
         web: {
-          include: ["@dojoengine/torii-client"],
+          include: ["@dojoengine/torii-client", "@dojoengine/torii-wasm"],
         },
       },
     },
@@ -84,4 +111,4 @@ export default defineConfig({
       },
     ],
   },
-});
+}));

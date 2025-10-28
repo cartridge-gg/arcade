@@ -126,7 +126,6 @@ export const MarketplaceItemsContainer = ({
     selection,
     clearSelection,
     toggleSelection,
-    searchFilteredAssets,
     searchFilteredTokensCount,
     totalTokensCount,
     collectionSupply,
@@ -137,12 +136,12 @@ export const MarketplaceItemsContainer = ({
     handleInspect,
     handlePurchase,
     sales,
-    rawTokens,
+    assets,
   } = useMarketplaceItemsViewModel({ collectionAddress });
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowCount = Math.ceil(searchFilteredAssets.length / ITEMS_PER_ROW);
+  const rowCount = Math.ceil(assets.length / ITEMS_PER_ROW);
 
   const virtualizer = useVirtualizer({
     count: rowCount + 1,
@@ -171,7 +170,7 @@ export const MarketplaceItemsContainer = ({
   }, [sales, collectionAddress]);
 
   const items = useMemo(() => {
-    return searchFilteredAssets.map((asset) =>
+    return assets.map((asset) =>
       createItemView({
         asset,
         collectionImage: collection?.image,
@@ -186,7 +185,7 @@ export const MarketplaceItemsContainer = ({
       }),
     );
   }, [
-    searchFilteredAssets,
+    assets,
     collection?.image,
     selection,
     isConnected,
@@ -226,13 +225,13 @@ export const MarketplaceItemsContainer = ({
 
   const shouldShowLoading =
     (collection !== null || collection === undefined) &&
-    (rawTokens === undefined || rawTokens.length === 0) &&
+    (assets === undefined || assets.length === 0) &&
     ["idle", "loading"].includes(status);
 
   const shouldShowEmpty =
     null === collection &&
-    rawTokens !== undefined &&
-    rawTokens.length === 0 &&
+    assets !== undefined &&
+    assets.length === 0 &&
     ["idle", "error", "success"].includes(status);
 
   if (shouldShowLoading) {

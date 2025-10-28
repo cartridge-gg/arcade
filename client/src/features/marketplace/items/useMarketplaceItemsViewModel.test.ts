@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import type { Token } from "@dojoengine/torii-wasm";
+import type { Token } from "@/types/torii";
 import type { OrderModel } from "@cartridge/arcade";
 import { StatusType } from "@cartridge/arcade";
 import { useMarketplaceItemsViewModel } from "./useMarketplaceItemsViewModel";
@@ -44,10 +44,14 @@ vi.mock("@/hooks/useAnalytics", () => ({
 }));
 
 const mockGetTokens = vi.fn();
+const mockGetListedTokens = vi.fn();
 
 vi.mock("@/store", () => ({
   useMarketplaceTokensStore: (selector: any) =>
-    selector({ getTokens: mockGetTokens }),
+    selector({
+      getTokens: mockGetTokens,
+      getListedTokens: mockGetListedTokens,
+    }),
 }));
 
 const mockUseMetadataFilters = vi.fn();
@@ -57,9 +61,14 @@ vi.mock("@/hooks/use-metadata-filters", () => ({
 }));
 
 const mockUseMarketTokensFetcher = vi.fn();
+const mockUseListedTokensFetcher = vi.fn();
 
 vi.mock("@/hooks/marketplace-tokens-fetcher", () => ({
   useMarketTokensFetcher: (args: any) => mockUseMarketTokensFetcher(args),
+}));
+
+vi.mock("@/hooks/use-listed-tokens-fetcher", () => ({
+  useListedTokensFetcher: (args: any) => mockUseListedTokensFetcher(args),
 }));
 
 describe("useMarketplaceItemsViewModel", () => {
@@ -83,12 +92,14 @@ describe("useMarketplaceItemsViewModel", () => {
 
     const order = {
       id: 1n,
+      tokenId: 1n,
       price: 200,
       currency: "0x1",
       status: { value: StatusType.Placed },
     } as unknown as OrderModel;
 
     mockGetTokens.mockReturnValue([token]);
+    mockGetListedTokens.mockReturnValue([]);
     mockUseMetadataFilters.mockReturnValue({
       filteredTokens: [token],
       activeFilters: {},

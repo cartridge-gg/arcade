@@ -4,6 +4,7 @@ import type { Token } from "@dojoengine/torii-wasm";
 import type { OrderModel } from "@cartridge/arcade";
 import { getChecksumAddress, type RpcProvider } from "starknet";
 import type ControllerConnector from "@cartridge/connector/controller";
+import { filterTokensByMetadata } from "@cartridge/arcade/marketplace";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -11,6 +12,7 @@ import { useMarketplaceTokensStore } from "@/store";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
+import { useListedTokensFetcher } from "@/hooks/use-listed-tokens-fetcher";
 
 const ERC1155_ENTRYPOINT = "balance_of_batch";
 
@@ -82,6 +84,9 @@ export function useMarketplaceItemsViewModel({
   const [selection, setSelection] = useState<MarketplaceAsset[]>([]);
 
   const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
+  const getListedTokens = useMarketplaceTokensStore(
+    (state) => state.getListedTokens,
+  );
   const rawTokens = getTokens(DEFAULT_PROJECT, collectionAddress);
   const tokens = rawTokens || [];
 
@@ -96,6 +101,21 @@ export function useMarketplaceItemsViewModel({
     return getCollectionOrders(collectionAddress);
   }, [getCollectionOrders, collectionAddress]);
 
+  const listedTokenIds = useMemo(() => {
+    if (!collectionOrders) return [];
+    return Object.values(collectionOrders).flatMap((o) =>
+      o.map((i) => i.tokenId.toString(16)),
+    );
+  }, [collectionOrders]);
+
+  useListedTokensFetcher({
+    collectionAddress,
+    tokenIds: listedTokenIds,
+    enabled: listedTokenIds.length > 0,
+  });
+
+  const listedTokens = getListedTokens(DEFAULT_PROJECT, collectionAddress);
+
   const getOrdersForToken = useCallback(
     (rawTokenId?: string | bigint) => {
       if (!rawTokenId) return [];
@@ -105,10 +125,12 @@ export function useMarketplaceItemsViewModel({
       candidates.add(tokenIdString);
 
       try {
-        const numericId = BigInt(tokenIdString).toString();
-        candidates.add(numericId);
+        if (tokenIdString.startsWith("0x")) {
+          const numericId = BigInt(tokenIdString).toString();
+          candidates.add(numericId);
+        }
       } catch (error) {
-        // Ignore parse errors; fall back to original string
+        // Ignore parse errors
       }
 
       for (const candidate of candidates) {
@@ -143,11 +165,24 @@ export function useMarketplaceItemsViewModel({
       return filteredTokens;
     }
 
+    if (listedTokens.length > 0) {
+      if (Object.keys(activeFilters).length > 0) {
+        return filterTokensByMetadata(listedTokens, activeFilters);
+      }
+      return listedTokens;
+    }
+
     return filteredTokens.filter((token) => {
       const tokenOrders = getOrdersForToken(token.token_id?.toString());
       return tokenOrders.length > 0;
     });
-  }, [statusFilter, filteredTokens, getOrdersForToken]);
+  }, [
+    statusFilter,
+    filteredTokens,
+    listedTokens,
+    activeFilters,
+    getOrdersForToken,
+  ]);
 
   const searchFilteredTokens = useMemo(() => {
     if (!search.trim()) return statusFilteredTokens;
@@ -202,13 +237,22 @@ export function useMarketplaceItemsViewModel({
   }, []);
 
   const assets = useMemo(() => {
-    return searchFilteredTokens.map((token) => {
+    const assetsWithOrders = searchFilteredTokens.map((token) => {
       const orders = getOrdersForToken(token.token_id?.toString());
       return {
         ...token,
         orders,
         owner: address || "",
       } as MarketplaceAsset;
+    });
+
+    return assetsWithOrders.sort((a, b) => {
+      const aHasOrders = a.orders.length > 0;
+      const bHasOrders = b.orders.length > 0;
+
+      if (aHasOrders === bHasOrders) return 0;
+
+      return aHasOrders ? -1 : 1;
     });
   }, [searchFilteredTokens, getOrdersForToken, address]);
 
