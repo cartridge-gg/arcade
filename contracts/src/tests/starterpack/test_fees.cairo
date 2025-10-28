@@ -2,7 +2,7 @@
 
 use arcade::systems::starterpack::IStarterpackRegistryDispatcherTrait;
 use arcade::tests::setup::setup::{OWNER, PLAYER, spawn};
-use openzeppelin_token::erc20::interface::IERC20DispatcherTrait;
+use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
 use starterpack::constants::FEE_DENOMINATOR;
 
