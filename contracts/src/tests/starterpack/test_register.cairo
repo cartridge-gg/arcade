@@ -22,6 +22,7 @@ fn test_sp_register() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
@@ -61,6 +62,7 @@ fn test_sp_register_invalid_referral_percentage() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] With invalid referral percentage (>50%)
     testing::set_contract_address(context.creator);
@@ -86,6 +88,7 @@ fn test_sp_register_multiple_starterpacks() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] First starterpack
     testing::set_contract_address(context.creator);
@@ -125,5 +128,57 @@ fn test_sp_register_multiple_starterpacks() {
     assert_eq!(sp2.referral_percentage, 20);
     assert_eq!(sp1.reissuable, true);
     assert_eq!(sp2.reissuable, false);
+}
+
+#[test]
+#[should_panic(expected: ('Starterpack: not found', 'ENTRYPOINT_FAILED'))]
+fn test_sp_not_found_metadata() {
+    // [Setup]
+    let (_world, systems, _context) = spawn();
+
+    // [Initialize] Protocol
+    testing::set_contract_address(OWNER());
+
+    // [Try] Access metadata of non-existent starterpack - should fail
+    let _non_existent_id = 99999_u32;
+    systems.starterpack.metadata(_non_existent_id);
+}
+
+#[test]
+#[should_panic(expected: ('Starterpack: not found', 'ENTRYPOINT_FAILED'))]
+fn test_sp_not_found_quote() {
+    // [Setup]
+    let (_world, systems, _context) = spawn();
+
+    // [Initialize] Protocol
+    testing::set_contract_address(OWNER());
+
+    // [Try] Get quote for non-existent starterpack - should fail
+    let _non_existent_id = 99999_u32;
+    systems.starterpack.quote(_non_existent_id, 1, false);
+}
+
+#[test]
+#[should_panic(expected: ('Starterpack: not found', 'ENTRYPOINT_FAILED'))]
+fn test_sp_not_found_update() {
+    // [Setup]
+    let (_world, systems, context) = spawn();
+
+    // [Initialize] Protocol
+    testing::set_contract_address(OWNER());
+
+    // [Try] Update non-existent starterpack - should fail
+    testing::set_contract_address(context.creator);
+    let _non_existent_id = 99999_u32;
+    systems
+        .starterpack
+        .update(
+            starterpack_id: _non_existent_id,
+            implementation: systems.starterpack_impl,
+            referral_percentage: 10,
+            reissuable: true,
+            price: PRICE,
+            payment_token: systems.erc20.contract_address,
+        );
 }
 

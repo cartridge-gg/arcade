@@ -24,6 +24,7 @@ fn test_sp_issue() {
 
     // [Initialize] Protocol
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
@@ -67,6 +68,7 @@ fn test_sp_issue_with_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -164,6 +166,7 @@ fn test_sp_issue_reissuable() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
@@ -219,6 +222,7 @@ fn test_sp_issue_paused() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -260,6 +264,7 @@ fn test_sp_referral_reward_tracking() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -307,6 +312,7 @@ fn test_sp_group_reward_tracking() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -355,6 +361,7 @@ fn test_sp_multiple_referrals_accumulation() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
@@ -412,6 +419,7 @@ fn test_sp_group_multiple_referrals_accumulation() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
@@ -478,6 +486,7 @@ fn test_sp_no_referral_tracking_without_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -523,6 +532,7 @@ fn test_sp_issue_with_quantity() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -568,6 +578,7 @@ fn test_sp_quote_with_quantity() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -606,6 +617,7 @@ fn test_sp_quote_with_quantity_and_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -645,6 +657,7 @@ fn test_sp_issue_quantity_with_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -709,6 +722,7 @@ fn test_sp_issue_quantity_group_rewards() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -760,6 +774,7 @@ fn test_sp_issue_quantity_exceeds_limit_non_reissuable() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] Non-reissuable starterpack
     testing::set_contract_address(context.creator);

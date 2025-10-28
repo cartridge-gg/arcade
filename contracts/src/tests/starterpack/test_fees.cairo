@@ -22,6 +22,7 @@ fn test_sp_fees_distribution_no_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -84,6 +85,7 @@ fn test_sp_fees_distribution_with_referrer() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -157,6 +159,7 @@ fn test_sp_quote_calculation() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -199,6 +202,7 @@ fn test_sp_free() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register] Free starterpack (price = 0)
     testing::set_contract_address(context.creator);

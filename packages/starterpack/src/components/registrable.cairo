@@ -90,9 +90,12 @@ pub mod RegistrableComponent {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
+            // [Check] Starterpack exists
+            let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
+
             // [Check] Caller is owner
             let caller = get_caller_address();
-            let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_is_owner(caller);
 
             // [Check] Referral percentage is valid
@@ -131,9 +134,12 @@ pub mod RegistrableComponent {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
+            // [Check] Starterpack exists
+            let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
+
             // [Check] Caller is owner
             let caller = get_caller_address();
-            let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_is_owner(caller);
 
             // [Effect] Update metadata
@@ -164,8 +170,12 @@ pub mod RegistrableComponent {
         ) {
             let mut store = StoreTrait::new(world);
 
-            let caller = get_caller_address();
+            // [Check] Starterpack exists
             let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
+
+            // [Check] Caller is owner
+            let caller = get_caller_address();
             starterpack.assert_is_owner(caller);
 
             starterpack.pause();
@@ -181,8 +191,12 @@ pub mod RegistrableComponent {
         ) {
             let mut store = StoreTrait::new(world);
 
-            let caller = get_caller_address();
+            // [Check] Starterpack exists
             let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
+
+            // [Check] Caller is owner
+            let caller = get_caller_address();
             starterpack.assert_is_owner(caller);
 
             starterpack.resume();

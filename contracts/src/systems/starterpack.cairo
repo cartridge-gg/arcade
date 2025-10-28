@@ -81,6 +81,7 @@ pub mod StarterpackRegistry {
         IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
     };
     use starterpack::models::config::ConfigTrait;
+    use starterpack::models::starterpack::StarterpackAssert;
     use starterpack::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
     use super::{IAdministration, IStarterpackRegistry, StarterpackQuote};
 
@@ -163,6 +164,7 @@ pub mod StarterpackRegistry {
 
             // Get starterpack details
             let starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
 
             // Get config for protocol fee
             let config = store.get_config(CONFIG_ID);
@@ -194,6 +196,8 @@ pub mod StarterpackRegistry {
             let store = StoreTrait::new(world);
 
             let starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
+
             let implementation = IStarterpackImplementationDispatcher {
                 contract_address: starterpack.implementation,
             };
@@ -205,6 +209,7 @@ pub mod StarterpackRegistry {
             let world = self.world_storage();
             let mut store = StoreTrait::new(world);
             let starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
             starterpack.metadata
         }
 

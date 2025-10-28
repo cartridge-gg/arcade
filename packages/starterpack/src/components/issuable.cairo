@@ -54,6 +54,7 @@ pub mod IssuableComponent {
             let mut store = StoreTrait::new(world);
 
             let mut starterpack = store.get_starterpack(starterpack_id);
+            starterpack.assert_does_exist();
             starterpack.assert_is_active();
             starterpack.assert_quantity_allowed(quantity);
             starterpack.assert_supply_available(quantity);

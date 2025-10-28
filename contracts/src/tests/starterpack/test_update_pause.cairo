@@ -22,6 +22,7 @@ fn test_sp_update() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -68,6 +69,7 @@ fn test_sp_update_unauthorized() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -105,6 +107,7 @@ fn test_sp_pause_resume() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -145,6 +148,7 @@ fn test_sp_pause_unauthorized() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
@@ -174,6 +178,7 @@ fn test_sp_resume_unauthorized() {
 
     // [Initialize]
     testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
 
     // [Register]
     testing::set_contract_address(context.creator);
