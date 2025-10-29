@@ -59,6 +59,17 @@ export async function fetchCollectionTokens(
   try {
     const response = await fetchToriis([projectId], {
       client: async ({ client }: ClientCallbackParams) => {
+        console.log({
+          contract_addresses: [addAddressPadding(address)],
+          token_ids: normalizedTokenIds,
+          attribute_filters: filters,
+          pagination: {
+            limit,
+            cursor: cursor ?? undefined,
+            direction: "Forward",
+            order_by: [],
+          },
+        });
         return client.getTokens({
           contract_addresses: [addAddressPadding(address)],
           token_ids: normalizedTokenIds,
