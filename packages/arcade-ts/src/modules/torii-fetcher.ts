@@ -80,7 +80,10 @@ async function fetchFromEndpoint(
         client,
         signal,
       });
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+      throw new Error((e as Error).toString());
+    }
     // leave this commented out for now.
     // TODO: return client instance to free them at the end of caller function
     // } finally {

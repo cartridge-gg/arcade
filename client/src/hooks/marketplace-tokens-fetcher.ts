@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Token } from "@dojoengine/torii-wasm";
-import { getChecksumAddress } from "starknet";
+import { addAddressPadding, getChecksumAddress } from "starknet";
 import {
   useMarketplaceCollectionTokens,
   type UseMarketplaceQueryResult,
@@ -37,13 +37,14 @@ export function useMarketTokensFetcher({
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const prevAddressRef = useRef<string | null>(null);
+  const prevFiltersRef = useRef<string | null>(null);
 
   const projectId = project[0] ?? DEFAULT_PROJECT;
 
   const normalizedAddress = useMemo(() => {
     if (!address) return "";
     try {
-      return getChecksumAddress(address);
+      return addAddressPadding(address);
     } catch (error) {
       console.warn(
         "Invalid contract address provided to useMarketTokensFetcher",
@@ -56,19 +57,16 @@ export function useMarketTokensFetcher({
     }
   }, [address]);
 
-  const collection = useTokenContract(normalizedAddress);
+  const collection = useTokenContract(getChecksumAddress(address));
 
   const queryOptions = useMemo(() => {
     return {
       address: normalizedAddress,
-      project: projectId,
       cursor,
       attributeFilters,
       limit: LIMIT,
-      fetchImages: true,
-      defaultProjectId: projectId,
     };
-  }, [normalizedAddress, projectId, cursor, attributeFilters]);
+  }, [normalizedAddress, cursor, attributeFilters]);
 
   const enabled =
     autoFetch &&
@@ -140,6 +138,30 @@ export function useMarketTokensFetcher({
     setNextCursor(null);
     setIsFetchingNextPage(false);
   }, [address, normalizedAddress, projectId, clearTokens]);
+
+  useEffect(() => {
+    if (!address) return;
+
+    const filtersKey = attributeFilters
+      ? JSON.stringify(
+          Object.entries(attributeFilters).map(([key, values]) => [
+            key,
+            Array.from(values).sort(),
+          ]),
+        )
+      : null;
+
+    if (prevFiltersRef.current === filtersKey) return;
+
+    if (prevFiltersRef.current !== null) {
+      clearTokens(projectId, address);
+      setCursor(undefined);
+      setNextCursor(null);
+      setIsFetchingNextPage(false);
+    }
+
+    prevFiltersRef.current = filtersKey;
+  }, [attributeFilters, address, projectId, clearTokens]);
 
   useEffect(() => {
     if (projectError || status === "error") {

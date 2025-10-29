@@ -90,12 +90,11 @@ export function useMarketplaceItemsViewModel({
   const rawTokens = getTokens(DEFAULT_PROJECT, collectionAddress);
   const tokens = rawTokens || [];
 
-  const { activeFilters, clearAllFilters, statusFilter, filteredTokens } =
-    useMetadataFilters({
-      tokens,
-      collectionAddress,
-      enabled: !!collectionAddress && tokens.length > 0,
-    });
+  const { activeFilters, clearAllFilters, statusFilter } = useMetadataFilters({
+    tokens,
+    collectionAddress,
+    enabled: !!collectionAddress && tokens.length > 0,
+  });
 
   const collectionOrders = useMemo(() => {
     return getCollectionOrders(collectionAddress);
@@ -162,7 +161,7 @@ export function useMarketplaceItemsViewModel({
 
   const statusFilteredTokens = useMemo(() => {
     if (statusFilter === "all") {
-      return filteredTokens;
+      return rawTokens;
     }
 
     if (listedTokens.length > 0) {
@@ -172,17 +171,18 @@ export function useMarketplaceItemsViewModel({
       return listedTokens;
     }
 
-    return filteredTokens.filter((token) => {
+    return rawTokens.filter((token) => {
       const tokenOrders = getOrdersForToken(token.token_id?.toString());
       return tokenOrders.length > 0;
     });
-  }, [
-    statusFilter,
-    filteredTokens,
-    listedTokens,
-    activeFilters,
-    getOrdersForToken,
-  ]);
+  }, [statusFilter, rawTokens, listedTokens, activeFilters, getOrdersForToken]);
+
+  const hasMoreFiltered = useMemo(() => {
+    if (statusFilter !== "all" && listedTokens.length > 0) {
+      return false;
+    }
+    return hasMore;
+  }, [statusFilter, listedTokens.length, hasMore]);
 
   const searchFilteredTokens = useMemo(() => {
     if (!search.trim()) return statusFilteredTokens;
@@ -388,7 +388,7 @@ export function useMarketplaceItemsViewModel({
     collection,
     status,
     loadingProgress,
-    hasMore,
+    hasMore: hasMoreFiltered,
     isFetchingNextPage,
     fetchNextPage,
     search,
