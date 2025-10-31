@@ -1,0 +1,13 @@
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+
+[indexing]
+allowed_origins = ["*"]
+polling_interval = 500
+world_block = 0
+pending = true
+transactions = true
+contracts = [
+    "ERC20:0x0124aeb495b947201f5faC96fD1138E326AD86195B98df6DEc9009158A533B49", # Lords
+    "ERC20:0x035f581b050a39958b7188ab5c75daaa1f9d3571a0c032203038c898663f31f8", # Tickets
+    "ERC721:0x71333ac75b7d5ba89a2d0c2b67d5b955258a4d46eb42f3428da6137bbbfdfd9", # Pistols
+]

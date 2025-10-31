@@ -1480,7 +1480,7 @@
   "contracts": [
     {
       "address": "0x6bbf16b6c67b1bef27a187b499b2f3a14af31646c2c90d64f11b9087c3f527c",
-      "class_hash": "0x76646054f8212bc683cbc826eff99020c3d8633e188e33b85cc845e4a6ddde8",
+      "class_hash": "0x4d67a14e14d72e664f14333268ef1fb950f2e4ef7433aca8eaacf1d87826f37",
       "abi": [
         {
           "type": "impl",
@@ -3703,6 +3703,616 @@
       ]
     },
     {
+      "address": "0x3eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43",
+      "class_hash": "0x7182a1f830eae5a4de047ffe1a871f94b03c6993392f737405926b3a11eb8fb",
+      "abi": [
+        {
+          "type": "impl",
+          "name": "StarterpackRegistry__ContractImpl",
+          "interface_name": "dojo::contract::interface::IContract"
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::interface::IContract",
+          "items": []
+        },
+        {
+          "type": "impl",
+          "name": "DojoDeployedContractImpl",
+          "interface_name": "dojo::meta::interface::IDeployedResource"
+        },
+        {
+          "type": "struct",
+          "name": "core::byte_array::ByteArray",
+          "members": [
+            {
+              "name": "data",
+              "type": "core::array::Array::<core::bytes_31::bytes31>"
+            },
+            {
+              "name": "pending_word",
+              "type": "core::felt252"
+            },
+            {
+              "name": "pending_word_len",
+              "type": "core::integer::u32"
+            }
+          ]
+        },
+        {
+          "type": "interface",
+          "name": "dojo::meta::interface::IDeployedResource",
+          "items": [
+            {
+              "type": "function",
+              "name": "dojo_name",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "core::byte_array::ByteArray"
+                }
+              ],
+              "state_mutability": "view"
+            }
+          ]
+        },
+        {
+          "type": "function",
+          "name": "dojo_init",
+          "inputs": [
+            {
+              "name": "protocol_fee",
+              "type": "core::integer::u8"
+            },
+            {
+              "name": "fee_receiver",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "owner",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ],
+          "outputs": [],
+          "state_mutability": "external"
+        },
+        {
+          "type": "impl",
+          "name": "AdministrationImpl",
+          "interface_name": "arcade::systems::starterpack::IAdministration"
+        },
+        {
+          "type": "interface",
+          "name": "arcade::systems::starterpack::IAdministration",
+          "items": [
+            {
+              "type": "function",
+              "name": "grant_role",
+              "inputs": [
+                {
+                  "name": "account",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                },
+                {
+                  "name": "role_id",
+                  "type": "core::integer::u8"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "revoke_role",
+              "inputs": [
+                {
+                  "name": "account",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "set_protocol_fee",
+              "inputs": [
+                {
+                  "name": "fee_percentage",
+                  "type": "core::integer::u8"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "set_fee_receiver",
+              "inputs": [
+                {
+                  "name": "receiver",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            }
+          ]
+        },
+        {
+          "type": "impl",
+          "name": "StarterpackImpl",
+          "interface_name": "arcade::systems::starterpack::IStarterpackRegistry"
+        },
+        {
+          "type": "enum",
+          "name": "core::bool",
+          "variants": [
+            {
+              "name": "False",
+              "type": "()"
+            },
+            {
+              "name": "True",
+              "type": "()"
+            }
+          ]
+        },
+        {
+          "type": "struct",
+          "name": "core::integer::u256",
+          "members": [
+            {
+              "name": "low",
+              "type": "core::integer::u128"
+            },
+            {
+              "name": "high",
+              "type": "core::integer::u128"
+            }
+          ]
+        },
+        {
+          "type": "struct",
+          "name": "arcade::systems::starterpack::StarterpackQuote",
+          "members": [
+            {
+              "name": "base_price",
+              "type": "core::integer::u256"
+            },
+            {
+              "name": "referral_fee",
+              "type": "core::integer::u256"
+            },
+            {
+              "name": "protocol_fee",
+              "type": "core::integer::u256"
+            },
+            {
+              "name": "total_cost",
+              "type": "core::integer::u256"
+            },
+            {
+              "name": "payment_token",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ]
+        },
+        {
+          "type": "enum",
+          "name": "core::option::Option::<core::integer::u32>",
+          "variants": [
+            {
+              "name": "Some",
+              "type": "core::integer::u32"
+            },
+            {
+              "name": "None",
+              "type": "()"
+            }
+          ]
+        },
+        {
+          "type": "enum",
+          "name": "core::option::Option::<core::starknet::contract_address::ContractAddress>",
+          "variants": [
+            {
+              "name": "Some",
+              "type": "core::starknet::contract_address::ContractAddress"
+            },
+            {
+              "name": "None",
+              "type": "()"
+            }
+          ]
+        },
+        {
+          "type": "enum",
+          "name": "core::option::Option::<core::felt252>",
+          "variants": [
+            {
+              "name": "Some",
+              "type": "core::felt252"
+            },
+            {
+              "name": "None",
+              "type": "()"
+            }
+          ]
+        },
+        {
+          "type": "interface",
+          "name": "arcade::systems::starterpack::IStarterpackRegistry",
+          "items": [
+            {
+              "type": "function",
+              "name": "quote",
+              "inputs": [
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "quantity",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "has_referrer",
+                  "type": "core::bool"
+                }
+              ],
+              "outputs": [
+                {
+                  "type": "arcade::systems::starterpack::StarterpackQuote"
+                }
+              ],
+              "state_mutability": "view"
+            },
+            {
+              "type": "function",
+              "name": "supply",
+              "inputs": [
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [
+                {
+                  "type": "core::option::Option::<core::integer::u32>"
+                }
+              ],
+              "state_mutability": "view"
+            },
+            {
+              "type": "function",
+              "name": "metadata",
+              "inputs": [
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [
+                {
+                  "type": "core::byte_array::ByteArray"
+                }
+              ],
+              "state_mutability": "view"
+            },
+            {
+              "type": "function",
+              "name": "register",
+              "inputs": [
+                {
+                  "name": "implementation",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                },
+                {
+                  "name": "referral_percentage",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "reissuable",
+                  "type": "core::bool"
+                },
+                {
+                  "name": "price",
+                  "type": "core::integer::u256"
+                },
+                {
+                  "name": "payment_token",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                },
+                {
+                  "name": "metadata",
+                  "type": "core::byte_array::ByteArray"
+                }
+              ],
+              "outputs": [
+                {
+                  "type": "core::integer::u32"
+                }
+              ],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "update",
+              "inputs": [
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "implementation",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                },
+                {
+                  "name": "referral_percentage",
+                  "type": "core::integer::u8"
+                },
+                {
+                  "name": "reissuable",
+                  "type": "core::bool"
+                },
+                {
+                  "name": "price",
+                  "type": "core::integer::u256"
+                },
+                {
+                  "name": "payment_token",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "update_metadata",
+              "inputs": [
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "metadata",
+                  "type": "core::byte_array::ByteArray"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "pause",
+              "inputs": [
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "resume",
+              "inputs": [
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "issue",
+              "inputs": [
+                {
+                  "name": "recipient",
+                  "type": "core::starknet::contract_address::ContractAddress"
+                },
+                {
+                  "name": "starterpack_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "quantity",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "referrer",
+                  "type": "core::option::Option::<core::starknet::contract_address::ContractAddress>"
+                },
+                {
+                  "name": "referrer_group",
+                  "type": "core::option::Option::<core::felt252>"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            }
+          ]
+        },
+        {
+          "type": "impl",
+          "name": "WorldProviderImpl",
+          "interface_name": "dojo::contract::components::world_provider::IWorldProvider"
+        },
+        {
+          "type": "struct",
+          "name": "dojo::world::iworld::IWorldDispatcher",
+          "members": [
+            {
+              "name": "contract_address",
+              "type": "core::starknet::contract_address::ContractAddress"
+            }
+          ]
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::components::world_provider::IWorldProvider",
+          "items": [
+            {
+              "type": "function",
+              "name": "world_dispatcher",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "dojo::world::iworld::IWorldDispatcher"
+                }
+              ],
+              "state_mutability": "view"
+            }
+          ]
+        },
+        {
+          "type": "impl",
+          "name": "UpgradeableImpl",
+          "interface_name": "dojo::contract::components::upgradeable::IUpgradeable"
+        },
+        {
+          "type": "interface",
+          "name": "dojo::contract::components::upgradeable::IUpgradeable",
+          "items": [
+            {
+              "type": "function",
+              "name": "upgrade",
+              "inputs": [
+                {
+                  "name": "new_class_hash",
+                  "type": "core::starknet::class_hash::ClassHash"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            }
+          ]
+        },
+        {
+          "type": "constructor",
+          "name": "constructor",
+          "inputs": []
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
+          "kind": "struct",
+          "members": [
+            {
+              "name": "class_hash",
+              "type": "core::starknet::class_hash::ClassHash",
+              "kind": "data"
+            }
+          ]
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "Upgraded",
+              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Upgraded",
+              "kind": "nested"
+            }
+          ]
+        },
+        {
+          "type": "event",
+          "name": "dojo::contract::components::world_provider::world_provider_cpt::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
+          "name": "starterpack::components::initializable::InitializableComponent::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
+          "name": "starterpack::components::issuable::IssuableComponent::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
+          "name": "starterpack::components::manageable::ManageableComponent::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
+          "name": "starterpack::components::registrable::RegistrableComponent::Event",
+          "kind": "enum",
+          "variants": []
+        },
+        {
+          "type": "event",
+          "name": "arcade::systems::starterpack::StarterpackRegistry::Event",
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "UpgradeableEvent",
+              "type": "dojo::contract::components::upgradeable::upgradeable_cpt::Event",
+              "kind": "nested"
+            },
+            {
+              "name": "WorldProviderEvent",
+              "type": "dojo::contract::components::world_provider::world_provider_cpt::Event",
+              "kind": "nested"
+            },
+            {
+              "name": "InitializableEvent",
+              "type": "starterpack::components::initializable::InitializableComponent::Event",
+              "kind": "flat"
+            },
+            {
+              "name": "IssuableEvent",
+              "type": "starterpack::components::issuable::IssuableComponent::Event",
+              "kind": "flat"
+            },
+            {
+              "name": "ManageableEvent",
+              "type": "starterpack::components::manageable::ManageableComponent::Event",
+              "kind": "flat"
+            },
+            {
+              "name": "RegistrableEvent",
+              "type": "starterpack::components::registrable::RegistrableComponent::Event",
+              "kind": "flat"
+            }
+          ]
+        }
+      ],
+      "init_calldata": [
+        "0x0",
+        "0x03F7F4E5a23A712787F0C100f02934c4A88606B7F0C880c2FD43e817E6275d83",
+        "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b"
+      ],
+      "tag": "ARCADE-StarterpackRegistry",
+      "selector": "0xcdc75f0c1d3c4d5dea0b66ab4b6916090d93f77107de3bda85803a5757d068",
+      "systems": [
+        "dojo_init",
+        "grant_role",
+        "revoke_role",
+        "set_protocol_fee",
+        "set_fee_receiver",
+        "register",
+        "update",
+        "update_metadata",
+        "pause",
+        "resume",
+        "issue",
+        "upgrade"
+      ]
+    },
+    {
       "address": "0x100698358760af6c63e039a9cf967f483cd5307dc555758da29d12ab2b39823",
       "class_hash": "0x51425e072de27d4bcc7ca96a199ee18c77a23eb25be7598f4c15f789faa42f8",
       "abi": [
@@ -3940,6 +4550,12 @@
     },
     {
       "members": [],
+      "class_hash": "0x51690f187b2d0a7d89681504889f61ff923a243dafa6bad0e931ddc4d20fcd0",
+      "tag": "ARCADE-Config",
+      "selector": "0x2acddbd3e98712d6b8982b6fa1f0ca69f94951c8f651e72151c527ebd2f266e"
+    },
+    {
+      "members": [],
       "class_hash": "0xfcae989e3ab23625b12abc7a76dbddf75565d82e8ba5eb59260b74ae3fe494",
       "tag": "ARCADE-Controller",
       "selector": "0x7b2fac00792560d241723d9852f29e952bb0ecc88219dd3fb86b61796dc5952"
@@ -3970,9 +4586,21 @@
     },
     {
       "members": [],
+      "class_hash": "0x3486d342363db661312f649ecf39db22d1c6c536be746051f8548d7266f7d7f",
+      "tag": "ARCADE-GroupReward",
+      "selector": "0x1c86cf4f335a8540c0570893b6a80fe919d0a0e83d87a1b43c2a7165998c97a"
+    },
+    {
+      "members": [],
       "class_hash": "0x69d03c2b170fdc5ad689fd39723839482705f71e628fb7bdc1522574f3136ba",
       "tag": "ARCADE-Guild",
       "selector": "0x95501f151f575b4fab06c5ceb7237739dd0608982727cbc226273aecf006aa"
+    },
+    {
+      "members": [],
+      "class_hash": "0x3ba21f814264eaa7090b4281b46a010cb1c948c465d9e8665a0edf315c0de66",
+      "tag": "ARCADE-Issuance",
+      "selector": "0x66c8281c6f8dd789600905e731b9b4b5efcde71de46cf6e0a34f3528d4b0eba"
     },
     {
       "members": [],
@@ -3988,7 +4616,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x164877a30554b1f3b5d0d8d6b248c43b437a408a6cfe2229165ccd2b349bddd",
+      "class_hash": "0x27c9de22c93c693925745b6c752dc6b534b15e909a05341bf276874bcbf658b",
       "tag": "ARCADE-Moderator",
       "selector": "0x49fbc92425ff5ad15b4c6729ff6a69d06f59b62c62bd831d1fb37a75c51abca"
     },
@@ -4000,9 +4628,21 @@
     },
     {
       "members": [],
+      "class_hash": "0x2e7a7273d69f9368e164fc506e8d67a72ce07dafa11f9dafacdd89dcda984e1",
+      "tag": "ARCADE-ReferralReward",
+      "selector": "0x74cf804535a2b1d155b4a6a46b591031818467c316bf8027742626b6a087a03"
+    },
+    {
+      "members": [],
       "class_hash": "0x5d32a26f44bb3d8e3444ed1964e144e2c085eec91e18d218c39db6e3bce5e84",
       "tag": "ARCADE-Signer",
       "selector": "0x79493096b3a4188aade984eaf8272a97748ee48111c1f7e6683a89f64406c1a"
+    },
+    {
+      "members": [],
+      "class_hash": "0x6e13af2589c79b32671331ff8d20fc40c403cf3497b4f4a97c6044d0608df9f",
+      "tag": "ARCADE-Starterpack",
+      "selector": "0x32ac195a467afb108c978ce40d0ea76f652390f2ec41ff6d5653eb69e358eed"
     },
     {
       "members": [],
@@ -4047,6 +4687,36 @@
       "class_hash": "0x4a9d320c1f08983660d027ac625418208b7b9e81704a6b6024948d8e0f6774c",
       "tag": "ARCADE-Sale",
       "selector": "0x2641babd55028e5173f25aec79c7481d2625d36a6856060fa02b0818ca8a199"
+    },
+    {
+      "members": [],
+      "class_hash": "0x553a9260af762e7433f75a90b7cc3fe78c8bc0f4d1ecee339716d115d4ee975",
+      "tag": "ARCADE-StarterpackIssued",
+      "selector": "0x6e1f6f6ed6b1d58c790b45fea70226d9a9ea380626d8fdf0050a730c24ffb84"
+    },
+    {
+      "members": [],
+      "class_hash": "0x33f40ee77b950d66b85665e1d408b291ae5cfda564d70d9bceb4a5557645123",
+      "tag": "ARCADE-StarterpackPaused",
+      "selector": "0x8d5575e855e77246eb4e21db0316f1d45936a3077eecce6762547ef7c129a5"
+    },
+    {
+      "members": [],
+      "class_hash": "0x7f552921d2526de87e3623b4694fe4b18c2fc1758dc04c7b249b5dfacd52dde",
+      "tag": "ARCADE-StarterpackRegistered",
+      "selector": "0x562c7a296437394d061d12c6da24a8d8aefaf314290ac9b10c768183390ac5e"
+    },
+    {
+      "members": [],
+      "class_hash": "0x2a053607d467fef5c5b366895fcddcdb0a5d28c6bebcfc38d962b9b54a0102a",
+      "tag": "ARCADE-StarterpackResumed",
+      "selector": "0x553a3914a9f22648654321eae39e652683dbe0289a95bc21ad44499ec69d7db"
+    },
+    {
+      "members": [],
+      "class_hash": "0x5f1c86d793f2d10e85814fe1448d91261a00ab1b89425e4b8b2cb19f30046c4",
+      "tag": "ARCADE-StarterpackUpdated",
+      "selector": "0x62909cd8734ac789e28270aed11833a568a5ef955a1c5c27aa4eb5137db6341"
     },
     {
       "members": [],
