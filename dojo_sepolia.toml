@@ -1,0 +1,43 @@
+[world]
+name = "Cartridge World"
+description = "Cartridge World"
+website = "https://github.com/dojoengine/dojo-starter"
+seed = "Arcade-2.0.4"
+
+[namespace]
+default = "ARCADE"
+
+[init_call_args]
+"ARCADE-Registry" = [
+    "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # Owner
+    "0x0048a025f86e823fa7ccbdf6e05648865d0aa707c2d7271f11bde62f615f7c62", # Collection
+]
+"ARCADE-Marketplace" = [
+    "0x1",                                                                # Royalties
+    "0x0",                                                                # 0% fee
+    "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # Fee receiver
+    "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # Owner
+]
+"ARCADE-StarterpackRegistry" = [
+    "0x0",                                                                # 0% protocol fee
+    "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # fee_receiver
+    "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753", # owner
+]
+
+[writers]
+"ARCADE" = [
+    "ARCADE-Slot",
+    "ARCADE-Social",
+    "ARCADE-Wallet",
+    "ARCADE-Marketplace",
+    "ARCADE-StarterpackRegistry",
+]
+
+[owners]
+"ARCADE" = ["ARCADE-Registry", "ARCADE-StarterpackRegistry"]
+
+[env]
+rpc_url = "https://api.cartridge.gg/x/starknet/sepolia"
+account_address = "0x059b1a0c489b635d7c7f43594d187362ddd2dcea6c82db4eef2579fd185b3753"
+keystore_path = "./keystore_sepolia.json"
+# world_address = "0x07a079295990e43441a7389fdc3b9ba063c6cd6aee16fb846f598c42a9f04ff7"

@@ -31,6 +31,7 @@ cairo_test = "2.12.2"
 [workspace.tool.fmt]
 sort-module-level-items = true
 
+[profile.sepolia]
 [profile.mainnet]
 
 [tool.scarb]
