@@ -10,6 +10,7 @@ server/*
 vite.config.ts.*
 
 .zed
+.idea/
 .rules
 .DS_Store
 packages/*/tsup.config.bundled_*.mjs

@@ -30,6 +30,9 @@ export default defineConfig(({ mode }) => ({
     mode === "test"
       ? [wasmMockPlugin(), topLevelAwait()]
       : [wasm(), topLevelAwait()],
+  define: {
+    __COMMIT_SHA__: JSON.stringify("test"),
+  },
   server: {
     fs: {
       allow: [rootDir, resolve(rootDir, "../node_modules")],
