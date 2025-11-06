@@ -1,44 +1,41 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Token } from "@/types/torii";
-import { addAddressPadding, getChecksumAddress } from "starknet";
-import {
-  useMarketplaceCollectionTokens,
-  type UseMarketplaceQueryResult,
-} from "@cartridge/arcade/marketplace/react";
-import type { FetchCollectionTokensResult } from "@cartridge/arcade/marketplace";
+import { useTokenContract } from "@/collections";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
-import { useTokenContract } from "@/collections";
-import { fetchTokenImage } from "./fetcher-utils";
+import type {
+  FetchTokenBalancesResult,
+  UseMarketplaceQueryResult,
+} from "@cartridge/arcade/marketplace";
+import { useMarketplaceTokenBalances } from "@cartridge/arcade/marketplace/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { addAddressPadding, getChecksumAddress } from "starknet";
 
-type MarketTokensFetcherInput = {
+type MarketBalancesFetcherInput = {
   project: string[];
   address: string;
   autoFetch?: boolean;
-  attributeFilters?: { [name: string]: Set<string> };
-  tokenIds?: string[];
+  tokenId?: string;
 };
 
 const LIMIT = 100;
 
-type CollectionTokensQuery =
-  UseMarketplaceQueryResult<FetchCollectionTokensResult>;
+type TokenBalancesQuery = UseMarketplaceQueryResult<FetchTokenBalancesResult>;
 
-export function useMarketTokensFetcher({
+export function useMarketBalancesFetcher({
   project,
   address,
   autoFetch = true,
-  attributeFilters,
-  tokenIds,
-}: MarketTokensFetcherInput) {
-  const addTokens = useMarketplaceTokensStore((state) => state.addTokens);
-  const clearTokens = useMarketplaceTokensStore((state) => state.clearTokens);
+  tokenId,
+}: MarketBalancesFetcherInput) {
+  const addBalances = useMarketplaceTokensStore((state) => state.addBalances);
+  const clearBalances = useMarketplaceTokensStore(
+    (state) => state.clearBalances,
+  );
 
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const prevAddressRef = useRef<string | null>(null);
-  const prevFiltersRef = useRef<string | null>(null);
+  const prevTokenIdRef = useRef<string | null>(null);
 
   const projectId = project[0] ?? DEFAULT_PROJECT;
 
@@ -48,7 +45,7 @@ export function useMarketTokensFetcher({
       return addAddressPadding(address);
     } catch (error) {
       console.warn(
-        "Invalid contract address provided to useMarketTokensFetcher",
+        "Invalid contract address provided to useMarketBalancesFetcher",
         {
           address,
           error,
@@ -62,13 +59,13 @@ export function useMarketTokensFetcher({
 
   const queryOptions = useMemo(() => {
     return {
-      address: normalizedAddress,
+      project: projectId,
+      contractAddresses: normalizedAddress ? [normalizedAddress] : [],
+      tokenIds: tokenId ? [tokenId] : [],
       cursor,
-      attributeFilters,
-      tokenIds,
       limit: LIMIT,
     };
-  }, [normalizedAddress, cursor, attributeFilters, tokenIds]);
+  }, [projectId, normalizedAddress, tokenId, cursor]);
 
   const enabled =
     autoFetch &&
@@ -77,8 +74,8 @@ export function useMarketTokensFetcher({
     collection !== null &&
     collection !== undefined;
 
-  const { data, status, error, isFetching }: CollectionTokensQuery =
-    useMarketplaceCollectionTokens(queryOptions, enabled);
+  const { data, status, error, isFetching }: TokenBalancesQuery =
+    useMarketplaceTokenBalances(queryOptions, enabled);
 
   const projectError = useMemo(() => {
     if (!data) return null;
@@ -102,23 +99,12 @@ export function useMarketTokensFetcher({
     setNextCursor(page.nextCursor);
     setIsFetchingNextPage(false);
 
-    if (!page.tokens.length) return;
+    if (!page.balances.length) return;
 
-    (async () => {
-      const enriched = await Promise.all(
-        page.tokens.map(async (token) => {
-          const image = await fetchTokenImage(token as Token, projectId, true);
-          return { ...token, image };
-        }),
-      );
-
-      addTokens(projectId, {
-        [address]: enriched as Token[],
-      });
-    })().catch((err) => {
-      console.error("Failed to enrich marketplace tokens", err);
+    addBalances(projectId, {
+      [address]: page.balances,
     });
-  }, [data, projectError, projectId, address, addTokens]);
+  }, [data, projectError, projectId, address, addBalances]);
 
   useEffect(() => {
     if (!enabled) {
@@ -135,36 +121,28 @@ export function useMarketTokensFetcher({
     if (prevAddressRef.current === checksumAddress) return;
 
     prevAddressRef.current = checksumAddress;
-    clearTokens(projectId, address);
+    clearBalances(projectId, address);
     setCursor(undefined);
     setNextCursor(null);
     setIsFetchingNextPage(false);
-  }, [address, normalizedAddress, projectId, clearTokens]);
+  }, [address, normalizedAddress, projectId, clearBalances]);
 
   useEffect(() => {
     if (!address) return;
 
-    const filtersKey = JSON.stringify([
-      attributeFilters
-        ? Object.entries(attributeFilters).map(([key, values]) => [
-            key,
-            Array.from(values).sort(),
-          ])
-        : null,
-      tokenIds?.sort() ?? null,
-    ]);
+    const tokenIdKey = tokenId || null;
 
-    if (prevFiltersRef.current === filtersKey) return;
+    if (prevTokenIdRef.current === tokenIdKey) return;
 
-    if (prevFiltersRef.current !== null) {
-      clearTokens(projectId, address);
+    if (prevTokenIdRef.current !== null) {
+      clearBalances(projectId, address);
       setCursor(undefined);
       setNextCursor(null);
       setIsFetchingNextPage(false);
     }
 
-    prevFiltersRef.current = filtersKey;
-  }, [attributeFilters, tokenIds, address, projectId, clearTokens]);
+    prevTokenIdRef.current = tokenIdKey;
+  }, [tokenId, address, projectId, clearBalances]);
 
   useEffect(() => {
     if (projectError || status === "error") {
@@ -178,23 +156,30 @@ export function useMarketTokensFetcher({
     setCursor(nextCursor);
   }, [nextCursor]);
 
-  const tokens = useMarketplaceTokensStore(
-    (state) => state.tokens[projectId]?.[address],
+  const balances = useMarketplaceTokensStore(
+    (state) => state.balances[projectId]?.[address],
   );
+
+  const filteredBalances = useMemo(() => {
+    if (!balances) return [];
+    if (!tokenId) return balances;
+    return balances.filter(
+      (b) =>
+        BigInt(b.token_id ?? "0x0") ===
+        BigInt(tokenId.startsWith("0x") ? tokenId : `0x${tokenId}`),
+    );
+  }, [balances, tokenId]);
 
   const effectiveStatus = projectError ? "error" : status;
   const effectiveError = projectError?.error ?? error ?? null;
 
   return {
     collection,
-    tokens,
-    owners: [],
+    balances: filteredBalances,
     status: effectiveStatus,
     isLoading: effectiveStatus === "loading" && !isFetchingNextPage,
     isError: effectiveStatus === "error",
     errorMessage: effectiveError ? effectiveError.message : null,
-    loadingProgress: undefined,
-    retryCount: 0,
     hasMore: Boolean(nextCursor),
     isFetchingNextPage: isFetchingNextPage || (isFetching && Boolean(cursor)),
     fetchNextPage,

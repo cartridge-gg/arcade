@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { useRouterState } from "@tanstack/react-router";
+import { TokenDetailTemplate } from "@/components/token-detail-template";
 import { TokenDetailContainer } from "@/features/marketplace/token-detail";
 import { useProject } from "@/hooks/project";
 
-export const TokenDetailScene = () => {
+export const TokenDetailPage = () => {
   const { collection } = useProject();
   const routerState = useRouterState();
 
@@ -19,6 +20,8 @@ export const TokenDetailScene = () => {
   if (!collection || !tokenId) return null;
 
   return (
-    <TokenDetailContainer collectionAddress={collection} tokenId={tokenId} />
+    <TokenDetailTemplate>
+      <TokenDetailContainer collectionAddress={collection} tokenId={tokenId} />
+    </TokenDetailTemplate>
   );
 };

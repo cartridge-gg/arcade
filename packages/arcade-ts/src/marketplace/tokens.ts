@@ -13,6 +13,10 @@ import type {
   CollectionTokensPage,
   FetchCollectionTokensOptions,
   FetchCollectionTokensResult,
+  FetchTokenBalancesOptions,
+  FetchTokenBalancesResult,
+  TokenBalancesError,
+  TokenBalancesPage,
 } from "./types";
 import {
   DEFAULT_PROJECT_ID,
@@ -123,6 +127,96 @@ export async function fetchCollectionTokens(
     return {
       page: null,
       error: collectionError,
+    };
+  }
+}
+
+type TokenBalancePage = Awaited<ReturnType<ToriiClient["getTokenBalances"]>>;
+
+export async function fetchTokenBalances(
+  options: FetchTokenBalancesOptions,
+): Promise<FetchTokenBalancesResult> {
+  const {
+    project,
+    contractAddresses = [],
+    accountAddresses = [],
+    tokenIds = [],
+    cursor,
+    limit = DEFAULT_LIMIT,
+  } = options;
+
+  const projectIds = resolveProjects(
+    project ? [project] : undefined,
+    options.defaultProjectId ?? DEFAULT_PROJECT_ID,
+  );
+  const projectId = projectIds[0];
+
+  const normalizedContractAddresses = contractAddresses.map(addAddressPadding);
+  const normalizedAccountAddresses = accountAddresses.map(addAddressPadding);
+  const normalizedTokenIds = normalizeTokenIdsForQuery(tokenIds);
+
+  try {
+    const response = await fetchToriis([projectId], {
+      client: async ({ client }: ClientCallbackParams) => {
+        return client.getTokenBalances({
+          contract_addresses: normalizedContractAddresses,
+          account_addresses: normalizedAccountAddresses,
+          token_ids: normalizedTokenIds,
+          pagination: {
+            limit,
+            cursor: cursor ?? undefined,
+            direction: "Forward",
+            order_by: [],
+          },
+        });
+      },
+    });
+
+    if (response.errors && response.errors.length > 0) {
+      const err = response.errors[0];
+      const balancesError: TokenBalancesError = {
+        error: err,
+      };
+      return {
+        page: null,
+        error: balancesError,
+      };
+    }
+
+    const pages = response.data as TokenBalancePage[];
+    let nextCursor: string | null = null;
+    const balances: TokenBalancePage["items"] = [];
+
+    for (const page of pages) {
+      nextCursor = page.next_cursor ?? null;
+      if (!page.items.length) continue;
+      balances.push(...page.items);
+    }
+
+    const page: TokenBalancesPage = {
+      balances,
+      nextCursor,
+    };
+
+    return {
+      page,
+      error: null,
+    };
+  } catch (error) {
+    const err =
+      error instanceof Error
+        ? error
+        : new Error(
+            typeof error === "string"
+              ? error
+              : "Failed to fetch token balances",
+          );
+    const balancesError: TokenBalancesError = {
+      error: err,
+    };
+    return {
+      page: null,
+      error: balancesError,
     };
   }
 }

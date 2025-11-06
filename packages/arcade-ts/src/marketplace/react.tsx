@@ -14,12 +14,15 @@ import type {
   CollectionSummaryOptions,
   FetchCollectionTokensOptions,
   FetchCollectionTokensResult,
+  FetchTokenBalancesOptions,
+  FetchTokenBalancesResult,
   MarketplaceClient,
   MarketplaceClientConfig,
   NormalizedCollection,
   TokenDetailsOptions,
   TokenDetails,
 } from "./types";
+import { fetchTokenBalances } from "./tokens";
 import { createMarketplaceClient } from "./client";
 import type { OrderModel } from "../modules/marketplace";
 
@@ -407,4 +410,88 @@ export function useMarketplaceToken(
     Boolean(stableOptions.collection) &&
     Boolean(stableOptions.tokenId);
   return useMarketplaceClientQuery(request, shouldFetch);
+}
+
+export function useMarketplaceTokenBalances(
+  options: FetchTokenBalancesOptions,
+  enabled = true,
+): UseMarketplaceQueryResult<FetchTokenBalancesResult> {
+  const stableOptions = useStableValue(options);
+  const fetchIdRef = useRef(0);
+  const [state, setState] = useState<{
+    data: FetchTokenBalancesResult | null;
+    status: QueryStatus;
+    error: Error | null;
+    isFetching: boolean;
+  }>({
+    data: null,
+    status: "idle",
+    error: null,
+    isFetching: false,
+  });
+
+  const execute = useCallback(async () => {
+    if (!enabled) {
+      return null;
+    }
+
+    const fetchId = ++fetchIdRef.current;
+    setState((prev) => ({
+      ...prev,
+      status: "loading",
+      isFetching: true,
+      error: null,
+    }));
+
+    try {
+      const result = await fetchTokenBalances(stableOptions);
+      if (fetchIdRef.current !== fetchId) {
+        return result;
+      }
+      setState({
+        data: result,
+        status: "success",
+        error: null,
+        isFetching: false,
+      });
+      return result;
+    } catch (err) {
+      if (fetchIdRef.current !== fetchId) {
+        return null;
+      }
+      const error = err instanceof Error ? err : new Error(String(err));
+      setState((prev) => ({
+        ...prev,
+        status: "error",
+        error,
+        isFetching: false,
+      }));
+      return null;
+    }
+  }, [enabled, stableOptions]);
+
+  useEffect(() => {
+    if (!enabled) {
+      setState({
+        data: null,
+        status: "idle",
+        error: null,
+        isFetching: false,
+      });
+      return;
+    }
+    void execute();
+  }, [enabled, execute]);
+
+  const refresh = useCallback(() => {
+    if (!enabled) {
+      return Promise.resolve(state.data);
+    }
+    return execute();
+  }, [enabled, execute, state.data]);
+
+  return {
+    ...state,
+    refresh,
+  };
 }

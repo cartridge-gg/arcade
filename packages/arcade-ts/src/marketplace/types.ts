@@ -1,4 +1,8 @@
-import type { Token, TokenContract } from "@dojoengine/torii-wasm/types";
+import type {
+  Token,
+  TokenBalance,
+  TokenContract,
+} from "@dojoengine/torii-wasm/types";
 import type { constants } from "starknet";
 import type { OrderModel } from "../modules/marketplace";
 
@@ -120,4 +124,28 @@ export interface MarketplaceClient {
     options: CollectionListingsOptions,
   ): Promise<OrderModel[]>;
   getToken(options: TokenDetailsOptions): Promise<TokenDetails | null>;
+}
+
+export interface TokenBalancesPage {
+  balances: TokenBalance[];
+  nextCursor: string | null;
+}
+
+export interface TokenBalancesError {
+  error: Error;
+}
+
+export interface FetchTokenBalancesOptions {
+  project?: string;
+  contractAddresses?: string[];
+  accountAddresses?: string[];
+  tokenIds?: string[];
+  cursor?: string | null | undefined;
+  limit?: number;
+  defaultProjectId?: string;
+}
+
+export interface FetchTokenBalancesResult {
+  page: TokenBalancesPage | null;
+  error: TokenBalancesError | null;
 }

@@ -37,6 +37,7 @@ export function useListedTokensFetcher({
   const queryOptions = useMemo(() => {
     return {
       address: normalizedAddress,
+      // this is normalized by lib
       tokenIds,
       limit: tokenIds.length || 100,
     };

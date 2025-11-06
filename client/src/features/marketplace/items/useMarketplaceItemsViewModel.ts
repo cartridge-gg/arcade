@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { useNavigate } from "@tanstack/react-router";
 import type { Token } from "@dojoengine/torii-wasm";
 import type { OrderModel } from "@cartridge/arcade";
 import { getChecksumAddress, type RpcProvider } from "starknet";
@@ -9,13 +8,13 @@ import { filterTokensByMetadata } from "@cartridge/arcade/marketplace";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useMarketplaceTokensStore } from "@/store";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
+import { useMarketplaceTokensStore } from "@/store";
 import { useListedTokensFetcher } from "@/hooks/use-listed-tokens-fetcher";
 
-const ERC1155_ENTRYPOINT = "balance_of_batch";
+export const ERC1155_ENTRYPOINT = "balance_of_batch";
 
 export type MarketplaceAsset = Token & { orders: OrderModel[]; owner: string };
 
@@ -52,7 +51,10 @@ interface MarketplaceItemsViewModel {
   rawTokens: Token[] | undefined;
 }
 
-const getEntrypoints = async (provider: RpcProvider, address: string) => {
+export const getEntrypoints = async (
+  provider: RpcProvider,
+  address: string,
+) => {
   try {
     const code = await provider.getClassAt(address);
     if (!code) return [];
@@ -77,7 +79,6 @@ export function useMarketplaceItemsViewModel({
 }: UseMarketplaceItemsViewModelArgs): MarketplaceItemsViewModel {
   const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
-  const navigate = useNavigate();
   const { provider } = useArcade();
   const { trackEvent, events } = useAnalytics();
   const { sales, getCollectionOrders } = useMarketplace();
@@ -85,12 +86,15 @@ export function useMarketplaceItemsViewModel({
   const [lastSearch, setLastSearch] = useState<string>("");
   const [selection, setSelection] = useState<MarketplaceAsset[]>([]);
 
-  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
-  const getListedTokens = useMarketplaceTokensStore(
-    (state) => state.getListedTokens,
+  const rawTokens = useMarketplaceTokensStore(
+    (s) => s.tokens[DEFAULT_PROJECT]?.[collectionAddress],
   );
-  const rawTokens = getTokens(DEFAULT_PROJECT, collectionAddress);
+  const rawListedTokens = useMarketplaceTokensStore(
+    (s) => s.listedTokens[DEFAULT_PROJECT]?.[collectionAddress],
+  );
+
   const tokens = rawTokens || [];
+  const listedTokens = rawListedTokens || [];
 
   const { activeFilters, clearAllFilters, statusFilter } = useMetadataFilters({
     tokens,
@@ -114,8 +118,6 @@ export function useMarketplaceItemsViewModel({
     tokenIds: listedTokenIds,
     enabled: listedTokenIds.length > 0,
   });
-
-  const listedTokens = getListedTokens(DEFAULT_PROJECT, collectionAddress);
 
   const getOrdersForToken = useCallback(
     (rawTokenId?: string | bigint) => {
@@ -187,14 +189,16 @@ export function useMarketplaceItemsViewModel({
   }, [statusFilter, listedTokens.length, hasMore]);
 
   const searchFilteredTokens = useMemo(() => {
-    if (!search.trim()) return statusFilteredTokens;
+    if (!search.trim()) return statusFilteredTokens ?? [];
 
     const searchLower = search.toLowerCase();
 
-    return statusFilteredTokens.filter((token) => {
-      const tokenName = (token.metadata as any)?.name || token.name || "";
-      return tokenName.toLowerCase().includes(searchLower);
-    });
+    return (
+      statusFilteredTokens.filter((token) => {
+        const tokenName = (token.metadata as any)?.name || token.name || "";
+        return tokenName.toLowerCase().includes(searchLower);
+      }) ?? []
+    );
   }, [statusFilteredTokens, search]);
 
   useEffect(() => {
@@ -266,20 +270,8 @@ export function useMarketplaceItemsViewModel({
         collection_address: token.contract_address,
         seller_address: token.owner,
       });
-
-      const tokenId = token.token_id?.toString();
-      if (!tokenId) return;
-
-      navigate({
-        to: "/collection/$collection/$tokenId",
-        params: {
-          collection: getChecksumAddress(token.contract_address),
-          tokenId: tokenId.startsWith("0x") ? tokenId.slice(2) : tokenId,
-        },
-        search: { filter: undefined },
-      });
     },
-    [navigate, trackEvent, events],
+    [trackEvent, events],
   );
 
   const handlePurchase = useCallback(

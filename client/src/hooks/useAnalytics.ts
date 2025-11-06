@@ -36,6 +36,7 @@ export const AnalyticsEvents = {
   GAME_PUBLISHED: "game_published",
   GAME_HIDDEN: "game_hidden",
   GAME_UPDATED: "game_updated",
+  GAME_SHARED: "game_shared",
 
   // Achievement Events
   ACHIEVEMENT_VIEWED: "achievement_viewed",
@@ -65,6 +66,11 @@ export const AnalyticsEvents = {
 
   // Profile Events
   PROFILE_BUTTON_CLICKED: "profile_button_clicked",
+  PROFILE_SHARED: "profile_shared",
+
+  // Share Events
+  COLLECTION_SHARED: "collection_shared",
+  TOKEN_SHARED: "token_shared",
 
   // Social Events
   SOCIAL_DISCORD_CLICKED: "social_discord_clicked",

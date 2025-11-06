@@ -38,7 +38,7 @@ export const ConnectionView = ({
     <div className="flex items-center gap-3">
       <Button
         variant="secondary"
-        className="bg-background-100 hover:bg-background-150 px-3 py-2.5 select-none"
+        className="bg-background-100 hover:bg-background-150 px-3 py-2.5 select-none border border-background-200"
         onClick={onOpenProfile}
       >
         <div className="size-5 flex items-center justify-center">
@@ -50,7 +50,7 @@ export const ConnectionView = ({
         <button
           type="button"
           onClick={onDisconnect}
-          className="p-2 rounded bg-background-100 hover:bg-background-150"
+          className="p-2 rounded bg-background-100 hover:bg-background-150 border border-background-200"
         >
           <SignOutIcon size="default" />
         </button>

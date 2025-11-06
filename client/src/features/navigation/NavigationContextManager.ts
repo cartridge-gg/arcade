@@ -1,5 +1,6 @@
 import { parseRouteParams, type TAB_SEGMENTS } from "@/hooks/project";
 import { joinPaths } from "@/lib/helpers";
+import { getChecksumAddress } from "starknet";
 
 export type TabValue = (typeof TAB_SEGMENTS)[number];
 
@@ -224,6 +225,70 @@ export class NavigationContextManager {
     return tab
       ? joinPaths("player", playerName, tab)
       : joinPaths("player", playerName);
+  }
+
+  generateTokenDetailHref(collectionAddress: string, tokenId: string): string {
+    const checksummedAddress = getChecksumAddress(collectionAddress);
+    const normalizedTokenId = tokenId.startsWith("0x")
+      ? tokenId.slice(2)
+      : tokenId;
+
+    if (this.params.edition && this.params.game) {
+      return joinPaths(
+        "game",
+        this.params.game,
+        "edition",
+        this.params.edition,
+        "collection",
+        checksummedAddress,
+        normalizedTokenId,
+      );
+    }
+
+    if (this.params.game) {
+      return joinPaths(
+        "game",
+        this.params.game,
+        "collection",
+        checksummedAddress,
+        normalizedTokenId,
+      );
+    }
+
+    return joinPaths("collection", checksummedAddress, normalizedTokenId);
+  }
+
+  generateCollectionHref(collectionAddress: string): string {
+    const checksummedAddress = getChecksumAddress(collectionAddress);
+
+    if (this.params.edition && this.params.game) {
+      return joinPaths(
+        "game",
+        this.params.game,
+        "edition",
+        this.params.edition,
+        "collection",
+        checksummedAddress,
+      );
+    }
+
+    if (this.params.game) {
+      return joinPaths(
+        "game",
+        this.params.game,
+        "collection",
+        checksummedAddress,
+      );
+    }
+
+    return joinPaths("collection", checksummedAddress);
+  }
+
+  generateGameHref(gameIdOrName: string, editionIdOrName?: string): string {
+    if (editionIdOrName) {
+      return joinPaths("game", gameIdOrName, "edition", editionIdOrName);
+    }
+    return joinPaths("game", gameIdOrName);
   }
 
   getParentContextHref(): string {

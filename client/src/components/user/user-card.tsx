@@ -2,6 +2,8 @@ import { useAccountByAddress } from "@/collections";
 import { usePlayerStats } from "@/hooks/achievements";
 import { useProject } from "@/hooks/project";
 import { useArcade } from "@/hooks/arcade";
+import { useShare } from "@/hooks/useShare";
+import { AnalyticsEvents } from "@/hooks/useAnalytics";
 import { cn } from "@/lib/utils";
 import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
 import {
@@ -94,40 +96,18 @@ const UserCardInner = (
     return navManager.generatePlayerHref(playerName);
   }, [username, address, navManager]);
 
-  const isShareAvailable = useMemo(() => {
-    return typeof navigator !== "undefined" && !!navigator.share;
-  }, []);
-
-  const handleShare = useCallback(async () => {
-    const profileUrl = `${window.location.origin}${target}`;
-    const shareData = {
-      title: username?.username ?? "Player Profile",
-      text: `Check out ${username?.username} with ${totalEarnings} points`,
-      url: profileUrl,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        // trackEvent(events.PROFILE_SHARED, {
-        //   profile_address: address,
-        //   profile_username: username?.username,
-        //   method: "native",
-        // });
-      } else {
-        await navigator.clipboard.writeText(profileUrl);
-        // trackEvent(events.PROFILE_SHARED, {
-        //   profile_address: address,
-        //   profile_username: username?.username,
-        //   method: "clipboard",
-        // });
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name !== "AbortError") {
-        console.error("Share failed:", error);
-      }
-    }
-  }, [username, target, totalEarnings]);
+  const { handleShare, isShareAvailable } = useShare({
+    title: username?.username ?? "Player Profile",
+    text: `Check out ${username?.username} with ${totalEarnings} points`,
+    url: `${window.location.origin}${target}`,
+    analyticsEvent: {
+      name: AnalyticsEvents.PROFILE_SHARED,
+      properties: {
+        profile_address: address,
+        profile_username: username?.username,
+      },
+    },
+  });
 
   const handleCopyAddress = useCallback(async () => {
     const profileUrl = `${window.location.origin}/player/${address}`;

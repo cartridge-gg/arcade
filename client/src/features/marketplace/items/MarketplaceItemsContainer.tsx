@@ -20,6 +20,9 @@ import {
   formatPriceInfo,
   deriveLatestSalePriceForToken,
 } from "@/lib/shared/marketplace/utils";
+import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
+import { useRouterState } from "@tanstack/react-router";
+import { useArcade } from "@/hooks/arcade";
 
 const ROW_HEIGHT = 218;
 const ITEMS_PER_ROW = 4;
@@ -54,6 +57,7 @@ const createItemView = (params: {
   onInspect: (asset: MarketplaceAsset) => Promise<void>;
   onPurchase: (assets: MarketplaceAsset[]) => Promise<void>;
   salesByContract: Record<string, Record<string, SaleEvent>> | undefined;
+  navManager: NavigationContextManager;
 }): MarketplaceItemCardProps => {
   const {
     asset,
@@ -66,6 +70,7 @@ const createItemView = (params: {
     onInspect,
     onPurchase,
     salesByContract,
+    navManager,
   } = params;
 
   const selected = selection.some((item) => item.token_id === asset.token_id);
@@ -102,6 +107,10 @@ const createItemView = (params: {
     canOpen: openable,
     isConnected,
     selectionActive,
+    tokenDetailHref: navManager.generateTokenDetailHref(
+      asset.contract_address,
+      asset.token_id ?? "0x0",
+    ),
     onToggleSelect: () => onToggleSelection(asset),
     onBuy: () => onPurchase([asset]),
     onInspect: () => onInspect(asset),
@@ -141,6 +150,9 @@ export const MarketplaceItemsContainer = ({
 
   const parentRef = useRef<HTMLDivElement>(null);
 
+  const { location } = useRouterState();
+  const { games, editions } = useArcade();
+
   const rowCount = Math.ceil(assets.length / ITEMS_PER_ROW);
 
   const virtualizer = useVirtualizer({
@@ -169,6 +181,17 @@ export const MarketplaceItemsContainer = ({
       | undefined;
   }, [sales, collectionAddress]);
 
+  const navManager = useMemo(
+    () =>
+      new NavigationContextManager({
+        pathname: location.pathname,
+        games,
+        editions,
+        isLoggedIn: Boolean(isConnected),
+      }),
+    [location.pathname, games, editions, isConnected],
+  );
+
   const items = useMemo(() => {
     return assets.map((asset) =>
       createItemView({
@@ -182,6 +205,7 @@ export const MarketplaceItemsContainer = ({
         onInspect: handleInspect,
         onPurchase: handlePurchase,
         salesByContract,
+        navManager,
       }),
     );
   }, [
@@ -194,6 +218,7 @@ export const MarketplaceItemsContainer = ({
     handleInspect,
     handlePurchase,
     salesByContract,
+    navManager,
   ]);
 
   const rows: MarketplaceItemsRow[] = useMemo(() => {

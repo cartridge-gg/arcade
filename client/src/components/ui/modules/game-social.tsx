@@ -1,7 +1,7 @@
 import {
+  Button,
   DiscordIcon,
   GitHubIcon,
-  PlayIcon,
   TelegramIcon,
   XIcon,
 } from "@cartridge/ui";
@@ -10,6 +10,9 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { SquareArrowOutUpRightIcon } from "lucide-react";
 import type { HTMLAttributes } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { PlayIcon, ShareIcon } from "../icons";
+import { useShare } from "@/hooks/useShare";
+import { useNavigationContext } from "@/features/navigation";
 
 interface GameSocialWebsiteProps
   extends VariantProps<typeof GameSocialVariants> {
@@ -25,19 +28,42 @@ export const GameSocialWebsite = ({ website }: GameSocialWebsiteProps) => {
     });
     trackSocialClick("website", website);
   };
+  const { manager, game } = useNavigationContext();
+
+  const { handleShare } = useShare({
+    title: game?.name ?? "Arcade",
+    text: `Check out ${game?.name ?? "Arcade"} on Arcade`,
+    url: `${window.location.origin}/${manager.generateGameHref(game?.name ?? "Arcade")}`,
+    analyticsEvent: {
+      name: events.GAME_SHARED,
+      properties: {
+        game: game?.name ?? "Arcade",
+      },
+    },
+  });
 
   return (
-    <a
-      href={website}
-      draggable={false}
-      target="_blank"
-      onClick={handleClick}
-      className="flex items-center rounded-full p-2 cursor-pointer text-spacer-100 bg-primary hover:bg-primary hover:opacity-80 justify-center lg:px-4 py-2.5"
-      rel="noreferrer"
-    >
-      <PlayIcon size="sm" />
-      <p className="px-0.5 truncate max-w-32">Play</p>
-    </a>
+    <>
+      <Button
+        variant="secondary"
+        size="icon"
+        className="rounded-full"
+        onClick={handleShare}
+      >
+        <ShareIcon />
+      </Button>
+      <a
+        href={website}
+        draggable={false}
+        target="_blank"
+        onClick={handleClick}
+        className="flex items-center rounded-md lg:rounded-full p-2 cursor-pointer w-[32px] h-[32px] lg:w-auto lg:h-auto text-spacer-100 bg-primary hover:bg-primary hover:opacity-80 justify-center lg:px-4 py-2.5"
+        rel="noreferrer"
+      >
+        <PlayIcon />
+        <p className="px-0.5 truncate max-w-32 hidden lg:block">Play</p>
+      </a>
+    </>
   );
 };
 

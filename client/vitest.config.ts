@@ -11,7 +11,11 @@ const wasmMockPlugin = () => ({
   name: "wasm-mock",
   enforce: "pre" as const,
   resolveId(id: string) {
-    if (id.endsWith(".wasm") || id.includes("dojo_c_bg.wasm")) {
+    if (
+      id.endsWith(".wasm") ||
+      id.includes("dojo_c_bg.wasm") ||
+      id.includes("dojo_wasm_bg.wasm")
+    ) {
       console.log("WASM MOCK PLUGIN: Intercepting", id);
       return "\0wasm-stub";
     }
@@ -50,11 +54,21 @@ export default defineConfig(({ mode }) => ({
       "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
-    exclude: ["node_modules", "dist", "www"],
+    exclude: [
+      "node_modules",
+      "dist",
+      "www",
+    ],
+    server: {
+      deps: {
+        external: ["**/dojo_wasm_bg.wasm", "@dojoengine/torii-wasm"],
+      },
+    },
     deps: {
       optimizer: {
         web: {
-          include: ["@dojoengine/torii-client", "@dojoengine/torii-wasm"],
+          include: ["@dojoengine/torii-client"],
+          exclude: ["@dojoengine/torii-wasm"],
         },
       },
     },
@@ -70,9 +84,7 @@ export default defineConfig(({ mode }) => ({
       },
       {
         find: "@cartridge/ui/utils/api/indexer",
-        replacement: resolveFromRoot(
-          "tests/mocks/cartridge-ui-api-indexer.ts",
-        ),
+        replacement: resolveFromRoot("tests/mocks/cartridge-ui-api-indexer.ts"),
       },
       {
         find: "@cartridge/ui/utils",
@@ -91,7 +103,19 @@ export default defineConfig(({ mode }) => ({
         replacement: resolveFromRoot("tests/mocks/torii-wasm-pkg.ts"),
       },
       {
+        find: /^@dojoengine\/torii-wasm\/pkg\/web\/dojo_wasm_bg\.wasm$/,
+        replacement: resolveFromRoot("tests/mocks/torii-wasm-pkg.ts"),
+      },
+      {
+        find: /dojo_wasm_bg\.wasm$/,
+        replacement: resolveFromRoot("tests/mocks/torii-wasm-pkg.ts"),
+      },
+      {
         find: /^@dojoengine\/torii-wasm$/,
+        replacement: resolveFromRoot("tests/mocks/torii-wasm.ts"),
+      },
+      {
+        find: "@dojoengine/torii-wasm",
         replacement: resolveFromRoot("tests/mocks/torii-wasm.ts"),
       },
       {
@@ -101,6 +125,12 @@ export default defineConfig(({ mode }) => ({
       {
         find: "@cartridge/ui",
         replacement: resolveFromRoot("tests/mocks/cartridge-ui.ts"),
+      },
+      {
+        find: /^@cartridge\/arcade\/marketplace\/react$/,
+        replacement: resolveFromRoot(
+          "tests/mocks/cartridge-arcade-marketplace.ts",
+        ),
       },
       {
         find: /^@cartridge\/arcade\/marketplace$/,

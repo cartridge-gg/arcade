@@ -56,7 +56,7 @@ export const MarketplaceFiltersView = ({
   onSearchChange,
 }: MarketplaceFiltersViewProps) => {
   return (
-    <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden">
+    <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden rounded-none lg:rounded-xl">
       <MarketplaceHeader label="Status" />
       <div className="flex flex-col gap-2 w-fit">
         <MarketplaceRadialItem

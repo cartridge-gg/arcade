@@ -73,6 +73,7 @@ export interface NavigationContextViewModel extends NavigationViewModel {
   game: ReturnType<NavigationContextManager["getActiveGame"]>;
   edition: ReturnType<NavigationContextManager["getActiveEdition"]>;
   player: ReturnType<NavigationContextManager["getPlayerContext"]>;
+  manager: NavigationContextManager;
 }
 
 export function useNavigationContext(): NavigationContextViewModel {
@@ -142,5 +143,6 @@ export function useNavigationContext(): NavigationContextViewModel {
     game,
     edition,
     player,
+    manager,
   };
 }

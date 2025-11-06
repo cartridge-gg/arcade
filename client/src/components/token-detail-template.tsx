@@ -1,39 +1,28 @@
-import { type ReactNode, useMemo } from "react";
-import { GamesContainer } from "@/features/games";
+import type { ReactNode } from "react";
 import { HeaderContainer } from "@/features/header";
 import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
-import { useProject } from "@/hooks/project";
 import { ThemeProvider } from "@/context/theme";
 import { useDevice } from "@/hooks/device";
-import { UserCard } from "./user/user-card";
-import arcade from "@/assets/arcade-logo.png";
-import { Socials } from "@cartridge/arcade";
-import { GameHeader } from "./ui/games/GameHeader";
-import { NavigationContainer } from "@/features/navigation";
+import { TokenDetailSidebar } from "@/components/ui/marketplace/token-detail/TokenDetailSidebar";
 
-interface TemplateProps {
+interface TokenDetailTemplateProps {
   children: ReactNode;
+  sidebar?: ReactNode;
 }
 
-export function Template({ children }: TemplateProps) {
+export function TokenDetailTemplate({ children }: TokenDetailTemplateProps) {
   const { isOpen, handleTouchMove, handleTouchStart } = useSidebar();
-  const { game, edition } = useProject();
-
   const { isMobile } = useDevice();
-
-  const socials = useMemo(() => {
-    return Socials.merge(edition?.socials, game?.socials);
-  }, [edition, game]);
-
-  const isDashboard = !(edition && game);
 
   return (
     <ThemeProvider defaultScheme="dark">
       <SceneLayout>
         <div
-          className={cn("h-full w-full lg:px-6 lg:py-5 lg:pt-0")}
+          className={cn(
+            "h-full w-full overflow-y-scroll lg:px-6 lg:py-5 lg:pt-0 ",
+          )}
           style={{ scrollbarWidth: "none" }}
         >
           <div
@@ -59,9 +48,8 @@ export function Template({ children }: TemplateProps) {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             >
-              {!isMobile && <UserCard />}
               <div className="flex-1 overflow-hidden">
-                <GamesContainer />
+                <TokenDetailSidebar />
               </div>
             </div>
 
@@ -77,19 +65,10 @@ export function Template({ children }: TemplateProps) {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             >
-              <GameHeader
-                isDashboard={isDashboard}
-                isMobile={isMobile}
-                arcade={arcade}
-                edition={edition}
-                game={game}
-                socials={socials}
-              />
-              <NavigationContainer />
-
               <div className="lg:hidden w-full p-3">
                 <HeaderContainer />
               </div>
+
               <div
                 className={cn(
                   "relative grow h-full flex flex-col rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",

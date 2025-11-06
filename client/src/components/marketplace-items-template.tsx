@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo } from "react";
-import { GamesContainer } from "@/features/games";
+import { MarketplaceFiltersContainer } from "@/features/marketplace/filters";
 import { HeaderContainer } from "@/features/header";
 import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
@@ -10,16 +10,18 @@ import { useDevice } from "@/hooks/device";
 import { UserCard } from "./user/user-card";
 import arcade from "@/assets/arcade-logo.png";
 import { Socials } from "@cartridge/arcade";
-import { GameHeader } from "./ui/games/GameHeader";
 import { NavigationContainer } from "@/features/navigation";
+import { CollectionHeader } from "./ui/marketplace/items/CollectionHeader";
 
-interface TemplateProps {
+interface MarketplaceItemsTemplateProps {
   children: ReactNode;
 }
 
-export function Template({ children }: TemplateProps) {
+export function MarketplaceItemsTemplate({
+  children,
+}: MarketplaceItemsTemplateProps) {
   const { isOpen, handleTouchMove, handleTouchStart } = useSidebar();
-  const { game, edition } = useProject();
+  const { player, game, edition, collection } = useProject();
 
   const { isMobile } = useDevice();
 
@@ -33,7 +35,9 @@ export function Template({ children }: TemplateProps) {
     <ThemeProvider defaultScheme="dark">
       <SceneLayout>
         <div
-          className={cn("h-full w-full lg:px-6 lg:py-5 lg:pt-0")}
+          className={cn(
+            "h-full w-full overflow-y-scroll lg:px-6 lg:py-5 lg:pt-0 ",
+          )}
           style={{ scrollbarWidth: "none" }}
         >
           <div
@@ -61,7 +65,7 @@ export function Template({ children }: TemplateProps) {
             >
               {!isMobile && <UserCard />}
               <div className="flex-1 overflow-hidden">
-                <GamesContainer />
+                <MarketplaceFiltersContainer />
               </div>
             </div>
 
@@ -77,24 +81,26 @@ export function Template({ children }: TemplateProps) {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             >
-              <GameHeader
-                isDashboard={isDashboard}
-                isMobile={isMobile}
-                arcade={arcade}
-                edition={edition}
-                game={game}
-                socials={socials}
-              />
-              <NavigationContainer />
-
               <div className="lg:hidden w-full p-3">
                 <HeaderContainer />
               </div>
               <div
                 className={cn(
                   "relative grow h-full flex flex-col rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
+                  player &&
+                    "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}
               >
+                <CollectionHeader
+                  isDashboard={isDashboard}
+                  isMobile={isMobile}
+                  arcade={arcade}
+                  edition={edition}
+                  game={game}
+                  socials={socials}
+                  collectionAddress={collection ?? "0x0"}
+                />
+                <NavigationContainer />
                 {children}
               </div>
             </div>

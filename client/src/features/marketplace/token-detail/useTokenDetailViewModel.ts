@@ -1,11 +1,20 @@
 import { useCallback, useMemo } from "react";
-import { useAccount } from "@starknet-react/core";
-import type { Token } from "@dojoengine/torii-wasm";
+import { useAccount, useConnect } from "@starknet-react/core";
+import { useRouterState } from "@tanstack/react-router";
+import type { Token } from "@/types/torii";
 import type { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useMarketplaceTokensStore } from "@/store";
 import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
-import { DEFAULT_PROJECT } from "@/constants";
+import { useMarketBalancesFetcher } from "@/hooks/marketplace-balances-fetcher";
+import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
+import { addAddressPadding, getChecksumAddress } from "starknet";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { useArcade } from "@/hooks/arcade";
+import { ERC1155_ENTRYPOINT, getEntrypoints } from "../items";
+import type ControllerConnector from "@cartridge/connector/controller";
+import { useAccountByAddress } from "@/collections";
+import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
 
 interface UseTokenDetailViewModelArgs {
   collectionAddress: string;
@@ -19,6 +28,9 @@ interface TokenDetailViewModel {
   isLoading: boolean;
   isOwner: boolean;
   isListed: boolean;
+  owner: string;
+  controller: { address: string; username: string } | null;
+  collectionHref: string;
   handleBuy: () => Promise<void>;
   handleList: () => Promise<void>;
   handleUnlist: () => Promise<void>;
@@ -29,18 +41,45 @@ export function useTokenDetailViewModel({
   collectionAddress,
   tokenId,
 }: UseTokenDetailViewModelArgs): TokenDetailViewModel {
-  const { address } = useAccount();
+  const { connector } = useConnect();
+  const { address, isConnected } = useAccount();
   const { getCollectionOrders } = useMarketplace();
-
-  const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
-  const rawTokens = getTokens(DEFAULT_PROJECT, collectionAddress);
+  const { trackEvent, events } = useAnalytics();
+  const { provider, games, editions } = useArcade();
+  const { location } = useRouterState();
 
   const defaultProjects = useMemo(() => [DEFAULT_PROJECT], []);
 
   const { collection, status } = useMarketTokensFetcher({
     project: defaultProjects,
     address: collectionAddress,
+    tokenIds: [tokenId],
   });
+
+  const { balances } = useMarketBalancesFetcher({
+    project: defaultProjects,
+    address: collectionAddress,
+    tokenId,
+  });
+  const owner = useMemo(
+    () =>
+      balances && balances.length === 1
+        ? addAddressPadding(balances[0].account_address)
+        : "0x0",
+    [balances],
+  );
+  const isOwner = useMemo(
+    () =>
+      undefined !== address &&
+      getChecksumAddress(addAddressPadding(address)) ===
+        getChecksumAddress(addAddressPadding(owner)),
+    [address, owner],
+  );
+  const { data: controllerName } = useAccountByAddress(owner);
+
+  const rawTokens = useMarketplaceTokensStore(
+    (state) => state.tokens[DEFAULT_PROJECT]?.[collectionAddress],
+  );
 
   const token = useMemo(() => {
     if (!rawTokens) return undefined;
@@ -81,32 +120,183 @@ export function useTokenDetailViewModel({
     return [];
   }, [collectionOrders, tokenId]);
 
-  const isOwner = useMemo(() => {
-    if (!address || !token) return false;
-    return true;
-  }, [address, token]);
-
   const isListed = useMemo(() => {
     return orders.length > 0;
   }, [orders]);
 
   const isLoading = status === "loading" || status === "idle";
 
+  const navManager = useMemo(
+    () =>
+      new NavigationContextManager({
+        pathname: location.pathname,
+        games,
+        editions,
+        isLoggedIn: Boolean(isConnected),
+      }),
+    [location.pathname, games, editions, isConnected],
+  );
+
+  const collectionHref = useMemo(
+    () => navManager.generateCollectionHref(collectionAddress),
+    [navManager, collectionAddress],
+  );
+
   const handleBuy = useCallback(async () => {
-    console.log("Buy clicked");
-  }, []);
+    if (!isConnected || !connector) return;
+
+    const eventType = events.MARKETPLACE_PURCHASE_INITIATED;
+
+    trackEvent(eventType, {
+      purchase_type: "single",
+      items_count: 1,
+      order_ids: orders.map((order) => order.id.toString()),
+      collection_address: collectionAddress,
+      buyer_address: address,
+      item_token_ids: tokenId,
+    });
+
+    const controller = (connector as ControllerConnector)?.controller;
+    const username = await controller?.username();
+    if (!controller || !username) {
+      console.error("Connector not initialized");
+      trackEvent(events.MARKETPLACE_PURCHASE_FAILED, {
+        error_message: "Connector not initialized",
+        purchase_type: "single",
+      });
+      return;
+    }
+
+    const entrypoints = await getEntrypoints(
+      provider.provider,
+      collectionAddress,
+    );
+    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
+    const subpath = isERC1155 ? "collectible" : "collection";
+
+    const project = DEFAULT_PROJECT;
+    const preset = DEFAULT_PRESET;
+    const options = [`ps=${project}`];
+    if (preset) {
+      options.push(`preset=${preset}`);
+    } else {
+      options.push("preset=cartridge");
+    }
+
+    options.push(`address=${getChecksumAddress(owner)}`);
+    options.push("purchaseView=true");
+    options.push(`tokenIds=${[tokenId].join(",")}`);
+    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${tokenId}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+
+    controller.openProfileAt(path);
+  }, [
+    address,
+    connector,
+    events,
+    isConnected,
+    provider,
+    tokenId,
+    trackEvent,
+    collectionAddress,
+    orders,
+    owner,
+  ]);
 
   const handleList = useCallback(async () => {
-    console.log("List clicked");
-  }, []);
+    if (!isConnected || !connector) return;
+
+    const controller = (connector as ControllerConnector)?.controller;
+    const username = await controller?.username();
+    if (!controller || !username) {
+      console.error("Connector not initialized");
+      return;
+    }
+
+    const entrypoints = await getEntrypoints(
+      provider.provider,
+      collectionAddress,
+    );
+    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
+    const subpath = isERC1155 ? "collectible" : "collection";
+
+    const project = DEFAULT_PROJECT;
+    const preset = DEFAULT_PRESET;
+    const options = [`ps=${project}`];
+    if (preset) {
+      options.push(`preset=${preset}`);
+    } else {
+      options.push("preset=cartridge");
+    }
+
+    options.push("listView=true");
+    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+
+    controller.openProfileAt(path);
+  }, [connector, isConnected, provider, tokenId, collectionAddress]);
 
   const handleUnlist = useCallback(async () => {
-    console.log("Unlist clicked");
-  }, []);
+    if (!isConnected || !connector) return;
+
+    const controller = (connector as ControllerConnector)?.controller;
+    const username = await controller?.username();
+    if (!controller || !username) {
+      console.error("Connector not initialized");
+      return;
+    }
+
+    const entrypoints = await getEntrypoints(
+      provider.provider,
+      collectionAddress,
+    );
+    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
+    const subpath = isERC1155 ? "collectible" : "collection";
+
+    const project = DEFAULT_PROJECT;
+    const preset = DEFAULT_PRESET;
+    const options = [`ps=${project}`];
+    if (preset) {
+      options.push(`preset=${preset}`);
+    } else {
+      options.push("preset=cartridge");
+    }
+
+    options.push("unlistView=true");
+    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+
+    controller.openProfileAt(path);
+  }, [connector, isConnected, provider, tokenId, collectionAddress]);
 
   const handleSend = useCallback(async () => {
-    console.log("Send clicked");
-  }, []);
+    if (!isConnected || !connector) return;
+
+    const controller = (connector as ControllerConnector)?.controller;
+    const username = await controller?.username();
+    if (!controller || !username) {
+      console.error("Connector not initialized");
+      return;
+    }
+
+    const entrypoints = await getEntrypoints(
+      provider.provider,
+      collectionAddress,
+    );
+    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
+    const subpath = isERC1155 ? "collectible" : "collection";
+
+    const project = DEFAULT_PROJECT;
+    const preset = DEFAULT_PRESET;
+    const options = [`ps=${project}`];
+    if (preset) {
+      options.push(`preset=${preset}`);
+    } else {
+      options.push("preset=cartridge");
+    }
+
+    options.push("sendView=true");
+    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+
+    controller.openProfileAt(path);
+  }, [connector, isConnected, provider, tokenId, collectionAddress]);
 
   return {
     token,
@@ -115,6 +305,9 @@ export function useTokenDetailViewModel({
     isLoading,
     isOwner,
     isListed,
+    owner,
+    controller: controllerName,
+    collectionHref,
     handleBuy,
     handleList,
     handleUnlist,

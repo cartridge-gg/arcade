@@ -16,6 +16,7 @@ import {
   cn,
 } from "@cartridge/ui";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
+import { Link } from "@tanstack/react-router";
 
 export interface MarketplaceItemPriceInfo {
   value: string;
@@ -35,6 +36,7 @@ export interface MarketplaceItemCardProps {
   canOpen: boolean;
   isConnected: boolean;
   selectionActive: boolean;
+  tokenDetailHref: string;
   onToggleSelect: () => void;
   onBuy: () => void;
   onInspect: () => void;
@@ -91,7 +93,7 @@ export const ItemsView = ({
   loadingOverlay,
 }: ItemsViewProps) => {
   return (
-    <div className="flex flex-col gap-4 h-full w-full overflow-hidden">
+    <div className="flex flex-col gap-4 h-full w-full overflow-hidden order-3">
       <div className="min-h-10 w-full flex justify-between items-center relative">
         <div className="flex items-center gap-4">
           <SelectionSummary
@@ -263,6 +265,7 @@ const MarketplaceItemCard = ({
   listingCount,
   price,
   lastSale,
+  tokenDetailHref,
 }: MarketplaceItemCardProps) => {
   const fallbackImage = placeholderImage ?? image ?? "";
   const [displayImage, setDisplayImage] = useState<string>(fallbackImage);
@@ -323,22 +326,24 @@ const MarketplaceItemCard = ({
 
   return (
     <div className="w-full group select-none" onClick={handleContainerClick}>
-      <CollectibleCard
-        title={title}
-        image={displayImage}
-        listingCount={listingCount}
-        onClick={handleCardClick}
-        className={
-          selectable || canOpen
-            ? "cursor-pointer"
-            : "cursor-default pointer-events-none"
-        }
-        onSelect={isConnected && selectable ? onToggleSelect : undefined}
-        price={price}
-        lastSale={lastSale}
-        selectable={selectable}
-        selected={selected}
-      />
+      <Link to={tokenDetailHref}>
+        <CollectibleCard
+          title={title}
+          image={displayImage}
+          listingCount={listingCount}
+          onClick={handleCardClick}
+          className={
+            selectable || canOpen
+              ? "cursor-pointer"
+              : "cursor-default pointer-events-none"
+          }
+          onSelect={isConnected && selectable ? onToggleSelect : undefined}
+          price={price}
+          lastSale={lastSale}
+          selectable={selectable}
+          selected={selected}
+        />
+      </Link>
     </div>
   );
 };

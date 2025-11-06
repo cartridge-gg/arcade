@@ -49,14 +49,14 @@ vi.mock("@/hooks/useAnalytics", () => ({
   useAnalytics: () => ({ trackEvent: mockTrackEvent, events: mockEvents }),
 }));
 
-const mockGetTokens = vi.fn();
-const mockGetListedTokens = vi.fn();
+const mockTokens: Record<string, Record<string, any[]>> = {};
+const mockListedTokens: Record<string, Record<string, any[]>> = {};
 
 vi.mock("@/store", () => ({
   useMarketplaceTokensStore: (selector: any) =>
     selector({
-      getTokens: mockGetTokens,
-      getListedTokens: mockGetListedTokens,
+      tokens: mockTokens,
+      listedTokens: mockListedTokens,
     }),
 }));
 
@@ -104,8 +104,8 @@ describe("useMarketplaceItemsViewModel", () => {
       status: { value: StatusType.Placed },
     } as unknown as OrderModel;
 
-    mockGetTokens.mockReturnValue([token]);
-    mockGetListedTokens.mockReturnValue([]);
+    mockTokens["arcade-main"] = { "0xabc": [token] };
+    mockListedTokens["arcade-main"] = { "0xabc": [] };
     mockUseMetadataFilters.mockReturnValue({
       filteredTokens: [token],
       activeFilters: {},

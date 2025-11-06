@@ -25,11 +25,11 @@ export function GameHeader({
   return (
     <div
       className={cn(
-        "w-full flex flex-col gap-4 lg:p-4  lg:border lg:border-primary lg:rounded-lg bg-background-125 order-1 lg:order-1",
+        "w-full flex flex-col gap-4 lg:p-4 lg:mb-6  lg:border lg:border-background-200 lg:rounded-lg bg-background-125 order-1 lg:order-1",
         isDashboard ? "p-0" : "p-4",
       )}
     >
-      <div className="flex flex-col gap-4 border border-primary rounded-lg p-4 lg:border-none lg:p-0">
+      <div className="flex flex-col gap-4 border border-background-200 rounded-lg p-4 lg:border-none lg:p-0">
         <div className="flex items-start justify-between">
           <div
             className={cn(
@@ -50,16 +50,11 @@ export function GameHeader({
             </div>
           </div>
           {game ? (
-            <div className=" hidden lg:block">
+            <div className="flex flex-row gap-2 items-center self-end lg:self-start">
               <GameSocialWebsite website={socials?.website || ""} label />
             </div>
           ) : null}
         </div>
-        {game ? (
-          <div className="block lg:hidden">
-            <GameSocialWebsite website={socials?.website || ""} label />
-          </div>
-        ) : null}
       </div>
     </div>
   );

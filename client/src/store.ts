@@ -1,5 +1,12 @@
+import type { Token } from "@/types/torii";
 import { create } from "zustand";
-import type { Token } from "@dojoengine/torii-wasm";
+
+export type TokenBalance = {
+  account_address: string;
+  contract_address: string;
+  token_id: string | undefined;
+  balance: string;
+};
 
 export type Contract = {
   project: string;
@@ -131,6 +138,11 @@ type MarketplaceTokensState = {
       [collectionAddress: string]: Token[];
     };
   };
+  balances: {
+    [project: string]: {
+      [collectionAddress: string]: TokenBalance[];
+    };
+  };
   owners: {
     [project: string]: {
       [collectionAddress: string]: {
@@ -145,6 +157,11 @@ type MarketplaceTokensState = {
   loadingState: {
     [key: string]: CollectionLoadingState;
   };
+  fetchedCollections: {
+    [project: string]: {
+      [collectionAddress: string]: boolean;
+    };
+  };
 };
 
 type MarketplaceTokensActions = {
@@ -152,6 +169,12 @@ type MarketplaceTokensActions = {
   getTokens: (project: string, address: string) => Token[];
   setListedTokens: (project: string, address: string, tokens: Token[]) => void;
   getListedTokens: (project: string, address: string) => Token[];
+  addBalances: (
+    project: string,
+    balances: { [address: string]: TokenBalance[] },
+  ) => void;
+  getBalances: (project: string, address: string) => TokenBalance[];
+  clearBalances: (project: string, address: string) => void;
   updateLoadingState: (
     project: string,
     address: string,
@@ -172,6 +195,8 @@ type MarketplaceTokensActions = {
     token_ids: string[];
     username?: string;
   }>;
+  markCollectionFetched: (project: string, address: string) => void;
+  isCollectionFetched: (project: string, address: string) => boolean;
 };
 
 export const useMarketplaceTokensStore = create<
@@ -179,8 +204,10 @@ export const useMarketplaceTokensStore = create<
 >((set, get) => ({
   tokens: {},
   listedTokens: {},
+  balances: {},
   owners: {},
   loadingState: {},
+  fetchedCollections: {},
   addTokens: (project, newTokens) =>
     set((state) => {
       const existingTokens = { ...state.tokens };
@@ -228,6 +255,55 @@ export const useMarketplaceTokensStore = create<
     if (!projectTokens) return [];
     return projectTokens[address] || [];
   },
+  addBalances: (project, newBalances) =>
+    set((state) => {
+      const existingBalances = { ...state.balances };
+
+      if (!existingBalances[project]) {
+        existingBalances[project] = {};
+      }
+
+      for (const [collectionAddress, balances] of Object.entries(newBalances)) {
+        if (!existingBalances[project][collectionAddress]) {
+          existingBalances[project][collectionAddress] = [];
+        }
+
+        const existing = existingBalances[project][collectionAddress];
+        const existingKeys = new Set(
+          existing.map(
+            (b) => `${b.account_address}_${b.token_id}_${b.contract_address}`,
+          ),
+        );
+        const newUniqueBalances = balances.filter(
+          (b) =>
+            !existingKeys.has(
+              `${b.account_address}_${b.token_id}_${b.contract_address}`,
+            ),
+        );
+
+        existingBalances[project][collectionAddress] = [
+          ...existing,
+          ...newUniqueBalances,
+        ];
+      }
+
+      return { balances: existingBalances };
+    }),
+  getBalances: (project, address) => {
+    const projectBalances = get().balances[project];
+    if (!projectBalances) return [];
+    return projectBalances[address] || [];
+  },
+  clearBalances: (project, address) =>
+    set((state) => {
+      const balances = { ...state.balances };
+
+      if (balances[project]?.[address]) {
+        delete balances[project][address];
+      }
+
+      return { balances };
+    }),
   updateLoadingState: (project, address, state) =>
     set((prevState) => {
       const key = `${project}_${address}`;
@@ -300,5 +376,19 @@ export const useMarketplaceTokensStore = create<
     );
 
     return ownersArray.sort((a, b) => b.balance - a.balance);
+  },
+  markCollectionFetched: (project, address) =>
+    set((state) => {
+      const fetchedCollections = { ...state.fetchedCollections };
+      if (!fetchedCollections[project]) {
+        fetchedCollections[project] = {};
+      }
+      fetchedCollections[project][address] = true;
+      return { fetchedCollections };
+    }),
+  isCollectionFetched: (project, address) => {
+    const projectFetched = get().fetchedCollections[project];
+    if (!projectFetched) return false;
+    return projectFetched[address] || false;
   },
 }));
