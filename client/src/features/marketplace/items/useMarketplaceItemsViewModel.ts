@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
+import { useNavigate } from "@tanstack/react-router";
 import type { Token } from "@dojoengine/torii-wasm";
 import type { OrderModel } from "@cartridge/arcade";
 import { getChecksumAddress, type RpcProvider } from "starknet";
@@ -76,6 +77,7 @@ export function useMarketplaceItemsViewModel({
 }: UseMarketplaceItemsViewModelArgs): MarketplaceItemsViewModel {
   const { connector, address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
+  const navigate = useNavigate();
   const { provider } = useArcade();
   const { trackEvent, events } = useAnalytics();
   const { sales, getCollectionOrders } = useMarketplace();
@@ -258,8 +260,6 @@ export function useMarketplaceItemsViewModel({
 
   const handleInspect = useCallback(
     async (token: MarketplaceAsset) => {
-      if (!isConnected || !connector) return;
-
       trackEvent(events.MARKETPLACE_ITEM_INSPECTED, {
         item_token_id: token.token_id,
         item_name: (token.metadata as any)?.name || token.name || "",
@@ -267,35 +267,19 @@ export function useMarketplaceItemsViewModel({
         seller_address: token.owner,
       });
 
-      const controller = (connector as ControllerConnector)?.controller;
-      const username = await controller?.username();
-      if (!controller || !username) {
-        console.error("Connector not initialized");
-        return;
-      }
+      const tokenId = token.token_id?.toString();
+      if (!tokenId) return;
 
-      const entrypoints = await getEntrypoints(
-        provider.provider,
-        token.contract_address,
-      );
-      const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-      const subpath = isERC1155 ? "collectible" : "collection";
-
-      const project = DEFAULT_PROJECT;
-      const preset = DEFAULT_PRESET;
-      const options = [`ps=${project}`];
-      if (preset) {
-        options.push(`preset=${preset}`);
-      } else {
-        options.push("preset=cartridge");
-      }
-      options.push(`address=${getChecksumAddress(token.owner)}`);
-      options.push("purchaseView=true");
-
-      const path = `account/${username}/inventory/${subpath}/${token.contract_address}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-      controller.openProfileAt(path);
+      navigate({
+        to: "/collection/$collection/$tokenId",
+        params: {
+          collection: getChecksumAddress(token.contract_address),
+          tokenId: tokenId.startsWith("0x") ? tokenId.slice(2) : tokenId,
+        },
+        search: { filter: undefined },
+      });
     },
-    [connector, isConnected, provider.provider, trackEvent, events],
+    [navigate, trackEvent, events],
   );
 
   const handlePurchase = useCallback(

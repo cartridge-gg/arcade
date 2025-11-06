@@ -311,7 +311,7 @@ const MarketplaceItemCard = ({
       return;
     }
 
-    if (canOpen && isConnected) {
+    if (canOpen) {
       onInspect();
       return;
     }

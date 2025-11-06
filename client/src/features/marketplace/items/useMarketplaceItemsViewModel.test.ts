@@ -14,6 +14,12 @@ vi.mock("@starknet-react/core", () => ({
   useConnect: () => ({ connect: mockConnect, connectors: mockConnectors }),
 }));
 
+const mockNavigate = vi.fn();
+
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => mockNavigate,
+}));
+
 const mockGetClassAt = vi.fn();
 
 vi.mock("@/hooks/arcade", () => ({

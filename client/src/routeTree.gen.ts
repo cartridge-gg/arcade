@@ -36,6 +36,7 @@ import { Route as GameGameAboutRouteImport } from './routes/game/$game/about'
 import { Route as CollectionCollectionItemsRouteImport } from './routes/collection/$collection/items'
 import { Route as CollectionCollectionHoldersRouteImport } from './routes/collection/$collection/holders'
 import { Route as CollectionCollectionActivityRouteImport } from './routes/collection/$collection/activity'
+import { Route as CollectionCollectionTokenIdRouteImport } from './routes/collection/$collection/$tokenId'
 import { Route as GameGamePlayerPlayerRouteImport } from './routes/game/$game_/player/$player'
 import { Route as GameGameCollectionCollectionRouteImport } from './routes/game/$game/collection/$collection'
 import { Route as GameGamePlayerPlayerIndexRouteImport } from './routes/game/$game_/player/$player/index'
@@ -205,6 +206,12 @@ const CollectionCollectionActivityRoute =
   CollectionCollectionActivityRouteImport.update({
     id: '/activity',
     path: '/activity',
+    getParentRoute: () => CollectionCollectionRoute,
+  } as any)
+const CollectionCollectionTokenIdRoute =
+  CollectionCollectionTokenIdRouteImport.update({
+    id: '/$tokenId',
+    path: '/$tokenId',
     getParentRoute: () => CollectionCollectionRoute,
   } as any)
 const GameGamePlayerPlayerRoute = GameGamePlayerPlayerRouteImport.update({
@@ -398,6 +405,7 @@ export interface FileRoutesByFullPath {
   '/collection/$collection': typeof CollectionCollectionRouteWithChildren
   '/game/$game': typeof GameGameRouteWithChildren
   '/player/$player': typeof PlayerPlayerRouteWithChildren
+  '/collection/$collection/$tokenId': typeof CollectionCollectionTokenIdRoute
   '/collection/$collection/activity': typeof CollectionCollectionActivityRoute
   '/collection/$collection/holders': typeof CollectionCollectionHoldersRoute
   '/collection/$collection/items': typeof CollectionCollectionItemsRoute
@@ -454,6 +462,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/predict': typeof PredictRoute
+  '/collection/$collection/$tokenId': typeof CollectionCollectionTokenIdRoute
   '/collection/$collection/activity': typeof CollectionCollectionActivityRoute
   '/collection/$collection/holders': typeof CollectionCollectionHoldersRoute
   '/collection/$collection/items': typeof CollectionCollectionItemsRoute
@@ -510,6 +519,7 @@ export interface FileRoutesById {
   '/collection/$collection': typeof CollectionCollectionRouteWithChildren
   '/game/$game': typeof GameGameRouteWithChildren
   '/player/$player': typeof PlayerPlayerRouteWithChildren
+  '/collection/$collection/$tokenId': typeof CollectionCollectionTokenIdRoute
   '/collection/$collection/activity': typeof CollectionCollectionActivityRoute
   '/collection/$collection/holders': typeof CollectionCollectionHoldersRoute
   '/collection/$collection/items': typeof CollectionCollectionItemsRoute
@@ -571,6 +581,7 @@ export interface FileRouteTypes {
     | '/collection/$collection'
     | '/game/$game'
     | '/player/$player'
+    | '/collection/$collection/$tokenId'
     | '/collection/$collection/activity'
     | '/collection/$collection/holders'
     | '/collection/$collection/items'
@@ -627,6 +638,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/marketplace'
     | '/predict'
+    | '/collection/$collection/$tokenId'
     | '/collection/$collection/activity'
     | '/collection/$collection/holders'
     | '/collection/$collection/items'
@@ -682,6 +694,7 @@ export interface FileRouteTypes {
     | '/collection/$collection'
     | '/game/$game'
     | '/player/$player'
+    | '/collection/$collection/$tokenId'
     | '/collection/$collection/activity'
     | '/collection/$collection/holders'
     | '/collection/$collection/items'
@@ -938,6 +951,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollectionCollectionActivityRouteImport
       parentRoute: typeof CollectionCollectionRoute
     }
+    '/collection/$collection/$tokenId': {
+      id: '/collection/$collection/$tokenId'
+      path: '/$tokenId'
+      fullPath: '/collection/$collection/$tokenId'
+      preLoaderRoute: typeof CollectionCollectionTokenIdRouteImport
+      parentRoute: typeof CollectionCollectionRoute
+    }
     '/game/$game_/player/$player': {
       id: '/game/$game_/player/$player'
       path: '/game/$game/player/$player'
@@ -1152,6 +1172,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface CollectionCollectionRouteChildren {
+  CollectionCollectionTokenIdRoute: typeof CollectionCollectionTokenIdRoute
   CollectionCollectionActivityRoute: typeof CollectionCollectionActivityRoute
   CollectionCollectionHoldersRoute: typeof CollectionCollectionHoldersRoute
   CollectionCollectionItemsRoute: typeof CollectionCollectionItemsRoute
@@ -1159,6 +1180,7 @@ interface CollectionCollectionRouteChildren {
 }
 
 const CollectionCollectionRouteChildren: CollectionCollectionRouteChildren = {
+  CollectionCollectionTokenIdRoute: CollectionCollectionTokenIdRoute,
   CollectionCollectionActivityRoute: CollectionCollectionActivityRoute,
   CollectionCollectionHoldersRoute: CollectionCollectionHoldersRoute,
   CollectionCollectionItemsRoute: CollectionCollectionItemsRoute,
