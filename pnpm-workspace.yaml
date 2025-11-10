@@ -9,11 +9,11 @@ catalog:
   "@cartridge/controller": 0.10.6
   "@starknet-react/core": =5.0.1
   "@starknet-react/chains": =5.0.1
-  "@dojoengine/core": 1.8.1
-  "@dojoengine/sdk": 1.8.2
-  "@dojoengine/torii-client": 1.8.1
-  "@dojoengine/torii-wasm": 1.8.1
-  "@dojoengine/grpc": 1.8.2
+  "@dojoengine/core": 1.8.3
+  "@dojoengine/sdk": 1.8.4
+  "@dojoengine/torii-client": 1.8.2
+  "@dojoengine/torii-wasm": 1.8.2
+  "@dojoengine/grpc": 1.8.3
   class-variance-authority: ^0.7.1
   starknet: 8.5.4
   tsup: 8.4.0

@@ -13,6 +13,8 @@ import { resolve } from "node:path";
 const resolveFromRoot = (path: string) =>
   resolve(fileURLToPath(new URL(".", import.meta.url)), path);
 
+const COMMIT_SHA = process.env.VERCEL_GIT_COMMIT_SHA || 'dev';
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -28,6 +30,9 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
         mode: "development",
+        additionalManifestEntries: [
+          { url: "/__version__", revision: COMMIT_SHA },
+        ],
       },
       manifest: {
         name: "Arcade",
@@ -60,6 +65,9 @@ export default defineConfig({
       },
     }),
   ],
+  define: {
+    __COMMIT_SHA__: JSON.stringify(COMMIT_SHA),
+  },
   server: {
     port: process.env.NODE_ENV === "development" ? 3003 : undefined,
   },

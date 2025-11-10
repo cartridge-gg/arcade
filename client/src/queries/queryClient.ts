@@ -1,6 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 
+declare const __COMMIT_SHA__: string;
+
+const CACHE_VERSION = __COMMIT_SHA__;
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -21,6 +25,7 @@ export const queryClient = new QueryClient({
 
 export const persister = createAsyncStoragePersister({
   storage: window.localStorage,
+  key: `arcade-query-cache-${CACHE_VERSION}`,
 });
 
 export const queryConfigs = {

@@ -16,6 +16,9 @@ import { queryClient, persister } from "../queries";
 import { MarketplaceClientProvider } from "@cartridge/arcade/marketplace/react";
 import { constants } from "starknet";
 import { DEFAULT_PROJECT } from "@/constants";
+import { checkAndClearStaleCache } from "@/utils/versionCheck";
+
+checkAndClearStaleCache();
 
 export function Provider({ children }: PropsWithChildren) {
   return (
