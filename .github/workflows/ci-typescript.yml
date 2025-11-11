@@ -1,4 +1,4 @@
-name: ci
+name: ci-typescript
 
 on:
   push:
@@ -13,83 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cairo-format-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.5.2
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - uses: software-mansion/setup-scarb@v1
-        with:
-          scarb-version: "2.12.2"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Check Cairo formatting
-        run: pnpm format:check:cairo
-
-  cairo-lint-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.5.2
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - uses: software-mansion/setup-scarb@v1
-        with:
-          scarb-version: "2.12.2"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Check Cairo linting
-        run: pnpm lint:check:cairo
-
-  cairo-build-test:
-    runs-on: ubuntu-latest
-    needs: [cairo-format-check, cairo-lint-check]
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: software-mansion/setup-scarb@v1
-        with:
-          scarb-version: "2.12.2"
-
-      - name: Cache Scarb
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-scarb-${{ hashFiles('**/Scarb.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-scarb-
-
-      - name: Build Cairo contracts
-        run: scarb build
-
-      - name: Test Cairo contracts
-        run: scarb test
-
   ts-format-check:
     runs-on: ubuntu-latest
     steps:
