@@ -1,4 +1,4 @@
-import { createCollection, eq, or, useLiveQuery } from "@tanstack/react-db";
+import { createCollection, eq, useLiveQuery } from "@tanstack/react-db";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { graphqlClient } from "@/queries/graphql-client";
 import { queryKeys } from "@/queries/keys";
@@ -104,12 +104,12 @@ export const useAccount = (identifier: string | undefined) => {
     (q) =>
       q
         .from({ user: accountsCollection })
-        .where(({ user }) =>
-          or(
-            eq(user.address, checksumedAddress),
-            eq(user.username, identifier),
-          ),
-        )
+        .fn.where(({ user }) => {
+          return (
+            user.username === checksumedAddress ||
+            user.address === checksumedAddress
+          );
+        })
         .select(({ user }) => ({ ...user })),
     [identifier, checksumedAddress],
   );

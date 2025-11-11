@@ -64,7 +64,7 @@ export function useInventoryCollectionsViewModel({
 
   const ownedAddresses = useMemo(() => {
     const addresses: string[] = [];
-    ownedCollections.forEach((collection) => {
+    for (const collection of ownedCollections) {
       const address = collection.address;
       if (!address) return;
       addresses.push(address);
@@ -73,7 +73,7 @@ export function useInventoryCollectionsViewModel({
       } catch {
         // ignore malformed address; fallback to raw value
       }
-    });
+    }
     return new Set(addresses);
   }, [ownedCollections]);
 
@@ -81,9 +81,9 @@ export function useInventoryCollectionsViewModel({
     return collections.filter((collection) => {
       const address = collection.contract_address;
       if (!address) return false;
-      if (ownedAddresses.has(address)) return true;
+      if (ownedAddresses?.has(address)) return true;
       try {
-        return ownedAddresses.has(getChecksumAddress(address));
+        return ownedAddresses?.has(getChecksumAddress(address));
       } catch {
         return false;
       }
@@ -189,6 +189,7 @@ export function useInventoryCollectionsViewModel({
     location.pathname,
     trackEvent,
     events,
+    account?.username,
   ]);
 
   return {

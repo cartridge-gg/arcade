@@ -2,6 +2,7 @@ import { createContext, type ReactNode, useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useCollectibles } from "@/hooks/token-fetcher";
+import { useAddress } from "@/hooks/address";
 
 export enum CollectionType {
   ERC721 = "ERC-721",
@@ -27,7 +28,8 @@ export const CollectionContext = createContext<CollectionContextType | null>(
 );
 
 export function CollectionProvider({ children }: { children: ReactNode }) {
-  const { editions, player: address } = useArcade();
+  const { editions } = useArcade();
+  const { address } = useAddress();
 
   const projects = useMemo(
     () => [

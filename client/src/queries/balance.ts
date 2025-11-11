@@ -1,4 +1,3 @@
-import { useArcade } from "@/hooks/arcade";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
 import { graphqlClient } from "./graphql-client";
@@ -6,6 +5,8 @@ import { addAddressPadding, getChecksumAddress } from "starknet";
 import { useState } from "react";
 import makeBlockie from "ethereum-blockies-base64";
 import { erc20Metadata } from "@cartridge/presets";
+import { useAccount } from "@starknet-react/core";
+import { useAddress } from "@/hooks/address";
 
 const LIMIT = 1000;
 
@@ -71,12 +72,13 @@ const BALANCES_QUERY = `query Balances(
 `;
 
 export function useBalancesQuery(projects: string[]) {
-  const { player: address = "0x0" } = useArcade();
+  const { address } = useAddress();
+  const { address: connectedAddress } = useAccount();
   const [offset, setOffset] = useState(0);
 
   return useQuery({
     queryKey: queryKeys.prices.balance(address),
-    enabled: address !== "0x0",
+    enabled: address !== "0x0" || undefined !== connectedAddress,
     queryFn: async () => {
       const res = await graphqlClient(BALANCES_QUERY, {
         accountAddress: addAddressPadding(address.toLowerCase()),

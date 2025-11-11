@@ -86,7 +86,7 @@ interface ArcadeContextType {
   };
   addOrder: (order: OrderModel) => void;
   removeOrder: (order: OrderModel) => void;
-  setPlayer: (address: string | undefined) => void;
+  setPlayer: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 /**
