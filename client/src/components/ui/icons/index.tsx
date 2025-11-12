@@ -1,3 +1,39 @@
+import { forwardRef, memo } from "react";
+import { type VariantProps, cva } from "class-variance-authority";
+
+const base = "";
+
+export const size = {
+  "2xs": "h-3 w-3",
+  xs: "h-4 w-4",
+  sm: "h-5 w-5",
+  default: "h-6 w-6",
+  lg: "h-8 w-8",
+  xl: "h-12 w-12",
+  "2xl": "h-14 w-14",
+  "3xl": "h-[72px] w-[72px]",
+};
+
+export const iconVariants = cva(base, {
+  variants: {
+    size,
+  },
+  defaultVariants: {
+    size: "default",
+  },
+});
+
+export type IconProps = React.SVGAttributes<SVGElement> &
+  VariantProps<typeof iconVariants>;
+
+export type DirectionalIconProps = React.SVGAttributes<SVGElement> &
+  VariantProps<typeof iconVariants> & { variant: Direction };
+
+export type Direction = "up" | "right" | "down" | "left";
+
+export type StateIconProps = React.SVGAttributes<SVGElement> &
+  VariantProps<typeof iconVariants> & { variant: "solid" | "line" };
+
 export const LayersIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -57,3 +93,22 @@ export const PlayIcon = () => (
     />
   </svg>
 );
+export const CopyIcon = memo(
+  forwardRef<SVGSVGElement, IconProps>(
+    ({ className, size, ...props }, forwardedRef) => (
+      <svg
+        viewBox="0 0 24 24"
+        className={iconVariants({ size, className })}
+        ref={forwardedRef}
+        {...props}
+      >
+        <path
+          fill="currentColor"
+          d="M6 19h7c.553 0 1-.447 1-1v-1.5c0-.275.225-.5.5-.5s.5.225.5.5V18c0 1.103-.897 2-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1.5c.275 0 .5.225.5.5s-.225.5-.5.5H6a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1ZM9 6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7c0 1.103-.897 2-2 2h-7c-1.103 0-2-.897-2-2V6Zm2 8h7c.553 0 1-.447 1-1V6a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v7c0 .553.447 1 1 1Z"
+        />
+      </svg>
+    ),
+  ),
+);
+
+CopyIcon.displayName = "CopyIcon";

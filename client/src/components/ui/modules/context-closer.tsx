@@ -8,7 +8,7 @@ const closeVariants = cva("relative group w-5 h-5 cursor-pointer", {
   variants: {
     variant: {
       rounded:
-        "absolute group -top-5 -right-5 rounded-full bg-background-150 border border-primary-100 p-4 center hidden lg:flex",
+        "absolute group -top-5 -right-5 rounded-full bg-background-150 border border-background-200 p-4 center hidden lg:flex",
       muted: "cursor-pointer block",
       "rounded-muted":
         "absolute group top-2 right-2 lg:-top-3 lg:-right-3 rounded-full bg-background-100 border border-background-200 p-4 center flex",

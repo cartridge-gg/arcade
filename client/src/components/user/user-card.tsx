@@ -72,6 +72,7 @@ const UserCardInner = (
       <UserAvatar
         username={username?.username ?? ""}
         className="h-full w-full"
+        size={"sm"}
       />
     );
   }, [username]);
@@ -165,11 +166,11 @@ const UserCardInner = (
           </div>
 
           <div className="flex flex-row justify-between items-center">
-            <div className="flex items-center font-sans text-foreground-200 gap-1 rounded-sm bg-background-150 p-1 shrink-0">
+            <div className="flex items-center font-sans text-foreground-200 gap-1 rounded-md bg-background-200 hover:bg-background-300 shrink-0 px-[6px] py-1">
               <CopyAddress
                 size="xs"
                 address={address}
-                className="text-sm font-sans px-[6px] gap-[6px] rounded-md"
+                className="text-sm font-sans  gap-[6px] rounded-md"
                 first={2}
                 last={2}
               />
