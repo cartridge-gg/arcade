@@ -9,6 +9,7 @@ import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { queryClient, queryKeys } from "@/queries";
 import { ToriiGrpcClient } from "@dojoengine/grpc";
 import { DEFAULT_PROJECT } from "@/constants";
+import { getToriiUrl } from "@cartridge/arcade";
 
 export type Ownership = {
   contractAddress: string;
@@ -36,7 +37,7 @@ const arcadeCollectionOwnerships = createCollection(
       const arcadeCollection = arcadeCollectionAddress.toArray[0];
 
       const client = new ToriiGrpcClient({
-        toriiUrl: `https://api.cartridge.gg/x/${DEFAULT_PROJECT}/torii`,
+        toriiUrl: getToriiUrl(DEFAULT_PROJECT),
         worldAddress: "0x0",
       });
       const res = await client.getTokenBalances({

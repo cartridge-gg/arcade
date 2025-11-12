@@ -235,6 +235,20 @@ const getSocialPolicies = (_chainId: unknown) => ({ contracts: {} });
 const getRegistryPolicies = (_chainId: unknown) => ({ contracts: {} });
 const getMarketplacePolicies = (_chainId: unknown) => ({ contracts: {} });
 
+const getToriiUrl = (project: string) =>
+  `https://api.cartridge.gg/x/${project}/torii`;
+const getToriiSqlUrl = (project: string) => `${getToriiUrl(project)}/sql`;
+const getToriiGraphqlUrl = (project: string) =>
+  `${getToriiUrl(project)}/graphql`;
+const getToriiAssetUrl = (
+  project: string,
+  contractAddress: string,
+  tokenId?: string,
+) => {
+  const base = `${getToriiUrl(project)}/static/${contractAddress}`;
+  return tokenId ? `${base}/${tokenId}/image` : `${base}/image`;
+};
+
 export {
   AccessModel,
   ArcadeProvider,
@@ -261,4 +275,8 @@ export {
   getMarketplacePolicies,
   getRegistryPolicies,
   getSocialPolicies,
+  getToriiAssetUrl,
+  getToriiGraphqlUrl,
+  getToriiSqlUrl,
+  getToriiUrl,
 };

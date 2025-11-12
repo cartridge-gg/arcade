@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { MetadataHelper } from "@/lib/metadata";
 import type { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
+import { getToriiAssetUrl } from "@cartridge/arcade";
 
 const createToken = (overrides: Partial<Token> = {}): Token =>
   ({
@@ -71,8 +72,11 @@ describe("MetadataHelper", () => {
 
   it("returns torii image when available", async () => {
     const token = createToken();
-    const paddedId = addAddressPadding(token.token_id ?? "");
-    const expectedUrl = `https://api.cartridge.gg/x/sample-project/torii/static/${addAddressPadding(token.contract_address ?? 0)}/${paddedId}/image`;
+    const expectedUrl = getToriiAssetUrl(
+      "sample-project",
+      addAddressPadding(token.contract_address ?? 0),
+      addAddressPadding(token.token_id ?? ""),
+    );
 
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")

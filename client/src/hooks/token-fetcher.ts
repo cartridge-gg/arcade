@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { fetchToriis, type ClientCallbackParams } from "@cartridge/arcade";
+import {
+  fetchToriis,
+  type ClientCallbackParams,
+  getToriiAssetUrl,
+} from "@cartridge/arcade";
 import { CollectionType } from "@/context/collection";
 import { addAddressPadding } from "starknet";
 
@@ -435,7 +439,11 @@ function getAssetImage(
   image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
   return (
     image ??
-    `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(metadata?.contract_address ?? "0x0")}/${addAddressPadding(firstNFT.token_id ?? "0x0")}/image`
+    getToriiAssetUrl(
+      project,
+      addAddressPadding(metadata?.contract_address ?? "0x0"),
+      addAddressPadding(firstNFT.token_id ?? "0x0"),
+    )
   );
 }
 

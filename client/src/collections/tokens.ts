@@ -16,6 +16,7 @@ import {
 import { getChecksumAddress } from "starknet";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchContractImage, fetchTokenImage } from "@/hooks/fetcher-utils";
+import { getToriiUrl } from "@cartridge/arcade";
 
 export type EnrichedTokenContract = TokenContract & {
   totalSupply: bigint;
@@ -30,7 +31,7 @@ export const tokenContractsCollection = createCollection(
     queryKey: queryKeys.tokens.collections,
     queryFn: async () => {
       const client = await new ToriiClient({
-        toriiUrl: `https://api.cartridge.gg/x/${DEFAULT_PROJECT}/torii`,
+        toriiUrl: getToriiUrl(DEFAULT_PROJECT),
         worldAddress: "0x0",
       });
       const contracts: TokenContract[] = [];

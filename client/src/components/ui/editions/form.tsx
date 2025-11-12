@@ -1,5 +1,6 @@
 import { RpcProvider } from "starknet";
 import { z } from "zod";
+import { getToriiUrl } from "@cartridge/arcade";
 
 export const formSchema = z.object({
   // Configuration
@@ -14,9 +15,7 @@ export const formSchema = z.object({
     .refine(
       async (val) => {
         try {
-          const response = await fetch(
-            `https://api.cartridge.gg/x/${val}/torii`,
-          );
+          const response = await fetch(getToriiUrl(val));
           return !!response && response.status !== 404;
         } catch (error) {
           console.log("Error fetching Torii instance:", error);

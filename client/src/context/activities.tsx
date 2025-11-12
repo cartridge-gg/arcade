@@ -10,6 +10,7 @@ import { useAchievements } from "@/hooks/achievements";
 import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";
 import { getChainId } from "@/lib/helpers";
+import { getToriiAssetUrl } from "@cartridge/arcade";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -139,7 +140,11 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
             (edition) => edition.config.project === item.meta.project,
           );
           const chainId = getChainId(edition?.config.rpc);
-          const image = `https://api.cartridge.gg/x/${item.meta.project}/torii/static/${addAddressPadding(transfer.contractAddress)}/${addAddressPadding(transfer.tokenId)}/image`;
+          const image = getToriiAssetUrl(
+            item.meta.project,
+            addAddressPadding(transfer.contractAddress),
+            addAddressPadding(transfer.tokenId),
+          );
           const card: CardProps = {
             variant: "collectible",
             key: `${transfer.transactionHash}-${transfer.eventId}`,

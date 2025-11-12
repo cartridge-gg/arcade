@@ -1,4 +1,6 @@
-const API_URL = "https://api.cartridge.gg/x/arcade-main/torii";
+import { getToriiSqlUrl } from "@cartridge/arcade";
+
+const API_URL = getToriiSqlUrl("arcade-main");
 
 export interface SQLError {
   message: string;
@@ -9,7 +11,7 @@ export interface SQLError {
 export interface SQLResponse extends Array<any> {}
 
 export async function sqlClient<T = any>(query: string): Promise<T[]> {
-  const response = await fetch(`${API_URL}/sql`, {
+  const response = await fetch(API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

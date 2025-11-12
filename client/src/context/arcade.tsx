@@ -30,6 +30,7 @@ import {
   StatusType,
   type MarketplaceOptions,
   CollectionEditionModel,
+  getToriiUrl,
 } from "@cartridge/arcade";
 import {
   constants,
@@ -452,7 +453,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
           // FIXME: some old torii version not compatible with the dojo.js version
           if (IGNORES.includes(edition.config.project)) return;
           // Fetch the torii client to ensure it exists
-          const url = `https://api.cartridge.gg/x/${edition.config.project}/torii`;
+          const url = getToriiUrl(edition.config.project);
           try {
             const response = await fetch(url);
             if (!!response && response.status !== 404) {
@@ -466,7 +467,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
           }
         }),
       );
-      const arcade = "https://api.cartridge.gg/x/arcade-main/torii";
+      const arcade = getToriiUrl("arcade-main");
       const client: torii.ToriiClient = await provider.getToriiClient(arcade);
       clients["arcade-main"] = client;
       setClients(clients);

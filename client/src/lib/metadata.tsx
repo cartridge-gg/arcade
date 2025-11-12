@@ -1,5 +1,6 @@
 import type { Token } from "@dojoengine/torii-wasm";
 import { addAddressPadding } from "starknet";
+import { getToriiAssetUrl } from "@cartridge/arcade";
 
 const JWT =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI3ZjhjN2JlYy00OGIwLTQ4ODQtOTllMS1lY2U2NTk4YTNjZWQiLCJlbWFpbCI6ImJhbDdoYXphckBwcm90b24ubWUiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiNTgxNjFkM2ZkYjNlOTE5MGVlNjUiLCJzY29wZWRLZXlTZWNyZXQiOiJhNjk1MjFjMjYwZWQ4ODA2YjdlYTg1YmU2OWFlMGE5MTE0ZmQ1YmIyOTJiYzJjM2FhYWVmZDgxZjU0ZmFlN2ExIiwiZXhwIjoxNzc4MDc3MDE3fQ.vNU3I0QnD-D-jZChENS5mTFYNGjppU56IJv38K8X7gQ";
@@ -205,7 +206,10 @@ export const MetadataHelper = {
   ): Promise<string | undefined> => {
     if (!contractAddress) return;
 
-    const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(contractAddress)}/image`;
+    const toriiImage = getToriiAssetUrl(
+      project,
+      addAddressPadding(contractAddress),
+    );
 
     // Fetch if the image exists
 
@@ -225,7 +229,11 @@ export const MetadataHelper = {
     token: Token,
   ): Promise<string | undefined> => {
     if (!token.contract_address || !token.token_id) return;
-    const toriiImage = `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(token.contract_address)}/${addAddressPadding(token.token_id)}/image`;
+    const toriiImage = getToriiAssetUrl(
+      project,
+      addAddressPadding(token.contract_address),
+      addAddressPadding(token.token_id),
+    );
     // Fetch if the image exists
     try {
       const response = await fetch(toriiImage);
@@ -241,7 +249,11 @@ export const MetadataHelper = {
     token: Token,
   ): Promise<string | undefined> => {
     if (!token.contract_address || !token.token_id) return;
-    return `https://api.cartridge.gg/x/${project}/torii/static/${addAddressPadding(token.contract_address)}/${addAddressPadding(token.token_id)}/image`;
+    return getToriiAssetUrl(
+      project,
+      addAddressPadding(token.contract_address),
+      addAddressPadding(token.token_id),
+    );
   },
 
   getMetadataImage: async (token: Token): Promise<string | undefined> => {
