@@ -18,7 +18,6 @@ type CollectionHeaderProps = {
 };
 
 export function CollectionHeader({
-  isMobile,
   edition,
   game,
   arcade,
@@ -40,17 +39,11 @@ export function CollectionHeader({
     },
   });
 
-  // if (!game) return null;
   return (
     <div className={cn("w-full flex flex-col gap-4 pb-5")}>
-      <div className="flex flex-col gap-4 rounded-lg p-4  lg:p-0">
+      <div className="flex flex-col gap-4 rounded-lg lg:p-0">
         <div className="flex items-start justify-between">
-          <div
-            className={cn(
-              "flex gap-4 items-center overflow-hidden",
-              isMobile && "hidden",
-            )}
-          >
+          <div className={cn("flex gap-4 items-center overflow-hidden")}>
             <Thumbnail
               icon={edition?.properties.icon || game?.properties.icon || arcade}
               size="xl"

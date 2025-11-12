@@ -1,115 +1,97 @@
-import { useEditionsMap } from "@/collections";
-import {
-  fetchToriisStream,
-  type ClientCallbackParams,
-} from "@cartridge/arcade";
-import type { TokenBalance } from "@dojoengine/torii-wasm";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { getChecksumAddress } from "starknet";
+import { useEditionsMap, useAccounts } from "@/collections";
+import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
+import type {
+  FetchTokenBalancesResult,
+  UseMarketplaceQueryResult,
+} from "@cartridge/arcade/marketplace";
+import { useMarketplaceTokenBalances } from "@cartridge/arcade/marketplace/react";
+import type { TokenBalance } from "@dojoengine/torii-wasm";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { addAddressPadding, getChecksumAddress } from "starknet";
 import { useMarketCollectionFetcher } from "./marketplace-fetcher";
-import {
-  useFetcherState,
-  withRetry,
-  sleep,
-  useAbortController,
-} from "./fetcher-utils";
-import { useAccounts } from "@/collections";
 
 type MarketOwnersFetcherInput = {
   project: string[];
   address: string;
+  autoFetch?: boolean;
 };
 
-const MAX_RETRY_ATTEMPTS = 3;
 const LIMIT = 1000;
-const RETRY_BASE_DELAY = 1000;
-const POLL_INTERVAL = 30000; // 30 seconds
-const CACHE_DURATION = 30000; // 30 seconds
 
-enum FetchStrategy {
-  INITIAL = "initial",
-  INCREMENTAL = "incremental",
-  CHECK_NEW = "check_new",
-}
-
-type OwnersLoadingState = {
-  isLoading: boolean;
-  isComplete: boolean;
-  lastCursor: string | null;
-  lastFetchTime: number;
-  totalCount?: number;
-};
+type TokenBalancesQuery = UseMarketplaceQueryResult<FetchTokenBalancesResult>;
 
 export function useMarketOwnersFetcher({
   project,
   address,
+  autoFetch = true,
 }: MarketOwnersFetcherInput) {
-  const {
-    status,
-    isLoading,
-    isError,
-    editionError,
-    errorMessage,
-    loadingProgress,
-    retryCount,
-    setRetryCount,
-    startLoading,
-    setSuccess,
-    setError,
-    setLoadingProgress,
-    setErrorMessage,
-  } = useFetcherState(true);
-
-  const [hasFetch, setHasFetch] = useState(false);
-  const [ownersLoadingState, setOwnersLoadingState] = useState<{
-    [key: string]: OwnersLoadingState;
-  }>({});
-  const { createController, cleanup, isMounted } = useAbortController();
-
   const { data: usernamesMap } = useAccounts();
+  const editions = useEditionsMap();
+  const addOwners = useMarketplaceTokensStore((state) => state.addOwners);
+  const clearOwners = useMarketplaceTokensStore((state) => state.clearOwners);
+  const getOwners = useMarketplaceTokensStore((state) => state.getOwners);
+
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const [isAutoFetching, setIsAutoFetching] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const prevAddressRef = useRef<string | null>(null);
+  const prevProjectRef = useRef<string | null>(null);
+
+  const projectId = project[0] ?? DEFAULT_PROJECT;
+
   const { collections } = useMarketCollectionFetcher({ projects: project });
   const collection = useMemo(
     () => collections.find((c) => c.contract_address === address),
     [collections, address],
   );
 
-  const editions = useEditionsMap();
-  const getOwners = useMarketplaceTokensStore((s) => s.getOwners);
+  const normalizedAddress = useMemo(() => {
+    if (!address) return "";
+    try {
+      return addAddressPadding(address);
+    } catch (error) {
+      console.warn(
+        "Invalid contract address provided to useMarketOwnersFetcher",
+        {
+          address,
+          error,
+        },
+      );
+      return "";
+    }
+  }, [address]);
 
-  const getLoadingState = useCallback(
-    (project: string, address: string) => {
-      const key = `${project}_${address}_owners`;
-      return ownersLoadingState[key] || null;
-    },
-    [ownersLoadingState],
-  );
+  const queryOptions = useMemo(() => {
+    return {
+      project: projectId,
+      contractAddresses: normalizedAddress ? [normalizedAddress] : [],
+      accountAddresses: [],
+      tokenIds: [],
+      cursor,
+      limit: LIMIT,
+    };
+  }, [projectId, normalizedAddress, cursor]);
 
-  const updateLoadingState = useCallback(
-    (project: string, address: string, state: Partial<OwnersLoadingState>) => {
-      setOwnersLoadingState((prev) => {
-        const key = `${project}_${address}_owners`;
-        const currentState = prev[key] || {
-          isLoading: false,
-          isComplete: false,
-          lastCursor: null,
-          lastFetchTime: 0,
-        };
+  const enabled =
+    autoFetch &&
+    Boolean(projectId) &&
+    normalizedAddress.length > 0 &&
+    collection !== null &&
+    collection !== undefined;
 
-        return {
-          ...prev,
-          [key]: {
-            ...currentState,
-            ...state,
-          },
-        };
-      });
-    },
-    [],
-  );
+  const { data, status, error, isFetching }: TokenBalancesQuery =
+    useMarketplaceTokenBalances(queryOptions, enabled);
+
+  const projectError = useMemo(() => {
+    if (!data) return null;
+    return data.error;
+  }, [data]);
 
   const batchProcessOwners = useCallback(
-    async (data: TokenBalance[]) => {
+    async (balances: TokenBalance[]) => {
       const processed: {
         [address: string]: {
           [ownerAddress: string]: {
@@ -120,14 +102,15 @@ export function useMarketOwnersFetcher({
         };
       } = { [address]: {} };
 
-      // Group balances and collect token IDs
       const balanceMap: { [ownerAddress: string]: bigint } = {};
       const tokenIdsMap: { [ownerAddress: string]: string[] } = {};
 
-      for (const balance of data) {
-        const ownerAddress = getChecksumAddress(balance.account_address);
-        // Convert hex or decimal string to BigInt
+      for (const balance of balances) {
         const balanceValue = BigInt(balance.balance);
+        if (balanceValue === 0n) continue;
+
+        const ownerAddress = getChecksumAddress(balance.account_address);
+        if (BigInt(ownerAddress) === 0n) continue;
 
         if (!balanceMap[ownerAddress]) {
           balanceMap[ownerAddress] = balanceValue;
@@ -136,13 +119,11 @@ export function useMarketOwnersFetcher({
           balanceMap[ownerAddress] += balanceValue;
         }
 
-        // Collect token IDs if present
         if (balance.token_id) {
           tokenIdsMap[ownerAddress].push(balance.token_id);
         }
       }
 
-      // Prepare final data
       for (const [ownerAddress, balance] of Object.entries(balanceMap)) {
         const balanceNumber = Number(balance);
 
@@ -158,289 +139,158 @@ export function useMarketOwnersFetcher({
     [address, usernamesMap],
   );
 
-  const addOwners = useCallback(
-    (
-      project: string,
-      owners: {
-        [address: string]: {
-          [ownerAddress: string]: {
-            balance: number;
-            token_ids: string[];
-            username?: string;
-          };
-        };
-      },
-    ) => {
-      useMarketplaceTokensStore.setState((state) => {
-        const existingOwners = { ...state.owners };
-
-        // Initialize project if it doesn't exist
-        if (!existingOwners[project]) {
-          existingOwners[project] = {};
-        }
-
-        // Process each collection
-        for (const [collectionAddress, collectionOwners] of Object.entries(
-          owners,
-        )) {
-          if (!existingOwners[project][collectionAddress]) {
-            existingOwners[project][collectionAddress] = {};
-          }
-
-          // Merge with existing owners
-          existingOwners[project][collectionAddress] = {
-            ...existingOwners[project][collectionAddress],
-            ...collectionOwners,
-          };
-        }
-
-        return { owners: existingOwners };
-      });
-    },
-    [],
-  );
-
-  const clearOwners = useCallback((project: string, address: string) => {
-    useMarketplaceTokensStore.setState((state) => {
-      const owners = { ...state.owners };
-
-      if (owners[project]?.[address]) {
-        delete owners[project][address];
-      }
-
-      return { owners };
-    });
-
-    // Clear loading state
-    const key = `${project}_${address}_owners`;
-    setOwnersLoadingState((prev) => {
-      const newState = { ...prev };
-      delete newState[key];
-      return newState;
-    });
-  }, []);
-
-  const fetchOwnersImpl = useCallback(
-    async (
-      strategy: FetchStrategy = FetchStrategy.INITIAL,
-      attemptNumber = 0,
-    ) => {
-      const loadingState = getLoadingState(project[0], address);
-      const now = Date.now();
-
-      // Check if we should skip fetching
-      if (strategy === FetchStrategy.INITIAL && loadingState) {
-        if (
-          loadingState.isComplete &&
-          now - loadingState.lastFetchTime < CACHE_DURATION
-        ) {
-          // Collection is complete and recently fetched, skip
-          setSuccess();
-          return;
-        }
-      }
-
-      if (attemptNumber === 0) {
-        startLoading();
-        updateLoadingState(project[0], address, { isLoading: true });
-      }
-
-      createController();
-
-      const stream = fetchToriisStream(project, {
-        client: async function* ({ client }: ClientCallbackParams) {
-          let cursor =
-            strategy === FetchStrategy.INCREMENTAL && loadingState?.lastCursor
-              ? loadingState.lastCursor
-              : undefined;
-          let totalFetched =
-            strategy === FetchStrategy.INCREMENTAL && loadingState?.totalCount
-              ? loadingState.totalCount
-              : 0;
-          let latestCursor = cursor;
-
-          while (true) {
-            if (!isMounted()) break;
-
-            const response = await client.getTokenBalances({
-              contract_addresses: [address],
-              account_addresses: [],
-              token_ids: [],
-              pagination: {
-                limit: strategy === FetchStrategy.CHECK_NEW ? 10 : LIMIT,
-                cursor: cursor,
-                direction: "Forward",
-                order_by: [],
-              },
-            });
-
-            totalFetched += response.items.length;
-            latestCursor = response.next_cursor || latestCursor;
-
-            if (isMounted()) {
-              setLoadingProgress({
-                completed: totalFetched,
-                total: totalFetched,
-              });
-            }
-
-            yield response;
-
-            // For CHECK_NEW strategy, only fetch one batch
-            if (
-              strategy === FetchStrategy.CHECK_NEW &&
-              response.items.length > 0
-            ) {
-              break;
-            }
-
-            cursor = response.next_cursor;
-            if (!cursor) {
-              // Collection fully fetched
-              updateLoadingState(project[0], address, {
-                isComplete: true,
-                lastCursor: null,
-                lastFetchTime: Date.now(),
-                totalCount: totalFetched,
-                isLoading: false,
-              });
-              break;
-            }
-            // Update cursor for incremental fetching
-            updateLoadingState(project[0], address, {
-              lastCursor: cursor,
-              totalCount: totalFetched,
-            });
-          }
-        },
-      });
-
-      for await (const result of stream) {
-        if (!isMounted()) break;
-
-        const owners = await batchProcessOwners(result.data.items);
-        addOwners(result.endpoint, owners);
-      }
-
-      if (isMounted()) {
-        setSuccess();
-        updateLoadingState(project[0], address, {
-          isLoading: false,
-          lastFetchTime: Date.now(),
-        });
-      }
-    },
-    [
-      project,
-      address,
-      addOwners,
-      batchProcessOwners,
-      startLoading,
-      setSuccess,
-      setLoadingProgress,
-      createController,
-      isMounted,
-      getLoadingState,
-      updateLoadingState,
-    ],
-  );
-
-  const fetchOwners = useCallback(
-    async (strategy: FetchStrategy = FetchStrategy.INITIAL) => {
-      try {
-        await withRetry(
-          async (attemptNumber) => {
-            if (attemptNumber > 0) {
-              setRetryCount(attemptNumber);
-              setErrorMessage(
-                `Request failed. Retrying... (${attemptNumber}/${MAX_RETRY_ATTEMPTS})`,
-              );
-              await sleep(RETRY_BASE_DELAY * 2 ** (attemptNumber - 1));
-            }
-            await fetchOwnersImpl(strategy, attemptNumber);
-          },
-          { maxAttempts: MAX_RETRY_ATTEMPTS, baseDelay: RETRY_BASE_DELAY },
-        );
-      } catch (error) {
-        if (isMounted()) {
-          const e = editions.get(project[0]);
-          setError(
-            e,
-            error instanceof Error
-              ? error.message
-              : "Failed to fetch owners after multiple attempts",
-          );
-          updateLoadingState(project[0], address, { isLoading: false });
-        }
-      }
-    },
-    [
-      fetchOwnersImpl,
-      setRetryCount,
-      setErrorMessage,
-      setError,
-      isMounted,
-      updateLoadingState,
-      project,
-      address,
-    ],
-  );
-
-  const refetch = useCallback(
-    async (force = false) => {
-      if (force) {
-        // Force full refetch by clearing owners and state
-        clearOwners(project[0], address);
-        await fetchOwners(FetchStrategy.INITIAL);
-      } else {
-        // Incremental fetch from last cursor
-        const loadingState = getLoadingState(project[0], address);
-        if (loadingState?.isComplete) {
-          await fetchOwners(FetchStrategy.CHECK_NEW);
-        } else {
-          await fetchOwners(FetchStrategy.INCREMENTAL);
-        }
-      }
-    },
-    [fetchOwners, clearOwners, getLoadingState, project, address],
-  );
-
   useEffect(() => {
-    if (!hasFetch && project.length > 0) {
-      fetchOwners(FetchStrategy.INITIAL);
-      setHasFetch(true);
+    if (!data || projectError) {
+      if (projectError) {
+        setIsFetchingNextPage(false);
+      }
+      return;
     }
-  }, [hasFetch, project]); // Remove fetchOwners from deps to avoid re-runs
 
-  // Periodic polling for new items
+    const page = data.page;
+    if (!page) {
+      setNextCursor(null);
+      return;
+    }
+
+    setNextCursor(page.nextCursor);
+    setIsFetchingNextPage(false);
+
+    if (!page.balances.length) return;
+
+    void batchProcessOwners(page.balances).then((owners) => {
+      addOwners(projectId, owners);
+    });
+  }, [data, projectError, projectId, address, addOwners, batchProcessOwners]);
+
   useEffect(() => {
-    if (!project.length || !hasFetch) return;
+    if (!enabled) {
+      setCursor(undefined);
+      setNextCursor(null);
+      setIsFetchingNextPage(false);
+    }
+  }, [enabled]);
 
-    const interval = setInterval(() => {
-      const loadingState = getLoadingState(project[0], address);
-      if (loadingState?.isComplete && !loadingState.isLoading) {
-        // Check for new items
-        fetchOwners(FetchStrategy.CHECK_NEW);
+  useEffect(() => {
+    if (!usernamesMap || usernamesMap.size === 0) return;
+
+    const currentOwners = getOwners(projectId, address);
+    if (currentOwners.length === 0) return;
+
+    const needsUpdate = currentOwners.some(
+      (o) => !o.username && usernamesMap.has(o.address),
+    );
+
+    if (needsUpdate) {
+      const updated: {
+        [ownerAddress: string]: {
+          balance: number;
+          token_ids: string[];
+          username?: string;
+        };
+      } = {};
+
+      for (const owner of currentOwners) {
+        updated[owner.address] = {
+          balance: owner.balance,
+          token_ids: owner.token_ids,
+          username: usernamesMap.get(owner.address) || owner.username,
+        };
       }
-    }, POLL_INTERVAL);
 
-    return () => clearInterval(interval);
-  }, [project, address, hasFetch, getLoadingState]); // Remove fetchOwners from deps
+      addOwners(projectId, { [address]: updated });
+    }
+  }, [usernamesMap, projectId, address, getOwners, addOwners]);
 
   useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
+    if (!normalizedAddress) return;
+    if (!address) return;
+    const checksumAddress = normalizedAddress;
+    if (
+      prevAddressRef.current === checksumAddress &&
+      prevProjectRef.current === projectId
+    ) {
+      return;
+    }
+
+    prevAddressRef.current = checksumAddress;
+    prevProjectRef.current = projectId;
+    clearOwners(projectId, address);
+    setCursor(undefined);
+    setNextCursor(null);
+    setIsFetchingNextPage(false);
+    setInitialLoadComplete(false);
+    setIsAutoFetching(false);
+  }, [address, normalizedAddress, projectId, clearOwners]);
+
+  useEffect(() => {
+    if (projectError || status === "error") {
+      setIsFetchingNextPage(false);
+    }
+  }, [status, projectError]);
+
+  useEffect(() => {
+    if (!autoFetch || !enabled) return;
+    if (initialLoadComplete) return;
+    if (isFetching || isFetchingNextPage) return;
+    if (!nextCursor) {
+      if (isAutoFetching) {
+        setIsAutoFetching(false);
+        setInitialLoadComplete(true);
+      }
+      return;
+    }
+
+    setIsAutoFetching(true);
+    setIsFetchingNextPage(true);
+    setCursor(nextCursor);
+  }, [
+    nextCursor,
+    isFetching,
+    isFetchingNextPage,
+    autoFetch,
+    enabled,
+    initialLoadComplete,
+    isAutoFetching,
+  ]);
+
+  const fetchNextPage = useCallback(() => {
+    if (!nextCursor) return;
+    setIsFetchingNextPage(true);
+    setCursor(nextCursor);
+  }, [nextCursor]);
+
+  const refetch = useCallback(() => {
+    clearOwners(projectId, address);
+    setCursor(undefined);
+    setNextCursor(null);
+    setIsFetchingNextPage(false);
+    setInitialLoadComplete(false);
+    setIsAutoFetching(false);
+  }, [clearOwners, projectId, address]);
+
+  const owners = getOwners(projectId, address);
+
+  const effectiveStatus = projectError ? "error" : status;
+  const effectiveError = projectError?.error ?? error ?? null;
+  const edition = effectiveError ? editions.get(projectId) : null;
+  const editionError = edition ? [edition] : [];
 
   return {
     collection: collection ?? null,
-    owners: getOwners(project[0], address),
-    status,
-    isLoading,
-    isError,
+    owners,
+    status: effectiveStatus,
+    isLoading: effectiveStatus === "loading" && !isFetchingNextPage,
+    isError: effectiveStatus === "error",
     editionError,
-    errorMessage,
-    loadingProgress,
-    retryCount,
+    errorMessage: effectiveError ? effectiveError.message : null,
+    loadingProgress: undefined,
+    retryCount: 0,
+    hasMore: Boolean(nextCursor),
+    isFetchingNextPage: isFetchingNextPage || (isFetching && Boolean(cursor)),
+    isAutoFetching,
+    initialLoadComplete,
+    fetchNextPage,
     refetch,
   };
 }

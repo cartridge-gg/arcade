@@ -23,7 +23,7 @@ export const HoldersView = ({
   loadingProgress,
 }: HoldersViewProps) => {
   return (
-    <div className="flex flex-col pt-6 gap-4">
+    <div className="flex flex-col gap-4 lg:order-3">
       {(hasActiveFilters || totalOwners > 0) && (
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -52,29 +52,11 @@ export const HoldersView = ({
       <div className="rounded overflow-hidden w-full mb-6">
         <div className="flex flex-col gap-px overflow-y-auto">
           {owners.map((holder, index) => (
-            <div
+            <HolderLine
               key={`${holder.address}-${index}`}
-              className="flex items-center gap-3 bg-background-200 text-foreground-100 font-medium text-sm h-10 w-full"
-            >
-              <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-                <p className="w-8 text-foreground-400 font-normal">
-                  {index + 1}.
-                </p>
-                <div className="flex items-center gap-1">
-                  <UserAvatar
-                    username={
-                      holder.username || holder.address.slice(0, 9) || ""
-                    }
-                    size="sm"
-                  />
-                  <p>{holder.username || holder.address.slice(0, 9) || ""}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-                <p className="w-1/2 text-right">{holder.balance}</p>
-                <p className="w-1/2 text-right">{holder.ratio}%</p>
-              </div>
-            </div>
+              holder={holder}
+              index={index}
+            />
           ))}
         </div>
       </div>
@@ -100,6 +82,30 @@ export const HoldersHeader = () => {
     </div>
   );
 };
+
+function HolderLine({
+  holder,
+  index,
+}: { holder: MarketplaceHolder; index: number }) {
+  return (
+    <div className="flex items-center gap-3 bg-background-200 text-foreground-100 font-medium text-sm h-10 w-full">
+      <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+        <p className="w-8 text-foreground-400 font-normal">{index + 1}.</p>
+        <div className="flex items-center gap-1 text-foreground-100 font-normal font-sans">
+          <UserAvatar
+            username={holder.username || holder.address.slice(0, 9) || ""}
+            size="sm"
+          />
+          <p>{holder.username || holder.address.slice(0, 9) || ""}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+        <p className="w-1/2 text-right">{holder.balance}</p>
+        <p className="w-1/2 text-right">{holder.ratio}%</p>
+      </div>
+    </div>
+  );
+}
 
 export const HoldersEmptyState = () => {
   return <Empty title="No holders" icon="guild" className="h-full" />;

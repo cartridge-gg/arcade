@@ -131,9 +131,7 @@ const UserCardInner = (
     <div
       className={cn(
         "flex flex-col items-start py-2 px-3 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl",
-        isPlayer
-          ? "lg:border-primary-100 lg:hover:border-primary-100"
-          : "lg:border-background-150 lg:hover:border-background-200",
+        "lg:border-background-200 lg:hover:border-background-200",
         className,
       )}
     >
@@ -152,12 +150,12 @@ const UserCardInner = (
         <div className="flex-1">
           <div className="flex flex-row justify-between">
             <div className="flex items-center gap-3">
-              <p className="text-foreground-100 text-lg/6 font-semibold">
+              <p className="text-foreground-100 text-[20px] font-semibold">
                 {username?.username}
               </p>
             </div>
             <div className="flex items-center gap-1 p-3">
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5 bg-translucent-dark-100 rounded-xl">
                 <SparklesIcon variant="solid" size="xs" />
                 <p className="text-[14px] text-foreground-100">
                   {totalEarnings}
@@ -167,19 +165,37 @@ const UserCardInner = (
           </div>
 
           <div className="flex flex-row justify-between items-center">
-            <div className="flex items-center text-xs font-normal text-foreground-300 gap-1 rounded-sm bg-background-150 p-1 shrink-0">
-              <CopyAddress size="xs" className="text-sm" address={address} />
+            <div className="flex items-center font-sans text-foreground-200 gap-1 rounded-sm bg-background-150 p-1 shrink-0">
+              <CopyAddress
+                size="xs"
+                address={address}
+                className="text-sm font-sans px-[6px] gap-[6px] rounded-md"
+                first={2}
+                last={2}
+              />
             </div>
             <div className="flex-1 flex items-center justify-end gap-1">
-              <Button variant="tertiary" size="thumbnail" className="hidden">
-                <XIcon />
+              <Button
+                variant="tertiary"
+                size="icon"
+                className="px-[6px] py-1 w-auto h-auto hidden"
+              >
+                <XIcon size={"sm"} />
               </Button>
-              <Button variant="tertiary" size="thumbnail" className="hidden">
-                <DiscordIcon />
+              <Button
+                variant="tertiary"
+                size="icon"
+                className="px-[6px] py-1 w-auto h-auto hidden"
+              >
+                <DiscordIcon size={"sm"} />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="tertiary" size="icon" className="h-7 w-7">
+                  <Button
+                    variant="tertiary"
+                    size="icon"
+                    className="px-[6px] py-1 w-auto h-auto"
+                  >
                     <DotsIcon size={"sm"} />
                   </Button>
                 </DropdownMenuTrigger>

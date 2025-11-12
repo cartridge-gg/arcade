@@ -86,7 +86,7 @@ export function MarketplaceItemsTemplate({
               </div>
               <div
                 className={cn(
-                  "relative grow h-full flex flex-col rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
+                  "relative grow h-full flex flex-col rounded-none lg:rounded-xl lg:gap-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overflow-y-scroll border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
                   player &&
                     "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
                 )}

@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import type { EditionModel } from "@cartridge/arcade";
 import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
 import { useMarketplaceTokensStore } from "@/store";
 import { DEFAULT_PROJECT } from "@/constants";
@@ -14,7 +13,6 @@ export interface MarketplaceHolder {
 }
 
 interface UseMarketplaceHoldersViewModelArgs {
-  edition: EditionModel;
   collectionAddress: string;
 }
 
@@ -35,12 +33,11 @@ export interface MarketplaceHoldersViewModel {
 }
 
 export function useMarketplaceHoldersViewModel({
-  edition,
   collectionAddress,
 }: UseMarketplaceHoldersViewModelArgs): MarketplaceHoldersViewModel {
   const { owners, status, editionError, loadingProgress } =
     useMarketOwnersFetcher({
-      project: [edition.config.project],
+      project: [DEFAULT_PROJECT],
       address: collectionAddress,
     });
 
