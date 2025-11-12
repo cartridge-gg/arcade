@@ -307,4 +307,11 @@ export class NavigationContextManager {
 
     return "/";
   }
+
+  removeGameContext(): string {
+    if (this.params.player && this.params.tab) {
+      return joinPaths("player", this.params.player, this.params.tab);
+    }
+    return "/";
+  }
 }

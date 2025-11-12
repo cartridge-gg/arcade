@@ -58,7 +58,7 @@ export function GameHeader({
           ) : null}
         </div>
       </div>
-      <ContextCloser variant={"rounded-muted"} />
+      <ContextCloser variant={"rounded-muted"} context="game" />
     </div>
   );
 }

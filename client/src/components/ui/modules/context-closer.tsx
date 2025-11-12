@@ -2,6 +2,7 @@ import { useNavigationContext } from "@/features/navigation";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useMemo } from "react";
 
 const closeVariants = cva("relative group w-5 h-5 cursor-pointer", {
   variants: {
@@ -37,23 +38,31 @@ const lineVariants = cva(
   },
 );
 
-export function ContextCloser(props: VariantProps<typeof closeVariants>) {
+type ContextCloserBaseProps = {
+  // Context to close
+  context: string;
+};
+
+type ContextCloserProps = Partial<ContextCloserBaseProps> &
+  VariantProps<typeof closeVariants>;
+
+const defaultProps: Partial<ContextCloserProps> = {
+  context: "player",
+};
+
+export function ContextCloser(props: ContextCloserProps) {
+  const { variant, context } = { ...defaultProps, ...props };
   const { manager } = useNavigationContext();
+
+  const href = useMemo(() => {
+    if ("player" === context) return manager.getParentContextHref();
+    if ("game" === context) return manager.removeGameContext();
+  }, [manager, context]);
+
   return (
-    <Link
-      to={manager.getParentContextHref()}
-      className={cn(closeVariants({ variant: props.variant }))}
-    >
-      <div
-        className={cn(
-          lineVariants({ variant: props.variant, direction: "left" }),
-        )}
-      />
-      <div
-        className={cn(
-          lineVariants({ variant: props.variant, direction: "right" }),
-        )}
-      />
+    <Link to={href} className={cn(closeVariants({ variant }))}>
+      <div className={cn(lineVariants({ variant, direction: "left" }))} />
+      <div className={cn(lineVariants({ variant, direction: "right" }))} />
     </Link>
   );
 }
