@@ -3,6 +3,7 @@ import { cn } from "@cartridge/ui/utils";
 import { EditionsContainer } from "@/features/editions";
 import { GameSocialWebsite } from "@/components/ui/modules/game-social";
 import type { GameModel, EditionModel, Socials } from "@cartridge/arcade";
+import { ContextCloser } from "../modules/context-closer";
 
 interface GameHeaderProps {
   isDashboard: boolean;
@@ -27,6 +28,7 @@ export function GameHeader({
       className={cn(
         "w-full flex flex-col gap-4 lg:p-4 lg:mb-6  lg:border lg:border-background-200 lg:rounded-lg bg-background-125 order-1 lg:order-1",
         isDashboard ? "p-0" : "p-4",
+        "relative",
       )}
     >
       <div className="flex flex-col gap-4 border border-background-200 rounded-lg p-4 lg:border-none lg:p-0">
@@ -56,6 +58,7 @@ export function GameHeader({
           ) : null}
         </div>
       </div>
+      <ContextCloser variant={"rounded-muted"} />
     </div>
   );
 }

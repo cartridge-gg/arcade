@@ -21,11 +21,12 @@ import {
   CopyIcon,
 } from "@cartridge/ui";
 import { useAccount } from "@starknet-react/core";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
 import React, { useCallback, useMemo } from "react";
 import { UserAvatar } from "./avatar";
 import { getChecksumAddress } from "starknet";
 import { ShareIcon } from "lucide-react";
+import { ContextCloser } from "../ui/modules/context-closer";
 
 export const UserCard = React.forwardRef<
   HTMLAnchorElement,
@@ -178,18 +179,25 @@ const UserCardInner = (
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="tertiary" size="icon">
-                    <DotsIcon />
+                  <Button variant="tertiary" size="icon" className="h-7 w-7">
+                    <DotsIcon size={"sm"} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   {isShareAvailable && (
-                    <DropdownMenuItem onClick={handleShare}>
-                      <ShareIcon className="h-6 w-6" /> Share via
+                    <DropdownMenuItem
+                      onClick={handleShare}
+                      className="text-foreground-300 cursor-pointer"
+                    >
+                      <ShareIcon className="h-4 w-4 mr-1" size={"sm"} /> Share
+                      via
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={handleCopyAddress}>
-                    <CopyIcon />
+                  <DropdownMenuItem
+                    onClick={handleCopyAddress}
+                    className="text-foreground-300 cursor-pointer"
+                  >
+                    <CopyIcon className="h-4 w-4 mr-1" size={"sm"} />
                     Copy profile address
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -197,15 +205,7 @@ const UserCardInner = (
             </div>
           </div>
         </div>
-        {isPlayer && (
-          <Link
-            className="absolute w-5 h-5 cursor-pointer group -top-5 -right-5 rounded-full bg-background-150 border border-primary-100 p-4 center hidden lg:flex"
-            to={navManager.getParentContextHref()}
-          >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[15px] h-0.5 bg-current rotate-45 group-hover:bg-foreground-100 transition-colors" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[15px] h-0.5 bg-current -rotate-45 group-hover:bg-foreground-100 transition-colors" />
-          </Link>
-        )}
+        {isPlayer && <ContextCloser />}
       </div>
     </div>
   );

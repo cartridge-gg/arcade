@@ -12,6 +12,7 @@ import arcade from "@/assets/arcade-logo.png";
 import { Socials } from "@cartridge/arcade";
 import { GameHeader } from "./ui/games/GameHeader";
 import { NavigationContainer } from "@/features/navigation";
+import { ViewingAsPlayerBannerInformation } from "./user/viewing-as-player";
 
 interface TemplateProps {
   children: ReactNode;
@@ -31,6 +32,7 @@ export function Template({ children }: TemplateProps) {
 
   return (
     <ThemeProvider defaultScheme="dark">
+      <ViewingAsPlayerBannerInformation />
       <SceneLayout>
         <div
           className={cn("h-full w-full lg:px-6 lg:py-5 lg:pt-0")}
