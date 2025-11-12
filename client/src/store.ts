@@ -195,6 +195,19 @@ type MarketplaceTokensActions = {
     token_ids: string[];
     username?: string;
   }>;
+  addOwners: (
+    project: string,
+    owners: {
+      [address: string]: {
+        [ownerAddress: string]: {
+          balance: number;
+          token_ids: string[];
+          username?: string;
+        };
+      };
+    },
+  ) => void;
+  clearOwners: (project: string, address: string) => void;
   markCollectionFetched: (project: string, address: string) => void;
   isCollectionFetched: (project: string, address: string) => boolean;
 };
@@ -377,6 +390,39 @@ export const useMarketplaceTokensStore = create<
 
     return ownersArray.sort((a, b) => b.balance - a.balance);
   },
+  addOwners: (project, newOwners) =>
+    set((state) => {
+      const existingOwners = { ...state.owners };
+
+      if (!existingOwners[project]) {
+        existingOwners[project] = {};
+      }
+
+      for (const [collectionAddress, collectionOwners] of Object.entries(
+        newOwners,
+      )) {
+        if (!existingOwners[project][collectionAddress]) {
+          existingOwners[project][collectionAddress] = {};
+        }
+
+        existingOwners[project][collectionAddress] = {
+          ...existingOwners[project][collectionAddress],
+          ...collectionOwners,
+        };
+      }
+
+      return { owners: existingOwners };
+    }),
+  clearOwners: (project, address) =>
+    set((state) => {
+      const owners = { ...state.owners };
+
+      if (owners[project]?.[address]) {
+        delete owners[project][address];
+      }
+
+      return { owners };
+    }),
   markCollectionFetched: (project, address) =>
     set((state) => {
       const fetchedCollections = { ...state.fetchedCollections };

@@ -1,5 +1,4 @@
 import { Empty } from "@cartridge/ui";
-import type { EditionModel } from "@cartridge/arcade";
 import {
   HoldersEmptyState,
   HoldersFilteredEmptyState,
@@ -9,12 +8,10 @@ import {
 import { useMarketplaceHoldersViewModel } from "./useMarketplaceHoldersViewModel";
 
 interface MarketplaceHoldersContainerProps {
-  edition: EditionModel;
   collectionAddress: string;
 }
 
 export const MarketplaceHoldersContainer = ({
-  edition,
   collectionAddress,
 }: MarketplaceHoldersContainerProps) => {
   const {
@@ -29,7 +26,7 @@ export const MarketplaceHoldersContainer = ({
     editionError,
     loadingProgress,
     clearAllFilters,
-  } = useMarketplaceHoldersViewModel({ edition, collectionAddress });
+  } = useMarketplaceHoldersViewModel({ collectionAddress });
 
   if (isInitialLoading) {
     return <HoldersLoadingState />;
