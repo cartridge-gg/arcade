@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import type { EditionModel } from "@cartridge/arcade";
 import { useMarketplaceHoldersViewModel } from "./useMarketplaceHoldersViewModel";
 
 type MockOwner = {
@@ -29,10 +28,6 @@ vi.mock("@/hooks/use-metadata-filters", () => ({
 }));
 
 describe("useMarketplaceHoldersViewModel", () => {
-  const edition = {
-    config: { project: "proj" },
-  } as EditionModel;
-
   const owners: MockOwner[] = [
     {
       address: "0x1",
@@ -79,7 +74,7 @@ describe("useMarketplaceHoldersViewModel", () => {
 
   it("returns base owners when no filters are active", () => {
     const { result } = renderHook(() =>
-      useMarketplaceHoldersViewModel({ edition, collectionAddress: "0xabc" }),
+      useMarketplaceHoldersViewModel({ collectionAddress: "0xabc" }),
     );
 
     expect(result.current.owners).toHaveLength(2);
@@ -98,7 +93,7 @@ describe("useMarketplaceHoldersViewModel", () => {
     });
 
     const { result } = renderHook(() =>
-      useMarketplaceHoldersViewModel({ edition, collectionAddress: "0xabc" }),
+      useMarketplaceHoldersViewModel({ collectionAddress: "0xabc" }),
     );
 
     expect(result.current.hasActiveFilters).toBe(true);
@@ -116,7 +111,7 @@ describe("useMarketplaceHoldersViewModel", () => {
     });
 
     const { result } = renderHook(() =>
-      useMarketplaceHoldersViewModel({ edition, collectionAddress: "0xabc" }),
+      useMarketplaceHoldersViewModel({ collectionAddress: "0xabc" }),
     );
 
     expect(result.current.hasActiveFilters).toBe(true);
