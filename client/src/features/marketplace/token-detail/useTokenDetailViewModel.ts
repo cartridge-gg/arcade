@@ -107,7 +107,7 @@ export function useTokenDetailViewModel({
         candidates.add(`0x${BigInt(tokenId).toString(16)}`);
       }
     } catch (error) {
-      // Ignore parse errors
+      candidates.add(BigInt(`0x${tokenId}`).toString());
     }
 
     for (const candidate of candidates) {
@@ -186,7 +186,7 @@ export function useTokenDetailViewModel({
     options.push(`address=${getChecksumAddress(owner)}`);
     options.push("purchaseView=true");
     options.push(`tokenIds=${[tokenId].join(",")}`);
-    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${tokenId}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+    const path = `account/${username}/inventory/${subpath}/${addAddressPadding(collectionAddress)}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
 
     controller.openProfileAt(path);
   }, [

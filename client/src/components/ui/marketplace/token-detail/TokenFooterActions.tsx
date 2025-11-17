@@ -1,5 +1,8 @@
-import { Button } from "@cartridge/ui";
+import { Button, type ButtonProps } from "@cartridge/ui";
 import type { OrderModel } from "@cartridge/arcade";
+import { Info } from "lucide-react";
+import { formatPriceInfo } from "@/lib/shared/marketplace/utils";
+import { erc20Metadata } from "@cartridge/presets";
 
 interface TokenFooterActionsProps {
   isOwner: boolean;
@@ -11,22 +14,63 @@ interface TokenFooterActionsProps {
   handleSend: () => void;
 }
 
+interface TokenSelectorProps {
+  currencyAddress: string;
+  currencyImage: string;
+}
+
+function TokenSelector({ currencyAddress, currencyImage }: TokenSelectorProps) {
+  const currencySymbol =
+    erc20Metadata.find(
+      (token) => BigInt(token.l2_token_address) === BigInt(currencyAddress),
+    )?.symbol ?? currencyAddress.slice(0, 6);
+
+  return (
+    <div className="bg-background-125 border border-background-200 rounded flex items-center justify-between p-2 h-[40px]">
+      <div className="flex items-center gap-1">
+        <img
+          src={currencyImage}
+          alt={currencySymbol}
+          className="w-6 h-6 rounded-full"
+        />
+        <span className="text-foreground-100 text-sm font-medium">
+          {currencySymbol}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 interface PriceDisplayProps {
   label: string;
   order: OrderModel;
+  showInfoIcon?: boolean;
 }
 
-function PriceDisplay({ label, order }: PriceDisplayProps) {
+function PriceDisplay({
+  label,
+  order,
+  showInfoIcon = false,
+}: PriceDisplayProps) {
+  const priceInfo = formatPriceInfo(order.currency, order.price);
+  const currencySymbol =
+    erc20Metadata.find(
+      (token) => BigInt(token.l2_token_address) === BigInt(order.currency),
+    )?.symbol ?? "";
+
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-foreground-300 text-xs font-sans">{label}</span>
-      <div className="flex items-center gap-2">
+    <div className="flex-1 bg-background-125 border border-background-200 rounded flex items-center justify-between px-3 py-2.5 h-[40px]">
+      <div className="flex items-center gap-1">
+        <span className="text-foreground-300 text-sm font-sans">{label}</span>
+        {showInfoIcon && <Info className="w-5 h-5 text-foreground-300" />}
+      </div>
+      <div className="flex items-center gap-1.5">
         <span className="text-foreground-100 text-sm font-medium">
-          ${order.price}
+          {priceInfo.value}
         </span>
-        <span className="text-foreground-300 text-sm">
-          {order.price} {order.currency}
-        </span>
+        {currencySymbol && (
+          <span className="text-foreground-300 text-sm">{currencySymbol}</span>
+        )}
       </div>
     </div>
   );
@@ -44,7 +88,7 @@ function FooterContainer({
   const justifyClass =
     justify === "between" ? "justify-between" : "justify-end";
   return (
-    <div className="bg-background-100">
+    <div className="bg-background-100 p-4">
       <div
         className={`max-w-7xl mx-auto flex items-center ${justifyClass} gap-3`}
       >
@@ -56,7 +100,7 @@ function FooterContainer({
 
 type ButtonConfig = {
   label: string;
-  variant: "primary" | "secondary" | "destructive";
+  variant: ButtonProps["variant"];
   onClick: () => void;
 };
 
@@ -72,7 +116,7 @@ function ActionButtons({ buttons }: ActionButtonsProps) {
         variant={button.variant}
         size="default"
         onClick={button.onClick}
-        className="flex-1 max-w-xs uppercase tracking-wider"
+        className="w-[120px] h-[40px] uppercase tracking-wider"
       >
         {button.label}
       </Button>
@@ -80,14 +124,14 @@ function ActionButtons({ buttons }: ActionButtonsProps) {
   }
 
   return (
-    <div className="flex gap-3 flex-1 max-w-md">
+    <div className="flex gap-3">
       {buttons.map((button) => (
         <Button
           key={button.label}
           variant={button.variant}
           size="default"
           onClick={button.onClick}
-          className="flex-1 uppercase tracking-wider"
+          className="w-[120px] h-[40px] uppercase tracking-wider"
         >
           {button.label}
         </Button>
@@ -112,9 +156,21 @@ export function TokenFooterActions({
   }
 
   if (!isOwner && isListed) {
+    const priceInfo = lowestOrder
+      ? formatPriceInfo(lowestOrder.currency, lowestOrder.price)
+      : null;
+
     return (
       <FooterContainer>
-        {lowestOrder && <PriceDisplay label="Total Cost" order={lowestOrder} />}
+        {lowestOrder && priceInfo && (
+          <div className="flex gap-3 flex-1">
+            <PriceDisplay label="Total" order={lowestOrder} showInfoIcon />
+            <TokenSelector
+              currencyAddress={lowestOrder.currency}
+              currencyImage={priceInfo.image}
+            />
+          </div>
+        )}
         <ActionButtons
           buttons={[
             { label: "BUY NOW", variant: "primary", onClick: handleBuy },
@@ -125,10 +181,24 @@ export function TokenFooterActions({
   }
 
   if (isOwner && isListed) {
+    const priceInfo = lowestOrder
+      ? formatPriceInfo(lowestOrder.currency, lowestOrder.price)
+      : null;
+
     return (
       <FooterContainer>
-        {lowestOrder && (
-          <PriceDisplay label="Listed Price" order={lowestOrder} />
+        {lowestOrder && priceInfo && (
+          <div className="flex gap-3 flex-1">
+            <PriceDisplay
+              label="Listed Price"
+              order={lowestOrder}
+              showInfoIcon
+            />
+            <TokenSelector
+              currencyAddress={lowestOrder.currency}
+              currencyImage={priceInfo.image}
+            />
+          </div>
         )}
         <ActionButtons
           buttons={[
