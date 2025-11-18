@@ -1,51 +1,53 @@
 {
-	"name": "arcade",
-	"packageManager": "pnpm@10.5.2",
-	"pnpm": {
-		"overrides": {
-			"@types/react": "^18.2.0",
-			"@types/react-dom": "^18.2.0"
-		}
-	},
-	"scripts": {
+  "name": "arcade",
+  "packageManager": "pnpm@10.5.2",
+  "scripts": {
     "prepare": "pnpm build && husky",
     "clean": "git clean -xdf",
-		"dev": "turbo watch dev",
-		"test": "turbo run test",
-		"test:ts": "turbo run test:ts",
-		"test:cairo": "turbo run test:cairo",
-		"test:watch": "turbo run test:watch",
-		"format": "turbo run format",
-		"format:check": "turbo run format:check",
-		"format:ts": "turbo run format:ts",
-		"format:check:ts": "turbo run format:check:ts",
-		"format:cairo": "turbo run format:cairo",
-		"format:check:cairo": "turbo run format:check:cairo",
-		"lint": "turbo run lint",
-		"lint:check": "turbo run lint:check",
-		"lint:ts": "turbo run lint:ts",
-		"lint:check:ts": "turbo run lint:check:ts",
-		"lint:cairo": "turbo run lint:cairo",
-		"lint:check:cairo": "turbo run lint:check:cairo",
-		"build:scarb": "turbo run build:scarb",
-		"build": "turbo run build",
-		"build:deps": "turbo run build:deps",
-		"type:check": "turbo run type:check"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
-		"@commitlint/cli": "^19.8.1",
-		"@commitlint/config-conventional": "^19.8.1",
-		"husky": "^9.1.7",
-		"turbo": "^2.5.4",
-		"@types/node": "^22.15.23",
-		"change-case": "^5.4.4",
-		"csv-parser": "^3.2.0",
-		"eslint": "^9.12.0",
-		"prettier": "^3.5.3",
-		"tsup": "^8.3.5"
-	},
-	"bin": {
-		"gen": "./scripts/genAchievements.ts"
-	}
+    "dev": "turbo watch dev",
+    "test": "turbo run test",
+    "test:ts": "turbo run test:ts",
+    "test:cairo": "turbo run test:cairo",
+    "test:watch": "turbo run test:watch",
+    "format": "turbo run format",
+    "format:check": "turbo run format:check",
+    "format:ts": "turbo run format:ts",
+    "format:check:ts": "turbo run format:check:ts",
+    "format:cairo": "turbo run format:cairo",
+    "format:check:cairo": "turbo run format:check:cairo",
+    "lint": "turbo run lint",
+    "lint:check": "turbo run lint:check",
+    "lint:ts": "turbo run lint:ts",
+    "lint:check:ts": "turbo run lint:check:ts",
+    "lint:cairo": "turbo run lint:cairo",
+    "lint:check:cairo": "turbo run lint:check:cairo",
+    "build:scarb": "turbo run build:scarb",
+    "build": "turbo run build",
+    "build:deps": "turbo run build:deps",
+    "type:check": "turbo run type:check"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
+    "turbo": "^2.5.4",
+    "@types/node": "^22.15.23",
+    "change-case": "^5.4.4",
+    "csv-parser": "^3.2.0",
+    "eslint": "^9.12.0",
+    "prettier": "^3.5.3",
+    "tsup": "^8.3.5"
+  },
+  "bin": {
+    "gen": "./scripts/genAchievements.ts"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0",
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+    }
+  }
 }

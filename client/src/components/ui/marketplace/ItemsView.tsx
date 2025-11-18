@@ -55,7 +55,7 @@ export interface MarketplaceItemsRow {
 }
 
 interface ItemsViewProps {
-  parentRef: RefObject<HTMLDivElement>;
+  parentRef: RefObject<HTMLDivElement | null>;
   totalHeight: number;
   rows: MarketplaceItemsRow[];
   hasMore: boolean;

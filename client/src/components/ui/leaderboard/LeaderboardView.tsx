@@ -14,8 +14,8 @@ interface LeaderboardViewProps {
   followingEntries: LeaderboardEntry[];
   getPlayerTarget: (nameOrAddress: string) => string;
   onScroll: (event: UIEvent<HTMLDivElement>) => void;
-  allListRef: React.RefObject<HTMLDivElement>;
-  followingListRef: React.RefObject<HTMLDivElement>;
+  allListRef: React.RefObject<HTMLDivElement | null>;
+  followingListRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const LeaderboardView = ({
