@@ -4,7 +4,6 @@
 
 use achievement::types::task::Task;
 
-
 #[derive(Clone, Drop, Serde)]
 #[dojo::event]
 pub struct TrophyCreation {

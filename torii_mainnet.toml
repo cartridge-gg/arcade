@@ -1,13 +1,18 @@
-# db_dir = "./torii-db"
 rpc = "https://api.cartridge.gg/x/starknet/mainnet"
 world_address = "0x07a079295990e43441a7389fdc3b9ba063c6cd6aee16fb846f598c42a9f04ff7"
 
+[grpc]
+optimistic = true
+
 [indexing]
+controllers = true
 pending = true
 polling_interval = 500
 max_concurrent_tasks = 100
 namespaces = ["ARCADE"]
-
 contracts = [
     "ERC721:0x07fc27ad206a82c097260f92d822de9bf205095205747fadef9c596714491437",
 ]
+
+[erc]
+metadata_updates = false

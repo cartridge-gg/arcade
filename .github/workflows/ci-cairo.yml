@@ -41,7 +41,7 @@ jobs:
 
       - uses: software-mansion/setup-scarb@v1
         with:
-          scarb-version: "2.12.2"
+          scarb-version: "2.13.1"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -65,7 +65,7 @@ jobs:
 
       - uses: software-mansion/setup-scarb@v1
         with:
-          scarb-version: "2.12.2"
+          scarb-version: "2.13.1"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -81,7 +81,7 @@ jobs:
 
       - uses: software-mansion/setup-scarb@v1
         with:
-          scarb-version: "2.12.2"
+          scarb-version: "2.13.1"
 
       - name: Cache Scarb
         uses: actions/cache@v4
