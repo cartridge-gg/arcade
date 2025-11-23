@@ -11,6 +11,7 @@ pub mod models {
     pub mod advancement;
     pub mod association;
     pub mod completion;
+    pub mod condition;
     pub mod definition;
     pub mod index;
 }
@@ -21,6 +22,7 @@ pub mod events {
     pub mod creation;
     pub mod index;
     pub mod progression;
+    pub mod unlocked;
 }
 
 pub mod components {

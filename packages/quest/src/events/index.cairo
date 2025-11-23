@@ -23,6 +23,18 @@ pub struct QuestProgression {
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::event]
+pub struct QuestUnlocked {
+    #[key]
+    pub player_id: felt252,
+    #[key]
+    pub quest_id: felt252,
+    #[key]
+    pub interval_id: u64,
+    pub time: u64,
+}
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
 pub struct QuestCompleted {
     #[key]
     pub player_id: felt252,

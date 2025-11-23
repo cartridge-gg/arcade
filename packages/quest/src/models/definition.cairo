@@ -24,6 +24,7 @@ pub impl DefinitionImpl of DefinitionTrait {
         duration: u64,
         interval: u64,
         tasks: Span<Task>,
+        conditions: Span<felt252>,
         metadata: ByteArray,
     ) -> QuestDefinition {
         // [Check] Inputs
@@ -40,6 +41,7 @@ pub impl DefinitionImpl of DefinitionTrait {
             duration: duration,
             interval: interval,
             tasks: tasks,
+            conditions: conditions,
             metadata: metadata,
         }
     }
@@ -72,6 +74,7 @@ pub impl DefinitionImpl of DefinitionTrait {
         self.duration = 0;
         self.interval = 0;
         self.tasks = array![].span();
+        self.conditions = array![].span();
         self.metadata = Default::default();
     }
 
@@ -155,6 +158,10 @@ mod tests {
         array![TaskTrait::new(TASK_ID, TOTAL, "TASK DESCRIPTION")].span()
     }
 
+    fn CONDITIONS() -> Span<felt252> {
+        array![QUEST_ID].span()
+    }
+
     fn METADATA() -> ByteArray {
         "METADATA"
     }
@@ -162,7 +169,7 @@ mod tests {
     #[test]
     fn test_quest_definition_new() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, REWARDER(), START, END, DURATION, INTERVAL, TASKS(), METADATA(),
+            QUEST_ID, REWARDER(), START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(), METADATA(),
         );
         assert_eq!(quest.id, QUEST_ID);
         assert_eq!(quest.rewarder, REWARDER());
@@ -177,14 +184,24 @@ mod tests {
     #[test]
     #[should_panic(expected: ('Quest: invalid id',))]
     fn test_quest_definition_new_invalid_id() {
-        DefinitionTrait::new(0, REWARDER(), START, END, DURATION, INTERVAL, TASKS(), METADATA());
+        DefinitionTrait::new(
+            0, REWARDER(), START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(), METADATA(),
+        );
     }
 
     #[test]
     #[should_panic(expected: ('Quest: invalid verifier',))]
     fn test_quest_definition_new_invalid_verifier() {
         DefinitionTrait::new(
-            QUEST_ID, 0.try_into().unwrap(), START, END, DURATION, INTERVAL, TASKS(), METADATA(),
+            QUEST_ID,
+            0.try_into().unwrap(),
+            START,
+            END,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
         );
     }
 
@@ -192,7 +209,15 @@ mod tests {
     #[should_panic(expected: ('Quest: invalid tasks',))]
     fn test_quest_definition_new_invalid_tasks() {
         DefinitionTrait::new(
-            QUEST_ID, REWARDER(), START, END, DURATION, INTERVAL, array![].span(), METADATA(),
+            QUEST_ID,
+            REWARDER(),
+            START,
+            END,
+            DURATION,
+            INTERVAL,
+            array![].span(),
+            CONDITIONS(),
+            METADATA(),
         );
     }
 
@@ -200,14 +225,22 @@ mod tests {
     #[should_panic(expected: ('Quest: invalid duration',))]
     fn test_quest_definition_new_invalid_duration() {
         DefinitionTrait::new(
-            QUEST_ID, REWARDER(), START, 1, DURATION, INTERVAL, TASKS(), METADATA(),
+            QUEST_ID, REWARDER(), START, 1, DURATION, INTERVAL, TASKS(), CONDITIONS(), METADATA(),
         );
     }
 
     #[test]
     fn test_quest_compute_interval_id() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, DURATION, INTERVAL, TASKS(), Default::default(),
+            QUEST_ID,
+            IMPLEMENTATION(),
+            START,
+            END,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
         );
         assert_eq!(quest.compute_interval_id(START), 0);
         assert_eq!(quest.compute_interval_id(START + DURATION - 1), 0);
@@ -217,7 +250,15 @@ mod tests {
     #[test]
     fn test_quest_compute_interval_id_no_start() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, END, DURATION, INTERVAL, TASKS(), Default::default(),
+            QUEST_ID,
+            IMPLEMENTATION(),
+            0,
+            END,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
         );
         assert_eq!(quest.compute_interval_id(0), 0);
         assert_eq!(quest.compute_interval_id(DURATION - 1), 0);
@@ -227,7 +268,15 @@ mod tests {
     #[test]
     fn test_quest_compute_interval_id_no_end() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, 0, DURATION, INTERVAL, TASKS(), Default::default(),
+            QUEST_ID,
+            IMPLEMENTATION(),
+            START,
+            0,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
         );
         assert_eq!(quest.compute_interval_id(START), 0);
         assert_eq!(quest.compute_interval_id(START + DURATION - 1), 0);
@@ -240,7 +289,7 @@ mod tests {
     #[test]
     fn test_quest_compute_interval_id_permanent() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, DURATION, 0, TASKS(), Default::default(),
+            QUEST_ID, IMPLEMENTATION(), START, END, DURATION, 0, TASKS(), CONDITIONS(), METADATA(),
         );
         assert_eq!(quest.compute_interval_id(START), 0);
         assert_eq!(quest.compute_interval_id(START + DURATION - 1), 0);
@@ -254,7 +303,7 @@ mod tests {
     #[test]
     fn test_quest_compute_interval_id_no_duration() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, 0, INTERVAL, TASKS(), Default::default(),
+            QUEST_ID, IMPLEMENTATION(), START, END, 0, INTERVAL, TASKS(), CONDITIONS(), METADATA(),
         );
         assert_eq!(quest.is_active(0), false);
         assert_eq!(quest.is_active(START), false);
@@ -268,7 +317,7 @@ mod tests {
     #[test]
     fn test_quest_compute_interval_id_default() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, 0, 0, 0, TASKS(), Default::default(),
+            QUEST_ID, IMPLEMENTATION(), 0, 0, 0, 0, TASKS(), CONDITIONS(), METADATA(),
         );
         assert_eq!(quest.compute_interval_id(0), 0);
         assert_eq!(quest.compute_interval_id(DURATION - 1), 0);

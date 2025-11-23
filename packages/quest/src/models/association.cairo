@@ -1,20 +1,12 @@
 pub use crate::models::index::QuestAssociation;
 pub use crate::types::task::Task;
 
-// Errors
-
-pub mod errors {
-    pub const COMPLETION_INVALID_PLAYER_ID: felt252 = 'Quest: invalid player id';
-    pub const COMPLETION_INVALID_QUEST_ID: felt252 = 'Quest: invalid quest id';
-    pub const COMPLETION_INVALID_TASK_ID: felt252 = 'Quest: invalid task id';
-}
-
 #[generate_trait]
 pub impl AssociationImpl of AssociationTrait {
     #[inline]
-    fn new(task_id: felt252, quests: felt252) -> QuestAssociation {
+    fn new(task_id: felt252) -> QuestAssociation {
         // [Return] QuestAssociation
-        QuestAssociation { task_id: task_id, quests: array![quests] }
+        QuestAssociation { task_id: task_id, quests: array![] }
     }
 
     #[inline]
@@ -48,7 +40,8 @@ mod tests {
 
     #[test]
     fn test_quest_association_new() {
-        let association = AssociationTrait::new(TASK_ID, QUEST_ID);
+        let mut association = AssociationTrait::new(TASK_ID);
+        association.insert(QUEST_ID);
         assert_eq!(association.task_id, TASK_ID);
         assert_eq!(association.quests.len(), 1);
         assert_eq!(association.quests.at(0), @QUEST_ID);
@@ -56,22 +49,15 @@ mod tests {
 
     #[test]
     fn test_quest_association_contains() {
-        let association = AssociationTrait::new(TASK_ID, QUEST_ID);
+        let mut association = AssociationTrait::new(TASK_ID);
+        association.insert(QUEST_ID);
         assert_eq!(association.contains(QUEST_ID), true);
         assert_eq!(association.contains(0), false);
     }
 
     #[test]
-    fn test_quest_association_insert() {
-        let mut association = AssociationTrait::new(TASK_ID, QUEST_ID);
-        association.insert(QUEST_ID);
-        assert_eq!(association.quests.len(), 1);
-        assert_eq!(association.quests.at(0), @QUEST_ID);
-    }
-
-    #[test]
     fn test_quest_association_insert_duplicate() {
-        let mut association = AssociationTrait::new(TASK_ID, QUEST_ID);
+        let mut association = AssociationTrait::new(TASK_ID);
         association.insert(QUEST_ID);
         association.insert(QUEST_ID);
         assert_eq!(association.quests.len(), 1);

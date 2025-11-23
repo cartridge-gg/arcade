@@ -16,6 +16,7 @@ pub struct QuestDefinition {
     pub duration: u64,
     pub interval: u64,
     pub tasks: Span<Task>,
+    pub conditions: Span<felt252>,
     pub metadata: ByteArray,
 }
 
@@ -29,7 +30,8 @@ pub struct QuestCompletion {
     #[key]
     pub interval_id: u64,
     pub timestamp: u64,
-    pub claimed: bool,
+    pub unclaimed: bool,
+    pub lock_count: u32,
 }
 
 #[derive(Copy, Drop, Serde)]
@@ -54,3 +56,12 @@ pub struct QuestAssociation {
     pub task_id: felt252,
     pub quests: Array<felt252>,
 }
+
+#[derive(Clone, Drop, Serde)]
+#[dojo::model]
+pub struct QuestCondition {
+    #[key]
+    pub quest_id: felt252,
+    pub quests: Array<felt252>,
+}
+

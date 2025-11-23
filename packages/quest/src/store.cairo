@@ -8,9 +8,11 @@ use crate::events::claimed::{ClaimedTrait, QuestClaimed};
 use crate::events::completed::{CompletedTrait, QuestCompleted};
 use crate::events::creation::{CreationTrait, QuestCreation};
 use crate::events::progression::{ProgressTrait, QuestProgression};
+use crate::events::unlocked::{QuestUnlocked, UnlockedTrait};
 use crate::models::advancement::{AdvancementTrait, QuestAdvancement};
 use crate::models::association::{AssociationTrait, QuestAssociation};
 use crate::models::completion::{CompletionTrait, QuestCompletion};
+use crate::models::condition::{ConditionTrait, QuestCondition};
 use crate::models::definition::{DefinitionTrait, QuestDefinition};
 use crate::types::task::Task;
 
@@ -63,6 +65,16 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
+    fn get_condition(self: Store, quest_id: felt252) -> QuestCondition {
+        self.world.read_model(quest_id)
+    }
+
+    #[inline]
+    fn set_condition(mut self: Store, condition: @QuestCondition) {
+        self.world.write_model(condition);
+    }
+
+    #[inline]
     fn get_advancement(
         self: Store, player_id: felt252, quest_id: felt252, task_id: felt252, interval_id: u64,
     ) -> QuestAdvancement {
@@ -84,6 +96,7 @@ pub impl StoreImpl of StoreTrait {
         duration: u64,
         interval: u64,
         mut tasks: Span<Task>,
+        mut conditions: Span<felt252>,
         metadata: ByteArray,
         to_store: bool,
     ) {
@@ -96,6 +109,7 @@ pub impl StoreImpl of StoreTrait {
             duration: duration,
             interval: interval,
             tasks: tasks,
+            conditions: conditions,
             metadata: metadata,
         );
         // [Event] Emit quest creation
@@ -112,6 +126,12 @@ pub impl StoreImpl of StoreTrait {
             let mut association = self.get_association(*task.id);
             association.insert(id);
             self.set_association(@association);
+        }
+        // [Effect] Update conditions
+        while let Option::Some(condition) = conditions.pop_front() {
+            let mut condition = self.get_condition(*condition);
+            condition.insert(id);
+            self.set_condition(@condition);
         };
     }
 
@@ -141,26 +161,59 @@ pub impl StoreImpl of StoreTrait {
             if (!definition.is_active(time)) {
                 continue;
             }
-            // [Effect] Update player quest advancement
+            // [Check] Completion is unlocked, otherwise save and continue
             let interval_id = definition.compute_interval_id(time);
+            let mut completion = self.get_completion(player_id, task_id, interval_id);
+            if (completion.is_undefined()) {
+                completion =
+                    CompletionTrait::new(
+                        player_id, quest_id, interval_id, definition.conditions.len(),
+                    );
+            }
+            if (!completion.is_unlocked()) {
+                self.set_completion(@completion);
+                continue;
+            }
+            // [Check] Quest is not already completed, otherwise save and continue
+            if (completion.is_completed()) {
+                continue;
+            }
+            // [Effect] Update player quest advancement
             let mut advancement = self.get_advancement(player_id, quest_id, task_id, interval_id);
             advancement.add(count);
             advancement.assess(definition.tasks, time);
             self.set_advancement(@advancement);
-            // [Effect] Update player completion
-            let mut completion = self.get_completion(player_id, task_id, interval_id);
+            // [Check] Task is completed, otherwise save and continue
+            if (!advancement.is_completed()) {
+                continue;
+            }
+            // [Check] Quest is completed, otherwise save and continue
             let mut completed = true;
             let mut tasks = definition.tasks;
             while let Option::Some(task) = tasks.pop_front() {
                 let advancement = self.get_advancement(player_id, quest_id, *task.id, interval_id);
                 completed = completed && advancement.is_completed();
             }
+            if (!completed) {
+                continue;
+            }
             // [Effect] Update player quest completion if completed
-            if completed {
-                completion.complete(time);
+            completion.complete(time);
+            self.set_completion(@completion);
+            // [Event] Emit quest completed
+            self.complete(player_id, quest_id, interval_id, time);
+            // [Check] Quest unlocks other quests
+            let conditions = self.get_condition(quest_id);
+            let mut conditions = conditions.quests;
+            while let Option::Some(condition) = conditions.pop_front() {
+                // [Effect] Update quest unlock condition for the other quest
+                let definition = self.get_definition(condition);
+                let interval_id = definition.compute_interval_id(time);
+                let mut completion = self.get_completion(player_id, condition, interval_id);
+                completion.unlock();
                 self.set_completion(@completion);
-                // [Event] Emit quest completed
-                self.complete(player_id, quest_id, interval_id, time);
+                // [Event] Emit quest unlocked
+                self.unlock(player_id, condition, interval_id, time);
             }
         };
     }
@@ -171,6 +224,13 @@ pub impl StoreImpl of StoreTrait {
     ) {
         // [Event] Emit quest completed
         let event: QuestCompleted = CompletedTrait::new(player_id, quest_id, interval_id, time);
+        self.world.emit_event(@event);
+    }
+
+    #[inline]
+    fn unlock(mut self: Store, player_id: felt252, quest_id: felt252, interval_id: u64, time: u64) {
+        // [Event] Emit quest completed
+        let event: QuestUnlocked = UnlockedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);
     }
 

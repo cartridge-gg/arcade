@@ -13,7 +13,9 @@ pub mod errors {
 #[generate_trait]
 pub impl CompletionImpl of CompletionTrait {
     #[inline]
-    fn new(player_id: felt252, quest_id: felt252, interval_id: u64) -> QuestCompletion {
+    fn new(
+        player_id: felt252, quest_id: felt252, interval_id: u64, lock_count: u32,
+    ) -> QuestCompletion {
         // [Check] Inputs
         CompletionAssert::assert_valid_player_id(player_id);
         CompletionAssert::assert_valid_quest_id(quest_id);
@@ -23,8 +25,29 @@ pub impl CompletionImpl of CompletionTrait {
             quest_id: quest_id,
             interval_id: interval_id,
             timestamp: 0,
-            claimed: false,
+            unclaimed: true,
+            lock_count: lock_count,
         }
+    }
+
+    #[inline]
+    fn is_completed(self: @QuestCompletion) -> bool {
+        self.timestamp != @0
+    }
+
+    #[inline]
+    fn is_unlocked(self: @QuestCompletion) -> bool {
+        self.lock_count == @0
+    }
+
+    #[inline]
+    fn is_undefined(self: @QuestCompletion) -> bool {
+        self.timestamp == @0 && !*self.unclaimed
+    }
+
+    #[inline]
+    fn unlock(ref self: QuestCompletion) {
+        self.lock_count -= 1;
     }
 
     #[inline]
@@ -34,7 +57,10 @@ pub impl CompletionImpl of CompletionTrait {
 
     #[inline]
     fn claim(ref self: QuestCompletion) {
-        self.claimed = true;
+        // [Check] Completion not yet claimed
+        self.assert_not_claimed();
+        // [Update] Completion
+        self.unclaimed = false;
     }
 
     #[inline]
@@ -57,12 +83,12 @@ pub impl CompletionAssert of AssertTrait {
 
     #[inline]
     fn assert_is_completed(self: @QuestCompletion) {
-        assert(self.timestamp != @0, errors::COMPLETION_NOT_COMPLETED);
+        assert(self.is_completed(), errors::COMPLETION_NOT_COMPLETED);
     }
 
     #[inline]
     fn assert_not_claimed(self: @QuestCompletion) {
-        assert(!*self.claimed, errors::COMPLETION_CLAIMED);
+        assert(*self.unclaimed, errors::COMPLETION_CLAIMED);
     }
 }
 
@@ -75,10 +101,11 @@ mod tests {
     const PLAYER_ID: felt252 = 'PLAYER';
     const INTERVAL_ID: u64 = 0;
     const QUEST_ID: felt252 = 'QUEST';
+    const LOCK_COUNT: u32 = 0;
 
     #[test]
     fn test_quest_completion_new() {
-        let quest = CompletionTrait::new(PLAYER_ID, QUEST_ID, INTERVAL_ID);
+        let quest = CompletionTrait::new(PLAYER_ID, QUEST_ID, INTERVAL_ID, LOCK_COUNT);
         assert_eq!(quest.player_id, PLAYER_ID);
         assert_eq!(quest.quest_id, QUEST_ID);
         assert_eq!(quest.interval_id, INTERVAL_ID);
@@ -88,25 +115,25 @@ mod tests {
     #[test]
     #[should_panic(expected: ('Quest: invalid player id',))]
     fn test_quest_completion_new_invalid_player_id() {
-        CompletionTrait::new(0, QUEST_ID, INTERVAL_ID);
+        CompletionTrait::new(0, QUEST_ID, INTERVAL_ID, LOCK_COUNT);
     }
 
     #[test]
     #[should_panic(expected: ('Quest: invalid quest id',))]
     fn test_quest_completion_new_invalid_quest_id() {
-        CompletionTrait::new(PLAYER_ID, 0, INTERVAL_ID);
+        CompletionTrait::new(PLAYER_ID, 0, INTERVAL_ID, LOCK_COUNT);
     }
 
     #[test]
     fn test_quest_completion_complete() {
-        let mut quest = CompletionTrait::new(PLAYER_ID, QUEST_ID, INTERVAL_ID);
+        let mut quest = CompletionTrait::new(PLAYER_ID, QUEST_ID, INTERVAL_ID, LOCK_COUNT);
         quest.complete(1000000000);
         assert_eq!(quest.timestamp, 1000000000);
     }
 
     #[test]
     fn test_quest_completion_nullify() {
-        let mut quest = CompletionTrait::new(PLAYER_ID, QUEST_ID, INTERVAL_ID);
+        let mut quest = CompletionTrait::new(PLAYER_ID, QUEST_ID, INTERVAL_ID, LOCK_COUNT);
         quest.nullify();
         assert_eq!(quest.timestamp, 0);
     }

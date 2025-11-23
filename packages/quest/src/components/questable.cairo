@@ -61,6 +61,7 @@ pub mod QuestableComponent {
             duration: u64,
             interval: u64,
             tasks: Span<Task>,
+            conditions: Span<felt252>,
             hidden: bool,
             name: ByteArray,
             description: ByteArray,
@@ -88,6 +89,7 @@ pub mod QuestableComponent {
                     duration: duration,
                     interval: interval,
                     tasks: tasks,
+                    conditions: conditions,
                     metadata: metadata,
                     to_store: to_store,
                 );
