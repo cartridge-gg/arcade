@@ -49,28 +49,25 @@ fn test_achievable_create() {
         );
     let contract_event = starknet::testing::pop_log::<Event>(world.dispatcher.contract_address)
         .unwrap();
-    match contract_event {
-        Event::EventEmitted(event) => {
-            assert(*event.keys.at(0) == TROPHY_ID, 'Invalid trophy id');
-            assert(*event.values.at(0) == 0, 'Invalid hidden');
-            assert(*event.values.at(1) == INDEX.into(), 'Invalid index');
-            assert(*event.values.at(2) == POINTS.into(), 'Invalid points');
-            assert(*event.values.at(3) == START.into(), 'Invalid start');
-            assert(*event.values.at(4) == END.into(), 'Invalid end');
-            assert(*event.values.at(5) == GROUP.into(), 'Invalid group');
-            assert(*event.values.at(6) == ICON.into(), 'Invalid icon');
-            assert(*event.values.at(7) == TITLE.into(), 'Invalid title');
-            assert(*event.values.at(8) == 0, 'Invalid data');
-            assert(*event.values.at(9) == 'Description', 'Invalid description');
-            assert(*event.values.at(10) == 11, 'Invalid task count');
-            assert(*event.values.at(11) == 1, 'Invalid task count');
-            assert(*event.values.at(12) == TASK_ID, 'Invalid task id');
-            assert(*event.values.at(13) == TOTAL.into(), 'Invalid task total');
-            assert(*event.values.at(14) == 0, 'Invalid task time');
-            assert(*event.values.at(15) == 'Description', 'Invalid task description');
-            assert(*event.values.at(16) == 11, 'Invalid task points');
-        },
-        _ => {},
+    if let Event::EventEmitted(event) = contract_event {
+        assert(*event.keys.at(0) == TROPHY_ID, 'Invalid trophy id');
+        assert(*event.values.at(0) == 0, 'Invalid hidden');
+        assert(*event.values.at(1) == INDEX.into(), 'Invalid index');
+        assert(*event.values.at(2) == POINTS.into(), 'Invalid points');
+        assert(*event.values.at(3) == START.into(), 'Invalid start');
+        assert(*event.values.at(4) == END.into(), 'Invalid end');
+        assert(*event.values.at(5) == GROUP, 'Invalid group');
+        assert(*event.values.at(6) == ICON, 'Invalid icon');
+        assert(*event.values.at(7) == TITLE, 'Invalid title');
+        assert(*event.values.at(8) == 0, 'Invalid data');
+        assert(*event.values.at(9) == 'Description', 'Invalid description');
+        assert(*event.values.at(10) == 11, 'Invalid task count');
+        assert(*event.values.at(11) == 1, 'Invalid task count');
+        assert(*event.values.at(12) == TASK_ID, 'Invalid task id');
+        assert(*event.values.at(13) == TOTAL.into(), 'Invalid task total');
+        assert(*event.values.at(14) == 0, 'Invalid task time');
+        assert(*event.values.at(15) == 'Description', 'Invalid task description');
+        assert(*event.values.at(16) == 11, 'Invalid task points');
     }
 }
 #[test]
@@ -80,14 +77,11 @@ fn test_achievable_progress() {
     systems.achiever.progress(context.player_id, TASK_ID, COUNT);
     let contract_event = starknet::testing::pop_log::<Event>(world.dispatcher.contract_address)
         .unwrap();
-    match contract_event {
-        Event::EventEmitted(event) => {
-            assert(*event.keys.at(0) == context.player_id, 'Invalid player id');
-            assert(*event.keys.at(1) == TASK_ID, 'Invalid task id');
-            assert(*event.values.at(0) == COUNT.into(), 'Invalid count');
-            assert(*event.values.at(1) == 0, 'Invalid time');
-        },
-        _ => {},
+    if let Event::EventEmitted(event) = contract_event {
+        assert(*event.keys.at(0) == context.player_id, 'Invalid player id');
+        assert(*event.keys.at(1) == TASK_ID, 'Invalid task id');
+        assert(*event.values.at(0) == COUNT.into(), 'Invalid count');
+        assert(*event.values.at(1) == 0, 'Invalid time');
     }
 }
 

@@ -50,6 +50,18 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
+    fn get_completion_or_new(
+        self: Store, player_id: felt252, definition: @QuestDefinition, time: u64,
+    ) -> QuestCompletion {
+        let interval_id = definition.compute_interval_id(time);
+        let completion = self.get_completion(player_id, *definition.id, interval_id);
+        if (!completion.is_undefined()) {
+            return completion;
+        }
+        CompletionTrait::new(player_id, *definition.id, interval_id, definition.conditions.len())
+    }
+
+    #[inline]
     fn set_completion(mut self: Store, completion: @QuestCompletion) {
         self.world.write_model(completion);
     }
@@ -163,13 +175,7 @@ pub impl StoreImpl of StoreTrait {
             }
             // [Check] Completion is unlocked, otherwise save and continue
             let interval_id = definition.compute_interval_id(time);
-            let mut completion = self.get_completion(player_id, task_id, interval_id);
-            if (completion.is_undefined()) {
-                completion =
-                    CompletionTrait::new(
-                        player_id, quest_id, interval_id, definition.conditions.len(),
-                    );
-            }
+            let mut completion = self.get_completion_or_new(player_id, @definition, time);
             if (!completion.is_unlocked()) {
                 self.set_completion(@completion);
                 continue;
@@ -185,6 +191,7 @@ pub impl StoreImpl of StoreTrait {
             self.set_advancement(@advancement);
             // [Check] Task is completed, otherwise save and continue
             if (!advancement.is_completed()) {
+                self.set_completion(@completion);
                 continue;
             }
             // [Check] Quest is completed, otherwise save and continue
@@ -195,6 +202,7 @@ pub impl StoreImpl of StoreTrait {
                 completed = completed && advancement.is_completed();
             }
             if (!completed) {
+                self.set_completion(@completion);
                 continue;
             }
             // [Effect] Update player quest completion if completed
@@ -203,19 +211,20 @@ pub impl StoreImpl of StoreTrait {
             // [Event] Emit quest completed
             self.complete(player_id, quest_id, interval_id, time);
             // [Check] Quest unlocks other quests
-            let conditions = self.get_condition(quest_id);
-            let mut conditions = conditions.quests;
-            while let Option::Some(condition) = conditions.pop_front() {
+            let mut conditions = self.get_condition(quest_id);
+            while let Option::Some(condition) = conditions.quests.pop_front() {
                 // [Effect] Update quest unlock condition for the other quest
                 let definition = self.get_definition(condition);
                 let interval_id = definition.compute_interval_id(time);
-                let mut completion = self.get_completion(player_id, condition, interval_id);
+                let mut completion = self.get_completion_or_new(player_id, @definition, time);
                 completion.unlock();
                 self.set_completion(@completion);
                 // [Event] Emit quest unlocked
                 self.unlock(player_id, condition, interval_id, time);
             }
-        };
+            // [Effect] Nullify condition
+            self.set_condition(@conditions);
+        }
     }
 
     #[inline]

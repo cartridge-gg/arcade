@@ -28,3 +28,14 @@ pub mod events {
 pub mod components {
     pub mod questable;
 }
+
+#[cfg(test)]
+pub mod tests {
+    pub mod setup;
+    pub mod test_questable;
+
+    pub mod mocks {
+        pub mod quester;
+        pub mod rewarder;
+    }
+}
