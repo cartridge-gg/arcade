@@ -1,17 +1,15 @@
 //! Store struct and component management methods.
 
-// Dojo imports
+// Imports
 
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
-// Models imports
-
-use registry::models::access::Access;
-use registry::models::collection::Collection;
-use registry::models::collection_edition::CollectionEdition;
-use registry::models::edition::{Edition, EditionTrait};
-use registry::models::game::{Game, GameTrait};
-use registry::models::unicity::{Unicity, UnicityTrait};
+use crate::models::access::Access;
+use crate::models::collection::Collection;
+use crate::models::collection_edition::CollectionEdition;
+use crate::models::edition::{Edition, EditionTrait};
+use crate::models::game::{Game, GameTrait};
+use crate::models::unicity::{Unicity, UnicityTrait};
 
 // Structs
 

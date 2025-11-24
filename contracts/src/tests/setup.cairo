@@ -1,24 +1,7 @@
 pub mod setup {
-    // Starknet imports
+    // Imports
 
     use achievement::events::index as achievement_events;
-    // use collection::collection::Collection;
-
-    // Internal imports
-
-    use arcade::constants::NAMESPACE;
-    use arcade::systems::marketplace::{IMarketplaceDispatcher, Marketplace};
-    use arcade::systems::registry::{IRegistryDispatcher, Registry};
-    use arcade::systems::slot::{ISlotDispatcher, Slot};
-    use arcade::systems::social::{ISocialDispatcher, Social};
-    use arcade::systems::starterpack::{IStarterpackRegistryDispatcher, StarterpackRegistry};
-    use arcade::systems::wallet::{IWalletDispatcher, Wallet};
-    use arcade::tests::mocks::account::Account;
-    use arcade::tests::mocks::collection::Collection;
-    use arcade::tests::mocks::erc1155::ERC1155;
-    use arcade::tests::mocks::erc20::ERC20;
-    use arcade::tests::mocks::erc721::ERC721;
-    use arcade::tests::mocks::starterpack_impl::StarterpackImplementation;
 
     // External imports
 
@@ -32,9 +15,7 @@ pub mod setup {
         spawn_test_world,
     };
     use models::rbac::models::index as rbac_models;
-    use openzeppelin::token::erc1155::interface::IERC1155Dispatcher;
     use openzeppelin::token::erc20::interface::IERC20Dispatcher;
-    use openzeppelin::token::erc721::interface::IERC721Dispatcher;
     use orderbook::events::index as orderbook_events;
     use orderbook::models::index as orderbook_models;
     use provider::models::index as provider_models;
@@ -46,6 +27,19 @@ pub mod setup {
     use starknet::{ContractAddress, SyscallResultTrait};
     use starterpack::events::index as starterpack_events;
     use starterpack::models::index as starterpack_models;
+    use crate::constants::NAMESPACE;
+    use crate::systems::marketplace::{IMarketplaceDispatcher, Marketplace};
+    use crate::systems::registry::{IRegistryDispatcher, Registry};
+    use crate::systems::slot::{ISlotDispatcher, Slot};
+    use crate::systems::social::{ISocialDispatcher, Social};
+    use crate::systems::starterpack::{
+        IAdministrationDispatcher, IStarterpackRegistryDispatcher, StarterpackRegistry,
+    };
+    use crate::systems::wallet::{IWalletDispatcher, Wallet};
+    use crate::tests::mocks::account::Account;
+    use crate::tests::mocks::collection::Collection;
+    use crate::tests::mocks::erc20::ERC20;
+    use crate::tests::mocks::starterpack_impl::StarterpackImplementation;
 
     // Constant
 
@@ -76,7 +70,6 @@ pub mod setup {
     pub fn PLAYER() -> ContractAddress {
         'PLAYER'.try_into().unwrap()
     }
-    use arcade::systems::starterpack::IAdministrationDispatcher;
 
     #[derive(Copy, Drop)]
     pub struct Systems {
@@ -89,8 +82,6 @@ pub mod setup {
         pub starterpack_admin: IAdministrationDispatcher,
         pub starterpack_impl: ContractAddress,
         pub erc20: IERC20Dispatcher,
-        pub erc721: IERC721Dispatcher,
-        pub erc1155: IERC1155Dispatcher,
     }
 
     #[derive(Copy, Drop)]
@@ -185,7 +176,7 @@ pub mod setup {
 
     fn setup_account(public_key: felt252) -> ContractAddress {
         let (account_address, _) = deploy_syscall(
-            class_hash: Account::TEST_CLASS_HASH.try_into().unwrap(),
+            class_hash: Account::TEST_CLASS_HASH,
             contract_address_salt: public_key,
             calldata: [public_key].span(),
             deploy_from_zero: false,
@@ -196,35 +187,13 @@ pub mod setup {
 
     fn setup_erc20(recipient: ContractAddress) -> IERC20Dispatcher {
         let (erc20_address, _) = deploy_syscall(
-            class_hash: ERC20::TEST_CLASS_HASH.try_into().unwrap(),
+            class_hash: ERC20::TEST_CLASS_HASH,
             contract_address_salt: 'ERC20',
             calldata: [recipient.into()].span(),
             deploy_from_zero: false,
         )
             .unwrap_syscall();
         IERC20Dispatcher { contract_address: erc20_address }
-    }
-
-    fn setup_erc721(recipient: ContractAddress, creator: ContractAddress) -> IERC721Dispatcher {
-        let (erc721_address, _) = deploy_syscall(
-            class_hash: ERC721::TEST_CLASS_HASH.try_into().unwrap(),
-            contract_address_salt: 'ERC721',
-            calldata: [recipient.into(), creator.into()].span(),
-            deploy_from_zero: false,
-        )
-            .unwrap_syscall();
-        IERC721Dispatcher { contract_address: erc721_address }
-    }
-
-    fn setup_erc1155(recipient: ContractAddress, creator: ContractAddress) -> IERC1155Dispatcher {
-        let (erc1155_address, _) = deploy_syscall(
-            class_hash: ERC1155::TEST_CLASS_HASH.try_into().unwrap(),
-            contract_address_salt: 'ERC1155',
-            calldata: [recipient.into(), creator.into()].span(),
-            deploy_from_zero: false,
-        )
-            .unwrap_syscall();
-        IERC1155Dispatcher { contract_address: erc1155_address }
     }
 
     #[inline]
@@ -262,8 +231,6 @@ pub mod setup {
             starterpack_admin: IAdministrationDispatcher { contract_address: starterpack_address },
             starterpack_impl: starterpack_impl,
             erc20: setup_erc20(context.spender),
-            erc721: setup_erc721(context.holder, context.creator),
-            erc1155: setup_erc1155(context.holder, context.creator),
         };
 
         // [Return]
@@ -272,7 +239,7 @@ pub mod setup {
 
     fn setup_starterpack_impl() -> ContractAddress {
         let (impl_address, _) = deploy_syscall(
-            class_hash: StarterpackImplementation::TEST_CLASS_HASH.try_into().unwrap(),
+            class_hash: StarterpackImplementation::TEST_CLASS_HASH,
             contract_address_salt: 'STARTERPACK_IMPL',
             calldata: [].span(),
             deploy_from_zero: false,

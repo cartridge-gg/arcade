@@ -1,6 +1,6 @@
 // Internal imports
 
-use registry::helpers::json::{JsonifiableString, JsonifiableTrait};
+use crate::helpers::json::{JsonifiableString, JsonifiableTrait};
 
 // Constants
 

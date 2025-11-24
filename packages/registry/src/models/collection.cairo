@@ -1,8 +1,8 @@
 // Internal imports
 
 use core::num::traits::Zero;
-pub use registry::models::index::Collection;
 use starknet::ContractAddress;
+pub use crate::models::index::Collection;
 
 // Errors
 

@@ -4,7 +4,7 @@ use graffiti::json::JsonImpl;
 
 // Internal imports
 
-use registry::helpers::base64::{
+use crate::helpers::base64::{
     ArrayU8IntoByteArray, Base64Decoder, Base64Encoder, Base64UrlDecoder, Base64UrlEncoder,
     ByteArrayIntoArrayU8,
 };

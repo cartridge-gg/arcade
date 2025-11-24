@@ -2,11 +2,11 @@
 
 // Internal imports
 
-use arcade::systems::registry::IRegistryDispatcherTrait;
-use arcade::tests::setup::setup::{PLAYER, Systems, spawn};
 use registry::models::game::Game;
 use registry::store::StoreTrait;
 use starknet::{ContractAddress, testing};
+use crate::tests::mocks::register::IRegisterDispatcherTrait;
+use crate::tests::setup::setup::{PLAYER, Systems, spawn};
 
 // Constants
 
@@ -23,25 +23,17 @@ fn register(systems: @Systems) {
     (*systems)
         .registry
         .register_game(
-            world_address: 'WORLD'.try_into().unwrap(),
-            namespace: 'NAMESPACE',
-            project: "project",
-            rpc: "rpc",
-            policies: "policies",
             color: "#123456",
-            game_image: "game_image",
-            edition_image: "edition_image",
+            image: "game_image",
+            image_data: "game_image_data",
             external_url: "external_url",
             description: "description",
-            game_name: "game_name",
-            edition_name: "edition_name",
-            game_attributes: "game_attributes",
-            edition_attributes: "edition_attributes",
+            name: "game_name",
+            attributes: "game_attributes",
             animation_url: "animation_url",
             youtube_url: "youtube_url",
             properties: "properties",
-            game_socials: "game_socials",
-            edition_socials: "edition_socials",
+            socials: "game_socials",
         );
 }
 

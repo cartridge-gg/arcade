@@ -1,7 +1,6 @@
 // Internal imports
 
-use registry::helpers::seeder::Seeder;
-pub use registry::models::index::Unicity;
+pub use crate::models::index::Unicity;
 
 // Errors
 

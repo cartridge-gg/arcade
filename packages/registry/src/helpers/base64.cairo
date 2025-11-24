@@ -68,7 +68,7 @@ pub impl Base64UrlFeltEncoder of Encoder<felt252> {
 
 pub fn encode_u8_array(mut bytes: Array<u8>, base64_chars: Span<u8>) -> Array<u8> {
     let mut result = array![];
-    if bytes.len() == 0 {
+    if bytes.is_empty() {
         return result;
     }
     let mut p: u8 = 0;
@@ -176,7 +176,7 @@ fn inner_decode(data: Array<u8>) -> Array<u8> {
     let mut result = array![];
 
     // Early return for empty input
-    if data.len() == 0 {
+    if data.is_empty() {
         return result;
     }
 

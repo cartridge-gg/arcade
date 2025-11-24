@@ -1,7 +1,7 @@
 // Internal imports
 
-pub use registry::models::index::Access;
-use registry::types::role::Role;
+pub use crate::models::index::Access;
+use crate::types::role::Role;
 
 // Errors
 

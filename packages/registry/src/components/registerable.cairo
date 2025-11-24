@@ -717,7 +717,7 @@ pub mod RegisterableComponent {
             self.assert_is_owner(world, caller_id, edition.id.into());
 
             // [Effect] Remove unicity
-            let mut unicity = store.get_unicity(edition.world_address.into(), edition.namespace);
+            let mut unicity = store.get_unicity(edition.world_address, edition.namespace);
             store.delete_unicity(ref unicity);
 
             // [Effect] Remove edition

@@ -4,7 +4,6 @@ pub mod store;
 pub mod helpers {
     pub mod base64;
     pub mod json;
-    pub mod seeder;
 }
 
 pub mod types {
@@ -26,4 +25,15 @@ pub mod models {
 pub mod components {
     pub mod initializable;
     pub mod registerable;
+}
+
+#[cfg(test)]
+pub mod tests {
+    pub mod mocks {
+        pub mod collection;
+        pub mod register;
+    }
+    pub mod setup;
+    pub mod test_registerable;
+    pub mod test_setup;
 }

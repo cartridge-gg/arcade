@@ -18,16 +18,9 @@ mod tests {
     pub mod mocks {
         pub mod account;
         pub mod collection;
-        pub mod erc1155;
         pub mod erc20;
-        pub mod erc721;
-        pub mod register;
         // Re-export top-level starterpack_impl for tests
         pub use super::super::starterpack_impl;
-    }
-
-    pub mod registry {
-        mod test_registerable;
     }
 
     pub mod starterpack {

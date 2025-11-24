@@ -1,9 +1,8 @@
 // Internal imports
 
-use registry::helpers::json::JsonifiableTrait;
-use registry::helpers::seeder::Seeder;
-pub use registry::models::index::Edition;
-use registry::types::config::Config;
+use crate::helpers::json::JsonifiableTrait;
+pub use crate::models::index::Edition;
+use crate::types::config::Config;
 
 // Errors
 
@@ -198,7 +197,7 @@ pub impl EditionAssert of AssertTrait {
 mod tests {
     // Internal imports
 
-    use registry::types::config::{Config, ConfigJsonifiable, ConfigTrait};
+    use crate::types::config::{Config, ConfigJsonifiable, ConfigTrait};
 
     // Local imports
 

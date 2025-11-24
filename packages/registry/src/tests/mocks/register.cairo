@@ -85,6 +85,12 @@ pub trait IRegister<TContractState> {
     fn remove_edition(self: @TContractState, edition_id: felt252);
 }
 
+// Constants
+
+pub fn NAMESPACE() -> ByteArray {
+    "NAMESPACE"
+}
+
 #[dojo::contract]
 pub mod Register {
     // Starknet imports
@@ -101,7 +107,7 @@ pub mod Register {
 
     // Local imports
 
-    use super::IRegister;
+    use super::{IRegister, NAMESPACE};
 
     // Components
 
@@ -370,7 +376,7 @@ pub mod Register {
     #[generate_trait]
     impl Private of PrivateTrait {
         fn world_storage(self: @ContractState) -> WorldStorage {
-            self.world(@"namespace")
+            self.world(@NAMESPACE())
         }
     }
 }

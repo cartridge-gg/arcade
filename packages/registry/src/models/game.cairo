@@ -1,6 +1,6 @@
 // Internal imports
 
-pub use registry::models::index::Game;
+pub use crate::models::index::Game;
 
 // Errors
 
