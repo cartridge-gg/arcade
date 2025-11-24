@@ -9,21 +9,21 @@ import {
   MarketplacePropertyHeader,
   MarketplaceRadialItem,
   MarketplaceSearch,
-  MarketplaceSearchEngine,
   SearchResult,
+  SparklesIcon,
+  XIcon,
 } from "@cartridge/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useProject } from "@/hooks/project";
 import { useBalances } from "@/hooks/market-collections";
 import { useUsernames } from "@/hooks/account";
 import { UserAvatar } from "@/components/user/avatar";
+import { usePlayerStats } from "@/hooks/achievements";
 
 export const Filters = () => {
   const {
     active,
     setActive,
-    collectionSearch,
-    setCollectionSearch,
     filteredMetadata,
     clearable,
     addSelected,
@@ -34,7 +34,6 @@ export const Filters = () => {
   } = useMetadataFiltersAdapter();
 
   const { selected, setSelected } = useMarketFilters();
-  const [search, setSearch] = useState<{ [key: string]: string }>({});
   const [playerSearch, setPlayerSearch] = useState<string>("");
 
   // Player search functionality
@@ -92,21 +91,13 @@ export const Filters = () => {
     }
   }, [filter, searchResults, setSelected, selected]);
 
-  // Build filtered properties with search and dynamic counts
+  // Build filtered properties with dynamic counts
   const getFilteredProperties = useMemo(() => {
     return (attribute: string) => {
       const precomputedProps = precomputedProperties[attribute] || [];
-      const searchTerm = search[attribute]?.toLowerCase() || "";
-
-      // Filter by search term
-      const filtered = searchTerm
-        ? precomputedProps.filter((prop) =>
-            prop.property.toLowerCase().includes(searchTerm)
-          )
-        : precomputedProps;
 
       // Add dynamic count from filtered metadata
-      return filtered.map((prop) => ({
+      return precomputedProps.map((prop) => ({
         property: prop.property,
         order: prop.order,
         count:
@@ -115,19 +106,15 @@ export const Filters = () => {
           )?.tokens.length || 0,
       }));
     };
-  }, [precomputedProperties, filteredMetadata, search]);
+  }, [precomputedProperties, filteredMetadata]);
 
   const clear = useCallback(() => {
     resetSelected();
-    setSearch({});
     setPlayerSearch("");
-    setCollectionSearch("");
     setSelected(undefined);
   }, [
     resetSelected,
-    setSearch,
     setPlayerSearch,
-    setCollectionSearch,
     setSelected,
   ]);
 
@@ -147,19 +134,7 @@ export const Filters = () => {
         />
       </div>
 
-      <MarketplaceHeader label="Search"></MarketplaceHeader>
-      <div className="w-full pb-4">
-        <MarketplaceSearch
-          search={collectionSearch}
-          setSearch={setCollectionSearch}
-          selected={undefined}
-          setSelected={() => {}}
-          options={[]}
-          variant="darkest"
-          className="w-full"
-        />
-      </div>
-      {/* <MarketplaceHeader label="Owners" />
+      <MarketplaceHeader label="Owners" />
       <div className="w-full pb-4">
         {selected ? (
           <PlayerCard
@@ -181,7 +156,7 @@ export const Filters = () => {
             className="w-full"
           />
         )}
-      </div> */}
+      </div>
       <MarketplaceHeader label="Properties">
         {clearable && <MarketplaceHeaderReset onClick={clear} />}
       </MarketplaceHeader>
@@ -197,13 +172,6 @@ export const Filters = () => {
               label={attribute}
               count={properties.length}
             >
-              <MarketplaceSearchEngine
-                variant="darkest"
-                search={search[attribute] || ""}
-                setSearch={(value: string) =>
-                  setSearch((prev) => ({ ...prev, [attribute]: value }))
-                }
-              />
               <div className="flex flex-col gap-px">
                 {properties
                   .sort((a, b) => b.order - a.order)
@@ -229,47 +197,47 @@ export const Filters = () => {
   );
 };
 
-// function PlayerCard({
-//   selected,
-//   onClose,
-//   usernames,
-// }: {
-//   selected: SearchResult;
-//   onClose: () => void;
-//   usernames: { username: string | undefined; address: string | undefined }[];
-// }) {
-//   const account = usernames.find(
-//     (item) => item.username === selected?.label
-//   )?.address;
+function PlayerCard({
+  selected,
+  onClose,
+  usernames,
+}: {
+  selected: SearchResult;
+  onClose: () => void;
+  usernames: { username: string | undefined; address: string | undefined }[];
+}) {
+  const account = usernames.find(
+    (item) => item.username === selected?.label
+  )?.address;
 
-//   const { earnings } = usePlayerStats(account || undefined);
+  const { earnings } = usePlayerStats(account || undefined);
 
-//   return (
-//     <div className="w-full outline outline-1 border-4 border-background-100 outline-background-300 flex justify-between bg-background-200 rounded px-2 py-2">
-//       <div className="flex items-center gap-2">
-//         <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-//           {selected.image}
-//         </div>
-//         <div className="flex-1 min-w-0">
-//           <p className=" font-light text-sm">{selected.label}</p>
-//         </div>
-//       </div>
-//       <div className="flex items-center gap-2 rounded">
-//         <div className="flex justify-between items-center bg-background-400 rounded py-1 pl-1 pr-2 gap-1">
-//           <span className="text-foreground-300 text-xs">
-//             <SparklesIcon variant="solid" size="xs" color="white" />
-//           </span>
-//           <span className="text-foreground-100 text-xs">
-//             {earnings.toLocaleString()}
-//           </span>
-//         </div>
-//         <button
-//           onClick={onClose}
-//           className="text-foreground-400 hover:text-foreground-200 w-5 h-5"
-//         >
-//           <XIcon size="sm" />
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
+  return (
+    <div className="w-full outline outline-1 border-4 border-background-100 outline-background-300 flex justify-between bg-background-200 rounded px-2 py-2">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+          {selected.image}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className=" font-light text-sm">{selected.label}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 rounded">
+        <div className="flex justify-between items-center bg-background-400 rounded py-1 pl-1 pr-2 gap-1">
+          <span className="text-foreground-300 text-xs">
+            <SparklesIcon variant="solid" size="xs" color="white" />
+          </span>
+          <span className="text-foreground-100 text-xs">
+            {earnings.toLocaleString()}
+          </span>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-foreground-400 hover:text-foreground-200 w-5 h-5"
+        >
+          <XIcon size="sm" />
+        </button>
+      </div>
+    </div>
+  );
+}

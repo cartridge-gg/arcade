@@ -13,7 +13,6 @@ import { useMarketplace } from './marketplace';
 export function useMetadataFiltersAdapter() {
   const { collection: collectionAddress, edition } = useProject();
   const [active, setActive] = useState(1); // 0 = Buy Now, 1 = Show All
-  const [collectionSearch, setCollectionSearch] = useState<string>(''); // Collection search state
   const [, ] = useSearchParams();
   const { getCollectionOrders } = useMarketplace();
 
@@ -66,31 +65,19 @@ export function useMetadataFiltersAdapter() {
     });
   }, [filteredTokens, active, collectionOrders]);
 
-  // Apply collection search on top of status filter
-  const tokensAfterSearch = useMemo(() => {
-    if (!collectionSearch.trim()) return tokensAfterStatusFilter;
-
-    const searchLower = collectionSearch.toLowerCase();
-
-    return tokensAfterStatusFilter.filter(token => {
-      const tokenName = (token.metadata as unknown as { name: string })?.name || token.name || '';
-      return tokenName.toLowerCase().includes(searchLower);
-    });
-  }, [tokensAfterStatusFilter, collectionSearch]);
-
   // Calculate filtered metadata based on active tokens
   const filteredMetadata = useMemo(() => {
     if (!precomputed?.allMetadata) return [];
 
-    // Get the set of filtered token IDs (after status filter and search)
-    const filteredTokenIds = new Set(tokensAfterSearch.map(t => t.token_id));
+    // Get the set of filtered token IDs (after status filter)
+    const filteredTokenIds = new Set(tokensAfterStatusFilter.map(t => t.token_id));
 
     // Filter pre-computed metadata to only include tokens in filtered set
     return precomputed.allMetadata.map(item => ({
       ...item,
       tokens: item.tokens.filter(t => filteredTokenIds.has(t.token_id))
     }));
-  }, [precomputed, tokensAfterSearch]);
+  }, [precomputed, tokensAfterStatusFilter]);
 
   // Check if a filter is active
   const isActive = useCallback((trait: string, value: string) => {
@@ -109,18 +96,17 @@ export function useMetadataFiltersAdapter() {
   // Reset all filters
   const resetSelected = useCallback(() => {
     clearAllFilters();
-    setCollectionSearch('');
-  }, [clearAllFilters, setCollectionSearch]);
+  }, [clearAllFilters]);
 
   // Check if any filters are active
   const clearable = useMemo(() => {
-    return Object.keys(activeFilters).length > 0 || collectionSearch.trim().length > 0;
-  }, [activeFilters, collectionSearch]);
+    return Object.keys(activeFilters).length > 0;
+  }, [activeFilters]);
 
   // Check if filters result in empty state
   const empty = useMemo(() => {
-    return (Object.keys(activeFilters).length > 0 || collectionSearch.trim()) && tokensAfterSearch.length === 0;
-  }, [activeFilters, collectionSearch, tokensAfterSearch]);
+    return Object.keys(activeFilters).length > 0 && tokensAfterStatusFilter.length === 0;
+  }, [activeFilters, tokensAfterStatusFilter]);
 
   // Check if a specific filter is selected (for context compatibility)
   const isSelected = useCallback((attributes: Array<{ trait_type: string; value: string }>) => {
@@ -149,10 +135,6 @@ export function useMetadataFiltersAdapter() {
     active,
     setActive,
 
-    // Collection search
-    collectionSearch,
-    setCollectionSearch,
-
     // Metadata
     allMetadata,
     filteredMetadata,
@@ -175,7 +157,7 @@ export function useMetadataFiltersAdapter() {
 
     // Additional data from original hook
     tokens,
-    filteredTokens: tokensAfterSearch, // Use final filtered tokens (after search)
+    filteredTokens: tokensAfterStatusFilter,
     activeFilters,
     availableFilters
   };
