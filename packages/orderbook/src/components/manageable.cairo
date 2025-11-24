@@ -10,13 +10,13 @@ pub mod ManageableComponent {
     use models::rbac::models::moderator::{ModeratorAssert, ModeratorTrait};
     use models::rbac::store::ModeratorStoreTrait;
     use models::rbac::types::role::Role;
+    use starknet::ContractAddress;
 
     // Internal imports
 
-    use orderbook::constants::BOOK_ID;
-    use orderbook::models::book::{BookAssert, BookTrait};
-    use orderbook::store::StoreTrait;
-    use starknet::ContractAddress;
+    use crate::constants::BOOK_ID;
+    use crate::models::book::{BookAssert, BookTrait};
+    use crate::store::StoreTrait;
 
     // Constants
 

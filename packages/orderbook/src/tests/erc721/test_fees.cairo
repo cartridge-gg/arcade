@@ -2,15 +2,15 @@
 
 // Internal imports
 
-use arcade::systems::marketplace::IMarketplaceDispatcherTrait;
-use arcade::tests::setup::setup::spawn;
 use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
 use openzeppelin::token::erc721::interface::IERC721DispatcherTrait;
-use orderbook::constants;
+use crate::constants;
 
 // Package imports
 
-use orderbook::models::order::OrderAssert;
+use crate::models::order::OrderAssert;
+use crate::tests::mocks::marketplace::IMarketplaceDispatcherTrait;
+use crate::tests::setup::setup::spawn;
 
 // Constants
 
