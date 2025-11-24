@@ -313,7 +313,8 @@ fn test_single_parent_multiple_children_unlock() {
 
     // [Assert] A is completed
     let definition_a = store.get_definition(QUEST_A);
-    let completion_a = store.get_completion(context.player_id, QUEST_A, definition_a.compute_interval_id(1000));
+    let completion_a = store
+        .get_completion(context.player_id, QUEST_A, definition_a.compute_interval_id(1000));
     assert_eq!(completion_a.is_completed(), true, "Quest A should be completed");
 
     // [Assert] B and C are now unlocked
@@ -333,7 +334,10 @@ fn test_single_parent_multiple_children_unlock() {
     // [Assert] B and C have progress
     let advancement_b = store.get_advancement(context.player_id, QUEST_B, TASK_B, interval_id);
     let definition_c = store.get_definition(QUEST_C);
-    let advancement_c = store.get_advancement(context.player_id, QUEST_C, TASK_C, definition_c.compute_interval_id(1000));
+    let advancement_c = store
+        .get_advancement(
+            context.player_id, QUEST_C, TASK_C, definition_c.compute_interval_id(1000),
+        );
     assert_eq!(advancement_b.count, COUNT, "Quest B should have progress");
     assert_eq!(advancement_c.count, COUNT, "Quest C should have progress");
 }
