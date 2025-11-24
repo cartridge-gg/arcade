@@ -11,6 +11,7 @@ pub mod errors {
     pub const DEFINITION_INVALID_TASKS: felt252 = 'Quest: invalid tasks';
     pub const DEFINITION_INVALID_DURATION: felt252 = 'Quest: invalid duration';
     pub const DEFINITION_NOT_EXIST: felt252 = 'Quest: does not exist';
+    pub const DEFINITION_INVALID_INTERVAL: felt252 = 'Quest: invalid interval';
 }
 
 #[generate_trait]
@@ -32,6 +33,7 @@ pub impl DefinitionImpl of DefinitionTrait {
         DefinitionAssert::assert_valid_verifier(rewarder);
         DefinitionAssert::assert_valid_tasks(tasks);
         DefinitionAssert::assert_valid_duration(start, end);
+        DefinitionAssert::assert_valid_interval(duration, interval);
         // [Return] QuestDefinition
         QuestDefinition {
             id: id,
@@ -121,6 +123,14 @@ pub impl DefinitionAssert of AssertTrait {
     #[inline]
     fn assert_valid_duration(start: u64, end: u64) {
         assert(end >= start || end == 0, errors::DEFINITION_INVALID_DURATION);
+    }
+
+    #[inline]
+    fn assert_valid_interval(duration: u64, interval: u64) {
+        assert(
+            (duration + interval) == 0 || (interval * duration) != 0,
+            errors::DEFINITION_INVALID_INTERVAL,
+        );
     }
 
     #[inline]
@@ -230,77 +240,7 @@ mod tests {
     }
 
     #[test]
-    fn test_quest_compute_interval_id() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID,
-            IMPLEMENTATION(),
-            START,
-            END,
-            DURATION,
-            INTERVAL,
-            TASKS(),
-            CONDITIONS(),
-            METADATA(),
-        );
-        assert_eq!(quest.compute_interval_id(START), 0);
-        assert_eq!(quest.compute_interval_id(START + DURATION - 1), 0);
-        assert_eq!(quest.compute_interval_id(START + INTERVAL), 1);
-    }
-
-    #[test]
-    fn test_quest_compute_interval_id_no_start() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID,
-            IMPLEMENTATION(),
-            0,
-            END,
-            DURATION,
-            INTERVAL,
-            TASKS(),
-            CONDITIONS(),
-            METADATA(),
-        );
-        assert_eq!(quest.compute_interval_id(0), 0);
-        assert_eq!(quest.compute_interval_id(DURATION - 1), 0);
-        assert_eq!(quest.compute_interval_id(INTERVAL), 1);
-    }
-
-    #[test]
-    fn test_quest_compute_interval_id_no_end() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID,
-            IMPLEMENTATION(),
-            START,
-            0,
-            DURATION,
-            INTERVAL,
-            TASKS(),
-            CONDITIONS(),
-            METADATA(),
-        );
-        assert_eq!(quest.compute_interval_id(START), 0);
-        assert_eq!(quest.compute_interval_id(START + DURATION - 1), 0);
-        assert_eq!(quest.compute_interval_id(START + INTERVAL), 1);
-        assert_eq!(
-            quest.compute_interval_id(END), quest.compute_interval_id(END - INTERVAL + 1) + 1,
-        );
-    }
-
-    #[test]
-    fn test_quest_compute_interval_id_permanent() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, DURATION, 0, TASKS(), CONDITIONS(), METADATA(),
-        );
-        assert_eq!(quest.compute_interval_id(START), 0);
-        assert_eq!(quest.compute_interval_id(START + DURATION - 1), 0);
-        assert_eq!(quest.compute_interval_id(START + DURATION), 0);
-        assert_eq!(quest.compute_interval_id(START + INTERVAL), 0);
-        assert_eq!(quest.compute_interval_id(START + INTERVAL + DURATION), 0);
-        assert_eq!(quest.compute_interval_id(END - 1), 0);
-        assert_eq!(quest.is_active(END), false);
-    }
-
-    #[test]
+    #[should_panic(expected: ('Quest: invalid interval',))]
     fn test_quest_compute_interval_id_no_duration() {
         let quest = DefinitionTrait::new(
             QUEST_ID, IMPLEMENTATION(), START, END, 0, INTERVAL, TASKS(), CONDITIONS(), METADATA(),
@@ -314,16 +254,380 @@ mod tests {
         assert_eq!(quest.is_active(END), false);
     }
 
+    // Case 1: Permanent quest (start=0, end=0, duration=0, interval=0)
     #[test]
-    fn test_quest_compute_interval_id_default() {
+    fn test_permanent_is_active() {
         let quest = DefinitionTrait::new(
             QUEST_ID, IMPLEMENTATION(), 0, 0, 0, 0, TASKS(), CONDITIONS(), METADATA(),
         );
-        assert_eq!(quest.compute_interval_id(0), 0);
-        assert_eq!(quest.compute_interval_id(DURATION - 1), 0);
-        assert_eq!(quest.compute_interval_id(DURATION), 0);
-        assert_eq!(quest.compute_interval_id(INTERVAL), 0);
-        assert_eq!(quest.compute_interval_id(INTERVAL + DURATION), 0);
-        assert_eq!(quest.compute_interval_id(END), 0);
+        assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
+        assert_eq!(quest.is_active(1000000), true, "Quest should be active at time 1000000");
+        assert_eq!(
+            quest.is_active(999999999999), true, "Quest should be active at very far future",
+        );
+    }
+
+    #[test]
+    fn test_permanent_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), 0, 0, 0, 0, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
+        assert_eq!(
+            quest.compute_interval_id(1000000), 0, "Interval ID should be 0 at time 1000000",
+        );
+        assert_eq!(
+            quest.compute_interval_id(999999999999),
+            0,
+            "Interval ID should be 0 at very far future",
+        );
+    }
+
+    // Case 2: Delayed Permanent quest (start>0, end=0, duration=0, interval=0)
+    #[test]
+    fn test_delayed_permanent_is_active() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), START, 0, 0, 0, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
+        assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
+        assert_eq!(quest.is_active(START), true, "Quest should be active at start time");
+        assert_eq!(quest.is_active(START + 1), true, "Quest should be active after start");
+        assert_eq!(
+            quest.is_active(START + 1000000), true, "Quest should be active far after start",
+        );
+        assert_eq!(
+            quest.is_active(999999999999), true, "Quest should be active at very far future",
+        );
+    }
+
+    #[test]
+    fn test_delayed_permanent_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), START, 0, 0, 0, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
+        assert_eq!(
+            quest.compute_interval_id(START + 1000000), 0, "Interval ID should be 0 after start",
+        );
+    }
+
+    // Case 3: Time-Limited quest (start=0, end>0, duration=0, interval=0)
+    #[test]
+    fn test_time_limited_is_active() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), 0, END, 0, 0, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
+        assert_eq!(quest.is_active(END - 1), true, "Quest should be active just before end");
+        assert_eq!(quest.is_active(END), false, "Quest should be inactive at end time");
+        assert_eq!(quest.is_active(END + 1), false, "Quest should be inactive after end");
+        assert_eq!(quest.is_active(END + 1000000), false, "Quest should be inactive far after end");
+    }
+
+    #[test]
+    fn test_time_limited_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), 0, END, 0, 0, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
+        assert_eq!(quest.compute_interval_id(END - 1), 0, "Interval ID should be 0 before end");
+    }
+
+    // Case 4: Time-Limited with Delay quest (start>0, end>0, duration=0, interval=0)
+    #[test]
+    fn test_time_limited_with_delay_is_active() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), START, END, 0, 0, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
+        assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
+        assert_eq!(quest.is_active(START), true, "Quest should be active at start time");
+        assert_eq!(quest.is_active(START + 1), true, "Quest should be active after start");
+        assert_eq!(quest.is_active((START + END) / 2), true, "Quest should be active in middle");
+        assert_eq!(quest.is_active(END - 1), true, "Quest should be active just before end");
+        assert_eq!(quest.is_active(END), false, "Quest should be inactive at end time");
+        assert_eq!(quest.is_active(END + 1), false, "Quest should be inactive after end");
+    }
+
+    #[test]
+    fn test_time_limited_with_delay_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), START, END, 0, 0, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
+        assert_eq!(quest.compute_interval_id(END - 1), 0, "Interval ID should be 0 before end");
+    }
+
+    // Case 5: Recurring Permanent quest (start=0, end=0, duration>0, interval>0)
+    #[test]
+    fn test_recurring_permanent_is_active() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), 0, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
+        assert_eq!(
+            quest.is_active(DURATION - 1), true, "Quest should be active just before duration ends",
+        );
+        assert_eq!(quest.is_active(DURATION), false, "Quest should be inactive after duration");
+        assert_eq!(
+            quest.is_active(INTERVAL - 1), false, "Quest should be inactive just before next cycle",
+        );
+        assert_eq!(
+            quest.is_active(INTERVAL), true, "Quest should be active at start of second cycle",
+        );
+        assert_eq!(
+            quest.is_active(INTERVAL + DURATION - 1),
+            true,
+            "Quest should be active during second cycle",
+        );
+        assert_eq!(
+            quest.is_active(INTERVAL + DURATION),
+            false,
+            "Quest should be inactive after second cycle duration",
+        );
+        assert_eq!(
+            quest.is_active(2 * INTERVAL), true, "Quest should be active at start of third cycle",
+        );
+    }
+
+    #[test]
+    fn test_recurring_permanent_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID, IMPLEMENTATION(), 0, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(), METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
+        assert_eq!(
+            quest.compute_interval_id(DURATION - 1),
+            0,
+            "Interval ID should be 0 during first cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(INTERVAL),
+            1,
+            "Interval ID should be 1 at start of second cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(INTERVAL + DURATION - 1),
+            1,
+            "Interval ID should be 1 during second cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(2 * INTERVAL),
+            2,
+            "Interval ID should be 2 at start of third cycle",
+        );
+    }
+
+    // Case 6: Recurring Permanent with Delay quest (start>0, end=0, duration>0, interval>0)
+    #[test]
+    fn test_recurring_permanent_with_delay_is_active() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID,
+            IMPLEMENTATION(),
+            START,
+            0,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
+        );
+        assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
+        assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
+        assert_eq!(quest.is_active(START), true, "Quest should be active at start time");
+        assert_eq!(
+            quest.is_active(START + DURATION - 1),
+            true,
+            "Quest should be active just before duration ends",
+        );
+        assert_eq!(
+            quest.is_active(START + DURATION),
+            false,
+            "Quest should be inactive after first cycle duration",
+        );
+        assert_eq!(
+            quest.is_active(START + INTERVAL - 1),
+            false,
+            "Quest should be inactive just before second cycle",
+        );
+        assert_eq!(
+            quest.is_active(START + INTERVAL),
+            true,
+            "Quest should be active at start of second cycle",
+        );
+        assert_eq!(
+            quest.is_active(START + INTERVAL + DURATION - 1),
+            true,
+            "Quest should be active during second cycle",
+        );
+    }
+
+    #[test]
+    fn test_recurring_permanent_with_delay_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID,
+            IMPLEMENTATION(),
+            START,
+            0,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
+        assert_eq!(
+            quest.compute_interval_id(START + DURATION - 1),
+            0,
+            "Interval ID should be 0 during first cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(START + INTERVAL),
+            1,
+            "Interval ID should be 1 at start of second cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(START + INTERVAL + DURATION - 1),
+            1,
+            "Interval ID should be 1 during second cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(START + 2 * INTERVAL),
+            2,
+            "Interval ID should be 2 at start of third cycle",
+        );
+    }
+
+    // Case 7: Recurring Time-Limited quest (start=0, end>0, duration>0, interval>0)
+    #[test]
+    fn test_recurring_time_limited_is_active() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID,
+            IMPLEMENTATION(),
+            0,
+            END,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
+        );
+        assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
+        assert_eq!(
+            quest.is_active(DURATION - 1), true, "Quest should be active just before duration ends",
+        );
+        assert_eq!(quest.is_active(DURATION), false, "Quest should be inactive after duration");
+        assert_eq!(
+            quest.is_active(INTERVAL - 1), false, "Quest should be inactive just before next cycle",
+        );
+        assert_eq!(
+            quest.is_active(INTERVAL), true, "Quest should be active at start of second cycle",
+        );
+        assert_eq!(quest.is_active(END), false, "Quest should be inactive at end time");
+        assert_eq!(quest.is_active(END + 1), false, "Quest should be inactive after end");
+    }
+
+    #[test]
+    fn test_recurring_time_limited_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID,
+            IMPLEMENTATION(),
+            0,
+            END,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
+        assert_eq!(
+            quest.compute_interval_id(DURATION - 1),
+            0,
+            "Interval ID should be 0 during first cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(INTERVAL),
+            1,
+            "Interval ID should be 1 at start of second cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(INTERVAL + DURATION - 1),
+            1,
+            "Interval ID should be 1 during second cycle",
+        );
+    }
+
+    // Case 8: Recurring Time-Limited with Delay quest (start>0, end>0, duration>0, interval>0)
+    #[test]
+    fn test_recurring_time_limited_with_delay_is_active() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID,
+            IMPLEMENTATION(),
+            START,
+            END,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
+        );
+        assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
+        assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
+        assert_eq!(quest.is_active(START), true, "Quest should be active at start time");
+        assert_eq!(
+            quest.is_active(START + DURATION - 1),
+            true,
+            "Quest should be active just before duration ends",
+        );
+        assert_eq!(
+            quest.is_active(START + DURATION),
+            false,
+            "Quest should be inactive after first cycle duration",
+        );
+        assert_eq!(
+            quest.is_active(START + INTERVAL - 1),
+            false,
+            "Quest should be inactive just before second cycle",
+        );
+        assert_eq!(
+            quest.is_active(START + INTERVAL),
+            true,
+            "Quest should be active at start of second cycle",
+        );
+        assert_eq!(quest.is_active(END), false, "Quest should be inactive at end time");
+        assert_eq!(quest.is_active(END + 1), false, "Quest should be inactive after end");
+    }
+
+    #[test]
+    fn test_recurring_time_limited_with_delay_compute_interval_id() {
+        let quest = DefinitionTrait::new(
+            QUEST_ID,
+            IMPLEMENTATION(),
+            START,
+            END,
+            DURATION,
+            INTERVAL,
+            TASKS(),
+            CONDITIONS(),
+            METADATA(),
+        );
+        assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
+        assert_eq!(
+            quest.compute_interval_id(START + DURATION - 1),
+            0,
+            "Interval ID should be 0 during first cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(START + INTERVAL),
+            1,
+            "Interval ID should be 1 at start of second cycle",
+        );
+        assert_eq!(
+            quest.compute_interval_id(START + INTERVAL + DURATION - 1),
+            1,
+            "Interval ID should be 1 during second cycle",
+        );
     }
 }

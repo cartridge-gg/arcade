@@ -32,7 +32,27 @@ pub mod components {
 #[cfg(test)]
 pub mod tests {
     pub mod setup;
-    pub mod test_questable;
+
+    pub mod cases {
+        pub mod test_delayed_permanent;
+        pub mod test_permanent;
+        pub mod test_recurring_permanent;
+        pub mod test_recurring_permanent_with_delay;
+        pub mod test_recurring_time_limited;
+        pub mod test_recurring_time_limited_with_delay;
+        pub mod test_time_limited;
+        pub mod test_time_limited_with_delay;
+    }
+
+    pub mod conditions {
+        pub mod test_convergent;
+        pub mod test_diamond;
+        pub mod test_independent;
+        pub mod test_linear_chain;
+        pub mod test_multiple_parents_single_child;
+        pub mod test_single_parent_multiple_children;
+        pub mod test_tree;
+    }
 
     pub mod mocks {
         pub mod quester;
