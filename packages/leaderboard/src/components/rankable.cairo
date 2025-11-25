@@ -1,5 +1,6 @@
 #[starknet::component]
 pub mod RankableComponent {
+    use core::num::traits::Bounded;
     use dojo::world::WorldStorage;
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
@@ -11,17 +12,15 @@ pub mod RankableComponent {
 
     pub const KEY_OFFSET: felt252 = 252;
 
-    // Errors
-
-    mod errors {}
-
     // Storage
 
     #[storage]
     pub struct Storage {
+        pub cap: Map<felt252, u8>,
         pub len: Map<felt252, u8>,
         pub keys: Map<felt252, Map<felt252, u128>>,
         pub data: Map<felt252, Map<felt252, Item>>,
+        pub lowest_key: Map<felt252, u128>,
     }
 
     // Events
@@ -35,34 +34,18 @@ pub mod RankableComponent {
         TContractState, +HasComponent<TContractState>,
     > of InternalTrait<TContractState> {
         #[inline]
-        fn submit(
-            ref self: ComponentState<TContractState>,
-            world: WorldStorage,
-            leaderboard_id: felt252,
-            game_id: u64,
-            player_id: felt252,
-            score: u64,
-            time: u64,
-            to_store: bool,
-        ) {
-            // [Setup] Datastore
-            let store = StoreTrait::new(world);
-            // [Event] Submit score
-            store
-                .submit(
-                    leaderboard_id: leaderboard_id,
-                    game_id: game_id.into(),
-                    player_id: player_id,
-                    score: score,
-                    time: time,
-                );
-            // [Check] Store score if required, skip otherwise
-            if (!to_store) {
-                return;
-            }
-            // [Effect] Store score
-            let item = ItemTrait::new(game_id, score, time);
-            self.add(leaderboard_id, item);
+        fn set(ref self: ComponentState<TContractState>, leaderboard_id: felt252, cap: u8) {
+            self.cap.entry(leaderboard_id).write(cap);
+        }
+
+        #[inline]
+        fn cap(self: @ComponentState<TContractState>, leaderboard_id: felt252) -> u8 {
+            self.cap.entry(leaderboard_id).read()
+        }
+
+        #[inline]
+        fn len(self: @ComponentState<TContractState>, leaderboard_id: felt252) -> u64 {
+            self.len.entry(leaderboard_id).read().into()
         }
 
         #[inline]
@@ -101,6 +84,37 @@ pub mod RankableComponent {
         }
 
         #[inline]
+        fn submit(
+            ref self: ComponentState<TContractState>,
+            world: WorldStorage,
+            leaderboard_id: felt252,
+            game_id: u64,
+            player_id: felt252,
+            score: u64,
+            time: u64,
+            to_store: bool,
+        ) {
+            // [Setup] Datastore
+            let store = StoreTrait::new(world);
+            // [Event] Submit score
+            store
+                .submit(
+                    leaderboard_id: leaderboard_id,
+                    game_id: game_id.into(),
+                    player_id: player_id,
+                    score: score,
+                    time: time,
+                );
+            // [Check] Store score if required, skip otherwise
+            if (!to_store) {
+                return;
+            }
+            // [Effect] Store score
+            let item = ItemTrait::new(game_id, score, time);
+            self.add(leaderboard_id, item);
+        }
+
+        #[inline]
         fn contains(
             self: @ComponentState<TContractState>, leaderboard_id: felt252, key: u128,
         ) -> bool {
@@ -111,10 +125,29 @@ pub mod RankableComponent {
 
         #[inline]
         fn add(ref self: ComponentState<TContractState>, leaderboard_id: felt252, item: Item) {
-            // [Effect] Update heap length
+            // [Check] Capacity is reached and new item is lower than the lowest item, then skip
+            let lowest_key: u128 = self.lowest_key.entry(leaderboard_id).read();
+            let lowest_item = self.data.entry(leaderboard_id).entry(lowest_key.into()).read();
+            let len: u8 = self.len.entry(leaderboard_id).read();
+            let cap = self.cap.entry(leaderboard_id).read();
+            if (len == cap || len == Bounded::MAX) && item < lowest_item {
+                return;
+            }
+            // [Effect] Update lowest item if it is greater than the new item
             let key: u128 = item.key.into();
-            let index = self.len.entry(leaderboard_id).read().into();
-            self.len.entry(leaderboard_id).write(self.len.entry(leaderboard_id).read() + 1);
+            if lowest_item.is_zero() || lowest_item > item {
+                self.lowest_key.entry(leaderboard_id).write(key);
+            }
+            // [Effect] Update length if capacity is not exceeded
+            let mut index = len.into();
+            if len < cap || (cap == 0 && len != Bounded::MAX) {
+                // [Effect] Increment leaderboard length if the capacity is not exceeded
+                self.len.entry(leaderboard_id).write(self.len.entry(leaderboard_id).read() + 1);
+            } else {
+                // [Effect] Otherwise, keep the same length and swap the lowest and the last item
+                index -= 1;
+                self.swap(leaderboard_id, index, lowest_key);
+            }
             // [Effect] Insert item at the end
             self.data.entry(leaderboard_id).entry(key.into()).write(item);
             self.keys.entry(leaderboard_id).entry(index.into()).write(key);

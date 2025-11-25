@@ -1,7 +1,7 @@
 //! Store struct and component management methods.
 
 use dojo::event::EventStorage;
-use dojo::world::{IWorldDispatcherTrait, WorldStorage};
+use dojo::world::WorldStorage;
 use crate::events::score::LeaderboardScoreTrait;
 
 // Structs
@@ -33,7 +33,6 @@ pub impl StoreImpl of StoreTrait {
         let score = LeaderboardScoreTrait::new(
             leaderboard_id: leaderboard_id,
             game_id: game_id,
-            uuid: self.world.dispatcher.uuid().into(),
             player: player_id,
             score: score,
             timestamp: time,

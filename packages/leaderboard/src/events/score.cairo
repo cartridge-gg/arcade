@@ -8,17 +8,11 @@ pub use crate::events::index::LeaderboardScore;
 pub impl LeaderboardScoreImpl of LeaderboardScoreTrait {
     #[inline]
     fn new(
-        leaderboard_id: felt252,
-        game_id: felt252,
-        uuid: felt252,
-        player: felt252,
-        score: u64,
-        timestamp: u64,
+        leaderboard_id: felt252, game_id: felt252, player: felt252, score: u64, timestamp: u64,
     ) -> LeaderboardScore {
         LeaderboardScore {
             leaderboard_id: leaderboard_id,
             game_id: game_id,
-            uuid: uuid,
             player: player,
             score: score,
             timestamp: timestamp,
