@@ -6,6 +6,7 @@ members = [
   "packages/starterpack",
   "packages/collection",
   "packages/controller",
+  "packages/leaderboard",
   "packages/orderbook",
   "packages/provider",
   "packages/registry",
