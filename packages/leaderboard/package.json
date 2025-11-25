@@ -1,5 +1,5 @@
 {
-  "name": "@cartridge/arcade-quest",
+  "name": "@cartridge/arcade-leaderboard",
   "version": "0.0.0",
   "main": "index.js",
   "scripts": {
