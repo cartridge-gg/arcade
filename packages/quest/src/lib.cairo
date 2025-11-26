@@ -2,8 +2,8 @@ pub mod interfaces;
 pub mod store;
 
 pub mod types {
-    pub mod index;
     pub mod metadata;
+    pub mod reward;
     pub mod task;
 }
 

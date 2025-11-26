@@ -8,7 +8,7 @@ pub mod QuestableComponent {
     use crate::models::completion::{CompletionAssert, CompletionTrait};
     use crate::models::definition::DefinitionAssert;
     use crate::store::{Store, StoreTrait};
-    use crate::types::metadata::Metadata;
+    use crate::types::metadata::{Metadata, MetadataTrait};
     use crate::types::task::Task;
 
     // Errors
@@ -62,22 +62,11 @@ pub mod QuestableComponent {
             interval: u64,
             tasks: Span<Task>,
             conditions: Span<felt252>,
-            hidden: bool,
-            name: ByteArray,
-            description: ByteArray,
-            index: Option<u8>,
-            group: Option<ByteArray>,
-            icon: Option<ByteArray>,
-            data: Option<ByteArray>,
+            metadata: Metadata,
             to_store: bool,
         ) {
             // [Setup] Store
             let store: Store = StoreTrait::new(world);
-
-            // [Compute] Metadata
-            let metadata: ByteArray = Metadata::jsonify(
-                name, description, hidden, index, group, icon, data,
-            );
 
             // [Event] Emit quest creation
             store
@@ -90,7 +79,7 @@ pub mod QuestableComponent {
                     interval: interval,
                     tasks: tasks,
                     conditions: conditions,
-                    metadata: metadata,
+                    metadata: metadata.jsonify(),
                     to_store: to_store,
                 );
         }

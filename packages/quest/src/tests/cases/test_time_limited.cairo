@@ -17,6 +17,7 @@ use crate::models::definition::{DefinitionAssert, DefinitionTrait};
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
+use crate::types::metadata::{Metadata, MetadataTrait};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -28,12 +29,8 @@ const COUNT: u128 = 50;
 const ONE_WEEK: u64 = 7 * 24 * 60 * 60;
 const END: u64 = 48 * ONE_WEEK; // 48 weeks
 
-fn NAME() -> ByteArray {
-    "Time-Limited Quest"
-}
-
-fn DESCRIPTION() -> ByteArray {
-    "A quest that expires after a certain time"
+fn METADATA() -> Metadata {
+    MetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
 }
 
 #[test]
@@ -54,13 +51,7 @@ fn test_time_limited_quest_creation() {
             interval: 0,
             tasks: tasks,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -91,13 +82,7 @@ fn test_time_limited_quest_completion_once() {
             interval: 0,
             tasks: tasks,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -153,13 +138,7 @@ fn test_time_limited_quest_claim() {
             interval: 0,
             tasks: tasks,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 

@@ -1,6 +1,7 @@
 // Internal imports
 
 use starknet::ContractAddress;
+use crate::types::metadata::Metadata;
 use crate::types::task::Task;
 
 // Constants
@@ -21,13 +22,7 @@ pub trait IQuester<TContractState> {
         interval: u64,
         tasks: Span<Task>,
         conditions: Span<felt252>,
-        hidden: bool,
-        name: ByteArray,
-        description: ByteArray,
-        index: Option<u8>,
-        group: Option<ByteArray>,
-        icon: Option<ByteArray>,
-        data: Option<ByteArray>,
+        metadata: Metadata,
         to_store: bool,
     );
     fn progress(
@@ -41,6 +36,7 @@ pub mod Quester {
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
     use crate::components::questable::QuestableComponent;
+    use crate::types::metadata::Metadata;
     use crate::types::task::Task;
     use super::{IQuester, NAMESPACE};
 
@@ -74,13 +70,7 @@ pub mod Quester {
             interval: u64,
             tasks: Span<Task>,
             conditions: Span<felt252>,
-            hidden: bool,
-            name: ByteArray,
-            description: ByteArray,
-            index: Option<u8>,
-            group: Option<ByteArray>,
-            icon: Option<ByteArray>,
-            data: Option<ByteArray>,
+            metadata: Metadata,
             to_store: bool,
         ) {
             self
@@ -95,13 +85,7 @@ pub mod Quester {
                     interval,
                     tasks,
                     conditions,
-                    hidden,
-                    name,
-                    description,
-                    index,
-                    group,
-                    icon,
-                    data,
+                    metadata,
                     to_store,
                 );
         }

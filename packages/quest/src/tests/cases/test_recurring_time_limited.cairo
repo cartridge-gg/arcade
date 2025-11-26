@@ -19,6 +19,7 @@ use crate::models::definition::{DefinitionAssert, DefinitionTrait};
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
+use crate::types::metadata::{Metadata, MetadataTrait};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -33,12 +34,8 @@ const END: u64 = 48 * ONE_WEEK; // 48 weeks
 const DURATION: u64 = 1 * ONE_DAY; // 1 day
 const INTERVAL: u64 = 1 * ONE_WEEK; // 1 week
 
-fn NAME() -> ByteArray {
-    "Recurring Time-Limited Quest"
-}
-
-fn DESCRIPTION() -> ByteArray {
-    "A quest that repeats within a time window"
+fn METADATA() -> Metadata {
+    MetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
 }
 
 #[test]
@@ -59,13 +56,7 @@ fn test_recurring_time_limited_quest_creation() {
             interval: INTERVAL,
             tasks: tasks,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -96,13 +87,7 @@ fn test_recurring_time_limited_quest_multiple_completions() {
             interval: INTERVAL,
             tasks: tasks,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -158,13 +143,7 @@ fn test_recurring_time_limited_quest_claim_multiple_intervals() {
             interval: INTERVAL,
             tasks: tasks,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 

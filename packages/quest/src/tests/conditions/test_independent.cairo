@@ -15,6 +15,7 @@ use crate::models::definition::DefinitionAssert;
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
+use crate::types::metadata::{Metadata, MetadataTrait};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -26,12 +27,8 @@ const TASK_B: felt252 = 'TASK-B';
 const TOTAL: u128 = 100;
 const COUNT: u128 = 50;
 
-fn NAME() -> ByteArray {
-    "Quest"
-}
-
-fn DESCRIPTION() -> ByteArray {
-    "Quest description"
+fn METADATA() -> Metadata {
+    MetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
 }
 
 #[test]
@@ -52,13 +49,7 @@ fn test_independent_quests_creation() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -75,13 +66,7 @@ fn test_independent_quests_creation() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -112,13 +97,7 @@ fn test_independent_quests_initial_state() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -134,13 +113,7 @@ fn test_independent_quests_initial_state() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -173,13 +146,7 @@ fn test_independent_quests_progress_simultaneously() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -195,13 +162,7 @@ fn test_independent_quests_progress_simultaneously() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 

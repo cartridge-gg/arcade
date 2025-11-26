@@ -1,10 +1,21 @@
 // Imports
 
 use graffiti::json::JsonImpl;
+use crate::types::reward::{Reward, RewardTrait};
+
+// Types
+
+#[derive(Clone, Drop, Serde)]
+pub struct Metadata {
+    pub name: ByteArray,
+    pub description: ByteArray,
+    pub icon: ByteArray,
+    pub rewards: Span<Reward>,
+}
 
 // Errors
 
-pub mod errors {
+pub mod Errors {
     pub const METADATA_INVALID_NAME: felt252 = 'Metadata: invalid name';
     pub const METADATA_INVALID_DESCRIPTION: felt252 = 'Metadata: invalid description';
     pub const METADATA_INVALID_HIDDEN: felt252 = 'Metadata: invalid hidden';
@@ -17,34 +28,31 @@ pub mod errors {
 // Implementations
 
 #[generate_trait]
-pub impl Metadata of MetadataTrait {
+pub impl MetadataImpl of MetadataTrait {
     #[inline]
-    fn jsonify(
-        name: ByteArray,
-        description: ByteArray,
-        hidden: bool,
-        index: Option<u8>,
-        group: Option<ByteArray>,
-        icon: Option<ByteArray>,
-        data: Option<ByteArray>,
-    ) -> ByteArray {
+    fn new(
+        name: ByteArray, description: ByteArray, icon: ByteArray, rewards: Span<Reward>,
+    ) -> Metadata {
         // [Check] Inputs
         MetadataAssert::assert_valid_name(@name);
         MetadataAssert::assert_valid_description(@description);
+        MetadataAssert::assert_valid_icon(@icon);
         // [Return] Metadata
-        let hidden: ByteArray = if hidden {
-            "true"
-        } else {
-            "false"
-        };
+        Metadata { name, description, icon, rewards }
+    }
+
+    #[inline]
+    fn jsonify(mut self: Metadata) -> ByteArray {
+        // [Return] Metadata
+        let mut rewards: Array<ByteArray> = array![];
+        while let Option::Some(reward) = self.rewards.pop_front() {
+            rewards.append(reward.clone().jsonify());
+        }
         JsonImpl::new()
-            .add("name", name)
-            .add("description", description)
-            .add("hidden", hidden)
-            .add_if_some("index", index.map(|index| format!("{}", index)))
-            .add_if_some("group", group)
-            .add_if_some("icon", icon)
-            .add_if_some("data", data)
+            .add("name", self.name)
+            .add("description", self.description)
+            .add("icon", self.icon)
+            .add_array("rewards", rewards.span())
             .build()
     }
 }
@@ -53,12 +61,17 @@ pub impl Metadata of MetadataTrait {
 pub impl MetadataAssert of AssertTrait {
     #[inline]
     fn assert_valid_name(name: @ByteArray) {
-        assert(name.len() > 0, errors::METADATA_INVALID_NAME);
+        assert(name.len() > 0, Errors::METADATA_INVALID_NAME);
     }
 
     #[inline]
     fn assert_valid_description(description: @ByteArray) {
-        assert(description.len() > 0, errors::METADATA_INVALID_DESCRIPTION);
+        assert(description.len() > 0, Errors::METADATA_INVALID_DESCRIPTION);
+    }
+
+    #[inline]
+    fn assert_valid_icon(icon: @ByteArray) {
+        assert(icon.len() > 0, Errors::METADATA_INVALID_ICON);
     }
 }
 
@@ -70,25 +83,18 @@ mod tests {
 
     // Constants
 
-    const HIDDEN: bool = false;
-    const INDEX: u8 = 0;
-    const GROUP: felt252 = 'GROUP';
     const ICON: felt252 = 'ICON';
 
     #[test]
     fn test_metadata_complete() {
         let name: ByteArray = "NAME";
         let description: ByteArray = "DESCRIPTION";
-        let index: Option<u8> = Option::Some(0);
-        let group: Option<ByteArray> = Option::Some("GROUP");
-        let icon: Option<ByteArray> = Option::Some("ICON");
-        let data: Option<ByteArray> = Option::Some("DATA");
-        let metadata: ByteArray = Metadata::jsonify(
-            name, description, HIDDEN, index, group, icon, data,
-        );
+        let icon: ByteArray = "ICON";
+        let rewards: Span<Reward> = array![RewardTrait::new("NAME", "DESCRIPTION", "ICON")].span();
+        let metadata: ByteArray = MetadataImpl::new(name, description, icon, rewards).jsonify();
         assert_eq!(
             metadata,
-            "{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"hidden\":\"false\",\"index\":\"0\",\"group\":\"GROUP\",\"icon\":\"ICON\",\"data\":\"DATA\"}",
+            "{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"icon\":\"ICON\",\"rewards\":[{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"icon\":\"ICON\"}]}",
         );
     }
 
@@ -96,11 +102,12 @@ mod tests {
     fn test_metadata_empty() {
         let name: ByteArray = "NAME";
         let description: ByteArray = "DESCRIPTION";
-        let metadata: ByteArray = Metadata::jsonify(
-            name, description, HIDDEN, Option::None, Option::None, Option::None, Option::None,
-        );
+        let icon: ByteArray = "ICON";
+        let metadata: ByteArray = MetadataImpl::new(name, description, icon, array![].span())
+            .jsonify();
         assert_eq!(
-            metadata, "{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"hidden\":\"false\"}",
+            metadata,
+            "{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"icon\":\"ICON\",\"rewards\":[]}",
         );
     }
 
@@ -108,22 +115,24 @@ mod tests {
     #[should_panic(expected: ('Metadata: invalid name',))]
     fn test_metadata_creation_new_invalid_name() {
         let description: ByteArray = "DESCRIPTION";
-        let index: Option<u8> = Option::Some(0);
-        let group: Option<ByteArray> = Option::Some("GROUP");
-        let icon: Option<ByteArray> = Option::Some("ICON");
-        let data: Option<ByteArray> = Option::Some("DATA");
-        Metadata::jsonify("", description, HIDDEN, index, group, icon, data);
+        let icon: ByteArray = "ICON";
+        MetadataImpl::new("", description, icon, array![].span()).jsonify();
     }
 
     #[test]
     #[should_panic(expected: ('Metadata: invalid description',))]
     fn test_metadata_creation_new_invalid_description() {
         let name: ByteArray = "NAME";
-        let index: Option<u8> = Option::Some(0);
-        let group: Option<ByteArray> = Option::Some("GROUP");
-        let icon: Option<ByteArray> = Option::Some("ICON");
-        let data: Option<ByteArray> = Option::Some("DATA");
-        Metadata::jsonify(name, "", HIDDEN, index, group, icon, data);
+        let icon: ByteArray = "ICON";
+        MetadataImpl::new(name, "", icon, array![].span()).jsonify();
+    }
+
+    #[test]
+    #[should_panic(expected: ('Metadata: invalid icon',))]
+    fn test_metadata_creation_new_invalid_icon() {
+        let name: ByteArray = "NAME";
+        let description: ByteArray = "DESCRIPTION";
+        MetadataImpl::new(name, description, "", array![].span()).jsonify();
     }
 }
 

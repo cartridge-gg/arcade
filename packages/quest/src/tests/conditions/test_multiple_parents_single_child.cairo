@@ -18,6 +18,7 @@ use crate::models::definition::DefinitionAssert;
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
+use crate::types::metadata::{Metadata, MetadataTrait};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -31,12 +32,8 @@ const TASK_C: felt252 = 'TASK-C';
 const TOTAL: u128 = 100;
 const COUNT: u128 = 50;
 
-fn NAME() -> ByteArray {
-    "Quest"
-}
-
-fn DESCRIPTION() -> ByteArray {
-    "Quest description"
+fn METADATA() -> Metadata {
+    MetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
 }
 
 #[test]
@@ -57,13 +54,7 @@ fn test_multiple_parents_single_child_creation() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -80,13 +71,7 @@ fn test_multiple_parents_single_child_creation() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -103,13 +88,7 @@ fn test_multiple_parents_single_child_creation() {
             interval: 0,
             tasks: tasks_c,
             conditions: array![QUEST_A, QUEST_B].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -145,13 +124,7 @@ fn test_multiple_parents_single_child_initial_state() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -167,13 +140,7 @@ fn test_multiple_parents_single_child_initial_state() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -189,13 +156,7 @@ fn test_multiple_parents_single_child_initial_state() {
             interval: 0,
             tasks: tasks_c,
             conditions: array![QUEST_A, QUEST_B].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -232,13 +193,7 @@ fn test_multiple_parents_single_child_unlock() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -254,13 +209,7 @@ fn test_multiple_parents_single_child_unlock() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -276,13 +225,7 @@ fn test_multiple_parents_single_child_unlock() {
             interval: 0,
             tasks: tasks_c,
             conditions: array![QUEST_A, QUEST_B].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 

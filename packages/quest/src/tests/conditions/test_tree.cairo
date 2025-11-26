@@ -21,6 +21,7 @@ use crate::models::definition::DefinitionAssert;
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
+use crate::types::metadata::{Metadata, MetadataTrait};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -38,12 +39,8 @@ const TASK_E: felt252 = 'TASK-E';
 const TOTAL: u128 = 100;
 const COUNT: u128 = 50;
 
-fn NAME() -> ByteArray {
-    "Quest"
-}
-
-fn DESCRIPTION() -> ByteArray {
-    "Quest description"
+fn METADATA() -> Metadata {
+    MetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
 }
 
 #[test]
@@ -64,13 +61,7 @@ fn test_tree_pattern_creation() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -87,13 +78,7 @@ fn test_tree_pattern_creation() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![QUEST_A].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -110,13 +95,7 @@ fn test_tree_pattern_creation() {
             interval: 0,
             tasks: tasks_c,
             conditions: array![QUEST_A].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -133,13 +112,7 @@ fn test_tree_pattern_creation() {
             interval: 0,
             tasks: tasks_d,
             conditions: array![QUEST_B].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -156,13 +129,7 @@ fn test_tree_pattern_creation() {
             interval: 0,
             tasks: tasks_e,
             conditions: array![QUEST_B].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -204,13 +171,7 @@ fn test_tree_pattern_unlock_sequence() {
             interval: 0,
             tasks: tasks_a,
             conditions: array![].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -226,13 +187,7 @@ fn test_tree_pattern_unlock_sequence() {
             interval: 0,
             tasks: tasks_b,
             conditions: array![QUEST_A].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -248,13 +203,7 @@ fn test_tree_pattern_unlock_sequence() {
             interval: 0,
             tasks: tasks_c,
             conditions: array![QUEST_A].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -270,13 +219,7 @@ fn test_tree_pattern_unlock_sequence() {
             interval: 0,
             tasks: tasks_d,
             conditions: array![QUEST_B].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
@@ -292,13 +235,7 @@ fn test_tree_pattern_unlock_sequence() {
             interval: 0,
             tasks: tasks_e,
             conditions: array![QUEST_B].span(),
-            hidden: false,
-            name: NAME(),
-            description: DESCRIPTION(),
-            index: Option::None,
-            group: Option::None,
-            icon: Option::None,
-            data: Option::None,
+            metadata: METADATA(),
             to_store: true,
         );
 
