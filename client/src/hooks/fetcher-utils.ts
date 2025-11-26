@@ -171,22 +171,7 @@ export async function fetchTokenImage(
   return "";
 }
 
-export function parseJsonSafe<T = any>(
-  jsonString: string,
-  fallback: T | null = null,
-  onError?: (error: Error) => void,
-): T | null {
-  try {
-    return JSON.parse(jsonString) as T;
-  } catch (error) {
-    if (onError && error instanceof Error) {
-      onError(error);
-    }
-    return fallback;
-  }
-}
-
-export function sleep(ms: number): Promise<void> {
+function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

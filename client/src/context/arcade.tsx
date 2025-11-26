@@ -30,7 +30,6 @@ import {
   StatusType,
   type MarketplaceOptions,
   CollectionEditionModel,
-  getToriiUrl,
 } from "@cartridge/arcade";
 import {
   constants,
@@ -39,18 +38,8 @@ import {
   shortString,
 } from "starknet";
 import type { Chain } from "@starknet-react/chains";
-import type * as torii from "@dojoengine/torii-wasm";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
-const IGNORES = [
-  "populariumdemo-game",
-  "dragark-mainnet-v11-6",
-  "evolute-duel-arcade",
-  "zkube-budo-mainnet",
-  "budokan-mainnet-2",
-  "ponziland-tourney-2-2",
-  "jokersofneon",
-];
 
 export interface ProjectProps {
   namespace: string;
@@ -72,7 +61,6 @@ interface ArcadeContextType {
   collectionEditions: { [collection: string]: number[] };
   chains: Chain[];
   player: string | undefined;
-  clients: { [key: string]: torii.ToriiClient };
   book: BookModel | null;
   orders: {
     [collection: string]: { [token: string]: { [order: string]: OrderModel } };
@@ -129,9 +117,6 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     [collectionEditionId: string]: CollectionEditionModel;
   }>({});
   const [chains, setChains] = useState<Chain[]>([]);
-  const [clients, setClients] = useState<{ [key: string]: torii.ToriiClient }>(
-    {},
-  );
   const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
@@ -182,11 +167,7 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     throw new Error("ArcadeProvider can only be used once");
   }
 
-  const provider = useMemo(
-    // TODO: Update here to select either Mainnet or Sepolia
-    () => new ExternalProvider(CHAIN_ID),
-    [],
-  );
+  const provider = useMemo(() => new ExternalProvider(CHAIN_ID), []);
 
   const removeOrder = useCallback(
     (order: OrderModel) => {
@@ -445,36 +426,6 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [initialized, handleMarketplaceEntities]);
 
-  useEffect(() => {
-    const getClients = async () => {
-      const clients: { [key: string]: torii.ToriiClient } = {};
-      await Promise.all(
-        Object.values(editions).map(async (edition) => {
-          // FIXME: some old torii version not compatible with the dojo.js version
-          if (IGNORES.includes(edition.config.project)) return;
-          // Fetch the torii client to ensure it exists
-          const url = getToriiUrl(edition.config.project);
-          try {
-            const response = await fetch(url);
-            if (!!response && response.status !== 404) {
-              const client: torii.ToriiClient =
-                await provider.getToriiClient(url);
-              clients[edition.config.project] = client;
-            }
-          } catch (error) {
-            console.log("Error fetching Torii instance:", error);
-            return;
-          }
-        }),
-      );
-      const arcade = getToriiUrl("arcade-main");
-      const client: torii.ToriiClient = await provider.getToriiClient(arcade);
-      clients["arcade-main"] = client;
-      setClients(clients);
-    };
-    getClients();
-  }, [provider, editions]);
-
   const sortedAccesses = useMemo(() => {
     return Object.values(accesses).sort((a, b) =>
       a.identifier.localeCompare(b.identifier),
@@ -520,7 +471,6 @@ export const ArcadeProvider = ({ children }: { children: ReactNode }) => {
         editions: sortedEditions,
         collectionEditions: formmatedCollectionEditions,
         chains,
-        clients,
         player,
         book,
         orders,

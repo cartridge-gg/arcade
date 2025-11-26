@@ -4,44 +4,6 @@ import { getChecksumAddress } from "starknet";
 import { useArcade } from "./arcade";
 import { useAddress } from "./address";
 
-export interface Item {
-  id: string;
-  hidden: boolean;
-  index: number;
-  earning: number;
-  group: string;
-  icon: string;
-  title: string;
-  description: string;
-  timestamp: number;
-  percentage: string;
-  completed: boolean;
-  pinned: boolean;
-  tasks: ItemTask[];
-}
-
-export interface ItemTask {
-  id: string;
-  count: number;
-  total: number;
-  description: string;
-}
-
-export interface Counters {
-  [player: string]: { [quest: string]: { count: number; timestamp: number }[] };
-}
-
-export interface Stats {
-  [quest: string]: number;
-}
-
-export interface Player {
-  address: string;
-  earnings: number;
-  timestamp: number;
-  completeds: string[];
-}
-
 export const useAchievements = () => {
   const context = useContext(AchievementContext);
 
