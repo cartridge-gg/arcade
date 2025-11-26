@@ -1,0 +1,22 @@
+[world]
+name = "Leaderboard"
+description = "Leaderboard"
+seed = "adsefsef"
+
+[namespace]
+default = "NAMESPACE"
+
+[init_call_args]
+"NAMESPACE-Ranker" = []
+
+[writers]
+"NAMESPACE" = []
+
+[owners]
+"NAMESPACE" = ["NAMESPACE-Ranker"]
+
+[env]
+rpc_url = "https://api.cartridge.gg/x/starknet/mainnet"
+account_address = "0x041aad5a7493b75f240f418cb5f052d1a68981af21e813ed0a35e96d3e83123b"
+keystore_path = "./keystore.json"
+world_address = "0x0385159de9a5e71faf55ceee62ece37fc401e994eefa81c98ef1d4443016cf6b"

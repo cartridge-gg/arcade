@@ -1,41 +1,43 @@
 // Internal imports
 
+use achievement::types::metadata::AchievementMetadata;
 use achievement::types::task::Task;
+use starknet::ContractAddress;
+
+pub fn NAMESPACE() -> ByteArray {
+    "NAMESPACE"
+}
 
 #[starknet::interface]
 pub trait IAchiever<TContractState> {
     fn create(
         self: @TContractState,
         id: felt252,
-        hidden: bool,
-        index: u8,
-        points: u16,
+        rewarder: ContractAddress,
         start: u64,
         end: u64,
-        group: felt252,
-        icon: felt252,
-        title: felt252,
-        description: ByteArray,
         tasks: Span<Task>,
-        data: ByteArray,
+        metadata: AchievementMetadata,
+        to_store: bool,
     );
-    fn progress(self: @TContractState, player_id: felt252, task_id: felt252, count: u128);
+    fn progress(
+        self: @TContractState, player_id: felt252, task_id: felt252, count: u128, to_store: bool,
+    );
 }
 
 #[dojo::contract]
 pub mod Achiever {
-    // Dojo imports
+    // Imports
 
     use achievement::components::achievable::AchievableComponent;
-
-    // Internal imports
-
+    use achievement::types::metadata::AchievementMetadata;
     use achievement::types::task::Task;
     use dojo::world::WorldStorage;
+    use starknet::ContractAddress;
 
     // Local imports
 
-    use super::IAchiever;
+    use super::{IAchiever, NAMESPACE};
 
     // Components
 
@@ -60,46 +62,29 @@ pub mod Achiever {
         fn create(
             self: @ContractState,
             id: felt252,
-            hidden: bool,
-            index: u8,
-            points: u16,
+            rewarder: ContractAddress,
             start: u64,
             end: u64,
-            group: felt252,
-            icon: felt252,
-            title: felt252,
-            description: ByteArray,
             tasks: Span<Task>,
-            data: ByteArray,
+            metadata: AchievementMetadata,
+            to_store: bool,
         ) {
             self
                 .achievable
-                .create(
-                    self.world_storage(),
-                    id,
-                    hidden,
-                    index,
-                    points,
-                    start,
-                    end,
-                    group,
-                    icon,
-                    title,
-                    description,
-                    tasks,
-                    data,
-                );
+                .create(self.world_storage(), id, rewarder, start, end, tasks, metadata, to_store);
         }
 
-        fn progress(self: @ContractState, player_id: felt252, task_id: felt252, count: u128) {
-            self.achievable.progress(self.world_storage(), player_id, task_id, count);
+        fn progress(
+            self: @ContractState, player_id: felt252, task_id: felt252, count: u128, to_store: bool,
+        ) {
+            self.achievable.progress(self.world_storage(), player_id, task_id, count, to_store);
         }
     }
 
     #[generate_trait]
     impl Private of PrivateTrait {
         fn world_storage(self: @ContractState) -> WorldStorage {
-            self.world(@"namespace")
+            self.world(@NAMESPACE())
         }
     }
 }

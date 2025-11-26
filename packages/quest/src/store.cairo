@@ -14,6 +14,7 @@ use crate::models::association::{AssociationTrait, QuestAssociation};
 use crate::models::completion::{CompletionTrait, QuestCompletion};
 use crate::models::condition::{ConditionTrait, QuestCondition};
 use crate::models::definition::{DefinitionTrait, QuestDefinition};
+use crate::types::metadata::QuestMetadata;
 use crate::types::task::Task;
 
 // Structs
@@ -109,7 +110,7 @@ pub impl StoreImpl of StoreTrait {
         interval: u64,
         mut tasks: Span<Task>,
         mut conditions: Span<felt252>,
-        metadata: ByteArray,
+        metadata: QuestMetadata,
         to_store: bool,
     ) {
         // [Model] Create quest definition
@@ -122,10 +123,11 @@ pub impl StoreImpl of StoreTrait {
             interval: interval,
             tasks: tasks,
             conditions: conditions,
-            metadata: metadata,
         );
         // [Event] Emit quest creation
-        let event: QuestCreation = CreationTrait::new(id: id, definition: definition.clone());
+        let event: QuestCreation = CreationTrait::new(
+            id: id, definition: definition.clone(), metadata: metadata,
+        );
         self.world.emit_event(@event);
         // [Check] Skip if storing is not requested
         if (!to_store) {

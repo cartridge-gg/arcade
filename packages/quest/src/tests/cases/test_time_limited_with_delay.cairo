@@ -17,7 +17,7 @@ use crate::models::definition::{DefinitionAssert, DefinitionTrait};
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
-use crate::types::metadata::{Metadata, MetadataTrait};
+use crate::types::metadata::{QuestMetadata, QuestMetadataTrait};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -30,8 +30,8 @@ const ONE_WEEK: u64 = 7 * 24 * 60 * 60;
 const START: u64 = 4 * ONE_WEEK; // 4 weeks
 const END: u64 = 48 * ONE_WEEK; // 48 weeks
 
-fn METADATA() -> Metadata {
-    MetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
+fn METADATA() -> QuestMetadata {
+    QuestMetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
 }
 
 #[test]

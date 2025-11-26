@@ -2,6 +2,7 @@
 
 pub use crate::events::index::QuestCreation;
 use crate::models::definition::QuestDefinition;
+use crate::types::metadata::{QuestMetadata, QuestMetadataTrait};
 
 // Errors
 
@@ -14,11 +15,11 @@ pub mod errors {
 #[generate_trait]
 pub impl CreationImpl of CreationTrait {
     #[inline]
-    fn new(id: felt252, definition: QuestDefinition) -> QuestCreation {
+    fn new(id: felt252, definition: QuestDefinition, metadata: QuestMetadata) -> QuestCreation {
         // [Check] Inputs
         CreationAssert::assert_valid_id(id);
         // [Return] QuestCreation
-        QuestCreation { id: id, definition: definition }
+        QuestCreation { id: id, definition: definition, metadata: metadata.jsonify() }
     }
 }
 

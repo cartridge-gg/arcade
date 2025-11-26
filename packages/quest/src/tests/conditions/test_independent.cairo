@@ -15,7 +15,7 @@ use crate::models::definition::DefinitionAssert;
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
 use crate::tests::setup::setup::spawn_game;
-use crate::types::metadata::{Metadata, MetadataTrait};
+use crate::types::metadata::{QuestMetadata, QuestMetadataTrait};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -27,8 +27,8 @@ const TASK_B: felt252 = 'TASK-B';
 const TOTAL: u128 = 100;
 const COUNT: u128 = 50;
 
-fn METADATA() -> Metadata {
-    MetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
+fn METADATA() -> QuestMetadata {
+    QuestMetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
 }
 
 #[test]

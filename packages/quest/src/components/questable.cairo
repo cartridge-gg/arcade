@@ -8,7 +8,7 @@ pub mod QuestableComponent {
     use crate::models::completion::{CompletionAssert, CompletionTrait};
     use crate::models::definition::DefinitionAssert;
     use crate::store::{Store, StoreTrait};
-    use crate::types::metadata::{Metadata, MetadataTrait};
+    use crate::types::metadata::QuestMetadata;
     use crate::types::task::Task;
 
     // Errors
@@ -62,7 +62,7 @@ pub mod QuestableComponent {
             interval: u64,
             tasks: Span<Task>,
             conditions: Span<felt252>,
-            metadata: Metadata,
+            metadata: QuestMetadata,
             to_store: bool,
         ) {
             // [Setup] Store
@@ -79,7 +79,7 @@ pub mod QuestableComponent {
                     interval: interval,
                     tasks: tasks,
                     conditions: conditions,
-                    metadata: metadata.jsonify(),
+                    metadata: metadata,
                     to_store: to_store,
                 );
         }

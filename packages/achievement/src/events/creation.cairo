@@ -75,7 +75,7 @@ impl CreationAssert of AssertTrait {
 
     #[inline]
     fn assert_valid_duration(start: u64, end: u64) {
-        assert(end >= start, errors::CREATION_INVALID_DURATION);
+        assert(end > start || end == 0, errors::CREATION_INVALID_DURATION);
     }
 
     #[inline]
@@ -184,7 +184,7 @@ mod tests {
             INDEX,
             POINTS,
             START,
-            0,
+            START - 1,
             GROUP,
             ICON,
             TITLE,
@@ -214,4 +214,3 @@ mod tests {
         );
     }
 }
-

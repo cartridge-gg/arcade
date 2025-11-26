@@ -2,6 +2,8 @@
 
 use achievement::tests::mocks::achiever::IAchieverDispatcherTrait;
 use achievement::tests::setup::setup::{clear_events, spawn_game};
+use achievement::types::metadata::MetadataTrait;
+use achievement::types::reward::RewardTrait;
 
 // Internal imports
 
@@ -27,26 +29,14 @@ const TITLE: felt252 = 'Title';
 
 #[test]
 fn test_achievable_create() {
-    spawn_game();
-    let (world, systems, _context) = spawn_game();
+    let (world, systems, context) = spawn_game();
     clear_events(world.dispatcher.contract_address);
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .achiever
-        .create(
-            TROPHY_ID,
-            HIDDEN,
-            INDEX,
-            POINTS,
-            START,
-            END,
-            GROUP,
-            ICON,
-            TITLE,
-            "Description",
-            tasks,
-            "",
-        );
+    let rewards = array![RewardTrait::new("NAME", "DESCRIPTION", "ICON")].span();
+    let metadata = MetadataTrait::new(
+        TITLE, "DESCRIPTION", ICON, POINTS, HIDDEN, INDEX, GROUP, rewards, "",
+    );
+    systems.achiever.create(TROPHY_ID, context.rewarder, START, END, tasks, metadata, false);
     let contract_event = starknet::testing::pop_log::<Event>(world.dispatcher.contract_address)
         .unwrap();
     if let Event::EventEmitted(event) = contract_event {
@@ -60,7 +50,6 @@ fn test_achievable_create() {
         assert(*event.values.at(6) == ICON, 'Invalid icon');
         assert(*event.values.at(7) == TITLE, 'Invalid title');
         assert(*event.values.at(8) == 0, 'Invalid data');
-        assert(*event.values.at(9) == 'Description', 'Invalid description');
         assert(*event.values.at(10) == 11, 'Invalid task count');
         assert(*event.values.at(11) == 1, 'Invalid task count');
         assert(*event.values.at(12) == TASK_ID, 'Invalid task id');
@@ -74,7 +63,7 @@ fn test_achievable_create() {
 fn test_achievable_progress() {
     let (world, systems, context) = spawn_game();
     clear_events(world.dispatcher.contract_address);
-    systems.achiever.progress(context.player_id, TASK_ID, COUNT);
+    systems.achiever.progress(context.player_id, TASK_ID, COUNT, true);
     let contract_event = starknet::testing::pop_log::<Event>(world.dispatcher.contract_address)
         .unwrap();
     if let Event::EventEmitted(event) = contract_event {

@@ -5,7 +5,7 @@ use graffiti::json::JsonImpl;
 // Types
 
 #[derive(Clone, Drop, Serde)]
-pub struct QuestReward {
+pub struct AchievementReward {
     pub name: ByteArray,
     pub description: ByteArray,
     pub icon: ByteArray,
@@ -24,17 +24,17 @@ pub mod Errors {
 #[generate_trait]
 pub impl RewardImpl of RewardTrait {
     #[inline]
-    fn new(name: ByteArray, description: ByteArray, icon: ByteArray) -> QuestReward {
+    fn new(name: ByteArray, description: ByteArray, icon: ByteArray) -> AchievementReward {
         // [Check] Inputs
         RewardAssert::assert_valid_name(@name);
         RewardAssert::assert_valid_description(@description);
         RewardAssert::assert_valid_icon(@icon);
         // [Return] Reward
-        QuestReward { name, description, icon }
+        AchievementReward { name, description, icon }
     }
 
     #[inline]
-    fn jsonify(self: QuestReward) -> ByteArray {
+    fn jsonify(self: AchievementReward) -> ByteArray {
         // [Return] Reward
         JsonImpl::new()
             .add("name", self.name)

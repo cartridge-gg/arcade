@@ -8,6 +8,7 @@ pub struct QuestCreation {
     #[key]
     pub id: felt252,
     pub definition: QuestDefinition,
+    pub metadata: ByteArray,
 }
 
 #[derive(Copy, Drop, Serde)]

@@ -1,6 +1,6 @@
 //! Events
 
-// Internal imports
+// Imports
 
 use achievement::types::task::Task;
 
@@ -35,10 +35,21 @@ pub struct TrophyProgression {
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::event]
-pub struct TrophyPinning {
+pub struct AchievementCompleted {
     #[key]
     pub player_id: felt252,
     #[key]
     pub achievement_id: felt252,
     pub time: u64,
 }
+
+#[derive(Copy, Drop, Serde)]
+#[dojo::event]
+pub struct AchievementClaimed {
+    #[key]
+    pub player_id: felt252,
+    #[key]
+    pub achievement_id: felt252,
+    pub time: u64,
+}
+

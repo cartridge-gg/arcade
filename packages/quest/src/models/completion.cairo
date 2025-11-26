@@ -57,6 +57,8 @@ pub impl CompletionImpl of CompletionTrait {
 
     #[inline]
     fn claim(ref self: QuestCompletion) {
+        // [Check] Completion is completed
+        self.assert_is_completed();
         // [Check] Completion not yet claimed
         self.assert_not_claimed();
         // [Update] Completion
