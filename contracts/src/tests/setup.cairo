@@ -1,14 +1,7 @@
 pub mod setup {
     // Imports
 
-    use achievement::events::index as achievement_events;
-
-    // External imports
-
-    use controller::models::{index as controller_models};
-
-    // Dojo imports
-
+    use controller::models::index as controller_models;
     use dojo::world::{WorldStorage, WorldStorageTrait, world};
     use dojo_cairo_test::{
         ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
@@ -126,7 +119,6 @@ pub mod setup {
                 TestResource::Model(starterpack_models::m_ReferralReward::TEST_CLASS_HASH),
                 TestResource::Model(starterpack_models::m_GroupReward::TEST_CLASS_HASH),
                 TestResource::Event(social_events::e_Follow::TEST_CLASS_HASH),
-                TestResource::Event(achievement_events::e_TrophyPinning::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Listing::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Sale::TEST_CLASS_HASH),
                 TestResource::Event(orderbook_events::e_Offer::TEST_CLASS_HASH),

@@ -2,8 +2,6 @@
 
 #[starknet::interface]
 pub trait ISocial<TContractState> {
-    fn pin(ref self: TContractState, achievement_id: felt252);
-    fn unpin(ref self: TContractState, achievement_id: felt252);
     fn follow(ref self: TContractState, target: felt252);
     fn unfollow(ref self: TContractState, target: felt252);
     fn create_alliance(ref self: TContractState, metadata: ByteArray, socials: ByteArray);
@@ -32,13 +30,7 @@ pub trait ISocial<TContractState> {
 
 #[dojo::contract]
 pub mod Social {
-    // Dojo imports
-
-    // Component imports
-
-    use achievement::components::pinnable::PinnableComponent;
-
-    // Internal imports
+    // Imports
 
     use arcade::constants::NAMESPACE;
     use dojo::world::WorldStorage;
@@ -52,8 +44,6 @@ pub mod Social {
 
     // Components
 
-    component!(path: PinnableComponent, storage: pinnable, event: PinnableEvent);
-    impl PinnableInternalImpl = PinnableComponent::InternalImpl<ContractState>;
     component!(path: AllianceableComponent, storage: allianceable, event: AllianceableEvent);
     impl AllianceableImpl = AllianceableComponent::InternalImpl<ContractState>;
     component!(path: FollowableComponent, storage: followable, event: FollowableEvent);
@@ -65,8 +55,6 @@ pub mod Social {
 
     #[storage]
     struct Storage {
-        #[substorage(v0)]
-        pinnable: PinnableComponent::Storage,
         #[substorage(v0)]
         allianceable: AllianceableComponent::Storage,
         #[substorage(v0)]
@@ -81,8 +69,6 @@ pub mod Social {
     #[derive(Drop, starknet::Event)]
     enum Event {
         #[flat]
-        PinnableEvent: PinnableComponent::Event,
-        #[flat]
         AllianceableEvent: AllianceableComponent::Event,
         #[flat]
         FollowableEvent: FollowableComponent::Event,
@@ -94,18 +80,6 @@ pub mod Social {
 
     #[abi(embed_v0)]
     impl SocialImpl of ISocial<ContractState> {
-        fn pin(ref self: ContractState, achievement_id: felt252) {
-            let world: WorldStorage = self.world_storage();
-            let caller: felt252 = starknet::get_caller_address().into();
-            self.pinnable.pin(world, caller, achievement_id);
-        }
-
-        fn unpin(ref self: ContractState, achievement_id: felt252) {
-            let world: WorldStorage = self.world_storage();
-            let caller: felt252 = starknet::get_caller_address().into();
-            self.pinnable.unpin(world, caller, achievement_id);
-        }
-
         fn follow(ref self: ContractState, target: felt252) {
             let world = self.world_storage();
             let caller: felt252 = starknet::get_caller_address().into();
