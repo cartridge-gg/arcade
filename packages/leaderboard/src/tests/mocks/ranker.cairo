@@ -21,7 +21,7 @@ pub trait IRanker<TContractState> {
         time: u64,
         to_store: bool,
     );
-    fn at(ref self: TContractState, leaderboard_id: felt252, game_id: u64) -> Option<Item>;
+    fn at(ref self: TContractState, leaderboard_id: felt252, rank: u8) -> Option<Item>;
 }
 
 #[dojo::contract]
@@ -75,8 +75,8 @@ pub mod Ranker {
                 );
         }
 
-        fn at(ref self: ContractState, leaderboard_id: felt252, game_id: u64) -> Option<Item> {
-            self.rankable.at(leaderboard_id, game_id)
+        fn at(ref self: ContractState, leaderboard_id: felt252, rank: u8) -> Option<Item> {
+            self.rankable.at(leaderboard_id, rank)
         }
     }
 

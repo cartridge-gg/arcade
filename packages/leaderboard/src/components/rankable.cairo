@@ -5,6 +5,7 @@ pub mod RankableComponent {
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
     };
+    use crate::helpers::heap::HeapTrait;
     use crate::store::StoreTrait;
     use crate::types::item::{Item, ItemStorePacking, ItemTrait, ItemZero};
 
@@ -54,33 +55,35 @@ pub mod RankableComponent {
         }
 
         #[inline]
+        fn span(
+            self: @ComponentState<TContractState>, leaderboard_id: felt252, count: u8,
+        ) -> Span<Item> {
+            let mut heap = HeapTrait::new();
+            let mut index = self.len.entry(leaderboard_id).read();
+            while index > 0 {
+                index -= 1;
+                let key = self.keys.entry(leaderboard_id).entry(index.into()).read();
+                let item = self.data.entry(leaderboard_id).entry(key.into()).read();
+                heap.add(item);
+            }
+            heap.span(count)
+        }
+
+        #[inline]
         fn get(self: @ComponentState<TContractState>, leaderboard_id: felt252, key: u128) -> Item {
             self.data.entry(leaderboard_id).entry(key.into()).read()
         }
 
         #[inline]
         fn at(
-            ref self: ComponentState<TContractState>, leaderboard_id: felt252, rank: u64,
+            self: @ComponentState<TContractState>, leaderboard_id: felt252, rank: u8,
         ) -> Option<Item> {
             // [Check] Rank is valid
-            if rank >= self.len.entry(leaderboard_id).read().into() {
+            if rank >= self.len.entry(leaderboard_id).read() {
                 return Option::None;
             }
-            // [Effect] Pop items until the rank is reached
-            let mut items: Array<Item> = array![];
-            let mut index = rank;
-            while let Option::Some(item) = self.pop_front(leaderboard_id) {
-                items.append(item);
-                if index == 0 {
-                    break;
-                }
-                index -= 1;
-            }
-            let result = Option::Some(*items.at(items.len() - 1));
-            while let Option::Some(item) = items.pop_front() {
-                self.add(leaderboard_id, item);
-            }
-            result
+            // [Return] Item at the rank
+            Option::Some(*self.span(leaderboard_id, 1 + rank).at(rank.into()))
         }
 
         #[inline]
@@ -111,9 +114,33 @@ pub mod RankableComponent {
             }
             // [Effect] Store score
             let item = ItemTrait::new(game_id, score, time);
-            self.add(leaderboard_id, item);
+            self.insert(leaderboard_id, item);
         }
 
+        #[inline]
+        fn pop_front(
+            ref self: ComponentState<TContractState>, leaderboard_id: felt252,
+        ) -> Option<Item> {
+            if self.is_empty(leaderboard_id) {
+                return Option::None;
+            }
+            let len = self.len.entry(leaderboard_id).read() - 1;
+            self.len.entry(leaderboard_id).write(len);
+            let first_key: u128 = self.keys.entry(leaderboard_id).entry(0).read();
+            let mut first: Item = self.data.entry(leaderboard_id).entry(first_key.into()).read();
+            if len != 0 {
+                let last_key: u128 = self.keys.entry(leaderboard_id).entry(len.into()).read();
+                self.swap(leaderboard_id, first_key, last_key);
+                self.sort_down(leaderboard_id, last_key);
+            }
+            Option::Some(first)
+        }
+    }
+
+    #[generate_trait]
+    pub impl PrivateImpl<
+        TContractState, +HasComponent<TContractState>,
+    > of PrivateTrait<TContractState> {
         #[inline]
         fn contains(
             self: @ComponentState<TContractState>, leaderboard_id: felt252, key: u128,
@@ -121,6 +148,18 @@ pub mod RankableComponent {
             let index = self.keys.entry(leaderboard_id).entry(key.into() + KEY_OFFSET).read();
             let item_key = self.keys.entry(leaderboard_id).entry(index.into()).read();
             index < self.len.entry(leaderboard_id).read().into() && item_key == key
+        }
+
+        #[inline]
+        fn insert(ref self: ComponentState<TContractState>, leaderboard_id: felt252, item: Item) {
+            // [Check] Item is already in the leaderboard
+            if self.contains(leaderboard_id, item.key.into()) {
+                // [Effect] Update item
+                self.update(leaderboard_id, item);
+                return;
+            }
+            // [Effect] Add item
+            self.add(leaderboard_id, item);
         }
 
         #[inline]
@@ -162,26 +201,8 @@ pub mod RankableComponent {
             let key: u128 = item.key.into();
             self.data.entry(leaderboard_id).entry(key.into()).write(item);
             // [Effect] Sort up
+            self.sort_down(leaderboard_id, key);
             self.sort_up(leaderboard_id, key);
-        }
-
-        #[inline]
-        fn pop_front(
-            ref self: ComponentState<TContractState>, leaderboard_id: felt252,
-        ) -> Option<Item> {
-            if self.is_empty(leaderboard_id) {
-                return Option::None;
-            }
-            let len = self.len.entry(leaderboard_id).read() - 1;
-            self.len.entry(leaderboard_id).write(len);
-            let first_key: u128 = self.keys.entry(leaderboard_id).entry(0).read();
-            let mut first: Item = self.data.entry(leaderboard_id).entry(first_key.into()).read();
-            if len != 0 {
-                let last_key: u128 = self.keys.entry(leaderboard_id).entry(len.into()).read();
-                self.swap(leaderboard_id, first_key, last_key);
-                self.sort_down(leaderboard_id, last_key);
-            }
-            Option::Some(first)
         }
 
         #[inline]

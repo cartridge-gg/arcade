@@ -4,6 +4,10 @@ pub mod types {
     pub mod item;
 }
 
+pub mod helpers {
+    pub mod heap;
+}
+
 pub mod events {
     pub mod index;
     pub mod score;

@@ -412,3 +412,78 @@ fn test_ranker_with_capacity_indirect_order() {
         assert(false, 'Rank 2 should be empty')
     };
 }
+
+#[test]
+fn test_ranker_duplicate_submission() {
+    // [Setup] World
+    let (_world, systems, context) = spawn_game();
+
+    // [Submit] Score
+    systems
+        .ranker
+        .submit(
+            leaderboard_id: LEADERBOARD_ID,
+            game_id: 3,
+            player_id: context.player_id,
+            score: 30,
+            time: 300,
+            to_store: true,
+        );
+
+    // [Submit] Score
+    systems
+        .ranker
+        .submit(
+            leaderboard_id: LEADERBOARD_ID,
+            game_id: 2,
+            player_id: context.player_id,
+            score: 20,
+            time: 200,
+            to_store: true,
+        );
+
+    // [Submit] Score
+    systems
+        .ranker
+        .submit(
+            leaderboard_id: LEADERBOARD_ID,
+            game_id: 1,
+            player_id: context.player_id,
+            score: 10,
+            time: 100,
+            to_store: true,
+        );
+
+    // [Assert] Leaderboard length
+    assert_eq!(systems.ranker.len(LEADERBOARD_ID), 3);
+
+    // [Submit] Score
+    systems
+        .ranker
+        .submit(
+            leaderboard_id: LEADERBOARD_ID,
+            game_id: 1,
+            player_id: context.player_id,
+            score: 40,
+            time: 400,
+            to_store: true,
+        );
+
+    // [Assert] Leaderboard length
+    assert_eq!(systems.ranker.len(LEADERBOARD_ID), 3);
+
+    // [Assert] Rank 0
+    let item = systems.ranker.at(LEADERBOARD_ID, 0).unwrap();
+    assert_eq!(item.key, 1);
+    assert_eq!(item.time, 400);
+
+    // [Assert] Rank 1
+    let item = systems.ranker.at(LEADERBOARD_ID, 1).unwrap();
+    assert_eq!(item.key, 3);
+    assert_eq!(item.time, 300);
+
+    // [Assert] Rank 2
+    let item = systems.ranker.at(LEADERBOARD_ID, 2).unwrap();
+    assert_eq!(item.key, 2);
+    assert_eq!(item.time, 200);
+}

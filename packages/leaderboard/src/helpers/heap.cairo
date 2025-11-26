@@ -20,80 +20,87 @@ pub trait HeapTrait<T, U> {
     /// # Returns
     /// * `true` if the heap is empty, `false` otherwise
     fn is_empty(self: @Heap<T, U>) -> bool;
-    /// Get an item from the heap if it exists.
+    /// Get an node from the heap if it exists.
     /// # Arguments
     /// * `self` - The heap
-    /// * `key` - The key of the item
+    /// * `key` - The key of the node
     /// # Returns
-    /// * The item if it exists, `None` otherwise
+    /// * The node if it exists, `None` otherwise
     fn get(ref self: Heap<T, U>, key: U) -> Option<T>;
-    /// Get an item from the heap.
+    /// Get an node from the heap.
     /// # Arguments
     /// * `self` - The heap
-    /// * `key` - The key of the item
+    /// * `key` - The key of the node
     /// # Returns
-    /// * The item
+    /// * The node
     /// # Panics
-    /// * If the item does not exist
+    /// * If the node does not exist
     fn at(ref self: Heap<T, U>, key: U) -> T;
-    /// Check if the heap contains an item.
+    /// Check if the heap contains an node.
     /// # Arguments
     /// * `self` - The heap
-    /// * `key` - The key of the item
+    /// * `key` - The key of the node
     /// # Returns
-    /// * `true` if the item exists, `false` otherwise
+    /// * `true` if the node exists, `false` otherwise
     fn contains(ref self: Heap<T, U>, key: U) -> bool;
-    /// Add an item to the heap.
+    /// Add an node to the heap.
     /// # Arguments
     /// * `self` - The heap
-    /// * `item` - The item to add
+    /// * `node` - The node to add
     /// # Effects
-    /// * The item is added at the end of the heap and the heap is sorted up
-    fn add(ref self: Heap<T, U>, item: T);
-    /// Update an item in the heap.
+    /// * The node is added at the end of the heap and the heap is sorted up
+    fn add(ref self: Heap<T, U>, node: T);
+    /// Update an node in the heap.
     /// # Arguments
     /// * `self` - The heap
-    /// * `item` - The item to update
+    /// * `node` - The node to update
     /// # Effects
-    /// * The item is updated and the heap is sorted up since it cannot be updated with a lower
+    /// * The node is updated and the heap is sorted up since it cannot be updated with a lower
     /// score in case of A* algorithm
-    fn update(ref self: Heap<T, U>, item: T);
-    /// Pop the first item from the heap.
+    fn update(ref self: Heap<T, U>, node: T);
+    /// Pop the first node from the heap.
     /// # Arguments
     /// * `self` - The heap
     /// # Returns
-    /// * The first item if the heap is not empty, `None` otherwise
+    /// * The first node if the heap is not empty, `None` otherwise
     fn pop_front(ref self: Heap<T, U>) -> Option<T>;
-    /// Sort an item up in the heap.
+    /// Sort an node up in the heap.
     /// # Arguments
     /// * `self` - The heap
-    /// * `item_key` - The key of the item to sort up
+    /// * `node_key` - The key of the node to sort up
     /// # Effects
-    /// * The items are swapped until the item is in the right place
-    fn sort_up(ref self: Heap<T, U>, item_key: U);
-    /// Sort an item down in the heap.
+    /// * The nodes are swapped until the node is in the right place
+    fn sort_up(ref self: Heap<T, U>, node_key: U);
+    /// Sort an node down in the heap.
     /// # Arguments
     /// * `self` - The heap
-    /// * `item_key` - The key of the item to sort down
+    /// * `node_key` - The key of the node to sort down
     /// # Effects
-    /// * The items are swapped until the item is in the right place
-    fn sort_down(ref self: Heap<T, U>, item_key: U);
-    /// Swap two items in the heap.
+    /// * The nodes are swapped until the node is in the right place
+    fn sort_down(ref self: Heap<T, U>, node_key: U);
+    /// Swap two nodes in the heap.
     /// # Arguments
     /// * `self` - The heap
-    /// * `lhs` - The key of the first item
-    /// * `rhs` - The key of the second item
+    /// * `lhs` - The key of the first node
+    /// * `rhs` - The key of the second node
     /// # Effects
-    /// * The items are swapped
+    /// * The nodes are swapped
     fn swap(ref self: Heap<T, U>, lhs: U, rhs: U);
+    /// Get a span of nodes from the heap.
+    /// # Arguments
+    /// * `self` - The heap
+    /// * `count` - The number of nodes to get
+    /// # Returns
+    /// * The span of nodes
+    fn span(ref self: Heap<T, U>, count: u8) -> Span<T>;
 }
 
-pub trait ItemTrait<T, U> {
-    /// Get the key of the item.
+pub trait NodeTrait<T, U> {
+    /// Get the key of the node.
     /// # Arguments
-    /// * `self` - The item
+    /// * `self` - The node
     /// # Returns
-    /// * The key of the item
+    /// * The key of the node
     fn key(self: T) -> U;
 }
 
@@ -102,10 +109,10 @@ pub trait ItemTrait<T, U> {
 pub struct Heap<T, U> {
     /// The length of the heap.
     pub len: u8,
-    /// The keys of the items in the heap and also the indexes of the items in the data.
+    /// The keys of the nodes in the heap and also the indexes of the nodes in the data.
     /// Both information is stored in the same map to save gas.
     pub keys: Felt252Dict<Nullable<U>>,
-    /// The items.
+    /// The nodes.
     pub data: Felt252Dict<Nullable<T>>,
 }
 
@@ -113,7 +120,7 @@ pub struct Heap<T, U> {
 pub impl HeapImpl<
     T,
     U,
-    +ItemTrait<T, U>,
+    +NodeTrait<T, U>,
     +PartialOrd<T>,
     +Copy<T>,
     +Drop<T>,
@@ -155,18 +162,18 @@ pub impl HeapImpl<
     #[inline]
     fn contains(ref self: Heap<T, U>, key: U) -> bool {
         let index = self.keys.get(key.into() + KEY_OFFSET).deref();
-        let item_key = self.keys.get(index.into()).deref();
-        index < self.len.into() && item_key == key
+        let node_key = self.keys.get(index.into()).deref();
+        index < self.len.into() && node_key == key
     }
 
     #[inline]
-    fn add(ref self: Heap<T, U>, item: T) {
+    fn add(ref self: Heap<T, U>, node: T) {
         // [Effect] Update heap length
-        let key = item.key();
+        let key = node.key();
         let index = self.len.into();
         self.len += 1;
-        // [Effect] Insert item at the end
-        self.data.insert(key.into(), NullableTrait::new(item));
+        // [Effect] Insert node at the end
+        self.data.insert(key.into(), NullableTrait::new(node));
         self.keys.insert(index.into(), NullableTrait::new(key));
         self.keys.insert(key.into() + KEY_OFFSET, NullableTrait::new(index));
         // [Effect] Sort up
@@ -174,10 +181,10 @@ pub impl HeapImpl<
     }
 
     #[inline]
-    fn update(ref self: Heap<T, U>, item: T) {
-        // [Effect] Update item
-        let key = item.key();
-        self.data.insert(key.into(), NullableTrait::new(item));
+    fn update(ref self: Heap<T, U>, node: T) {
+        // [Effect] Update node
+        let key = node.key();
+        self.data.insert(key.into(), NullableTrait::new(node));
         // [Effect] Sort up
         self.sort_up(key);
     }
@@ -199,28 +206,28 @@ pub impl HeapImpl<
     }
 
     #[inline]
-    fn sort_up(ref self: Heap<T, U>, item_key: U) {
-        // [Compute] Item
-        let item: T = self.data.get(item_key.into()).deref();
-        let mut index = self.keys.get(item_key.into() + KEY_OFFSET).deref();
-        // [Compute] Peform swaps until the item is in the right place
+    fn sort_up(ref self: Heap<T, U>, node_key: U) {
+        // [Compute] Node
+        let node: T = self.data.get(node_key.into()).deref();
+        let mut index = self.keys.get(node_key.into() + KEY_OFFSET).deref();
+        // [Compute] Peform swaps until the node is in the right place
         while index != 0_u8.into() {
             index = (index - 1_u8.into()) / 2_u8.into();
             let parent_key = self.keys.get(index.into()).deref();
             let mut parent: T = self.data.get(parent_key.into()).deref();
-            if parent >= item {
+            if parent >= node {
                 break;
             }
-            self.swap(parent_key, item_key);
+            self.swap(parent_key, node_key);
         }
     }
 
     #[inline]
-    fn sort_down(ref self: Heap<T, U>, item_key: U) {
-        // [Compute] Item
-        let item: T = self.data.get(item_key.into()).deref();
-        let mut index: U = self.keys.get(item_key.into() + KEY_OFFSET).deref();
-        // [Compute] Peform swaps until the item is in the right place
+    fn sort_down(ref self: Heap<T, U>, node_key: U) {
+        // [Compute] Node
+        let node: T = self.data.get(node_key.into()).deref();
+        let mut index: U = self.keys.get(node_key.into() + KEY_OFFSET).deref();
+        // [Compute] Peform swaps until the node is in the right place
         let mut lhs_index = index * 2_u8.into() + 1_u8.into();
         while lhs_index < self.len.into() {
             // [Compute] Child to swap
@@ -239,10 +246,10 @@ pub impl HeapImpl<
                 };
             }
             // [Effect] Swap if necessary
-            if item >= child {
+            if node >= child {
                 break;
             }
-            self.swap(item_key, child_key);
+            self.swap(node_key, child_key);
             // [Check] Stop criteria, assess left child side
             lhs_index = index * 2_u8.into() + 1_u8.into();
         }
@@ -257,6 +264,18 @@ pub impl HeapImpl<
         self.keys.insert(rhs.into() + KEY_OFFSET, NullableTrait::new(lhs_index));
         self.keys.insert(lhs_index.into(), NullableTrait::new(rhs));
         self.keys.insert(rhs_index.into(), NullableTrait::new(lhs));
+    }
+
+    #[inline]
+    fn span(ref self: Heap<T, U>, count: u8) -> Span<T> {
+        let mut nodes: Array<T> = array![];
+        let mut index = core::cmp::min(self.len, count);
+        while index > 0 {
+            index -= 1;
+            let node = self.pop_front();
+            nodes.append(node.unwrap());
+        }
+        nodes.span()
     }
 }
 

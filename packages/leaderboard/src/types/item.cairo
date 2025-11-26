@@ -1,6 +1,7 @@
 // Internal imports
 
 use starknet::storage_access::StorePacking;
+use crate::helpers::heap::NodeTrait;
 
 // Constants
 
@@ -26,6 +27,13 @@ pub impl ItemImpl of ItemTrait {
     fn new(key: u64, score: u64, time: u64) -> Item {
         // [Return] Item
         Item { key, score, time }
+    }
+}
+
+pub impl ItemNodeTrait of NodeTrait<Item, u64> {
+    #[inline]
+    fn key(self: Item) -> u64 {
+        self.key
     }
 }
 
