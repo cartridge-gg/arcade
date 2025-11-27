@@ -1,27 +1,30 @@
-import { useContext, useMemo } from "react";
-import { MetricsContext } from "../context/metrics";
+import { useMemo } from "react";
+import { useAtomValue } from "@effect-atom/atom-react";
+import {
+  editionsAtom,
+  createMetricsAtom,
+  type MetricsData,
+} from "@/effect/atoms";
+import { unwrap } from "@/effect/utils/result";
 import { useProject } from "./project";
+import type { MetricsProject } from "@cartridge/ui/utils/api/cartridge";
 
-/**
- * Custom hook to access the Metric context and account information.
- * Must be used within a MetricProvider component.
- *
- * @returns An object containing:
- * - metrics: The registered metrics
- * - status: The status of the metrics
- * @throws {Error} If used outside of a MetricProvider context
- */
+export type Metrics = MetricsData;
+
 export const useMetrics = () => {
-  const context = useContext(MetricsContext);
   const { edition } = useProject();
+  const editionsResult = useAtomValue(editionsAtom);
+  const { value: editions } = unwrap(editionsResult, []);
 
-  if (!context) {
-    throw new Error(
-      "The `useMetrics` hook must be used within a `MetricProvider`",
-    );
-  }
+  const projects: MetricsProject[] = useMemo(() => {
+    return editions.map((edition) => ({
+      project: edition.config.project,
+    }));
+  }, [editions]);
 
-  const { metrics: allMetrics, status } = context;
+  const metricsAtom = useMemo(() => createMetricsAtom(projects), [projects]);
+  const metricsResult = useAtomValue(metricsAtom);
+  const { value: allMetrics, status } = unwrap(metricsResult, [] as Metrics[]);
 
   const metrics = useMemo(() => {
     if (!edition) return allMetrics;

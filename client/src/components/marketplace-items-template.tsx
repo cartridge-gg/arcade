@@ -5,7 +5,7 @@ import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
 import { useProject } from "@/hooks/project";
-import { ThemeProvider } from "@/context/theme";
+import { useTheme } from "@/hooks/context";
 import { useDevice } from "@/hooks/device";
 import { UserCard } from "./user/user-card";
 import arcade from "@/assets/arcade-logo.png";
@@ -20,6 +20,7 @@ interface MarketplaceItemsTemplateProps {
 export function MarketplaceItemsTemplate({
   children,
 }: MarketplaceItemsTemplateProps) {
+  useTheme();
   const { isOpen, handleTouchMove, handleTouchStart } = useSidebar();
   const { player, game, edition, collection } = useProject();
 
@@ -32,8 +33,7 @@ export function MarketplaceItemsTemplate({
   const isDashboard = !(edition && game);
 
   return (
-    <ThemeProvider defaultScheme="dark">
-      <SceneLayout>
+    <SceneLayout>
         <div
           className={cn(
             "h-full w-full overflow-y-scroll lg:px-6 lg:py-5 lg:pt-0 ",
@@ -106,7 +106,6 @@ export function MarketplaceItemsTemplate({
             </div>
           </div>
         </div>
-      </SceneLayout>
-    </ThemeProvider>
+    </SceneLayout>
   );
 }

@@ -1,8 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { VoyagerUrl } from "@cartridge/ui/utils";
 import type { constants } from "starknet";
-import { useActivities } from "@/hooks/activities";
-import type { CardProps } from "@/context/activities";
+import { useActivities, type CardProps } from "@/hooks/activities";
 
 export type ActivityEventVariant =
   | "token"
@@ -144,7 +143,7 @@ export function useActivityViewModel({
         ? "error"
         : limitedActivities.length === 0
           ? "empty"
-          : status;
+          : "success";
 
   return {
     status: derivedStatus,

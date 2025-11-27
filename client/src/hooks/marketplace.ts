@@ -1,28 +1,56 @@
-import { useCallback, useContext, useMemo, useState } from "react";
-import { useRouterState, useSearch } from "@tanstack/react-router";
-import { getChecksumAddress } from "starknet";
+import { bookAtom, listingsAtom, ordersAtom, salesAtom } from "@/effect/atoms";
+import { ArcadeProvider as ExternalProvider } from "@cartridge/arcade";
 import { type OrderModel, StatusType } from "@cartridge/arcade";
-import { ArcadeContext } from "@/context";
+import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { useRouterState, useSearch } from "@tanstack/react-router";
+import { useCallback, useMemo, useState } from "react";
+import { constants, getChecksumAddress } from "starknet";
+import { useArcadeInit } from "./arcadeInit";
 import { parseRouteParams } from "./project";
 
-/**
- * Custom hook to access the Marketplace context and account information.
- * Must be used within a ArcadeProvider component.
- *
- * @returns An object containing:
- * - chainId: The chain id
- * - provider: The Marketplace provider instance
- * - orders: All the existing orders
- * @throws {Error} If used outside of a ArcadeProvider context
- */
 export const useMarketplace = () => {
-  const context = useContext(ArcadeContext);
+  // const { chainId, provider, addOrder, removeOrder } = useArcadeInit();
+  const chainId = constants.StarknetChainId.SN_MAIN;
+  const provider = useMemo(() => new ExternalProvider(chainId), []);
+  const setOrders = useAtomSet(ordersAtom);
 
-  if (!context) {
-    throw new Error(
-      "The `useMarketplace` hook must be used within a `ArcadeProvider`",
-    );
-  }
+  const addOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => ({
+        ...prev,
+        [collection]: {
+          ...(prev[collection] || {}),
+          [token]: {
+            ...(prev[collection]?.[token] || {}),
+            [order.id]: order,
+          },
+        },
+      }));
+    },
+    [setOrders],
+  );
+
+  const removeOrder = useCallback(
+    (order: OrderModel) => {
+      const collection = getChecksumAddress(order.collection);
+      const token = order.tokenId.toString();
+      setOrders((prev) => {
+        const newOrders = { ...prev };
+        if (newOrders[collection]?.[token]?.[order.id]) {
+          delete newOrders[collection][token][order.id];
+        }
+        return newOrders;
+      });
+    },
+    [setOrders],
+  );
+
+  const book = useAtomValue(bookAtom);
+  const orders = useAtomValue(ordersAtom);
+  const listings = useAtomValue(listingsAtom);
+  const sales = useAtomValue(salesAtom);
 
   const routerState = useRouterState();
   const search = useSearch({ strict: false });
@@ -38,16 +66,6 @@ export const useMarketplace = () => {
     const value = (search as Record<string, unknown>).token;
     return typeof value === "string" ? value : undefined;
   }, [params.token, search]);
-  const {
-    chainId,
-    provider,
-    orders,
-    addOrder,
-    removeOrder,
-    listings,
-    sales,
-    book,
-  } = context;
   const [amount, setAmount] = useState<number>(0);
 
   const getCollectionOrders = useCallback(

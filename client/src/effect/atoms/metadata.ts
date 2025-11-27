@@ -50,5 +50,29 @@ const fetchMetadataEffect = ({
 
 const metadataRuntime = Atom.runtime(Layer.empty);
 
-export const createMetadataAtom = (options: MetadataOptions) =>
+const createUncachedMetadataAtom = (options: MetadataOptions) =>
   metadataRuntime.atom(fetchMetadataEffect(options)).pipe(Atom.keepAlive);
+
+type MetadataAtom = ReturnType<typeof createUncachedMetadataAtom>;
+
+const metadataAtomCache = new Map<string, MetadataAtom>();
+
+const buildCacheKey = (options: MetadataOptions): string => {
+  const traitsKey = JSON.stringify(options.traits);
+  const projectsKey = options.projects
+    ? JSON.stringify([...options.projects].sort())
+    : "";
+  return `${options.contractAddress}:${traitsKey}:${projectsKey}`;
+};
+
+export const createMetadataAtom = (options: MetadataOptions): MetadataAtom => {
+  const key = buildCacheKey(options);
+
+  let atom = metadataAtomCache.get(key);
+  if (!atom) {
+    atom = createUncachedMetadataAtom(options);
+    metadataAtomCache.set(key, atom);
+  }
+
+  return atom;
+};

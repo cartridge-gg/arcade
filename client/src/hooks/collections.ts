@@ -1,32 +1,35 @@
-import { useContext, useMemo } from "react";
-import { CollectionContext } from "../context/collection";
+import { useMemo } from "react";
+import { useAtomValue } from "@effect-atom/atom-react";
+import { editionsAtom } from "@/effect/atoms";
+import { unwrapOr } from "@/effect/utils/result";
 import { useProject } from "./project";
+import { useAddress } from "./address";
+import { useCollectibles, type Collection } from "@/hooks/token-fetcher";
+import { DEFAULT_PROJECT } from "@/constants";
 
-/**
- * Custom hook to access the Collection context and account information.
- * Must be used within a CollectionProvider component.
- *
- * @returns An object containing:
- * - collections: The registered collections
- * - status: The status of the collections
- * @throws {Error} If used outside of a CollectionProvider context
- */
+export { CollectionType, type Collection } from "@/hooks/token-fetcher";
+
 export const useCollections = () => {
-  const context = useContext(CollectionContext);
   const { edition } = useProject();
+  const { address } = useAddress();
 
-  if (!context) {
-    throw new Error(
-      "The `useCollections` hook must be used within a `CollectionProvider`",
-    );
-  }
+  const editionsResult = useAtomValue(editionsAtom);
+  const editions = unwrapOr(editionsResult, []);
 
-  const { collections: allCollections, status } = context;
+  const projects = useMemo(
+    () => [DEFAULT_PROJECT, ...editions.map((ed) => ed.config.project)],
+    [editions],
+  );
+
+  const { collections: allCollections, status } = useCollectibles(
+    projects,
+    address,
+  );
 
   const collections = useMemo(() => {
     if (!edition) return allCollections;
     return allCollections.filter(
-      (collection) => collection.project === edition.config.project,
+      (collection: Collection) => collection.project === edition.config.project,
     );
   }, [edition, allCollections]);
 

@@ -1,33 +1,100 @@
-import { useContext, useMemo } from "react";
-import { AchievementContext } from "@/context";
+import { useMemo, useState, useEffect } from "react";
 import { getChecksumAddress } from "starknet";
+import { useProgressions, useTrophies, useAccounts } from "@/collections";
+import {
+  AchievementHelper,
+  type AchievementData,
+  type Item,
+  type Player,
+  type Event,
+} from "@/lib/achievements";
 import { useArcade } from "./arcade";
 import { useAddress } from "./address";
 
 export const useAchievements = () => {
-  const context = useContext(AchievementContext);
+  const [players, setPlayers] = useState<{ [game: string]: Player[] }>({});
+  const [events, setEvents] = useState<{ [game: string]: Event[] }>({});
+  const [globals, setGlobals] = useState<Player[]>([]);
+  const [achievements, setAchievements] = useState<{ [game: string]: Item[] }>(
+    {},
+  );
 
-  if (!context) {
-    throw new Error(
-      "The `useAchievements` hook must be used within a `AchievementProvider`",
-    );
-  }
+  const { address } = useAddress();
 
   const {
-    achievements,
-    players,
-    events,
-    usernames,
-    globals,
-    isLoading,
-    isError,
-  } = context;
+    data: trophies,
+    isLoading: trophiesLoading,
+    isError: trophiesError,
+  } = useTrophies();
+  const {
+    data: progressions,
+    isLoading: progressionsLoading,
+    isError: progressionsError,
+  } = useProgressions();
+
+  useEffect(() => {
+    if (
+      !Object.values(trophies).length ||
+      !Object.values(progressions).length ||
+      !address ||
+      address === "0x0"
+    )
+      return;
+    const data: AchievementData = AchievementHelper.extract(
+      progressions,
+      trophies,
+    );
+    const { stats, players, events, globals } =
+      AchievementHelper.computePlayers(data, trophies);
+    setPlayers(players);
+    setEvents(events);
+    setGlobals(globals);
+    const achievements = AchievementHelper.computeAchievements(
+      data,
+      trophies,
+      players,
+      stats,
+      address,
+    );
+    setAchievements(achievements);
+  }, [address, trophies, progressions]);
+
+  const addresses = useMemo(() => {
+    const addresses = Object.values(players).flatMap((gamePlayers) =>
+      gamePlayers.map((player) => player.address),
+    );
+    const uniqueAddresses = [...new Set(addresses)];
+    return uniqueAddresses;
+  }, [players]);
+
+  const { data } = useAccounts();
+
+  const usernamesData = useMemo(() => {
+    if (!data || addresses.length === 0) return {};
+    const usernamesList = addresses.map((addr) => ({
+      address: getChecksumAddress(addr),
+      username: data.get(getChecksumAddress(addr)) || addr.slice(0, 9),
+    }));
+    const result: { [key: string]: string | undefined } = {};
+    for (const addr of addresses) {
+      result[getChecksumAddress(addr)] = usernamesList.find(
+        (u) => BigInt(u.address || "0x0") === BigInt(addr),
+      )?.username;
+    }
+    return result;
+  }, [data, addresses]);
+
+  const isLoading =
+    !trophiesError &&
+    !progressionsError &&
+    (trophiesLoading || progressionsLoading);
+  const isError = trophiesError || progressionsError;
 
   return {
     achievements,
     players,
     events,
-    usernames,
+    usernames: usernamesData,
     globals,
     isLoading,
     isError,

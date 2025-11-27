@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import type { CardProps } from "@/context/activities";
+import type { CardProps } from "@/hooks/activities";
 import { useActivityViewModel } from "./useActivityViewModel";
 
 const mockUseActivities = vi.fn();

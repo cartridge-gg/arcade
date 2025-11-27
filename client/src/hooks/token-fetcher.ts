@@ -4,8 +4,12 @@ import {
   type ClientCallbackParams,
   getToriiAssetUrl,
 } from "@cartridge/arcade";
-import { CollectionType } from "@/context/collection";
 import { addAddressPadding } from "starknet";
+
+export enum CollectionType {
+  ERC721 = "ERC-721",
+  ERC1155 = "ERC-1155",
+}
 
 /**
  * Hook for fetching token balances from multiple Torii endpoints

@@ -5,7 +5,7 @@ import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
 import { useProject } from "@/hooks/project";
-import { ThemeProvider } from "@/context/theme";
+import { useTheme } from "@/hooks/context";
 import { useDevice } from "@/hooks/device";
 import { UserCard } from "./user/user-card";
 import arcade from "@/assets/arcade-logo.png";
@@ -19,6 +19,7 @@ interface TemplateProps {
 }
 
 export function Template({ children }: TemplateProps) {
+  useTheme();
   const { isOpen, handleTouchMove, handleTouchStart } = useSidebar();
   const { game, edition } = useProject();
 
@@ -31,7 +32,7 @@ export function Template({ children }: TemplateProps) {
   const isDashboard = !(edition && game);
 
   return (
-    <ThemeProvider defaultScheme="dark">
+    <>
       <ViewingAsPlayerBannerInformation />
       <SceneLayout>
         <div
@@ -103,6 +104,6 @@ export function Template({ children }: TemplateProps) {
           </div>
         </div>
       </SceneLayout>
-    </ThemeProvider>
+    </>
   );
 }

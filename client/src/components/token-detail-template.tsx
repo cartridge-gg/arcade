@@ -3,7 +3,7 @@ import { HeaderContainer } from "@/features/header";
 import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
-import { ThemeProvider } from "@/context/theme";
+import { useTheme } from "@/hooks/context";
 import { useDevice } from "@/hooks/device";
 import { TokenDetailSidebar } from "@/components/ui/marketplace/token-detail/TokenDetailSidebar";
 
@@ -13,12 +13,12 @@ interface TokenDetailTemplateProps {
 }
 
 export function TokenDetailTemplate({ children }: TokenDetailTemplateProps) {
+  useTheme();
   const { isOpen, handleTouchMove, handleTouchStart } = useSidebar();
   const { isMobile } = useDevice();
 
   return (
-    <ThemeProvider defaultScheme="dark">
-      <SceneLayout>
+    <SceneLayout>
         <div
           className={cn(
             "h-full w-full overflow-y-scroll lg:px-6 lg:py-5 lg:pt-0 ",
@@ -79,7 +79,6 @@ export function TokenDetailTemplate({ children }: TokenDetailTemplateProps) {
             </div>
           </div>
         </div>
-      </SceneLayout>
-    </ThemeProvider>
+    </SceneLayout>
   );
 }

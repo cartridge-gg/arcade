@@ -7,7 +7,7 @@ import { useProject } from "@/hooks/project";
 import { DEFAULT_TOKENS_PROJECT } from "@/constants";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useAddress } from "@/hooks/address";
-import type { Token } from "@/context/token";
+import type { Token } from "@/hooks/tokens";
 
 const DEFAULT_TOKENS_COUNT = 3;
 

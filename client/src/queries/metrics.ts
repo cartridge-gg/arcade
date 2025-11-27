@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
 import { graphqlClient } from "./graphql-client";
-import type { Metrics } from "@/context/metrics";
+import type { Metrics } from "@/hooks/metrics";
 
 const METRICS_QUERY = `query Metrics($projects: [MetricsProject!]!) {
   metrics(projects: $projects) {

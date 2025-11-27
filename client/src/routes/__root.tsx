@@ -10,9 +10,13 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useNavigationContext } from "@/features/navigation";
 import { useArcade } from "@/hooks/arcade";
 import { useAccount } from "@/collections";
+import { useAtomValue } from "@effect-atom/atom-react";
+import { arcadeAtom } from "@/effect/atoms/arcade";
 
 function RootComponent() {
   const router = useRouterState();
+  const arcade = useAtomValue(arcadeAtom);
+  console.log(arcade);
   const { setPlayer } = useArcade();
   const pathname = router.location.pathname;
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import type { Token } from "@/context/token";
+import type { Token } from "@/hooks/tokens";
 import { useInventoryTokensViewModel } from "./useInventoryTokensViewModel";
 
 const mockUseArcade = vi.fn();

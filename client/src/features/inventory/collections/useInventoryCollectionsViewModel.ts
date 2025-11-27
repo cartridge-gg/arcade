@@ -6,7 +6,7 @@ import { useAccount } from "@starknet-react/core";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useRouterState } from "@tanstack/react-router";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { CollectionType } from "@/context/collection";
+import { CollectionType } from "@/hooks/collections";
 import { getChecksumAddress } from "starknet";
 import { joinPaths, resizeImage } from "@/lib/helpers";
 import { TAB_SEGMENTS } from "@/hooks/project";

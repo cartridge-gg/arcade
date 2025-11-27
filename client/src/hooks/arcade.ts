@@ -1,49 +1,107 @@
-import { useContext, useMemo } from "react";
-import { ArcadeContext } from "../context/arcade";
+import { ArcadeProvider as ExternalProvider } from "@cartridge/arcade";
+import {
+  accessesAtom,
+  collectionEditionsAtom,
+  editionsAtom,
+  followsAtom,
+  gamesAtom,
+  pinsAtom,
+  playerAtom,
+} from "@/effect/atoms";
+import { unwrapOr } from "@/effect/utils/result";
+import {
+  type AccessModel,
+  type CollectionEditionModel,
+  type EditionModel,
+  type FollowEvent,
+  type GameModel,
+  type PinEvent,
+  RoleType,
+} from "@cartridge/arcade";
+import { useAtom, useAtomValue } from "@effect-atom/atom-react";
 import { useAccount } from "@starknet-react/core";
-import { RoleType } from "@cartridge/arcade";
+import { useMemo } from "react";
+import { constants, getChecksumAddress } from "starknet";
+import { useArcadeInit } from "./arcadeInit";
 import { useOwnerships } from "./ownerships";
 
-/**
- * Custom hook to access the Arcade context and account information.
- * Must be used within a ArcadeProvider component.
- *
- * @returns An object containing:
- * - chainId: The chain id
- * - provider: The Arcade provider instance
- * - pins: All the existing pins
- * - games: The registered games
- * - chains: The chains
- * @throws {Error} If used outside of a ArcadeProvider context
- */
 export const useArcade = () => {
-  const context = useContext(ArcadeContext);
+  //const { chainId, provider, chains } = useArcadeInit();
+  const chainId = constants.StarknetChainId.SN_MAIN;
+  const provider = useMemo(() => new ExternalProvider(chainId), []);
+  const chains = [];
 
-  if (!context) {
-    throw new Error(
-      "The `useArcade` hook must be used within a `ArcadeProvider`",
-    );
-  }
+  const gamesResult = useAtomValue(gamesAtom);
+  const games = unwrapOr(gamesResult, [] as GameModel[]);
 
-  const {
-    chainId,
-    provider,
-    pins,
-    follows,
-    accesses,
-    games,
-    editions,
-    collectionEditions,
-    chains,
-    player,
-    setPlayer,
-  } = context;
+  const editionsResult = useAtomValue(editionsAtom);
+  const editions = unwrapOr(editionsResult, [] as EditionModel[]);
+
+  const accessesResult = useAtomValue(accessesAtom);
+  const accesses = unwrapOr(accessesResult, [] as AccessModel[]);
+
+  const collectionEditionsResult = useAtomValue(collectionEditionsAtom);
+  const collectionEditionsData = unwrapOr(
+    collectionEditionsResult,
+    [] as CollectionEditionModel[],
+  );
+
+  const pinsResult = useAtomValue(pinsAtom);
+  const pinsData = unwrapOr(pinsResult, [] as PinEvent[]);
+
+  const followsResult = useAtomValue(followsAtom);
+  const followsData = unwrapOr(followsResult, [] as FollowEvent[]);
+
+  const [player, setPlayer] = useAtom(playerAtom);
+
   const { address } = useAccount();
   const { ownerships } = useOwnerships();
 
+  const pins = useMemo(() => {
+    const result: { [playerId: string]: string[] } = {};
+    for (const pin of pinsData) {
+      const playerId = getChecksumAddress(pin.playerId);
+      if (!result[playerId]) {
+        result[playerId] = [];
+      }
+      if (pin.time !== 0) {
+        result[playerId] = [
+          ...new Set([...result[playerId], pin.achievementId]),
+        ];
+      }
+    }
+    return result;
+  }, [pinsData]);
+
+  const follows = useMemo(() => {
+    const result: { [playerId: string]: string[] } = {};
+    for (const follow of followsData) {
+      const follower = getChecksumAddress(follow.follower);
+      const followed = getChecksumAddress(follow.followed);
+      if (!result[follower]) {
+        result[follower] = [];
+      }
+      if (follow.time !== 0) {
+        result[follower] = [...new Set([...result[follower], followed])];
+      }
+    }
+    return result;
+  }, [followsData]);
+
+  const collectionEditions = useMemo(() => {
+    const results: { [collection: string]: number[] } = {};
+    for (const ce of collectionEditionsData) {
+      if (!results[ce.collection]) {
+        results[ce.collection] = [];
+      }
+      results[ce.collection].push(Number.parseInt(ce.edition));
+    }
+    return results;
+  }, [collectionEditionsData]);
+
   const access = useMemo(() => {
     return accesses.find(
-      (access) => BigInt(access.address) === BigInt(address || "0x1"),
+      (acc) => BigInt(acc.address) === BigInt(address || "0x1"),
     );
   }, [accesses, address]);
 
@@ -54,7 +112,7 @@ export const useArcade = () => {
     );
   }, [access]);
 
-  const fileteredGames = useMemo(() => {
+  const filteredGames = useMemo(() => {
     return games.filter((game) => {
       const gameOwner = ownerships.find(
         (ownership) => ownership.tokenId === BigInt(game.id),
@@ -88,7 +146,7 @@ export const useArcade = () => {
         );
       })
       .map((edition) => {
-        const game = games.find((game) => game.id === edition.gameId);
+        const game = games.find((g) => g.id === edition.gameId);
         const gameOwnership = ownerships.find(
           (ownership) => ownership.tokenId === BigInt(game?.id || "0x0"),
         );
@@ -109,7 +167,7 @@ export const useArcade = () => {
     pins,
     follows,
     accesses,
-    games: fileteredGames,
+    games: filteredGames,
     editions: filteredEditions,
     collectionEditions,
     chains,
