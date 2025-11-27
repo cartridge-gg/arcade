@@ -18,6 +18,9 @@ import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchContractImage, fetchTokenImage } from "@/hooks/fetcher-utils";
 import { getToriiUrl } from "@cartridge/arcade";
 
+/**
+ * @deprecated Use EnrichedTokenContract from src/effect/atoms/tokens.ts instead
+ */
 export type EnrichedTokenContract = TokenContract & {
   totalSupply: bigint;
   token_id: string | null;
@@ -26,6 +29,9 @@ export type EnrichedTokenContract = TokenContract & {
   contract_type: string;
 };
 
+/**
+ * @deprecated Use tokenContractsAtom from src/effect/atoms/tokens.ts instead
+ */
 export const tokenContractsCollection = createCollection(
   queryCollectionOptions({
     queryKey: queryKeys.tokens.collections,
@@ -117,6 +123,9 @@ export const tokenContractsCollection = createCollection(
   }),
 );
 
+/**
+ * @deprecated Use tokenContractsAtom with useAtomValue from src/effect/atoms/tokens.ts instead
+ */
 export function useTokenContracts() {
   const { data, ...rest } = useLiveQuery((q) =>
     q
@@ -134,10 +143,14 @@ export function useTokenContracts() {
   return { data, ...rest };
 }
 
-// This hook is returning
-// - TokenContract
-// - null if not found
-// - undefined while loading
+/**
+ * @deprecated Use createTokenContractAtom with useAtomValue from src/effect/atoms/tokens.ts instead
+ *
+ * This hook is returning:
+ * - TokenContract if found
+ * - null if not found
+ * - undefined while loading
+ */
 export function useTokenContract(address: string) {
   const { data, status } = useLiveQuery((q) =>
     q

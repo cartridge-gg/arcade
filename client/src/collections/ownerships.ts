@@ -11,6 +11,9 @@ import { ToriiGrpcClient } from "@dojoengine/grpc";
 import { DEFAULT_PROJECT } from "@/constants";
 import { getToriiUrl } from "@cartridge/arcade";
 
+/**
+ * @deprecated Use Ownership from src/effect/atoms/ownerships.ts instead
+ */
 export type Ownership = {
   contractAddress: string;
   accountAddress: string;
@@ -18,7 +21,9 @@ export type Ownership = {
   balance: bigint;
 };
 
-// Arcade Game `token_contract` collection to dynamically retrieve address
+/**
+ * @deprecated Part of legacy TanStack Query implementation
+ */
 const arcadeCollectionAddress = createLiveQueryCollection({
   startSync: true,
   query: (q) =>
@@ -28,7 +33,9 @@ const arcadeCollectionAddress = createLiveQueryCollection({
       .select(({ collections }) => ({ ...collections })),
 });
 
-// Fetch `token_balances` for `Arcade Game` collection;
+/**
+ * @deprecated Use ownershipsAtom from src/effect/atoms/ownerships.ts instead
+ */
 const arcadeCollectionOwnerships = createCollection(
   queryCollectionOptions({
     queryKey: queryKeys.ownerships.arcade,
@@ -71,6 +78,9 @@ const arcadeCollectionOwnerships = createCollection(
   }),
 );
 
+/**
+ * @deprecated Use ownershipsAtom with useAtomValue from src/effect/atoms/ownerships.ts instead
+ */
 export function useOwnershipsCollection() {
   const { data, ...rest } = useLiveQuery(arcadeCollectionOwnerships);
   if (!data || data.length < 1) {

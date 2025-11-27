@@ -26,21 +26,27 @@ import { useMemo } from "react";
 
 const CHAIN_ID = constants.StarknetChainId.SN_MAIN;
 
-// Type discriminated union for Registry models
+/**
+ * @deprecated Use RegistryItem from src/effect/layers/registry.ts instead
+ */
 export interface RegistryItem {
   type: "game" | "edition" | "access" | "collectionEdition";
   identifier: string;
   data: GameModel | EditionModel | AccessModel | CollectionEditionModel;
 }
 
-// Type discriminated union for Social models
+/**
+ * @deprecated Use SocialItem from src/effect/layers/social.ts instead
+ */
 export interface SocialItem {
   type: "pin" | "follow" | "guild";
   key: string;
   data: PinEvent | FollowEvent | GuildModel;
 }
 
-// Main Registry collection - fetches all registry data in one call
+/**
+ * @deprecated Use registryAtom from src/effect/atoms/registry.ts instead
+ */
 export const arcadeRegistryCollection = createCollection(
   queryCollectionOptions({
     queryKey: [...queryKeys.games.all, "registry"],
@@ -109,7 +115,9 @@ export const arcadeRegistryCollection = createCollection(
   }),
 );
 
-// Main Social collection - fetches all social data in one call
+/**
+ * @deprecated Use socialAtom from src/effect/atoms/social.ts instead
+ */
 export const arcadeSocialCollection = createCollection(
   queryCollectionOptions({
     queryKey: ["arcade", "social"],
@@ -282,7 +290,9 @@ const guildsQuery = createCollection(
   }),
 );
 
-// Hook functions for accessing the collections
+/**
+ * @deprecated Use gamesAtom with useAtomValue from src/effect/atoms/registry.ts instead
+ */
 export function useGames() {
   const { data } = useLiveQuery((q) =>
     q
@@ -294,6 +304,9 @@ export function useGames() {
   return data || [];
 }
 
+/**
+ * @deprecated Use editionsAtom with useAtomValue from src/effect/atoms/registry.ts instead
+ */
 export function useEditions() {
   const { data } = useLiveQuery((q) =>
     q
@@ -315,6 +328,9 @@ export function useEditionsMap() {
   return editionsMap;
 }
 
+/**
+ * @deprecated Use collectionEditionsAtom with useAtomValue from src/effect/atoms/registry.ts instead
+ */
 export function useCollectionEditions(): CollectionEditionModel[] {
   const { data } = useLiveQuery((q) =>
     q
@@ -326,6 +342,9 @@ export function useCollectionEditions(): CollectionEditionModel[] {
   return (data as CollectionEditionModel[]) || [];
 }
 
+/**
+ * @deprecated Use accessesAtom with useAtomValue from src/effect/atoms/registry.ts instead
+ */
 export function useAccesses() {
   const { data } = useLiveQuery((q) =>
     q
@@ -336,6 +355,9 @@ export function useAccesses() {
   return data || [];
 }
 
+/**
+ * @deprecated Use pinsAtom or createPinsByPlayerAtom with useAtomValue from src/effect/atoms/social.ts instead
+ */
 export function usePins(playerId?: string) {
   const { data } = useLiveQuery((q) => {
     let query = q.from({ pins: pinsQuery });
@@ -353,6 +375,9 @@ export function usePins(playerId?: string) {
   return data || [];
 }
 
+/**
+ * @deprecated Use followsAtom or createFollowsByFollowerAtom with useAtomValue from src/effect/atoms/social.ts instead
+ */
 export function useFollows(follower?: string) {
   const { data } = useLiveQuery((q) => {
     let query = q.from({ follows: followsQuery });
@@ -370,6 +395,9 @@ export function useFollows(follower?: string) {
   return data || [];
 }
 
+/**
+ * @deprecated Use guildsAtom with useAtomValue from src/effect/atoms/social.ts instead
+ */
 export function useGuilds() {
   const { data } = useLiveQuery((q) =>
     q

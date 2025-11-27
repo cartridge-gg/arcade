@@ -48,6 +48,9 @@ const metadataQueryFn = async ({
   }
 };
 
+/**
+ * @deprecated Use createMetadataAtom with useAtomValue from src/effect/atoms/metadata.ts instead
+ */
 export const getMetadataQueryOptions = ({
   contractAddress,
   traits,
@@ -67,6 +70,9 @@ export const getMetadataQueryOptions = ({
   };
 };
 
+/**
+ * @deprecated Use createMetadataAtom with useAtomValue from src/effect/atoms/metadata.ts instead
+ */
 export const useMetadata = ({
   contractAddress,
   traits,

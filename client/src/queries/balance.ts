@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use createBalancesAtom from src/effect/atoms/balances.ts instead
+ */
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
 import { graphqlClient } from "./graphql-client";
@@ -71,6 +74,9 @@ const BALANCES_QUERY = `query Balances(
 }
 `;
 
+/**
+ * @deprecated Use createBalancesAtom with useAtomValue from src/effect/atoms/balances.ts instead
+ */
 export function useBalancesQuery(projects: string[]) {
   const { address } = useAddress();
   const { address: connectedAddress } = useAccount();

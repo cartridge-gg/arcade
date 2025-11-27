@@ -14,6 +14,9 @@ const CREDITS_BALANCE_QUERY = `query Credit($username: String!) {
   }
 }`;
 
+/**
+ * @deprecated Use createCreditsAtom with useAtomValue from src/effect/atoms/credits.ts instead
+ */
 export function useCreditsBalance({ username }: CreditsBalanceProps) {
   return useQuery({
     queryKey: queryKeys.prices.credits(username ?? ""),

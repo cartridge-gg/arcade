@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use createPricesAtom and createPricesByPeriodAtom from src/effect/atoms/prices.ts instead
+ */
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
 import { graphqlClient } from "./graphql-client";
@@ -22,6 +25,9 @@ type PriceByAddressesResponse = {
   priceByAddresses: Price[];
 };
 
+/**
+ * @deprecated Use createPricesAtom with useAtomValue from src/effect/atoms/prices.ts instead
+ */
 export function usePriceByAddresses(addresses: string[]) {
   return useQuery({
     queryKey: queryKeys.prices.addresses(addresses),
@@ -57,6 +63,9 @@ type PriceByPeriodAndAddressResponse = {
   pricePeriodByAddresses: Price[];
 };
 
+/**
+ * @deprecated Use createPricesByPeriodAtom with useAtomValue from src/effect/atoms/prices.ts instead
+ */
 export function usePricesByPeriodAndAddress({
   addresses,
   start,

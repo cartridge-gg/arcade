@@ -56,6 +56,9 @@ type Response = {
   transfers: { transfers: { items: { meta: Meta; transfers: Transfer[] }[] } };
 };
 
+/**
+ * @deprecated Use createTransfersAtom with useAtomValue from src/effect/atoms/transfers.ts instead
+ */
 export function useTransfersQuery() {
   const { player: address = "0x0" } = useArcade();
   const projects = useActivitiesEditions(address);

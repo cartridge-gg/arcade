@@ -37,6 +37,9 @@ type Response = {
   }[];
 };
 
+/**
+ * @deprecated Use createMetricsAtom with useAtomValue from src/effect/atoms/metrics.ts instead
+ */
 export function useMetricsQuery(projects: { project: string }[]) {
   return useQuery({
     queryKey: queryKeys.metrics.projects(projects.map((p) => p.project)),

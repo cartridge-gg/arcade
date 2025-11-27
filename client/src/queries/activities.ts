@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use createActivitiesAtom from src/effect/atoms/activities.ts instead
+ */
 import { graphqlClient, queryKeys } from "@/queries";
 import { useActivitiesEditions } from "../collections/arcade";
 import { useQuery } from "@tanstack/react-query";
@@ -43,6 +46,9 @@ type Response = {
   };
 };
 
+/**
+ * @deprecated Use createActivitiesAtom with useAtomValue from src/effect/atoms/activities.ts instead
+ */
 export function useActivitiesQuery() {
   const { player: address = "0x0" } = useArcade();
   const projects = useActivitiesEditions(address);

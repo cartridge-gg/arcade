@@ -20,6 +20,9 @@ function formatValue(balance: string, amount: string, decimals: number) {
   };
 }
 
+/**
+ * @deprecated Use createCountervaluesAtom with useAtomValue from src/effect/atoms/countervalue.ts instead
+ */
 export function useCountervalue({ tokens }: CounterValueProps) {
   const addresses = useMemo(
     () => tokens.map((token) => token.address),
