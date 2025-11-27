@@ -1,16 +1,10 @@
 import { createContext, type ReactNode, useMemo } from "react";
-import { useMetricsQuery } from "@/queries";
+import { useAtomValue } from "@effect-atom/atom-react";
+import { createMetricsAtom, unwrap, type MetricsData } from "@/effect";
 import type { MetricsProject } from "@cartridge/ui/utils/api/cartridge";
 import { useArcade } from "@/hooks/arcade";
 
-export type Metrics = {
-  project: string;
-  data: {
-    date: Date;
-    transactionCount: number;
-    callerCount: number;
-  }[];
-};
+export type Metrics = MetricsData;
 
 export type MetricsContextType = {
   metrics: Metrics[];
@@ -28,7 +22,9 @@ export function MetricsProvider({ children }: { children: ReactNode }) {
     }));
   }, [editions]);
 
-  const { data: metrics = [], status } = useMetricsQuery(projects);
+  const metricsAtom = useMemo(() => createMetricsAtom(projects), [projects]);
+  const result = useAtomValue(metricsAtom);
+  const { value: metrics, status } = unwrap(result, [] as Metrics[]);
 
   return (
     <MetricsContext.Provider

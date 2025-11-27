@@ -1,6 +1,14 @@
 import { createContext, type ReactNode, useMemo } from "react";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { useArcade } from "@/hooks/arcade";
-import { useTransfersQuery, useActivitiesQuery } from "@/queries";
+import {
+  createTransfersAtom,
+  createActivitiesAtom,
+  unwrapOr,
+  toStatus,
+  type TransferProject,
+  type ActivityProject,
+} from "@/effect";
 import {
   addAddressPadding,
   type constants,
@@ -52,22 +60,51 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
 
   const { achievements } = useAchievements();
 
-  const { data: transfers, status: transfersStatus } = useTransfersQuery();
+  const transferProjects: TransferProject[] = useMemo(() => {
+    return editions.map((edition) => ({
+      project: edition.config.project,
+      address: `0x${BigInt(address ?? "0x0").toString(16)}`,
+      limit: 0,
+      date: "",
+    }));
+  }, [editions, address]);
 
-  const { data: transactions, status: transactionsStatus } =
-    useActivitiesQuery();
+  const activityProjects: ActivityProject[] = useMemo(() => {
+    return editions.map((edition) => ({
+      project: edition.config.project,
+      address: `0x${BigInt(address ?? "0x0").toString(16)}`,
+      limit: 0,
+    }));
+  }, [editions, address]);
+
+  const transfersAtom = useMemo(
+    () => createTransfersAtom(transferProjects),
+    [transferProjects],
+  );
+  const activitiesAtom = useMemo(
+    () => createActivitiesAtom(activityProjects),
+    [activityProjects],
+  );
+
+  const transfersResult = useAtomValue(transfersAtom);
+  const activitiesResult = useAtomValue(activitiesAtom);
+
+  const transfers = unwrapOr(transfersResult, []);
+  const transactions = unwrapOr(activitiesResult, []);
 
   const status = useMemo(() => {
+    const transfersStatus = toStatus(transfersResult);
+    const transactionsStatus = toStatus(activitiesResult);
     return transfersStatus === "pending" || transactionsStatus === "pending"
       ? "loading"
       : transfersStatus === "error" || transactionsStatus === "error"
         ? "error"
         : "success";
-  }, [transfersStatus, transactionsStatus]);
+  }, [transfersResult, activitiesResult]);
 
   const erc20s: { [project: string]: CardProps[] } = useMemo(() => {
     const results: { [project: string]: CardProps[] } = {};
-    transfers?.transfers?.items.forEach((item) => {
+    transfers.forEach((item) => {
       item.transfers
         .filter((transfer) => BigInt(transfer.tokenId) === 0n)
         .forEach((transfer) => {
@@ -117,7 +154,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
 
   const erc721s: { [project: string]: CardProps[] } = useMemo(() => {
     const results: { [project: string]: CardProps[] } = {};
-    transfers?.transfers?.items.forEach((item) => {
+    transfers.forEach((item) => {
       item.transfers
         .filter((transfer) => BigInt(transfer.tokenId) > 0n)
         .forEach((transfer) => {
@@ -125,9 +162,8 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
           const date = getDate(timestamp);
           let metadata;
           try {
-            metadata = JSON.parse(
-              !transfer.metadata ? "{}" : transfer.metadata,
-            );
+            const metadataStr = transfer.metadata as string | null | undefined;
+            metadata = JSON.parse(!metadataStr ? "{}" : metadataStr);
           } catch (error) {
             console.warn(error);
           }
@@ -181,7 +217,7 @@ export function ActivitiesProvider({ children }: { children: ReactNode }) {
 
   const actions: { [project: string]: CardProps[] } = useMemo(() => {
     const results: { [project: string]: CardProps[] } = {};
-    transactions?.activities?.items.forEach((item) => {
+    transactions.forEach((item) => {
       item.activities?.forEach(
         ({ transactionHash, contractAddress, entrypoint, executedAt }) => {
           const timestamp = new Date(executedAt).getTime();

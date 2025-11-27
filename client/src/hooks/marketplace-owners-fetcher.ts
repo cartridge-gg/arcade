@@ -1,4 +1,4 @@
-import { useEditionsMap, useAccounts } from "@/collections";
+import { useAccounts } from "@/collections";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
 import type {
@@ -10,6 +10,8 @@ import type { TokenBalance } from "@dojoengine/torii-wasm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { useMarketCollectionFetcher } from "./marketplace-fetcher";
+import { useAtomValue } from "@effect-atom/atom-react";
+import { editionsAtom, type EditionModel } from "@/effect";
 
 type MarketOwnersFetcherInput = {
   project: string[];
@@ -27,7 +29,14 @@ export function useMarketOwnersFetcher({
   autoFetch = true,
 }: MarketOwnersFetcherInput) {
   const { data: usernamesMap } = useAccounts();
-  const editions = useEditionsMap();
+  const editionsResult = useAtomValue(editionsAtom);
+  const editions = useMemo(() => {
+    const map = new Map<string, EditionModel>();
+    if (editionsResult._tag === "Success") {
+      editionsResult.value.forEach((e) => map.set(e.config.project, e));
+    }
+    return map;
+  }, [editionsResult]);
   const addOwners = useMarketplaceTokensStore((state) => state.addOwners);
   const clearOwners = useMarketplaceTokensStore((state) => state.clearOwners);
   const getOwners = useMarketplaceTokensStore((state) => state.getOwners);

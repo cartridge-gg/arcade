@@ -1,9 +1,10 @@
 import { useContext, useMemo } from "react";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { type Token, TokenContext } from "../context/token";
 import { useProject } from "./project";
 import { useAddress } from "./address";
 import { useAccountByAddress } from "@/collections";
-import { useCreditsBalance } from "@/queries";
+import { createCreditsAtom, unwrapOr } from "@/effect";
 
 /**
  * Custom hook to access the Token context and account information.
@@ -38,11 +39,13 @@ export const useTokens = () => {
 
   const { data: account } = useAccountByAddress(address);
 
-  const { data: creditBalance = { balance: { value: 0 } } } = useCreditsBalance(
-    {
-      username: account?.username,
-    },
+  const creditsAtom = useMemo(
+    () => createCreditsAtom(account?.username ?? ""),
+    [account?.username],
   );
+  const creditsResult = useAtomValue(creditsAtom);
+
+  const creditBalance = unwrapOr(creditsResult, { amount: 0, decimals: 6 });
 
   const credits: Token = useMemo(() => {
     return {

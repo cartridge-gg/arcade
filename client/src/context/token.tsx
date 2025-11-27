@@ -1,4 +1,5 @@
 import { createContext, type ReactNode, useMemo } from "react";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { useArcade } from "@/hooks/arcade";
 import { erc20Metadata } from "@cartridge/presets";
 import { getChecksumAddress, RpcProvider } from "starknet";
@@ -11,7 +12,14 @@ import {
   type UseERC20BalanceResponse,
 } from "@cartridge/ui/utils";
 import { DEFAULT_TOKENS_PROJECT } from "@/constants";
-import { useCountervalue, useBalancesQuery } from "@/queries";
+import {
+  createBalancesAtom,
+  createCountervaluesAtom,
+  unwrap,
+  unwrapOr,
+  type Token as EffectToken,
+} from "@/effect";
+import { useAddress } from "@/hooks/address";
 
 const DEFAULT_ERC20_ADDRESSES: string[] = [];
 
@@ -51,6 +59,7 @@ export const TokenContext = createContext<TokenContextType | null>(null);
 
 export function TokenProvider({ children }: { children: ReactNode }) {
   const { editions, player: address } = useArcade();
+  const { address: userAddress } = useAddress();
 
   const provider = useMemo(
     () => new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_URL }),
@@ -61,7 +70,15 @@ export function TokenProvider({ children }: { children: ReactNode }) {
     [editions],
   );
 
-  const { data: toriiData = {}, status } = useBalancesQuery(projects);
+  const balancesAtom = useMemo(
+    () => createBalancesAtom(userAddress, projects),
+    [userAddress, projects],
+  );
+  const balancesResult = useAtomValue(balancesAtom);
+  const { value: toriiData, status } = unwrap(
+    balancesResult,
+    {} as { [key: string]: EffectToken },
+  );
 
   // Query default ERC20 balances
   const contractAddresses = [
@@ -85,7 +102,12 @@ export function TokenProvider({ children }: { children: ReactNode }) {
   );
 
   // Get prices for filtered tokens
-  const { countervalues } = useCountervalue({ tokens: tokenData });
+  const countervaluesAtom = useMemo(
+    () => createCountervaluesAtom(tokenData),
+    [tokenData],
+  );
+  const countervaluesResult = useAtomValue(countervaluesAtom);
+  const countervalues = unwrapOr(countervaluesResult, []);
 
   // Merge data
   const data = useMemo(() => {

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useAtomValue } from "@effect-atom/atom-react";
 import {
   StatusType,
   type EditionModel,
@@ -7,11 +8,8 @@ import {
   type SaleEvent,
 } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import {
-  useCollectionEditions,
-  useTokenContracts,
-  type EnrichedTokenContract,
-} from "@/collections";
+import { useTokenContracts, type EnrichedTokenContract } from "@/collections";
+import { collectionEditionsAtom, unwrapOr } from "@/effect";
 import { resizeImage } from "@/lib/helpers";
 import {
   deriveBestPrice,
@@ -110,7 +108,8 @@ export function useMarketplaceCollectionsViewModel({
   game,
   currentPathname,
 }: UseMarketplaceCollectionsViewModelArgs): MarketplaceCollectionsViewModel {
-  const collectionEditions = useCollectionEditions();
+  const collectionEditionsResult = useAtomValue(collectionEditionsAtom);
+  const collectionEditions = unwrapOr(collectionEditionsResult, []);
   const { data: allCollections, status } = useTokenContracts();
   const { orders, sales } = useMarketplace();
 

@@ -1,10 +1,9 @@
-import { useEditionsMap } from "@/collections";
 import { type Contract, useMarketplaceStore } from "@/store";
 import {
   fetchToriisStream,
   type ClientCallbackParams,
 } from "@cartridge/arcade";
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useMemo } from "react";
 import { getChecksumAddress } from "starknet";
 import type { Token } from "@dojoengine/torii-wasm";
 import {
@@ -13,6 +12,8 @@ import {
   processToriiStream,
 } from "./fetcher-utils";
 import { BLACKLISTS } from "@/constants";
+import { useAtomValue } from "@effect-atom/atom-react";
+import { editionsAtom, type EditionModel } from "@/effect";
 
 type UseMarketplaceFetcherParams = {
   projects: string[];
@@ -34,7 +35,14 @@ export function useMarketCollectionFetcher({
   } = useFetcherState();
   const hasInitialFetch = useRef(false);
 
-  const editions = useEditionsMap();
+  const editionsResult = useAtomValue(editionsAtom);
+  const editions = useMemo(() => {
+    const map = new Map<string, EditionModel>();
+    if (editionsResult._tag === "Success") {
+      editionsResult.value.forEach((e) => map.set(e.config.project, e));
+    }
+    return map;
+  }, [editionsResult]);
   const addCollections = useMarketplaceStore((s) => s.addCollections);
   const getFlattenCollections = useMarketplaceStore(
     (s) => s.getFlattenCollections,
@@ -150,7 +158,9 @@ export function useMarketCollectionFetcher({
               error,
             );
             const e = editions.get(endpoint);
-            setError(e, "Error fetching marketplace collections");
+            if (e) {
+              setError(e, "Error fetching marketplace collections");
+            }
           },
           onComplete: () => {
             setSuccess();

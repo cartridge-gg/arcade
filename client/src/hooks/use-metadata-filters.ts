@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useAtomValue } from "@effect-atom/atom-react";
 import {
   buildAvailableFilters,
   buildPrecomputedFilters,
@@ -7,7 +8,11 @@ import {
   flattenActiveFilters,
 } from "@cartridge/arcade/marketplace";
 import { useMetadataFilterStore } from "@/store/metadata-filters";
-import { useMetadata } from "@/queries";
+import {
+  createMetadataAtom,
+  unwrapOr,
+  isLoading as isResultLoading,
+} from "@/effect";
 import {
   parseFiltersFromURL,
   serializeFiltersToURL,
@@ -106,13 +111,18 @@ export function useMetadataFilters({
     [activeFilters],
   );
 
-  const metadataQuery = useMetadata({
-    contractAddress: collectionAddress,
-    traits: selectedTraits,
-    enabled: enabled && !!collectionAddress,
-  });
+  const metadataAtom = useMemo(
+    () =>
+      createMetadataAtom({
+        contractAddress: collectionAddress,
+        traits: selectedTraits,
+      }),
+    [collectionAddress, selectedTraits],
+  );
+  const metadataResult = useAtomValue(metadataAtom);
 
-  const metadata = Array.isArray(metadataQuery.data) ? metadataQuery.data : [];
+  const metadata = unwrapOr(metadataResult, []);
+  const isMetadataLoading = isResultLoading(metadataResult);
 
   const availableFilters = useMemo(
     () => buildAvailableFilters(metadata, activeFilters),
@@ -180,7 +190,7 @@ export function useMetadataFilters({
   const isEmpty =
     filteredTokens.length === 0 && Object.keys(activeFilters).length > 0;
 
-  const isLoading = metadataQuery.isLoading || metadataQuery.isFetching;
+  const isLoading = isMetadataLoading;
 
   return {
     filteredTokens,
