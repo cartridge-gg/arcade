@@ -1,51 +1,15 @@
 import { bookAtom, listingsAtom, ordersAtom, salesAtom } from "@/effect/atoms";
-import { ArcadeProvider as ExternalProvider } from "@cartridge/arcade";
-import { type OrderModel, StatusType } from "@cartridge/arcade";
-import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { ArcadeProvider as ExternalProvider, StatusType } from "@cartridge/arcade";
+import type { OrderModel } from "@cartridge/arcade";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { useRouterState, useSearch } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { constants, getChecksumAddress } from "starknet";
-import { useArcadeInit } from "./arcadeInit";
 import { parseRouteParams } from "./project";
 
 export const useMarketplace = () => {
-  // const { chainId, provider, addOrder, removeOrder } = useArcadeInit();
   const chainId = constants.StarknetChainId.SN_MAIN;
   const provider = useMemo(() => new ExternalProvider(chainId), []);
-  const setOrders = useAtomSet(ordersAtom);
-
-  const addOrder = useCallback(
-    (order: OrderModel) => {
-      const collection = getChecksumAddress(order.collection);
-      const token = order.tokenId.toString();
-      setOrders((prev) => ({
-        ...prev,
-        [collection]: {
-          ...(prev[collection] || {}),
-          [token]: {
-            ...(prev[collection]?.[token] || {}),
-            [order.id]: order,
-          },
-        },
-      }));
-    },
-    [setOrders],
-  );
-
-  const removeOrder = useCallback(
-    (order: OrderModel) => {
-      const collection = getChecksumAddress(order.collection);
-      const token = order.tokenId.toString();
-      setOrders((prev) => {
-        const newOrders = { ...prev };
-        if (newOrders[collection]?.[token]?.[order.id]) {
-          delete newOrders[collection][token][order.id];
-        }
-        return newOrders;
-      });
-    },
-    [setOrders],
-  );
 
   const book = useAtomValue(bookAtom);
   const orders = useAtomValue(ordersAtom);
@@ -74,8 +38,8 @@ export const useMarketplace = () => {
       const collectionOrders = orders[collection];
       if (!collectionOrders) return {};
       return Object.entries(collectionOrders).reduce(
-        (acc, [token, orders]) => {
-          const filtered = Object.values(orders).filter(
+        (acc, [token, tokenOrders]) => {
+          const filtered = Object.values(tokenOrders).filter(
             (order) => !!order && order.status.value === StatusType.Placed,
           );
           if (filtered.length === 0) return acc;
@@ -100,7 +64,7 @@ export const useMarketplace = () => {
     return Object.values(collectionOrders[token] || {}).filter(
       (order) => order.status.value === StatusType.Placed,
     );
-  }, [orders, tokenId]);
+  }, [orders, contractAddress, tokenId]);
 
   const order: OrderModel | undefined = useMemo(() => {
     if (!contractAddress || !tokenId) return;
@@ -127,8 +91,6 @@ export const useMarketplace = () => {
     sales,
     orders,
     marketplaceFee,
-    addOrder,
-    removeOrder,
     setAmount,
     order,
     collectionOrders,

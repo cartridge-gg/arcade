@@ -62,7 +62,7 @@ const buildListingCount = (
 const buildMarketplaceItems = (
   collections: EnrichedTokenContract[],
   options: {
-    orders: ReturnType<typeof useMarketplace>["orders"];
+    orders: ReturnType<typeof useMarketplace>["listings"];
     sales: ReturnType<typeof useMarketplace>["sales"];
     currentPathname: string;
     edition: EditionModel | undefined;
@@ -111,7 +111,7 @@ export function useMarketplaceCollectionsViewModel({
   const collectionEditionsResult = useAtomValue(collectionEditionsAtom);
   const collectionEditions = unwrapOr(collectionEditionsResult, []);
   const { data: allCollections, status } = useTokenContracts();
-  const { orders, sales } = useMarketplace();
+  const { listings: orders, sales } = useMarketplace();
 
   const filteredCollections = useMemo(() => {
     if (!edition) return allCollections;

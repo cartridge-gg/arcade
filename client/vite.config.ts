@@ -13,13 +13,17 @@ import { resolve } from "node:path";
 const resolveFromRoot = (path: string) =>
   resolve(fileURLToPath(new URL(".", import.meta.url)), path);
 
-const COMMIT_SHA = process.env.VERCEL_GIT_COMMIT_SHA || 'dev';
+const COMMIT_SHA = process.env.VERCEL_GIT_COMMIT_SHA || "dev";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
-    react(),
+    react({
+      babel: {
+        plugins: [["babel-plugin-react-compiler"]],
+      },
+    }),
     wasm(),
     topLevelAwait(),
     mkcert(),

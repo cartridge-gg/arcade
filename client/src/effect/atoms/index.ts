@@ -28,7 +28,6 @@ export {
 } from "./prices";
 
 export {
-  registryAtom,
   gamesAtom,
   editionsAtom,
   accessesAtom,
@@ -40,7 +39,6 @@ export {
 } from "./registry";
 
 export {
-  socialAtom,
   pinsAtom,
   createPinsByPlayerAtom,
   followsAtom,

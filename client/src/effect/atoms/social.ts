@@ -1,38 +1,27 @@
 import { Atom } from "@effect-atom/atom-react";
-import { Effect, Array as A, pipe } from "effect";
+import { Array as A, pipe } from "effect";
 import { getChecksumAddress } from "starknet";
-import {
-  SocialClient,
-  socialLayer,
-  type SocialItem,
-} from "../layers/social";
-import type {
-  PinEvent,
-  FollowEvent,
-  GuildModel,
-} from "@cartridge/arcade";
+import type { PinEvent, FollowEvent, GuildModel } from "@cartridge/arcade";
+import { arcadeAtom } from "./arcade";
+import type { ArcadeEntityItem, ArcadeEventItem } from "../layers/arcade";
 
-const fetchSocialEffect = Effect.gen(function* () {
-  const client = yield* SocialClient;
-  return yield* client.fetchAll();
-});
+type ArcadeSocialModels = {
+  TrophyPinning?: ArcadeEventItem & { type: "pin"; data: PinEvent };
+  Follow?: ArcadeEventItem & { type: "follow"; data: FollowEvent };
+  Guild?: ArcadeEntityItem & { type: "guild"; data: GuildModel };
+};
 
-const socialRuntime = Atom.runtime(socialLayer);
-
-export const socialAtom = socialRuntime
-  .atom(fetchSocialEffect)
-  .pipe(Atom.keepAlive);
+const getArcadeSocialModels = (entity: { models?: Record<string, unknown> }): ArcadeSocialModels | undefined =>
+  entity.models?.ARCADE as ArcadeSocialModels | undefined;
 
 export const pinsAtom = Atom.make((get) => {
-  const result = get(socialAtom);
+  const result = get(arcadeAtom);
   if (result._tag !== "Success") return result;
 
   const pins = pipe(
-    result.value,
-    A.filter((item): item is SocialItem & { data: PinEvent } =>
-      item.type === "pin"
-    ),
-    A.map((item) => item.data)
+    result.value.items,
+    A.filter((entity) => getArcadeSocialModels(entity)?.TrophyPinning !== undefined),
+    A.map((entity) => getArcadeSocialModels(entity)!.TrophyPinning!.data),
   );
 
   return { ...result, value: pins };
@@ -55,15 +44,13 @@ export const createPinsByPlayerAtom = (playerId: string) =>
   });
 
 export const followsAtom = Atom.make((get) => {
-  const result = get(socialAtom);
+  const result = get(arcadeAtom);
   if (result._tag !== "Success") return result;
 
   const follows = pipe(
-    result.value,
-    A.filter((item): item is SocialItem & { data: FollowEvent } =>
-      item.type === "follow"
-    ),
-    A.map((item) => item.data)
+    result.value.items,
+    A.filter((entity) => getArcadeSocialModels(entity)?.Follow !== undefined),
+    A.map((entity) => getArcadeSocialModels(entity)!.Follow!.data),
   );
 
   return { ...result, value: follows };
@@ -86,15 +73,13 @@ export const createFollowsByFollowerAtom = (follower: string) =>
   });
 
 export const guildsAtom = Atom.make((get) => {
-  const result = get(socialAtom);
+  const result = get(arcadeAtom);
   if (result._tag !== "Success") return result;
 
   const guilds = pipe(
-    result.value,
-    A.filter((item): item is SocialItem & { data: GuildModel } =>
-      item.type === "guild"
-    ),
-    A.map((item) => item.data)
+    result.value.items,
+    A.filter((entity) => getArcadeSocialModels(entity)?.Guild !== undefined),
+    A.map((entity) => getArcadeSocialModels(entity)!.Guild!.data),
   );
 
   return { ...result, value: guilds };

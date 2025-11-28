@@ -1,5 +1,5 @@
 import { createEntityQueryWithUpdatesAtom } from "@dojoengine/react/effect";
-import { mainnetConfig, toriiRuntime } from "../layers/arcade";
+import { ARCADE_MODELS, mainnetConfig, toriiRuntime } from "../layers/arcade";
 import { KeysClause, ToriiQueryBuilder } from "@dojoengine/sdk";
 
 const clause = KeysClause([], [], "VariableLen").build();
@@ -7,8 +7,9 @@ export const arcadeAtom = createEntityQueryWithUpdatesAtom(
   toriiRuntime,
   new ToriiQueryBuilder()
     .withClause(clause)
+    .withEntityModels(ARCADE_MODELS)
     .includeHashedKeys()
-    .withLimit(1000),
+    .withLimit(10000),
   clause,
   mainnetConfig.manifest.world.address,
 );
