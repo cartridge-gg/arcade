@@ -9,6 +9,7 @@ use crate::events::completed::{CompletedTrait, QuestCompleted};
 use crate::events::creation::{CreationTrait, QuestCreation};
 use crate::events::progression::{ProgressTrait, QuestProgression};
 use crate::events::unlocked::{QuestUnlocked, UnlockedTrait};
+use crate::interfaces::{IQuestRewarderDispatcher, IQuestRewarderDispatcherTrait};
 use crate::models::advancement::{AdvancementTrait, QuestAdvancement};
 use crate::models::association::{AssociationTrait, QuestAssociation};
 use crate::models::completion::{CompletionTrait, QuestCompletion};
@@ -211,7 +212,7 @@ pub impl StoreImpl of StoreTrait {
             completion.complete(time);
             self.set_completion(@completion);
             // [Event] Emit quest completed
-            self.complete(player_id, quest_id, interval_id, time);
+            self.complete(definition.rewarder, player_id, quest_id, interval_id, time);
             // [Check] Quest unlocks other quests
             let mut conditions = self.get_condition(quest_id);
             while let Option::Some(condition) = conditions.quests.pop_front() {
@@ -222,7 +223,7 @@ pub impl StoreImpl of StoreTrait {
                 completion.unlock();
                 self.set_completion(@completion);
                 // [Event] Emit quest unlocked
-                self.unlock(player_id, condition, interval_id, time);
+                self.unlock(definition.rewarder, player_id, condition, interval_id, time);
             }
             // [Effect] Nullify condition
             self.set_condition(@conditions);
@@ -231,15 +232,35 @@ pub impl StoreImpl of StoreTrait {
 
     #[inline]
     fn complete(
-        mut self: Store, player_id: felt252, quest_id: felt252, interval_id: u64, time: u64,
+        mut self: Store,
+        rewarder: ContractAddress,
+        player_id: felt252,
+        quest_id: felt252,
+        interval_id: u64,
+        time: u64,
     ) {
+        // [Interaction] Call rewarder
+        let rewarder = IQuestRewarderDispatcher { contract_address: rewarder };
+        let recipient: ContractAddress = player_id.try_into().unwrap();
+        rewarder.on_quest_complete(recipient, quest_id, interval_id);
         // [Event] Emit quest completed
         let event: QuestCompleted = CompletedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);
     }
 
     #[inline]
-    fn unlock(mut self: Store, player_id: felt252, quest_id: felt252, interval_id: u64, time: u64) {
+    fn unlock(
+        mut self: Store,
+        rewarder: ContractAddress,
+        player_id: felt252,
+        quest_id: felt252,
+        interval_id: u64,
+        time: u64,
+    ) {
+        // [Interaction] Call rewarder
+        let rewarder = IQuestRewarderDispatcher { contract_address: rewarder };
+        let recipient: ContractAddress = player_id.try_into().unwrap();
+        rewarder.on_quest_unlock(recipient, quest_id, interval_id);
         // [Event] Emit quest completed
         let event: QuestUnlocked = UnlockedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);

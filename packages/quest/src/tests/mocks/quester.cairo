@@ -12,6 +12,12 @@ pub fn NAMESPACE() -> ByteArray {
 
 #[starknet::interface]
 pub trait IQuester<TContractState> {
+    fn is_completed(
+        self: @TContractState, player_id: felt252, quest_id: felt252, interval_id: u64,
+    ) -> bool;
+    fn are_completed(
+        self: @TContractState, player_id: felt252, quest_ids: Array<felt252>, interval_id: u64,
+    ) -> bool;
     fn create(
         ref self: TContractState,
         id: felt252,
@@ -60,6 +66,18 @@ pub mod Quester {
 
     #[abi(embed_v0)]
     pub impl QuesterImpl of IQuester<ContractState> {
+        fn is_completed(
+            self: @ContractState, player_id: felt252, quest_id: felt252, interval_id: u64,
+        ) -> bool {
+            self.questable.is_completed(self.world_storage(), player_id, quest_id, interval_id)
+        }
+
+        fn are_completed(
+            self: @ContractState, player_id: felt252, quest_ids: Array<felt252>, interval_id: u64,
+        ) -> bool {
+            self.questable.are_completed(self.world_storage(), player_id, quest_ids, interval_id)
+        }
+
         fn create(
             ref self: ContractState,
             id: felt252,

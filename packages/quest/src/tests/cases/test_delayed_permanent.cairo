@@ -124,8 +124,8 @@ fn test_delayed_permanent_quest_completion_once() {
         .progress(player_id: context.player_id, task_id: TASK_ID, count: COUNT, to_store: true);
 
     // [Assert] Quest remains completed, cannot be completed again
-    let completion = store.get_completion(context.player_id, QUEST_ID, interval_id);
-    assert_eq!(completion.is_completed(), true, "Quest should remain completed");
+    let completion = systems.quester.is_completed(context.player_id, QUEST_ID, interval_id);
+    assert_eq!(completion, true, "Quest should remain completed");
 }
 
 #[test]
