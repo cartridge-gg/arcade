@@ -24,19 +24,19 @@ interface GraphQLResponse<T = unknown> {
 export interface CartridgeInternalGqlClientImpl {
   query: <T = unknown>(
     query: string,
-    variables?: Record<string, unknown>
+    variables?: Record<string, unknown>,
   ) => Effect.Effect<T, GraphQLClientError>;
 }
 
 export class CartridgeInternalGqlClient extends Context.Tag(
-  "CartridgeInternalGqlClient"
+  "CartridgeInternalGqlClient",
 )<CartridgeInternalGqlClient, CartridgeInternalGqlClientImpl>() {}
 
 export const makeGraphQLLayer = () =>
   Layer.succeed(CartridgeInternalGqlClient, {
     query: <T = unknown>(
       query: string,
-      variables?: Record<string, unknown>
+      variables?: Record<string, unknown>,
     ): Effect.Effect<T, GraphQLClientError> =>
       Effect.tryPromise({
         try: async () => {

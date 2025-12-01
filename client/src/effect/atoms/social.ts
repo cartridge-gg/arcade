@@ -11,8 +11,9 @@ type ArcadeSocialModels = {
   Guild?: ArcadeEntityItem & { type: "guild"; data: GuildModel };
 };
 
-const getArcadeSocialModels = (entity: { models?: Record<string, unknown> }): ArcadeSocialModels | undefined =>
-  entity.models?.ARCADE as ArcadeSocialModels | undefined;
+const getArcadeSocialModels = (entity: { models?: Record<string, unknown> }):
+  | ArcadeSocialModels
+  | undefined => entity.models?.ARCADE as ArcadeSocialModels | undefined;
 
 export const pinsAtom = Atom.make((get) => {
   const result = get(arcadeAtom);
@@ -20,7 +21,9 @@ export const pinsAtom = Atom.make((get) => {
 
   const pins = pipe(
     result.value.items,
-    A.filter((entity) => getArcadeSocialModels(entity)?.TrophyPinning !== undefined),
+    A.filter(
+      (entity) => getArcadeSocialModels(entity)?.TrophyPinning !== undefined,
+    ),
     A.map((entity) => getArcadeSocialModels(entity)!.TrophyPinning!.data),
   );
 
@@ -35,9 +38,7 @@ export const createPinsByPlayerAtom = (playerId: string) =>
     const checksumAddress = getChecksumAddress(playerId);
     const filteredPins = pipe(
       result.value,
-      A.filter(
-        (pin) => getChecksumAddress(pin.playerId) === checksumAddress
-      )
+      A.filter((pin) => getChecksumAddress(pin.playerId) === checksumAddress),
     );
 
     return { ...result, value: filteredPins };
@@ -65,8 +66,8 @@ export const createFollowsByFollowerAtom = (follower: string) =>
     const filteredFollows = pipe(
       result.value,
       A.filter(
-        (follow) => getChecksumAddress(follow.follower) === checksumAddress
-      )
+        (follow) => getChecksumAddress(follow.follower) === checksumAddress,
+      ),
     );
 
     return { ...result, value: filteredFollows };

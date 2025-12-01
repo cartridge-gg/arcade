@@ -5,7 +5,10 @@ import {
   cloneFilters,
   ensureCollectionState,
 } from "@/effect/atoms";
-import type { ActiveFilters, StatusFilter } from "@/types/metadata-filter.types";
+import type {
+  ActiveFilters,
+  StatusFilter,
+} from "@/types/metadata-filter.types";
 
 export interface UseFilterActionsReturn {
   replaceFilters: (filters: ActiveFilters) => void;

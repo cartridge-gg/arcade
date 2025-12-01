@@ -26,7 +26,11 @@ export type ArcadeEntityItem =
   | { type: "game"; identifier: string; data: GameModel }
   | { type: "edition"; identifier: string; data: EditionModel }
   | { type: "access"; identifier: string; data: AccessModel }
-  | { type: "collectionEdition"; identifier: string; data: CollectionEditionModel }
+  | {
+      type: "collectionEdition";
+      identifier: string;
+      data: CollectionEditionModel;
+    }
   | { type: "order"; identifier: string; data: OrderModel }
   | { type: "book"; identifier: string; data: BookModel }
   | { type: "moderator"; identifier: string; data: ModeratorModel }

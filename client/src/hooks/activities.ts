@@ -61,7 +61,8 @@ export const useActivities = () => {
   const pins = unwrapOr(pinsResult, []);
   const playerPin = pins.find(
     (pin) =>
-      address && getChecksumAddress(pin.playerId) === getChecksumAddress(address),
+      address &&
+      getChecksumAddress(pin.playerId) === getChecksumAddress(address),
   );
   const player = playerPin?.playerId;
 

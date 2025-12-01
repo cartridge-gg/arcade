@@ -235,6 +235,10 @@ const getSocialPolicies = (_chainId: unknown) => ({ contracts: {} });
 const getRegistryPolicies = (_chainId: unknown) => ({ contracts: {} });
 const getMarketplacePolicies = (_chainId: unknown) => ({ contracts: {} });
 
+const configs: Record<string, { manifest: { world: { address: string } } }> = {
+  "0x534e5f4d41494e": { manifest: { world: { address: "0x0" } } },
+};
+
 const getToriiUrl = (project: string) =>
   `https://api.cartridge.gg/x/${project}/torii`;
 const getToriiSqlUrl = (project: string) => `${getToriiUrl(project)}/sql`;
@@ -256,6 +260,7 @@ export {
   BookModel,
   CategoryType,
   CollectionEditionModel,
+  configs,
   EditionModel,
   FollowEvent,
   GameModel,

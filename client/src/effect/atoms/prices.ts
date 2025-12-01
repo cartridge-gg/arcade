@@ -43,7 +43,7 @@ const fetchPricesByAddressesEffect = (addresses: string[]) =>
     const client = yield* CartridgeInternalGqlClient;
     const data = yield* client.query<PriceByAddressesResponse>(
       PRICES_BY_ADDRESS_QUERY,
-      { addresses }
+      { addresses },
     );
     return data.priceByAddresses;
   });
@@ -51,7 +51,7 @@ const fetchPricesByAddressesEffect = (addresses: string[]) =>
 const fetchPricesByPeriodAndAddressEffect = (
   addresses: string[],
   start: number,
-  end: number
+  end: number,
 ) =>
   Effect.gen(function* () {
     if (addresses.length === 0) {
@@ -60,7 +60,7 @@ const fetchPricesByPeriodAndAddressEffect = (
     const client = yield* CartridgeInternalGqlClient;
     const data = yield* client.query<PriceByPeriodAndAddressResponse>(
       PRICES_BY_PERIOD_AND_ADDRESS_QUERY,
-      { addresses, start, end }
+      { addresses, start, end },
     );
     return data.pricePeriodByAddresses;
   });
@@ -75,7 +75,7 @@ export const createPricesAtom = (addresses: string[]) =>
 export const createPricesByPeriodAtom = (
   addresses: string[],
   start: number,
-  end: number
+  end: number,
 ) =>
   pricesRuntime
     .atom(fetchPricesByPeriodAndAddressEffect(addresses, start, end))

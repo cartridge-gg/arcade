@@ -1,5 +1,8 @@
 import { bookAtom, listingsAtom, ordersAtom, salesAtom } from "@/effect/atoms";
-import { ArcadeProvider as ExternalProvider, StatusType } from "@cartridge/arcade";
+import {
+  ArcadeProvider as ExternalProvider,
+  StatusType,
+} from "@cartridge/arcade";
 import type { OrderModel } from "@cartridge/arcade";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { useRouterState, useSearch } from "@tanstack/react-router";

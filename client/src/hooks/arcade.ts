@@ -22,14 +22,13 @@ import { useAtom, useAtomValue } from "@effect-atom/atom-react";
 import { useAccount } from "@starknet-react/core";
 import { useMemo } from "react";
 import { constants, getChecksumAddress } from "starknet";
-import { useArcadeInit } from "./arcadeInit";
 import { useOwnerships } from "./ownerships";
 
 export const useArcade = () => {
   //const { chainId, provider, chains } = useArcadeInit();
   const chainId = constants.StarknetChainId.SN_MAIN;
   const provider = useMemo(() => new ExternalProvider(chainId), []);
-  const chains = [];
+  const chains: string[] = [];
 
   const gamesResult = useAtomValue(gamesAtom);
   const games = unwrapOr(gamesResult, [] as GameModel[]);

@@ -5,7 +5,10 @@ import { ToriiGrpcClient } from "@dojoengine/react/effect";
 import { toriiRuntime } from "../runtime";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchContractImage, fetchTokenImage } from "@/hooks/fetcher-utils";
-import type { Token, TokenContract as TokenContractWasm } from "@dojoengine/torii-wasm";
+import type {
+  Token,
+  TokenContract as TokenContractWasm,
+} from "@dojoengine/torii-wasm";
 
 export type EnrichedTokenContract = {
   contract_address: string;
@@ -41,7 +44,7 @@ const fetchTokenContractsEffect = Effect.gen(function* () {
         direction: "Forward",
         order_by: [],
       },
-    })
+    }),
   );
 
   for (const item of result.items) {
@@ -66,7 +69,7 @@ const fetchTokenContractsEffect = Effect.gen(function* () {
           direction: "Forward",
           order_by: [],
         },
-      })
+      }),
     );
     for (const item of result.items) {
       contracts.push({
@@ -93,7 +96,7 @@ const fetchTokenContractsEffect = Effect.gen(function* () {
               direction: "Forward",
               order_by: [],
             },
-          })
+          }),
         );
 
         let metadata = contract.metadata;
@@ -112,12 +115,12 @@ const fetchTokenContractsEffect = Effect.gen(function* () {
             return fetchTokenImage(
               { ...contract, metadata, token_id: tokenId } as unknown as Token,
               DEFAULT_PROJECT,
-              true
+              true,
             );
           }
           return fetchContractImage(
             contract as unknown as TokenContractWasm,
-            DEFAULT_PROJECT
+            DEFAULT_PROJECT,
           );
         });
 
@@ -133,25 +136,23 @@ const fetchTokenContractsEffect = Effect.gen(function* () {
           image: image ?? "",
           contract_type: "ERC721",
         } satisfies EnrichedTokenContract;
-      })
+      }),
     ),
-    { concurrency: 5 }
+    { concurrency: 5 },
   );
 
   const byName = Order.mapInput(
     Order.string,
-    (c: EnrichedTokenContract) => c.name ?? ""
+    (c: EnrichedTokenContract) => c.name ?? "",
   );
 
   return pipe(
     enrichedContracts,
     A.filter(
       (c: EnrichedTokenContract) =>
-        !BLACKLISTS.includes(
-          c.contract_address as (typeof BLACKLISTS)[number]
-        )
+        !BLACKLISTS.includes(c.contract_address as (typeof BLACKLISTS)[number]),
     ),
-    A.sort(byName)
+    A.sort(byName),
   );
 });
 
@@ -164,11 +165,12 @@ export const createTokenContractAtom = (address: string) =>
     .atom(
       pipe(
         fetchTokenContractsEffect,
-        Effect.map((contracts) =>
-          contracts.find(
-            (c) => c.contract_address.toLowerCase() === address.toLowerCase()
-          ) ?? null
-        )
-      )
+        Effect.map(
+          (contracts) =>
+            contracts.find(
+              (c) => c.contract_address.toLowerCase() === address.toLowerCase(),
+            ) ?? null,
+        ),
+      ),
     )
     .pipe(Atom.keepAlive);

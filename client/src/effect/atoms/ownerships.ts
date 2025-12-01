@@ -28,7 +28,7 @@ const fetchOwnershipsEffect = Effect.gen(function* () {
   });
 
   const arcadeCollection = tokenContractsResult.find(
-    (c) => c.name === "Arcade Game"
+    (c) => c.name === "Arcade Game",
   );
 
   if (!arcadeCollection) {
@@ -46,7 +46,7 @@ const fetchOwnershipsEffect = Effect.gen(function* () {
         order_by: [],
         cursor: undefined,
       },
-    })
+    }),
   );
 
   const balances: Ownership[] = [];

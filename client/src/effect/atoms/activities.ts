@@ -66,6 +66,4 @@ const fetchActivitiesEffect = (projects: ActivityProject[]) =>
 const activitiesRuntime = Atom.runtime(graphqlLayer);
 
 export const createActivitiesAtom = (projects: ActivityProject[]) =>
-  activitiesRuntime
-    .atom(fetchActivitiesEffect(projects))
-    .pipe(Atom.keepAlive);
+  activitiesRuntime.atom(fetchActivitiesEffect(projects)).pipe(Atom.keepAlive);

@@ -119,6 +119,14 @@ export default defineConfig(({ mode }) => ({
         replacement: resolveFromRoot("tests/mocks/torii-wasm.ts"),
       },
       {
+        find: /^@dojoengine\/react\/effect$/,
+        replacement: resolveFromRoot("tests/mocks/dojoengine-react-effect.ts"),
+      },
+      {
+        find: /^@dojoengine\/sdk$/,
+        replacement: resolveFromRoot("tests/mocks/dojoengine-sdk.ts"),
+      },
+      {
         find: "@",
         replacement: resolveFromRoot("src"),
       },

@@ -19,11 +19,7 @@ const COMMIT_SHA = process.env.VERCEL_GIT_COMMIT_SHA || "dev";
 export default defineConfig({
   plugins: [
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
-    react({
-      babel: {
-        plugins: [["babel-plugin-react-compiler"]],
-      },
-    }),
+    react(),
     wasm(),
     topLevelAwait(),
     mkcert(),

@@ -17,7 +17,7 @@ export type OrdersState = {
 
 export type ListingsState = {
   [collection: string]: {
-    [token: string]: { [listing: string]: ListingEvent };
+    [token: string]: { [listing: string]: OrderModel };
   };
 };
 

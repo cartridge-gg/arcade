@@ -89,11 +89,7 @@ type BalancesResponse = {
   };
 };
 
-const fetchBalancesEffect = (
-  address: string,
-  projects: string[],
-  offset = 0
-) =>
+const fetchBalancesEffect = (address: string, projects: string[], offset = 0) =>
   Effect.gen(function* () {
     const client = yield* CartridgeInternalGqlClient;
     const res = yield* client.query<BalancesResponse>(BALANCES_QUERY, {
@@ -120,7 +116,7 @@ const fetchBalancesEffect = (
       const tokenAddress = getChecksumAddress(contractAddress);
       const image =
         erc20Metadata.find(
-          (m) => getChecksumAddress(m.l2_token_address) === tokenAddress
+          (m) => getChecksumAddress(m.l2_token_address) === tokenAddress,
         )?.logo_url || makeBlockie(tokenAddress);
       const token: Token = {
         balance: {

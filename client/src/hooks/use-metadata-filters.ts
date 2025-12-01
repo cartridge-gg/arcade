@@ -23,12 +23,8 @@ export function useMetadataFilters({
     setStatusFilter,
   } = useFilterActions(collectionAddress);
 
-  const {
-    activeFilters,
-    statusFilter,
-    availableFilters,
-    isMetadataLoading,
-  } = useFilterData(collectionAddress);
+  const { activeFilters, statusFilter, availableFilters, isMetadataLoading } =
+    useFilterData(collectionAddress);
 
   useFilterUrlSync({
     collectionAddress,

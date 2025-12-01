@@ -24,12 +24,16 @@ vi.mock("@/collections", () => ({
 const mockCollectionEditionsAtom = vi.fn();
 
 vi.mock("@effect-atom/atom-react", () => ({
-  useAtomValue: () => ({ _tag: "Success", value: mockCollectionEditionsAtom() ?? [] }),
+  useAtomValue: () => ({
+    _tag: "Success",
+    value: mockCollectionEditionsAtom() ?? [],
+  }),
 }));
 
 vi.mock("@/effect", () => ({
   collectionEditionsAtom: {},
-  unwrapOr: (result: any, defaultValue: any) => result._tag === "Success" ? result.value : defaultValue,
+  unwrapOr: (result: any, defaultValue: any) =>
+    result._tag === "Success" ? result.value : defaultValue,
 }));
 
 vi.mock("@/hooks/marketplace", () => ({
@@ -88,7 +92,7 @@ describe("useMarketplaceCollectionsViewModel", () => {
     mockUseCollectionEditions.mockReturnValue(baseCollectionEdition);
     mockCollectionEditionsAtom.mockReturnValue(baseCollectionEdition);
     mockUseTokenContracts.mockReturnValue({ data: [], status: "idle" });
-    mockUseMarketplace.mockReturnValue({ orders: {}, sales: {} });
+    mockUseMarketplace.mockReturnValue({ listings: {}, sales: {} });
   });
 
   afterEach(() => {
@@ -125,7 +129,7 @@ describe("useMarketplaceCollectionsViewModel", () => {
     });
 
     mockUseMarketplace.mockReturnValue({
-      orders: {
+      listings: {
         [COLLECTION_ADDRESS]: {
           "1": {
             orderA: {

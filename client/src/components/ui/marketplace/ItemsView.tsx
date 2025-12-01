@@ -367,7 +367,7 @@ const CollectionCount = ({
 
 export const ItemsLoadingState = () => {
   return (
-    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full">
+    <div className="flex flex-col gap-y-3 lg:gap-y-4 h-full order-3">
       <div className="flex justify-between items-center">
         <Skeleton className="min-h-10 w-1/5" />
         <Skeleton className="min-h-10 w-1/3" />
@@ -383,6 +383,10 @@ export const ItemsLoadingState = () => {
 
 export const ItemsEmptyState = () => {
   return (
-    <Empty title="No related collections" icon="inventory" className="h-full" />
+    <Empty
+      title="No related collections"
+      icon="inventory"
+      className="h-full order-3"
+    />
   );
 };

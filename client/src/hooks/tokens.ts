@@ -61,7 +61,9 @@ export const useTokens = () => {
   const pinsResult = useAtomValue(pinsAtom);
   const pins = unwrapOr(pinsResult, []);
   const playerPin = pins.find(
-    (pin) => address && getChecksumAddress(pin.playerId) === getChecksumAddress(address),
+    (pin) =>
+      address &&
+      getChecksumAddress(pin.playerId) === getChecksumAddress(address),
   );
   const player = playerPin?.playerId;
 
@@ -85,9 +87,9 @@ export const useTokens = () => {
     {} as { [key: string]: EffectToken },
   );
 
-  const contractAddresses = [
-    ...EXTRA_ERC20_ADDRESSES,
-  ].filter((addr) => !toriiData[addr]);
+  const contractAddresses = [...EXTRA_ERC20_ADDRESSES].filter(
+    (addr) => !toriiData[addr],
+  );
 
   const { data: rpcData }: UseERC20BalanceResponse = useERC20Balance({
     address: player ? getChecksumAddress(player) : player,

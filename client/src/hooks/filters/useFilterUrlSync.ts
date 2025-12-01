@@ -51,7 +51,13 @@ export function useFilterUrlSync({
 
     hasSyncedFromURL.current = true;
     isUpdatingFromURL.current = false;
-  }, [collectionAddress, collectionState, enabled, location.searchStr, replaceFilters]);
+  }, [
+    collectionAddress,
+    collectionState,
+    enabled,
+    location.searchStr,
+    replaceFilters,
+  ]);
 
   useEffect(() => {
     if (!enabled) return;
