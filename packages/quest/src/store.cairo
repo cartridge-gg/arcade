@@ -267,7 +267,18 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn claim(mut self: Store, player_id: felt252, quest_id: felt252, interval_id: u64, time: u64) {
+    fn claim(
+        mut self: Store,
+        rewarder: ContractAddress,
+        player_id: felt252,
+        quest_id: felt252,
+        interval_id: u64,
+        time: u64,
+    ) {
+        // [Interaction] Call rewarder
+        let rewarder = IQuestRewarderDispatcher { contract_address: rewarder };
+        let recipient: ContractAddress = player_id.try_into().unwrap();
+        rewarder.on_quest_claim(recipient, quest_id, interval_id);
         // [Event] Emit quest claim
         let event: QuestClaimed = ClaimedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);

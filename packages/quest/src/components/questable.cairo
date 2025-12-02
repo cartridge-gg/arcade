@@ -4,7 +4,6 @@ pub mod QuestableComponent {
 
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
-    use crate::interfaces::{IQuestRewarderDispatcher, IQuestRewarderDispatcherTrait};
     use crate::models::completion::{CompletionAssert, CompletionTrait};
     use crate::models::definition::DefinitionAssert;
     use crate::store::{Store, StoreTrait};
@@ -189,12 +188,16 @@ pub mod QuestableComponent {
             completion.claim();
             store.set_completion(@completion);
 
-            // [Interaction] Reward player
-            let rewarder = IQuestRewarderDispatcher { contract_address: definition.rewarder };
-            rewarder.on_quest_claim(player_id.try_into().unwrap(), quest_id, interval_id);
             // [Event] Emit quest claim
             let time: u64 = starknet::get_block_timestamp();
-            store.claim(player_id, quest_id, interval_id, time);
+            store
+                .claim(
+                    rewarder: definition.rewarder,
+                    player_id: player_id,
+                    quest_id: quest_id,
+                    interval_id: interval_id,
+                    time: time,
+                );
         }
     }
 }
