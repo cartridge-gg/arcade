@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import type { EnrichedTokenContract } from "@/collections";
+import type { EnrichedTokenContract } from "@/effect";
 import { useInventoryCollectionsViewModel } from "./useInventoryCollectionsViewModel";
 
 const mockUseArcade = vi.fn();

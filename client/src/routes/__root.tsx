@@ -9,7 +9,7 @@ import { SonnerToaster } from "@cartridge/ui";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useNavigationContext } from "@/features/navigation";
 import { useArcade } from "@/hooks/arcade";
-import { useAccount } from "@/collections";
+import { useAccount } from "@/effect";
 
 function RootComponent() {
   const router = useRouterState();

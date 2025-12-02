@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useAccount } from "@starknet-react/core";
-import { useAccountByAddress } from "@/collections/users";
+import { useAccountByAddress } from "@/effect";
 import { useArcade } from "@/hooks/arcade";
 import {
   NavigationContextManager,

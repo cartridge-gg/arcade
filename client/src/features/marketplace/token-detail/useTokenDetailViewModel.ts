@@ -13,7 +13,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useArcade } from "@/hooks/arcade";
 import { ERC1155_ENTRYPOINT, getEntrypoints } from "../items";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccountByAddress } from "@/collections";
+import { useAccountByAddress } from "@/effect";
 import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
 
 interface UseTokenDetailViewModelArgs {

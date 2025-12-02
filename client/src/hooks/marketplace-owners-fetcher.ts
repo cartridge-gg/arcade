@@ -1,4 +1,4 @@
-import { useAccounts } from "@/collections";
+import { useAccounts } from "@/effect";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
 import type {

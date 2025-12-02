@@ -10,8 +10,7 @@ import { CollectionType } from "@/hooks/collections";
 import { getChecksumAddress } from "starknet";
 import { joinPaths, resizeImage } from "@/lib/helpers";
 import { TAB_SEGMENTS } from "@/hooks/project";
-import type { EnrichedTokenContract } from "@/collections";
-import { useAccountByAddress } from "@/collections";
+import { useAccountByAddress, type EnrichedTokenContract } from "@/effect";
 import { StatusType, type EditionModel } from "@cartridge/arcade";
 import { useAnalytics } from "@/hooks/useAnalytics";
 

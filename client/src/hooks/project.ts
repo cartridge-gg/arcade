@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useArcade } from "./arcade";
 import { getChecksumAddress } from "starknet";
 import { useRouterState, useSearch } from "@tanstack/react-router";
-import { useAccount } from "@/collections";
+import { useAccount } from "@/effect";
 import { useAccount as useSnReactAccount } from "@starknet-react/core";
 
 export const TAB_SEGMENTS = [

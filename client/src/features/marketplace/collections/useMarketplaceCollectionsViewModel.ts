@@ -8,7 +8,7 @@ import {
   type SaleEvent,
 } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useTokenContracts, type EnrichedTokenContract } from "@/collections";
+import { useTokenContracts, type EnrichedTokenContract } from "@/effect";
 import { collectionEditionsAtom, unwrapOr } from "@/effect";
 import { resizeImage } from "@/lib/helpers";
 import {

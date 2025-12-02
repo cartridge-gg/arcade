@@ -1,4 +1,4 @@
-import { useAccountByAddress } from "@/collections";
+import { useAccountByAddress } from "@/effect";
 import { usePlayerStats } from "@/hooks/achievements";
 import { useProject } from "@/hooks/project";
 import { useArcade } from "@/hooks/arcade";
@@ -34,6 +34,7 @@ export const UserCard = React.forwardRef<
 >((props, ref) => {
   const { account } = useAccount();
   const { player } = useProject();
+  console.log(player);
 
   const isPlayer = useMemo(
     () =>

@@ -17,7 +17,7 @@ import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/lib/helpers";
 import arcade from "@/assets/arcade-logo.png";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useTokenContract } from "@/collections";
+import { useTokenContract } from "@/effect";
 
 const TABS_ORDER = ["activity", "items", "holders"] as TabValue[];
 

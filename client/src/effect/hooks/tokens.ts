@@ -1,0 +1,33 @@
+import { useAtomValue } from "@effect-atom/atom-react";
+import { useMemo } from "react";
+import {
+  tokenContractsAtom,
+  createTokenContractAtom,
+  type EnrichedTokenContract,
+} from "../atoms/tokens";
+import { unwrapOr, toCollectionStatus } from "../utils/result";
+
+export const useTokenContracts = () => {
+  const result = useAtomValue(tokenContractsAtom);
+  const data = unwrapOr(result, [] as EnrichedTokenContract[]);
+  const status = toCollectionStatus(result);
+  return { data, status };
+};
+
+export const useTokenContract = (
+  address: string | undefined,
+): EnrichedTokenContract | null | undefined => {
+  const atom = useMemo(
+    () => (address ? createTokenContractAtom(address) : null),
+    [address],
+  );
+
+  const result = atom ? useAtomValue(atom) : null;
+
+  return useMemo(() => {
+    if (!result) return undefined;
+    return unwrapOr(result, null as EnrichedTokenContract | null);
+  }, [result]);
+};
+
+export type { EnrichedTokenContract };

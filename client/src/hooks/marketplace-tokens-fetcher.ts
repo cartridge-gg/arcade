@@ -8,7 +8,7 @@ import {
 import type { FetchCollectionTokensResult } from "@cartridge/arcade/marketplace";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
-import { useTokenContract } from "@/collections";
+import { useTokenContract } from "@/effect";
 import { fetchTokenImage } from "./fetcher-utils";
 
 type MarketTokensFetcherInput = {

@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { useProject } from "@/hooks/project";
 import { joinPaths } from "@/lib/helpers";
 import { PositionsScene } from "../scenes/positions";
-import { useAccountByAddress, useAccountsByAddresses } from "@/collections";
+import { useAccountByAddress, useAccountsByAddresses } from "@/effect";
 
 export function PlayerPage() {
   const { address, isSelf, self } = useAddress();

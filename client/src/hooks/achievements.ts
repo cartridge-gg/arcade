@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { getChecksumAddress } from "starknet";
-import { useProgressions, useTrophies, useAccounts } from "@/collections";
+import { useProgressions, useTrophies, useAccounts } from "@/effect";
 import {
   AchievementHelper,
   type AchievementData,

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { useProject } from "./project";
 import { useAddress } from "./address";
-import { useAccountByAddress } from "@/collections";
+import { useAccountByAddress } from "@/effect";
 import {
   editionsAtom,
   createBalancesAtom,

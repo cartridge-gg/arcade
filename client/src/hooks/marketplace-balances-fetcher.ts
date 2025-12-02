@@ -1,4 +1,4 @@
-import { useTokenContract } from "@/collections";
+import { useTokenContract } from "@/effect";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
 import type {
