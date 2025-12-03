@@ -28,7 +28,7 @@ export const InventoryTokensView = ({
 
   return (
     <div
-      className={cn("rounded overflow-y-scroll w-full flex flex-col gap-y-px")}
+      className={cn("rounded w-full flex flex-col gap-y-px ")}
       style={{ scrollbarWidth: "none" }}
     >
       <InventoryTokenCard card={creditsCard} />

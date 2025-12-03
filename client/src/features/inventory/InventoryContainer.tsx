@@ -21,7 +21,7 @@ export const InventoryContainer = () => {
   });
 
   return (
-    <div className="w-full flex flex-col gap-4 rounded">
+    <div className="w-full flex flex-col gap-4 rounded overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <InventoryTokensView {...tokensViewModel} />
       <InventoryCollectionsView {...collectionsViewModel} />
     </div>
