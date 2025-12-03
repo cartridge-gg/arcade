@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import {
   CardListContent,
   DotsIcon,
@@ -37,57 +37,63 @@ export const GamesView = React.memo(
     sidebar,
     sharedContext,
   }: GamesViewProps) => {
-  const [search, setSearch] = useState("");
+    const [search, setSearch] = useState("");
 
-  const filteredGames = useMemo(
-    () =>
-      games.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [games, search],
-  );
+    const filteredGames = useMemo(
+      () =>
+        games.filter((item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()),
+        ),
+      [games, search],
+    );
 
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border-r border-spacer-100 lg:border lg:border-background-200",
-        "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
-        isMobile && "fixed z-50 top-0 left-0",
-        sidebar.isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        "transition-all duration-300 ease-in-out",
-      )}
-      onTouchStart={sidebar.handleTouchStart}
-      onTouchMove={sidebar.handleTouchMove}
-    >
-      <UserCard className="bg-background-100 -mb-px lg:hidden" />
-      <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
-        <SearchInput value={search} onChange={setSearch} placeholder="Search" />
-        <div className="flex flex-col gap-1 grow overflow-hidden">
-          <CardListContent
-            className="p-0 pb-4 overflow-y-auto"
-            style={CARD_LIST_STYLE}
-          >
-            {filteredGames.map((item) => (
-              <GameListItem
-                key={item.id}
-                item={item}
-                selectedGameId={selectedGameId}
-                sharedContext={sharedContext}
-              />
-            ))}
-          </CardListContent>
-        </div>
-      </div>
+    return (
       <div
         className={cn(
-          "flex items-center justify-center p-3 lg:pb-3 gap-2.5 bg-background-100",
-          isPWA ? "pb-6" : "pb-3",
+          "flex flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border-r border-spacer-100 lg:border lg:border-background-200",
+          "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
+          isMobile && "fixed z-50 top-0 left-0",
+          sidebar.isOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0",
+          "transition-all duration-300 ease-in-out",
         )}
+        onTouchStart={sidebar.handleTouchStart}
+        onTouchMove={sidebar.handleTouchMove}
       >
-        <Register />
+        <UserCard className="bg-background-100 -mb-px lg:hidden" />
+        <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search"
+          />
+          <div className="flex flex-col gap-1 grow overflow-hidden">
+            <CardListContent
+              className="p-0 pb-4 overflow-y-auto"
+              style={CARD_LIST_STYLE}
+            >
+              {filteredGames.map((item) => (
+                <GameListItem
+                  key={item.id}
+                  item={item}
+                  selectedGameId={selectedGameId}
+                  sharedContext={sharedContext}
+                />
+              ))}
+            </CardListContent>
+          </div>
+        </div>
+        <div
+          className={cn(
+            "flex items-center justify-center p-3 lg:pb-3 gap-2.5 bg-background-100",
+            isPWA ? "pb-6" : "pb-3",
+          )}
+        >
+          <Register />
+        </div>
       </div>
-    </div>
-  );
+    );
   },
 );
 
@@ -105,9 +111,12 @@ const GameListItem = React.memo(
       sharedContext,
     );
 
+    const onSelectRef = useRef(viewModel.onSelect);
+    onSelectRef.current = viewModel.onSelect;
+
     const onSelect = useCallback(() => {
-      viewModel.onSelect();
-    }, [viewModel.onSelect]);
+      onSelectRef.current();
+    }, []);
 
     if (
       item.game &&

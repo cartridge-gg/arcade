@@ -7,8 +7,8 @@ import {
   editionsAtom,
   gamesAtom,
   pinsAtom,
-  createTransfersAtom,
-  createActivitiesAtom,
+  transfersAtom,
+  activitiesAtom,
   type TransferProject,
   type ActivityProject,
 } from "@/effect/atoms";
@@ -83,17 +83,8 @@ export const useActivities = () => {
     }));
   }, [editions, player]);
 
-  const transfersAtom = useMemo(
-    () => createTransfersAtom(transferProjects),
-    [transferProjects],
-  );
-  const activitiesAtom = useMemo(
-    () => createActivitiesAtom(activityProjects),
-    [activityProjects],
-  );
-
-  const transfersResult = useAtomValue(transfersAtom);
-  const activitiesResult = useAtomValue(activitiesAtom);
+  const transfersResult = useAtomValue(transfersAtom(transferProjects));
+  const activitiesResult = useAtomValue(activitiesAtom(activityProjects));
 
   const transfers = unwrapOr(transfersResult, []);
   const transactions = unwrapOr(activitiesResult, []);

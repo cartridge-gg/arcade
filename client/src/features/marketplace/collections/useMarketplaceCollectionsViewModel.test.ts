@@ -34,6 +34,7 @@ vi.mock("@/effect", () => ({
   collectionEditionsAtom: {},
   unwrapOr: (result: any, defaultValue: any) =>
     result._tag === "Success" ? result.value : defaultValue,
+  useTokenContracts: () => mockUseTokenContracts(),
 }));
 
 vi.mock("@/hooks/marketplace", () => ({

@@ -107,11 +107,15 @@ const trophiesRuntime = Atom.runtime(graphqlLayer);
 
 const trophiesFamily = Atom.family((key: string) => {
   const projects: TrophyProject[] = JSON.parse(key);
-  return trophiesRuntime.atom(fetchTrophiesEffect(projects)).pipe(Atom.keepAlive);
+  return trophiesRuntime
+    .atom(fetchTrophiesEffect(projects))
+    .pipe(Atom.keepAlive);
 });
 
 export const trophiesAtom = (projects: TrophyProject[]) => {
-  const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
+  const sorted = [...projects].sort((a, b) =>
+    a.project.localeCompare(b.project),
+  );
   return trophiesFamily(JSON.stringify(sorted));
 };
 
@@ -130,7 +134,9 @@ const trophiesDataFamily = Atom.family((key: string) => {
 });
 
 export const trophiesDataAtom = (projects: TrophyProject[]) => {
-  const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
+  const sorted = [...projects].sort((a, b) =>
+    a.project.localeCompare(b.project),
+  );
   return trophiesDataFamily(JSON.stringify(sorted));
 };
 

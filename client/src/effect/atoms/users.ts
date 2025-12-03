@@ -69,7 +69,9 @@ export const accountsAtom = accountsRuntime
   .atom(fetchAccountsEffect)
   .pipe(Atom.keepAlive);
 
-const nullResultAtom = Atom.make(() => ({ _tag: "Success", value: null }) as const);
+const nullResultAtom = Atom.make(
+  () => ({ _tag: "Success", value: null }) as const,
+);
 
 export const accountAtom = Atom.family((identifier: string | undefined) => {
   if (!identifier) return nullResultAtom;
@@ -96,34 +98,38 @@ export const accountAtom = Atom.family((identifier: string | undefined) => {
   );
 });
 
-export const accountByAddressAtom = Atom.family((address: string | undefined) => {
-  if (!address) return nullResultAtom;
+export const accountByAddressAtom = Atom.family(
+  (address: string | undefined) => {
+    if (!address) return nullResultAtom;
 
-  const checksumAddress = getChecksumAddress(address);
+    const checksumAddress = getChecksumAddress(address);
 
-  return accountsAtom.pipe(
-    Atom.map((result) =>
-      mapResult(
-        result,
-        (accounts) =>
-          accounts.find((a) => a.address === checksumAddress) ?? null,
+    return accountsAtom.pipe(
+      Atom.map((result) =>
+        mapResult(
+          result,
+          (accounts) =>
+            accounts.find((a) => a.address === checksumAddress) ?? null,
+        ),
       ),
-    ),
-  );
-});
+    );
+  },
+);
 
-export const accountByUsernameAtom = Atom.family((username: string | undefined) => {
-  if (!username) return nullResultAtom;
+export const accountByUsernameAtom = Atom.family(
+  (username: string | undefined) => {
+    if (!username) return nullResultAtom;
 
-  return accountsAtom.pipe(
-    Atom.map((result) =>
-      mapResult(
-        result,
-        (accounts) => accounts.find((a) => a.username === username) ?? null,
+    return accountsAtom.pipe(
+      Atom.map((result) =>
+        mapResult(
+          result,
+          (accounts) => accounts.find((a) => a.username === username) ?? null,
+        ),
       ),
-    ),
-  );
-});
+    );
+  },
+);
 
 const accountsByAddressesFamily = Atom.family((key: string) => {
   const checksumAddresses: string[] = JSON.parse(key);

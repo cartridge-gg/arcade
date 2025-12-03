@@ -5,11 +5,7 @@ import {
   flattenActiveFilters,
 } from "@cartridge/arcade/marketplace";
 import { filtersAtom, DEFAULT_STATUS_FILTER } from "@/effect/atoms";
-import {
-  createMetadataAtom,
-  unwrapOr,
-  isLoading as isResultLoading,
-} from "@/effect";
+import { metadataAtom, unwrapOr, isLoading as isResultLoading } from "@/effect";
 import type {
   ActiveFilters,
   AvailableFilters,
@@ -39,21 +35,12 @@ export function useFilterData(collectionAddress: string): UseFilterDataReturn {
     [activeFilters],
   );
 
-  const traitsKey = useMemo(
-    () => JSON.stringify(selectedTraits),
-    [selectedTraits],
+  const metadataResult = useAtomValue(
+    metadataAtom({
+      contractAddress: collectionAddress,
+      traits: selectedTraits,
+    }),
   );
-
-  const metadataAtom = useMemo(
-    () =>
-      createMetadataAtom({
-        contractAddress: collectionAddress,
-        traits: selectedTraits,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [collectionAddress, traitsKey],
-  );
-  const metadataResult = useAtomValue(metadataAtom);
   const metadata = unwrapOr(metadataResult, []);
   const isMetadataLoading = isResultLoading(metadataResult);
 

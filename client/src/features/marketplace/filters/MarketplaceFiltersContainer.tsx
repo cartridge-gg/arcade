@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { MarketplaceFiltersView } from "@/components/ui/marketplace/MarketplaceFiltersView";
 import { useMarketplaceFiltersViewModel } from "./useMarketplaceFiltersViewModel";
 
@@ -13,24 +13,21 @@ export const MarketplaceFiltersContainer = () => {
     setSearchValue,
   } = useMarketplaceFiltersViewModel();
 
-  const viewAttributes = useMemo(() => {
-    return attributes.map((attribute) => ({
-      name: attribute.name,
-      properties: attribute.properties.map((property) => ({
-        property: property.property,
-        count: property.count,
-        order: property.order,
-        isActive: property.isActive,
-      })),
-      search: attribute.search,
-    }));
-  }, [attributes]);
+  const handleListedClick = useCallback(
+    () => setStatusFilter("listed"),
+    [setStatusFilter],
+  );
+  const handleAllClick = useCallback(
+    () => setStatusFilter("all"),
+    [setStatusFilter],
+  );
 
   return (
     <MarketplaceFiltersView
       statusFilter={statusFilter}
-      onStatusChange={setStatusFilter}
-      attributes={viewAttributes}
+      onListedClick={handleListedClick}
+      onAllClick={handleAllClick}
+      attributes={attributes}
       hasActiveFilters={hasActiveFilters}
       onClearAll={clearAllFilters}
       onToggleProperty={setFilter}

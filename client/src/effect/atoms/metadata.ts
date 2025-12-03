@@ -50,29 +50,18 @@ const fetchMetadataEffect = ({
 
 const metadataRuntime = Atom.runtime(Layer.empty);
 
-const createUncachedMetadataAtom = (options: MetadataOptions) =>
-  metadataRuntime.atom(fetchMetadataEffect(options)).pipe(Atom.keepAlive);
+const metadataFamily = Atom.family((key: string) => {
+  const options: MetadataOptions = JSON.parse(key);
+  return metadataRuntime
+    .atom(fetchMetadataEffect(options))
+    .pipe(Atom.keepAlive);
+});
 
-type MetadataAtom = ReturnType<typeof createUncachedMetadataAtom>;
-
-const metadataAtomCache = new Map<string, MetadataAtom>();
-
-const buildCacheKey = (options: MetadataOptions): string => {
-  const traitsKey = JSON.stringify(options.traits);
-  const projectsKey = options.projects
-    ? JSON.stringify([...options.projects].sort())
-    : "";
-  return `${options.contractAddress}:${traitsKey}:${projectsKey}`;
-};
-
-export const createMetadataAtom = (options: MetadataOptions): MetadataAtom => {
-  const key = buildCacheKey(options);
-
-  let atom = metadataAtomCache.get(key);
-  if (!atom) {
-    atom = createUncachedMetadataAtom(options);
-    metadataAtomCache.set(key, atom);
-  }
-
-  return atom;
+export const metadataAtom = (options: MetadataOptions) => {
+  const sortedKey = JSON.stringify({
+    contractAddress: options.contractAddress,
+    traits: options.traits,
+    projects: options.projects ? [...options.projects].sort() : undefined,
+  });
+  return metadataFamily(sortedKey);
 };

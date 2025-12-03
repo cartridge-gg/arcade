@@ -22,8 +22,11 @@ type CreditsResponse = {
   };
 };
 
-const fetchCreditsEffect = (username: string) =>
+const creditsRuntime = Atom.runtime(graphqlLayer);
+
+const fetchCreditsEffect = (username: string | undefined) =>
   Effect.gen(function* () {
+    if (!username) return null;
     const client = yield* CartridgeInternalGqlClient;
     const data = yield* client.query<CreditsResponse>(CREDITS_BALANCE_QUERY, {
       username,
@@ -31,7 +34,11 @@ const fetchCreditsEffect = (username: string) =>
     return data.account.credits;
   });
 
-const creditsRuntime = Atom.runtime(graphqlLayer);
+const creditsFamily = Atom.family((key: string) => {
+  const username = key === "" ? undefined : key;
+  return creditsRuntime.atom(fetchCreditsEffect(username)).pipe(Atom.keepAlive);
+});
 
-export const createCreditsAtom = (username: string) =>
-  creditsRuntime.atom(fetchCreditsEffect(username)).pipe(Atom.keepAlive);
+export const creditsAtom = (username: string | undefined) => {
+  return creditsFamily(username ?? "");
+};

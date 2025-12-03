@@ -86,11 +86,15 @@ const progressionsRuntime = Atom.runtime(graphqlLayer);
 
 const progressionsFamily = Atom.family((key: string) => {
   const projects: ProgressionProject[] = JSON.parse(key);
-  return progressionsRuntime.atom(fetchProgressionsEffect(projects)).pipe(Atom.keepAlive);
+  return progressionsRuntime
+    .atom(fetchProgressionsEffect(projects))
+    .pipe(Atom.keepAlive);
 });
 
 export const progressionsAtom = (projects: ProgressionProject[]) => {
-  const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
+  const sorted = [...projects].sort((a, b) =>
+    a.project.localeCompare(b.project),
+  );
   return progressionsFamily(JSON.stringify(sorted));
 };
 
@@ -109,7 +113,9 @@ const progressionsDataFamily = Atom.family((key: string) => {
 });
 
 export const progressionsDataAtom = (projects: ProgressionProject[]) => {
-  const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
+  const sorted = [...projects].sort((a, b) =>
+    a.project.localeCompare(b.project),
+  );
   return progressionsDataFamily(JSON.stringify(sorted));
 };
 

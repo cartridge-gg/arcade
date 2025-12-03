@@ -12,7 +12,10 @@ import { unwrapOr } from "../utils/result";
 
 export const useAccounts = () => {
   const result = useAtomValue(accountsMapAtom);
-  return useMemo(() => ({ data: unwrapOr(result, new Map<string, string>()) }), [result]);
+  return useMemo(
+    () => ({ data: unwrapOr(result, new Map<string, string>()) }),
+    [result],
+  );
 };
 
 export const useAccount = (identifier: string | undefined) => {

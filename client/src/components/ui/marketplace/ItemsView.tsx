@@ -1,4 +1,5 @@
 import {
+  memo,
   useEffect,
   useState,
   type CSSProperties,
@@ -18,6 +19,8 @@ import {
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 import { Link } from "@tanstack/react-router";
 
+const NOOP = () => {};
+
 export interface MarketplaceItemPriceInfo {
   value: string;
   image: string;
@@ -25,6 +28,7 @@ export interface MarketplaceItemPriceInfo {
 
 export interface MarketplaceItemCardProps {
   id: string;
+  index: number;
   title: string;
   image?: string | null;
   placeholderImage?: string;
@@ -37,9 +41,9 @@ export interface MarketplaceItemCardProps {
   isConnected: boolean;
   selectionActive: boolean;
   tokenDetailHref: string;
-  onToggleSelect: () => void;
-  onBuy: () => void;
-  onInspect: () => void;
+  onToggleSelectByIndex: (index: number) => void;
+  onBuyByIndex: (index: number) => void;
+  onInspectByIndex: (index: number) => void;
   onConnect: () => Promise<void> | void;
 }
 
@@ -111,7 +115,7 @@ export const ItemsView = ({
           search={searchValue}
           setSearch={onSearchChange}
           selected={undefined}
-          setSelected={() => {}}
+          setSelected={NOOP}
           options={[]}
           variant="darkest"
           className="w-[200px] lg:w-[240px] absolute top-0 right-0 z-10"
@@ -249,104 +253,114 @@ const SelectionFooter = ({
   );
 };
 
-const MarketplaceItemCard = ({
-  selectionActive,
-  selectable,
-  selected,
-  canOpen,
-  isConnected,
-  onToggleSelect,
-  onBuy,
-  onInspect,
-  onConnect,
-  image,
-  placeholderImage,
-  title,
-  listingCount,
-  price,
-  lastSale,
-  tokenDetailHref,
-}: MarketplaceItemCardProps) => {
-  const fallbackImage = placeholderImage ?? image ?? "";
-  const [displayImage, setDisplayImage] = useState<string>(fallbackImage);
+const MarketplaceItemCard = memo(
+  ({
+    index,
+    selectionActive,
+    selectable,
+    selected,
+    canOpen,
+    isConnected,
+    onToggleSelectByIndex,
+    onBuyByIndex,
+    onInspectByIndex,
+    onConnect,
+    image,
+    placeholderImage,
+    title,
+    listingCount,
+    price,
+    lastSale,
+    tokenDetailHref,
+  }: MarketplaceItemCardProps) => {
+    const fallbackImage = placeholderImage ?? image ?? "";
+    const [displayImage, setDisplayImage] = useState<string>(fallbackImage);
 
-  useEffect(() => {
-    const nextFallback = placeholderImage ?? "";
+    useEffect(() => {
+      const nextFallback = placeholderImage ?? "";
 
-    if (!image) {
-      setDisplayImage(nextFallback || "");
-      return;
-    }
-
-    if (nextFallback) {
-      setDisplayImage(nextFallback);
-    }
-
-    let isMounted = true;
-    const loader = new window.Image();
-    loader.onload = () => {
-      if (isMounted) {
-        setDisplayImage(image);
-      }
-    };
-    loader.onerror = () => {
-      if (isMounted) {
+      if (!image) {
         setDisplayImage(nextFallback || "");
+        return;
+      }
+
+      if (nextFallback) {
+        setDisplayImage(nextFallback);
+      }
+
+      let isMounted = true;
+      const loader = new window.Image();
+      loader.onload = () => {
+        if (isMounted) {
+          setDisplayImage(image);
+        }
+      };
+      loader.onerror = () => {
+        if (isMounted) {
+          setDisplayImage(nextFallback || "");
+        }
+      };
+      loader.src = image;
+
+      return () => {
+        isMounted = false;
+      };
+    }, [image, placeholderImage]);
+
+    const handleContainerClick = (event: MouseEvent<HTMLDivElement>) => {
+      if (isConnected && selectionActive && selectable) {
+        event.preventDefault();
+        onToggleSelectByIndex(index);
       }
     };
-    loader.src = image;
 
-    return () => {
-      isMounted = false;
+    const handleCardClick = () => {
+      if (selectable && canOpen) {
+        onBuyByIndex(index);
+        return;
+      }
+
+      if (canOpen) {
+        onInspectByIndex(index);
+        return;
+      }
+
+      if (!isConnected) {
+        void onConnect();
+      }
     };
-  }, [image, placeholderImage]);
 
-  const handleContainerClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (isConnected && selectionActive && selectable) {
-      event.preventDefault();
-      onToggleSelect();
-    }
-  };
+    const handleSelect =
+      isConnected && selectable
+        ? () => onToggleSelectByIndex(index)
+        : undefined;
 
-  const handleCardClick = () => {
-    if (selectable && canOpen) {
-      onBuy();
-      return;
-    }
+    return (
+      <div className="w-full group select-none" onClick={handleContainerClick}>
+        <Link to={tokenDetailHref}>
+          <CollectibleCard
+            title={title}
+            image={displayImage}
+            listingCount={listingCount}
+            onClick={handleCardClick}
+            className={
+              selectable || canOpen
+                ? "cursor-pointer"
+                : "cursor-default pointer-events-none"
+            }
+            onSelect={handleSelect}
+            price={price}
+            lastSale={lastSale}
+            selectable={selectable}
+            selected={selected}
+          />
+        </Link>
+      </div>
+    );
+  },
+);
 
-    if (canOpen) {
-      onInspect();
-      return;
-    }
-
-    if (!isConnected) {
-      void onConnect();
-    }
-  };
-
-  return (
-    <div className="w-full group select-none" onClick={handleContainerClick}>
-      <Link to={tokenDetailHref}>
-        <CollectibleCard
-          title={title}
-          image={displayImage}
-          listingCount={listingCount}
-          onClick={handleCardClick}
-          className={
-            selectable || canOpen
-              ? "cursor-pointer"
-              : "cursor-default pointer-events-none"
-          }
-          onSelect={isConnected && selectable ? onToggleSelect : undefined}
-          price={price}
-          lastSale={lastSale}
-          selectable={selectable}
-          selected={selected}
-        />
-      </Link>
-    </div>
-  );
-};
+MarketplaceItemCard.displayName = "MarketplaceItemCard";
 
 const CollectionCount = ({
   collectionCount,

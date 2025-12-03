@@ -1,13 +1,13 @@
 export {
   tokenContractsAtom,
-  createTokenContractAtom,
+  tokenContractAtom,
   type EnrichedTokenContract,
 } from "./tokens";
 
 export { ownershipsAtom, type Ownership } from "./ownerships";
 
 export {
-  createActivitiesAtom,
+  activitiesAtom,
   type Activity,
   type ActivityMeta,
   type ActivityItem,
@@ -15,15 +15,15 @@ export {
 } from "./activities";
 
 export {
-  createBalancesAtom,
+  balancesAtom,
   type Balance,
   type Token,
   type TokenMetadata,
 } from "./balances";
 
 export {
-  createPricesAtom,
-  createPricesByPeriodAtom,
+  pricesAtom,
+  pricesByPeriodAtom,
   type Price,
 } from "./prices";
 
@@ -40,26 +40,26 @@ export {
 
 export {
   pinsAtom,
-  createPinsByPlayerAtom,
+  pinsByPlayerAtom,
   followsAtom,
-  createFollowsByFollowerAtom,
+  followsByFollowerAtom,
   guildsAtom,
   type PinEvent,
   type FollowEvent,
   type GuildModel,
 } from "./social";
 
-export { createCreditsAtom, type Credits } from "./credits";
+export { creditsAtom, type Credits } from "./credits";
 
 export {
-  createMetricsAtom,
+  metricsAtom,
   type MetricsMeta,
   type MetricsItem,
   type MetricsData,
 } from "./metrics";
 
 export {
-  createTransfersAtom,
+  transfersAtom,
   type TransferMeta,
   type Transfer,
   type TransferItem,
@@ -67,13 +67,13 @@ export {
 } from "./transfers";
 
 export {
-  createMetadataAtom,
+  metadataAtom,
   type Metadata,
   type MetadataOptions,
 } from "./metadata";
 
 export {
-  createCountervaluesAtom,
+  countervaluesAtom,
   type CountervaluePrice,
   type TokenBalance,
   type CountervalueResult,

@@ -8,9 +8,24 @@ const mockUseArcade = vi.fn();
 const mockUseOwnerships = vi.fn();
 const mockUseProject = vi.fn();
 const mockUseSidebar = vi.fn();
+const mockUseRouterState = vi.fn();
+const mockUseAnalytics = vi.fn();
+const mockUsePlayerStats = vi.fn();
 
 vi.mock("@starknet-react/core", () => ({
   useAccount: () => mockUseAccount(),
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  useRouterState: () => mockUseRouterState(),
+}));
+
+vi.mock("@/hooks/achievements", () => ({
+  usePlayerStats: () => mockUsePlayerStats(),
+}));
+
+vi.mock("@/hooks/useAnalytics", () => ({
+  useAnalytics: () => mockUseAnalytics(),
 }));
 
 vi.mock("@/hooks/arcade", () => ({
@@ -68,6 +83,18 @@ describe("useGamesViewModel", () => {
       handleTouchStart: vi.fn(),
       handleTouchMove: vi.fn(),
       close: vi.fn(),
+    });
+    mockUseRouterState.mockReturnValue({
+      location: { pathname: "/" },
+    });
+    mockUseAnalytics.mockReturnValue({
+      trackGameInteraction: vi.fn(),
+    });
+    mockUsePlayerStats.mockReturnValue({
+      completed: 0,
+      total: 0,
+      rank: 0,
+      earnings: 0,
     });
   });
 

@@ -141,7 +141,18 @@ const fetchBalancesEffect = (address: string, projects: string[], offset = 0) =>
 
 const balancesRuntime = Atom.runtime(graphqlLayer);
 
-export const createBalancesAtom = (address: string, projects: string[]) =>
-  balancesRuntime
+const balancesFamily = Atom.family((key: string) => {
+  const { address, projects }: { address: string; projects: string[] } =
+    JSON.parse(key);
+  return balancesRuntime
     .atom(fetchBalancesEffect(address, projects))
     .pipe(Atom.keepAlive);
+});
+
+export const balancesAtom = (address: string, projects: string[]) => {
+  const sortedKey = JSON.stringify({
+    address,
+    projects: [...projects].sort(),
+  });
+  return balancesFamily(sortedKey);
+};

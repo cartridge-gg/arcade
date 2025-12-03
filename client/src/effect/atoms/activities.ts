@@ -65,5 +65,16 @@ const fetchActivitiesEffect = (projects: ActivityProject[]) =>
 
 const activitiesRuntime = Atom.runtime(graphqlLayer);
 
-export const createActivitiesAtom = (projects: ActivityProject[]) =>
-  activitiesRuntime.atom(fetchActivitiesEffect(projects)).pipe(Atom.keepAlive);
+const activitiesFamily = Atom.family((key: string) => {
+  const projects: ActivityProject[] = JSON.parse(key);
+  return activitiesRuntime
+    .atom(fetchActivitiesEffect(projects))
+    .pipe(Atom.keepAlive);
+});
+
+export const activitiesAtom = (projects: ActivityProject[]) => {
+  const sortedKey = JSON.stringify(
+    [...projects].sort((a, b) => a.project.localeCompare(b.project)),
+  );
+  return activitiesFamily(sortedKey);
+};

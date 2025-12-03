@@ -67,16 +67,38 @@ const fetchPricesByPeriodAndAddressEffect = (
 
 const pricesRuntime = Atom.runtime(graphqlLayer);
 
-export const createPricesAtom = (addresses: string[]) =>
-  pricesRuntime
+const pricesFamily = Atom.family((key: string) => {
+  const addresses: string[] = JSON.parse(key);
+  return pricesRuntime
     .atom(fetchPricesByAddressesEffect(addresses))
     .pipe(Atom.keepAlive);
+});
 
-export const createPricesByPeriodAtom = (
+export const pricesAtom = (addresses: string[]) => {
+  const sortedKey = JSON.stringify([...addresses].sort());
+  return pricesFamily(sortedKey);
+};
+
+const pricesByPeriodFamily = Atom.family((key: string) => {
+  const {
+    addresses,
+    start,
+    end,
+  }: { addresses: string[]; start: number; end: number } = JSON.parse(key);
+  return pricesRuntime
+    .atom(fetchPricesByPeriodAndAddressEffect(addresses, start, end))
+    .pipe(Atom.keepAlive);
+});
+
+export const pricesByPeriodAtom = (
   addresses: string[],
   start: number,
   end: number,
-) =>
-  pricesRuntime
-    .atom(fetchPricesByPeriodAndAddressEffect(addresses, start, end))
-    .pipe(Atom.keepAlive);
+) => {
+  const sortedKey = JSON.stringify({
+    addresses: [...addresses].sort(),
+    start,
+    end,
+  });
+  return pricesByPeriodFamily(sortedKey);
+};

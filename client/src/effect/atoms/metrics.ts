@@ -81,5 +81,14 @@ const fetchMetricsEffect = (projects: { project: string }[]) =>
 
 const metricsRuntime = Atom.runtime(graphqlLayer);
 
-export const createMetricsAtom = (projects: { project: string }[]) =>
-  metricsRuntime.atom(fetchMetricsEffect(projects)).pipe(Atom.keepAlive);
+const metricsFamily = Atom.family((key: string) => {
+  const projects: { project: string }[] = JSON.parse(key);
+  return metricsRuntime.atom(fetchMetricsEffect(projects)).pipe(Atom.keepAlive);
+});
+
+export const metricsAtom = (projects: { project: string }[]) => {
+  const sortedKey = JSON.stringify(
+    [...projects].sort((a, b) => a.project.localeCompare(b.project)),
+  );
+  return metricsFamily(sortedKey);
+};

@@ -82,5 +82,16 @@ const fetchTransfersEffect = (projects: TransferProject[]) =>
 
 const transfersRuntime = Atom.runtime(graphqlLayer);
 
-export const createTransfersAtom = (projects: TransferProject[]) =>
-  transfersRuntime.atom(fetchTransfersEffect(projects)).pipe(Atom.keepAlive);
+const transfersFamily = Atom.family((key: string) => {
+  const projects: TransferProject[] = JSON.parse(key);
+  return transfersRuntime
+    .atom(fetchTransfersEffect(projects))
+    .pipe(Atom.keepAlive);
+});
+
+export const transfersAtom = (projects: TransferProject[]) => {
+  const sortedKey = JSON.stringify(
+    [...projects].sort((a, b) => a.project.localeCompare(b.project)),
+  );
+  return transfersFamily(sortedKey);
+};

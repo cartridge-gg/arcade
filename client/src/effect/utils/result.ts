@@ -26,7 +26,9 @@ export function toStatus(result: ResultLike<unknown>): ResultStatus {
       : "pending";
 }
 
-export function toCollectionStatus(result: ResultLike<unknown>): CollectionStatus {
+export function toCollectionStatus(
+  result: ResultLike<unknown>,
+): CollectionStatus {
   return result._tag === "Success"
     ? "ready"
     : result._tag === "Failure"

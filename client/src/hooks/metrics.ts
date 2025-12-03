@@ -1,10 +1,6 @@
 import { useMemo } from "react";
 import { useAtomValue } from "@effect-atom/atom-react";
-import {
-  editionsAtom,
-  createMetricsAtom,
-  type MetricsData,
-} from "@/effect/atoms";
+import { editionsAtom, metricsAtom, type MetricsData } from "@/effect/atoms";
 import { unwrap } from "@/effect/utils/result";
 import { useProject } from "./project";
 import type { MetricsProject } from "@cartridge/ui/utils/api/cartridge";
@@ -22,8 +18,7 @@ export const useMetrics = () => {
     }));
   }, [editions]);
 
-  const metricsAtom = useMemo(() => createMetricsAtom(projects), [projects]);
-  const metricsResult = useAtomValue(metricsAtom);
+  const metricsResult = useAtomValue(metricsAtom(projects));
   const { value: allMetrics, status } = unwrap(metricsResult, [] as Metrics[]);
 
   const metrics = useMemo(() => {

@@ -5,6 +5,7 @@ import { ToriiGrpcClient } from "@dojoengine/react/effect";
 import { toriiRuntime } from "../runtime";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchContractImage, fetchTokenImage } from "@/hooks/fetcher-utils";
+import { mapResult } from "../utils/result";
 import type {
   Token,
   TokenContract as TokenContractWasm,
@@ -160,17 +161,22 @@ export const tokenContractsAtom = toriiRuntime
   .atom(fetchTokenContractsEffect)
   .pipe(Atom.keepAlive);
 
-export const createTokenContractAtom = (address: string) =>
-  toriiRuntime
-    .atom(
-      pipe(
-        fetchTokenContractsEffect,
-        Effect.map(
-          (contracts) =>
-            contracts.find(
-              (c) => c.contract_address.toLowerCase() === address.toLowerCase(),
-            ) ?? null,
-        ),
+const nullContractResultAtom = Atom.make(
+  () => ({ _tag: "Success", value: null }) as const,
+);
+
+export const tokenContractAtom = Atom.family((address: string | undefined) => {
+  if (!address) return nullContractResultAtom;
+
+  return tokenContractsAtom.pipe(
+    Atom.map((result) =>
+      mapResult(
+        result,
+        (contracts) =>
+          contracts.find(
+            (c) => c.contract_address.toLowerCase() === address.toLowerCase(),
+          ) ?? null,
       ),
-    )
-    .pipe(Atom.keepAlive);
+    ),
+  );
+});

@@ -5,9 +5,9 @@ import { useAddress } from "./address";
 import { useAccountByAddress } from "@/effect";
 import {
   editionsAtom,
-  createBalancesAtom,
-  createCountervaluesAtom,
-  createCreditsAtom,
+  balancesAtom,
+  countervaluesAtom,
+  creditsAtom,
   type Token as EffectToken,
 } from "@/effect/atoms";
 import { unwrap, unwrapOr } from "@/effect/utils/result";
@@ -51,6 +51,8 @@ export type Token = {
   metadata: Metadata;
 };
 
+const provider = new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_URL });
+
 export const useTokens = () => {
   const { address } = useAddress();
   const { edition } = useProject();
@@ -67,21 +69,12 @@ export const useTokens = () => {
   );
   const player = playerPin?.playerId;
 
-  const provider = useMemo(
-    () => new RpcProvider({ nodeUrl: import.meta.env.VITE_RPC_URL }),
-    [],
-  );
-
   const projects = useMemo(
     () => editions.map((edition) => edition.config.project),
     [editions],
   );
 
-  const balancesAtom = useMemo(
-    () => createBalancesAtom(address ?? "", projects),
-    [address, projects],
-  );
-  const balancesResult = useAtomValue(balancesAtom);
+  const balancesResult = useAtomValue(balancesAtom(address ?? "", projects));
   const { value: toriiData, status } = unwrap(
     balancesResult,
     {} as { [key: string]: EffectToken },
@@ -107,11 +100,7 @@ export const useTokens = () => {
     [rpcData],
   );
 
-  const countervaluesAtom = useMemo(
-    () => createCountervaluesAtom(tokenData),
-    [tokenData],
-  );
-  const countervaluesResult = useAtomValue(countervaluesAtom);
+  const countervaluesResult = useAtomValue(countervaluesAtom(tokenData));
   const countervalues = unwrapOr(countervaluesResult, []);
 
   const allTokens = useMemo(() => {
@@ -163,12 +152,11 @@ export const useTokens = () => {
 
   const { data: account } = useAccountByAddress(address);
 
-  const creditsAtom = useMemo(
-    () => createCreditsAtom(account?.username ?? ""),
-    [account?.username],
-  );
-  const creditsResult = useAtomValue(creditsAtom);
-  const creditBalance = unwrapOr(creditsResult, { amount: 0, decimals: 6 });
+  const creditsResult = useAtomValue(creditsAtom(account?.username));
+  const creditBalance = unwrapOr(creditsResult, null) ?? {
+    amount: 0,
+    decimals: 6,
+  };
 
   const credits: Token = useMemo(() => {
     return {

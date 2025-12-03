@@ -122,7 +122,16 @@ const fetchCountervaluesEffect = (tokens: TokenBalance[]) =>
 
 const countervalueRuntime = Atom.runtime(graphqlLayer);
 
-export const createCountervaluesAtom = (tokens: TokenBalance[]) =>
-  countervalueRuntime
+const countervaluesFamily = Atom.family((key: string) => {
+  const tokens: TokenBalance[] = JSON.parse(key);
+  return countervalueRuntime
     .atom(fetchCountervaluesEffect(tokens))
     .pipe(Atom.keepAlive);
+});
+
+export const countervaluesAtom = (tokens: TokenBalance[]) => {
+  const sortedKey = JSON.stringify(
+    [...tokens].sort((a, b) => a.address.localeCompare(b.address)),
+  );
+  return countervaluesFamily(sortedKey);
+};

@@ -7,23 +7,18 @@ import {
   MarketplaceRadialItem,
 } from "@cartridge/ui";
 import { AttributeSection } from "./filters";
+import type {
+  MarketplaceFilterAttribute,
+  MarketplaceFilterProperty,
+} from "@/features/marketplace/filters/useMarketplaceFiltersViewModel";
 
-export interface MarketplaceFilterPropertyView {
-  property: string;
-  count: number;
-  order: number;
-  isActive: boolean;
-}
-
-export interface MarketplaceFilterAttributeView {
-  name: string;
-  properties: MarketplaceFilterPropertyView[];
-  search: string;
-}
+export type MarketplaceFilterPropertyView = MarketplaceFilterProperty;
+export type MarketplaceFilterAttributeView = MarketplaceFilterAttribute;
 
 interface MarketplaceFiltersViewProps {
   statusFilter: "all" | "listed";
-  onStatusChange: (value: "all" | "listed") => void;
+  onListedClick: () => void;
+  onAllClick: () => void;
   attributes: MarketplaceFilterAttributeView[];
   hasActiveFilters: boolean;
   onClearAll: () => void;
@@ -38,7 +33,8 @@ interface MarketplaceFiltersViewProps {
 export const MarketplaceFiltersView = memo(
   ({
     statusFilter,
-    onStatusChange,
+    onListedClick,
+    onAllClick,
     attributes,
     hasActiveFilters,
     onClearAll,
@@ -52,12 +48,12 @@ export const MarketplaceFiltersView = memo(
           <MarketplaceRadialItem
             label="Buy Now"
             active={statusFilter === "listed"}
-            onClick={() => onStatusChange("listed")}
+            onClick={onListedClick}
           />
           <MarketplaceRadialItem
             label="Show All"
             active={statusFilter === "all"}
-            onClick={() => onStatusChange("all")}
+            onClick={onAllClick}
           />
         </div>
         <MarketplaceHeader label="Properties">

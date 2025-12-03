@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { getChecksumAddress } from "starknet";
 import type { SaleEvent } from "@cartridge/arcade";
@@ -46,49 +46,25 @@ const deriveLastSale = (
   return deriveLatestSalePriceForToken(tokenSales);
 };
 
-const createItemView = (params: {
-  asset: MarketplaceAsset;
-  collectionImage?: string;
-  selection: MarketplaceAsset[];
-  selectionActive: boolean;
-  isConnected: boolean;
-  connectWallet: () => Promise<void>;
-  onToggleSelection: (asset: MarketplaceAsset) => void;
-  onInspect: (asset: MarketplaceAsset) => Promise<void>;
-  onPurchase: (assets: MarketplaceAsset[]) => Promise<void>;
-  salesByContract: Record<string, Record<string, SaleEvent>> | undefined;
-  navManager: NavigationContextManager;
-}): MarketplaceItemCardProps => {
-  const {
-    asset,
-    collectionImage,
-    selection,
-    selectionActive,
-    isConnected,
-    connectWallet,
-    onToggleSelection,
-    onInspect,
-    onPurchase,
-    salesByContract,
-    navManager,
-  } = params;
+interface BaseItemView {
+  id: string;
+  title: string;
+  image?: string | null;
+  placeholderImage: string;
+  listingCount: number;
+  price: MarketplaceItemPriceInfo | null;
+  lastSale: MarketplaceItemPriceInfo | null;
+  tokenDetailHref: string;
+  assetHasOrders: boolean;
+  currency?: string;
+}
 
-  const selected = selection.some((item) => item.token_id === asset.token_id);
-
-  const selectionHasCurrency =
-    selection.length > 0 && selection[0].orders.length > 0;
-
-  const assetHasOrders = asset.orders.length > 0;
-
-  const selectable =
-    selection.length === 0
-      ? assetHasOrders
-      : selectionHasCurrency && assetHasOrders
-        ? asset.orders[0].currency === selection[0].orders[0].currency
-        : false;
-
-  const openable = selection.length === 0;
-
+const createBaseItemView = (
+  asset: MarketplaceAsset,
+  collectionImage: string | undefined,
+  salesByContract: Record<string, Record<string, SaleEvent>> | undefined,
+  navManager: NavigationContextManager,
+): BaseItemView => {
   return {
     id: `${asset.contract_address}-${asset.token_id?.toString() ?? "0"}`,
     title:
@@ -102,19 +78,12 @@ const createItemView = (params: {
     price: derivePrice(asset),
     lastSale: deriveLastSale(asset, salesByContract),
     placeholderImage,
-    selectable: isConnected && selectable,
-    selected: isConnected && selected,
-    canOpen: openable,
-    isConnected,
-    selectionActive,
     tokenDetailHref: navManager.generateTokenDetailHref(
       asset.contract_address,
       asset.token_id ?? "0x0",
     ),
-    onToggleSelect: () => onToggleSelection(asset),
-    onBuy: () => onPurchase([asset]),
-    onInspect: () => onInspect(asset),
-    onConnect: connectWallet,
+    assetHasOrders: asset.orders.length > 0,
+    currency: asset.orders.length > 0 ? asset.orders[0].currency : undefined,
   };
 };
 
@@ -192,33 +161,94 @@ export const MarketplaceItemsContainer = ({
     [location.pathname, games, editions, isConnected],
   );
 
-  const items = useMemo(() => {
+  const assetsRef = useRef(assets);
+  assetsRef.current = assets;
+
+  const baseItems = useMemo(() => {
     return assets.map((asset) =>
-      createItemView({
-        asset,
-        collectionImage: collection?.image,
-        selection,
-        selectionActive: selection.length > 0,
-        isConnected,
-        connectWallet,
-        onToggleSelection: toggleSelection,
-        onInspect: handleInspect,
-        onPurchase: handlePurchase,
-        salesByContract,
-        navManager,
-      }),
+      createBaseItemView(asset, collection?.image, salesByContract, navManager),
     );
+  }, [assets, collection?.image, salesByContract, navManager]);
+
+  const selectionIds = useMemo(() => {
+    return new Set(selection.map((item) => item.token_id?.toString()));
+  }, [selection]);
+
+  const selectionCurrency = useMemo(() => {
+    if (selection.length === 0) return undefined;
+    return selection[0].orders.length > 0
+      ? selection[0].orders[0].currency
+      : undefined;
+  }, [selection]);
+
+  const handleToggleSelectById = useCallback(
+    (index: number) => {
+      const asset = assetsRef.current[index];
+      if (asset) toggleSelection(asset);
+    },
+    [toggleSelection],
+  );
+
+  const handleBuyById = useCallback(
+    (index: number) => {
+      const asset = assetsRef.current[index];
+      if (asset) handlePurchase([asset]);
+    },
+    [handlePurchase],
+  );
+
+  const handleInspectById = useCallback(
+    (index: number) => {
+      const asset = assetsRef.current[index];
+      if (asset) handleInspect(asset);
+    },
+    [handleInspect],
+  );
+
+  const handleBuySelection = useCallback(() => {
+    handlePurchase(selection);
+  }, [handlePurchase, selection]);
+
+  const items = useMemo(() => {
+    const selectionActive = selection.length > 0;
+    const selectionHasCurrency = selectionCurrency !== undefined;
+
+    return baseItems.map((base, index) => {
+      const tokenId = assets[index]?.token_id?.toString();
+      const selected = isConnected && selectionIds.has(tokenId);
+
+      const selectable =
+        selection.length === 0
+          ? base.assetHasOrders
+          : selectionHasCurrency && base.assetHasOrders
+            ? base.currency === selectionCurrency
+            : false;
+
+      return {
+        ...base,
+        index,
+        selectable: isConnected && selectable,
+        selected,
+        canOpen: !selectionActive,
+        isConnected,
+        selectionActive,
+        onToggleSelectByIndex: handleToggleSelectById,
+        onBuyByIndex: handleBuyById,
+        onInspectByIndex: handleInspectById,
+        onConnect: connectWallet,
+      } as MarketplaceItemCardProps;
+    });
   }, [
+    baseItems,
     assets,
-    collection?.image,
-    selection,
+    selection.length,
+    selectionIds,
+    selectionCurrency,
     isConnected,
     connectWallet,
-    toggleSelection,
-    handleInspect,
-    handlePurchase,
-    salesByContract,
-    navManager,
+    handleToggleSelectById,
+    handleBuyById,
+    handleInspectById,
   ]);
 
   const rows: MarketplaceItemsRow[] = useMemo(() => {
@@ -284,7 +314,7 @@ export const MarketplaceItemsContainer = ({
       onClearFilters={clearAllFilters}
       onResetSelection={clearSelection}
       isConnected={isConnected}
-      onBuySelection={() => handlePurchase(selection)}
+      onBuySelection={handleBuySelection}
       loadingOverlay={{
         isLoading: status === "loading",
         progress: loadingProgress,

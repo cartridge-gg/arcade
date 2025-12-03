@@ -30,12 +30,18 @@ export const pinsAtom = Atom.make((get) => {
   return { ...result, value: pins };
 });
 
-export const createPinsByPlayerAtom = (playerId: string) =>
-  Atom.make((get) => {
+const emptyPinsResultAtom = Atom.make(
+  () => ({ _tag: "Success", value: [] }) as const,
+);
+
+export const pinsByPlayerAtom = Atom.family((playerId: string | undefined) => {
+  if (!playerId) return emptyPinsResultAtom;
+
+  const checksumAddress = getChecksumAddress(playerId);
+  return Atom.make((get) => {
     const result = get(pinsAtom);
     if (result._tag !== "Success") return result;
 
-    const checksumAddress = getChecksumAddress(playerId);
     const filteredPins = pipe(
       result.value,
       A.filter((pin) => getChecksumAddress(pin.playerId) === checksumAddress),
@@ -43,6 +49,7 @@ export const createPinsByPlayerAtom = (playerId: string) =>
 
     return { ...result, value: filteredPins };
   });
+});
 
 export const followsAtom = Atom.make((get) => {
   const result = get(arcadeAtom);
@@ -57,21 +64,30 @@ export const followsAtom = Atom.make((get) => {
   return { ...result, value: follows };
 });
 
-export const createFollowsByFollowerAtom = (follower: string) =>
-  Atom.make((get) => {
-    const result = get(followsAtom);
-    if (result._tag !== "Success") return result;
+const emptyFollowsResultAtom = Atom.make(
+  () => ({ _tag: "Success", value: [] }) as const,
+);
+
+export const followsByFollowerAtom = Atom.family(
+  (follower: string | undefined) => {
+    if (!follower) return emptyFollowsResultAtom;
 
     const checksumAddress = getChecksumAddress(follower);
-    const filteredFollows = pipe(
-      result.value,
-      A.filter(
-        (follow) => getChecksumAddress(follow.follower) === checksumAddress,
-      ),
-    );
+    return Atom.make((get) => {
+      const result = get(followsAtom);
+      if (result._tag !== "Success") return result;
 
-    return { ...result, value: filteredFollows };
-  });
+      const filteredFollows = pipe(
+        result.value,
+        A.filter(
+          (follow) => getChecksumAddress(follow.follower) === checksumAddress,
+        ),
+      );
+
+      return { ...result, value: filteredFollows };
+    });
+  },
+);
 
 export const guildsAtom = Atom.make((get) => {
   const result = get(arcadeAtom);

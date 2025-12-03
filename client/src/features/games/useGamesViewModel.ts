@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useCallback } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useProject } from "@/hooks/project";
@@ -65,6 +65,18 @@ export function useGamesViewModel({
   const totalStats = usePlayerStats();
   const selectedGameId = useMemo(() => game?.id || 0, [game?.id]);
 
+  const closeRef = useRef(sidebar.close);
+  closeRef.current = sidebar.close;
+  const stableClose = useCallback(() => closeRef.current(), []);
+
+  const trackRef = useRef(trackGameInteraction);
+  trackRef.current = trackGameInteraction;
+  const stableTrackGameInteraction = useCallback(
+    (...args: Parameters<typeof trackGameInteraction>) =>
+      trackRef.current(...args),
+    [],
+  );
+
   const gameItems = useMemo(() => {
     return games.map((currentGame) => {
       const ownerAddress = ownerships.find(
@@ -90,6 +102,21 @@ export function useGamesViewModel({
     });
   }, [games, ownerships, address, selectedGameId]);
 
+  const stableTotalStats = useMemo(
+    () => ({
+      completed: totalStats.completed,
+      total: totalStats.total,
+      rank: totalStats.rank,
+      earnings: totalStats.earnings,
+    }),
+    [
+      totalStats.completed,
+      totalStats.total,
+      totalStats.rank,
+      totalStats.earnings,
+    ],
+  );
+
   const sharedContext = useMemo<GameItemSharedContext>(
     () => ({
       address,
@@ -97,9 +124,9 @@ export function useGamesViewModel({
       editions,
       ownerships,
       pathname: location.pathname,
-      close: sidebar.close,
-      trackGameInteraction,
-      totalStats,
+      close: stableClose,
+      trackGameInteraction: stableTrackGameInteraction,
+      totalStats: stableTotalStats as ReturnType<typeof usePlayerStats>,
     }),
     [
       address,
@@ -107,9 +134,9 @@ export function useGamesViewModel({
       editions,
       ownerships,
       location.pathname,
-      sidebar.close,
-      trackGameInteraction,
-      totalStats,
+      stableClose,
+      stableTrackGameInteraction,
+      stableTotalStats,
     ],
   );
 
@@ -118,13 +145,13 @@ export function useGamesViewModel({
       isOpen: sidebar.isOpen,
       handleTouchStart: sidebar.handleTouchStart,
       handleTouchMove: sidebar.handleTouchMove,
-      close: sidebar.close,
+      close: stableClose,
     }),
     [
       sidebar.isOpen,
       sidebar.handleTouchStart,
       sidebar.handleTouchMove,
-      sidebar.close,
+      stableClose,
     ],
   );
 
