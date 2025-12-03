@@ -1,12 +1,13 @@
 import { useAtomValue } from "@effect-atom/atom-react";
+import { useMemo } from "react";
 import {
-  trophiesAtom,
+  trophiesDataAtom,
   type TrophyProject,
   type TrophyItem,
   type Trophy,
 } from "../atoms/trophies";
 import {
-  progressionsAtom,
+  progressionsDataAtom,
   type ProgressionProject,
   type ProgressionItem,
   type Progress,
@@ -21,66 +22,64 @@ const useTrophyProjects = (): TrophyProject[] => {
   const editionsResult = useAtomValue(editionsAtom);
   const editions = unwrapOr(editionsResult, []);
 
-  return editions.map((e) => ({
-    project: e.config.project,
-    namespace: e.namespace as string,
-    model: getSelectorFromTag(e.namespace as string, TROPHY),
-  }));
+  return useMemo(
+    () =>
+      editions.map((e) => ({
+        project: e.config.project,
+        namespace: e.namespace as string,
+        model: getSelectorFromTag(e.namespace as string, TROPHY),
+      })),
+    [editions],
+  );
 };
 
 const useProgressionProjects = (): ProgressionProject[] => {
   const editionsResult = useAtomValue(editionsAtom);
   const editions = unwrapOr(editionsResult, []);
 
-  return editions.map((e) => ({
-    project: e.config.project,
-    namespace: e.namespace as string,
-    model: getSelectorFromTag(e.namespace as string, PROGRESS),
-  }));
+  return useMemo(
+    () =>
+      editions.map((e) => ({
+        project: e.config.project,
+        namespace: e.namespace as string,
+        model: getSelectorFromTag(e.namespace as string, PROGRESS),
+      })),
+    [editions],
+  );
 };
 
 export const useTrophies = (projectsOverride?: TrophyProject[]) => {
   const derivedProjects = useTrophyProjects();
   const projects = projectsOverride ?? derivedProjects;
 
-  const atom = trophiesAtom(projects);
+  const atom = useMemo(() => trophiesDataAtom(projects), [projects]);
   const result = useAtomValue(atom);
-  const items = unwrapOr(result, [] as TrophyItem[]);
 
-  const data = items.reduce(
-    (acc, item) => {
-      acc[item.project] = item.trophies;
-      return acc;
-    },
-    {} as Trophies,
+  return useMemo(
+    () => ({
+      data: unwrapOr(result, {} as Trophies),
+      isLoading: result._tag === "Initial",
+      isError: result._tag === "Failure",
+    }),
+    [result],
   );
-
-  const isLoading = result._tag === "Initial";
-  const isError = result._tag === "Failure";
-
-  return { data, isLoading, isError };
 };
 
 export const useProgressions = (projectsOverride?: ProgressionProject[]) => {
   const derivedProjects = useProgressionProjects();
   const projects = projectsOverride ?? derivedProjects;
 
-  const atom = progressionsAtom(projects);
+  const atom = useMemo(() => progressionsDataAtom(projects), [projects]);
   const result = useAtomValue(atom);
-  const items = unwrapOr(result, [] as ProgressionItem[]);
 
-  const data = items.reduce(
-    (acc, item) => {
-      acc[item.project] = item.progressions;
-      return acc;
-    },
-    {} as Progressions,
+  return useMemo(
+    () => ({
+      data: unwrapOr(result, {} as Progressions),
+      isLoading: result._tag === "Initial",
+      isError: result._tag === "Failure",
+    }),
+    [result],
   );
-
-  const isLoading = result._tag === "Initial";
-  const isError = result._tag === "Failure";
-
-  return { data, isLoading, isError };
 };
 
 export type {

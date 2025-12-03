@@ -1,4 +1,5 @@
 import { useAtomValue } from "@effect-atom/atom-react";
+import { useMemo } from "react";
 import {
   accountsMapAtom,
   accountAtom,
@@ -11,27 +12,27 @@ import { unwrapOr } from "../utils/result";
 
 export const useAccounts = () => {
   const result = useAtomValue(accountsMapAtom);
-  return { data: unwrapOr(result, new Map<string, string>()) };
+  return useMemo(() => ({ data: unwrapOr(result, new Map<string, string>()) }), [result]);
 };
 
 export const useAccount = (identifier: string | undefined) => {
   const result = useAtomValue(accountAtom(identifier));
-  return { data: unwrapOr(result, null) };
+  return useMemo(() => ({ data: unwrapOr(result, null) }), [result]);
 };
 
 export const useAccountByAddress = (address: string | undefined) => {
   const result = useAtomValue(accountByAddressAtom(address));
-  return { data: unwrapOr(result, null) };
+  return useMemo(() => ({ data: unwrapOr(result, null) }), [result]);
 };
 
 export const useAccountByUsername = (username: string | undefined) => {
   const result = useAtomValue(accountByUsernameAtom(username));
-  return { data: unwrapOr(result, null) };
+  return useMemo(() => ({ data: unwrapOr(result, null) }), [result]);
 };
 
 export const useAccountsByAddresses = (addresses: string[]) => {
   const result = useAtomValue(accountsByAddressesAtom(addresses));
-  return { data: unwrapOr(result, []) };
+  return useMemo(() => ({ data: unwrapOr(result, []) }), [result]);
 };
 
 export type { Account };

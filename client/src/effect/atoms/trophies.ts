@@ -2,6 +2,8 @@ import { Atom } from "@effect-atom/atom-react";
 import { Effect } from "effect";
 import { CartridgeInternalGqlClient, graphqlLayer } from "../layers/graphql";
 import { type RawTrophy, Trophy } from "@/models";
+import { mapResult } from "../utils/result";
+import type { Trophies } from "@/lib/achievements";
 
 const TROPHIES_QUERY = `query Achievements($projects: [Project!]!) {
   achievements(projects: $projects) {
@@ -111,6 +113,25 @@ const trophiesFamily = Atom.family((key: string) => {
 export const trophiesAtom = (projects: TrophyProject[]) => {
   const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
   return trophiesFamily(JSON.stringify(sorted));
+};
+
+const trophiesDataFamily = Atom.family((key: string) => {
+  const baseAtom = trophiesFamily(key);
+  return baseAtom.pipe(
+    Atom.map((result) =>
+      mapResult(result, (items) =>
+        items.reduce((acc, item) => {
+          acc[item.project] = item.trophies;
+          return acc;
+        }, {} as Trophies),
+      ),
+    ),
+  );
+});
+
+export const trophiesDataAtom = (projects: TrophyProject[]) => {
+  const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
+  return trophiesDataFamily(JSON.stringify(sorted));
 };
 
 export type { Trophy };

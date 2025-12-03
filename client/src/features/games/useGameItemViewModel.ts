@@ -1,14 +1,9 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { useAccount } from "@starknet-react/core";
-import { useArcade } from "@/hooks/arcade";
-import { useOwnerships } from "@/hooks/ownerships";
-import { usePlayerGameStats, usePlayerStats } from "@/hooks/achievements";
-import { useSidebar } from "@/hooks/sidebar";
-import { useRouterState } from "@tanstack/react-router";
+import { usePlayerGameStats } from "@/hooks/achievements";
 import { joinPaths } from "@/lib/helpers";
-import { useAnalytics } from "@/hooks/useAnalytics";
 import type { GameModel } from "@cartridge/arcade";
 import { DASHBOARD_ALLOWED_ROUTES } from "../navigation";
+import type { GameItemSharedContext } from "./useGamesViewModel";
 
 export interface GameItemViewModel {
   id: number;
@@ -46,12 +41,19 @@ export function useGameItemViewModel(
   options: {
     selectedGameId: number;
   },
+  shared: GameItemSharedContext,
 ): GameItemViewModel {
-  const { address } = useAccount();
-  const { accesses, editions } = useArcade();
-  const { ownerships } = useOwnerships();
-  const { trackGameInteraction } = useAnalytics();
-  const totalStats = usePlayerStats();
+  const {
+    address,
+    accesses,
+    editions,
+    ownerships,
+    pathname,
+    close,
+    trackGameInteraction,
+    totalStats,
+  } = shared;
+
   const projects = useMemo(() => {
     if (!game) return [];
     return editions
@@ -59,8 +61,6 @@ export function useGameItemViewModel(
       .map((edition) => edition.config.project);
   }, [editions, game]);
   const gameStats = usePlayerGameStats(projects);
-  const { close } = useSidebar();
-  const { location } = useRouterState();
 
   const cloneGame = useCallback((source: GameModel | null) => {
     if (!source) return null;
@@ -101,7 +101,7 @@ export function useGameItemViewModel(
   }, [options.selectedGameId, game]);
 
   const target = useMemo(() => {
-    const segments = location.pathname.split("/").filter(Boolean);
+    const segments = pathname.split("/").filter(Boolean);
     const playerIndex = segments.indexOf("player");
     const hasPlayer = playerIndex !== -1;
     const playerPath = hasPlayer ? segments.slice(playerIndex) : [];
@@ -119,10 +119,10 @@ export function useGameItemViewModel(
     }
 
     // Allow toggle on games click
-    const target = joinPaths(...targetSegments);
-    if (location.pathname.startsWith(target)) {
-      const withoutGame = location.pathname;
-      const pathnameParts = location.pathname.split("/");
+    const targetPath = joinPaths(...targetSegments);
+    if (pathname.startsWith(targetPath)) {
+      const withoutGame = pathname;
+      const pathnameParts = pathname.split("/");
       if (
         !DASHBOARD_ALLOWED_ROUTES.includes(
           pathnameParts[pathnameParts.length - 1],
@@ -130,11 +130,11 @@ export function useGameItemViewModel(
       ) {
         return hasPlayer ? joinPaths(...playerPath) : "/";
       }
-      return withoutGame.replace(target, "");
+      return withoutGame.replace(targetPath, "");
     }
 
     return joinPaths(...targetSegments);
-  }, [location.pathname, game]);
+  }, [pathname, game]);
 
   const onSelect = useCallback(() => {
     trackGameInteraction({

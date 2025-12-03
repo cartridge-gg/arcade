@@ -2,6 +2,8 @@ import { Atom } from "@effect-atom/atom-react";
 import { Effect } from "effect";
 import { CartridgeInternalGqlClient, graphqlLayer } from "../layers/graphql";
 import { type RawProgress, Progress } from "@/models";
+import { mapResult } from "../utils/result";
+import type { Progressions } from "@/lib/achievements";
 
 const PROGRESSIONS_QUERY = `query Progressions($projects: [Project!]!) {
   playerAchievements(projects: $projects) {
@@ -90,6 +92,25 @@ const progressionsFamily = Atom.family((key: string) => {
 export const progressionsAtom = (projects: ProgressionProject[]) => {
   const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
   return progressionsFamily(JSON.stringify(sorted));
+};
+
+const progressionsDataFamily = Atom.family((key: string) => {
+  const baseAtom = progressionsFamily(key);
+  return baseAtom.pipe(
+    Atom.map((result) =>
+      mapResult(result, (items) =>
+        items.reduce((acc, item) => {
+          acc[item.project] = item.progressions;
+          return acc;
+        }, {} as Progressions),
+      ),
+    ),
+  );
+});
+
+export const progressionsDataAtom = (projects: ProgressionProject[]) => {
+  const sorted = [...projects].sort((a, b) => a.project.localeCompare(b.project));
+  return progressionsDataFamily(JSON.stringify(sorted));
 };
 
 export type { Progress };

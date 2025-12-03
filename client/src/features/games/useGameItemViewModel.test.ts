@@ -2,43 +2,12 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import type { GameModel } from "@cartridge/arcade";
 import { useGameItemViewModel } from "./useGameItemViewModel";
+import type { GameItemSharedContext } from "./useGamesViewModel";
 
-const mockUseAccount = vi.fn();
-const mockUseArcade = vi.fn();
-const mockUseOwnerships = vi.fn();
-const mockUsePlayerStats = vi.fn();
 const mockUsePlayerGameStats = vi.fn();
-const mockUseSidebar = vi.fn();
-const mockUseRouterState = vi.fn();
-const mockUseAnalytics = vi.fn();
-
-vi.mock("@starknet-react/core", () => ({
-  useAccount: () => mockUseAccount(),
-}));
-
-vi.mock("@/hooks/arcade", () => ({
-  useArcade: () => mockUseArcade(),
-}));
-
-vi.mock("@/hooks/ownerships", () => ({
-  useOwnerships: () => mockUseOwnerships(),
-}));
 
 vi.mock("@/hooks/achievements", () => ({
-  usePlayerStats: () => mockUsePlayerStats(),
   usePlayerGameStats: () => mockUsePlayerGameStats(),
-}));
-
-vi.mock("@/hooks/sidebar", () => ({
-  useSidebar: () => mockUseSidebar(),
-}));
-
-vi.mock("@tanstack/react-router", () => ({
-  useRouterState: () => mockUseRouterState(),
-}));
-
-vi.mock("@/hooks/useAnalytics", () => ({
-  useAnalytics: () => mockUseAnalytics(),
 }));
 
 describe("useGameItemViewModel", () => {
@@ -56,38 +25,43 @@ describe("useGameItemViewModel", () => {
       ...overrides,
     }) as GameModel;
 
+  const createSharedContext = (
+    overrides: Partial<GameItemSharedContext> = {},
+  ): GameItemSharedContext => ({
+    address: "0x1",
+    accesses: [],
+    editions: [
+      {
+        id: 10,
+        gameId: 1,
+        config: { project: "proj" },
+      },
+    ] as GameItemSharedContext["editions"],
+    ownerships: [
+      {
+        tokenId: BigInt(1),
+        accountAddress: "0x1",
+        contractAddress: "0x0",
+        balance: BigInt(1),
+      },
+    ],
+    pathname: "/",
+    close: vi.fn(),
+    trackGameInteraction: vi.fn(),
+    totalStats: { completed: 0, total: 0, rank: 0, earnings: 50 },
+    ...overrides,
+  });
+
   beforeEach(() => {
     vi.resetAllMocks();
-    mockUseAccount.mockReturnValue({ address: "0x1" });
-    mockUseArcade.mockReturnValue({
-      accesses: [],
-      editions: [
-        {
-          id: 10,
-          gameId: 1,
-          config: { project: "proj" },
-        },
-      ],
-    });
-    mockUseOwnerships.mockReturnValue({
-      ownerships: [
-        {
-          tokenId: BigInt(1),
-          accountAddress: "0x1",
-        },
-      ],
-    });
-    mockUsePlayerStats.mockReturnValue({ earnings: 50 });
     mockUsePlayerGameStats.mockReturnValue({ earnings: 20 });
-    mockUseSidebar.mockReturnValue({ close: vi.fn() });
-    mockUseRouterState.mockReturnValue({ location: { pathname: "/" } });
-    mockUseAnalytics.mockReturnValue({ trackGameInteraction: vi.fn() });
   });
 
   it("computes view model for a game", () => {
     const game = createGame();
+    const sharedContext = createSharedContext();
     const { result } = renderHook(() =>
-      useGameItemViewModel(game, { selectedGameId: 1 }),
+      useGameItemViewModel(game, { selectedGameId: 1 }, sharedContext),
     );
 
     expect(result.current.active).toBe(true);
@@ -98,10 +72,10 @@ describe("useGameItemViewModel", () => {
   it("tracks selection on select", () => {
     const game = createGame();
     const trackGameInteraction = vi.fn();
-    mockUseAnalytics.mockReturnValue({ trackGameInteraction });
+    const sharedContext = createSharedContext({ trackGameInteraction });
 
     const { result } = renderHook(() =>
-      useGameItemViewModel(game, { selectedGameId: 0 }),
+      useGameItemViewModel(game, { selectedGameId: 0 }, sharedContext),
     );
 
     act(() => {
@@ -113,25 +87,18 @@ describe("useGameItemViewModel", () => {
 
   it("does not treat disconnected accounts as owners or admins", () => {
     const game = createGame();
-    mockUseAccount.mockReturnValue({ address: undefined });
-    mockUseArcade.mockReturnValue({
+    const sharedContext = createSharedContext({
+      address: undefined,
       accesses: [
         {
           address: "0x1",
           role: { value: "Admin" },
         },
-      ],
-      editions: [
-        {
-          id: 10,
-          gameId: 1,
-          config: { project: "proj" },
-        },
-      ],
+      ] as GameItemSharedContext["accesses"],
     });
 
     const { result } = renderHook(() =>
-      useGameItemViewModel(game, { selectedGameId: 1 }),
+      useGameItemViewModel(game, { selectedGameId: 1 }, sharedContext),
     );
 
     expect(result.current.owner).toBe(false);

@@ -120,6 +120,7 @@ export {
 
 export {
   trophiesAtom,
+  trophiesDataAtom,
   type TrophyProject,
   type TrophyMeta,
   type TrophyItem,
@@ -128,6 +129,7 @@ export {
 
 export {
   progressionsAtom,
+  progressionsDataAtom,
   type ProgressionProject,
   type ProgressionMeta,
   type ProgressionItem,

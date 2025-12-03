@@ -3,8 +3,12 @@ import { useAccount } from "@starknet-react/core";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useProject } from "@/hooks/project";
 import { useSidebar } from "@/hooks/sidebar";
-import type { GameModel } from "@cartridge/arcade";
+import { usePlayerStats } from "@/hooks/achievements";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { useRouterState } from "@tanstack/react-router";
+import type { GameModel, AccessModel, EditionModel } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
+import type { Ownership } from "@/effect/atoms/ownerships";
 
 export interface GameListItem {
   id: number;
@@ -19,6 +23,17 @@ export interface GameListItem {
   game?: GameModel;
 }
 
+export interface GameItemSharedContext {
+  address: string | undefined;
+  accesses: AccessModel[];
+  editions: EditionModel[];
+  ownerships: Ownership[];
+  pathname: string;
+  close: () => void;
+  trackGameInteraction: ReturnType<typeof useAnalytics>["trackGameInteraction"];
+  totalStats: ReturnType<typeof usePlayerStats>;
+}
+
 export interface GamesViewModel {
   games: GameListItem[];
   selectedGameId: number;
@@ -30,6 +45,7 @@ export interface GamesViewModel {
     handleTouchMove: (event: React.TouchEvent) => void;
     close: () => void;
   };
+  sharedContext: GameItemSharedContext;
 }
 
 export function useGamesViewModel({
@@ -40,11 +56,13 @@ export function useGamesViewModel({
   isPWA: boolean;
 }): GamesViewModel {
   const { address } = useAccount();
-  const { games } = useArcade();
-  // const games = useGames();
+  const { games, accesses, editions } = useArcade();
   const { game } = useProject();
   const { ownerships } = useOwnerships();
   const sidebar = useSidebar();
+  const { location } = useRouterState();
+  const { trackGameInteraction } = useAnalytics();
+  const totalStats = usePlayerStats();
   const selectedGameId = useMemo(() => game?.id || 0, [game?.id]);
 
   const gameItems = useMemo(() => {
@@ -72,16 +90,53 @@ export function useGamesViewModel({
     });
   }, [games, ownerships, address, selectedGameId]);
 
-  return {
-    games: gameItems as GameListItem[],
-    selectedGameId,
-    isMobile,
-    isPWA,
-    sidebar: {
+  const sharedContext = useMemo<GameItemSharedContext>(
+    () => ({
+      address,
+      accesses,
+      editions,
+      ownerships,
+      pathname: location.pathname,
+      close: sidebar.close,
+      trackGameInteraction,
+      totalStats,
+    }),
+    [
+      address,
+      accesses,
+      editions,
+      ownerships,
+      location.pathname,
+      sidebar.close,
+      trackGameInteraction,
+      totalStats,
+    ],
+  );
+
+  const sidebarProps = useMemo(
+    () => ({
       isOpen: sidebar.isOpen,
       handleTouchStart: sidebar.handleTouchStart,
       handleTouchMove: sidebar.handleTouchMove,
       close: sidebar.close,
-    },
-  } satisfies GamesViewModel;
+    }),
+    [
+      sidebar.isOpen,
+      sidebar.handleTouchStart,
+      sidebar.handleTouchMove,
+      sidebar.close,
+    ],
+  );
+
+  return useMemo(
+    () => ({
+      games: gameItems as GameListItem[],
+      selectedGameId,
+      isMobile,
+      isPWA,
+      sidebar: sidebarProps,
+      sharedContext,
+    }),
+    [gameItems, selectedGameId, isMobile, isPWA, sidebarProps, sharedContext],
+  );
 }

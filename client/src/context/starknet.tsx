@@ -1,6 +1,6 @@
 import { type Chain, mainnet, sepolia } from "@starknet-react/chains";
 import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
-import { type PropsWithChildren, useMemo } from "react";
+import type { PropsWithChildren } from "react";
 import { constants } from "starknet";
 import ControllerConnector from "@cartridge/connector/controller";
 import { getSocialPolicies, getRegistryPolicies } from "@cartridge/arcade";
@@ -25,23 +25,20 @@ const controller = new ControllerConnector({
     },
   },
 });
+const jsonProvider = jsonRpcProvider({
+  rpc: (chain: Chain) => {
+    switch (chain) {
+      case mainnet:
+        return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
+      case sepolia:
+        return { nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia" };
+      default:
+        return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
+    }
+  },
+});
 
 export function StarknetProvider({ children }: PropsWithChildren) {
-  const jsonProvider = useMemo(() => {
-    return jsonRpcProvider({
-      rpc: (chain: Chain) => {
-        switch (chain) {
-          case mainnet:
-            return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
-          case sepolia:
-            return { nodeUrl: "https://api.cartridge.gg/x/starknet/sepolia" };
-          default:
-            return { nodeUrl: "https://api.cartridge.gg/x/starknet/mainnet" };
-        }
-      },
-    });
-  }, []);
-
   return (
     <StarknetConfig
       autoConnect
