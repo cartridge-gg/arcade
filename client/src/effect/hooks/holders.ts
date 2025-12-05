@@ -44,7 +44,6 @@ export const useHolders = (
     const isLoading = isInitial && data.holders.length === 0;
     const isLoadingMore = !isInitial && data.hasMore;
 
-    console.log(result);
     return {
       holders: data.holders,
       totalBalance: data.totalBalance,

@@ -1,5 +1,5 @@
 import { Atom } from "@effect-atom/atom-react";
-import { Effect, Stream, Data, Layer } from "effect";
+import { Effect, Stream, Data, Layer, Option } from "effect";
 import { getChecksumAddress, addAddressPadding } from "starknet";
 import { fetchTokenBalances } from "@cartridge/arcade/marketplace";
 import type { TokenBalance } from "@dojoengine/torii-wasm";
@@ -90,44 +90,42 @@ const fetchTokenBalancesStream = (
 ): Stream.Stream<TokenBalancesState, TokenBalancesError> => {
   const normalizedAddress = addAddressPadding(contractAddress);
 
-  return Stream.asyncEffect<TokenBalancesState, TokenBalancesError>((emit) =>
+  return Stream.paginateEffect(undefined as string | undefined, (cursor) =>
     Effect.gen(function* () {
-      const allBalances: TokenBalance[] = [];
-      let cursor: string | null | undefined = undefined;
+      const result = yield* Effect.tryPromise({
+        try: () =>
+          fetchTokenBalances({
+            project,
+            contractAddresses: [normalizedAddress],
+            cursor,
+            limit: LIMIT,
+          }),
+        catch: (error) =>
+          new TokenBalancesError({
+            message: error instanceof Error ? error.message : String(error),
+          }),
+      });
 
-      do {
-        const result = yield* Effect.tryPromise({
-          try: () =>
-            fetchTokenBalances({
-              project,
-              contractAddresses: [normalizedAddress],
-              cursor,
-              limit: LIMIT,
-            }),
-          catch: (error) =>
-            new TokenBalancesError({
-              message: error instanceof Error ? error.message : String(error),
-            }),
-        });
+      if (result.error) {
+        return yield* Effect.fail(
+          new TokenBalancesError({ message: result.error.error.message }),
+        );
+      }
 
-        if (result.error) {
-          yield* Effect.fail(
-            new TokenBalancesError({ message: result.error.error.message }),
-          );
-          return;
-        }
+      const balances = result.page?.balances ?? [];
+      const nextCursor = result.page?.nextCursor;
+      const hasMore = !!nextCursor;
 
-        if (result.page) {
-          allBalances.push(...result.page.balances);
-          cursor = result.page.nextCursor;
-          emit.single({ balances: [...allBalances], hasMore: !!cursor });
-        } else {
-          cursor = null;
-        }
-      } while (cursor);
-
-      emit.end();
+      return [{ balances, hasMore }, Option.fromNullable(nextCursor)] as const;
     }),
+  ).pipe(
+    Stream.scan(
+      { balances: [] as TokenBalance[], hasMore: true } as TokenBalancesState,
+      (acc, page) => ({
+        balances: [...acc.balances, ...page.balances],
+        hasMore: page.hasMore,
+      }),
+    ),
   );
 };
 
