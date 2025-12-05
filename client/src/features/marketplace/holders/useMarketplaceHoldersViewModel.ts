@@ -1,45 +1,40 @@
 import { useMemo } from "react";
-import { useMarketOwnersFetcher } from "@/hooks/marketplace-owners-fetcher";
+import { useHolders, type MarketplaceHolder } from "@/effect";
 import { useMarketplaceTokensStore } from "@/store";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 
-export interface MarketplaceHolder {
-  address: string;
-  username?: string;
-  balance: number;
-  ratio: number;
-  token_ids: string[];
-}
+export type { MarketplaceHolder };
 
 interface UseMarketplaceHoldersViewModelArgs {
   collectionAddress: string;
 }
 
 export interface MarketplaceHoldersViewModel {
-  owners: MarketplaceHolder[];
-  displayedOwners: MarketplaceHolder[];
+  holders: MarketplaceHolder[];
+  displayedHolders: MarketplaceHolder[];
   hasActiveFilters: boolean;
-  totalOwners: number;
-  filteredOwnersCount: number;
+  totalHolders: number;
+  filteredHoldersCount: number;
   isInitialLoading: boolean;
   isEmpty: boolean;
   isFilteredResultEmpty: boolean;
   isLoadingMore: boolean;
-  status: ReturnType<typeof useMarketOwnersFetcher>["status"];
-  editionError: ReturnType<typeof useMarketOwnersFetcher>["editionError"];
-  loadingProgress: ReturnType<typeof useMarketOwnersFetcher>["loadingProgress"];
+  status: ReturnType<typeof useHolders>["status"];
+  editionError: ReturnType<typeof useHolders>["editionError"];
   clearAllFilters: ReturnType<typeof useMetadataFilters>["clearAllFilters"];
 }
 
 export function useMarketplaceHoldersViewModel({
   collectionAddress,
 }: UseMarketplaceHoldersViewModelArgs): MarketplaceHoldersViewModel {
-  const { owners, status, editionError, loadingProgress } =
-    useMarketOwnersFetcher({
-      project: [DEFAULT_PROJECT],
-      address: collectionAddress,
-    });
+  const {
+    holders,
+    status,
+    isLoading,
+    isLoadingMore: isLoadingMoreFromHook,
+    editionError,
+  } = useHolders(DEFAULT_PROJECT, collectionAddress);
 
   const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
   const tokens = getTokens(DEFAULT_PROJECT, collectionAddress ?? "");
@@ -52,15 +47,15 @@ export function useMarketplaceHoldersViewModel({
     },
   );
 
-  const ownersArray = owners ?? [];
+  const holdersArray = holders ?? [];
   const hasActiveFilters = useMemo(
     () => Object.keys(activeFilters).length > 0,
     [activeFilters],
   );
 
-  const filteredOwners = useMemo(() => {
-    if (!hasActiveFilters) return ownersArray;
-    if (!ownersArray.length) return [];
+  const filteredHolders = useMemo(() => {
+    if (!hasActiveFilters) return holdersArray;
+    if (!holdersArray.length) return [];
 
     const filteredTokenIds = new Set(
       filteredTokens
@@ -72,65 +67,63 @@ export function useMarketplaceHoldersViewModel({
       return [];
     }
 
-    const matchedOwners = ownersArray
-      .map((owner) => {
-        const ownedFilteredTokenIds = owner.token_ids.filter((tokenId) =>
+    const matchedHolders = holdersArray
+      .map((holder) => {
+        const ownedFilteredTokenIds = holder.token_ids.filter((tokenId) =>
           filteredTokenIds.has(tokenId),
         );
 
         if (ownedFilteredTokenIds.length === 0) return null;
 
         return {
-          ...owner,
+          ...holder,
           balance: ownedFilteredTokenIds.length,
           token_ids: ownedFilteredTokenIds,
         };
       })
       .filter(Boolean) as MarketplaceHolder[];
 
-    const totalFilteredBalance = matchedOwners.reduce(
-      (sum, owner) => sum + owner.balance,
+    const totalFilteredBalance = matchedHolders.reduce(
+      (sum, holder) => sum + holder.balance,
       0,
     );
 
-    return matchedOwners
-      .map((owner) => ({
-        ...owner,
+    return matchedHolders
+      .map((holder) => ({
+        ...holder,
         ratio:
           totalFilteredBalance > 0
-            ? Math.round((owner.balance / totalFilteredBalance) * 1000) / 10
+            ? Math.round((holder.balance / totalFilteredBalance) * 1000) / 10
             : 0,
       }))
       .sort((a, b) => b.balance - a.balance);
-  }, [hasActiveFilters, ownersArray, filteredTokens]);
+  }, [hasActiveFilters, holdersArray, filteredTokens]);
 
-  const displayedOwners = hasActiveFilters ? filteredOwners : ownersArray;
-  const totalOwners = ownersArray.length;
-  const filteredOwnersCount = displayedOwners.length;
+  const displayedHolders = hasActiveFilters ? filteredHolders : holdersArray;
+  const totalHolders = holdersArray.length;
+  const filteredHoldersCount = displayedHolders.length;
 
-  const isInitialLoading =
-    status === "idle" || (status === "loading" && ownersArray.length === 0);
+  const isInitialLoading = isLoading;
 
   const isEmpty =
-    !isInitialLoading && editionError.length === 0 && totalOwners === 0;
+    !isInitialLoading && editionError.length === 0 && totalHolders === 0;
 
-  const isFilteredResultEmpty = hasActiveFilters && filteredOwnersCount === 0;
+  const isFilteredResultEmpty = hasActiveFilters && filteredHoldersCount === 0;
 
-  const isLoadingMore = status === "loading" && ownersArray.length > 0;
+  const isLoadingMore = isLoadingMoreFromHook;
 
   return {
-    owners: ownersArray,
-    displayedOwners,
+    holders: holdersArray,
+    displayedHolders,
     hasActiveFilters,
-    totalOwners,
-    filteredOwnersCount,
+    totalHolders,
+    filteredHoldersCount,
     isInitialLoading,
     isEmpty,
     isFilteredResultEmpty,
     isLoadingMore,
     status,
     editionError,
-    loadingProgress,
     clearAllFilters,
   };
 }

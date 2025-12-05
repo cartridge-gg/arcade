@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useMarketplaceHoldersViewModel } from "./useMarketplaceHoldersViewModel";
 
-type MockOwner = {
+type MockHolder = {
   address: string;
   balance: number;
   ratio: number;
@@ -10,12 +10,13 @@ type MockOwner = {
   username?: string;
 };
 
-const mockUseMarketOwnersFetcher = vi.fn();
+const mockUseHolders = vi.fn();
 const mockUseMarketplaceTokensStore = vi.fn();
 const mockUseMetadataFilters = vi.fn();
 
-vi.mock("@/hooks/marketplace-owners-fetcher", () => ({
-  useMarketOwnersFetcher: (args: any) => mockUseMarketOwnersFetcher(args),
+vi.mock("@/effect", () => ({
+  useHolders: (project: string, address: string) =>
+    mockUseHolders(project, address),
 }));
 
 vi.mock("@/store", () => ({
@@ -28,7 +29,7 @@ vi.mock("@/hooks/use-metadata-filters", () => ({
 }));
 
 describe("useMarketplaceHoldersViewModel", () => {
-  const owners: MockOwner[] = [
+  const holders: MockHolder[] = [
     {
       address: "0x1",
       balance: 2,
@@ -53,11 +54,12 @@ describe("useMarketplaceHoldersViewModel", () => {
       { token_id: "4" },
     ]);
 
-    mockUseMarketOwnersFetcher.mockReturnValue({
-      owners,
-      status: "success",
+    mockUseHolders.mockReturnValue({
+      holders,
+      status: "ready",
+      isLoading: false,
+      isLoadingMore: false,
       editionError: [],
-      loadingProgress: undefined,
     });
 
     mockUseMetadataFilters.mockReturnValue({
@@ -72,20 +74,20 @@ describe("useMarketplaceHoldersViewModel", () => {
     });
   });
 
-  it("returns base owners when no filters are active", () => {
+  it("returns base holders when no filters are active", () => {
     const { result } = renderHook(() =>
       useMarketplaceHoldersViewModel({ collectionAddress: "0xabc" }),
     );
 
-    expect(result.current.owners).toHaveLength(2);
-    expect(result.current.displayedOwners).toHaveLength(2);
+    expect(result.current.holders).toHaveLength(2);
+    expect(result.current.displayedHolders).toHaveLength(2);
     expect(result.current.hasActiveFilters).toBe(false);
-    expect(result.current.totalOwners).toBe(2);
-    expect(result.current.filteredOwnersCount).toBe(2);
+    expect(result.current.totalHolders).toBe(2);
+    expect(result.current.filteredHoldersCount).toBe(2);
     expect(result.current.isFilteredResultEmpty).toBe(false);
   });
 
-  it("filters owners based on active metadata filters", () => {
+  it("filters holders based on active metadata filters", () => {
     mockUseMetadataFilters.mockReturnValueOnce({
       filteredTokens: [{ token_id: "1" }],
       activeFilters: { Rarity: new Set(["Legendary"]) },
@@ -97,13 +99,13 @@ describe("useMarketplaceHoldersViewModel", () => {
     );
 
     expect(result.current.hasActiveFilters).toBe(true);
-    expect(result.current.displayedOwners).toHaveLength(1);
-    expect(result.current.displayedOwners[0].address).toBe("0x1");
-    expect(result.current.displayedOwners[0].balance).toBe(1);
-    expect(result.current.displayedOwners[0].ratio).toBe(100);
+    expect(result.current.displayedHolders).toHaveLength(1);
+    expect(result.current.displayedHolders[0].address).toBe("0x1");
+    expect(result.current.displayedHolders[0].balance).toBe(1);
+    expect(result.current.displayedHolders[0].ratio).toBe(100);
   });
 
-  it("reports empty state when filters remove all owners", () => {
+  it("reports empty state when filters remove all holders", () => {
     mockUseMetadataFilters.mockReturnValueOnce({
       filteredTokens: [],
       activeFilters: { Rarity: new Set(["Legendary"]) },
@@ -115,7 +117,7 @@ describe("useMarketplaceHoldersViewModel", () => {
     );
 
     expect(result.current.hasActiveFilters).toBe(true);
-    expect(result.current.displayedOwners).toHaveLength(0);
+    expect(result.current.displayedHolders).toHaveLength(0);
     expect(result.current.isFilteredResultEmpty).toBe(true);
   });
 });

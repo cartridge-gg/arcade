@@ -143,17 +143,6 @@ type MarketplaceTokensState = {
       [collectionAddress: string]: TokenBalance[];
     };
   };
-  owners: {
-    [project: string]: {
-      [collectionAddress: string]: {
-        [ownerAddress: string]: {
-          balance: number;
-          token_ids: string[];
-          username?: string;
-        };
-      };
-    };
-  };
   loadingState: {
     [key: string]: CollectionLoadingState;
   };
@@ -185,29 +174,6 @@ type MarketplaceTokensActions = {
     address: string,
   ) => CollectionLoadingState | null;
   clearTokens: (project: string, address: string) => void;
-  getOwners: (
-    project: string,
-    address: string,
-  ) => Array<{
-    address: string;
-    balance: number;
-    ratio: number;
-    token_ids: string[];
-    username?: string;
-  }>;
-  addOwners: (
-    project: string,
-    owners: {
-      [address: string]: {
-        [ownerAddress: string]: {
-          balance: number;
-          token_ids: string[];
-          username?: string;
-        };
-      };
-    },
-  ) => void;
-  clearOwners: (project: string, address: string) => void;
   markCollectionFetched: (project: string, address: string) => void;
   isCollectionFetched: (project: string, address: string) => boolean;
 };
@@ -218,7 +184,6 @@ export const useMarketplaceTokensStore = create<
   tokens: {},
   listedTokens: {},
   balances: {},
-  owners: {},
   loadingState: {},
   fetchedCollections: {},
   addTokens: (project, newTokens) =>
@@ -344,7 +309,6 @@ export const useMarketplaceTokensStore = create<
   clearTokens: (project, address) =>
     set((state) => {
       const tokens = { ...state.tokens };
-      const owners = { ...state.owners };
       const loadingState = { ...state.loadingState };
       const key = `${project}_${address}`;
 
@@ -352,76 +316,11 @@ export const useMarketplaceTokensStore = create<
         delete tokens[project][address];
       }
 
-      if (owners[project]?.[address]) {
-        delete owners[project][address];
-      }
-
       if (loadingState[key]) {
         delete loadingState[key];
       }
 
-      return { tokens, owners, loadingState };
-    }),
-  getOwners: (project, address) => {
-    const projectOwners = get().owners[project];
-    if (!projectOwners || !projectOwners[address]) return [];
-
-    const ownersObj = projectOwners[address];
-
-    // Calculate total balance for ratio computation
-    const totalBalance = Object.values(ownersObj).reduce(
-      (sum, owner) => sum + owner.balance,
-      0,
-    );
-
-    // Convert to array, calculate ratios, and sort by balance descending
-    const ownersArray = Object.entries(ownersObj).map(
-      ([ownerAddress, data]) => ({
-        address: ownerAddress,
-        balance: data.balance,
-        ratio:
-          totalBalance > 0
-            ? Math.round((data.balance / totalBalance) * 1000) / 10
-            : 0,
-        token_ids: data.token_ids,
-        username: data.username,
-      }),
-    );
-
-    return ownersArray.sort((a, b) => b.balance - a.balance);
-  },
-  addOwners: (project, newOwners) =>
-    set((state) => {
-      const existingOwners = { ...state.owners };
-
-      if (!existingOwners[project]) {
-        existingOwners[project] = {};
-      }
-
-      for (const [collectionAddress, collectionOwners] of Object.entries(
-        newOwners,
-      )) {
-        if (!existingOwners[project][collectionAddress]) {
-          existingOwners[project][collectionAddress] = {};
-        }
-
-        existingOwners[project][collectionAddress] = {
-          ...existingOwners[project][collectionAddress],
-          ...collectionOwners,
-        };
-      }
-
-      return { owners: existingOwners };
-    }),
-  clearOwners: (project, address) =>
-    set((state) => {
-      const owners = { ...state.owners };
-
-      if (owners[project]?.[address]) {
-        delete owners[project][address];
-      }
-
-      return { owners };
+      return { tokens, loadingState };
     }),
   markCollectionFetched: (project, address) =>
     set((state) => {

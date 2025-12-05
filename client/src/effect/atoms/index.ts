@@ -135,3 +135,11 @@ export {
   type ProgressionItem,
   type Progress,
 } from "./progressions";
+
+export {
+  holdersAtom,
+  tokenBalancesAtom,
+  type MarketplaceHolder,
+  type HoldersState,
+  type TokenBalancesState,
+} from "./holders";

@@ -15,16 +15,15 @@ export const MarketplaceHoldersContainer = ({
   collectionAddress,
 }: MarketplaceHoldersContainerProps) => {
   const {
-    displayedOwners,
+    displayedHolders,
     hasActiveFilters,
-    totalOwners,
-    filteredOwnersCount,
+    totalHolders,
+    filteredHoldersCount,
     isInitialLoading,
     isEmpty,
     isFilteredResultEmpty,
     isLoadingMore,
     editionError,
-    loadingProgress,
     clearAllFilters,
   } = useMarketplaceHoldersViewModel({ collectionAddress });
 
@@ -36,7 +35,7 @@ export const MarketplaceHoldersContainer = ({
     return (
       <Empty
         title={`Failed to load holders data from ${editionError[0].attributes.preset} torii`}
-        className="h-full"
+        className="h-full lg:order-3"
       />
     );
   }
@@ -56,13 +55,12 @@ export const MarketplaceHoldersContainer = ({
 
   return (
     <HoldersView
-      owners={displayedOwners}
+      holders={displayedHolders}
       hasActiveFilters={hasActiveFilters}
-      totalOwners={totalOwners}
-      filteredOwnersCount={filteredOwnersCount}
+      totalHolders={totalHolders}
+      filteredHoldersCount={filteredHoldersCount}
       onClearFilters={clearAllFilters}
       isLoadingMore={isLoadingMore}
-      loadingProgress={loadingProgress}
     />
   );
 };

@@ -23,3 +23,9 @@ export {
   type ProgressionProject,
   type ProgressionItem,
 } from "./achievements";
+
+export {
+  useHolders,
+  type MarketplaceHolder,
+  type UseHoldersResult,
+} from "./holders";

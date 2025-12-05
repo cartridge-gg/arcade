@@ -1,36 +1,34 @@
 import { Button, Empty, Skeleton } from "@cartridge/ui";
 import { UserAvatar } from "@/components/user/avatar";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
-import type { MarketplaceHolder } from "@/features/marketplace/holders/useMarketplaceHoldersViewModel";
+import type { MarketplaceHolder } from "@/effect";
 
 interface HoldersViewProps {
-  owners: MarketplaceHolder[];
+  holders: MarketplaceHolder[];
   hasActiveFilters: boolean;
-  totalOwners: number;
-  filteredOwnersCount: number;
+  totalHolders: number;
+  filteredHoldersCount: number;
   onClearFilters: () => void;
   isLoadingMore: boolean;
-  loadingProgress: { completed: number; total: number } | undefined;
 }
 
 export const HoldersView = ({
-  owners,
+  holders,
   hasActiveFilters,
-  totalOwners,
-  filteredOwnersCount,
+  totalHolders,
+  filteredHoldersCount,
   onClearFilters,
   isLoadingMore,
-  loadingProgress,
 }: HoldersViewProps) => {
   return (
     <div className="flex flex-col gap-4 lg:order-3">
-      {(hasActiveFilters || totalOwners > 0) && (
+      {(hasActiveFilters || totalHolders > 0) && (
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             {hasActiveFilters ? (
               <>
                 <p className="text-foreground-300 text-sm">
-                  Showing {filteredOwnersCount} of {totalOwners} holders
+                  Showing {filteredHoldersCount} of {totalHolders} holders
                 </p>
                 <Button
                   variant="ghost"
@@ -42,7 +40,7 @@ export const HoldersView = ({
               </>
             ) : (
               <p className="text-foreground-300 text-sm">
-                {totalOwners} holders
+                {totalHolders} holders
               </p>
             )}
           </div>
@@ -51,7 +49,7 @@ export const HoldersView = ({
       <HoldersHeader />
       <div className="rounded overflow-hidden w-full mb-6">
         <div className="flex flex-col gap-px overflow-y-auto">
-          {owners.map((holder, index) => (
+          {holders.map((holder, index) => (
             <HolderLine
               key={`${holder.address}-${index}`}
               holder={holder}
@@ -60,10 +58,7 @@ export const HoldersView = ({
           ))}
         </div>
       </div>
-      <FloatingLoadingSpinner
-        isLoading={isLoadingMore}
-        loadingProgress={loadingProgress}
-      />
+      <FloatingLoadingSpinner isLoading={isLoadingMore} />
     </div>
   );
 };
@@ -108,7 +103,9 @@ function HolderLine({
 }
 
 export const HoldersEmptyState = () => {
-  return <Empty title="No holders" icon="guild" className="h-full" />;
+  return (
+    <Empty title="No holders" icon="guild" className="h-full lg:order-3" />
+  );
 };
 
 export const HoldersFilteredEmptyState = ({
@@ -119,7 +116,7 @@ export const HoldersFilteredEmptyState = ({
   hasActiveFilters: boolean;
 }) => {
   return (
-    <div className="flex flex-col pt-6 gap-4">
+    <div className="flex flex-col pt-6 gap-4 lg:order-3">
       {hasActiveFilters && (
         <div className="flex items-center gap-2">
           <p className="text-foreground-300 text-sm">
