@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
 import { useMarketplaceTokensStore } from "@/store";
@@ -56,6 +56,9 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
 
   const searchValue = useMemo(() => search, [search]);
 
+  const activeFiltersRef = useRef(activeFilters);
+  activeFiltersRef.current = activeFilters;
+
   const precomputedAttributes = precomputed?.attributes ?? [];
   const precomputedProperties = precomputed?.properties ?? {};
 
@@ -98,7 +101,8 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
 
   const handleSetFilter = useCallback(
     (attribute: string, property: string, enabled: boolean) => {
-      const isActive = activeFilters[attribute]?.has(property) ?? false;
+      const isActive =
+        activeFiltersRef.current[attribute]?.has(property) ?? false;
 
       if (enabled && !isActive) {
         setFilter(attribute, property);
@@ -113,14 +117,7 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
         from_page: location.pathname,
       });
     },
-    [
-      activeFilters,
-      setFilter,
-      removeFilter,
-      trackEvent,
-      events,
-      location.pathname,
-    ],
+    [setFilter, removeFilter, trackEvent, events, location.pathname],
   );
 
   const handleClearFilters = useCallback(() => {

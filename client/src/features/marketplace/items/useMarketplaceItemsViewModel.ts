@@ -5,6 +5,7 @@ import type { OrderModel } from "@cartridge/arcade";
 import { getChecksumAddress, type RpcProvider } from "starknet";
 import type ControllerConnector from "@cartridge/connector/controller";
 import { filterTokensByMetadata } from "@cartridge/arcade/marketplace";
+import { useShallow } from "zustand/shallow";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -87,10 +88,10 @@ export function useMarketplaceItemsViewModel({
   const [selection, setSelection] = useState<MarketplaceAsset[]>([]);
 
   const rawTokens = useMarketplaceTokensStore(
-    (s) => s.tokens[DEFAULT_PROJECT]?.[collectionAddress],
+    useShallow((s) => s.tokens[DEFAULT_PROJECT]?.[collectionAddress]),
   );
   const rawListedTokens = useMarketplaceTokensStore(
-    (s) => s.listedTokens[DEFAULT_PROJECT]?.[collectionAddress],
+    useShallow((s) => s.listedTokens[DEFAULT_PROJECT]?.[collectionAddress]),
   );
 
   const tokens = rawTokens || [];

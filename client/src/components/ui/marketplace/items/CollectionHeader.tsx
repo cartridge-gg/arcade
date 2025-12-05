@@ -6,6 +6,7 @@ import { useShare } from "@/hooks/useShare";
 import { AnalyticsEvents } from "@/hooks/useAnalytics";
 import { ShareIcon } from "../../icons";
 import { Button } from "../../button";
+import { memo, useMemo } from "react";
 
 type CollectionHeaderProps = {
   isDashboard: boolean;
@@ -17,7 +18,7 @@ type CollectionHeaderProps = {
   collectionAddress: string;
 };
 
-export function CollectionHeader({
+export const CollectionHeader = memo(function CollectionHeader({
   edition,
   game,
   arcade,
@@ -25,19 +26,24 @@ export function CollectionHeader({
 }: CollectionHeaderProps) {
   const { collection } = useMarketplaceItemsViewModel({ collectionAddress });
 
-  const { handleShare } = useShare({
-    title: collection?.name ?? "Collection",
-    text: `Check out ${collection?.name ?? "this collection"} on ${game?.name ?? "Arcade"}`,
-    url: `${window.location.origin}/collection/${collectionAddress}`,
-    analyticsEvent: {
-      name: AnalyticsEvents.COLLECTION_SHARED,
-      properties: {
-        collection_address: collectionAddress,
-        collection_name: collection?.name,
-        game_name: game?.name,
+  const shareConfig = useMemo(
+    () => ({
+      title: collection?.name ?? "Collection",
+      text: `Check out ${collection?.name ?? "this collection"} on ${game?.name ?? "Arcade"}`,
+      url: `${window.location.origin}/collection/${collectionAddress}`,
+      analyticsEvent: {
+        name: AnalyticsEvents.COLLECTION_SHARED,
+        properties: {
+          collection_address: collectionAddress,
+          collection_name: collection?.name,
+          game_name: game?.name,
+        },
       },
-    },
-  });
+    }),
+    [collection?.name, game?.name, collectionAddress],
+  );
+
+  const { handleShare } = useShare(shareConfig);
 
   return (
     <div className={cn("w-full flex flex-col gap-4 pb-5")}>
@@ -68,9 +74,11 @@ export function CollectionHeader({
       </div>
     </div>
   );
-}
+});
 
-function GameName({ game }: { game: GameModel | undefined }) {
+const GameName = memo(function GameName({
+  game,
+}: { game: GameModel | undefined }) {
   if (!game) return null;
   return (
     <div className="flex items-stretch gap-2 h-8 bg-background-150 px-2 rounded-md">
@@ -82,4 +90,4 @@ function GameName({ game }: { game: GameModel | undefined }) {
       </div>
     </div>
   );
-}
+});
