@@ -17,6 +17,7 @@ pub mod setup {
     use crate::models::index as models;
     use crate::tests::mocks::quester::{IQuesterDispatcher, NAMESPACE, Quester};
     use crate::tests::mocks::rewarder::Rewarder;
+    use crate::types::metadata::{QuestMetadata, QuestMetadataTrait};
 
     // Constant
 
@@ -26,6 +27,12 @@ pub mod setup {
 
     pub fn PLAYER() -> ContractAddress {
         'PLAYER'.try_into().unwrap()
+    }
+
+    pub fn METADATA() -> QuestMetadata {
+        QuestMetadataTrait::new(
+            "NAME", "DESCRIPTION", "ICON", 'REGISTRY'.try_into().unwrap(), array![].span(),
+        )
     }
 
     #[derive(Copy, Drop)]

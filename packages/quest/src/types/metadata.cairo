@@ -1,6 +1,7 @@
 // Imports
 
 use graffiti::json::JsonImpl;
+use starknet::ContractAddress;
 use crate::types::reward::{QuestReward, RewardTrait};
 
 // Types
@@ -10,6 +11,7 @@ pub struct QuestMetadata {
     pub name: ByteArray,
     pub description: ByteArray,
     pub icon: ByteArray,
+    pub registry: ContractAddress,
     pub rewards: Span<QuestReward>,
 }
 
@@ -31,14 +33,18 @@ pub mod Errors {
 pub impl QuestMetadataImpl of QuestMetadataTrait {
     #[inline]
     fn new(
-        name: ByteArray, description: ByteArray, icon: ByteArray, rewards: Span<QuestReward>,
+        name: ByteArray,
+        description: ByteArray,
+        icon: ByteArray,
+        registry: ContractAddress,
+        rewards: Span<QuestReward>,
     ) -> QuestMetadata {
         // [Check] Inputs
         MetadataAssert::assert_valid_name(@name);
         MetadataAssert::assert_valid_description(@description);
         MetadataAssert::assert_valid_icon(@icon);
         // [Return] Metadata
-        QuestMetadata { name, description, icon, rewards }
+        QuestMetadata { name, description, icon, registry, rewards }
     }
 
     #[inline]
@@ -84,6 +90,7 @@ mod tests {
     // Constants
 
     const ICON: felt252 = 'ICON';
+    const REGISTRY: ContractAddress = 'REGISTRY'.try_into().unwrap();
 
     #[test]
     fn test_metadata_complete() {
@@ -92,7 +99,7 @@ mod tests {
         let icon: ByteArray = "ICON";
         let rewards: Span<QuestReward> = array![RewardTrait::new("NAME", "DESCRIPTION", "ICON")]
             .span();
-        let metadata: ByteArray = QuestMetadataImpl::new(name, description, icon, rewards)
+        let metadata: ByteArray = QuestMetadataImpl::new(name, description, icon, REGISTRY, rewards)
             .jsonify();
         assert_eq!(
             metadata,
@@ -105,7 +112,9 @@ mod tests {
         let name: ByteArray = "NAME";
         let description: ByteArray = "DESCRIPTION";
         let icon: ByteArray = "ICON";
-        let metadata: ByteArray = QuestMetadataImpl::new(name, description, icon, array![].span())
+        let metadata: ByteArray = QuestMetadataImpl::new(
+            name, description, icon, REGISTRY, array![].span(),
+        )
             .jsonify();
         assert_eq!(
             metadata,
@@ -118,7 +127,7 @@ mod tests {
     fn test_metadata_creation_new_invalid_name() {
         let description: ByteArray = "DESCRIPTION";
         let icon: ByteArray = "ICON";
-        QuestMetadataImpl::new("", description, icon, array![].span()).jsonify();
+        QuestMetadataImpl::new("", description, icon, REGISTRY, array![].span()).jsonify();
     }
 
     #[test]
@@ -126,7 +135,7 @@ mod tests {
     fn test_metadata_creation_new_invalid_description() {
         let name: ByteArray = "NAME";
         let icon: ByteArray = "ICON";
-        QuestMetadataImpl::new(name, "", icon, array![].span()).jsonify();
+        QuestMetadataImpl::new(name, "", icon, REGISTRY, array![].span()).jsonify();
     }
 
     #[test]
@@ -134,7 +143,7 @@ mod tests {
     fn test_metadata_creation_new_invalid_icon() {
         let name: ByteArray = "NAME";
         let description: ByteArray = "DESCRIPTION";
-        QuestMetadataImpl::new(name, description, "", array![].span()).jsonify();
+        QuestMetadataImpl::new(name, description, "", REGISTRY, array![].span()).jsonify();
     }
 }
 

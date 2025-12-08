@@ -18,8 +18,7 @@ use crate::models::completion::{CompletionAssert, CompletionTrait};
 use crate::models::definition::{DefinitionAssert, DefinitionTrait};
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
-use crate::tests::setup::setup::spawn_game;
-use crate::types::metadata::{QuestMetadata, QuestMetadataTrait};
+use crate::tests::setup::setup::{METADATA, spawn_game};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -28,10 +27,6 @@ const QUEST_ID: felt252 = 'PERMANENT';
 const TASK_ID: felt252 = 'TASK';
 const TOTAL: u128 = 100;
 const COUNT: u128 = 50;
-
-fn METADATA() -> QuestMetadata {
-    QuestMetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
-}
 
 #[test]
 fn test_permanent_quest_creation() {

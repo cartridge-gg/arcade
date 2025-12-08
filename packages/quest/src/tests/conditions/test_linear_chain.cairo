@@ -16,8 +16,7 @@ use crate::models::completion::{CompletionAssert, CompletionTrait};
 use crate::models::definition::DefinitionAssert;
 use crate::store::StoreTrait;
 use crate::tests::mocks::quester::IQuesterDispatcherTrait;
-use crate::tests::setup::setup::spawn_game;
-use crate::types::metadata::{QuestMetadata, QuestMetadataTrait};
+use crate::tests::setup::setup::{METADATA, spawn_game};
 use crate::types::task::TaskTrait;
 
 // Constants
@@ -32,10 +31,6 @@ const TASK_C: felt252 = 'TASK-C';
 const TASK_D: felt252 = 'TASK-D';
 const TOTAL: u128 = 100;
 const COUNT: u128 = 50;
-
-fn METADATA() -> QuestMetadata {
-    QuestMetadataTrait::new("NAME", "DESCRIPTION", "ICON", array![].span())
-}
 
 #[test]
 fn test_linear_chain_creation() {
