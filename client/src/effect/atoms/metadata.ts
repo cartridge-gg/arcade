@@ -1,5 +1,5 @@
 import { Atom } from "@effect-atom/atom-react";
-import { Effect, Layer } from "effect";
+import { Effect } from "effect";
 import {
   aggregateTraitMetadata,
   fetchCollectionTraitMetadata,

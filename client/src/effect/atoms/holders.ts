@@ -65,17 +65,17 @@ const buildHolders = (
 };
 
 const fetchTokenBalancesStream = (
-  project: string,
+  _project: string,
   contractAddress: string,
-): Stream.Stream<TokenBalancesState, TokenBalancesError> => {
+) => {
   const normalizedAddress = addAddressPadding(contractAddress);
 
-  return Stream.paginateEffect(undefined as string | undefined, (cursor) =>
+  return Stream.paginateEffect(undefined as number | undefined, (cursor) =>
     Effect.gen(function* () {
       const { client } = yield* ToriiGrpcClient;
       const result = yield* Effect.tryPromise({
         try: () =>
-          client.executeSql(`SELECT 
+          client.executeSql(`SELECT
                     account_address,
                     COUNT(*) as token_count
                 FROM token_balances
@@ -91,15 +91,9 @@ const fetchTokenBalancesStream = (
           }),
       });
 
-      if (result.error) {
-        return yield* Effect.fail(
-          new TokenBalancesError({ message: result.error.error.message }),
-        );
-      }
-
-      const balances = result ?? [];
+      const balances = (result ?? []) as unknown as HolderTokenCount[];
       const nextCursor = (cursor ?? 0) + LIMIT;
-      const hasMore = result.length === LIMIT;
+      const hasMore = balances.length === LIMIT;
 
       return [
         { balances, hasMore },
@@ -108,7 +102,7 @@ const fetchTokenBalancesStream = (
     }),
   ).pipe(
     Stream.scan(
-      { balances: [] as TokenBalance[], hasMore: true } as TokenBalancesState,
+      { balances: [] as HolderTokenCount[], hasMore: true } as TokenBalancesState,
       (acc, page) => ({
         balances: [...acc.balances, ...page.balances],
         hasMore: page.hasMore,
