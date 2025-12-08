@@ -12,6 +12,7 @@
 //! - Can only be completed once per player (interval_id is always 0)
 
 use starknet::testing::set_block_timestamp;
+use crate::interfaces::IQuestRegistryDispatcherTrait;
 use crate::models::completion::{CompletionAssert, CompletionTrait};
 use crate::models::definition::{DefinitionAssert, DefinitionTrait};
 use crate::store::StoreTrait;
@@ -157,8 +158,12 @@ fn test_time_limited_quest_claim() {
 
     // [Claim] Quest
     systems
-        .quester
-        .claim(player_id: context.player_id, quest_id: QUEST_ID, interval_id: interval_id);
+        .registry
+        .quest_claim(
+            player: context.player_id.try_into().unwrap(),
+            quest_id: QUEST_ID,
+            interval_id: interval_id,
+        );
 
     // [Assert] Quest is claimed
     let completion = store.get_completion(context.player_id, QUEST_ID, interval_id);

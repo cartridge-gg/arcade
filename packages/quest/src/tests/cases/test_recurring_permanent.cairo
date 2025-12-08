@@ -13,6 +13,7 @@
 //! - Can be completed once per cycle (different interval_id per cycle)
 
 use starknet::testing::set_block_timestamp;
+use crate::interfaces::IQuestRegistryDispatcherTrait;
 use crate::models::completion::{CompletionAssert, CompletionTrait};
 use crate::models::definition::{DefinitionAssert, DefinitionTrait};
 use crate::store::StoreTrait;
@@ -168,8 +169,12 @@ fn test_recurring_permanent_quest_claim_multiple_intervals() {
 
     // [Claim] First cycle
     systems
-        .quester
-        .claim(player_id: context.player_id, quest_id: QUEST_ID, interval_id: interval_id_0);
+        .registry
+        .quest_claim(
+            player: context.player_id.try_into().unwrap(),
+            quest_id: QUEST_ID,
+            interval_id: interval_id_0,
+        );
 
     // [Assert] First cycle claimed
     let completion_0 = store.get_completion(context.player_id, QUEST_ID, interval_id_0);
@@ -190,8 +195,12 @@ fn test_recurring_permanent_quest_claim_multiple_intervals() {
 
     // [Claim] Second cycle
     systems
-        .quester
-        .claim(player_id: context.player_id, quest_id: QUEST_ID, interval_id: interval_id_1);
+        .registry
+        .quest_claim(
+            player: context.player_id.try_into().unwrap(),
+            quest_id: QUEST_ID,
+            interval_id: interval_id_1,
+        );
 
     // [Assert] Second cycle claimed
     let completion_1 = store.get_completion(context.player_id, QUEST_ID, interval_id_1);
@@ -216,8 +225,12 @@ fn test_recurring_permanent_quest_claim_multiple_intervals() {
 
     // [Claim] Third cycle
     systems
-        .quester
-        .claim(player_id: context.player_id, quest_id: QUEST_ID, interval_id: interval_id_2);
+        .registry
+        .quest_claim(
+            player: context.player_id.try_into().unwrap(),
+            quest_id: QUEST_ID,
+            interval_id: interval_id_2,
+        );
 
     // [Assert] Third cycle claimed
     let completion_2 = store.get_completion(context.player_id, QUEST_ID, interval_id_2);

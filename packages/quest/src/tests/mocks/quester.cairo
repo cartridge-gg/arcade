@@ -34,7 +34,6 @@ pub trait IQuester<TContractState> {
     fn progress(
         ref self: TContractState, player_id: felt252, task_id: felt252, count: u128, to_store: bool,
     );
-    fn claim(ref self: TContractState, player_id: felt252, quest_id: felt252, interval_id: u64);
 }
 
 #[dojo::contract]
@@ -42,6 +41,7 @@ pub mod Quester {
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
     use crate::components::questable::QuestableComponent;
+    use crate::interfaces::IQuestRegistry;
     use crate::types::metadata::QuestMetadata;
     use crate::types::task::Task;
     use super::{IQuester, NAMESPACE};
@@ -117,9 +117,14 @@ pub mod Quester {
         ) {
             self.questable.progress(self.world_storage(), player_id, task_id, count, to_store);
         }
+    }
 
-        fn claim(ref self: ContractState, player_id: felt252, quest_id: felt252, interval_id: u64) {
-            self.questable.claim(self.world_storage(), player_id, quest_id, interval_id);
+    #[abi(embed_v0)]
+    pub impl QuestRegistryImpl of IQuestRegistry<ContractState> {
+        fn quest_claim(
+            ref self: ContractState, player: ContractAddress, quest_id: felt252, interval_id: u64,
+        ) {
+            self.questable.claim(self.world_storage(), player.into(), quest_id, interval_id);
         }
     }
 

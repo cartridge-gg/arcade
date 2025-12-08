@@ -13,6 +13,7 @@ pub mod setup {
     use starknet::ContractAddress;
     use starknet::testing::set_contract_address;
     use crate::events::index as events;
+    use crate::interfaces::IQuestRegistryDispatcher;
     use crate::models::index as models;
     use crate::tests::mocks::quester::{IQuesterDispatcher, NAMESPACE, Quester};
     use crate::tests::mocks::rewarder::Rewarder;
@@ -30,6 +31,7 @@ pub mod setup {
     #[derive(Copy, Drop)]
     pub struct Systems {
         pub quester: IQuesterDispatcher,
+        pub registry: IQuestRegistryDispatcher,
     }
 
     #[derive(Copy, Drop)]
@@ -88,7 +90,10 @@ pub mod setup {
         // [Setup] Systems
         let (quester_address, _) = world.dns(@"Quester").expect('Quester not found');
         let (rewarder_address, _) = world.dns(@"Rewarder").expect('Rewarder not found');
-        let systems = Systems { quester: IQuesterDispatcher { contract_address: quester_address } };
+        let systems = Systems {
+            quester: IQuesterDispatcher { contract_address: quester_address },
+            registry: IQuestRegistryDispatcher { contract_address: quester_address },
+        };
 
         // [Setup] Context
         let context = Context { player_id: PLAYER().into(), rewarder: rewarder_address };
