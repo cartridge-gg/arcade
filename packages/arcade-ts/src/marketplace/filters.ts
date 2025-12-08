@@ -2,6 +2,7 @@ import type { Token } from "@dojoengine/torii-wasm/types";
 import { addAddressPadding } from "starknet";
 import { fetchToriis } from "../modules/torii-fetcher";
 import { DEFAULT_PROJECT_ID, parseJsonSafe, resolveProjects } from "./utils";
+import { ToriiGrpcClient } from "@dojoengine/grpc";
 
 export interface TraitSelection {
   name: string;
@@ -173,7 +174,10 @@ export async function fetchCollectionTraitMetadata(
   const query = buildTraitMetadataQuery({ address, traits });
 
   const response = await fetchToriis(projectIds, {
-    sql: query,
+    client: async ({ client }) => {
+      return await (client as ToriiGrpcClient).executeSql(query);
+    },
+    native: true,
   });
 
   const pages: CollectionTraitMetadataPage[] = [];
@@ -192,7 +196,7 @@ export async function fetchCollectionTraitMetadata(
 
     unmatchedProjects.delete(projectId);
 
-    const rows = extractRows(entry.data);
+    const rows = extractRows(entry);
     const traitsForProject: TraitMetadataRow[] = [];
 
     for (const row of rows) {

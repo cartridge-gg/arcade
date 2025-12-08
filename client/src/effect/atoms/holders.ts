@@ -1,11 +1,12 @@
 import { Atom } from "@effect-atom/atom-react";
-import { Effect, Stream, Data, Layer, Option } from "effect";
+import { Effect, Stream, Data, Option } from "effect";
 import { getChecksumAddress, addAddressPadding } from "starknet";
-import { fetchTokenBalances } from "@cartridge/arcade/marketplace";
+import { toriiRuntime } from "../layers/arcade";
 import type { TokenBalance } from "@dojoengine/torii-wasm";
 import { accountsMapAtom } from "./users";
+import { ToriiGrpcClient } from "../runtime";
 
-const LIMIT = 1000;
+const LIMIT = 100;
 
 export type MarketplaceHolder = {
   address: string;
@@ -15,8 +16,13 @@ export type MarketplaceHolder = {
   ratio: number;
 };
 
+type HolderTokenCount = {
+  account_address: string;
+  token_count: BigInt;
+};
+
 export type TokenBalancesState = {
-  balances: TokenBalance[];
+  balances: HolderTokenCount[];
   hasMore: boolean;
 };
 
@@ -35,49 +41,23 @@ type AtomKey = {
   contractAddress: string;
 };
 
-type BalanceMap = Map<string, { balance: bigint; tokenIds: string[] }>;
-
-const filterValidBalances = (balances: TokenBalance[]) =>
-  balances.filter((b) => b.token_id);
-
-const aggregateByAccount = (balances: TokenBalance[]): BalanceMap => {
-  const map: BalanceMap = new Map();
-  for (const b of balances) {
-    const value = BigInt(b.balance);
-    if (value === 0n) continue;
-    const addr = getChecksumAddress(b.account_address);
-    if (BigInt(addr) === 0n) continue;
-    const entry = map.get(addr);
-    if (entry) {
-      entry.balance += value;
-      if (b.token_id) entry.tokenIds.push(b.token_id);
-    } else {
-      map.set(addr, {
-        balance: value,
-        tokenIds: b.token_id ? [b.token_id] : [],
-      });
-    }
-  }
-  return map;
-};
-
 const buildHolders = (
-  balanceMap: BalanceMap,
+  balanceMap: HolderTokenCount[],
   usernamesMap: Map<string, string>,
 ): Omit<HoldersState, "hasMore"> => {
   const totalBalance = [...balanceMap.values()].reduce(
-    (sum, o) => sum + Number(o.balance),
+    (sum, o) => sum + Number(o.token_count),
     0,
   );
-  const holders = [...balanceMap.entries()]
-    .map(([address, data]) => ({
-      address,
-      balance: Number(data.balance),
-      token_ids: data.tokenIds,
-      username: usernamesMap.get(address),
+  const holders = balanceMap
+    .map((i) => ({
+      address: getChecksumAddress(i.account_address),
+      balance: Number(i.token_count),
+      token_ids: [],
+      username: usernamesMap.get(getChecksumAddress(i.account_address)),
       ratio:
         totalBalance > 0
-          ? Math.round((Number(data.balance) / totalBalance) * 1000) / 10
+          ? Math.round((Number(i.token_count) / totalBalance) * 1000) / 10
           : 0,
     }))
     .sort((a, b) => b.balance - a.balance);
@@ -92,14 +72,19 @@ const fetchTokenBalancesStream = (
 
   return Stream.paginateEffect(undefined as string | undefined, (cursor) =>
     Effect.gen(function* () {
+      const { client } = yield* ToriiGrpcClient;
       const result = yield* Effect.tryPromise({
         try: () =>
-          fetchTokenBalances({
-            project,
-            contractAddresses: [normalizedAddress],
-            cursor,
-            limit: LIMIT,
-          }),
+          client.executeSql(`SELECT 
+                    account_address,
+                    COUNT(*) as token_count
+                FROM token_balances
+                WHERE contract_address = '${normalizedAddress}' AND account_address != '0x0000000000000000000000000000000000000000000000000000000000000001'
+                  AND balance != '0x0000000000000000000000000000000000000000000000000000000000000000'
+                GROUP BY account_address
+                ORDER BY token_count DESC
+                LIMIT ${LIMIT}
+                OFFSET ${cursor ?? 0}`),
         catch: (error) =>
           new TokenBalancesError({
             message: error instanceof Error ? error.message : String(error),
@@ -112,11 +97,14 @@ const fetchTokenBalancesStream = (
         );
       }
 
-      const balances = result.page?.balances ?? [];
-      const nextCursor = result.page?.nextCursor;
-      const hasMore = !!nextCursor;
+      const balances = result ?? [];
+      const nextCursor = (cursor ?? 0) + LIMIT;
+      const hasMore = result.length === LIMIT;
 
-      return [{ balances, hasMore }, Option.fromNullable(nextCursor)] as const;
+      return [
+        { balances, hasMore },
+        hasMore ? Option.some(nextCursor) : Option.none(),
+      ] as const;
     }),
   ).pipe(
     Stream.scan(
@@ -129,11 +117,9 @@ const fetchTokenBalancesStream = (
   );
 };
 
-const holdersRuntime = Atom.runtime(Layer.empty);
-
 const tokenBalancesFamily = Atom.family((key: string) => {
   const { project, contractAddress }: AtomKey = JSON.parse(key);
-  return holdersRuntime
+  return toriiRuntime
     .atom(fetchTokenBalancesStream(project, contractAddress), {
       initialValue: { balances: [], hasMore: true },
     })
@@ -161,10 +147,8 @@ const holdersFamily = Atom.family((key: string) => {
     if (balancesResult._tag !== "Success") return balancesResult;
     if (usernamesResult._tag !== "Success") return usernamesResult;
 
-    const filteredBalances = filterValidBalances(balancesResult.value.balances);
-    const balanceMap = aggregateByAccount(filteredBalances);
     const { holders, totalBalance } = buildHolders(
-      balanceMap,
+      balancesResult.value.balances,
       usernamesResult.value,
     );
 

@@ -6,6 +6,8 @@ import {
   type TraitMetadataRow,
   type TraitSelection,
 } from "@cartridge/arcade/marketplace";
+import { toriiRuntime } from "../layers/arcade";
+import { ToriiGrpcClient } from "../runtime";
 
 export type Metadata = TraitMetadataRow;
 
@@ -24,6 +26,7 @@ const fetchMetadataEffect = ({
     if (!contractAddress) {
       return [] as Metadata[];
     }
+    const { client } = yield* ToriiGrpcClient;
 
     const result = yield* Effect.tryPromise({
       try: () =>
@@ -48,13 +51,9 @@ const fetchMetadataEffect = ({
     return aggregateTraitMetadata(result.pages);
   });
 
-const metadataRuntime = Atom.runtime(Layer.empty);
-
 const metadataFamily = Atom.family((key: string) => {
   const options: MetadataOptions = JSON.parse(key);
-  return metadataRuntime
-    .atom(fetchMetadataEffect(options))
-    .pipe(Atom.keepAlive);
+  return toriiRuntime.atom(fetchMetadataEffect(options)).pipe(Atom.keepAlive);
 });
 
 export const metadataAtom = (options: MetadataOptions) => {

@@ -81,7 +81,7 @@ async function fetchFromEndpoint(
         signal,
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
       throw new Error((e as Error).toString());
     }
     // leave this commented out for now.
