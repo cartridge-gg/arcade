@@ -23,8 +23,17 @@ export function useMetadataFilters({
     setStatusFilter,
   } = useFilterActions(collectionAddress);
 
-  const { activeFilters, statusFilter, availableFilters, isMetadataLoading } =
-    useFilterData(collectionAddress);
+  const {
+    activeFilters,
+    statusFilter,
+    availableFilters,
+    isMetadataLoading,
+    isSummaryLoading,
+    traitSummary,
+    expandedTraits,
+    expandTrait,
+    collapseTrait,
+  } = useFilterData(collectionAddress);
 
   useFilterUrlSync({
     collectionAddress,
@@ -75,12 +84,17 @@ export function useMetadataFilters({
     activeFilters,
     availableFilters,
     precomputed,
+    traitSummary,
     statusFilter,
     setStatusFilter,
     setFilter,
     removeFilter,
     clearAllFilters: wrappedClearAllFilters,
     isLoading: isMetadataLoading,
+    isSummaryLoading,
     isEmpty,
+    expandedTraits,
+    expandTrait,
+    collapseTrait,
   };
 }

@@ -2,7 +2,6 @@ import { Atom } from "@effect-atom/atom-react";
 import { Effect, Stream, Data, Option } from "effect";
 import { getChecksumAddress, addAddressPadding } from "starknet";
 import { toriiRuntime } from "../layers/arcade";
-import type { TokenBalance } from "@dojoengine/torii-wasm";
 import { accountsMapAtom } from "./users";
 import { ToriiGrpcClient } from "../runtime";
 
@@ -19,6 +18,7 @@ export type MarketplaceHolder = {
 type HolderTokenCount = {
   account_address: string;
   token_count: BigInt;
+  token_ids: string | null;
 };
 
 export type TokenBalancesState = {
@@ -53,7 +53,7 @@ const buildHolders = (
     .map((i) => ({
       address: getChecksumAddress(i.account_address),
       balance: Number(i.token_count),
-      token_ids: [],
+      token_ids: i.token_ids ? String(i.token_ids).split(",") : [],
       username: usernamesMap.get(getChecksumAddress(i.account_address)),
       ratio:
         totalBalance > 0
@@ -77,7 +77,8 @@ const fetchTokenBalancesStream = (
         try: () =>
           client.executeSql(`SELECT
                     account_address,
-                    COUNT(*) as token_count
+                    COUNT(*) as token_count,
+                    GROUP_CONCAT(token_id) as token_ids
                 FROM token_balances
                 WHERE contract_address = '${normalizedAddress}' AND account_address != '0x0000000000000000000000000000000000000000000000000000000000000001'
                   AND balance != '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -102,7 +103,10 @@ const fetchTokenBalancesStream = (
     }),
   ).pipe(
     Stream.scan(
-      { balances: [] as HolderTokenCount[], hasMore: true } as TokenBalancesState,
+      {
+        balances: [] as HolderTokenCount[],
+        hasMore: true,
+      } as TokenBalancesState,
       (acc, page) => ({
         balances: [...acc.balances, ...page.balances],
         hasMore: page.hasMore,

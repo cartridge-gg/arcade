@@ -28,6 +28,8 @@ interface MarketplaceFiltersViewProps {
     enabled: boolean,
   ) => void;
   onSearchChange: (attribute: string, value: string) => void;
+  onAttributeExpand: (attribute: string, expanded: boolean) => void;
+  isSummaryLoading?: boolean;
 }
 
 export const MarketplaceFiltersView = memo(
@@ -40,6 +42,8 @@ export const MarketplaceFiltersView = memo(
     onClearAll,
     onToggleProperty,
     onSearchChange,
+    onAttributeExpand,
+    isSummaryLoading,
   }: MarketplaceFiltersViewProps) => {
     return (
       <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden rounded-none lg:rounded-xl">
@@ -63,7 +67,9 @@ export const MarketplaceFiltersView = memo(
           className="h-full flex flex-col gap-2 overflow-y-scroll"
           style={{ scrollbarWidth: "none" }}
         >
-          {attributes.length === 0 ? (
+          {isSummaryLoading ? (
+            <MarketplaceFiltersEmptyState />
+          ) : attributes.length === 0 ? (
             <MarketplaceFiltersEmptyState />
           ) : (
             attributes.map((attribute) => (
@@ -72,6 +78,7 @@ export const MarketplaceFiltersView = memo(
                 attribute={attribute}
                 onToggleProperty={onToggleProperty}
                 onSearchChange={onSearchChange}
+                onExpand={onAttributeExpand}
               />
             ))
           )}

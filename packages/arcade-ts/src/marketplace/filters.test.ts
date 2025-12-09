@@ -136,7 +136,8 @@ describe("marketplace filters helpers", () => {
     expect(mockedFetchToriis).toHaveBeenCalledWith(
       ["arcade-main", "arcade-alt"],
       expect.objectContaining({
-        sql: expect.stringContaining("FROM token_attributes"),
+        client: expect.any(Function),
+        native: true,
       }),
     );
 
@@ -168,5 +169,33 @@ describe("marketplace filters helpers", () => {
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]?.projectId).toBe("arcade-main");
     expect(result.errors[0]?.error.message).toBe("boom");
+  });
+
+  it("preserves all trait_names when multiple traits share the same value", async () => {
+    mockedFetchToriis.mockResolvedValue({
+      data: [
+        {
+          endpoint: "arcade-main",
+          data: [
+            { trait_name: "Background", trait_value: "Gold", count: 50 },
+            { trait_name: "Ring", trait_value: "Gold", count: 30 },
+            { trait_name: "Background", trait_value: "Blue", count: 20 },
+          ],
+        },
+      ],
+      errors: [],
+    });
+
+    const result = await fetchCollectionTraitMetadata({
+      address: "0x123",
+      projects: ["arcade-main"],
+    });
+
+    const aggregated = aggregateTraitMetadata(result.pages);
+    const available = buildAvailableFilters(aggregated, {});
+
+    expect(available.Background?.Gold).toBe(50);
+    expect(available.Background?.Blue).toBe(20);
+    expect(available.Ring?.Gold).toBe(30);
   });
 });

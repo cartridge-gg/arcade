@@ -2,7 +2,7 @@ import type { Token } from "@dojoengine/torii-wasm/types";
 import { addAddressPadding } from "starknet";
 import { fetchToriis } from "../modules/torii-fetcher";
 import { DEFAULT_PROJECT_ID, parseJsonSafe, resolveProjects } from "./utils";
-import { ToriiGrpcClient } from "@dojoengine/grpc";
+import type { ToriiGrpcClient } from "@dojoengine/grpc";
 
 export interface TraitSelection {
   name: string;
@@ -52,6 +52,58 @@ export interface FetchCollectionTraitMetadataResult {
   errors: CollectionTraitMetadataError[];
 }
 
+export interface TraitNameSummary {
+  traitName: string;
+  valueCount: number;
+}
+
+export interface TraitNameSummaryPage {
+  projectId: string;
+  traits: TraitNameSummary[];
+}
+
+export interface FetchTraitNamesSummaryOptions {
+  address: string;
+  projects?: string[];
+  defaultProjectId?: string;
+}
+
+export interface FetchTraitNamesSummaryResult {
+  pages: TraitNameSummaryPage[];
+  errors: CollectionTraitMetadataError[];
+}
+
+export interface TraitValueRow {
+  traitValue: string;
+  count: number;
+}
+
+export interface TraitValuePage {
+  projectId: string;
+  values: TraitValueRow[];
+}
+
+export interface FetchTraitValuesOptions {
+  address: string;
+  traitName: string;
+  otherTraitFilters?: TraitSelection[];
+  projects?: string[];
+  defaultProjectId?: string;
+}
+
+export interface FetchTraitValuesResult {
+  pages: TraitValuePage[];
+  errors: CollectionTraitMetadataError[];
+}
+
+export interface FetchExpandedTraitsMetadataOptions {
+  address: string;
+  traitNames: string[];
+  otherTraitFilters?: TraitSelection[];
+  projects?: string[];
+  defaultProjectId?: string;
+}
+
 const escapeSqlValue = (value: string): string => {
   return value.replace(/'/g, "''");
 };
@@ -70,6 +122,108 @@ const buildTraitWhereClause = (traits: TraitSelection[]): string => {
     .join(" OR ");
 };
 
+const buildTraitNamesSummaryQuery = (address: string): string => {
+  const paddedAddress = addAddressPadding(address);
+  return `SELECT 
+				trait_name,
+				COUNT(DISTINCT trait_value) as value_count,
+				SUM(cnt) as total_count
+			FROM (
+				SELECT trait_name, trait_value, COUNT(*) as cnt
+				FROM token_attributes
+				WHERE token_id IN (
+					SELECT token_id
+					FROM token_attributes
+					WHERE token_id LIKE '${paddedAddress}:%'
+					GROUP BY token_id
+				)
+				GROUP BY trait_name, trait_value
+			)
+			GROUP BY trait_name
+			ORDER BY trait_name;`;
+};
+
+const buildTraitValuesQuery = ({
+  address,
+  traitName,
+  otherTraitFilters = [],
+}: {
+  address: string;
+  traitName: string;
+  otherTraitFilters?: TraitSelection[];
+}): string => {
+  const paddedAddress = addAddressPadding(address);
+  const escapedTraitName = escapeSqlValue(traitName);
+
+  if (otherTraitFilters.length === 0) {
+    return `SELECT trait_value, COUNT(*) as count
+FROM token_attributes
+WHERE token_id LIKE '${paddedAddress}:%'
+  AND trait_name = '${escapedTraitName}'
+GROUP BY trait_value
+ORDER BY count DESC`;
+  }
+
+  const whereClause = buildTraitWhereClause(otherTraitFilters);
+  return `SELECT trait_value, COUNT(*) as count
+FROM token_attributes
+WHERE trait_name = '${escapedTraitName}'
+  AND token_id IN (
+    SELECT token_id
+    FROM token_attributes
+    WHERE ${whereClause}
+      AND token_id LIKE '${paddedAddress}:%'
+    GROUP BY token_id
+    HAVING COUNT(DISTINCT trait_name) = ${otherTraitFilters.length}
+  )
+GROUP BY trait_value
+ORDER BY count DESC`;
+};
+
+const buildExpandedTraitsMetadataQuery = ({
+  address,
+  traitNames,
+  otherTraitFilters = [],
+}: {
+  address: string;
+  traitNames: string[];
+  otherTraitFilters?: TraitSelection[];
+}): string => {
+  const paddedAddress = addAddressPadding(address);
+
+  if (traitNames.length === 0) {
+    return "SELECT trait_name, trait_value, 0 as count WHERE 1 = 0";
+  }
+
+  const traitNamesCondition = traitNames
+    .map((name) => `'${escapeSqlValue(name)}'`)
+    .join(", ");
+
+  if (otherTraitFilters.length === 0) {
+    return `SELECT trait_name, trait_value, COUNT(*) as count
+FROM token_attributes
+WHERE token_id LIKE '${paddedAddress}:%'
+  AND trait_name IN (${traitNamesCondition})
+GROUP BY trait_name, trait_value
+ORDER BY trait_name, count DESC`;
+  }
+
+  const whereClause = buildTraitWhereClause(otherTraitFilters);
+  return `SELECT trait_name, trait_value, COUNT(*) as count
+FROM token_attributes
+WHERE trait_name IN (${traitNamesCondition})
+  AND token_id IN (
+    SELECT token_id
+    FROM token_attributes
+    WHERE ${whereClause}
+      AND token_id LIKE '${paddedAddress}:%'
+    GROUP BY token_id
+    HAVING COUNT(DISTINCT trait_name) = ${otherTraitFilters.length}
+  )
+GROUP BY trait_name, trait_value
+ORDER BY trait_name, count DESC`;
+};
+
 const buildTraitMetadataQuery = ({
   address,
   traits,
@@ -83,29 +237,18 @@ const buildTraitMetadataQuery = ({
     ? `HAVING COUNT(DISTINCT trait_name) = ${traits.length}`
     : "";
 
-  return `SELECT
-        trait_name,
-        trait_value,
-        count
-    FROM (
-        SELECT
-            trait_name,
-            trait_value,
-            COUNT(*) AS count,
-            ROW_NUMBER() OVER (PARTITION BY trait_value ORDER BY COUNT(*) DESC) AS rn
-        FROM token_attributes
-        WHERE token_id IN (
-            SELECT token_id
-            FROM token_attributes
-            WHERE ${whereClause}
-              AND token_id LIKE '${paddedAddress}:%'
-            GROUP BY token_id
-            ${havingClause}
-        )
-        GROUP BY trait_name, trait_value
-    ) ranked
-    WHERE rn = 1
-    ORDER BY trait_value, trait_name;`;
+  return `SELECT trait_name, trait_value, COUNT(*) AS count
+FROM token_attributes
+WHERE token_id IN (
+    SELECT token_id
+    FROM token_attributes
+    WHERE ${whereClause}
+      AND token_id LIKE '${paddedAddress}:%'
+    GROUP BY token_id
+    ${havingClause}
+)
+GROUP BY trait_name, trait_value
+ORDER BY trait_name, count DESC`;
 };
 
 const normalizeMetadataRow = (row: any): TraitMetadataRow | null => {
@@ -145,8 +288,313 @@ const extractRows = (data: any): any[] => {
   if (!data) return [];
   if (Array.isArray(data)) return data;
   if (Array.isArray(data.data)) return data.data;
+  if (Array.isArray(data.rows)) return data.rows;
+  if (Array.isArray(data.result)) return data.result;
   return [];
 };
+
+const normalizeTraitNameSummary = (row: any): TraitNameSummary | null => {
+  if (!row) return null;
+
+  const traitName =
+    typeof row.trait_name === "string"
+      ? row.trait_name
+      : typeof row.traitName === "string"
+        ? row.traitName
+        : null;
+
+  if (!traitName) return null;
+
+  const valueCountRaw =
+    typeof row.value_count === "number"
+      ? row.value_count
+      : typeof row.valueCount === "number"
+        ? row.valueCount
+        : typeof row.value_count === "bigint"
+          ? Number(row.value_count)
+          : typeof row.valueCount === "bigint"
+            ? Number(row.valueCount)
+            : typeof row.value_count === "string"
+              ? Number.parseInt(row.value_count, 10)
+              : typeof row.valueCount === "string"
+                ? Number.parseInt(row.valueCount, 10)
+                : 0;
+
+  const valueCount = Number.isFinite(valueCountRaw) ? valueCountRaw : 0;
+
+  return { traitName, valueCount };
+};
+
+const normalizeTraitValueRow = (row: any): TraitValueRow | null => {
+  if (!row) return null;
+
+  const traitValue =
+    typeof row.trait_value === "string"
+      ? row.trait_value
+      : typeof row.traitValue === "string"
+        ? row.traitValue
+        : null;
+
+  if (!traitValue) return null;
+
+  const countRaw =
+    typeof row.count === "number"
+      ? row.count
+      : typeof row.count === "bigint"
+        ? Number(row.count)
+        : typeof row.count === "string"
+          ? Number.parseInt(row.count, 10)
+          : 0;
+
+  const count = Number.isFinite(countRaw) ? countRaw : 0;
+
+  return { traitValue, count };
+};
+
+export async function fetchTraitNamesSummary(
+  options: FetchTraitNamesSummaryOptions,
+): Promise<FetchTraitNamesSummaryResult> {
+  const { address, projects, defaultProjectId = DEFAULT_PROJECT_ID } = options;
+
+  const projectIds = resolveProjects(projects, defaultProjectId);
+  if (projectIds.length === 0) {
+    return { pages: [], errors: [] };
+  }
+
+  const query = buildTraitNamesSummaryQuery(address);
+
+  const response = await fetchToriis(projectIds, {
+    client: async ({ client }) => {
+      return await (client as ToriiGrpcClient).executeSql(query);
+    },
+    native: true,
+  });
+
+  const pages: TraitNameSummaryPage[] = [];
+  const unmatchedProjects = new Set(projectIds);
+
+  for (const entry of response.data ?? []) {
+    if (!entry) continue;
+    const projectId =
+      typeof entry.endpoint === "string"
+        ? entry.endpoint
+        : projectIds.length === 1
+          ? projectIds[0]
+          : undefined;
+
+    if (!projectId) continue;
+
+    unmatchedProjects.delete(projectId);
+
+    const rows = extractRows(entry);
+    const traits: TraitNameSummary[] = [];
+
+    for (const row of rows) {
+      const normalized = normalizeTraitNameSummary(row);
+      if (normalized) traits.push(normalized);
+    }
+
+    pages.push({ projectId, traits });
+  }
+
+  const errors: CollectionTraitMetadataError[] = [];
+  const rawErrors = response.errors ?? [];
+  const remainingProjects = Array.from(unmatchedProjects);
+
+  rawErrors.forEach((error, index) => {
+    const projectId = remainingProjects[index];
+    errors.push({
+      projectId,
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
+  });
+
+  return { pages, errors };
+}
+
+export function aggregateTraitNamesSummary(
+  pages: TraitNameSummaryPage[],
+): TraitNameSummary[] {
+  const aggregate = new Map<string, TraitNameSummary>();
+
+  for (const page of pages) {
+    for (const trait of page.traits) {
+      const existing = aggregate.get(trait.traitName);
+      if (existing) {
+        existing.valueCount = Math.max(existing.valueCount, trait.valueCount);
+      } else {
+        aggregate.set(trait.traitName, { ...trait });
+      }
+    }
+  }
+
+  return Array.from(aggregate.values()).sort((a, b) =>
+    a.traitName.localeCompare(b.traitName),
+  );
+}
+
+export async function fetchTraitValues(
+  options: FetchTraitValuesOptions,
+): Promise<FetchTraitValuesResult> {
+  const {
+    address,
+    traitName,
+    otherTraitFilters = [],
+    projects,
+    defaultProjectId = DEFAULT_PROJECT_ID,
+  } = options;
+
+  const projectIds = resolveProjects(projects, defaultProjectId);
+  if (projectIds.length === 0) {
+    return { pages: [], errors: [] };
+  }
+
+  const query = buildTraitValuesQuery({
+    address,
+    traitName,
+    otherTraitFilters,
+  });
+
+  const response = await fetchToriis(projectIds, {
+    client: async ({ client }) => {
+      return await (client as ToriiGrpcClient).executeSql(query);
+    },
+    native: true,
+  });
+
+  const pages: TraitValuePage[] = [];
+  const unmatchedProjects = new Set(projectIds);
+
+  for (const entry of response.data ?? []) {
+    if (!entry) continue;
+    const projectId =
+      typeof entry.endpoint === "string"
+        ? entry.endpoint
+        : projectIds.length === 1
+          ? projectIds[0]
+          : undefined;
+
+    if (!projectId) continue;
+
+    unmatchedProjects.delete(projectId);
+
+    const rows = extractRows(entry);
+    const values: TraitValueRow[] = [];
+
+    for (const row of rows) {
+      const normalized = normalizeTraitValueRow(row);
+      if (normalized) values.push(normalized);
+    }
+
+    pages.push({ projectId, values });
+  }
+
+  const errors: CollectionTraitMetadataError[] = [];
+  const rawErrors = response.errors ?? [];
+  const remainingProjects = Array.from(unmatchedProjects);
+
+  rawErrors.forEach((error, index) => {
+    const projectId = remainingProjects[index];
+    errors.push({
+      projectId,
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
+  });
+
+  return { pages, errors };
+}
+
+export function aggregateTraitValues(pages: TraitValuePage[]): TraitValueRow[] {
+  const aggregate = new Map<string, TraitValueRow>();
+
+  for (const page of pages) {
+    for (const value of page.values) {
+      const existing = aggregate.get(value.traitValue);
+      if (existing) {
+        existing.count += value.count;
+      } else {
+        aggregate.set(value.traitValue, { ...value });
+      }
+    }
+  }
+
+  return Array.from(aggregate.values()).sort((a, b) => b.count - a.count);
+}
+
+export async function fetchExpandedTraitsMetadata(
+  options: FetchExpandedTraitsMetadataOptions,
+): Promise<FetchCollectionTraitMetadataResult> {
+  const {
+    address,
+    traitNames,
+    otherTraitFilters,
+    projects,
+    defaultProjectId = DEFAULT_PROJECT_ID,
+  } = options;
+
+  if (traitNames.length === 0) {
+    return { pages: [], errors: [] };
+  }
+
+  const projectIds = resolveProjects(projects, defaultProjectId);
+  if (projectIds.length === 0) {
+    return { pages: [], errors: [] };
+  }
+
+  const query = buildExpandedTraitsMetadataQuery({
+    address,
+    traitNames,
+    otherTraitFilters,
+  });
+
+  const response = await fetchToriis(projectIds, {
+    client: async ({ client }) => {
+      return await (client as ToriiGrpcClient).executeSql(query);
+    },
+    native: true,
+  });
+
+  const pages: CollectionTraitMetadataPage[] = [];
+  const unmatchedProjects = new Set(projectIds);
+
+  for (const entry of response.data ?? []) {
+    if (!entry) continue;
+    const projectId =
+      typeof entry.endpoint === "string"
+        ? entry.endpoint
+        : projectIds.length === 1
+          ? projectIds[0]
+          : undefined;
+
+    if (!projectId) continue;
+
+    unmatchedProjects.delete(projectId);
+
+    const rows = extractRows(entry);
+    const traitsForProject: TraitMetadataRow[] = [];
+
+    for (const row of rows) {
+      const normalized = normalizeMetadataRow(row);
+      if (normalized) traitsForProject.push(normalized);
+    }
+
+    pages.push({ projectId, traits: traitsForProject });
+  }
+
+  const errors: CollectionTraitMetadataError[] = [];
+  const rawErrors = response.errors ?? [];
+  const remainingProjects = Array.from(unmatchedProjects);
+
+  rawErrors.forEach((error, index) => {
+    const projectId = remainingProjects[index];
+    errors.push({
+      projectId,
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
+  });
+
+  return { pages, errors };
+}
 
 export function flattenActiveFilters(
   activeFilters: ActiveFilters,

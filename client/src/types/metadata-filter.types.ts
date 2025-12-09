@@ -3,6 +3,7 @@ import type {
   AvailableFilters,
   PrecomputedFilterData,
   PrecomputedFilterProperty,
+  TraitNameSummary,
 } from "@cartridge/arcade/marketplace";
 import type { Token } from "@dojoengine/torii-wasm";
 
@@ -11,6 +12,7 @@ export type {
   AvailableFilters,
   PrecomputedFilterData,
   PrecomputedFilterProperty,
+  TraitNameSummary,
 };
 
 export type StatusFilter = "all" | "listed";
@@ -26,13 +28,18 @@ export interface UseMetadataFiltersReturn {
   activeFilters: ActiveFilters;
   availableFilters: AvailableFilters;
   precomputed: PrecomputedFilterData;
+  traitSummary: TraitNameSummary[];
   statusFilter: StatusFilter;
   setStatusFilter: (status: StatusFilter) => void;
   setFilter: (trait: string, value: string) => void;
   removeFilter: (trait: string, value?: string) => void;
   clearAllFilters: () => void;
   isLoading: boolean;
+  isSummaryLoading: boolean;
   isEmpty: boolean;
+  expandedTraits: Set<string>;
+  expandTrait: (traitName: string) => void;
+  collapseTrait: (traitName: string) => void;
 }
 
 export interface CollectionFilterState {

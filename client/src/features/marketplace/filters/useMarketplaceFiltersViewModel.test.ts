@@ -67,6 +67,12 @@ describe("useMarketplaceFiltersViewModel", () => {
       },
       statusFilter: "all",
       setStatusFilter: vi.fn(),
+      traitSummary: [{ traitName: "Rarity", valueCount: 2 }],
+      expandedTraits: new Set<string>(),
+      expandTrait: vi.fn(),
+      collapseTrait: vi.fn(),
+      isLoading: false,
+      isSummaryLoading: false,
     });
 
     vi.clearAllMocks();
@@ -106,6 +112,12 @@ describe("useMarketplaceFiltersViewModel", () => {
       },
       statusFilter: "all",
       setStatusFilter: vi.fn(),
+      traitSummary: [{ traitName: "Rarity", valueCount: 1 }],
+      expandedTraits: new Set<string>(),
+      expandTrait: vi.fn(),
+      collapseTrait: vi.fn(),
+      isLoading: false,
+      isSummaryLoading: false,
     });
 
     const { result } = renderHook(() => useMarketplaceFiltersViewModel());
@@ -143,6 +155,12 @@ describe("useMarketplaceFiltersViewModel", () => {
       precomputed: { attributes: [], properties: {} },
       statusFilter: "all",
       setStatusFilter: vi.fn(),
+      traitSummary: [],
+      expandedTraits: new Set<string>(),
+      expandTrait: vi.fn(),
+      collapseTrait: vi.fn(),
+      isLoading: false,
+      isSummaryLoading: false,
     });
 
     const { result } = renderHook(() => useMarketplaceFiltersViewModel());

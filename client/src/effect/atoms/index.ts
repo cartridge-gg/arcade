@@ -73,6 +73,21 @@ export {
 } from "./metadata";
 
 export {
+  traitNamesAtom,
+  type TraitNamesSummaryOptions,
+} from "./trait-names";
+
+export {
+  traitValuesAtom,
+  type TraitValuesOptions,
+} from "./trait-values";
+
+export {
+  expandedTraitsMetadataAtom,
+  type ExpandedTraitsMetadataOptions,
+} from "./expanded-traits-metadata";
+
+export {
   countervaluesAtom,
   type CountervaluePrice,
   type TokenBalance,

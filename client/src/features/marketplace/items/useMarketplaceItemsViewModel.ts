@@ -4,16 +4,21 @@ import type { Token } from "@dojoengine/torii-wasm";
 import type { OrderModel } from "@cartridge/arcade";
 import { getChecksumAddress, type RpcProvider } from "starknet";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { filterTokensByMetadata } from "@cartridge/arcade/marketplace";
 import { useShallow } from "zustand/shallow";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
-import { useMarketplaceTokens } from "@/effect";
+import {
+  useMarketplaceTokens,
+  filtersAtom,
+  DEFAULT_STATUS_FILTER,
+} from "@/effect";
 import { useMarketplaceTokensStore } from "@/store";
 import { useListedTokensFetcher } from "@/hooks/use-listed-tokens-fetcher";
+import type { ActiveFilters } from "@/types/metadata-filter.types";
 
 export const ERC1155_ENTRYPOINT = "balance_of_batch";
 
@@ -50,6 +55,8 @@ interface MarketplaceItemsViewModel {
   sales: ReturnType<typeof useMarketplace>["sales"];
   address?: string;
   rawTokens: Token[];
+  statusFilter: string;
+  listedTokens: Token[];
 }
 
 export const getEntrypoints = async (
@@ -110,6 +117,11 @@ export function useMarketplaceItemsViewModel({
     enabled: listedTokenIds.length > 0,
   });
 
+  const collections = useAtomValue(filtersAtom);
+  const collectionState = collections[collectionAddress];
+  const activeFilters: ActiveFilters = collectionState?.activeFilters ?? {};
+  const statusFilter = collectionState?.statusFilter ?? DEFAULT_STATUS_FILTER;
+
   const getOrdersForToken = useCallback(
     (rawTokenId?: string | bigint) => {
       if (!rawTokenId) return [];
@@ -139,6 +151,8 @@ export function useMarketplaceItemsViewModel({
     [collectionOrders],
   );
 
+  const hasActiveFilters = Object.keys(activeFilters).length > 0;
+
   const {
     collection,
     tokens: rawTokens,
@@ -149,9 +163,10 @@ export function useMarketplaceItemsViewModel({
     isLoading: isLoadingTokens,
   } = useMarketplaceTokens(DEFAULT_PROJECT, collectionAddress, {
     enabled: !!collectionAddress,
+    attributeFilters: hasActiveFilters ? activeFilters : undefined,
   });
 
-  const { activeFilters, clearAllFilters, statusFilter } = useMetadataFilters({
+  const { clearAllFilters } = useMetadataFilters({
     tokens: rawTokens,
     collectionAddress,
     enabled: !!collectionAddress && rawTokens.length > 0,
@@ -163,8 +178,13 @@ export function useMarketplaceItemsViewModel({
     }
 
     if (listedTokens.length > 0) {
-      if (Object.keys(activeFilters).length > 0) {
-        return filterTokensByMetadata(listedTokens, activeFilters);
+      if (hasActiveFilters) {
+        const activeFilterSet = new Set(
+          rawTokens.map((t) => t.token_id?.toString()),
+        );
+        return listedTokens.filter((token) =>
+          activeFilterSet.has(token.token_id?.toString()),
+        );
       }
       return listedTokens;
     }
@@ -173,7 +193,13 @@ export function useMarketplaceItemsViewModel({
       const tokenOrders = getOrdersForToken(token.token_id?.toString());
       return tokenOrders.length > 0;
     });
-  }, [statusFilter, rawTokens, listedTokens, activeFilters, getOrdersForToken]);
+  }, [
+    statusFilter,
+    rawTokens,
+    listedTokens,
+    hasActiveFilters,
+    getOrdersForToken,
+  ]);
 
   const hasMoreFiltered = useMemo(() => {
     if (statusFilter !== "all" && listedTokens.length > 0) {
@@ -380,5 +406,7 @@ export function useMarketplaceItemsViewModel({
     address,
     rawTokens,
     isLoading: isLoadingTokens,
+    statusFilter,
+    listedTokens,
   };
 }

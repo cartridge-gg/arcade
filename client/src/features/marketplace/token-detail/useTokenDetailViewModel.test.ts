@@ -19,19 +19,12 @@ vi.mock("@/hooks/marketplace", () => ({
   }),
 }));
 
-const mockTokens: Record<string, Record<string, Token[]>> = {};
+const mockUseMarketplaceTokens = vi.fn();
+const mockUseAccountByAddress = vi.fn();
 
-vi.mock("@/store", () => ({
-  useMarketplaceTokensStore: (selector: any) =>
-    selector({
-      tokens: mockTokens,
-    }),
-}));
-
-const mockUseMarketTokensFetcher = vi.fn();
-
-vi.mock("@/hooks/marketplace-tokens-fetcher", () => ({
-  useMarketTokensFetcher: (args: any) => mockUseMarketTokensFetcher(args),
+vi.mock("@/effect", () => ({
+  useMarketplaceTokens: () => mockUseMarketplaceTokens(),
+  useAccountByAddress: () => mockUseAccountByAddress(),
 }));
 
 const mockUseMarketBalancesFetcher = vi.fn();
@@ -69,12 +62,19 @@ describe("useTokenDetailViewModel", () => {
       address: "0x123",
       isConnected: true,
     });
-    mockTokens["arcade-main"] = { "0xabc": [] };
     mockGetCollectionOrders.mockReturnValue({});
-    mockUseMarketTokensFetcher.mockReturnValue({
+    mockUseMarketplaceTokens.mockReturnValue({
       collection: null,
+      tokens: [],
       status: "idle",
+      hasMore: false,
+      isLoading: false,
+      isError: false,
+      errorMessage: null,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
     });
+    mockUseAccountByAddress.mockReturnValue({ data: null });
     mockUseMarketBalancesFetcher.mockReturnValue({
       balances: [],
     });
@@ -100,7 +100,17 @@ describe("useTokenDetailViewModel", () => {
       contract_address: "0xabc",
     } as Token;
 
-    mockTokens["arcade-main"]["0xabc"] = [mockToken];
+    mockUseMarketplaceTokens.mockReturnValue({
+      collection: null,
+      tokens: [mockToken],
+      status: "success",
+      hasMore: false,
+      isLoading: false,
+      isError: false,
+      errorMessage: null,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
+    });
 
     const { result } = renderHook(() =>
       useTokenDetailViewModel({
@@ -119,7 +129,17 @@ describe("useTokenDetailViewModel", () => {
       contract_address: "0xabc",
     } as Token;
 
-    mockTokens["arcade-main"]["0xabc"] = [mockToken];
+    mockUseMarketplaceTokens.mockReturnValue({
+      collection: null,
+      tokens: [mockToken],
+      status: "success",
+      hasMore: false,
+      isLoading: false,
+      isError: false,
+      errorMessage: null,
+      isFetchingNextPage: false,
+      fetchNextPage: vi.fn(),
+    });
     mockGetCollectionOrders.mockReturnValue({
       "1": [{ tokenId: 1n, price: "100" } as unknown as OrderModel],
     });

@@ -115,6 +115,8 @@ export const MarketplaceItemsContainer = ({
     sales,
     assets,
     isLoading,
+    statusFilter,
+    listedTokens,
   } = useMarketplaceItemsViewModel({ collectionAddress });
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -314,6 +316,8 @@ export const MarketplaceItemsContainer = ({
         isLoading: status === "loading",
         progress: undefined,
       }}
+      statusFilter={statusFilter}
+      listedTokensCount={listedTokens.length}
     />
   );
 };

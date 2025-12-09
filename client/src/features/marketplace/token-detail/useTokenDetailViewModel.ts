@@ -46,11 +46,13 @@ export function useTokenDetailViewModel({
   const { provider, games, editions } = useArcade();
   const { location } = useRouterState();
 
-  const { collection, tokens: rawTokens, status } = useMarketplaceTokens(
-    DEFAULT_PROJECT,
-    collectionAddress,
-    { tokenIds: [tokenId] },
-  );
+  const {
+    collection,
+    tokens: rawTokens,
+    status,
+  } = useMarketplaceTokens(DEFAULT_PROJECT, collectionAddress, {
+    tokenIds: [tokenId],
+  });
 
   const { balances } = useMarketBalancesFetcher({
     project: [DEFAULT_PROJECT],

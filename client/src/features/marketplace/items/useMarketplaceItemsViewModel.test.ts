@@ -66,11 +66,17 @@ vi.mock("@/hooks/use-metadata-filters", () => ({
   useMetadataFilters: (args: any) => mockUseMetadataFilters(args),
 }));
 
-const mockUseMarketTokensFetcher = vi.fn();
+const mockUseMarketplaceTokens = vi.fn();
 const mockUseListedTokensFetcher = vi.fn();
 
-vi.mock("@/hooks/marketplace-tokens-fetcher", () => ({
-  useMarketTokensFetcher: (args: any) => mockUseMarketTokensFetcher(args),
+vi.mock("@effect-atom/atom-react", () => ({
+  useAtomValue: () => ({}),
+}));
+
+vi.mock("@/effect", () => ({
+  useMarketplaceTokens: () => mockUseMarketplaceTokens(),
+  filtersAtom: {},
+  DEFAULT_STATUS_FILTER: "all",
 }));
 
 vi.mock("@/hooks/use-listed-tokens-fetcher", () => ({
@@ -128,14 +134,17 @@ describe("useMarketplaceItemsViewModel", () => {
       },
     };
 
-    mockUseMarketTokensFetcher.mockReturnValue({
+    mockUseMarketplaceTokens.mockReturnValue({
       collection: {
         total_supply: "0x10",
         image: "https://example.com/image.png",
       },
+      tokens: [token],
       status: "success",
-      loadingProgress: undefined,
       hasMore: false,
+      isLoading: false,
+      isError: false,
+      errorMessage: null,
       isFetchingNextPage: false,
       fetchNextPage: vi.fn(),
     });

@@ -11,6 +11,8 @@ export const MarketplaceFiltersContainer = () => {
     setFilter,
     clearAllFilters,
     setSearchValue,
+    onAttributeExpand,
+    isSummaryLoading,
   } = useMarketplaceFiltersViewModel();
 
   const handleListedClick = useCallback(
@@ -32,6 +34,8 @@ export const MarketplaceFiltersContainer = () => {
       onClearAll={clearAllFilters}
       onToggleProperty={setFilter}
       onSearchChange={setSearchValue}
+      onAttributeExpand={onAttributeExpand}
+      isSummaryLoading={isSummaryLoading}
     />
   );
 };

@@ -1,5 +1,5 @@
 import { useAtom, Atom, type Result } from "@effect-atom/atom-react";
-import { useMemo, useCallback, useEffect } from "react";
+import { useMemo, useCallback } from "react";
 import { getChecksumAddress } from "starknet";
 import { marketplaceTokensAtom } from "../atoms/marketplace-tokens";
 import { useTokenContract, type EnrichedTokenContract } from "./tokens";
@@ -43,12 +43,7 @@ export const useMarketplaceTokens = (
     autoFetch?: boolean;
   },
 ): UseMarketplaceTokensResult => {
-  const {
-    attributeFilters,
-    tokenIds,
-    enabled = true,
-    autoFetch = true,
-  } = options ?? {};
+  const { attributeFilters, tokenIds, enabled = true } = options ?? {};
 
   const collection = useTokenContract(
     address ? getChecksumAddress(address) : undefined,

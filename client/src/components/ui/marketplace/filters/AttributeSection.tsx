@@ -1,10 +1,11 @@
-import { memo, useMemo } from "react";
+import { memo, useMemo, useCallback } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
   MarketplacePropertyEmpty,
+  SpinnerIcon,
   cn,
 } from "@cartridge/ui";
 import { AttributeSearch } from "./AttributeSearch";
@@ -15,10 +16,16 @@ interface AttributeSectionProps {
   attribute: MarketplaceFilterAttributeView;
   onToggleProperty: (attr: string, prop: string, enabled: boolean) => void;
   onSearchChange: (attr: string, value: string) => void;
+  onExpand: (attr: string, expanded: boolean) => void;
 }
 
 export const AttributeSection = memo(
-  ({ attribute, onToggleProperty, onSearchChange }: AttributeSectionProps) => {
+  ({
+    attribute,
+    onToggleProperty,
+    onSearchChange,
+    onExpand,
+  }: AttributeSectionProps) => {
     const hasActiveProperty = attribute.properties.some((p) => p.isActive);
 
     const sortedProperties = useMemo(
@@ -26,11 +33,22 @@ export const AttributeSection = memo(
       [attribute.properties],
     );
 
+    const handleValueChange = useCallback(
+      (value: string) => {
+        onExpand(attribute.name, value === "item-1");
+      },
+      [attribute.name, onExpand],
+    );
+
+    const accordionValue =
+      hasActiveProperty || attribute.isExpanded ? "item-1" : undefined;
+
     return (
       <Accordion
         type="single"
         collapsible
-        defaultValue={hasActiveProperty ? "item-1" : undefined}
+        value={accordionValue}
+        onValueChange={handleValueChange}
       >
         <AccordionItem value="item-1">
           <div className="h-9 cursor-pointer">
@@ -45,7 +63,7 @@ export const AttributeSection = memo(
             >
               <p className="text-xs text-foreground-100">{attribute.name}</p>
               <span className="text-xs text-foreground-300 group-hover:text-foreground-200 transition-colors">
-                {attribute.properties.length}
+                {attribute.valueCount}
               </span>
             </AccordionTrigger>
           </div>
@@ -56,17 +74,24 @@ export const AttributeSection = memo(
               onSearchChange={onSearchChange}
             />
             <div className="flex flex-col gap-px">
-              {sortedProperties.map(({ property, count, isActive }) => (
-                <PropertyItem
-                  key={property}
-                  attributeName={attribute.name}
-                  property={property}
-                  count={count}
-                  isActive={isActive}
-                  onToggle={onToggleProperty}
-                />
-              ))}
-              {sortedProperties.length === 0 && <MarketplacePropertyEmpty />}
+              {attribute.isLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <SpinnerIcon className="w-4 h-4 animate-spin text-foreground-300" />
+                </div>
+              ) : sortedProperties.length === 0 ? (
+                <MarketplacePropertyEmpty />
+              ) : (
+                sortedProperties.map(({ property, count, isActive }) => (
+                  <PropertyItem
+                    key={property}
+                    attributeName={attribute.name}
+                    property={property}
+                    count={count}
+                    isActive={isActive}
+                    onToggle={onToggleProperty}
+                  />
+                ))
+              )}
             </div>
           </AccordionContent>
         </AccordionItem>

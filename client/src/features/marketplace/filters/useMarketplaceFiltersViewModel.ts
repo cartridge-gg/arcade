@@ -17,6 +17,9 @@ export interface MarketplaceFilterAttribute {
   name: string;
   properties: MarketplaceFilterProperty[];
   search: string;
+  valueCount: number;
+  isExpanded: boolean;
+  isLoading: boolean;
 }
 
 export interface MarketplaceFiltersViewModel {
@@ -28,6 +31,8 @@ export interface MarketplaceFiltersViewModel {
   clearAllFilters: () => void;
   searchValue: Record<string, string>;
   setSearchValue: (attribute: string, value: string) => void;
+  onAttributeExpand: (attribute: string, expanded: boolean) => void;
+  isSummaryLoading: boolean;
 }
 
 export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
@@ -48,6 +53,12 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     precomputed,
     statusFilter,
     setStatusFilter,
+    traitSummary,
+    expandedTraits,
+    expandTrait,
+    collapseTrait,
+    isLoading,
+    isSummaryLoading,
   } = useMetadataFilters({
     tokens: tokens || [],
     collectionAddress: collectionAddress ?? "",
@@ -59,13 +70,15 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
   const activeFiltersRef = useRef(activeFilters);
   activeFiltersRef.current = activeFilters;
 
-  const precomputedAttributes = precomputed?.attributes ?? [];
   const precomputedProperties = precomputed?.properties ?? {};
 
   const attributes = useMemo(() => {
-    return precomputedAttributes.map((attribute) => {
+    return traitSummary.map((summary) => {
+      const attribute = summary.traitName;
       const properties = precomputedProperties[attribute] || [];
       const searchTerm = search[attribute]?.toLowerCase() || "";
+      const hasActiveFilter = !!activeFilters[attribute]?.size;
+      const isExpanded = expandedTraits.has(attribute) || hasActiveFilter;
 
       const filtered = searchTerm
         ? properties.filter((prop) =>
@@ -84,14 +97,19 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
         name: attribute,
         properties: enriched,
         search: search[attribute] || "",
+        valueCount: summary.valueCount,
+        isExpanded,
+        isLoading: isExpanded && properties.length === 0 && isLoading,
       };
     });
   }, [
-    precomputedAttributes,
+    traitSummary,
     precomputedProperties,
     availableFilters,
     activeFilters,
     search,
+    expandedTraits,
+    isLoading,
   ]);
 
   const hasActiveFilters = useMemo(
@@ -129,6 +147,17 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     setSearch((prev) => ({ ...prev, [attribute]: value }));
   }, []);
 
+  const onAttributeExpand = useCallback(
+    (attribute: string, expanded: boolean) => {
+      if (expanded) {
+        expandTrait(attribute);
+      } else {
+        collapseTrait(attribute);
+      }
+    },
+    [expandTrait, collapseTrait],
+  );
+
   return {
     statusFilter,
     setStatusFilter,
@@ -138,5 +167,7 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     clearAllFilters: handleClearFilters,
     searchValue,
     setSearchValue,
+    onAttributeExpand,
+    isSummaryLoading,
   };
 }

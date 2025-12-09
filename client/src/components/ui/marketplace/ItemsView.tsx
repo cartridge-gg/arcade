@@ -75,6 +75,9 @@ interface ItemsViewProps {
     isLoading: boolean;
     progress?: { completed: number; total: number };
   };
+
+  statusFilter: string;
+  listedTokensCount: number;
 }
 
 export const ItemsView = ({
@@ -95,6 +98,8 @@ export const ItemsView = ({
   isConnected,
   onBuySelection,
   loadingOverlay,
+  statusFilter,
+  listedTokensCount,
 }: ItemsViewProps) => {
   return (
     <div className="flex flex-col gap-4 h-full w-full overflow-hidden order-3">
@@ -109,6 +114,8 @@ export const ItemsView = ({
             hasActiveFilters={hasActiveFilters}
             onClearFilters={onClearFilters}
             onResetSelection={onResetSelection}
+            statusFilter={statusFilter}
+            listedTokensCount={listedTokensCount}
           />
         </div>
         <MarketplaceSearch
@@ -179,6 +186,8 @@ const SelectionSummary = ({
   totalTokensCount,
   collectionSupply,
   onResetSelection,
+  statusFilter,
+  listedTokensCount,
 }: {
   isConnected: boolean;
   selectionCount: number;
@@ -188,6 +197,8 @@ const SelectionSummary = ({
   hasActiveFilters: boolean;
   onClearFilters: () => void;
   onResetSelection: () => void;
+  statusFilter: string;
+  listedTokensCount: number;
 }) => {
   const showSelection = isConnected && selectionCount > 0;
 
@@ -208,20 +219,83 @@ const SelectionSummary = ({
           checked
         />
       )}
-      {showSelection ? (
-        <p>{`${selectionCount} / ${filteredCount} Selected`}</p>
-      ) : (
-        <>
-          <CollectionCount
-            collectionCount={collectionSupply}
-            tokensCount={totalTokensCount}
-            filteredTokensCount={filteredCount}
-          />
-        </>
-      )}
+      <RenderCollectionCount
+        showSelection={showSelection}
+        statusFilter={statusFilter}
+        listedTokensCount={listedTokensCount}
+        selectionCount={selectionCount}
+        filteredCount={filteredCount}
+        totalTokensCount={totalTokensCount}
+        collectionSupply={collectionSupply}
+      />
     </div>
   );
 };
+function RenderCollectionCount({
+  showSelection,
+  statusFilter,
+  listedTokensCount,
+  selectionCount,
+  filteredCount,
+  totalTokensCount,
+  collectionSupply,
+}: {
+  showSelection: boolean;
+  statusFilter: string;
+  listedTokensCount: number;
+  selectionCount: number;
+  filteredCount: number;
+  totalTokensCount: number;
+  collectionSupply: number;
+}) {
+  if (showSelection)
+    return (
+      <SelectedCount
+        selectionCount={selectionCount}
+        filteredCount={filteredCount}
+      />
+    );
+  if (statusFilter === "listed")
+    return <BuyNowCount count={listedTokensCount} />;
+  return (
+    <AllCollectionCount
+      collectionSupply={collectionSupply}
+      totalTokensCount={totalTokensCount}
+      filteredCount={filteredCount}
+    />
+  );
+}
+function AllCollectionCount({
+  collectionSupply,
+  totalTokensCount,
+  filteredCount,
+}: {
+  collectionSupply: number;
+  totalTokensCount: number;
+  filteredCount: number;
+}) {
+  return (
+    <>
+      <CollectionCount
+        collectionCount={collectionSupply}
+        tokensCount={totalTokensCount}
+        filteredTokensCount={filteredCount}
+      />
+    </>
+  );
+}
+function BuyNowCount({ count }: { count: number }) {
+  return <p>{count} items</p>;
+}
+function SelectedCount({
+  selectionCount,
+  filteredCount,
+}: {
+  selectionCount: number;
+  filteredCount: number;
+}) {
+  return <p>{`${selectionCount} / ${filteredCount} Selected`}</p>;
+}
 
 const SelectionFooter = ({
   isVisible,
