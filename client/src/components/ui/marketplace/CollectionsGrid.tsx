@@ -1,4 +1,5 @@
-import { CollectibleCard, Empty, Skeleton } from "@cartridge/ui";
+import { Empty, Skeleton } from "@cartridge/ui";
+import CollectibleCard from "./collectible-card";
 import { Link } from "@tanstack/react-router";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 
@@ -35,7 +36,7 @@ export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
         >
           <CollectibleCard
             title={item.title}
-            image={item.image}
+            images={[item.image]}
             totalCount={item.totalCount}
             selectable={false}
             listingCount={item.listingCount}
