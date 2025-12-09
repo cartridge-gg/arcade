@@ -2,6 +2,8 @@ import { Empty, Skeleton } from "@cartridge/ui";
 import CollectibleCard from "./collectible-card";
 import { Link } from "@tanstack/react-router";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
+import { useProject } from "@/hooks/project";
+import arcade from "@/assets/arcade-logo.png";
 
 export interface CollectionsGridItem {
   key: string;
@@ -19,6 +21,8 @@ interface CollectionsGridProps {
 }
 
 export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
+  const { game, edition } = useProject();
+
   if (items.length === 0) {
     return null;
   }
@@ -35,6 +39,7 @@ export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
           className="w-full group select-none"
         >
           <CollectibleCard
+            icon={edition?.properties.icon || game?.properties.icon || arcade}
             title={item.title}
             images={[item.image]}
             totalCount={item.totalCount}

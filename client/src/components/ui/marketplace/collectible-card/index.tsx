@@ -63,6 +63,7 @@ export function CollectibleCard({
         selected={selected}
         onSelect={onSelect}
         variant={variant}
+        listingCount={listingCount}
       />
       <CollectiblePreview
         images={images}

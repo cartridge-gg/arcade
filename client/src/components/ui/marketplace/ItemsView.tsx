@@ -9,13 +9,13 @@ import {
 import {
   Button,
   Checkbox,
-  CollectibleCard,
   Empty,
   MarketplaceSearch,
   Separator,
   Skeleton,
   cn,
 } from "@cartridge/ui";
+import CollectibleCard from "./collectible-card";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
 import { Link } from "@tanstack/react-router";
 
@@ -340,7 +340,7 @@ const MarketplaceItemCard = memo(
         <Link to={tokenDetailHref}>
           <CollectibleCard
             title={title}
-            image={displayImage}
+            images={[displayImage]}
             listingCount={listingCount}
             onClick={handleCardClick}
             className={

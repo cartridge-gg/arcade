@@ -1,9 +1,7 @@
-import { CheckboxIcon, Thumbnail } from "@cartridge/ui";
+import { CheckboxIcon, TagIcon, Thumbnail } from "@cartridge/ui";
 import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
 import { useCallback } from "react";
-import { useProject } from "@/hooks/project";
-import arcade from "@/assets/arcade-logo.png";
 
 export interface CollectibleHeaderProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -13,10 +11,11 @@ export interface CollectibleHeaderProps
   selectable?: boolean;
   selected?: boolean;
   onSelect?: () => void;
+  listingCount?: number;
 }
 
 const collectibleHeaderVariants = cva(
-  "group absolute flex gap-2 p-3 justify-between items-center text-sm font-medium transition-all duration-150 z-10",
+  "group absolute w-full flex gap-2 p-3 justify-between items-center text-sm font-medium transition-all duration-150 z-10",
   {
     variants: {
       variant: {
@@ -37,6 +36,7 @@ export function CollectibleHeader({
   selected,
   onSelect,
   variant,
+  listingCount,
   className,
   ...props
 }: CollectibleHeaderProps) {
@@ -49,30 +49,23 @@ export function CollectibleHeader({
     [onSelect],
   );
 
-  const { game, edition } = useProject();
-
   return (
     <div
-      className={cn(
-        collectibleHeaderVariants({ variant }),
-        className,
-        // icon === undefined && "pl-2.5",
-      )}
+      className={cn(collectibleHeaderVariants({ variant }), className)}
       {...props}
     >
-      <div className="flex items-center gap-1.5 overflow-hidden">
+      <div className="flex items-center gap-1 overflow-hidden">
+        {!!listingCount && <TagIcon variant="solid" size="sm" />}
         <Thumbnail
           variant="light"
           size="sm"
-          // icon={icon === null ? undefined : icon}
-          icon={edition?.properties.icon || game?.properties.icon || arcade}
-          // className={icon === undefined ? "hidden" : ""}
+          className={icon === undefined ? "hidden" : ""}
         />
         <p
           className={cn(
             "truncate",
             (selected || selectable) && "pr-6",
-            icon === undefined && "pl-2.5",
+            !!listingCount && "ml-0.5",
           )}
         >
           {title}
