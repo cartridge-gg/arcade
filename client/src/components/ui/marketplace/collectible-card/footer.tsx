@@ -10,12 +10,12 @@ export interface CollectibleCardFooterProps
 }
 
 const collectibleCardFooterVariants = cva(
-  "px-3 py-2 flex flex-col gap-0.5 text-foreground-400 data-[hidden=true]:hidden",
+  "absolute bottom-0 w-full px-3 py-2 flex flex-row items-center justify-between gap-0.5 text-foreground-400 data-[hidden=true]:hidden",
   {
     variants: {
       variant: {
-        default: "bg-background-200 group-hover:bg-background-300",
-        faded: "bg-background-100 group-hover:bg-background-200",
+        default: "",
+        faded: "",
       },
     },
     defaultVariants: {
@@ -31,26 +31,31 @@ export function CollectibleCardFooter({
   className,
   ...props
 }: CollectibleCardFooterProps) {
+  console.log("price: ", price);
   return (
     <div
       data-hidden={price === undefined && lastSale === undefined}
       className={cn(collectibleCardFooterVariants({ variant }), className)}
       {...props}
     >
-      <div className="flex justify-between items-center text-[10px]/3">
-        <p>Price</p>
-        <p>Last Sale</p>
-      </div>
-      <div className="flex justify-between items-center text-sm font-medium">
+      <div className="flex flex-col items-start gap-1">
+        <p className="text-foreground-300 text-[10px]/3 font-normal">Price</p>
         {!!price && typeof price === "string" ? (
-          <p className="text-foreground-100">{price}</p>
+          <p className="text-foreground-100 text-sm font-medium">
+            {Number(price).toFixed(2)}
+          </p>
         ) : !!price && typeof price === "object" ? (
           <Price price={price} />
         ) : (
           <p>--</p>
         )}
+      </div>
+      <div className="flex flex-col items-end gap-1">
+        <p className="text-foreground-300 text-[10px]/3 font-normal">
+          Last Sale
+        </p>
         {!!lastSale && typeof lastSale === "string" ? (
-          <p className="text-foreground-100">{lastSale}</p>
+          <p className="text-foreground-100 text-sm font-medium">{lastSale}</p>
         ) : !!lastSale && typeof lastSale === "object" ? (
           <Price price={lastSale} />
         ) : (
@@ -71,7 +76,9 @@ function Price({ price }: { price: { value: string; image: string } }) {
         rounded
         transdark
       />
-      <p className="text-foreground-100">{price.value}</p>
+      <p className="text-foreground-100 text-sm font-medium">
+        {Number(price.value).toFixed(2)}
+      </p>
     </div>
   );
 }

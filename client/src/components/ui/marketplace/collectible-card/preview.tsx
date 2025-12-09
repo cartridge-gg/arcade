@@ -107,7 +107,7 @@ export const CollectiblePreview = ({
         src={data || currentSrc}
         onError={handleImageError}
       />
-      <div className="flex gap-1 items-center flex-wrap justify-start absolute bottom-1.5 left-1.5">
+      {/*<div className="flex gap-1 items-center flex-wrap justify-start absolute bottom-1.5 left-1.5">
         {!!totalCount && (
           <CollectibleTag label={`${formatNumber(totalCount)}`}>
             <StackDiamondIcon variant="solid" size="sm" />
@@ -118,7 +118,7 @@ export const CollectiblePreview = ({
             <TagIcon variant="solid" size="sm" />
           </CollectibleTag>
         )}
-      </div>
+      </div>*/}
     </div>
   );
 };
