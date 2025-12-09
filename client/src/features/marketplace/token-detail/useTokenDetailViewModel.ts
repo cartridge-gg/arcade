@@ -4,8 +4,6 @@ import { useRouterState } from "@tanstack/react-router";
 import type { Token } from "@/types/torii";
 import type { OrderModel } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
-import { useMarketplaceTokensStore } from "@/store";
-import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
 import { useMarketBalancesFetcher } from "@/hooks/marketplace-balances-fetcher";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { addAddressPadding, getChecksumAddress } from "starknet";
@@ -13,7 +11,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useArcade } from "@/hooks/arcade";
 import { ERC1155_ENTRYPOINT, getEntrypoints } from "../items";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { useAccountByAddress } from "@/effect";
+import { useAccountByAddress, useMarketplaceTokens } from "@/effect";
 import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
 
 interface UseTokenDetailViewModelArgs {
@@ -23,7 +21,7 @@ interface UseTokenDetailViewModelArgs {
 
 interface TokenDetailViewModel {
   token: Token | undefined;
-  collection: ReturnType<typeof useMarketTokensFetcher>["collection"];
+  collection: ReturnType<typeof useMarketplaceTokens>["collection"];
   orders: OrderModel[];
   isLoading: boolean;
   isOwner: boolean;
@@ -48,16 +46,14 @@ export function useTokenDetailViewModel({
   const { provider, games, editions } = useArcade();
   const { location } = useRouterState();
 
-  const defaultProjects = useMemo(() => [DEFAULT_PROJECT], []);
-
-  const { collection, status } = useMarketTokensFetcher({
-    project: defaultProjects,
-    address: collectionAddress,
-    tokenIds: [tokenId],
-  });
+  const { collection, tokens: rawTokens, status } = useMarketplaceTokens(
+    DEFAULT_PROJECT,
+    collectionAddress,
+    { tokenIds: [tokenId] },
+  );
 
   const { balances } = useMarketBalancesFetcher({
-    project: defaultProjects,
+    project: [DEFAULT_PROJECT],
     address: collectionAddress,
     tokenId,
   });
@@ -77,12 +73,8 @@ export function useTokenDetailViewModel({
   );
   const { data: controllerName } = useAccountByAddress(owner);
 
-  const rawTokens = useMarketplaceTokensStore(
-    (state) => state.tokens[DEFAULT_PROJECT]?.[collectionAddress],
-  );
-
   const token = useMemo(() => {
-    if (!rawTokens) return undefined;
+    if (!rawTokens || rawTokens.length === 0) return undefined;
     return rawTokens.find((t) => {
       const tid = t.token_id?.toString();
       return tid === tokenId || tid === `0x${tokenId}`;

@@ -29,3 +29,8 @@ export {
   type MarketplaceHolder,
   type UseHoldersResult,
 } from "./holders";
+
+export {
+  useMarketplaceTokens,
+  type UseMarketplaceTokensResult,
+} from "./marketplace-tokens";

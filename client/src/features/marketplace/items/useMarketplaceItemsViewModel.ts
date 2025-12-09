@@ -11,7 +11,7 @@ import { useMarketplace } from "@/hooks/marketplace";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
-import { useMarketTokensFetcher } from "@/hooks/marketplace-tokens-fetcher";
+import { useMarketplaceTokens } from "@/effect";
 import { useMarketplaceTokensStore } from "@/store";
 import { useListedTokensFetcher } from "@/hooks/use-listed-tokens-fetcher";
 
@@ -25,11 +25,11 @@ interface UseMarketplaceItemsViewModelArgs {
 
 interface MarketplaceItemsViewModel {
   collectionAddress: string;
-  collection: ReturnType<typeof useMarketTokensFetcher>["collection"];
-  status: ReturnType<typeof useMarketTokensFetcher>["status"];
-  loadingProgress: ReturnType<typeof useMarketTokensFetcher>["loadingProgress"];
+  collection: ReturnType<typeof useMarketplaceTokens>["collection"];
+  status: ReturnType<typeof useMarketplaceTokens>["status"];
   hasMore: boolean;
   isFetchingNextPage: boolean;
+  isLoading: boolean;
   fetchNextPage: () => void;
   search: string;
   setSearch: (value: string) => void;
@@ -49,7 +49,7 @@ interface MarketplaceItemsViewModel {
   handlePurchase: (tokens: MarketplaceAsset[]) => Promise<void>;
   sales: ReturnType<typeof useMarketplace>["sales"];
   address?: string;
-  rawTokens: Token[] | undefined;
+  rawTokens: Token[];
 }
 
 export const getEntrypoints = async (
@@ -87,21 +87,11 @@ export function useMarketplaceItemsViewModel({
   const [lastSearch, setLastSearch] = useState<string>("");
   const [selection, setSelection] = useState<MarketplaceAsset[]>([]);
 
-  const rawTokens = useMarketplaceTokensStore(
-    useShallow((s) => s.tokens[DEFAULT_PROJECT]?.[collectionAddress]),
-  );
   const rawListedTokens = useMarketplaceTokensStore(
     useShallow((s) => s.listedTokens[DEFAULT_PROJECT]?.[collectionAddress]),
   );
 
-  const tokens = rawTokens || [];
   const listedTokens = rawListedTokens || [];
-
-  const { activeFilters, clearAllFilters, statusFilter } = useMetadataFilters({
-    tokens,
-    collectionAddress,
-    enabled: !!collectionAddress && tokens.length > 0,
-  });
 
   const collectionOrders = useMemo(() => {
     return getCollectionOrders(collectionAddress);
@@ -149,19 +139,22 @@ export function useMarketplaceItemsViewModel({
     [collectionOrders],
   );
 
-  const defaultProjects = useMemo(() => [DEFAULT_PROJECT], []);
-
   const {
     collection,
+    tokens: rawTokens,
     status,
-    loadingProgress,
     hasMore,
     isFetchingNextPage,
     fetchNextPage,
-  } = useMarketTokensFetcher({
-    project: defaultProjects,
-    address: collectionAddress,
-    attributeFilters: activeFilters,
+    isLoading: isLoadingTokens,
+  } = useMarketplaceTokens(DEFAULT_PROJECT, collectionAddress, {
+    enabled: !!collectionAddress,
+  });
+
+  const { activeFilters, clearAllFilters, statusFilter } = useMetadataFilters({
+    tokens: rawTokens,
+    collectionAddress,
+    enabled: !!collectionAddress && rawTokens.length > 0,
   });
 
   const statusFilteredTokens = useMemo(() => {
@@ -364,7 +357,6 @@ export function useMarketplaceItemsViewModel({
     collectionAddress,
     collection,
     status,
-    loadingProgress,
     hasMore: hasMoreFiltered,
     isFetchingNextPage,
     fetchNextPage,
@@ -376,7 +368,7 @@ export function useMarketplaceItemsViewModel({
     assets,
     searchFilteredAssets,
     searchFilteredTokensCount: searchFilteredTokens.length,
-    totalTokensCount: tokens.length,
+    totalTokensCount: rawTokens.length,
     collectionSupply,
     activeFilters,
     clearAllFilters,
@@ -387,5 +379,6 @@ export function useMarketplaceItemsViewModel({
     sales,
     address,
     rawTokens,
+    isLoading: isLoadingTokens,
   };
 }
