@@ -1,6 +1,4 @@
-import { CollectibleTag, StackDiamondIcon, TagIcon } from "@cartridge/ui";
 import { cn } from "@/lib/utils";
-import { formatNumber } from "@/lib/number";
 import { cva, VariantProps } from "class-variance-authority";
 import { useEffect, useState } from "react";
 
@@ -37,8 +35,6 @@ const collectiblePreviewVariants = cva(
 
 export const CollectiblePreview = ({
   images,
-  totalCount,
-  listingCount,
   variant,
   size,
   className,
