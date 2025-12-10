@@ -8,34 +8,47 @@ import {
 } from "@cartridge/arcade";
 import { useMarketplaceCollectionsViewModel } from "./useMarketplaceCollectionsViewModel";
 
-const mockUseEditions = vi.fn();
-const mockUseGames = vi.fn();
-const mockUseCollectionEditions = vi.fn();
 const mockUseTokenContracts = vi.fn();
 const mockUseMarketplace = vi.fn();
 
-vi.mock("@/collections", () => ({
-  useEditions: () => mockUseEditions(),
-  useGames: () => mockUseGames(),
-  useCollectionEditions: () => mockUseCollectionEditions(),
-  useTokenContracts: () => mockUseTokenContracts(),
-}));
-
-const mockCollectionEditionsAtom = vi.fn();
+// Mock atom values
+let mockCollectionEditionsValue: any[] = [];
+let mockEditionsValue: any[] = [];
+let mockGamesValue: any[] = [];
 
 vi.mock("@effect-atom/atom-react", () => ({
-  useAtomValue: () => ({
-    _tag: "Success",
-    value: mockCollectionEditionsAtom() ?? [],
+  useAtomValue: vi.fn((atom: any) => {
+    // Check atom type by its __type property that we'll set in the @/effect mock
+    if (atom?.__type === "editions") {
+      return {
+        _tag: "Success",
+        value: mockEditionsValue,
+      };
+    }
+    if (atom?.__type === "games") {
+      return {
+        _tag: "Success",
+        value: mockGamesValue,
+      };
+    }
+    // Default to collectionEditions
+    return {
+      _tag: "Success",
+      value: mockCollectionEditionsValue,
+    };
   }),
 }));
 
-vi.mock("@/effect", () => ({
-  collectionEditionsAtom: {},
-  unwrapOr: (result: any, defaultValue: any) =>
-    result._tag === "Success" ? result.value : defaultValue,
-  useTokenContracts: () => mockUseTokenContracts(),
-}));
+vi.mock("@/effect", async () => {
+  return {
+    collectionEditionsAtom: { __type: "collectionEditions" },
+    editionsAtom: { __type: "editions" },
+    gamesAtom: { __type: "games" },
+    unwrapOr: (result: any, defaultValue: any) =>
+      result._tag === "Success" ? result.value : defaultValue,
+    useTokenContracts: () => mockUseTokenContracts(),
+  };
+});
 
 vi.mock("@/hooks/marketplace", () => ({
   useMarketplace: () => mockUseMarketplace(),
@@ -66,15 +79,17 @@ const CURRENCY_ADDRESS =
   "0x0000000000000000000000000000000000000000000000000000000000000001";
 
 const baseEdition = {
-  id: "1",
+  id: 1,
   name: "Season One",
   config: { project: "proj" },
-  gameId: "game-1",
+  gameId: 1,
+  properties: { icon: "https://game.example/icon.png" },
 } as unknown as EditionModel;
 
 const baseGame = {
-  id: "game-1",
+  id: 1,
   name: "My Game",
+  properties: { icon: "https://game.example/icon.png" },
 } as unknown as GameModel;
 
 const baseCollectionEdition = [
@@ -88,10 +103,11 @@ describe("useMarketplaceCollectionsViewModel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockUseEditions.mockReturnValue([baseEdition]);
-    mockUseGames.mockReturnValue([baseGame]);
-    mockUseCollectionEditions.mockReturnValue(baseCollectionEdition);
-    mockCollectionEditionsAtom.mockReturnValue(baseCollectionEdition);
+    // Reset mock atom values
+    mockCollectionEditionsValue = baseCollectionEdition;
+    mockEditionsValue = [baseEdition];
+    mockGamesValue = [baseGame];
+
     mockUseTokenContracts.mockReturnValue({ data: [], status: "idle" });
     mockUseMarketplace.mockReturnValue({ listings: {}, sales: {} });
   });
@@ -189,6 +205,7 @@ describe("useMarketplaceCollectionsViewModel", () => {
       image: "https://tokens.example/logo.png",
     });
     expect(item.href).toBe("/game/my-game/edition/season-one/collection/0x1");
+    expect(item.gameIcon).toBe("https://game.example/icon.png");
   });
 
   it("marks collection list as empty when edition filter excludes all collections", () => {
@@ -205,12 +222,10 @@ describe("useMarketplaceCollectionsViewModel", () => {
       ],
     });
 
-    mockUseCollectionEditions.mockReturnValue(baseCollectionEdition);
-
     const otherEdition = {
-      id: "2",
+      id: 2,
       config: { project: "proj" },
-      gameId: "game-1",
+      gameId: 1,
     } as unknown as EditionModel;
 
     const { result } = renderHook(() =>
