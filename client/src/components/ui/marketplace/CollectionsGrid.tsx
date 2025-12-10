@@ -2,13 +2,13 @@ import { Empty, Skeleton } from "@cartridge/ui";
 import CollectibleCard from "./collectible-card";
 import { Link } from "@tanstack/react-router";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
-import { useProject } from "@/hooks/project";
 import arcade from "@/assets/arcade-logo.png";
 
 export interface CollectionsGridItem {
   key: string;
   title: string;
   image: string;
+  gameIcon?: string;
   totalCount: number;
   listingCount: number;
   lastSale: { value: string; image: string } | null;
@@ -21,8 +21,6 @@ interface CollectionsGridProps {
 }
 
 export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
-  const { game, edition } = useProject();
-
   if (items.length === 0) {
     return null;
   }
@@ -39,12 +37,12 @@ export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
           className="w-full group select-none"
         >
           <CollectibleCard
-            icon={edition?.properties.icon || game?.properties.icon || arcade}
+            icon={item.gameIcon || arcade}
             title={item.title}
             images={[item.image]}
             totalCount={item.totalCount}
             selectable={false}
-            listingCount={item.listingCount}
+            // listingCount={item.listingCount}
             lastSale={item.lastSale}
             price={item.price}
             className="cursor-pointer"

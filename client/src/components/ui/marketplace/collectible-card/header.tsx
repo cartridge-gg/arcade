@@ -59,6 +59,7 @@ export function CollectibleHeader({
         <Thumbnail
           variant="light"
           size="sm"
+          icon={icon === null ? undefined : icon}
           className={icon === undefined ? "hidden" : ""}
         />
         <p

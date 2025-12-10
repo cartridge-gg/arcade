@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useAtomValue } from "@effect-atom/atom-react";
 import {
   StatusType,
+  type CollectionEditionModel,
   type EditionModel,
   type GameModel,
   type OrderModel,
@@ -9,7 +10,12 @@ import {
 } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useTokenContracts, type EnrichedTokenContract } from "@/effect";
-import { collectionEditionsAtom, unwrapOr } from "@/effect";
+import {
+  collectionEditionsAtom,
+  editionsAtom,
+  gamesAtom,
+  unwrapOr,
+} from "@/effect";
 import { resizeImage } from "@/lib/helpers";
 import {
   deriveBestPrice,
@@ -26,6 +32,7 @@ export interface MarketplaceCollectionListItem {
   key: string;
   title: string;
   image: string;
+  gameIcon?: string;
   totalCount: number;
   listingCount: number;
   lastSale: MarketplaceCollectionPriceInfo | null;
@@ -67,9 +74,21 @@ const buildMarketplaceItems = (
     currentPathname: string;
     edition: EditionModel | undefined;
     game: GameModel | undefined;
+    games: GameModel[];
+    editions: EditionModel[];
+    collectionEditions: CollectionEditionModel[];
   },
 ): MarketplaceCollectionListItem[] => {
-  const { orders, sales, edition, game, currentPathname } = options;
+  const {
+    orders,
+    sales,
+    edition,
+    game,
+    currentPathname,
+    games,
+    editions,
+    collectionEditions,
+  } = options;
 
   return collections.map((collection) => {
     const collectionAddress = collection.contract_address;
@@ -90,10 +109,28 @@ const buildMarketplaceItems = (
     );
     const totalCount = Number.parseInt(collection.total_supply ?? "0");
 
+    // Find the game icon for this collection using: collection → edition → game
+    // 1. Find the edition that this collection belongs to
+    const collectionEdition = collectionEditions.find(
+      (ce) => BigInt(ce.collection) === BigInt(collectionAddress),
+    );
+
+    // 2. Find the edition details
+    const collectionEditionDetails = collectionEdition
+      ? editions.find((e) => BigInt(e.id) === BigInt(collectionEdition.edition))
+      : undefined;
+
+    // 3. Find the game using the edition's gameId
+    const collectionGame = collectionEditionDetails
+      ? games.find((g) => g.id === collectionEditionDetails.gameId)
+      : undefined;
+
+    const gameIcon = collectionGame?.properties.icon;
     return {
       key: `${collection.project}-${collectionAddress}`,
       title: collection.name,
       image: resizeImage(collection.image, 300, 300) ?? collection.image,
+      gameIcon,
       totalCount: Number.isNaN(totalCount) ? 0 : totalCount,
       listingCount,
       lastSale,
@@ -110,8 +147,12 @@ export function useMarketplaceCollectionsViewModel({
 }: UseMarketplaceCollectionsViewModelArgs): MarketplaceCollectionsViewModel {
   const collectionEditionsResult = useAtomValue(collectionEditionsAtom);
   const collectionEditions = unwrapOr(collectionEditionsResult, []);
+  const editionsResult = useAtomValue(editionsAtom);
+  const editions = unwrapOr(editionsResult, [] as EditionModel[]);
   const { data: allCollections, status } = useTokenContracts();
   const { listings: orders, sales } = useMarketplace();
+  const gamesResult = useAtomValue(gamesAtom);
+  const games = unwrapOr(gamesResult, [] as GameModel[]);
 
   const filteredCollections = useMemo(() => {
     if (!edition) return allCollections;
@@ -135,8 +176,21 @@ export function useMarketplaceCollectionsViewModel({
         currentPathname,
         edition,
         game,
+        games,
+        editions,
+        collectionEditions,
       }),
-    [filteredCollections, orders, sales, currentPathname, edition, game],
+    [
+      filteredCollections,
+      orders,
+      sales,
+      currentPathname,
+      edition,
+      game,
+      games,
+      editions,
+      collectionEditions,
+    ],
   );
 
   const isLoading =
