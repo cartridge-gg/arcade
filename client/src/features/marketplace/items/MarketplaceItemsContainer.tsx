@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { getChecksumAddress } from "starknet";
 import type { SaleEvent } from "@cartridge/arcade";
+import { useMediaQuery } from "@cartridge/ui";
 import { resizeImage } from "@/lib/helpers";
 import placeholderImage from "@/assets/placeholder.svg";
 import {
@@ -24,8 +25,7 @@ import { NavigationContextManager } from "@/features/navigation/NavigationContex
 import { useRouterState } from "@tanstack/react-router";
 import { useArcade } from "@/hooks/arcade";
 
-const ROW_HEIGHT = 218;
-const ITEMS_PER_ROW = 4;
+const ROW_HEIGHT = 184;
 
 const derivePrice = (
   asset: MarketplaceAsset,
@@ -124,7 +124,10 @@ export const MarketplaceItemsContainer = ({
   const { location } = useRouterState();
   const { games, editions } = useArcade();
 
-  const rowCount = Math.ceil(assets.length / ITEMS_PER_ROW);
+  const isLargeScreen = useMediaQuery("(min-width: 1200px)");
+  const itemsPerRow = isLargeScreen ? 4 : 2;
+
+  const rowCount = Math.ceil(assets.length / itemsPerRow);
 
   const virtualizer = useVirtualizer({
     count: rowCount + 1,
@@ -265,8 +268,8 @@ export const MarketplaceItemsContainer = ({
         transform: `translateY(${virtualRow.start}px)`,
       };
 
-      const startIndex = virtualRow.index * ITEMS_PER_ROW;
-      const endIndex = Math.min(startIndex + ITEMS_PER_ROW, items.length);
+      const startIndex = virtualRow.index * itemsPerRow;
+      const endIndex = Math.min(startIndex + itemsPerRow, items.length);
       const rowItems = items.slice(startIndex, endIndex);
 
       return {
@@ -276,7 +279,7 @@ export const MarketplaceItemsContainer = ({
         items: rowItems,
       };
     });
-  }, [virtualItems, rowCount, items]);
+  }, [virtualItems, rowCount, items, itemsPerRow]);
 
   const totalHeight = virtualizer.getTotalSize();
 

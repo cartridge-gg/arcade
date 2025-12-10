@@ -10,7 +10,7 @@ describe("useSearchViewModel", () => {
 
     expect(result.current.disabled).toBe(false);
     expect(result.current.searchValue).toBe("");
-    expect(result.current.placeholder).toBe("Search");
+    expect(result.current.placeholder).toBe("Search tokens, games, players...");
   });
 
   it("accepts disabled prop and sets it correctly", () => {
