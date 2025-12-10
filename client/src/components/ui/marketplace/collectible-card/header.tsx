@@ -1,6 +1,6 @@
 import { CheckboxIcon, TagIcon, Thumbnail } from "@cartridge/ui";
 import { cn } from "@/lib/utils";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { useCallback } from "react";
 
 export interface CollectibleHeaderProps

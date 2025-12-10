@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { useEffect, useState } from "react";
 
 export interface CollectiblePreviewProps
@@ -86,13 +86,15 @@ export const CollectiblePreview = ({
       <div className="absolute grow inset-0 blur-[8px] transition-opacity duration-150 opacity-75 group-hover:opacity-100">
         <img
           src={data || currentSrc}
+          alt="background preview"
           className="object-cover absolute inset-0 w-full h-full image-pixelated"
           onError={handleImageError}
         />
         <div
           className="bg-center bg-cover h-full w-full relative"
           style={{
-            backgroundImage: `linear-gradient(0deg, rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.64))`,
+            backgroundImage:
+              "linear-gradient(0deg, rgba(0, 0, 0, 0.64), rgba(0, 0, 0, 0.64))",
           }}
         />
       </div>
@@ -101,6 +103,7 @@ export const CollectiblePreview = ({
         style={{ imageRendering: "pixelated" }}
         draggable={false}
         src={data || currentSrc}
+        alt="collectible preview"
         onError={handleImageError}
       />
       {/*<div className="flex gap-1 items-center flex-wrap justify-start absolute bottom-1.5 left-1.5">

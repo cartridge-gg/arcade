@@ -1,7 +1,7 @@
 import { CollectibleCardFooter } from "./footer";
 import CollectiblePreview from "./preview";
 import { cn } from "@/lib/utils";
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { CollectibleHeader } from "./header";
 
 export interface CollectibleCardProps
