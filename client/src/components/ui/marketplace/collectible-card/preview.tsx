@@ -106,18 +106,6 @@ export const CollectiblePreview = ({
         alt="collectible preview"
         onError={handleImageError}
       />
-      {/*<div className="flex gap-1 items-center flex-wrap justify-start absolute bottom-1.5 left-1.5">
-        {!!totalCount && (
-          <CollectibleTag label={`${formatNumber(totalCount)}`}>
-            <StackDiamondIcon variant="solid" size="sm" />
-          </CollectibleTag>
-        )}
-        {!!listingCount && (
-          <CollectibleTag label={`${formatNumber(listingCount)}`}>
-            <TagIcon variant="solid" size="sm" />
-          </CollectibleTag>
-        )}
-      </div>*/}
     </div>
   );
 };

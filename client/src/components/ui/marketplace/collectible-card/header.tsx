@@ -15,7 +15,7 @@ export interface CollectibleHeaderProps
 }
 
 const collectibleHeaderVariants = cva(
-  "group absolute w-full flex gap-2 p-3 justify-between items-center text-sm font-medium transition-all duration-150 z-10",
+  "group absolute w-full flex gap-2 p-3 justify-between items-center text-sm font-medium transition-all duration-150 z-10 bg-gradient-to-b from-[#000] to-transparent",
   {
     variants: {
       variant: {
@@ -51,7 +51,7 @@ export function CollectibleHeader({
 
   return (
     <div
-      className={cn(collectibleHeaderVariants({ variant }), className)}
+      className={cn(collectibleHeaderVariants({ variant }), className, "")}
       {...props}
     >
       <div className="flex items-center gap-1 overflow-hidden">

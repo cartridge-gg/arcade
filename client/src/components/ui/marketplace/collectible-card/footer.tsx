@@ -10,7 +10,7 @@ export interface CollectibleCardFooterProps
 }
 
 const collectibleCardFooterVariants = cva(
-  "absolute bottom-0 w-full p-3 flex flex-col gap-1 text-foreground-400 data-[hidden=true]:hidden",
+  "absolute bottom-0 w-full p-3 flex flex-col gap-1 text-foreground-400 data-[hidden=true]:hidden bg-gradient-to-t from-[#000] to-transparent",
   {
     variants: {
       variant: {
