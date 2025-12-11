@@ -98,14 +98,16 @@ export const CollectiblePreview = ({
           }}
         />
       </div>
-      <img
-        className="object-contain h-full w-full relative transition duration-150 ease-in-out group-hover:scale-[1.02]"
-        style={{ imageRendering: "pixelated" }}
-        draggable={false}
-        src={data || currentSrc}
-        alt="collectible preview"
-        onError={handleImageError}
-      />
+      <div className="w-[120px] h-[120px] transition duration-150 ease-in-out group-hover:scale-[1.12]">
+        <img
+          className="object-contain h-full w-full relative"
+          style={{ imageRendering: "pixelated" }}
+          draggable={false}
+          src={data || currentSrc}
+          alt="collectible preview"
+          onError={handleImageError}
+        />
+      </div>
     </div>
   );
 };
