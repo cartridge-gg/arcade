@@ -42,7 +42,6 @@ export const CollectionsGrid = ({ items }: CollectionsGridProps) => {
             images={[item.image]}
             totalCount={item.totalCount}
             selectable={false}
-            // listingCount={item.listingCount}
             lastSale={item.lastSale}
             price={item.price}
             className="cursor-pointer"
