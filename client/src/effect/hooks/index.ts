@@ -34,3 +34,9 @@ export {
   useMarketplaceTokens,
   type UseMarketplaceTokensResult,
 } from "./marketplace-tokens";
+
+export {
+  useSearch,
+  type SearchOptions,
+  type SearchResultsView,
+} from "./search";

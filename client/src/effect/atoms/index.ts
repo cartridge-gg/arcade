@@ -163,3 +163,9 @@ export {
   marketplaceTokensAtom,
   type MarketplaceTokensError,
 } from "./marketplace-tokens";
+
+export {
+  searchAtom,
+  type SearchOptions,
+  type SearchResultsView,
+} from "./search";
