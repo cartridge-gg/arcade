@@ -1,33 +1,23 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { PopoverContent } from "@cartridge/ui";
-import type { GroupedSearchResults } from "./types";
+import type { SearchResultItem } from "./types";
 import { SearchResultItemComponent } from "./SearchResultItem";
 
 interface SearchResultsDropdownProps {
-  results: GroupedSearchResults;
+  sortedItems: SearchResultItem[];
+  selectedIndex: number;
   isLoading: boolean;
   query: string;
   onClick?: () => void;
 }
 
-const TYPE_ORDER = { game: 0, collection: 1, player: 2 } as const;
-
 const SearchResultsContent = memo(function SearchResultsContent({
-  results,
+  sortedItems,
+  selectedIndex,
   isLoading,
   query,
   onClick,
 }: SearchResultsDropdownProps) {
-  const sortedItems = useMemo(() => {
-    return [...results.games, ...results.collections, ...results.players].sort(
-      (a, b) => {
-        const typeDiff = TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
-        if (typeDiff !== 0) return typeDiff;
-        return (b.score ?? 0) - (a.score ?? 0);
-      },
-    );
-  }, [results]);
-
   if (isLoading) {
     return <div className="text-foreground-400 text-sm">Searching...</div>;
   }
@@ -38,11 +28,12 @@ const SearchResultsContent = memo(function SearchResultsContent({
 
   return (
     <>
-      {sortedItems.map((item) => (
+      {sortedItems.map((item, index) => (
         <SearchResultItemComponent
           key={`${item.type}-${item.id}`}
           item={item}
           query={query}
+          isSelected={index === selectedIndex}
           onClick={onClick}
         />
       ))}
@@ -51,7 +42,8 @@ const SearchResultsContent = memo(function SearchResultsContent({
 });
 
 export const SearchResultsDropdown = memo(function SearchResultsDropdown({
-  results,
+  sortedItems,
+  selectedIndex,
   isLoading,
   query,
   onClick,
@@ -62,7 +54,8 @@ export const SearchResultsDropdown = memo(function SearchResultsDropdown({
       onOpenAutoFocus={(e) => e.preventDefault()}
     >
       <SearchResultsContent
-        results={results}
+        sortedItems={sortedItems}
+        selectedIndex={selectedIndex}
         isLoading={isLoading}
         query={query}
         onClick={onClick}

@@ -1,5 +1,4 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { usePlayerGameStats } from "@/hooks/achievements";
 import { joinPaths } from "@/lib/helpers";
 import type { GameModel } from "@cartridge/arcade";
 import { DASHBOARD_ALLOWED_ROUTES } from "../navigation";
@@ -46,21 +45,13 @@ export function useGameItemViewModel(
   const {
     address,
     accesses,
-    editions,
     ownerships,
     pathname,
     close,
     trackGameInteraction,
     totalStats,
+    gameStatsMap,
   } = shared;
-
-  const projects = useMemo(() => {
-    if (!game) return [];
-    return editions
-      .filter((edition) => edition.gameId === game.id)
-      .map((edition) => edition.config.project);
-  }, [editions, game]);
-  const gameStats = usePlayerGameStats(projects);
 
   const cloneGame = useCallback((source: GameModel | null) => {
     if (!source) return null;
@@ -233,7 +224,9 @@ export function useGameItemViewModel(
     whitelisted: localGame?.whitelisted ?? true,
     published: localGame?.published ?? true,
     color: game?.color,
-    points: game ? gameStats.earnings : totalStats.earnings,
+    points: game
+      ? (gameStatsMap.get(game.id)?.earnings ?? 0)
+      : totalStats.earnings,
     target,
     onSelect,
     actions,
