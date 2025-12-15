@@ -6,7 +6,6 @@ import {
   type EditionModel,
   type GameModel,
   type OrderModel,
-  type SaleEvent,
 } from "@cartridge/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useTokenContracts, type EnrichedTokenContract } from "@/effect";
@@ -20,6 +19,7 @@ import { resizeImage } from "@/lib/helpers";
 import {
   deriveBestPrice,
   deriveLatestSalePrice,
+  getCachedChecksumAddress,
 } from "@/lib/shared/marketplace/utils";
 import { buildMarketplaceTargetPath } from "@/lib/shared/marketplace/path";
 
@@ -95,8 +95,8 @@ const buildMarketplaceItems = (
     const collectionOrders = orders[collectionAddress];
     const listingCount = buildListingCount(collectionOrders);
     const lastSale = deriveLatestSalePrice(
-      sales[collectionAddress] as
-        | Record<string, Record<string, SaleEvent>>
+      sales[getCachedChecksumAddress(collectionAddress)] as
+        | Record<string, Record<string, OrderModel>>
         | undefined,
     );
     const price = deriveBestPrice(collectionOrders);

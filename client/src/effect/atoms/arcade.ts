@@ -9,7 +9,7 @@ export const arcadeAtom = createEntityQueryWithUpdatesAtom(
     .withClause(clause)
     .withEntityModels(ARCADE_MODELS)
     .includeHashedKeys()
-    .withLimit(10000) as unknown as Parameters<
+    .withLimit(100000) as unknown as Parameters<
     typeof createEntityQueryWithUpdatesAtom
   >[1],
   clause,

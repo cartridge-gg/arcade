@@ -25,6 +25,7 @@ export function BaseTemplate({
 }: BaseTemplateProps) {
   useTheme();
   const { isOpen, handleTouchMove, handleTouchStart } = useSidebar();
+
   const { isMobile } = useDevice();
 
   return (

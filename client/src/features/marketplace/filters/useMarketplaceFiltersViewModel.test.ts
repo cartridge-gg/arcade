@@ -35,6 +35,7 @@ const mockRouterState = { location: { pathname: "/marketplace" } };
 
 vi.mock("@tanstack/react-router", () => ({
   useRouterState: () => mockRouterState,
+  useNavigate: () => vi.fn(),
 }));
 
 describe("useMarketplaceFiltersViewModel", () => {

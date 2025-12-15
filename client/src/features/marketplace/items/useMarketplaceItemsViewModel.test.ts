@@ -76,6 +76,12 @@ vi.mock("@effect-atom/atom-react", () => ({
 vi.mock("@/effect", () => ({
   useMarketplaceTokens: () => mockUseMarketplaceTokens(),
   filtersAtom: {},
+  collectionFiltersAtom: () => ({
+    activeFilters: {},
+    statusFilter: "all",
+    search: "",
+  }),
+  ownerTokenIdsAtom: () => ({ _tag: "Success", value: new Set() }),
   DEFAULT_STATUS_FILTER: "all",
 }));
 

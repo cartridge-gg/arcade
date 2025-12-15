@@ -7,7 +7,7 @@ import type {
   SaleEvent,
 } from "@cartridge/arcade";
 import { CategoryType, StatusType } from "@cartridge/arcade";
-import { getChecksumAddress } from "starknet";
+import { getCachedChecksumAddress } from "@/lib/shared/marketplace/utils";
 import { arcadeAtom } from "./arcade";
 import type { ArcadeEntityItem, ArcadeEventItem } from "../layers/arcade";
 
@@ -22,7 +22,7 @@ export type ListingsState = {
 };
 
 export type SalesState = {
-  [collection: string]: { [token: string]: { [sale: string]: SaleEvent } };
+  [collection: string]: { [token: string]: { [sale: string]: OrderModel } };
 };
 
 type ArcadeMarketModels = {
@@ -60,7 +60,7 @@ export const ordersAtom = Atom.make((get) => {
   );
 
   return orders.reduce<OrdersState>((acc, order) => {
-    const collection = getChecksumAddress(order.collection);
+    const collection = getCachedChecksumAddress(order.collection);
     const token = order.tokenId.toString();
     if (!acc[collection]) acc[collection] = {};
     if (!acc[collection][token]) acc[collection][token] = {};
@@ -81,7 +81,7 @@ export const buyOrdersAtom = Atom.make((get) => {
   );
 
   return orders.reduce<OrdersState>((acc, order) => {
-    const collection = getChecksumAddress(order.collection);
+    const collection = getCachedChecksumAddress(order.collection);
     const token = order.tokenId.toString();
     if (!acc[collection]) acc[collection] = {};
     if (!acc[collection][token]) acc[collection][token] = {};
@@ -106,7 +106,7 @@ export const listingsAtom = Atom.make((get) => {
 
   return listings.reduce<ListingsState>((acc, listing) => {
     const order = listing;
-    const collection = getChecksumAddress(order.collection);
+    const collection = getCachedChecksumAddress(order.collection);
     const token = order.tokenId.toString();
     if (!acc[collection]) acc[collection] = {};
     if (!acc[collection][token]) acc[collection][token] = {};
@@ -121,17 +121,18 @@ export const salesAtom = Atom.make((get) => {
 
   const sales = pipe(
     result.value.items,
-    A.filter((entity) => getArcadeMarketModels(entity)?.Sale !== undefined),
-    A.map((entity) => getArcadeMarketModels(entity)!.Sale!.data),
+    A.filter((entity) => getArcadeMarketModels(entity)?.Order !== undefined),
+    A.map((entity) => getArcadeMarketModels(entity)!.Order!.data),
+    A.filter((order) => order.category.value === CategoryType.Sell),
+    A.filter((order) => order.status.value === StatusType.Executed),
   );
 
-  return sales.reduce<SalesState>((acc, sale) => {
-    const order = sale.order;
-    const collection = getChecksumAddress(order.collection);
+  return sales.reduce<SalesState>((acc, order) => {
+    const collection = getCachedChecksumAddress(order.collection);
     const token = order.tokenId.toString();
     if (!acc[collection]) acc[collection] = {};
     if (!acc[collection][token]) acc[collection][token] = {};
-    acc[collection][token][order.id] = sale;
+    acc[collection][token][order.id] = order;
     return acc;
   }, {});
 });

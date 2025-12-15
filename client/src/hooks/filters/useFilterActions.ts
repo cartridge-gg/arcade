@@ -16,6 +16,7 @@ export interface UseFilterActionsReturn {
   removeFilter: (trait: string, value?: string) => void;
   clearAllFilters: () => void;
   setStatusFilter: (status: StatusFilter) => void;
+  setOwnerFilter: (owner: string | undefined) => void;
 }
 
 export function useFilterActions(
@@ -30,8 +31,8 @@ export function useFilterActions(
         return {
           ...state,
           [collectionAddress]: {
+            ...collection,
             activeFilters: cloneFilters(filters),
-            statusFilter: collection.statusFilter,
           },
         };
       });
@@ -64,8 +65,8 @@ export function useFilterActions(
         return {
           ...state,
           [collectionAddress]: {
+            ...collection,
             activeFilters: nextFilters,
-            statusFilter: collection.statusFilter,
           },
         };
       });
@@ -100,8 +101,8 @@ export function useFilterActions(
         return {
           ...state,
           [collectionAddress]: {
+            ...collection,
             activeFilters: nextFilters,
-            statusFilter: collection.statusFilter,
           },
         };
       });
@@ -117,8 +118,8 @@ export function useFilterActions(
       return {
         ...state,
         [collectionAddress]: {
+          ...collection,
           activeFilters: {},
-          statusFilter: collection.statusFilter,
         },
       };
     });
@@ -131,8 +132,24 @@ export function useFilterActions(
         return {
           ...state,
           [collectionAddress]: {
-            activeFilters: cloneFilters(collection.activeFilters),
+            ...collection,
             statusFilter: status,
+          },
+        };
+      });
+    },
+    [collectionAddress, setFilters],
+  );
+
+  const setOwnerFilter = useCallback(
+    (owner: string | undefined) => {
+      setFilters((state) => {
+        const collection = ensureCollectionState(state, collectionAddress);
+        return {
+          ...state,
+          [collectionAddress]: {
+            ...collection,
+            ownerFilter: owner,
           },
         };
       });
@@ -146,5 +163,6 @@ export function useFilterActions(
     removeFilter,
     clearAllFilters,
     setStatusFilter,
+    setOwnerFilter,
   };
 }

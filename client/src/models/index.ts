@@ -3,18 +3,31 @@ import { type ByteArray, byteArray, hash } from "starknet";
 export * from "./trophy";
 export * from "./progress";
 
-// Computes dojo selector from namespace and event name
+const byteArrayHashCache = new Map<string, string>();
+
+export function computeByteArrayHash(str: string): string {
+  const cached = byteArrayHashCache.get(str);
+  if (cached) return cached;
+
+  const bytes = byteArray.byteArrayFromString(str);
+  const result = hash.computePoseidonHashOnElements(serializeByteArray(bytes));
+  byteArrayHashCache.set(str, result);
+  return result;
+}
+
+const selectorCache = new Map<string, string>();
+
 export function getSelectorFromTag(namespace: string, event: string): string {
-  return hash.computePoseidonHashOnElements([
+  const key = `${namespace}:${event}`;
+  const cached = selectorCache.get(key);
+  if (cached) return cached;
+
+  const result = hash.computePoseidonHashOnElements([
     computeByteArrayHash(namespace),
     computeByteArrayHash(event),
   ]);
-}
-
-// Poseidon hash of a string representated as a ByteArray
-export function computeByteArrayHash(str: string): string {
-  const bytes = byteArray.byteArrayFromString(str);
-  return hash.computePoseidonHashOnElements(serializeByteArray(bytes));
+  selectorCache.set(key, result);
+  return result;
 }
 
 // Serializes a ByteArray to a bigint array

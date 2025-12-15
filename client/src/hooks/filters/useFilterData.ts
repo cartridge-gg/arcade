@@ -6,8 +6,7 @@ import {
   type TraitNameSummary,
 } from "@cartridge/arcade/marketplace";
 import {
-  filtersAtom,
-  DEFAULT_STATUS_FILTER,
+  collectionFiltersAtom,
   traitNamesAtom,
   metadataAtom,
   expandedTraitsMetadataAtom,
@@ -24,6 +23,7 @@ const EMPTY_ACTIVE_FILTERS: ActiveFilters = {};
 export interface UseFilterDataReturn {
   activeFilters: ActiveFilters;
   statusFilter: StatusFilter;
+  ownerFilter: string | undefined;
   traitSummary: TraitNameSummary[];
   availableFilters: AvailableFilters;
   hasActiveFilters: boolean;
@@ -36,11 +36,13 @@ export interface UseFilterDataReturn {
 }
 
 export function useFilterData(collectionAddress: string): UseFilterDataReturn {
-  const collections = useAtomValue(filtersAtom);
-  const collectionState = collections[collectionAddress];
+  const collectionState = useAtomValue(
+    collectionFiltersAtom(collectionAddress),
+  );
 
   const activeFilters = collectionState?.activeFilters ?? EMPTY_ACTIVE_FILTERS;
-  const statusFilter = collectionState?.statusFilter ?? DEFAULT_STATUS_FILTER;
+  const statusFilter = collectionState?.statusFilter;
+  const ownerFilter = collectionState?.ownerFilter;
 
   const [expandedTraits, setExpandedTraits] = useState<Set<string>>(new Set());
 
@@ -140,6 +142,7 @@ export function useFilterData(collectionAddress: string): UseFilterDataReturn {
   return {
     activeFilters,
     statusFilter,
+    ownerFilter,
     traitSummary,
     availableFilters,
     hasActiveFilters,

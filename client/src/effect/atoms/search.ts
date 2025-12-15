@@ -69,3 +69,25 @@ export const searchUIAtom = Atom.make<SearchUIState>({
   isOverlayOpen: false,
   selectedIndex: -1,
 });
+
+export type SearchInputState = {
+  searchValue: string;
+  debouncedQuery: string;
+};
+
+export const searchInputAtom = Atom.make<SearchInputState>({
+  searchValue: "",
+  debouncedQuery: "",
+});
+
+export type SearchDropdownState = {
+  isOpen: boolean;
+  isOverlayOpen: boolean;
+};
+
+export const searchDropdownAtom = Atom.make<SearchDropdownState>({
+  isOpen: false,
+  isOverlayOpen: false,
+});
+
+export const searchSelectedIndexAtom = Atom.make<number>(-1);

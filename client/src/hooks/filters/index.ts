@@ -8,3 +8,8 @@ export {
   useFilteredTokens,
   type UseFilteredTokensReturn,
 } from "./useFilteredTokens";
+export {
+  useOwnerFilter,
+  isValidAddress,
+  type UseOwnerFilterReturn,
+} from "./useOwnerFilter";

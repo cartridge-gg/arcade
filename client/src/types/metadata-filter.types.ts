@@ -45,6 +45,7 @@ export interface UseMetadataFiltersReturn {
 export interface CollectionFilterState {
   activeFilters: ActiveFilters;
   statusFilter: StatusFilter;
+  ownerFilter?: string;
 }
 
 export interface MetadataFilterStore {

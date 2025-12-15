@@ -38,7 +38,7 @@ export const useMarketplace = () => {
   const getCollectionOrders = useCallback(
     (contractAddress: string) => {
       const collection = getChecksumAddress(contractAddress);
-      const collectionOrders = orders[collection];
+      const collectionOrders = listings[collection];
       if (!collectionOrders) return {};
       return Object.entries(collectionOrders).reduce(
         (acc, [token, tokenOrders]) => {
@@ -52,7 +52,7 @@ export const useMarketplace = () => {
         {} as { [token: string]: OrderModel[] },
       );
     },
-    [orders],
+    [listings],
   );
 
   const collectionOrders: { [token: string]: OrderModel[] } = useMemo(() => {

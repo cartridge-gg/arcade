@@ -179,7 +179,7 @@ export function useTokenDetailViewModel({
 
     options.push(`address=${getChecksumAddress(owner)}`);
     options.push("purchaseView=true");
-    options.push(`tokenIds=${[tokenId].join(",")}`);
+    options.push(`tokenIds=${[addAddressPadding(tokenId)].join(",")}`);
     const path = `account/${username}/inventory/${subpath}/${addAddressPadding(collectionAddress)}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
 
     controller.openProfileAt(path);

@@ -21,6 +21,7 @@ export function useMetadataFilters({
     removeFilter: actionsRemoveFilter,
     clearAllFilters,
     setStatusFilter,
+    setOwnerFilter,
   } = useFilterActions(collectionAddress);
 
   const {
@@ -39,6 +40,7 @@ export function useMetadataFilters({
     collectionAddress,
     enabled,
     replaceFilters,
+    setOwnerFilter,
   });
 
   const { filteredTokens, precomputed, isEmpty } = useFilteredTokens({

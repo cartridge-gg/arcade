@@ -6,11 +6,12 @@ import {
   MarketplacePropertyEmpty,
   MarketplaceRadialItem,
 } from "@cartridge/ui";
-import { AttributeSection } from "./filters";
+import { AttributeSection, OwnerFilterSection } from "./filters";
 import type {
   MarketplaceFilterAttribute,
   MarketplaceFilterProperty,
 } from "@/features/marketplace/filters/useMarketplaceFiltersViewModel";
+import type { Account } from "@/effect/atoms";
 
 export type MarketplaceFilterPropertyView = MarketplaceFilterProperty;
 export type MarketplaceFilterAttributeView = MarketplaceFilterAttribute;
@@ -30,6 +31,12 @@ interface MarketplaceFiltersViewProps {
   onSearchChange: (attribute: string, value: string) => void;
   onAttributeExpand: (attribute: string, expanded: boolean) => void;
   isSummaryLoading?: boolean;
+  ownerInput: string;
+  ownerSuggestions: Account[];
+  isOwnerAddressInput: boolean;
+  onOwnerInputChange: (value: string) => void;
+  onOwnerSelectSuggestion: (account: Account) => void;
+  onClearOwner: () => void;
 }
 
 export const MarketplaceFiltersView = memo(
@@ -44,6 +51,12 @@ export const MarketplaceFiltersView = memo(
     onSearchChange,
     onAttributeExpand,
     isSummaryLoading,
+    ownerInput,
+    ownerSuggestions,
+    isOwnerAddressInput,
+    onOwnerInputChange,
+    onOwnerSelectSuggestion,
+    onClearOwner,
   }: MarketplaceFiltersViewProps) => {
     return (
       <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden rounded-none lg:rounded-xl">
@@ -60,6 +73,15 @@ export const MarketplaceFiltersView = memo(
             onClick={onAllClick}
           />
         </div>
+        <MarketplaceHeader label="Owner" />
+        <OwnerFilterSection
+          inputValue={ownerInput}
+          onInputChange={onOwnerInputChange}
+          suggestions={ownerSuggestions}
+          isAddressInput={isOwnerAddressInput}
+          onSelectSuggestion={onOwnerSelectSuggestion}
+          onClear={onClearOwner}
+        />
         <MarketplaceHeader label="Properties">
           {hasActiveFilters && <MarketplaceHeaderReset onClick={onClearAll} />}
         </MarketplaceHeader>

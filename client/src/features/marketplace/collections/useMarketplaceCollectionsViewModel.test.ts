@@ -75,6 +75,8 @@ vi.mock("ethereum-blockies-base64", () => ({
 }));
 
 const COLLECTION_ADDRESS = "0x1";
+const COLLECTION_ADDRESS_CHECKSUM =
+  "0x0000000000000000000000000000000000000000000000000000000000000001";
 const CURRENCY_ADDRESS =
   "0x0000000000000000000000000000000000000000000000000000000000000001";
 
@@ -165,11 +167,12 @@ describe("useMarketplaceCollectionsViewModel", () => {
         },
       },
       sales: {
-        [COLLECTION_ADDRESS]: {
+        [COLLECTION_ADDRESS_CHECKSUM]: {
           "2": {
             saleA: {
-              time: 100,
-              order: { currency: CURRENCY_ADDRESS, price: 500 },
+              id: 100,
+              currency: CURRENCY_ADDRESS,
+              price: 500,
             },
           },
         },

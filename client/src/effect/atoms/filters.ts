@@ -9,7 +9,19 @@ export type FiltersState = Record<string, CollectionFilterState>;
 
 export const DEFAULT_STATUS_FILTER: StatusFilter = "all";
 
+const DEFAULT_COLLECTION_STATE: CollectionFilterState = {
+  activeFilters: {},
+  statusFilter: DEFAULT_STATUS_FILTER,
+  ownerFilter: undefined,
+};
+
 export const filtersAtom = Atom.make<FiltersState>({});
+
+export const collectionFiltersAtom = Atom.family((collectionAddress: string) =>
+  filtersAtom.pipe(
+    Atom.map((state) => state[collectionAddress] ?? DEFAULT_COLLECTION_STATE),
+  ),
+);
 
 export const cloneFilters = (filters: ActiveFilters): ActiveFilters => {
   return Object.fromEntries(
@@ -25,6 +37,7 @@ export const ensureCollectionState = (
     collections[collectionAddress] ?? {
       activeFilters: {},
       statusFilter: DEFAULT_STATUS_FILTER,
+      ownerFilter: undefined,
     }
   );
 };

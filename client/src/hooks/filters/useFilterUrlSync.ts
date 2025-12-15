@@ -1,34 +1,42 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAtomValue } from "@effect-atom/atom-react";
-import { filtersAtom } from "@/effect/atoms";
+import { collectionFiltersAtom } from "@/effect/atoms";
 import {
   parseFiltersFromURL,
   serializeFiltersToURL,
 } from "@/utils/marketplace-filters";
 import type { UseFilterActionsReturn } from "./useFilterActions";
 
+const URL_SYNC_DEBOUNCE_MS = 250;
+
 interface UseFilterUrlSyncOptions {
   collectionAddress: string;
   enabled?: boolean;
   replaceFilters: UseFilterActionsReturn["replaceFilters"];
+  setOwnerFilter: UseFilterActionsReturn["setOwnerFilter"];
 }
 
 export function useFilterUrlSync({
   collectionAddress,
   enabled = true,
   replaceFilters,
+  setOwnerFilter,
 }: UseFilterUrlSyncOptions): void {
   const navigate = useNavigate();
   const { location } = useRouterState();
 
-  const collections = useAtomValue(filtersAtom);
-  const collectionState = collections[collectionAddress];
+  const collectionState = useAtomValue(
+    collectionFiltersAtom(collectionAddress),
+  );
   const activeFilters = collectionState?.activeFilters ?? {};
+  const ownerFilter = collectionState?.ownerFilter;
 
   const hasSyncedFromURL = useRef(false);
   const prevSerializedFilters = useRef<string | null>(null);
+  const prevOwnerFilter = useRef<string | null>(null);
   const isUpdatingFromURL = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -37,6 +45,7 @@ export function useFilterUrlSync({
 
     const searchParams = new URLSearchParams(location.searchStr ?? "");
     const filterParam = searchParams.get("filters");
+    const ownerParam = searchParams.get("owner");
 
     isUpdatingFromURL.current = true;
 
@@ -49,6 +58,11 @@ export function useFilterUrlSync({
       prevSerializedFilters.current = "";
     }
 
+    if (ownerParam) {
+      setOwnerFilter(ownerParam);
+      prevOwnerFilter.current = ownerParam;
+    }
+
     hasSyncedFromURL.current = true;
     isUpdatingFromURL.current = false;
   }, [
@@ -57,6 +71,7 @@ export function useFilterUrlSync({
     enabled,
     location.searchStr,
     replaceFilters,
+    setOwnerFilter,
   ]);
 
   useEffect(() => {
@@ -65,29 +80,58 @@ export function useFilterUrlSync({
     if (isUpdatingFromURL.current) return;
 
     const serialized = serializeFiltersToURL(activeFilters);
-    if (prevSerializedFilters.current === serialized) return;
+    const filtersChanged = prevSerializedFilters.current !== serialized;
+    const ownerChanged = prevOwnerFilter.current !== (ownerFilter ?? null);
 
-    prevSerializedFilters.current = serialized;
+    if (!filtersChanged && !ownerChanged) return;
 
-    const nextParams = new URLSearchParams(location.searchStr ?? "");
-
-    if (serialized) {
-      nextParams.set("filters", serialized);
-    } else {
-      nextParams.delete("filters");
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
 
-    const payload: Record<string, string> = {};
-    nextParams.forEach((value, key) => {
-      if (value) {
-        payload[key] = value;
-      }
-    });
+    debounceTimerRef.current = setTimeout(() => {
+      prevSerializedFilters.current = serialized;
+      prevOwnerFilter.current = ownerFilter ?? null;
 
-    navigate({
-      to: location.pathname,
-      search: payload,
-      replace: true,
-    });
-  }, [activeFilters, enabled, navigate, location.pathname, location.searchStr]);
+      const nextParams = new URLSearchParams(location.searchStr ?? "");
+
+      if (serialized) {
+        nextParams.set("filters", serialized);
+      } else {
+        nextParams.delete("filters");
+      }
+
+      if (ownerFilter) {
+        nextParams.set("owner", ownerFilter);
+      } else {
+        nextParams.delete("owner");
+      }
+
+      const payload: Record<string, string> = {};
+      nextParams.forEach((value, key) => {
+        if (value) {
+          payload[key] = value;
+        }
+      });
+
+      navigate({
+        to: location.pathname,
+        search: payload,
+        replace: true,
+      });
+    }, URL_SYNC_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [
+    activeFilters,
+    ownerFilter,
+    enabled,
+    navigate,
+    location.pathname,
+    location.searchStr,
+  ]);
 }

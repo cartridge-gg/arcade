@@ -1,10 +1,16 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useProject } from "@/hooks/project";
 import { useMarketplaceTokensStore } from "@/store";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import {
+  useOwnerFilter,
+  useFilterActions,
+  useFilterUrlSync,
+} from "@/hooks/filters";
+import type { Account } from "@/effect/atoms";
 
 export interface MarketplaceFilterProperty {
   property: string;
@@ -33,6 +39,12 @@ export interface MarketplaceFiltersViewModel {
   setSearchValue: (attribute: string, value: string) => void;
   onAttributeExpand: (attribute: string, expanded: boolean) => void;
   isSummaryLoading: boolean;
+  ownerInput: string;
+  ownerSuggestions: Account[];
+  isOwnerAddressInput: boolean;
+  onOwnerInputChange: (value: string) => void;
+  onOwnerSelectSuggestion: (account: Account) => void;
+  onClearOwner: () => void;
 }
 
 export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
@@ -43,6 +55,30 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
   const { location } = useRouterState();
 
   const [search, setSearch] = useState<Record<string, string>>({});
+
+  const {
+    inputValue: ownerInput,
+    setInputValue: setOwnerInput,
+    resolvedAddress: ownerAddress,
+    isAddressInput: isOwnerAddressInput,
+    suggestions: ownerSuggestions,
+    clearOwner,
+  } = useOwnerFilter();
+
+  const { setOwnerFilter, replaceFilters } = useFilterActions(
+    collectionAddress ?? "",
+  );
+
+  useFilterUrlSync({
+    collectionAddress: collectionAddress ?? "",
+    enabled: !!collectionAddress,
+    replaceFilters,
+    setOwnerFilter,
+  });
+
+  useEffect(() => {
+    setOwnerFilter(ownerAddress ?? undefined);
+  }, [ownerAddress, setOwnerFilter]);
 
   const {
     activeFilters,
@@ -158,6 +194,18 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     [expandTrait, collapseTrait],
   );
 
+  const handleOwnerSelectSuggestion = useCallback(
+    (account: Account) => {
+      setOwnerInput(account.username);
+    },
+    [setOwnerInput],
+  );
+
+  const handleClearOwner = useCallback(() => {
+    clearOwner();
+    setOwnerFilter(undefined);
+  }, [clearOwner, setOwnerFilter]);
+
   return {
     statusFilter,
     setStatusFilter,
@@ -169,5 +217,11 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     setSearchValue,
     onAttributeExpand,
     isSummaryLoading,
+    ownerInput,
+    ownerSuggestions,
+    isOwnerAddressInput,
+    onOwnerInputChange: setOwnerInput,
+    onOwnerSelectSuggestion: handleOwnerSelectSuggestion,
+    onClearOwner: handleClearOwner,
   };
 }

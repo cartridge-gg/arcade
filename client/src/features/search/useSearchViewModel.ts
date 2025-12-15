@@ -3,7 +3,11 @@ import { useAtom, useAtomValue } from "@effect-atom/atom-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSearch } from "@/effect/hooks/search";
 import { gamesAtom, tokenContractsAtom } from "@/effect/atoms";
-import { searchUIAtom } from "@/effect/atoms/search";
+import {
+  searchInputAtom,
+  searchDropdownAtom,
+  searchSelectedIndexAtom,
+} from "@/effect/atoms/search";
 import { unwrapOr } from "@/effect/utils/result";
 import { useDevice } from "@/hooks/device";
 import type { GameModel } from "@cartridge/arcade";
@@ -50,9 +54,13 @@ const TYPE_ORDER = { game: 0, collection: 1, player: 2 } as const;
 export function useSearchViewModel({
   disabled,
 }: SearchViewModelProps): SearchViewModel {
-  const [state, setState] = useAtom(searchUIAtom);
-  const { searchValue, debouncedQuery, isOpen, isOverlayOpen, selectedIndex } =
-    state;
+  const [inputState, setInputState] = useAtom(searchInputAtom);
+  const [dropdownState, setDropdownState] = useAtom(searchDropdownAtom);
+  const [selectedIndex, setSelectedIndex] = useAtom(searchSelectedIndexAtom);
+
+  const { searchValue, debouncedQuery } = inputState;
+  const { isOpen, isOverlayOpen } = dropdownState;
+
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isMobile } = useDevice();
   const navigate = useNavigate();
@@ -85,15 +93,15 @@ export function useSearchViewModel({
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (searchValue.length >= MIN_QUERY_LENGTH) {
       debounceRef.current = setTimeout(() => {
-        setState((s) => ({ ...s, debouncedQuery: searchValue }));
+        setInputState((s) => ({ ...s, debouncedQuery: searchValue }));
       }, DEBOUNCE_MS);
     } else {
-      setState((s) => ({ ...s, debouncedQuery: "" }));
+      setInputState((s) => ({ ...s, debouncedQuery: "" }));
     }
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [searchValue, setState]);
+  }, [searchValue, setInputState]);
 
   const gameResults = useMemo<SearchResultItem[]>(() => {
     if (!debouncedQuery || debouncedQuery.length < MIN_QUERY_LENGTH) return [];
@@ -154,61 +162,48 @@ export function useSearchViewModel({
   }, [results]);
 
   useEffect(() => {
-    setState((s) => ({ ...s, selectedIndex: -1 }));
-  }, [debouncedQuery, setState]);
+    setSelectedIndex(-1);
+  }, [debouncedQuery, setSelectedIndex]);
 
   const onSearchChange = useCallback(
     (value: string) => {
-      setState((s) => ({
-        ...s,
-        searchValue: value,
-        isOpen: value.length >= MIN_QUERY_LENGTH ? true : s.isOpen,
-      }));
+      setInputState((s) => ({ ...s, searchValue: value }));
+      if (value.length >= MIN_QUERY_LENGTH) {
+        setDropdownState((s) => ({ ...s, isOpen: true }));
+      }
     },
-    [setState],
+    [setInputState, setDropdownState],
   );
 
   const onFocus = useCallback(() => {
     if (isMobile) {
-      setState((s) => ({ ...s, isOverlayOpen: true }));
+      setDropdownState((s) => ({ ...s, isOverlayOpen: true }));
       return;
     }
     if (searchValue.length >= MIN_QUERY_LENGTH) {
-      setState((s) => ({ ...s, isOpen: true }));
+      setDropdownState((s) => ({ ...s, isOpen: true }));
     }
-  }, [searchValue, isMobile, setState]);
+  }, [searchValue, isMobile, setDropdownState]);
 
   const onBlur = useCallback(() => {
-    setTimeout(() => setState((s) => ({ ...s, isOpen: false })), 200);
-  }, [setState]);
+    setTimeout(() => setDropdownState((s) => ({ ...s, isOpen: false })), 200);
+  }, [setDropdownState]);
 
   const onClear = useCallback(() => {
-    setState((s) => ({
-      ...s,
-      searchValue: "",
-      debouncedQuery: "",
-      isOpen: false,
-    }));
-  }, [setState]);
+    setInputState({ searchValue: "", debouncedQuery: "" });
+    setDropdownState((s) => ({ ...s, isOpen: false }));
+  }, [setInputState, setDropdownState]);
 
   const onOverlayClose = useCallback(() => {
-    setState((s) => ({
-      ...s,
-      isOverlayOpen: false,
-      searchValue: "",
-      debouncedQuery: "",
-    }));
-  }, [setState]);
+    setDropdownState((s) => ({ ...s, isOverlayOpen: false }));
+    setInputState({ searchValue: "", debouncedQuery: "" });
+  }, [setDropdownState, setInputState]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") {
-        setState((s) => ({
-          ...s,
-          isOpen: false,
-          isOverlayOpen: false,
-          selectedIndex: -1,
-        }));
+        setDropdownState({ isOpen: false, isOverlayOpen: false });
+        setSelectedIndex(-1);
         return;
       }
 
@@ -219,33 +214,31 @@ export function useSearchViewModel({
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setState((s) => ({
-          ...s,
-          selectedIndex: (s.selectedIndex + 1) % itemCount,
-        }));
+        setSelectedIndex((prev) => (prev + 1) % itemCount);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setState((s) => ({
-          ...s,
-          selectedIndex:
-            s.selectedIndex <= 0 ? itemCount - 1 : s.selectedIndex - 1,
-        }));
+        setSelectedIndex((prev) => (prev <= 0 ? itemCount - 1 : prev - 1));
       } else if (e.key === "Enter" && selectedIndex >= 0) {
         e.preventDefault();
         const item = sortedItems[selectedIndex];
         if (item) {
           navigate({ to: item.link });
-          setState((s) => ({
-            ...s,
-            isOpen: false,
-            selectedIndex: -1,
-            searchValue: "",
-            debouncedQuery: "",
-          }));
+          setDropdownState((s) => ({ ...s, isOpen: false }));
+          setSelectedIndex(-1);
+          setInputState({ searchValue: "", debouncedQuery: "" });
         }
       }
     },
-    [sortedItems, selectedIndex, navigate, setState, isOpen, isLoading],
+    [
+      sortedItems,
+      selectedIndex,
+      navigate,
+      setDropdownState,
+      setSelectedIndex,
+      setInputState,
+      isOpen,
+      isLoading,
+    ],
   );
 
   return {

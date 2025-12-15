@@ -13,9 +13,11 @@ import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 import {
   useMarketplaceTokens,
-  filtersAtom,
+  collectionFiltersAtom,
   DEFAULT_STATUS_FILTER,
+  ownerTokenIdsAtom,
 } from "@/effect";
+import { unwrapOr } from "@/effect";
 import { useMarketplaceTokensStore } from "@/store";
 import { useListedTokensFetcher } from "@/hooks/use-listed-tokens-fetcher";
 import type { ActiveFilters } from "@/types/metadata-filter.types";
@@ -117,10 +119,28 @@ export function useMarketplaceItemsViewModel({
     enabled: listedTokenIds.length > 0,
   });
 
-  const collections = useAtomValue(filtersAtom);
-  const collectionState = collections[collectionAddress];
+  const collectionState = useAtomValue(
+    collectionFiltersAtom(collectionAddress),
+  );
   const activeFilters: ActiveFilters = collectionState?.activeFilters ?? {};
   const statusFilter = collectionState?.statusFilter ?? DEFAULT_STATUS_FILTER;
+  const ownerFilter = collectionState?.ownerFilter;
+
+  const ownerTokenIdsResult = useAtomValue(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ownerTokenIdsAtom(collectionAddress, ownerFilter) as any,
+  ) as { _tag: string; value?: Set<string> };
+  const ownerTokenIds = ownerFilter
+    ? unwrapOr(
+        ownerTokenIdsResult as
+          | { _tag: "Success"; value: Set<string> }
+          | { _tag: "Initial" }
+          | { _tag: "Failure" },
+        new Set<string>(),
+      )
+    : null;
+  const isOwnerFilterLoading =
+    ownerFilter && ownerTokenIdsResult._tag === "Initial";
 
   const getOrdersForToken = useCallback(
     (rawTokenId?: string | bigint) => {
@@ -153,6 +173,31 @@ export function useMarketplaceItemsViewModel({
 
   const hasActiveFilters = Object.keys(activeFilters).length > 0;
 
+  const { combinedTokenIds, shouldShowEmpty } = useMemo(() => {
+    if (ownerFilter && ownerTokenIds) {
+      if (ownerTokenIds.size === 0) {
+        return { combinedTokenIds: undefined, shouldShowEmpty: true };
+      }
+      if (statusFilter === "listed" && listedTokenIds.length > 0) {
+        const listedSet = new Set(listedTokenIds);
+        const intersection = [...ownerTokenIds].filter((id) =>
+          listedSet.has(id),
+        );
+        return {
+          combinedTokenIds: intersection.length > 0 ? intersection : undefined,
+          shouldShowEmpty: intersection.length === 0,
+        };
+      }
+      return { combinedTokenIds: [...ownerTokenIds], shouldShowEmpty: false };
+    }
+
+    if (statusFilter === "listed" && listedTokenIds.length > 0) {
+      return { combinedTokenIds: listedTokenIds, shouldShowEmpty: false };
+    }
+
+    return { combinedTokenIds: undefined, shouldShowEmpty: false };
+  }, [ownerFilter, ownerTokenIds, statusFilter, listedTokenIds]);
+
   const {
     collection,
     tokens: rawTokens,
@@ -162,8 +207,9 @@ export function useMarketplaceItemsViewModel({
     fetchNextPage,
     isLoading: isLoadingTokens,
   } = useMarketplaceTokens(DEFAULT_PROJECT, collectionAddress, {
-    enabled: !!collectionAddress,
+    enabled: !!collectionAddress && !shouldShowEmpty,
     attributeFilters: hasActiveFilters ? activeFilters : undefined,
+    tokenIds: combinedTokenIds,
   });
 
   const { clearAllFilters } = useMetadataFilters({
@@ -172,54 +218,16 @@ export function useMarketplaceItemsViewModel({
     enabled: !!collectionAddress && rawTokens.length > 0,
   });
 
-  const statusFilteredTokens = useMemo(() => {
-    if (statusFilter === "all") {
-      return rawTokens;
-    }
-
-    if (listedTokens.length > 0) {
-      if (hasActiveFilters) {
-        const activeFilterSet = new Set(
-          rawTokens.map((t) => t.token_id?.toString()),
-        );
-        return listedTokens.filter((token) =>
-          activeFilterSet.has(token.token_id?.toString()),
-        );
-      }
-      return listedTokens;
-    }
-
-    return rawTokens.filter((token) => {
-      const tokenOrders = getOrdersForToken(token.token_id?.toString());
-      return tokenOrders.length > 0;
-    });
-  }, [
-    statusFilter,
-    rawTokens,
-    listedTokens,
-    hasActiveFilters,
-    getOrdersForToken,
-  ]);
-
-  const hasMoreFiltered = useMemo(() => {
-    if (statusFilter !== "all" && listedTokens.length > 0) {
-      return false;
-    }
-    return hasMore;
-  }, [statusFilter, listedTokens.length, hasMore]);
+  const effectiveTokens = shouldShowEmpty ? [] : rawTokens;
 
   const searchFilteredTokens = useMemo(() => {
-    if (!search.trim()) return statusFilteredTokens ?? [];
-
+    if (!search.trim()) return effectiveTokens;
     const searchLower = search.toLowerCase();
-
-    return (
-      statusFilteredTokens.filter((token) => {
-        const tokenName = (token.metadata as any)?.name || token.name || "";
-        return tokenName.toLowerCase().includes(searchLower);
-      }) ?? []
-    );
-  }, [statusFilteredTokens, search]);
+    return effectiveTokens.filter((token) => {
+      const tokenName = (token.metadata as any)?.name || token.name || "";
+      return tokenName.toLowerCase().includes(searchLower);
+    });
+  }, [effectiveTokens, search]);
 
   useEffect(() => {
     if (search && search !== lastSearch) {
@@ -383,7 +391,7 @@ export function useMarketplaceItemsViewModel({
     collectionAddress,
     collection,
     status,
-    hasMore: hasMoreFiltered,
+    hasMore,
     isFetchingNextPage,
     fetchNextPage,
     search,
@@ -405,7 +413,7 @@ export function useMarketplaceItemsViewModel({
     sales,
     address,
     rawTokens,
-    isLoading: isLoadingTokens,
+    isLoading: isLoadingTokens || Boolean(isOwnerFilterLoading),
     statusFilter,
     listedTokens,
   };

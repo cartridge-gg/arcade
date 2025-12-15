@@ -13,6 +13,12 @@ export const MarketplaceFiltersContainer = () => {
     setSearchValue,
     onAttributeExpand,
     isSummaryLoading,
+    ownerInput,
+    ownerSuggestions,
+    isOwnerAddressInput,
+    onOwnerInputChange,
+    onOwnerSelectSuggestion,
+    onClearOwner,
   } = useMarketplaceFiltersViewModel();
 
   const handleListedClick = useCallback(
@@ -36,6 +42,12 @@ export const MarketplaceFiltersContainer = () => {
       onSearchChange={setSearchValue}
       onAttributeExpand={onAttributeExpand}
       isSummaryLoading={isSummaryLoading}
+      ownerInput={ownerInput}
+      ownerSuggestions={ownerSuggestions}
+      isOwnerAddressInput={isOwnerAddressInput}
+      onOwnerInputChange={onOwnerInputChange}
+      onOwnerSelectSuggestion={onOwnerSelectSuggestion}
+      onClearOwner={onClearOwner}
     />
   );
 };

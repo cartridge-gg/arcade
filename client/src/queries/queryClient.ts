@@ -40,9 +40,9 @@ export const queryConfigs = {
     refetchInterval: false,
   },
   marketplace: {
-    staleTime: 0, // Always stale for real-time data
-    gcTime: 1000 * 60 * 5, // 5 minutes
-    refetchInterval: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 60 * 2, // 2 minutes - balance between freshness and performance
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchInterval: 1000 * 60 * 2, // 2 minutes - reduced from 30s to minimize re-renders
   },
   games: {
     staleTime: 1000 * 60 * 30, // 30 minutes

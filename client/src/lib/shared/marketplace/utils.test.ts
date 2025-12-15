@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { OrderModel, SaleEvent } from "@cartridge/arcade";
+import type { OrderModel } from "@cartridge/arcade";
 import {
   formatPriceInfo,
   deriveBestPrice,
@@ -30,12 +30,6 @@ const buildOrder = (overrides: Partial<OrderModel>): OrderModel =>
     ...overrides,
   }) as OrderModel;
 
-const buildSale = (overrides: Partial<SaleEvent>): SaleEvent =>
-  ({
-    time: 10,
-    order: buildOrder({}),
-    ...overrides,
-  }) as SaleEvent;
 
 describe("shared marketplace utils", () => {
   beforeEach(() => {
@@ -78,10 +72,10 @@ describe("shared marketplace utils", () => {
 
   describe("deriveLatestSalePrice", () => {
     it("returns the price of the most recent sale", () => {
-      const sales: Record<string, Record<string, SaleEvent>> = {
+      const sales: Record<string, Record<string, OrderModel>> = {
         "1": {
-          a: buildSale({ time: 5, order: buildOrder({ price: 1_100_000 }) }),
-          b: buildSale({ time: 15, order: buildOrder({ price: 600_000 }) }),
+          a: buildOrder({ id: 5, price: 1_100_000 }) as OrderModel,
+          b: buildOrder({ id: 15, price: 600_000 }) as OrderModel,
         },
       };
       const price = deriveLatestSalePrice(sales);
@@ -95,12 +89,9 @@ describe("shared marketplace utils", () => {
 
   describe("deriveLatestSalePriceForToken", () => {
     it("returns newest sale for a token", () => {
-      const sales: Record<string, SaleEvent> = {
-        old: buildSale({ time: 1, order: buildOrder({ price: 2_000_000 }) }),
-        recent: buildSale({
-          time: 10,
-          order: buildOrder({ price: 1_500_000 }),
-        }),
+      const sales: Record<string, OrderModel> = {
+        old: buildOrder({ id: 1, price: 2_000_000 }) as OrderModel,
+        recent: buildOrder({ id: 10, price: 1_500_000 }) as OrderModel,
       };
       const price = deriveLatestSalePriceForToken(sales);
       expect(price?.value).toBe("1.5000");
