@@ -5,7 +5,11 @@ import { LayersIcon } from "@/components/ui/icons";
 import { UserAvatar } from "@/components/user/avatar";
 import { cn } from "@/lib/utils";
 
-const truncateAddress = (address: string, startChars = 6, endChars = 4) => {
+export const truncateAddress = (
+  address: string,
+  startChars = 6,
+  endChars = 4,
+) => {
   if (!address) return "";
   if (address.length <= startChars + endChars) return address;
   return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
@@ -49,7 +53,9 @@ export function TokenDetailSidebar() {
           <DetailItem label="Contract Address">
             {collectionAddressTrunc}
           </DetailItem>
-          <DetailItem label="Token ID">{tokenIdStr}</DetailItem>
+          <DetailItem label="Token ID">
+            {truncateAddress(tokenIdStr)}
+          </DetailItem>
           <DetailItem label="Token Standard">{tokenStandard}</DetailItem>
         </div>
       </div>
@@ -130,8 +136,11 @@ function CollectionSupply({ supply }: { supply: string }) {
 function Username({
   username,
   address,
-}: { username: string | undefined; address: string }) {
-  if (!username) return address;
+}: {
+  username: string | undefined;
+  address: string;
+}) {
+  if (!username) return truncateAddress(address);
   return (
     <span className="flex flex-row gap-1 items-center">
       <UserAvatar username={username} />
