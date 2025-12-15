@@ -14,6 +14,7 @@ pub mod RegistrableComponent {
     };
     use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
     use starterpack::store::{StarterpackStoreTrait, StoreTrait};
+    use starterpack::types::metadata::{StarterpackMetadata, StarterpackMetadataTrait};
 
     // Storage
 
@@ -38,7 +39,7 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: ByteArray,
+            metadata: StarterpackMetadata,
         ) -> u32 {
             let mut store = StoreTrait::new(world);
 
@@ -56,7 +57,7 @@ pub mod RegistrableComponent {
                 reissuable,
                 price,
                 payment_token,
-                metadata,
+                metadata.jsonify(),
                 time,
             );
 
@@ -129,7 +130,7 @@ pub mod RegistrableComponent {
             self: @ComponentState<TContractState>,
             mut world: WorldStorage,
             starterpack_id: u32,
-            metadata: ByteArray,
+            metadata: StarterpackMetadata,
         ) {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
@@ -142,8 +143,9 @@ pub mod RegistrableComponent {
             let caller = get_caller_address();
             starterpack.assert_is_owner(caller);
 
-            // [Effect] Update metadata
-            starterpack.update_metadata(metadata.clone());
+            // [Effect] Update metadata (convert to JSON)
+            let metadata_json = metadata.jsonify();
+            starterpack.update_metadata(metadata_json.clone());
 
             // [Effect] Store updated starterpack
             store.set_starterpack(@starterpack);
@@ -159,7 +161,7 @@ pub mod RegistrableComponent {
                         reissuable: starterpack.reissuable,
                         price: starterpack.price,
                         payment_token: starterpack.payment_token,
-                        metadata,
+                        metadata: metadata_json,
                         time,
                     },
                 );

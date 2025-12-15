@@ -3,6 +3,7 @@ pub mod interface;
 pub mod store;
 
 pub mod types {
+    pub mod metadata;
     pub mod status;
 }
 
