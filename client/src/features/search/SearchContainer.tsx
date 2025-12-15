@@ -3,7 +3,7 @@ import { useSearchViewModel } from "./useSearchViewModel";
 
 export const SearchContainer = () => {
   const viewModel = useSearchViewModel({
-    disabled: process.env.NODE_ENV !== "development",
+    disabled: false,
   });
   return <SearchView {...viewModel} />;
 };

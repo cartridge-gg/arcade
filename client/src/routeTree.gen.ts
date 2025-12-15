@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as PredictRouteImport } from './routes/predict'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -70,6 +71,11 @@ import { Route as GameGameEditionEditionCollectionCollectionItemsRouteImport } f
 import { Route as GameGameEditionEditionCollectionCollectionHoldersRouteImport } from './routes/game/$game_/edition/$edition_/collection/$collection/holders'
 import { Route as GameGameEditionEditionCollectionCollectionActivityRouteImport } from './routes/game/$game_/edition/$edition_/collection/$collection/activity'
 
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PredictRoute = PredictRouteImport.update({
   id: '/predict',
   path: '/predict',
@@ -416,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/predict': typeof PredictRoute
+  '/search': typeof SearchRoute
   '/collection/$collection': typeof CollectionCollectionRouteWithChildren
   '/game/$game': typeof GameGameRouteWithChildren
   '/player/$player': typeof PlayerPlayerRouteWithChildren
@@ -478,6 +485,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/predict': typeof PredictRoute
+  '/search': typeof SearchRoute
   '/collection/$collection/activity': typeof CollectionCollectionActivityRoute
   '/collection/$collection/holders': typeof CollectionCollectionHoldersRoute
   '/collection/$collection/items': typeof CollectionCollectionItemsRoute
@@ -534,6 +542,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/marketplace': typeof MarketplaceRoute
   '/predict': typeof PredictRoute
+  '/search': typeof SearchRoute
   '/collection/$collection': typeof CollectionCollectionRouteWithChildren
   '/game/$game': typeof GameGameRouteWithChildren
   '/player/$player': typeof PlayerPlayerRouteWithChildren
@@ -598,6 +607,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/marketplace'
     | '/predict'
+    | '/search'
     | '/collection/$collection'
     | '/game/$game'
     | '/player/$player'
@@ -660,6 +670,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/marketplace'
     | '/predict'
+    | '/search'
     | '/collection/$collection/activity'
     | '/collection/$collection/holders'
     | '/collection/$collection/items'
@@ -715,6 +726,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/marketplace'
     | '/predict'
+    | '/search'
     | '/collection/$collection'
     | '/game/$game'
     | '/player/$player'
@@ -778,6 +790,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   MarketplaceRoute: typeof MarketplaceRoute
   PredictRoute: typeof PredictRoute
+  SearchRoute: typeof SearchRoute
   CollectionCollectionRoute: typeof CollectionCollectionRouteWithChildren
   GameGameRoute: typeof GameGameRouteWithChildren
   PlayerPlayerRoute: typeof PlayerPlayerRouteWithChildren
@@ -790,6 +803,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/predict': {
       id: '/predict'
       path: '/predict'
@@ -1402,6 +1422,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   MarketplaceRoute: MarketplaceRoute,
   PredictRoute: PredictRoute,
+  SearchRoute: SearchRoute,
   CollectionCollectionRoute: CollectionCollectionRouteWithChildren,
   GameGameRoute: GameGameRouteWithChildren,
   PlayerPlayerRoute: PlayerPlayerRouteWithChildren,
