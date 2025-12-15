@@ -1,7 +1,7 @@
 // Internal imports
 
 use arcade::systems::starterpack::IStarterpackRegistryDispatcherTrait;
-use arcade::tests::setup::setup::{OWNER, PLAYER, spawn};
+use arcade::tests::setup::setup::{OWNER, PLAYER, STARTERPACK_METADATA, spawn};
 use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
 use starterpack::constants::FEE_DENOMINATOR;
@@ -26,8 +26,6 @@ fn test_sp_fees_distribution_no_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -36,7 +34,7 @@ fn test_sp_fees_distribution_no_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Record] Initial balances
@@ -89,8 +87,6 @@ fn test_sp_fees_distribution_with_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -99,7 +95,7 @@ fn test_sp_fees_distribution_with_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Record] Initial balances
@@ -163,8 +159,6 @@ fn test_sp_quote_calculation() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -173,7 +167,7 @@ fn test_sp_quote_calculation() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Quote] Without referrer
@@ -206,8 +200,6 @@ fn test_sp_free() {
 
     // [Register] Free starterpack (price = 0)
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Free Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -216,7 +208,7 @@ fn test_sp_free() {
             reissuable: true,
             price: 0, // Free!
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Record] Initial balance

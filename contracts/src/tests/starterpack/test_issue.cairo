@@ -1,7 +1,7 @@
 // Internal imports
 
 use arcade::systems::starterpack::IStarterpackRegistryDispatcherTrait;
-use arcade::tests::setup::setup::{OWNER, PLAYER, spawn};
+use arcade::tests::setup::setup::{OWNER, PLAYER, STARTERPACK_METADATA, spawn};
 use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
 use starterpack::models::index::{GroupReward, ReferralReward, Starterpack};
@@ -28,8 +28,6 @@ fn test_sp_issue() {
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -38,7 +36,7 @@ fn test_sp_issue() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] Starterpack to player
@@ -72,8 +70,6 @@ fn test_sp_issue_with_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -82,7 +78,7 @@ fn test_sp_issue_with_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Record] Initial balances
@@ -120,8 +116,6 @@ fn test_sp_issue_not_reissuable() {
 
     // [Register] Non-reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -130,7 +124,7 @@ fn test_sp_issue_not_reissuable() {
             reissuable: false, // Not reissuable
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] First time
@@ -170,8 +164,6 @@ fn test_sp_issue_reissuable() {
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -180,7 +172,7 @@ fn test_sp_issue_reissuable() {
             reissuable: true, // Reissuable
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] First time
@@ -226,8 +218,6 @@ fn test_sp_issue_paused() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -236,7 +226,7 @@ fn test_sp_issue_paused() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Pause] Starterpack
@@ -268,8 +258,6 @@ fn test_sp_referral_reward_tracking() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -278,7 +266,7 @@ fn test_sp_referral_reward_tracking() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] With referrer
@@ -316,8 +304,6 @@ fn test_sp_group_reward_tracking() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -326,7 +312,7 @@ fn test_sp_group_reward_tracking() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] With referrer and group
@@ -365,8 +351,6 @@ fn test_sp_multiple_referrals_accumulation() {
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -375,7 +359,7 @@ fn test_sp_multiple_referrals_accumulation() {
             reissuable: true, // Make it reissuable for multiple purchases
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] First purchase with referrer
@@ -423,8 +407,6 @@ fn test_sp_group_multiple_referrals_accumulation() {
 
     // [Register] Reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -433,7 +415,7 @@ fn test_sp_group_multiple_referrals_accumulation() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     let group_name = 'awesome_group';
@@ -490,8 +472,6 @@ fn test_sp_no_referral_tracking_without_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -500,7 +480,7 @@ fn test_sp_no_referral_tracking_without_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] Without referrer
@@ -536,8 +516,6 @@ fn test_sp_issue_with_quantity() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -546,7 +524,7 @@ fn test_sp_issue_with_quantity() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] 5 starterpacks at once
@@ -582,8 +560,6 @@ fn test_sp_quote_with_quantity() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -592,7 +568,7 @@ fn test_sp_quote_with_quantity() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Quote] For quantity of 3
@@ -621,8 +597,6 @@ fn test_sp_quote_with_quantity_and_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -631,7 +605,7 @@ fn test_sp_quote_with_quantity_and_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Quote] For quantity of 3 with referrer
@@ -661,8 +635,6 @@ fn test_sp_issue_quantity_with_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -671,7 +643,7 @@ fn test_sp_issue_quantity_with_referrer() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Record] Initial balances
@@ -726,8 +698,6 @@ fn test_sp_issue_quantity_group_rewards() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -736,7 +706,7 @@ fn test_sp_issue_quantity_group_rewards() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     let group_name = 'quantity_group';
@@ -778,8 +748,6 @@ fn test_sp_issue_quantity_exceeds_limit_non_reissuable() {
 
     // [Register] Non-reissuable starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -788,7 +756,7 @@ fn test_sp_issue_quantity_exceeds_limit_non_reissuable() {
             reissuable: false, // Not reissuable
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Issue] Try to issue quantity > 1 on non-reissuable - should fail

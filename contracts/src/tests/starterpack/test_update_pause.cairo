@@ -1,7 +1,7 @@
 // Internal imports
 
 use arcade::systems::starterpack::IStarterpackRegistryDispatcherTrait;
-use arcade::tests::setup::setup::{OWNER, spawn};
+use arcade::tests::setup::setup::{OWNER, STARTERPACK_METADATA, spawn};
 use starknet::testing;
 use starterpack::models::index::Starterpack;
 use starterpack::store::{StarterpackStoreTrait, StoreTrait};
@@ -26,8 +26,6 @@ fn test_sp_update() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -36,7 +34,7 @@ fn test_sp_update() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Update] Starterpack settings
@@ -73,8 +71,6 @@ fn test_sp_update_unauthorized() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -83,7 +79,7 @@ fn test_sp_update_unauthorized() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Update] Try to update from different address - should fail
@@ -111,8 +107,6 @@ fn test_sp_pause_resume() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -121,7 +115,7 @@ fn test_sp_pause_resume() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Pause]
@@ -152,8 +146,6 @@ fn test_sp_pause_unauthorized() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -162,7 +154,7 @@ fn test_sp_pause_unauthorized() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Pause] Try from unauthorized address - should fail
@@ -182,8 +174,6 @@ fn test_sp_resume_unauthorized() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
     let starterpack_id = systems
         .starterpack
         .register(
@@ -192,7 +182,7 @@ fn test_sp_resume_unauthorized() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata,
+            metadata: STARTERPACK_METADATA(),
         );
 
     // [Pause] As owner

@@ -38,17 +38,26 @@ pub mod Errors {
 pub impl ItemImpl of ItemTrait {
     #[inline]
     fn new(name: ByteArray, description: ByteArray, image_uri: ByteArray) -> StarterpackItem {
-        // [Check] Inputs
-        ItemAssert::assert_valid_name(@name);
-        ItemAssert::assert_valid_description(@description);
-        ItemAssert::assert_valid_image_uri(@image_uri);
-        // [Return] Item
-        StarterpackItem { name, description, image_uri }
+        let item = StarterpackItem { name, description, image_uri };
+        item.validate();
+        item
+    }
+
+    #[inline]
+    fn validate(self: @StarterpackItem) {
+        ItemAssert::assert_valid_name(self.name);
+        ItemAssert::assert_valid_description(self.description);
+        ItemAssert::assert_valid_image_uri(self.image_uri);
     }
 
     #[inline]
     fn jsonify(self: StarterpackItem) -> ByteArray {
-        // [Return] Item
+        self.validate();
+        self.jsonify_unchecked()
+    }
+
+    #[inline]
+    fn jsonify_unchecked(self: StarterpackItem) -> ByteArray {
         JsonImpl::new()
             .add("name", self.name)
             .add("description", self.description)
@@ -85,20 +94,33 @@ pub impl StarterpackMetadataImpl of StarterpackMetadataTrait {
         items: Span<StarterpackItem>,
         additional_payment_tokens: Span<ContractAddress>,
     ) -> StarterpackMetadata {
-        // [Check] Inputs
-        MetadataAssert::assert_valid_name(@name);
-        MetadataAssert::assert_valid_description(@description);
-        MetadataAssert::assert_valid_image_uri(@image_uri);
-        // [Return] Metadata
-        StarterpackMetadata { name, description, image_uri, items, additional_payment_tokens }
+        let metadata = StarterpackMetadata {
+            name, description, image_uri, items, additional_payment_tokens,
+        };
+        metadata.validate();
+        metadata
+    }
+
+    #[inline]
+    fn validate(self: @StarterpackMetadata) {
+        // [Check] Metadata fields
+        MetadataAssert::assert_valid_name(self.name);
+        MetadataAssert::assert_valid_description(self.description);
+        MetadataAssert::assert_valid_image_uri(self.image_uri);
+        // [Check] Items
+        let mut items_copy = *self.items;
+        while let Option::Some(item) = items_copy.pop_front() {
+            item.validate();
+        };
     }
 
     #[inline]
     fn jsonify(mut self: StarterpackMetadata) -> ByteArray {
+        self.validate();
         // Build items array
         let mut items_json: Array<ByteArray> = array![];
         while let Option::Some(item) = self.items.pop_front() {
-            items_json.append(item.clone().jsonify());
+            items_json.append(item.clone().jsonify_unchecked());
         }
 
         // Build additional_payment_tokens array string manually
@@ -290,5 +312,104 @@ mod tests {
         let description: ByteArray = "DESCRIPTION";
         StarterpackMetadataImpl::new(name, description, "", array![].span(), array![].span())
             .jsonify();
+    }
+
+    #[test]
+    #[should_panic(expected: ('Item: invalid name',))]
+    fn test_metadata_creation_new_with_invalid_item() {
+        // Item constructed directly with invalid name (bypassing ItemImpl::new)
+        let invalid_item = StarterpackItem {
+            name: "", description: "DESC", image_uri: "https://example.com/item.png",
+        };
+        // Should fail in new() when validating items
+        StarterpackMetadataImpl::new(
+            "NAME",
+            "DESCRIPTION",
+            "https://example.com/image.png",
+            array![invalid_item].span(),
+            array![].span(),
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: ('Item: invalid description',))]
+    fn test_metadata_creation_new_with_invalid_item_description() {
+        let invalid_item = StarterpackItem {
+            name: "Item", description: "", image_uri: "https://example.com/item.png",
+        };
+        StarterpackMetadataImpl::new(
+            "NAME",
+            "DESCRIPTION",
+            "https://example.com/image.png",
+            array![invalid_item].span(),
+            array![].span(),
+        );
+    }
+
+    // Tests for direct struct construction (simulating Serde deserialization bypass)
+    // These verify that jsonify() enforces validation even without using new()
+
+    #[test]
+    #[should_panic(expected: ('Metadata: invalid name',))]
+    fn test_metadata_direct_construction_invalid_name() {
+        let metadata = StarterpackMetadata {
+            name: "",
+            description: "DESCRIPTION",
+            image_uri: "https://example.com/image.png",
+            items: array![].span(),
+            additional_payment_tokens: array![].span(),
+        };
+        metadata.jsonify();
+    }
+
+    #[test]
+    #[should_panic(expected: ('Metadata: invalid description',))]
+    fn test_metadata_direct_construction_invalid_description() {
+        let metadata = StarterpackMetadata {
+            name: "NAME",
+            description: "",
+            image_uri: "https://example.com/image.png",
+            items: array![].span(),
+            additional_payment_tokens: array![].span(),
+        };
+        metadata.jsonify();
+    }
+
+    #[test]
+    #[should_panic(expected: ('Metadata: invalid image uri',))]
+    fn test_metadata_direct_construction_invalid_image_uri() {
+        let metadata = StarterpackMetadata {
+            name: "NAME",
+            description: "DESCRIPTION",
+            image_uri: "",
+            items: array![].span(),
+            additional_payment_tokens: array![].span(),
+        };
+        metadata.jsonify();
+    }
+
+    #[test]
+    #[should_panic(expected: ('Item: invalid name',))]
+    fn test_item_direct_construction_invalid_name() {
+        let item = StarterpackItem {
+            name: "", description: "DESC", image_uri: "https://x.com/i.png",
+        };
+        item.jsonify();
+    }
+
+    #[test]
+    #[should_panic(expected: ('Item: invalid name',))]
+    fn test_metadata_with_invalid_item_direct_construction() {
+        let invalid_item = StarterpackItem {
+            name: "", description: "DESC", image_uri: "https://example.com/item.png",
+        };
+        let metadata = StarterpackMetadata {
+            name: "NAME",
+            description: "DESCRIPTION",
+            image_uri: "https://example.com/image.png",
+            items: array![invalid_item].span(),
+            additional_payment_tokens: array![].span(),
+        };
+        metadata.jsonify();
     }
 }

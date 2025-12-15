@@ -20,6 +20,9 @@ pub mod setup {
     use starknet::{ContractAddress, SyscallResultTrait};
     use starterpack::events::index as starterpack_events;
     use starterpack::models::index as starterpack_models;
+    use starterpack::types::metadata::{
+        ItemTrait, StarterpackItem, StarterpackMetadata, StarterpackMetadataTrait,
+    };
     use crate::constants::NAMESPACE;
     use crate::systems::marketplace::{IMarketplaceDispatcher, Marketplace};
     use crate::systems::registry::{IRegistryDispatcher, Registry};
@@ -62,6 +65,31 @@ pub mod setup {
 
     pub fn PLAYER() -> ContractAddress {
         'PLAYER'.try_into().unwrap()
+    }
+
+    pub fn STARTERPACK_METADATA() -> StarterpackMetadata {
+        StarterpackMetadataTrait::new(
+            "Test Starterpack",
+            "A test starterpack",
+            "https://example.com/image.png",
+            array![
+                ItemTrait::new(
+                    "Starter Item", "A basic starter item", "https://example.com/item.png",
+                ),
+            ]
+                .span(),
+            array![].span(),
+        )
+    }
+
+    pub fn STARTERPACK_METADATA_WITH_ITEMS(items: Span<StarterpackItem>) -> StarterpackMetadata {
+        StarterpackMetadataTrait::new(
+            "Test Starterpack",
+            "A test starterpack",
+            "https://example.com/image.png",
+            items,
+            array![].span(),
+        )
     }
 
     #[derive(Copy, Drop)]

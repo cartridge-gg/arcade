@@ -1,10 +1,11 @@
 // Internal imports
 
 use arcade::systems::starterpack::IStarterpackRegistryDispatcherTrait;
-use arcade::tests::setup::setup::{OWNER, spawn};
+use arcade::tests::setup::setup::{OWNER, STARTERPACK_METADATA, spawn};
 use starknet::testing;
 use starterpack::models::index::Starterpack;
 use starterpack::store::{StarterpackStoreTrait, StoreTrait};
+use starterpack::types::metadata::{ItemTrait, StarterpackMetadataTrait};
 use starterpack::types::status::Status;
 
 // Constants
@@ -26,8 +27,17 @@ fn test_sp_register() {
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Starterpack\",\"description\":\"A test starterpack for new players\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Sword\",\"description\":\"A starter sword\",\"image_uri\":\"https://example.com/sword.png\"},{\"name\":\"Shield\",\"description\":\"A starter shield\",\"image_uri\":\"https://example.com/shield.png\"}]}";
+    let metadata = StarterpackMetadataTrait::new(
+        "Test Starterpack",
+        "A test starterpack for new players",
+        "https://example.com/image.png",
+        array![
+            ItemTrait::new("Sword", "A starter sword", "https://example.com/sword.png"),
+            ItemTrait::new("Shield", "A starter shield", "https://example.com/shield.png"),
+        ]
+            .span(),
+        array![].span(),
+    );
 
     let starterpack_id = systems
         .starterpack
@@ -66,8 +76,7 @@ fn test_sp_register_invalid_referral_percentage() {
 
     // [Register] With invalid referral percentage (>50%)
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Starterpack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Item\",\"description\":\"Test item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata = STARTERPACK_METADATA();
 
     systems
         .starterpack
@@ -92,8 +101,13 @@ fn test_sp_register_multiple_starterpacks() {
 
     // [Register] First starterpack
     testing::set_contract_address(context.creator);
-    let metadata1 =
-        "{\"name\":\"Starterpack 1\",\"description\":\"First\",\"image_uri\":\"https://example.com/1.png\",\"items\":[{\"name\":\"Potion\",\"description\":\"Health potion\",\"image_uri\":\"https://example.com/potion.png\"}]}";
+    let metadata1 = StarterpackMetadataTrait::new(
+        "Starterpack 1",
+        "First",
+        "https://example.com/1.png",
+        array![ItemTrait::new("Potion", "Health potion", "https://example.com/potion.png")].span(),
+        array![].span(),
+    );
     let id1 = systems
         .starterpack
         .register(
@@ -106,8 +120,17 @@ fn test_sp_register_multiple_starterpacks() {
         );
 
     // [Register] Second starterpack
-    let metadata2 =
-        "{\"name\":\"Starterpack 2\",\"description\":\"Second\",\"image_uri\":\"https://example.com/2.png\",\"items\":[{\"name\":\"Armor\",\"description\":\"Starter armor\",\"image_uri\":\"https://example.com/armor.png\"},{\"name\":\"Helmet\",\"description\":\"Starter helmet\",\"image_uri\":\"https://example.com/helmet.png\"}]}";
+    let metadata2 = StarterpackMetadataTrait::new(
+        "Starterpack 2",
+        "Second",
+        "https://example.com/2.png",
+        array![
+            ItemTrait::new("Armor", "Starter armor", "https://example.com/armor.png"),
+            ItemTrait::new("Helmet", "Starter helmet", "https://example.com/helmet.png"),
+        ]
+            .span(),
+        array![].span(),
+    );
     let id2 = systems
         .starterpack
         .register(
