@@ -53,3 +53,19 @@ export const searchAtom = (options: SearchOptions) => {
   });
   return searchFamily(key);
 };
+
+export type SearchUIState = {
+  searchValue: string;
+  debouncedQuery: string;
+  isOpen: boolean;
+  isOverlayOpen: boolean;
+  selectedIndex: number;
+};
+
+export const searchUIAtom = Atom.make<SearchUIState>({
+  searchValue: "",
+  debouncedQuery: "",
+  isOpen: false,
+  isOverlayOpen: false,
+  selectedIndex: -1,
+});

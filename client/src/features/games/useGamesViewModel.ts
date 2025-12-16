@@ -3,7 +3,7 @@ import { useAccount } from "@starknet-react/core";
 import { useOwnerships } from "@/hooks/ownerships";
 import { useProject } from "@/hooks/project";
 import { useSidebar } from "@/hooks/sidebar";
-import { usePlayerStats } from "@/hooks/achievements";
+import { usePlayerStats, useAllGameStats } from "@/hooks/achievements";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useRouterState } from "@tanstack/react-router";
 import type { GameModel, AccessModel, EditionModel } from "@cartridge/arcade";
@@ -32,6 +32,7 @@ export interface GameItemSharedContext {
   close: () => void;
   trackGameInteraction: ReturnType<typeof useAnalytics>["trackGameInteraction"];
   totalStats: ReturnType<typeof usePlayerStats>;
+  gameStatsMap: Map<number, { earnings: number }>;
 }
 
 export interface GamesViewModel {
@@ -63,6 +64,7 @@ export function useGamesViewModel({
   const { location } = useRouterState();
   const { trackGameInteraction } = useAnalytics();
   const totalStats = usePlayerStats();
+  const gameStatsMap = useAllGameStats(editions);
   const selectedGameId = useMemo(() => game?.id || 0, [game?.id]);
 
   const closeRef = useRef(sidebar.close);
@@ -127,6 +129,7 @@ export function useGamesViewModel({
       close: stableClose,
       trackGameInteraction: stableTrackGameInteraction,
       totalStats: stableTotalStats as ReturnType<typeof usePlayerStats>,
+      gameStatsMap,
     }),
     [
       address,
@@ -137,6 +140,7 @@ export function useGamesViewModel({
       stableClose,
       stableTrackGameInteraction,
       stableTotalStats,
+      gameStatsMap,
     ],
   );
 

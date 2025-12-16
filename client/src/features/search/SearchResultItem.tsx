@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Thumbnail } from "@cartridge/ui";
 import { UserAvatar } from "@/components/user/avatar";
@@ -7,6 +7,7 @@ import type { SearchResultItem } from "./types";
 interface SearchResultItemProps {
   item: SearchResultItem;
   query: string;
+  isSelected?: boolean;
   onClick?: () => void;
 }
 
@@ -38,13 +39,23 @@ export const SearchResultItemComponent = memo(
   function SearchResultItemComponent({
     item,
     query,
+    isSelected,
     onClick,
   }: SearchResultItemProps) {
+    const ref = useRef<HTMLAnchorElement>(null);
+
+    useEffect(() => {
+      if (isSelected && ref.current) {
+        ref.current.scrollIntoView({ block: "nearest" });
+      }
+    }, [isSelected]);
+
     return (
       <Link
+        ref={ref}
         to={item.link}
         onClick={onClick}
-        className="w-full h-10 px-3 py-2.5 flex justify-between items-center gap-3 bg-spacer-100 hover:bg-background-200 transition-colors text-left"
+        className={`w-full h-10 px-3 py-2.5 flex justify-between items-center gap-3 ${isSelected ? "bg-background-200" : "bg-spacer-100"} hover:bg-background-200 transition-colors text-left`}
       >
         {item.type === "player" ? (
           <UserAvatar username={item.title} size="xs" className="shrink-0" />

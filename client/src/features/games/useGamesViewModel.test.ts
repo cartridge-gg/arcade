@@ -11,6 +11,7 @@ const mockUseSidebar = vi.fn();
 const mockUseRouterState = vi.fn();
 const mockUseAnalytics = vi.fn();
 const mockUsePlayerStats = vi.fn();
+const mockUseAllGameStats = vi.fn();
 
 vi.mock("@starknet-react/core", () => ({
   useAccount: () => mockUseAccount(),
@@ -22,6 +23,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("@/hooks/achievements", () => ({
   usePlayerStats: () => mockUsePlayerStats(),
+  useAllGameStats: () => mockUseAllGameStats(),
 }));
 
 vi.mock("@/hooks/useAnalytics", () => ({
@@ -96,6 +98,7 @@ describe("useGamesViewModel", () => {
       rank: 0,
       earnings: 0,
     });
+    mockUseAllGameStats.mockReturnValue(new Map([[1, { earnings: 10 }]]));
   });
 
   it("returns games list", () => {

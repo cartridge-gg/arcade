@@ -4,12 +4,6 @@ import type { GameModel } from "@cartridge/arcade";
 import { useGameItemViewModel } from "./useGameItemViewModel";
 import type { GameItemSharedContext } from "./useGamesViewModel";
 
-const mockUsePlayerGameStats = vi.fn();
-
-vi.mock("@/hooks/achievements", () => ({
-  usePlayerGameStats: () => mockUsePlayerGameStats(),
-}));
-
 describe("useGameItemViewModel", () => {
   const createGame = (overrides: Partial<GameModel> = {}): GameModel =>
     ({
@@ -49,12 +43,12 @@ describe("useGameItemViewModel", () => {
     close: vi.fn(),
     trackGameInteraction: vi.fn(),
     totalStats: { completed: 0, total: 0, rank: 0, earnings: 50 },
+    gameStatsMap: new Map([[1, { earnings: 20 }]]),
     ...overrides,
   });
 
   beforeEach(() => {
     vi.resetAllMocks();
-    mockUsePlayerGameStats.mockReturnValue({ earnings: 20 });
   });
 
   it("computes view model for a game", () => {

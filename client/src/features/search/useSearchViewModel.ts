@@ -1,7 +1,9 @@
-import { useCallback, useState, useMemo, useRef, useEffect } from "react";
-import { useAtomValue } from "@effect-atom/atom-react";
+import { useCallback, useMemo, useRef, useEffect } from "react";
+import { useAtom, useAtomValue } from "@effect-atom/atom-react";
+import { useNavigate } from "@tanstack/react-router";
 import { useSearch } from "@/effect/hooks/search";
 import { gamesAtom, tokenContractsAtom } from "@/effect/atoms";
+import { searchUIAtom } from "@/effect/atoms/search";
 import { unwrapOr } from "@/effect/utils/result";
 import { useDevice } from "@/hooks/device";
 import type { GameModel } from "@cartridge/arcade";
@@ -28,6 +30,8 @@ export interface SearchViewModel {
   isLoading: boolean;
   isMobile: boolean;
   results: GroupedSearchResults;
+  sortedItems: SearchResultItem[];
+  selectedIndex: number;
   hasResults: boolean;
   onSearchChange: (value: string) => void;
   onFocus: () => void;
@@ -41,15 +45,17 @@ type SearchViewModelProps = {
   disabled: boolean;
 };
 
+const TYPE_ORDER = { game: 0, collection: 1, player: 2 } as const;
+
 export function useSearchViewModel({
   disabled,
 }: SearchViewModelProps): SearchViewModel {
-  const [searchValue, setSearchValue] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [state, setState] = useAtom(searchUIAtom);
+  const { searchValue, debouncedQuery, isOpen, isOverlayOpen, selectedIndex } =
+    state;
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { isMobile } = useDevice();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useSearch({
     query: debouncedQuery,
@@ -79,15 +85,15 @@ export function useSearchViewModel({
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (searchValue.length >= MIN_QUERY_LENGTH) {
       debounceRef.current = setTimeout(() => {
-        setDebouncedQuery(searchValue);
+        setState((s) => ({ ...s, debouncedQuery: searchValue }));
       }, DEBOUNCE_MS);
     } else {
-      setDebouncedQuery("");
+      setState((s) => ({ ...s, debouncedQuery: "" }));
     }
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [searchValue]);
+  }, [searchValue, setState]);
 
   const gameResults = useMemo<SearchResultItem[]>(() => {
     if (!debouncedQuery || debouncedQuery.length < MIN_QUERY_LENGTH) return [];
@@ -137,45 +143,110 @@ export function useSearchViewModel({
     return Object.values(results).some((arr) => arr.length > 0);
   }, [results]);
 
-  const onSearchChange = useCallback((value: string) => {
-    setSearchValue(value);
-    if (value.length >= MIN_QUERY_LENGTH) {
-      setIsOpen(true);
-    }
-  }, []);
+  const sortedItems = useMemo(() => {
+    return [...results.games, ...results.collections, ...results.players].sort(
+      (a, b) => {
+        const typeDiff = TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
+        if (typeDiff !== 0) return typeDiff;
+        return (b.score ?? 0) - (a.score ?? 0);
+      },
+    );
+  }, [results]);
+
+  useEffect(() => {
+    setState((s) => ({ ...s, selectedIndex: -1 }));
+  }, [debouncedQuery, setState]);
+
+  const onSearchChange = useCallback(
+    (value: string) => {
+      setState((s) => ({
+        ...s,
+        searchValue: value,
+        isOpen: value.length >= MIN_QUERY_LENGTH ? true : s.isOpen,
+      }));
+    },
+    [setState],
+  );
 
   const onFocus = useCallback(() => {
     if (isMobile) {
-      setIsOverlayOpen(true);
+      setState((s) => ({ ...s, isOverlayOpen: true }));
       return;
     }
     if (searchValue.length >= MIN_QUERY_LENGTH) {
-      setIsOpen(true);
+      setState((s) => ({ ...s, isOpen: true }));
     }
-  }, [searchValue, isMobile]);
+  }, [searchValue, isMobile, setState]);
 
   const onBlur = useCallback(() => {
-    setTimeout(() => setIsOpen(false), 200);
-  }, []);
+    setTimeout(() => setState((s) => ({ ...s, isOpen: false })), 200);
+  }, [setState]);
 
   const onClear = useCallback(() => {
-    setSearchValue("");
-    setDebouncedQuery("");
-    setIsOpen(false);
-  }, []);
+    setState((s) => ({
+      ...s,
+      searchValue: "",
+      debouncedQuery: "",
+      isOpen: false,
+    }));
+  }, [setState]);
 
   const onOverlayClose = useCallback(() => {
-    setIsOverlayOpen(false);
-    setSearchValue("");
-    setDebouncedQuery("");
-  }, []);
+    setState((s) => ({
+      ...s,
+      isOverlayOpen: false,
+      searchValue: "",
+      debouncedQuery: "",
+    }));
+  }, [setState]);
 
-  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setIsOpen(false);
-      setIsOverlayOpen(false);
-    }
-  }, []);
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setState((s) => ({
+          ...s,
+          isOpen: false,
+          isOverlayOpen: false,
+          selectedIndex: -1,
+        }));
+        return;
+      }
+
+      if (!isOpen || isLoading) return;
+
+      const itemCount = sortedItems.length;
+      if (itemCount === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setState((s) => ({
+          ...s,
+          selectedIndex: (s.selectedIndex + 1) % itemCount,
+        }));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setState((s) => ({
+          ...s,
+          selectedIndex:
+            s.selectedIndex <= 0 ? itemCount - 1 : s.selectedIndex - 1,
+        }));
+      } else if (e.key === "Enter" && selectedIndex >= 0) {
+        e.preventDefault();
+        const item = sortedItems[selectedIndex];
+        if (item) {
+          navigate({ to: item.link });
+          setState((s) => ({
+            ...s,
+            isOpen: false,
+            selectedIndex: -1,
+            searchValue: "",
+            debouncedQuery: "",
+          }));
+        }
+      }
+    },
+    [sortedItems, selectedIndex, navigate, setState, isOpen, isLoading],
+  );
 
   return {
     disabled,
@@ -186,6 +257,8 @@ export function useSearchViewModel({
     isLoading,
     isMobile,
     results,
+    sortedItems,
+    selectedIndex,
     hasResults,
     onSearchChange,
     onFocus,

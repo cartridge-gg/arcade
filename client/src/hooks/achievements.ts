@@ -132,6 +132,35 @@ export function usePlayerStats(address?: string) {
   return { completed, total, rank, earnings };
 }
 
+export function useAllGameStats(
+  editions: Array<{ gameId: number; config: { project: string } }>,
+) {
+  const { players } = useAchievements();
+  const { address } = useAddress();
+
+  return useMemo(() => {
+    const statsMap = new Map<number, { earnings: number }>();
+
+    const editionsByGame = new Map<number, string[]>();
+    for (const edition of editions) {
+      const projects = editionsByGame.get(edition.gameId) || [];
+      projects.push(edition.config.project);
+      editionsByGame.set(edition.gameId, projects);
+    }
+
+    for (const [gameId, projects] of editionsByGame) {
+      const gamePlayers = projects.flatMap((p) => players[p] || []);
+      const earnings =
+        gamePlayers
+          .filter((player) => BigInt(player.address || 0) === BigInt(address))
+          ?.reduce((acc, player) => acc + player.earnings, 0) || 0;
+      statsMap.set(gameId, { earnings });
+    }
+
+    return statsMap;
+  }, [players, editions, address]);
+}
+
 export function usePlayerGameStats(projects: string[]) {
   const { pins } = useArcade();
   const { address } = useAddress();

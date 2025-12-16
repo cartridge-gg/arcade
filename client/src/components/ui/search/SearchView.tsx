@@ -12,6 +12,8 @@ export const SearchView = ({
   isOverlayOpen,
   isLoading,
   results,
+  sortedItems,
+  selectedIndex,
   onSearchChange,
   onFocus,
   onBlur,
@@ -38,7 +40,8 @@ export const SearchView = ({
           </div>
         </PopoverAnchor>
         <SearchResultsDropdown
-          results={results}
+          sortedItems={sortedItems}
+          selectedIndex={selectedIndex}
           isLoading={isLoading}
           query={searchValue}
           onClick={onClear}
