@@ -55,8 +55,12 @@ export function useTheme() {
 
   useEffect(() => {
     if (!game) {
-      resetTheme();
-      resetCover();
+      if (state.theme !== defaultTheme) {
+        resetTheme();
+      }
+      if (state.cover !== undefined) {
+        resetCover();
+      }
       return;
     }
     if (game.color) {
@@ -68,7 +72,7 @@ export function useTheme() {
     if (game.properties.cover) {
       setCover(game.properties.cover);
     }
-  }, [game, resetTheme, resetCover, setTheme, setCover]);
+  }, [game, state.theme, state.cover, resetTheme, resetCover, setTheme, setCover]);
 
   return {
     colorScheme: state.colorScheme,

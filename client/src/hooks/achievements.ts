@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { getChecksumAddress } from "starknet";
 import { useProgressions, useTrophies, useAccounts } from "@/effect";
 import {
@@ -137,6 +137,7 @@ export function useAllGameStats(
 ) {
   const { players } = useAchievements();
   const { address } = useAddress();
+  const prevMapRef = useRef<Map<number, { earnings: number }>>(new Map());
 
   return useMemo(() => {
     const statsMap = new Map<number, { earnings: number }>();
@@ -157,6 +158,15 @@ export function useAllGameStats(
       statsMap.set(gameId, { earnings });
     }
 
+    if (
+      prevMapRef.current.size === statsMap.size &&
+      [...statsMap.entries()].every(
+        ([k, v]) => prevMapRef.current.get(k)?.earnings === v.earnings,
+      )
+    ) {
+      return prevMapRef.current;
+    }
+    prevMapRef.current = statsMap;
     return statsMap;
   }, [players, editions, address]);
 }

@@ -5,7 +5,6 @@ import { useProject } from "@/hooks/project";
 import { useSidebar } from "@/hooks/sidebar";
 import { usePlayerStats, useAllGameStats } from "@/hooks/achievements";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useRouterState } from "@tanstack/react-router";
 import type { GameModel, AccessModel, EditionModel } from "@cartridge/arcade";
 import { useArcade } from "@/hooks/arcade";
 import type { Ownership } from "@/effect/atoms/ownerships";
@@ -28,7 +27,6 @@ export interface GameItemSharedContext {
   accesses: AccessModel[];
   editions: EditionModel[];
   ownerships: Ownership[];
-  pathname: string;
   close: () => void;
   trackGameInteraction: ReturnType<typeof useAnalytics>["trackGameInteraction"];
   totalStats: ReturnType<typeof usePlayerStats>;
@@ -61,7 +59,6 @@ export function useGamesViewModel({
   const { game } = useProject();
   const { ownerships } = useOwnerships();
   const sidebar = useSidebar();
-  const { location } = useRouterState();
   const { trackGameInteraction } = useAnalytics();
   const totalStats = usePlayerStats();
   const gameStatsMap = useAllGameStats(editions);
@@ -125,7 +122,6 @@ export function useGamesViewModel({
       accesses,
       editions,
       ownerships,
-      pathname: location.pathname,
       close: stableClose,
       trackGameInteraction: stableTrackGameInteraction,
       totalStats: stableTotalStats as ReturnType<typeof usePlayerStats>,
@@ -136,7 +132,6 @@ export function useGamesViewModel({
       accesses,
       editions,
       ownerships,
-      location.pathname,
       stableClose,
       stableTrackGameInteraction,
       stableTotalStats,

@@ -92,7 +92,7 @@ export function useNavigationContext(): NavigationContextViewModel {
       routerState.location?.pathname ??
       routerState.resolvedLocation?.pathname ??
       (typeof window !== "undefined" ? window.location.pathname : "/"),
-    [routerState],
+    [routerState.location?.pathname, routerState.resolvedLocation?.pathname],
   );
 
   const manager = useMemo(

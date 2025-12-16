@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { joinPaths } from "@/lib/helpers";
 import type { GameModel } from "@cartridge/arcade";
 import { DASHBOARD_ALLOWED_ROUTES } from "../navigation";
@@ -46,12 +47,13 @@ export function useGameItemViewModel(
     address,
     accesses,
     ownerships,
-    pathname,
     close,
     trackGameInteraction,
     totalStats,
     gameStatsMap,
   } = shared;
+  const { location } = useRouterState();
+  const pathname = location.pathname;
 
   const cloneGame = useCallback((source: GameModel | null) => {
     if (!source) return null;

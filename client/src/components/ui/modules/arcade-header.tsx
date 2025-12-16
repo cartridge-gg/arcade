@@ -12,6 +12,8 @@ export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> {
 export const ArcadeHeader = memo(
   ({ children, onClick, onLogoClick, ...props }: ArcadeHeaderProps) => {
     const { isMobile } = useDevice();
+    const { theme } = useTheme();
+    const primaryColor = theme.colors?.primary?.toString() || "#fbcb4a";
 
     return (
       <div
@@ -32,8 +34,8 @@ export const ArcadeHeader = memo(
                 "flex items-center justify-center gap-2 text-primary w-auto",
               )}
             >
-              <ArcadeIcon className="h-5" />
-              <ArcadeIconText className="h-5" />
+              <ArcadeIcon className="h-5" color={primaryColor} />
+              <ArcadeIconText className="h-5" color={primaryColor} />
             </div>
           </Link>
         )}
@@ -46,12 +48,12 @@ export const ArcadeHeader = memo(
   },
 );
 
+interface ArcadeIconProps extends SVGProps<SVGSVGElement> {
+  color?: string;
+}
+
 export const ArcadeIcon = memo(
-  ({ className, ...props }: SVGProps<SVGSVGElement>) => {
-    const { theme } = useTheme();
-
-    const color = theme.colors?.primary?.toString() || "#fbcb4a";
-
+  ({ className, color = "#fbcb4a", ...props }: ArcadeIconProps) => {
     return (
       <svg
         fill="none"
@@ -79,11 +81,7 @@ export const ArcadeIcon = memo(
 );
 
 export const ArcadeIconText = memo(
-  ({ className, ...props }: SVGProps<SVGSVGElement>) => {
-    const { theme } = useTheme();
-
-    const color = theme.colors?.primary?.toString() || "#fbcb4a";
-
+  ({ className, color = "#fbcb4a", ...props }: ArcadeIconProps) => {
     return (
       <svg
         fill="none"

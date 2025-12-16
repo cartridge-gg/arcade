@@ -4,6 +4,12 @@ import type { GameModel } from "@cartridge/arcade";
 import { useGameItemViewModel } from "./useGameItemViewModel";
 import type { GameItemSharedContext } from "./useGamesViewModel";
 
+vi.mock("@tanstack/react-router", () => ({
+  useRouterState: () => ({
+    location: { pathname: "/" },
+  }),
+}));
+
 describe("useGameItemViewModel", () => {
   const createGame = (overrides: Partial<GameModel> = {}): GameModel =>
     ({
@@ -39,7 +45,6 @@ describe("useGameItemViewModel", () => {
         balance: BigInt(1),
       },
     ],
-    pathname: "/",
     close: vi.fn(),
     trackGameInteraction: vi.fn(),
     totalStats: { completed: 0, total: 0, rank: 0, earnings: 50 },
