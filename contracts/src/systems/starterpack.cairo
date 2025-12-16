@@ -1,5 +1,4 @@
 use starknet::ContractAddress;
-use starterpack::types::metadata::Metadata;
 
 #[derive(Drop, Serde)]
 pub struct StarterpackQuote {
@@ -36,7 +35,7 @@ pub trait IStarterpackRegistry<TContractState> {
         reissuable: bool,
         price: u256,
         payment_token: ContractAddress,
-        metadata: Metadata,
+        metadata: ByteArray,
     ) -> u32; // returns starterpack_id
 
     fn update(
@@ -84,7 +83,6 @@ pub mod StarterpackRegistry {
     use starterpack::models::config::ConfigTrait;
     use starterpack::models::starterpack::StarterpackAssert;
     use starterpack::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
-    use starterpack::types::metadata::Metadata;
     use super::{IAdministration, IStarterpackRegistry, StarterpackQuote};
 
     // Components
@@ -222,7 +220,7 @@ pub mod StarterpackRegistry {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: Metadata,
+            metadata: ByteArray,
         ) -> u32 {
             let world = self.world_storage();
             self

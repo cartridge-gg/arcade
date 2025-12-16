@@ -10,7 +10,6 @@ pub mod RegistrableComponent {
     use crate::constants::MAX_REFERRAL_FEE;
     use crate::models::starterpack::{StarterpackAssert, StarterpackTrait};
     use crate::store::{StarterpackStoreTrait, StoreTrait};
-    use crate::types::metadata::{Metadata, MetadataTrait};
 
     // Storage
 
@@ -35,7 +34,7 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: Metadata,
+            metadata: ByteArray,
         ) -> u32 {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
@@ -55,7 +54,7 @@ pub mod RegistrableComponent {
                 reissuable: reissuable,
                 price: price,
                 payment_token: payment_token,
-                metadata: metadata.jsonify(),
+                metadata: metadata,
                 time: time,
             );
             store.set_starterpack(@starterpack);

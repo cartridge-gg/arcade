@@ -1,5 +1,4 @@
 use starknet::ContractAddress;
-use crate::types::metadata::Metadata;
 
 // Constants
 
@@ -43,7 +42,7 @@ pub trait IRegistry<TContractState> {
         reissuable: bool,
         price: u256,
         payment_token: ContractAddress,
-        metadata: Metadata,
+        metadata: ByteArray,
     ) -> u32; // returns starterpack_id
 
     fn update(
@@ -88,7 +87,6 @@ pub mod Registry {
     use crate::models::config::ConfigTrait;
     use crate::models::starterpack::StarterpackAssert;
     use crate::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
-    use crate::types::metadata::Metadata;
     use super::{IAdministration, IRegistry, NAMESPACE, StarterpackQuote};
 
     // Components
@@ -226,7 +224,7 @@ pub mod Registry {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: Metadata,
+            metadata: ByteArray,
         ) -> u32 {
             let world = self.world_storage();
             self

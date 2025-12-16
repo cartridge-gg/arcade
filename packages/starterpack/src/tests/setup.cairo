@@ -20,7 +20,7 @@ pub mod setup {
         IAdministrationDispatcher, IRegistryDispatcher, NAMESPACE, Registry,
     };
     use crate::types::item::ItemTrait;
-    use crate::types::metadata::{Metadata, MetadataTrait};
+    use crate::types::metadata::MetadataTrait;
 
     // Constant
 
@@ -52,7 +52,7 @@ pub mod setup {
         'PLAYER'.try_into().unwrap()
     }
 
-    pub fn METADATA() -> Metadata {
+    pub fn METADATA() -> ByteArray {
         MetadataTrait::new(
             name: "Test Pack",
             description: "Test",
@@ -67,6 +67,7 @@ pub mod setup {
                 .span(),
             tokens: array![].span(),
         )
+            .jsonify()
     }
 
     #[derive(Copy, Drop)]
