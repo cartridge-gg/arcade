@@ -8,7 +8,6 @@ pub mod setup {
         spawn_test_world,
     };
     use models::rbac::models::index as rbac_models;
-    use openzeppelin::token::erc20::interface::IERC20Dispatcher;
     use orderbook::events::index as orderbook_events;
     use orderbook::models::index as orderbook_models;
     use provider::models::index as provider_models;
@@ -25,14 +24,10 @@ pub mod setup {
     use crate::systems::registry::{IRegistryDispatcher, Registry};
     use crate::systems::slot::{ISlotDispatcher, Slot};
     use crate::systems::social::{ISocialDispatcher, Social};
-    use crate::systems::starterpack::{
-        IAdministrationDispatcher, IStarterpackRegistryDispatcher, StarterpackRegistry,
-    };
+    use crate::systems::starterpack::{IStarterpackRegistryDispatcher, StarterpackRegistry};
     use crate::systems::wallet::{IWalletDispatcher, Wallet};
     use crate::tests::mocks::account::Account;
     use crate::tests::mocks::collection::Collection;
-    use crate::tests::mocks::erc20::ERC20;
-    use crate::tests::mocks::starterpack_impl::StarterpackImplementation;
 
     // Constant
 
@@ -72,9 +67,6 @@ pub mod setup {
         pub wallet: IWalletDispatcher,
         pub marketplace: IMarketplaceDispatcher,
         pub starterpack: IStarterpackRegistryDispatcher,
-        pub starterpack_admin: IAdministrationDispatcher,
-        pub starterpack_impl: ContractAddress,
-        pub erc20: IERC20Dispatcher,
     }
 
     #[derive(Copy, Drop)]
@@ -177,17 +169,6 @@ pub mod setup {
         account_address
     }
 
-    fn setup_erc20(recipient: ContractAddress) -> IERC20Dispatcher {
-        let (erc20_address, _) = deploy_syscall(
-            class_hash: ERC20::TEST_CLASS_HASH,
-            contract_address_salt: 'ERC20',
-            calldata: [recipient.into()].span(),
-            deploy_from_zero: false,
-        )
-            .unwrap_syscall();
-        IERC20Dispatcher { contract_address: erc20_address }
-    }
-
     #[inline]
     pub fn spawn() -> (WorldStorage, Systems, Context) {
         // [Setup] World
@@ -212,7 +193,6 @@ pub mod setup {
         let (wallet_address, _) = world.dns(@"Wallet").unwrap();
         let (marketplace_address, _) = world.dns(@"Marketplace").unwrap();
         let (starterpack_address, _) = world.dns(@"StarterpackRegistry").unwrap();
-        let starterpack_impl = setup_starterpack_impl();
         let systems = Systems {
             registry: IRegistryDispatcher { contract_address: registry_address },
             slot: ISlotDispatcher { contract_address: slot_address },
@@ -220,23 +200,9 @@ pub mod setup {
             wallet: IWalletDispatcher { contract_address: wallet_address },
             marketplace: IMarketplaceDispatcher { contract_address: marketplace_address },
             starterpack: IStarterpackRegistryDispatcher { contract_address: starterpack_address },
-            starterpack_admin: IAdministrationDispatcher { contract_address: starterpack_address },
-            starterpack_impl: starterpack_impl,
-            erc20: setup_erc20(context.spender),
         };
 
         // [Return]
         (world, systems, context)
-    }
-
-    fn setup_starterpack_impl() -> ContractAddress {
-        let (impl_address, _) = deploy_syscall(
-            class_hash: StarterpackImplementation::TEST_CLASS_HASH,
-            contract_address_salt: 'STARTERPACK_IMPL',
-            calldata: [].span(),
-            deploy_from_zero: false,
-        )
-            .unwrap_syscall();
-        impl_address
     }
 }

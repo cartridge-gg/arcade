@@ -1,7 +1,7 @@
 // Internal imports
 
 use core::num::traits::Zero;
-use starterpack::models::index::ReferralReward;
+use crate::models::index::ReferralReward;
 
 // Errors
 

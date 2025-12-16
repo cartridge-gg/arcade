@@ -2,7 +2,6 @@
 pub mod IssuableComponent {
     // Dojo imports
 
-    use dojo::event::EventStorage;
     use dojo::world::WorldStorage;
 
     // External imports
@@ -13,7 +12,6 @@ pub mod IssuableComponent {
     // Internal imports
 
     use starterpack::constants::{CONFIG_ID, FEE_DENOMINATOR};
-    use starterpack::events::index::StarterpackIssued;
     use starterpack::interface::{
         IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
     };
@@ -51,30 +49,32 @@ pub mod IssuableComponent {
             referrer: Option<ContractAddress>,
             referrer_group: Option<felt252>,
         ) {
-            let mut store = StoreTrait::new(world);
+            // [Setup] Datastore
+            let store = StoreTrait::new(world);
 
+            // [Check] Starterpack
             let mut starterpack = store.get_starterpack(starterpack_id);
             starterpack.assert_does_exist();
             starterpack.assert_is_active();
             starterpack.assert_quantity_allowed(quantity);
             starterpack.assert_supply_available(quantity);
 
+            // [Check] Reissuable
             if !starterpack.reissuable {
                 let issuance = store.get_issuance(starterpack_id, recipient);
                 issuance.assert_not_issued();
             }
 
+            // [Setup] Payment
             let payer = get_caller_address();
             let unit_price = starterpack.price;
             let base_price = unit_price * quantity.into();
             let payment_token = starterpack.payment_token;
 
             // Skip payment if base price is zero
-            if base_price > 0 {
+            let config = store.get_config(CONFIG_ID);
+            if base_price != 0 {
                 let token_dispatcher = IERC20Dispatcher { contract_address: payment_token };
-
-                // Get global config for protocol fee
-                let config = store.get_config(CONFIG_ID);
 
                 // Calculate referral fee if referrer exists (included in base price)
                 let referral_fee_amount = if let Option::Some(ref_addr) = referrer {
@@ -124,34 +124,22 @@ pub mod IssuableComponent {
                 }
             }
 
+            // [Interaction] Perform issuance
             let implementation_dispatcher = IStarterpackImplementationDispatcher {
                 contract_address: starterpack.implementation,
             };
             implementation_dispatcher.on_issue(recipient, starterpack_id, quantity);
-
             let time = get_block_timestamp();
             let issuance = IssuanceTrait::new(starterpack_id, recipient, time);
-
-            starterpack.issue(quantity);
-
-            store.set_starterpack(@starterpack);
             store.set_issuance(@issuance);
 
-            let config = store.get_config(CONFIG_ID);
+            // [Effect] Update starterpack
+            starterpack.issue(quantity);
+            store.set_starterpack(@starterpack);
+
+            // [Event] Emit event
             let total_amount = base_price + config.protocol_fee_amount(base_price);
-            world
-                .emit_event(
-                    @StarterpackIssued {
-                        recipient,
-                        starterpack_id,
-                        payment_token,
-                        amount: total_amount,
-                        quantity,
-                        referrer,
-                        referrer_group,
-                        time,
-                    },
-                );
+            store.issued(@starterpack, @issuance, total_amount, quantity, referrer, referrer_group);
         }
     }
 }

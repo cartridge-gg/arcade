@@ -1,6 +1,6 @@
 // Internal imports
 
-use starterpack::models::index::Issuance;
+use crate::models::index::Issuance;
 
 // Errors
 

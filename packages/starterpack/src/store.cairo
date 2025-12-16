@@ -1,5 +1,6 @@
 // Dojo imports
 
+use dojo::event::EventStorage;
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
 
@@ -7,10 +8,14 @@ use dojo::world::WorldStorage;
 pub use models::rbac::models::index::Moderator;
 pub use models::rbac::store::ModeratorStoreTrait;
 use starknet::ContractAddress;
+use crate::events::index::{
+    StarterpackIssued, StarterpackPaused, StarterpackRegistered, StarterpackResumed,
+    StarterpackUpdated,
+};
 
 // Internal imports
 
-use starterpack::models::index::{Config, GroupReward, Issuance, ReferralReward, Starterpack};
+use crate::models::index::{Config, GroupReward, Issuance, ReferralReward, Starterpack};
 
 // Store trait
 
@@ -36,7 +41,7 @@ pub impl ConfigStoreImpl of ConfigStoreTrait {
         self.world.read_model(id)
     }
 
-    fn set_config(ref self: Store, config: @Config) {
+    fn set_config(mut self: Store, config: @Config) {
         self.world.write_model(config);
     }
 }
@@ -49,8 +54,66 @@ pub impl StarterpackStoreImpl of StarterpackStoreTrait {
         self.world.read_model(starterpack_id)
     }
 
-    fn set_starterpack(ref self: Store, starterpack: @Starterpack) {
+    fn set_starterpack(mut self: Store, starterpack: @Starterpack) {
         self.world.write_model(starterpack);
+    }
+
+    fn registered(mut self: Store, starterpack: @Starterpack) {
+        let event = StarterpackRegistered {
+            starterpack_id: *starterpack.starterpack_id,
+            implementation: *starterpack.implementation,
+            referral_percentage: *starterpack.referral_percentage,
+            reissuable: *starterpack.reissuable,
+            owner: *starterpack.owner,
+            time: *starterpack.created_at,
+        };
+        self.world.emit_event(@event);
+    }
+
+    fn updated(mut self: Store, starterpack: @Starterpack, time: u64) {
+        let event = StarterpackUpdated {
+            starterpack_id: *starterpack.starterpack_id,
+            implementation: *starterpack.implementation,
+            referral_percentage: *starterpack.referral_percentage,
+            reissuable: *starterpack.reissuable,
+            price: *starterpack.price,
+            payment_token: *starterpack.payment_token,
+            metadata: starterpack.metadata.clone(),
+            time: time,
+        };
+        self.world.emit_event(@event);
+    }
+
+    fn issued(
+        mut self: Store,
+        starterpack: @Starterpack,
+        issuance: @Issuance,
+        amount: u256,
+        quantity: u32,
+        referrer: Option<ContractAddress>,
+        referrer_group: Option<felt252>,
+    ) {
+        let event = StarterpackIssued {
+            recipient: *issuance.recipient,
+            starterpack_id: *starterpack.starterpack_id,
+            payment_token: *starterpack.payment_token,
+            amount: amount,
+            quantity: quantity,
+            referrer: referrer,
+            referrer_group: referrer_group,
+            time: *issuance.issued_at,
+        };
+        self.world.emit_event(@event);
+    }
+
+    fn paused(mut self: Store, starterpack_id: u32, time: u64) {
+        let event = StarterpackPaused { starterpack_id, time: time };
+        self.world.emit_event(@event);
+    }
+
+    fn resumed(mut self: Store, starterpack_id: u32, time: u64) {
+        let event = StarterpackResumed { starterpack_id, time: time };
+        self.world.emit_event(@event);
     }
 }
 
@@ -62,7 +125,7 @@ pub impl IssuanceStoreImpl of IssuanceStoreTrait {
         self.world.read_model((starterpack_id, recipient))
     }
 
-    fn set_issuance(ref self: Store, issuance: @Issuance) {
+    fn set_issuance(mut self: Store, issuance: @Issuance) {
         self.world.write_model(issuance);
     }
 }
@@ -75,7 +138,7 @@ pub impl ReferralRewardStoreImpl of ReferralRewardStoreTrait {
         self.world.read_model(referrer)
     }
 
-    fn set_referral_reward(ref self: Store, referral_reward: @ReferralReward) {
+    fn set_referral_reward(mut self: Store, referral_reward: @ReferralReward) {
         self.world.write_model(referral_reward);
     }
 }
@@ -88,7 +151,7 @@ pub impl GroupRewardStoreImpl of GroupRewardStoreTrait {
         self.world.read_model(group)
     }
 
-    fn set_group_reward(ref self: Store, group_reward: @GroupReward) {
+    fn set_group_reward(mut self: Store, group_reward: @GroupReward) {
         self.world.write_model(group_reward);
     }
 }

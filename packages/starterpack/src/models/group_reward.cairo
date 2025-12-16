@@ -1,7 +1,7 @@
 // Internal imports
 
 use core::num::traits::Zero;
-use starterpack::models::index::GroupReward;
+use crate::models::index::GroupReward;
 
 // Errors
 

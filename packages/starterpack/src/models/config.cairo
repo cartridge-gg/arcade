@@ -4,8 +4,8 @@ use core::num::traits::Zero;
 
 // Internal imports
 
-use starterpack::constants::{FEE_DENOMINATOR, MAX_PROTOCOL_FEE};
-use starterpack::models::index::Config;
+use crate::constants::{FEE_DENOMINATOR, MAX_PROTOCOL_FEE};
+use crate::models::index::Config;
 
 // Errors
 

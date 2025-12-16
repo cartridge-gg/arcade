@@ -1,10 +1,10 @@
 // Internal imports
 
-use starterpack::interface::{
+use crate::interface::{
     IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
 };
-use starterpack::models::index::Starterpack;
-use starterpack::types::status::Status;
+use crate::models::index::Starterpack;
+use crate::types::status::Status;
 
 // Errors
 

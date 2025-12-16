@@ -5,6 +5,7 @@ node_modules
 .turbo/
 *account*.json
 *keystore*.json
+torii_observability.log
 
 server/*
 vite.config.ts.*

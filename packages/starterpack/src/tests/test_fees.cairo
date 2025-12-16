@@ -1,10 +1,10 @@
 // Internal imports
 
-use arcade::systems::starterpack::IStarterpackRegistryDispatcherTrait;
-use arcade::tests::setup::setup::{OWNER, PLAYER, spawn};
 use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
 use starknet::testing;
-use starterpack::constants::FEE_DENOMINATOR;
+use crate::constants::FEE_DENOMINATOR;
+use crate::tests::mocks::registry::IRegistryDispatcherTrait;
+use crate::tests::setup::setup::{METADATA, OWNER, PLAYER, spawn};
 
 // Constants
 
@@ -26,8 +26,7 @@ fn test_sp_fees_distribution_no_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata = METADATA();
     let starterpack_id = systems
         .starterpack
         .register(
@@ -89,8 +88,7 @@ fn test_sp_fees_distribution_with_referrer() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata = METADATA();
     let starterpack_id = systems
         .starterpack
         .register(
@@ -163,8 +161,7 @@ fn test_sp_quote_calculation() {
 
     // [Register]
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata = METADATA();
     let starterpack_id = systems
         .starterpack
         .register(
@@ -206,8 +203,7 @@ fn test_sp_free() {
 
     // [Register] Free starterpack (price = 0)
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Free Pack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Starter Item\",\"description\":\"A basic starter item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata = METADATA();
     let starterpack_id = systems
         .starterpack
         .register(

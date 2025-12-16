@@ -13,7 +13,7 @@ pub mod StarterpackImplementation {
     }
 
     #[abi(embed_v0)]
-    impl StarterpackImplementationImpl of starterpack::interface::IStarterpackImplementation<
+    impl StarterpackImplementationImpl of crate::interface::IStarterpackImplementation<
         ContractState,
     > {
         fn on_issue(

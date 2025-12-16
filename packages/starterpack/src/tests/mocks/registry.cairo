@@ -1,5 +1,12 @@
 use starknet::ContractAddress;
-use starterpack::types::metadata::Metadata;
+use crate::types::metadata::Metadata;
+
+// Constants
+
+pub fn NAMESPACE() -> ByteArray {
+    "NAMESPACE"
+}
+
 
 #[derive(Drop, Serde)]
 pub struct StarterpackQuote {
@@ -20,7 +27,7 @@ pub trait IAdministration<TContractState> {
 
 
 #[starknet::interface]
-pub trait IStarterpackRegistry<TContractState> {
+pub trait IRegistry<TContractState> {
     fn quote(
         self: @TContractState, starterpack_id: u32, quantity: u32, has_referrer: bool,
     ) -> StarterpackQuote;
@@ -67,25 +74,22 @@ pub trait IStarterpackRegistry<TContractState> {
 
 
 #[dojo::contract]
-pub mod StarterpackRegistry {
-    use arcade::constants::NAMESPACE;
+pub mod Registry {
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
-
-    // Component imports
-    use starterpack::components::initializable::InitializableComponent;
-    use starterpack::components::issuable::IssuableComponent;
-    use starterpack::components::manageable::ManageableComponent;
-    use starterpack::components::registrable::RegistrableComponent;
-    use starterpack::constants::CONFIG_ID;
-    use starterpack::interface::{
+    use crate::components::initializable::InitializableComponent;
+    use crate::components::issuable::IssuableComponent;
+    use crate::components::manageable::ManageableComponent;
+    use crate::components::registrable::RegistrableComponent;
+    use crate::constants::CONFIG_ID;
+    use crate::interface::{
         IStarterpackImplementationDispatcher, IStarterpackImplementationDispatcherTrait,
     };
-    use starterpack::models::config::ConfigTrait;
-    use starterpack::models::starterpack::StarterpackAssert;
-    use starterpack::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
-    use starterpack::types::metadata::Metadata;
-    use super::{IAdministration, IStarterpackRegistry, StarterpackQuote};
+    use crate::models::config::ConfigTrait;
+    use crate::models::starterpack::StarterpackAssert;
+    use crate::store::{ConfigStoreTrait, StarterpackStoreTrait, StoreTrait};
+    use crate::types::metadata::Metadata;
+    use super::{IAdministration, IRegistry, NAMESPACE, StarterpackQuote};
 
     // Components
     component!(path: InitializableComponent, storage: initializable, event: InitializableEvent);
@@ -157,7 +161,7 @@ pub mod StarterpackRegistry {
     }
 
     #[abi(embed_v0)]
-    impl StarterpackImpl of IStarterpackRegistry<ContractState> {
+    impl StarterpackImpl of IRegistry<ContractState> {
         fn quote(
             self: @ContractState, starterpack_id: u32, quantity: u32, has_referrer: bool,
         ) -> StarterpackQuote {

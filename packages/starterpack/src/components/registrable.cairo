@@ -2,18 +2,15 @@
 pub mod RegistrableComponent {
     // Dojo imports
 
-    use dojo::event::EventStorage;
     use dojo::world::{IWorldDispatcherTrait, WorldStorage};
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // Internal imports
 
-    use starterpack::constants::MAX_REFERRAL_FEE;
-    use starterpack::events::index::{
-        StarterpackPaused, StarterpackRegistered, StarterpackResumed, StarterpackUpdated,
-    };
-    use starterpack::models::starterpack::{StarterpackAssert, StarterpackTrait};
-    use starterpack::store::{StarterpackStoreTrait, StoreTrait};
+    use crate::constants::MAX_REFERRAL_FEE;
+    use crate::models::starterpack::{StarterpackAssert, StarterpackTrait};
+    use crate::store::{StarterpackStoreTrait, StoreTrait};
+    use crate::types::metadata::{Metadata, MetadataTrait};
 
     // Storage
 
@@ -32,54 +29,47 @@ pub mod RegistrableComponent {
     > of InternalTrait<TContractState> {
         fn register(
             self: @ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             implementation: ContractAddress,
             referral_percentage: u8,
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
-            metadata: ByteArray,
+            metadata: Metadata,
         ) -> u32 {
-            let mut store = StoreTrait::new(world);
+            // [Setup] Datastore
+            let store = StoreTrait::new(world);
 
+            // [Check] Referral percentage is valid
             assert(referral_percentage <= MAX_REFERRAL_FEE, 'Starterpack: referral too high');
 
+            // [Effect] Create starterpack
             let starterpack_id = world.dispatcher.uuid();
-
             let time = get_block_timestamp();
             let owner = get_caller_address();
             let starterpack = StarterpackTrait::new(
-                starterpack_id,
-                implementation,
-                owner,
-                referral_percentage,
-                reissuable,
-                price,
-                payment_token,
-                metadata,
-                time,
+                starterpack_id: starterpack_id,
+                implementation: implementation,
+                owner: owner,
+                referral_percentage: referral_percentage,
+                reissuable: reissuable,
+                price: price,
+                payment_token: payment_token,
+                metadata: metadata.jsonify(),
+                time: time,
             );
-
             store.set_starterpack(@starterpack);
 
-            world
-                .emit_event(
-                    @StarterpackRegistered {
-                        starterpack_id,
-                        implementation,
-                        referral_percentage,
-                        reissuable,
-                        owner,
-                        time,
-                    },
-                );
+            // [Event] Emit event
+            store.registered(@starterpack);
 
+            // [Return] Starterpack ID
             starterpack_id
         }
 
         fn update(
             self: @ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             starterpack_id: u32,
             implementation: ContractAddress,
             referral_percentage: u8,
@@ -88,7 +78,7 @@ pub mod RegistrableComponent {
             payment_token: ContractAddress,
         ) {
             // [Setup] Datastore
-            let mut store = StoreTrait::new(world);
+            let store = StoreTrait::new(world);
 
             // [Check] Starterpack exists
             let mut starterpack = store.get_starterpack(starterpack_id);
@@ -110,29 +100,17 @@ pub mod RegistrableComponent {
 
             // [Event] Emit event
             let time = get_block_timestamp();
-            world
-                .emit_event(
-                    @StarterpackUpdated {
-                        starterpack_id,
-                        implementation,
-                        referral_percentage,
-                        reissuable,
-                        price,
-                        payment_token,
-                        metadata: starterpack.metadata.clone(),
-                        time,
-                    },
-                );
+            store.updated(@starterpack, time);
         }
 
         fn update_metadata(
             self: @ComponentState<TContractState>,
-            mut world: WorldStorage,
+            world: WorldStorage,
             starterpack_id: u32,
             metadata: ByteArray,
         ) {
             // [Setup] Datastore
-            let mut store = StoreTrait::new(world);
+            let store = StoreTrait::new(world);
 
             // [Check] Starterpack exists
             let mut starterpack = store.get_starterpack(starterpack_id);
@@ -150,25 +128,12 @@ pub mod RegistrableComponent {
 
             // [Event] Emit event
             let time = get_block_timestamp();
-            world
-                .emit_event(
-                    @StarterpackUpdated {
-                        starterpack_id: starterpack.starterpack_id,
-                        implementation: starterpack.implementation,
-                        referral_percentage: starterpack.referral_percentage,
-                        reissuable: starterpack.reissuable,
-                        price: starterpack.price,
-                        payment_token: starterpack.payment_token,
-                        metadata,
-                        time,
-                    },
-                );
+            store.updated(@starterpack, time);
         }
 
-        fn pause(
-            self: @ComponentState<TContractState>, mut world: WorldStorage, starterpack_id: u32,
-        ) {
-            let mut store = StoreTrait::new(world);
+        fn pause(self: @ComponentState<TContractState>, world: WorldStorage, starterpack_id: u32) {
+            // [Setup] Datastore
+            let store = StoreTrait::new(world);
 
             // [Check] Starterpack exists
             let mut starterpack = store.get_starterpack(starterpack_id);
@@ -178,18 +143,18 @@ pub mod RegistrableComponent {
             let caller = get_caller_address();
             starterpack.assert_is_owner(caller);
 
+            // [Effect] Pause starterpack
             starterpack.pause();
-
             store.set_starterpack(@starterpack);
 
+            // [Event] Emit event
             let time = get_block_timestamp();
-            world.emit_event(@StarterpackPaused { starterpack_id, time });
+            store.paused(starterpack_id, time);
         }
 
-        fn resume(
-            self: @ComponentState<TContractState>, mut world: WorldStorage, starterpack_id: u32,
-        ) {
-            let mut store = StoreTrait::new(world);
+        fn resume(self: @ComponentState<TContractState>, world: WorldStorage, starterpack_id: u32) {
+            // [Setup] Datastore
+            let store = StoreTrait::new(world);
 
             // [Check] Starterpack exists
             let mut starterpack = store.get_starterpack(starterpack_id);
@@ -199,12 +164,13 @@ pub mod RegistrableComponent {
             let caller = get_caller_address();
             starterpack.assert_is_owner(caller);
 
+            // [Effect] Resume starterpack
             starterpack.resume();
-
             store.set_starterpack(@starterpack);
 
+            // [Event] Emit event
             let time = get_block_timestamp();
-            world.emit_event(@StarterpackResumed { starterpack_id, time });
+            store.resumed(starterpack_id, time);
         }
     }
 }

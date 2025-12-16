@@ -263,6 +263,7 @@ version = "0.0.0"
 dependencies = [
  "dojo",
  "dojo_cairo_test",
+ "graffiti",
  "models",
  "openzeppelin",
 ]

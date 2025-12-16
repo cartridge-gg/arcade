@@ -4,8 +4,9 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-dojo.workspace = true
 models = { path = "../models" }
+dojo.workspace = true
+graffiti.workspace = true
 openzeppelin.workspace = true
 starknet.workspace = true
 
@@ -14,3 +15,9 @@ dojo_cairo_test.workspace = true
 cairo_test.workspace = true
 
 [lib]
+
+[[target.starknet-contract]]
+build-external-contracts = [
+    "dojo::world::world_contract::world",
+    "models::rbac::models::index::m_Moderator",
+]

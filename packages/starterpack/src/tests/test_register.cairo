@@ -1,11 +1,11 @@
 // Internal imports
 
-use arcade::systems::starterpack::IStarterpackRegistryDispatcherTrait;
-use arcade::tests::setup::setup::{OWNER, spawn};
 use starknet::testing;
-use starterpack::models::index::Starterpack;
-use starterpack::store::{StarterpackStoreTrait, StoreTrait};
-use starterpack::types::status::Status;
+use crate::models::index::Starterpack;
+use crate::store::{StarterpackStoreTrait, StoreTrait};
+use crate::tests::mocks::registry::IRegistryDispatcherTrait;
+use crate::tests::setup::setup::{METADATA, OWNER, spawn};
+use crate::types::status::Status;
 
 // Constants
 
@@ -26,8 +26,7 @@ fn test_sp_register() {
 
     // [Register] Starterpack
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Starterpack\",\"description\":\"A test starterpack for new players\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Sword\",\"description\":\"A starter sword\",\"image_uri\":\"https://example.com/sword.png\"},{\"name\":\"Shield\",\"description\":\"A starter shield\",\"image_uri\":\"https://example.com/shield.png\"}]}";
+    let metadata = METADATA();
 
     let starterpack_id = systems
         .starterpack
@@ -66,8 +65,7 @@ fn test_sp_register_invalid_referral_percentage() {
 
     // [Register] With invalid referral percentage (>50%)
     testing::set_contract_address(context.creator);
-    let metadata =
-        "{\"name\":\"Test Starterpack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Item\",\"description\":\"Test item\",\"image_uri\":\"https://example.com/item.png\"}]}";
+    let metadata = METADATA();
 
     systems
         .starterpack
@@ -92,8 +90,7 @@ fn test_sp_register_multiple_starterpacks() {
 
     // [Register] First starterpack
     testing::set_contract_address(context.creator);
-    let metadata1 =
-        "{\"name\":\"Starterpack 1\",\"description\":\"First\",\"image_uri\":\"https://example.com/1.png\",\"items\":[{\"name\":\"Potion\",\"description\":\"Health potion\",\"image_uri\":\"https://example.com/potion.png\"}]}";
+    let metadata = METADATA();
     let id1 = systems
         .starterpack
         .register(
@@ -102,12 +99,10 @@ fn test_sp_register_multiple_starterpacks() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata1,
+            metadata: metadata.clone(),
         );
 
     // [Register] Second starterpack
-    let metadata2 =
-        "{\"name\":\"Starterpack 2\",\"description\":\"Second\",\"image_uri\":\"https://example.com/2.png\",\"items\":[{\"name\":\"Armor\",\"description\":\"Starter armor\",\"image_uri\":\"https://example.com/armor.png\"},{\"name\":\"Helmet\",\"description\":\"Starter helmet\",\"image_uri\":\"https://example.com/helmet.png\"}]}";
     let id2 = systems
         .starterpack
         .register(
@@ -116,7 +111,7 @@ fn test_sp_register_multiple_starterpacks() {
             reissuable: false,
             price: PRICE * 2,
             payment_token: systems.erc20.contract_address,
-            metadata: metadata2,
+            metadata: metadata,
         );
 
     // [Assert] Both starterpacks exist and are different

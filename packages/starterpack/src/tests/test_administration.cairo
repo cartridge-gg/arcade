@@ -1,12 +1,12 @@
 // Internal imports
 
-use arcade::systems::starterpack::IAdministrationDispatcherTrait;
-use arcade::tests::setup::setup::{OWNER, spawn};
 use models::rbac::types::role::Role;
 use starknet::testing;
-use starterpack::constants::CONFIG_ID;
-use starterpack::models::index::Config;
-use starterpack::store::{ConfigStoreTrait, StoreTrait};
+use crate::constants::CONFIG_ID;
+use crate::models::index::Config;
+use crate::store::{ConfigStoreTrait, StoreTrait};
+use crate::tests::mocks::registry::IAdministrationDispatcherTrait;
+use crate::tests::setup::setup::{OWNER, spawn};
 
 // Constants
 

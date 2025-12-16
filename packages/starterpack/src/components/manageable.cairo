@@ -12,9 +12,9 @@ pub mod ManageableComponent {
 
     // Internal imports
 
-    use starterpack::constants::CONFIG_ID;
-    use starterpack::models::config::{ConfigAssert, ConfigAssertTrait, ConfigTrait};
-    use starterpack::store::{ConfigStoreTrait, StoreTrait};
+    use crate::constants::CONFIG_ID;
+    use crate::models::config::{ConfigAssert, ConfigAssertTrait, ConfigTrait};
+    use crate::store::{ConfigStoreTrait, StoreTrait};
 
     // Storage
 

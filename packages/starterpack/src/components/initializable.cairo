@@ -12,9 +12,9 @@ pub mod InitializableComponent {
 
     // Internal imports
 
-    use starterpack::constants::CONFIG_ID;
-    use starterpack::models::config::ConfigTrait;
-    use starterpack::store::{ConfigStoreTrait, StoreTrait};
+    use crate::constants::CONFIG_ID;
+    use crate::models::config::ConfigTrait;
+    use crate::store::{ConfigStoreTrait, StoreTrait};
 
     // Storage
 

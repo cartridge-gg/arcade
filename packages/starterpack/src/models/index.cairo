@@ -1,7 +1,7 @@
 //! Models
 
 use starknet::ContractAddress;
-use starterpack::types::status::Status;
+use crate::types::status::Status;
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
