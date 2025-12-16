@@ -63,7 +63,7 @@ const EditionActions = ({
             data-disabled={disabled}
             active={false}
             simplified={!disabled}
-            className="bg-background-150 hover:bg-background-200 text-foreground-300 hover:text-foreground-200 h-8 w-full flex items-center justify-start gap-1 px-1"
+            className="hover:bg-background-200 bg-background-150 hover:text-foreground-100 text-foreground-300 w-full flex items-center justify-start gap-1 px-1"
           >
             {certified && whitelisted ? (
               <VerifiedIcon size="sm" />
