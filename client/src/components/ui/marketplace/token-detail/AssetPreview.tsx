@@ -46,7 +46,7 @@ export function AssetPreview({ image, name, className }: AssetPreviewProps) {
               src={image}
               alt={name || "NFT"}
               className="w-[640px] h-[640px] object-contain"
-              k={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>,
           document.body,
