@@ -16,7 +16,7 @@ export function AssetPreview({ image, name, className }: AssetPreviewProps) {
       <div
         onClick={() => setIsFullscreen(true)}
         className={cn(
-          "w-full flex items-center justify-center bg-[#000000] rounded-xl border border-background-200 py-8 cursor-pointer hover:shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] group",
+          "w-full flex items-center justify-center bg-[#000000] rounded-xl py-8 cursor-pointer hover:shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] group",
           className,
         )}
       >
