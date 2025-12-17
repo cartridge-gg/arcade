@@ -30,7 +30,6 @@ const buildOrder = (overrides: Partial<OrderModel>): OrderModel =>
     ...overrides,
   }) as OrderModel;
 
-
 describe("shared marketplace utils", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -267,7 +267,6 @@ function RenderCollectionCount({
 }
 function AllCollectionCount({
   collectionSupply,
-  totalTokensCount,
   filteredCount,
 }: {
   collectionSupply: number;
@@ -278,7 +277,6 @@ function AllCollectionCount({
     <>
       <CollectionCount
         collectionCount={collectionSupply}
-        tokensCount={totalTokensCount}
         filteredTokensCount={filteredCount}
       />
     </>
@@ -438,17 +436,15 @@ MarketplaceItemCard.displayName = "MarketplaceItemCard";
 
 const CollectionCount = ({
   collectionCount,
-  tokensCount,
   filteredTokensCount,
 }: {
   collectionCount: number;
-  tokensCount: number;
   filteredTokensCount: number;
 }) => {
   if (filteredTokensCount === 0) return <p>{collectionCount} Items</p>;
   return (
     <p>
-      {tokensCount} of {collectionCount} Items
+      {filteredTokensCount} of {collectionCount} Items
     </p>
   );
 };

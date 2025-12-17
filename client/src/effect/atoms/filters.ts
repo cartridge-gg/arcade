@@ -7,7 +7,7 @@ import type {
 
 export type FiltersState = Record<string, CollectionFilterState>;
 
-export const DEFAULT_STATUS_FILTER: StatusFilter = "all";
+export const DEFAULT_STATUS_FILTER: StatusFilter = "listed";
 
 const DEFAULT_COLLECTION_STATE: CollectionFilterState = {
   activeFilters: {},

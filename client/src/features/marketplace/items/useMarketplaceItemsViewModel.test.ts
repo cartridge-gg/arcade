@@ -27,12 +27,10 @@ vi.mock("@/hooks/arcade", () => ({
 }));
 
 let mockSales: Record<string, Record<string, any>> = {};
-const mockGetCollectionOrders = vi.fn();
 
 vi.mock("@/hooks/marketplace", () => ({
   useMarketplace: () => ({
     sales: mockSales,
-    getCollectionOrders: mockGetCollectionOrders,
   }),
 }));
 
@@ -69,12 +67,24 @@ vi.mock("@/hooks/use-metadata-filters", () => ({
 const mockUseMarketplaceTokens = vi.fn();
 const mockUseListedTokensFetcher = vi.fn();
 
-vi.mock("@effect-atom/atom-react", () => ({
-  useAtomValue: () => ({}),
-}));
+vi.mock("@effect-atom/atom-react", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@effect-atom/atom-react")>();
+  return {
+    ...actual,
+    useAtomValue: () => ({}),
+  };
+});
 
 vi.mock("@/effect", () => ({
   useMarketplaceTokens: () => mockUseMarketplaceTokens(),
+  useListedTokens: () => ({
+    tokens: [],
+    status: "success",
+    isLoading: false,
+    isError: false,
+    errorMessage: null,
+  }),
   filtersAtom: {},
   collectionFiltersAtom: () => ({
     activeFilters: {},
@@ -87,6 +97,23 @@ vi.mock("@/effect", () => ({
 
 vi.mock("@/hooks/use-listed-tokens-fetcher", () => ({
   useListedTokensFetcher: (args: any) => mockUseListedTokensFetcher(args),
+}));
+
+const mockGetOrdersForToken = vi.fn();
+
+vi.mock("./hooks", () => ({
+  useCollectionOrders: () => ({
+    listedTokenIds: [],
+    getOrdersForToken: mockGetOrdersForToken,
+  }),
+  useCombinedTokenFilter: () => ({
+    combinedTokenIds: undefined,
+    shouldShowEmpty: false,
+    isOwnerFilterLoading: false,
+    statusFilter: "all",
+    activeFilters: {},
+    hasActiveFilters: false,
+  }),
 }));
 
 describe("useMarketplaceItemsViewModel", () => {
@@ -125,8 +152,11 @@ describe("useMarketplaceItemsViewModel", () => {
       statusFilter: "all",
     });
 
-    mockGetCollectionOrders.mockReturnValue({
-      "1": [order],
+    mockGetOrdersForToken.mockImplementation((tokenId: string) => {
+      if (tokenId === "1") {
+        return [{ order, usdPrice: 100, normalizedPrice: 200 }];
+      }
+      return [];
     });
 
     mockSales = {

@@ -30,9 +30,9 @@ const ROW_HEIGHT = 184;
 const derivePrice = (
   asset: MarketplaceAsset,
 ): MarketplaceItemPriceInfo | null => {
-  if (!asset.orders.length || asset.orders.length > 1) return null;
-  const order = asset.orders[0];
-  return formatPriceInfo(order.currency, order.price);
+  if (!asset.orders.length) return null;
+  const listing = asset.orders[0];
+  return formatPriceInfo(listing.order.currency, listing.order.price);
 };
 
 const deriveLastSale = (
@@ -86,7 +86,8 @@ const createBaseItemView = (
       asset.token_id ?? "0x0",
     ),
     assetHasOrders: asset.orders.length > 0,
-    currency: asset.orders.length > 0 ? asset.orders[0].currency : undefined,
+    currency:
+      asset.orders.length > 0 ? asset.orders[0].order.currency : undefined,
   };
 };
 
@@ -185,7 +186,7 @@ export const MarketplaceItemsContainer = ({
   const selectionCurrency = useMemo(() => {
     if (selection.length === 0) return undefined;
     return selection[0].orders.length > 0
-      ? selection[0].orders[0].currency
+      ? selection[0].orders[0].order.currency
       : undefined;
   }, [selection]);
 

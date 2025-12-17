@@ -133,11 +133,6 @@ type MarketplaceTokensState = {
       [collectionAddress: string]: Token[];
     };
   };
-  listedTokens: {
-    [project: string]: {
-      [collectionAddress: string]: Token[];
-    };
-  };
   balances: {
     [project: string]: {
       [collectionAddress: string]: TokenBalance[];
@@ -156,8 +151,6 @@ type MarketplaceTokensState = {
 type MarketplaceTokensActions = {
   addTokens: (project: string, tokens: { [address: string]: Token[] }) => void;
   getTokens: (project: string, address: string) => Token[];
-  setListedTokens: (project: string, address: string, tokens: Token[]) => void;
-  getListedTokens: (project: string, address: string) => Token[];
   addBalances: (
     project: string,
     balances: { [address: string]: TokenBalance[] },
@@ -182,7 +175,6 @@ export const useMarketplaceTokensStore = create<
   MarketplaceTokensState & MarketplaceTokensActions
 >((set, get) => ({
   tokens: {},
-  listedTokens: {},
   balances: {},
   loadingState: {},
   fetchedCollections: {},
@@ -216,20 +208,6 @@ export const useMarketplaceTokensStore = create<
     }),
   getTokens: (project, address) => {
     const projectTokens = get().tokens[project];
-    if (!projectTokens) return [];
-    return projectTokens[address] || [];
-  },
-  setListedTokens: (project, address, tokens) =>
-    set((state) => {
-      const listedTokens = { ...state.listedTokens };
-      if (!listedTokens[project]) {
-        listedTokens[project] = {};
-      }
-      listedTokens[project][address] = tokens;
-      return { listedTokens };
-    }),
-  getListedTokens: (project, address) => {
-    const projectTokens = get().listedTokens[project];
     if (!projectTokens) return [];
     return projectTokens[address] || [];
   },

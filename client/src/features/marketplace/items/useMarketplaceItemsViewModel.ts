@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
 import type { Token } from "@dojoengine/torii-wasm";
-import type { OrderModel } from "@cartridge/arcade";
+import type { ListingWithUsd } from "@/effect/atoms/marketplace";
 import { getChecksumAddress, type RpcProvider } from "starknet";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { useShallow } from "zustand/shallow";
-import { useAtomValue } from "@effect-atom/atom-react";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -13,25 +11,24 @@ import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
 import {
   useMarketplaceTokens,
-  collectionFiltersAtom,
-  DEFAULT_STATUS_FILTER,
-  ownerTokenIdsAtom,
+  useListedTokens,
+  type EnrichedListedToken,
 } from "@/effect";
-import { unwrapOr } from "@/effect";
-import { useMarketplaceTokensStore } from "@/store";
-import { useListedTokensFetcher } from "@/hooks/use-listed-tokens-fetcher";
-import type { ActiveFilters } from "@/types/metadata-filter.types";
+import { useCollectionOrders, useCombinedTokenFilter } from "./hooks";
 
 export const ERC1155_ENTRYPOINT = "balance_of_batch";
 
-export type MarketplaceAsset = Token & { orders: OrderModel[]; owner: string };
+export type MarketplaceAsset = Token & {
+  orders: ListingWithUsd[];
+  owner: string;
+  minUsdPrice: number | null;
+};
 
 interface UseMarketplaceItemsViewModelArgs {
   collectionAddress: string;
 }
 
 interface MarketplaceItemsViewModel {
-  collectionAddress: string;
   collection: ReturnType<typeof useMarketplaceTokens>["collection"];
   status: ReturnType<typeof useMarketplaceTokens>["status"];
   hasMore: boolean;
@@ -44,7 +41,6 @@ interface MarketplaceItemsViewModel {
   clearSelection: () => void;
   toggleSelection: (asset: MarketplaceAsset) => void;
   assets: MarketplaceAsset[];
-  searchFilteredAssets: MarketplaceAsset[];
   searchFilteredTokensCount: number;
   totalTokensCount: number;
   collectionSupply: number;
@@ -55,10 +51,8 @@ interface MarketplaceItemsViewModel {
   handleInspect: (token: MarketplaceAsset) => Promise<void>;
   handlePurchase: (tokens: MarketplaceAsset[]) => Promise<void>;
   sales: ReturnType<typeof useMarketplace>["sales"];
-  address?: string;
-  rawTokens: Token[];
   statusFilter: string;
-  listedTokens: Token[];
+  listedTokens: EnrichedListedToken[];
 }
 
 export const getEntrypoints = async (
@@ -91,112 +85,29 @@ export function useMarketplaceItemsViewModel({
   const { connect, connectors } = useConnect();
   const { provider } = useArcade();
   const { trackEvent, events } = useAnalytics();
-  const { sales, getCollectionOrders } = useMarketplace();
+  const { sales } = useMarketplace();
   const [search, setSearch] = useState<string>("");
   const [lastSearch, setLastSearch] = useState<string>("");
   const [selection, setSelection] = useState<MarketplaceAsset[]>([]);
 
-  const rawListedTokens = useMarketplaceTokensStore(
-    useShallow((s) => s.listedTokens[DEFAULT_PROJECT]?.[collectionAddress]),
-  );
+  const { listedTokenIds, getOrdersForToken } =
+    useCollectionOrders(collectionAddress);
 
-  const listedTokens = rawListedTokens || [];
-
-  const collectionOrders = useMemo(() => {
-    return getCollectionOrders(collectionAddress);
-  }, [getCollectionOrders, collectionAddress]);
-
-  const listedTokenIds = useMemo(() => {
-    if (!collectionOrders) return [];
-    return Object.values(collectionOrders).flatMap((o) =>
-      o.map((i) => i.tokenId.toString(16)),
-    );
-  }, [collectionOrders]);
-
-  useListedTokensFetcher({
+  const { tokens: listedTokens } = useListedTokens(
+    DEFAULT_PROJECT,
     collectionAddress,
-    tokenIds: listedTokenIds,
-    enabled: listedTokenIds.length > 0,
-  });
-
-  const collectionState = useAtomValue(
-    collectionFiltersAtom(collectionAddress),
-  );
-  const activeFilters: ActiveFilters = collectionState?.activeFilters ?? {};
-  const statusFilter = collectionState?.statusFilter ?? DEFAULT_STATUS_FILTER;
-  const ownerFilter = collectionState?.ownerFilter;
-
-  const ownerTokenIdsResult = useAtomValue(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ownerTokenIdsAtom(collectionAddress, ownerFilter) as any,
-  ) as { _tag: string; value?: Set<string> };
-  const ownerTokenIds = ownerFilter
-    ? unwrapOr(
-        ownerTokenIdsResult as
-          | { _tag: "Success"; value: Set<string> }
-          | { _tag: "Initial" }
-          | { _tag: "Failure" },
-        new Set<string>(),
-      )
-    : null;
-  const isOwnerFilterLoading =
-    ownerFilter && ownerTokenIdsResult._tag === "Initial";
-
-  const getOrdersForToken = useCallback(
-    (rawTokenId?: string | bigint) => {
-      if (!rawTokenId) return [];
-
-      const candidates = new Set<string>();
-      const tokenIdString = rawTokenId.toString();
-      candidates.add(tokenIdString);
-
-      try {
-        if (tokenIdString.startsWith("0x")) {
-          const numericId = BigInt(tokenIdString).toString();
-          candidates.add(numericId);
-        }
-      } catch (error) {
-        // Ignore parse errors
-      }
-
-      for (const candidate of candidates) {
-        const orders = collectionOrders?.[candidate];
-        if (orders?.length) {
-          return orders;
-        }
-      }
-
-      return [];
-    },
-    [collectionOrders],
+    listedTokenIds,
+    listedTokenIds.length > 0,
   );
 
-  const hasActiveFilters = Object.keys(activeFilters).length > 0;
-
-  const { combinedTokenIds, shouldShowEmpty } = useMemo(() => {
-    if (ownerFilter && ownerTokenIds) {
-      if (ownerTokenIds.size === 0) {
-        return { combinedTokenIds: undefined, shouldShowEmpty: true };
-      }
-      if (statusFilter === "listed" && listedTokenIds.length > 0) {
-        const listedSet = new Set(listedTokenIds);
-        const intersection = [...ownerTokenIds].filter((id) =>
-          listedSet.has(id),
-        );
-        return {
-          combinedTokenIds: intersection.length > 0 ? intersection : undefined,
-          shouldShowEmpty: intersection.length === 0,
-        };
-      }
-      return { combinedTokenIds: [...ownerTokenIds], shouldShowEmpty: false };
-    }
-
-    if (statusFilter === "listed" && listedTokenIds.length > 0) {
-      return { combinedTokenIds: listedTokenIds, shouldShowEmpty: false };
-    }
-
-    return { combinedTokenIds: undefined, shouldShowEmpty: false };
-  }, [ownerFilter, ownerTokenIds, statusFilter, listedTokenIds]);
+  const {
+    combinedTokenIds,
+    shouldShowEmpty,
+    isOwnerFilterLoading,
+    statusFilter,
+    activeFilters,
+    hasActiveFilters,
+  } = useCombinedTokenFilter(collectionAddress, listedTokenIds);
 
   const {
     collection,
@@ -218,16 +129,19 @@ export function useMarketplaceItemsViewModel({
     enabled: !!collectionAddress && rawTokens.length > 0,
   });
 
-  const effectiveTokens = shouldShowEmpty ? [] : rawTokens;
-
   const searchFilteredTokens = useMemo(() => {
+    const baseEffectiveTokens = shouldShowEmpty ? [] : rawTokens;
+    const effectiveTokens =
+      statusFilter === "all"
+        ? [...listedTokens, ...baseEffectiveTokens]
+        : baseEffectiveTokens;
     if (!search.trim()) return effectiveTokens;
     const searchLower = search.toLowerCase();
     return effectiveTokens.filter((token) => {
       const tokenName = (token.metadata as any)?.name || token.name || "";
       return tokenName.toLowerCase().includes(searchLower);
     });
-  }, [effectiveTokens, search]);
+  }, [rawTokens, search, shouldShowEmpty, statusFilter, listedTokens]);
 
   useEffect(() => {
     if (search && search !== lastSearch) {
@@ -271,24 +185,68 @@ export function useMarketplaceItemsViewModel({
   }, []);
 
   const assets = useMemo(() => {
+    const listedTokenIdSet = new Set(listedTokenIds);
+
     const assetsWithOrders = searchFilteredTokens.map((token) => {
-      const orders = getOrdersForToken(token.token_id?.toString());
+      const isEnrichedToken = "orders" in token;
+      const orders = isEnrichedToken
+        ? (token as EnrichedListedToken).orders
+        : getOrdersForToken(token.token_id?.toString());
+
+      let minUsdPrice: number | null = null;
+      if (isEnrichedToken && "minUsdPrice" in token) {
+        minUsdPrice = (token as EnrichedListedToken).minUsdPrice;
+      } else if (orders.length > 0) {
+        const prices = orders
+          .map((o) => o.usdPrice)
+          .filter((p): p is number => p !== null);
+        minUsdPrice = prices.length > 0 ? Math.min(...prices) : null;
+      }
+
       return {
         ...token,
         orders,
         owner: address || "",
+        minUsdPrice,
       } as MarketplaceAsset;
     });
+
+    if (statusFilter === "all") {
+      const listed: MarketplaceAsset[] = [];
+      const nonListed: MarketplaceAsset[] = [];
+
+      for (const asset of assetsWithOrders) {
+        const tokenIdHex = asset.token_id
+          ? BigInt(asset.token_id.toString()).toString(16)
+          : undefined;
+        if (tokenIdHex && listedTokenIdSet.has(tokenIdHex)) {
+          listed.push(asset);
+        } else {
+          nonListed.push(asset);
+        }
+      }
+
+      return [...listed, ...nonListed];
+    }
 
     return assetsWithOrders.sort((a, b) => {
       const aHasOrders = a.orders.length > 0;
       const bHasOrders = b.orders.length > 0;
-
-      if (aHasOrders === bHasOrders) return 0;
-
-      return aHasOrders ? -1 : 1;
+      if (aHasOrders !== bHasOrders) return aHasOrders ? -1 : 1;
+      if (aHasOrders && bHasOrders) {
+        const aUsdPrice = a.minUsdPrice ?? Number.POSITIVE_INFINITY;
+        const bUsdPrice = b.minUsdPrice ?? Number.POSITIVE_INFINITY;
+        return aUsdPrice - bUsdPrice;
+      }
+      return 0;
     });
-  }, [searchFilteredTokens, getOrdersForToken, address]);
+  }, [
+    searchFilteredTokens,
+    getOrdersForToken,
+    address,
+    statusFilter,
+    listedTokenIds,
+  ]);
 
   const handleInspect = useCallback(
     async (token: MarketplaceAsset) => {
@@ -321,7 +279,7 @@ export function useMarketplaceItemsViewModel({
       trackEvent(eventType, {
         purchase_type: tokensToPurchase.length > 1 ? "bulk" : "single",
         items_count: tokensToPurchase.length,
-        order_ids: orders.map((order) => order.id.toString()),
+        order_ids: orders.map((listing) => listing.order.id.toString()),
         collection_address: Array.from(contractAddresses)[0],
         buyer_address: address,
         item_token_ids: tokensToPurchase.map(
@@ -360,7 +318,9 @@ export function useMarketplaceItemsViewModel({
       let path: string;
 
       if (orders.length > 1) {
-        options.push(`orders=${orders.map((order) => order.id).join(",")}`);
+        options.push(
+          `orders=${orders.map((listing) => listing.order.id).join(",")}`,
+        );
         path = `account/${username}/inventory/${subpath}/${contractAddress}/purchase${options.length > 0 ? `?${options.join("&")}` : ""}`;
       } else {
         const [token] = tokensToPurchase;
@@ -375,8 +335,6 @@ export function useMarketplaceItemsViewModel({
     [connector, isConnected, provider.provider, events, trackEvent, address],
   );
 
-  const searchFilteredAssets = assets;
-
   const collectionSupply = useMemo(() => {
     if (!collection?.total_supply) return 0;
     try {
@@ -388,7 +346,6 @@ export function useMarketplaceItemsViewModel({
   }, [collection?.total_supply]);
 
   return {
-    collectionAddress,
     collection,
     status,
     hasMore,
@@ -400,7 +357,6 @@ export function useMarketplaceItemsViewModel({
     clearSelection,
     toggleSelection,
     assets,
-    searchFilteredAssets,
     searchFilteredTokensCount: searchFilteredTokens.length,
     totalTokensCount: rawTokens.length,
     collectionSupply,
@@ -411,8 +367,6 @@ export function useMarketplaceItemsViewModel({
     handleInspect,
     handlePurchase,
     sales,
-    address,
-    rawTokens,
     isLoading: isLoadingTokens || Boolean(isOwnerFilterLoading),
     statusFilter,
     listedTokens,

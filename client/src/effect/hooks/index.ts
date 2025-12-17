@@ -40,3 +40,8 @@ export {
   type SearchOptions,
   type SearchResultsView,
 } from "./search";
+
+export {
+  useListedTokens,
+  type UseListedTokensResult,
+} from "./listed-tokens";

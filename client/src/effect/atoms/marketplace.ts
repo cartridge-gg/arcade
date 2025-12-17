@@ -7,9 +7,35 @@ import type {
   SaleEvent,
 } from "@cartridge/arcade";
 import { CategoryType, StatusType } from "@cartridge/arcade";
+import { erc20Metadata } from "@cartridge/presets";
+import {
+  USDC_CONTRACT_ADDRESS,
+  USDT_CONTRACT_ADDRESS,
+} from "@cartridge/ui/utils";
 import { getCachedChecksumAddress } from "@/lib/shared/marketplace/utils";
 import { arcadeAtom } from "./arcade";
+import { pricesAtom } from "./prices";
 import type { ArcadeEntityItem, ArcadeEventItem } from "../layers/arcade";
+
+const erc20MetadataByAddress = new Map(
+  erc20Metadata.map((item) => [
+    getCachedChecksumAddress(item.l2_token_address),
+    item,
+  ]),
+);
+
+const getErc20Decimals = (currency: string): number => {
+  const checksum = getCachedChecksumAddress(currency);
+  return erc20MetadataByAddress.get(checksum)?.decimals ?? 0;
+};
+
+const isUsdCurrency = (currency: string): boolean => {
+  const checksum = getCachedChecksumAddress(currency);
+  return (
+    checksum === getCachedChecksumAddress(USDC_CONTRACT_ADDRESS) ||
+    checksum === getCachedChecksumAddress(USDT_CONTRACT_ADDRESS)
+  );
+};
 
 export type OrdersState = {
   [collection: string]: { [token: string]: { [order: string]: OrderModel } };
@@ -136,3 +162,195 @@ export const salesAtom = Atom.make((get) => {
     return acc;
   }, {});
 });
+
+export const collectionOrdersAtom = Atom.family((contractAddress: string) => {
+  return Atom.make((get) => {
+    const listings = get(listingsAtom);
+    const collection = getCachedChecksumAddress(contractAddress);
+    const collectionOrders = listings[collection];
+    if (!collectionOrders) return {};
+
+    return Object.entries(collectionOrders).reduce(
+      (acc, [token, tokenOrders]) => {
+        const filtered = Object.values(tokenOrders).filter(
+          (order) => !!order && order.status.value === StatusType.Placed,
+        );
+        if (filtered.length === 0) return acc;
+        acc[token] = filtered;
+        return acc;
+      },
+      {} as { [token: string]: OrderModel[] },
+    );
+  });
+});
+
+export const tokenOrdersAtom = Atom.family((key: string) => {
+  const { contractAddress, tokenId } = JSON.parse(key) as {
+    contractAddress: string;
+    tokenId: string;
+  };
+
+  return Atom.make((get) => {
+    const orders = get(ordersAtom);
+    const collection = getCachedChecksumAddress(contractAddress);
+    const collectionOrders = orders[collection];
+    if (!collectionOrders) return [];
+
+    const token = BigInt(tokenId).toString();
+    return Object.values(collectionOrders[token] || {}).filter(
+      (order) => order.status.value === StatusType.Placed,
+    );
+  });
+});
+
+export const orderAtom = Atom.family((key: string) => {
+  const { contractAddress, tokenId } = JSON.parse(key) as {
+    contractAddress: string;
+    tokenId: string;
+  };
+
+  return Atom.make((get) => {
+    const orders = get(ordersAtom);
+    const collection = getCachedChecksumAddress(contractAddress);
+    const collectionOrders = orders[collection];
+    if (!collectionOrders) return undefined;
+
+    const token = BigInt(tokenId).toString();
+    const tokenOrders = Object.values(collectionOrders[token] || {}).filter(
+      (order) => order.status.value === StatusType.Placed,
+    );
+    return tokenOrders.length > 0 ? tokenOrders[0] : undefined;
+  });
+});
+
+export const marketplaceFeeAtom = Atom.family((amount: number) => {
+  return Atom.make((get) => {
+    const book = get(bookAtom);
+    if (!book) return 0;
+    return (book.fee_num * amount) / 10000;
+  });
+});
+
+export type UsdPriceMapping = {
+  [currencyAddress: string]: number;
+};
+
+export type ListingWithUsd = {
+  order: OrderModel;
+  usdPrice: number | null;
+  normalizedPrice: number | null;
+};
+
+export type ListingsWithUsdState = {
+  [collection: string]: {
+    [token: string]: { [listing: string]: ListingWithUsd };
+  };
+};
+
+export const currencyAddressesAtom = Atom.make((get) => {
+  const result = get(arcadeAtom);
+  if (result._tag !== "Success") return [];
+
+  const currencies = new Set<string>();
+  result.value.items.forEach((entity) => {
+    const order = getArcadeMarketModels(entity)?.Order?.data;
+    if (order) currencies.add(order.currency);
+  });
+  return Array.from(currencies);
+});
+
+export const usdPriceMappingAtom = Atom.make((get) => {
+  const addresses = get(currencyAddressesAtom);
+  if (addresses.length === 0) return {};
+
+  const pricesResult = get(pricesAtom(addresses));
+  if (pricesResult._tag !== "Success") return {};
+
+  return pricesResult.value.reduce<UsdPriceMapping>((acc, price) => {
+    const normalized = Number(price.amount) / 10 ** price.decimals;
+    acc[getCachedChecksumAddress(price.base)] = normalized;
+    return acc;
+  }, {});
+});
+
+export const listingsWithUsdAtom = Atom.make((get) => {
+  const listings = get(listingsAtom);
+  const usdMapping = get(usdPriceMappingAtom);
+
+  const result: ListingsWithUsdState = {};
+
+  for (const [collection, tokens] of Object.entries(listings)) {
+    result[collection] = {};
+    for (const [token, orders] of Object.entries(tokens)) {
+      result[collection][token] = {};
+      for (const [orderId, order] of Object.entries(orders)) {
+        const isUsd = isUsdCurrency(order.currency);
+        const usdPricePerUnit = isUsd ? 1 : usdMapping[order.currency];
+        const decimals = getErc20Decimals(order.currency);
+        const normalizedPrice = order.price / 10 ** decimals;
+
+        result[collection][token][orderId] = {
+          order,
+          usdPrice: isUsd
+            ? normalizedPrice
+            : usdPricePerUnit
+              ? normalizedPrice * usdPricePerUnit
+              : null,
+          normalizedPrice,
+        };
+      }
+    }
+  }
+
+  return result;
+});
+
+export const collectionOrdersWithUsdAtom = Atom.family(
+  (contractAddress: string) => {
+    return Atom.make((get) => {
+      const listings = get(listingsWithUsdAtom);
+      const collection = getCachedChecksumAddress(contractAddress);
+      const collectionListings = listings[collection];
+      if (!collectionListings) return {};
+
+      return Object.entries(collectionListings).reduce(
+        (acc, [token, tokenListings]) => {
+          const filtered = Object.values(tokenListings).filter(
+            (listing) =>
+              !!listing && listing.order.status.value === StatusType.Placed,
+          );
+          if (filtered.length === 0) return acc;
+          acc[token] = filtered;
+          return acc;
+        },
+        {} as { [token: string]: ListingWithUsd[] },
+      );
+    });
+  },
+);
+
+export const sortedListedTokenIdsAtom = Atom.family(
+  (contractAddress: string) => {
+    return Atom.make((get) => {
+      const collectionOrders = get(
+        collectionOrdersWithUsdAtom(contractAddress),
+      );
+      if (!collectionOrders || Object.keys(collectionOrders).length === 0) {
+        return [];
+      }
+
+      const tokenPrices = Object.entries(collectionOrders).map(
+        ([tokenId, listings]) => {
+          const minUsdPrice = Math.min(
+            ...listings.map((l) => l.usdPrice ?? Number.POSITIVE_INFINITY),
+          );
+          return { tokenId, minUsdPrice };
+        },
+      );
+
+      tokenPrices.sort((a, b) => a.minUsdPrice - b.minUsdPrice);
+
+      return tokenPrices.map((t) => t.tokenId);
+    });
+  },
+);

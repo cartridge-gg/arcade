@@ -3,7 +3,6 @@ import { useAccount, useConnect } from "@starknet-react/core";
 import { useRouterState } from "@tanstack/react-router";
 import type { Token } from "@/types/torii";
 import type { OrderModel } from "@cartridge/arcade";
-import { useMarketplace } from "@/hooks/marketplace";
 import { useMarketBalancesFetcher } from "@/hooks/marketplace-balances-fetcher";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
 import { addAddressPadding, getChecksumAddress } from "starknet";
@@ -12,6 +11,8 @@ import { useArcade } from "@/hooks/arcade";
 import { ERC1155_ENTRYPOINT, getEntrypoints } from "../items";
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccountByAddress, useMarketplaceTokens } from "@/effect";
+import { collectionOrdersAtom } from "@/effect/atoms";
+import { useAtomValue } from "@effect-atom/atom-react";
 import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
 
 interface UseTokenDetailViewModelArgs {
@@ -41,7 +42,6 @@ export function useTokenDetailViewModel({
 }: UseTokenDetailViewModelArgs): TokenDetailViewModel {
   const { connector } = useConnect();
   const { address, isConnected } = useAccount();
-  const { getCollectionOrders } = useMarketplace();
   const { trackEvent, events } = useAnalytics();
   const { provider, games, editions } = useArcade();
   const { location } = useRouterState();
@@ -83,9 +83,9 @@ export function useTokenDetailViewModel({
     });
   }, [rawTokens, tokenId]);
 
-  const collectionOrders = useMemo(() => {
-    return getCollectionOrders(collectionAddress);
-  }, [getCollectionOrders, collectionAddress]);
+  const collectionOrders = useAtomValue(
+    collectionOrdersAtom(collectionAddress),
+  );
 
   const orders = useMemo(() => {
     if (!collectionOrders || !tokenId) return [];

@@ -11,13 +11,20 @@ vi.mock("@starknet-react/core", () => ({
   useConnect: () => ({ connector: null }),
 }));
 
-const mockGetCollectionOrders = vi.fn();
+const mockCollectionOrders = vi.fn();
 
-vi.mock("@/hooks/marketplace", () => ({
-  useMarketplace: () => ({
-    getCollectionOrders: mockGetCollectionOrders,
-  }),
+vi.mock("@/effect/atoms", () => ({
+  collectionOrdersAtom: () => mockCollectionOrders(),
 }));
+
+vi.mock("@effect-atom/atom-react", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@effect-atom/atom-react")>();
+  return {
+    ...actual,
+    useAtomValue: (atom: any) => atom,
+  };
+});
 
 const mockUseMarketplaceTokens = vi.fn();
 const mockUseAccountByAddress = vi.fn();
@@ -62,7 +69,7 @@ describe("useTokenDetailViewModel", () => {
       address: "0x123",
       isConnected: true,
     });
-    mockGetCollectionOrders.mockReturnValue({});
+    mockCollectionOrders.mockReturnValue({});
     mockUseMarketplaceTokens.mockReturnValue({
       collection: null,
       tokens: [],
@@ -140,7 +147,7 @@ describe("useTokenDetailViewModel", () => {
       isFetchingNextPage: false,
       fetchNextPage: vi.fn(),
     });
-    mockGetCollectionOrders.mockReturnValue({
+    mockCollectionOrders.mockReturnValue({
       "1": [{ tokenId: 1n, price: "100" } as unknown as OrderModel],
     });
 
