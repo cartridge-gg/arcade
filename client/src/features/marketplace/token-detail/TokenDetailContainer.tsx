@@ -91,7 +91,11 @@ export const TokenDetailContainer = ({
             verified
           />
 
-          <AssetPreview image={tokenImage} name={tokenName} className="h-80" />
+          <AssetPreview
+            image={tokenImage}
+            name={tokenName}
+            className="h-[360px]"
+          />
 
           <TokenTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
