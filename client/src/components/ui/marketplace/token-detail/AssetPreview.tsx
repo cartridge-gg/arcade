@@ -1,3 +1,4 @@
+import { TimesIcon } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
 import { useState } from "react";
 import { createPortal } from "react-dom";
@@ -42,6 +43,12 @@ export function AssetPreview({ image, name, className }: AssetPreviewProps) {
             className="fixed inset-0 z-50 bg-translucent-dark-300 backdrop-blur-[2px] flex items-center justify-center"
             onClick={() => setIsFullscreen(false)}
           >
+            <button
+              type="button"
+              className="bg-translucent-light-100 hover:bg-translucent-light-150 flex items-center justify-center p-2 rounded absolute top-6 right-6"
+            >
+              <TimesIcon className="text-foreground" />
+            </button>
             <img
               src={image}
               alt={name || "NFT"}
