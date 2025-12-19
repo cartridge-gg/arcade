@@ -12,7 +12,6 @@ import {
   ChestIcon,
   LeaderboardIcon,
   LightbulbIcon,
-  ListIcon,
   MetricsIcon,
   PulseIcon,
   ScrollIcon,
@@ -21,13 +20,14 @@ import {
   TrophyIcon,
   UsersIcon,
 } from "@cartridge/ui";
+import { DashboardIcon } from "@/components/ui/icons";
 
 export interface NavigationViewModel {
   tabs: TabItem[];
   activeTab: TabValue;
 }
 
-export const DEFAULT_TAB: TabValue = "marketplace";
+export const DEFAULT_TAB: TabValue = "about";
 export const DASHBOARD_ALLOWED_ROUTES = [DEFAULT_TAB, "leaderboard", "predict"];
 
 export type TabItem = {
@@ -52,7 +52,7 @@ const TabValueDisplayMap = (tab: TabValue) => {
     case "metrics":
       return { name: "Metrics", icon: MetricsIcon };
     case "about":
-      return { name: "About", icon: ListIcon };
+      return { name: "Dashboard", icon: DashboardIcon };
     case "marketplace":
       return { name: "Marketplace", icon: ShoppingCartIcon };
     case "items":
@@ -131,7 +131,7 @@ export function useNavigationContext(): NavigationContextViewModel {
   const activeTab = useMemo(() => {
     const currentTab = manager.getParams().tab;
     if (!currentTab || !tabs.some((item) => item.tab === currentTab)) {
-      return "marketplace" as TabValue;
+      return "about" as TabValue;
     }
     return currentTab as TabValue;
   }, [manager, tabs]);
