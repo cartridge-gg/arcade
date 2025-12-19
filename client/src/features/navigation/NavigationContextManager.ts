@@ -111,13 +111,13 @@ export class NavigationContextManager {
       case "general":
       case "game":
       case "edition":
-        return "marketplace";
+        return "about";
       case "player":
         return "inventory";
       case "marketplace":
         return "items";
       default:
-        return "marketplace";
+        return "about";
     }
   }
 
@@ -150,32 +150,16 @@ export class NavigationContextManager {
   private getTabConfigsForContext(context: NavigationContext): TabValue[] {
     switch (context) {
       case "general":
-        return ["marketplace", "leaderboard", "inventory", "predict"];
+        return ["about", "marketplace", "leaderboard", "inventory", "predict"];
       case "game":
       case "edition":
-        return [
-          // "activity",
-          "marketplace",
-          "leaderboard",
-          "inventory",
-          "predict",
-          // "guilds",
-          "about",
-        ];
+        return ["about", "marketplace", "leaderboard", "inventory", "predict"];
       case "marketplace":
-        return [
-          // "activity",
-          "items",
-          "holders",
-        ];
+        return ["items", "holders"];
       case "player":
-        return [
-          "inventory",
-          "achievements",
-          // "activity"
-        ];
+        return ["inventory", "achievements"];
       default:
-        return ["marketplace"];
+        return ["about"];
     }
   }
 
