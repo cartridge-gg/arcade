@@ -261,7 +261,11 @@ describe("NavigationContextManager", () => {
       });
 
       const tabs = manager.getAvailableTabs();
-      expect(tabs.map((t) => t.tab)).toEqual(["marketplace", "leaderboard"]);
+      expect(tabs.map((t) => t.tab)).toEqual([
+        "about",
+        "marketplace",
+        "leaderboard",
+      ]);
     });
 
     it("includes inventory when logged in", () => {
@@ -274,6 +278,7 @@ describe("NavigationContextManager", () => {
 
       const tabs = manager.getAvailableTabs();
       expect(tabs.map((t) => t.tab)).toEqual([
+        "about",
         "marketplace",
         "leaderboard",
         "inventory",
@@ -292,9 +297,9 @@ describe("NavigationContextManager", () => {
 
       const tabs = manager.getAvailableTabs();
       expect(tabs.map((t) => t.tab)).toEqual([
+        "about",
         "marketplace",
         "leaderboard",
-        "about",
       ]);
     });
 
@@ -308,10 +313,10 @@ describe("NavigationContextManager", () => {
 
       const tabs = manager.getAvailableTabs();
       expect(tabs.map((t) => t.tab)).toEqual([
+        "about",
         "marketplace",
         "leaderboard",
         "inventory",
-        "about",
       ]);
     });
   });
@@ -327,9 +332,9 @@ describe("NavigationContextManager", () => {
 
       const tabs = manager.getAvailableTabs();
       expect(tabs.map((t) => t.tab)).toEqual([
+        "about",
         "marketplace",
         "leaderboard",
-        "about",
       ]);
     });
   });
@@ -395,7 +400,7 @@ describe("NavigationContextManager", () => {
   });
 
   describe("Default Tab", () => {
-    it("returns marketplace for general context", () => {
+    it("returns about for general context", () => {
       const manager = new NavigationContextManager({
         pathname: "/marketplace",
         games: mockGames,
@@ -403,10 +408,10 @@ describe("NavigationContextManager", () => {
         isLoggedIn: false,
       });
 
-      expect(manager.getDefaultTab()).toBe("marketplace");
+      expect(manager.getDefaultTab()).toBe("about");
     });
 
-    it("returns marketplace for game context", () => {
+    it("returns about for game context", () => {
       const manager = new NavigationContextManager({
         pathname: "/game/1/marketplace",
         games: mockGames,
@@ -414,10 +419,10 @@ describe("NavigationContextManager", () => {
         isLoggedIn: false,
       });
 
-      expect(manager.getDefaultTab()).toBe("marketplace");
+      expect(manager.getDefaultTab()).toBe("about");
     });
 
-    it("returns marketplace for edition context", () => {
+    it("returns about for edition context", () => {
       const manager = new NavigationContextManager({
         pathname: "/game/1/edition/1/marketplace",
         games: mockGames,
@@ -425,7 +430,7 @@ describe("NavigationContextManager", () => {
         isLoggedIn: false,
       });
 
-      expect(manager.getDefaultTab()).toBe("marketplace");
+      expect(manager.getDefaultTab()).toBe("about");
     });
 
     it("returns items for marketplace context", () => {
@@ -452,7 +457,7 @@ describe("NavigationContextManager", () => {
   });
 
   describe("Link Generation", () => {
-    it("generates root path for marketplace in general context", () => {
+    it("generates root path for about in general context", () => {
       const manager = new NavigationContextManager({
         pathname: "/leaderboard",
         games: mockGames,
@@ -461,8 +466,8 @@ describe("NavigationContextManager", () => {
       });
 
       const tabs = manager.getAvailableTabs();
-      const marketplaceTab = tabs.find((t) => t.tab === "marketplace");
-      expect(marketplaceTab?.href).toBe("/");
+      const aboutTab = tabs.find((t) => t.tab === "about");
+      expect(aboutTab?.href).toBe("/");
     });
 
     it("generates proper hrefs for game context", () => {
@@ -477,10 +482,10 @@ describe("NavigationContextManager", () => {
       const hrefMap = Object.fromEntries(tabs.map((t) => [t.tab, t.href]));
 
       expect(hrefMap).toMatchObject({
-        marketplace: "/game/1",
+        about: "/game/1",
+        marketplace: "/game/1/marketplace",
         leaderboard: "/game/1/leaderboard",
         inventory: "/game/1/inventory",
-        about: "/game/1/about",
       });
     });
 
@@ -496,7 +501,8 @@ describe("NavigationContextManager", () => {
       const hrefMap = Object.fromEntries(tabs.map((t) => [t.tab, t.href]));
 
       expect(hrefMap).toMatchObject({
-        marketplace: "/game/1/edition/season-1",
+        about: "/game/1/edition/season-1",
+        marketplace: "/game/1/edition/season-1/marketplace",
         leaderboard: "/game/1/edition/season-1/leaderboard",
         inventory: "/game/1/edition/season-1/inventory",
       });
@@ -545,10 +551,12 @@ describe("NavigationContextManager", () => {
       });
 
       const tabs = manager.getAvailableTabs();
+      const aboutTab = tabs.find((t) => t.tab === "about");
       const marketplaceTab = tabs.find((t) => t.tab === "marketplace");
       const inventoryTab = tabs.find((t) => t.tab === "inventory");
 
-      expect(marketplaceTab?.href).toBe("/game/1/edition/2");
+      expect(aboutTab?.href).toBe("/game/1/edition/2");
+      expect(marketplaceTab?.href).toBe("/game/1/edition/2/marketplace");
       expect(inventoryTab?.href).toBe("/game/1/edition/2/inventory");
     });
   });
