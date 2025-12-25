@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { truncateAddress } from "./TokenDetailSidebar";
 
 interface TokenProperty {
   name: string;
@@ -9,7 +10,8 @@ interface TokenPropertiesProps {
   properties: TokenProperty[];
 }
 const formatterMap: Record<string, (val: string) => string> = {
-  "Token ID": (val: string): string => BigInt(val).toString(10),
+  "Token ID": (val: string): string =>
+    truncateAddress(BigInt(val).toString(10)),
 };
 function formatValue(name: string, value: string): string {
   const formatter = formatterMap[name];
