@@ -6,8 +6,11 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR/../.." || exit 1
 
-STARKNET_RPC=http://localhost:8001/x/starknet/mainnet/rpc/v0_9
+STARKNET_RPC=https://api.cartridge.gg/x/starknet/sepolia/rpc/v0_9
 PROFILE=${PROFILE:-dev}
+#STARTERPACK_ADDRESS=ARCADE-StarterpackRegistry
+STARTERPACK_ADDRESS=0x3eb03b8f2be0ec2aafd186d72f6d8f3dd320dbc89f2b6802bca7465f6ccaa43
+REGISTERED_EVENT_KEY=0x562c7a296437394d061d12c6da24a8d8aefaf314290ac9b10c768183390ac5e
 
 strip_hex_zeros() {
   local hex=$1
@@ -24,17 +27,106 @@ COMMAND=$1
 case $COMMAND in
   register)
     # Parameters: implementation referral_percentage reissuable price_low price_high payment_token metadata
-    IMPLEMENTATION=${2:-0x37639cc1b5bfa16f2546a28eb56f0844313529f01f6cde071d3ef930df754af}
-    REFERRAL_PCT=${3:-0x0}
+    IMPLEMENTATION=${2:-0x1a2bd193640e652b5c55c11cbfb4776a739a75ba9a7ed7e0a7733a337f55fb4}
+    REFERRAL_PCT=${3:-0x5}
     REISSUABLE=${4:-0x1}
     PRICE_LOW=${5:-1000000000000000000}
     PRICE_HIGH=${6:-0}
     PAYMENT_TOKEN=${7:-0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d}
-    METADATA=${8:-"{\"name\":\"Test Starterpack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Item\",\"description\":\"Test item\",\"image_uri\":\"https://example.com/item.png\"}]}"}
+    METADATA=${8:-"{\"name\":\"Sick Starterpack\",\"description\":\"This starterpack is so sick\",\"image_uri\":\"https://storage.googleapis.com/c7e-prod-static/media/ssp.png\",\"items\":[{\"name\":\"Sick Item\",\"description\":\"This item is so sick\",\"image_uri\":\"https://storage.googleapis.com/c7e-prod-static/media/sick_item.png\"}]}"}
     
-    sozo execute --profile $PROFILE ARCADE-StarterpackRegistry register \
+    RECEIPT_OUTPUT=$(sozo execute --profile $PROFILE $STARTERPACK_ADDRESS register \
       $IMPLEMENTATION $REFERRAL_PCT $REISSUABLE $PRICE_LOW $PRICE_HIGH $PAYMENT_TOKEN \
-      str:"$METADATA"
+      str:"$METADATA" --wait --receipt 2>&1)
+    
+    # Extract JSON from output - sozo outputs "Receipt: {...}" where JSON may be multiline
+    # Find line with "Receipt:" and extract everything from that line onwards, then remove the prefix
+    RECEIPT_LINE_START=$(echo "$RECEIPT_OUTPUT" | grep -n "Receipt:" | head -1 | cut -d: -f1)
+    if [ -n "$RECEIPT_LINE_START" ]; then
+      # Extract from receipt line onwards and remove "Receipt: " prefix from first line
+      # Store compact version for parsing
+      RECEIPT_JSON=$(echo "$RECEIPT_OUTPUT" | sed -n "${RECEIPT_LINE_START},\$p" | sed '1s/.*Receipt: //' | jq -c . 2>/dev/null)
+      # Store formatted version for display
+      RECEIPT_FORMATTED=$(echo "$RECEIPT_OUTPUT" | sed -n "${RECEIPT_LINE_START},\$p" | sed '1s/.*Receipt: //' | jq . 2>/dev/null)
+    else
+      # Fallback: try to parse the whole output as JSON or find JSON object
+      RECEIPT_JSON=$(echo "$RECEIPT_OUTPUT" | jq -c . 2>/dev/null || echo "$RECEIPT_OUTPUT")
+      RECEIPT_FORMATTED=$(echo "$RECEIPT_OUTPUT" | jq . 2>/dev/null || echo "$RECEIPT_OUTPUT")
+    fi
+    
+    # Parse receipt to find REGISTERED_EVENT_KEY and extract all event data
+    # Data array indices: starterpack_id (1), implementation (3), referral_percentage (4), 
+    # reissuable (5), owner (6), time (7)
+    EVENT_DATA=$(echo "$RECEIPT_JSON" | jq -r --arg key "$REGISTERED_EVENT_KEY" '
+      if type == "object" and has("events") then
+        .events[]? | 
+        select(.keys[]? == $key) | 
+        {
+          starterpack_id: .data[1],
+          implementation: .data[3],
+          referral_percentage: .data[4],
+          reissuable: .data[5],
+          owner: .data[6],
+          time: .data[7]
+        }
+      else
+        empty
+      end
+    ' 2>/dev/null)
+    
+    if [ -z "$EVENT_DATA" ] || [ "$EVENT_DATA" = "null" ] || [ "$EVENT_DATA" = "{}" ]; then
+      echo "Error: Could not find REGISTERED_EVENT_KEY in receipt or extract event data"
+      echo "Receipt output:"
+      echo "$RECEIPT_OUTPUT"
+      exit 1
+    fi
+    
+    # Extract individual fields
+    STARTERPACK_ID=$(echo "$EVENT_DATA" | jq -r '.starterpack_id // empty')
+    IMPLEMENTATION=$(echo "$EVENT_DATA" | jq -r '.implementation // empty')
+    REFERRAL_PCT=$(echo "$EVENT_DATA" | jq -r '.referral_percentage // empty')
+    REISSUABLE=$(echo "$EVENT_DATA" | jq -r '.reissuable // empty')
+    OWNER=$(echo "$EVENT_DATA" | jq -r '.owner // empty')
+    TIME=$(echo "$EVENT_DATA" | jq -r '.time // empty')
+    
+    # Convert reissuable and referral_percentage to decimal
+    REISSUABLE_DEC=$(printf "%d" $REISSUABLE 2>/dev/null || echo "unknown")
+    REFERRAL_PCT_DEC=$(printf "%d" $REFERRAL_PCT 2>/dev/null || echo "unknown")
+    STARTERPACK_ID_DEC=$(printf "%d" $STARTERPACK_ID 2>/dev/null || echo "unknown")
+    
+    # Convert time to decimal (it's u64, Unix timestamp)
+    TIME_DEC=$(printf "%d" $TIME 2>/dev/null || echo "unknown")
+    
+    # Format Unix timestamp as human-readable date
+    if [ "$TIME_DEC" != "unknown" ] && [ -n "$TIME_DEC" ]; then
+      TIME_FORMATTED=$(date -d "@$TIME_DEC" "+%Y-%m-%d %H:%M:%S UTC" 2>/dev/null || \
+                       date -r "$TIME_DEC" "+%Y-%m-%d %H:%M:%S UTC" 2>/dev/null || \
+                       echo "invalid timestamp")
+      # Trim any leading/trailing whitespace
+      TIME_FORMATTED=$(echo "$TIME_FORMATTED" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    else
+      TIME_FORMATTED="unknown"
+    fi
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "              STARTERPACK REGISTERED                 "
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "  Starterpack ID:     $STARTERPACK_ID_DEC ($(strip_hex_zeros $STARTERPACK_ID))"
+    echo "  Implementation:     $(strip_hex_zeros $IMPLEMENTATION)"
+    echo "  Referral %:         $REFERRAL_PCT_DEC ($(strip_hex_zeros $REFERRAL_PCT))"
+    if [ "$REISSUABLE_DEC" = "1" ]; then
+      echo "  Reissuable:         Yes"
+    elif [ "$REISSUABLE_DEC" = "0" ]; then
+      echo "  Reissuable:         No"
+    else
+      echo "  Reissuable:         $REISSUABLE ($(strip_hex_zeros $REISSUABLE))"
+    fi
+    echo "  Owner:              $(strip_hex_zeros $OWNER)"
+    echo "  Time Created:       $TIME_FORMATTED ($(strip_hex_zeros $TIME))"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     ;;
     
   update)
@@ -53,7 +145,7 @@ case $COMMAND in
       exit 1
     fi
     
-    sozo execute --profile $PROFILE ARCADE-StarterpackRegistry update \
+    sozo execute --profile $PROFILE $STARTERPACK_ADDRESS update \
       $STARTERPACK_ID $IMPLEMENTATION $REFERRAL_PCT $REISSUABLE $PRICE_LOW $PRICE_HIGH $PAYMENT_TOKEN
     ;;
     
@@ -68,7 +160,7 @@ case $COMMAND in
       exit 1
     fi
     
-    sozo execute --profile $PROFILE ARCADE-StarterpackRegistry update_metadata \
+    sozo execute --profile $PROFILE $STARTERPACK_ADDRESS update_metadata \
       $STARTERPACK_ID str:"$METADATA"
     ;;
     
@@ -85,7 +177,7 @@ case $COMMAND in
     echo "Getting supply for Starterpack ID: $STARTERPACK_ID"
     echo ""
     
-    RESULT=$(sozo call --profile $PROFILE ARCADE-StarterpackRegistry supply $STARTERPACK_ID 2>&1)
+    RESULT=$(sozo call --profile $PROFILE $STARTERPACK_ADDRESS supply $STARTERPACK_ID 2>&1)
     
     # Extract values from the array
     VALUES=$(echo "$RESULT" | grep -oP '\[.*\]' | sed 's/\[//g' | sed 's/\]//g' | sed 's/0x0x/0x/g' | tr ' ' '\n' | grep '^0x')
@@ -137,7 +229,7 @@ case $COMMAND in
     echo "Getting metadata for Starterpack ID: $STARTERPACK_ID"
     echo ""
     
-    RESULT=$(sozo call --profile $PROFILE ARCADE-StarterpackRegistry metadata $STARTERPACK_ID 2>&1)
+    RESULT=$(sozo call --profile $PROFILE $STARTERPACK_ADDRESS metadata $STARTERPACK_ID 2>&1)
     
     # Extract the values from the array
     VALUES=$(echo "$RESULT" | grep -oP '\[.*\]' | sed 's/\[//g' | sed 's/\]//g' | sed 's/0x0x/0x/g' | tr ' ' '\n' | grep '^0x')
@@ -199,7 +291,7 @@ case $COMMAND in
     echo "Getting quote for Starterpack ID: $STARTERPACK_ID (Amount: $AMOUNT, Has Referral: $HAS_REFERRAL)"
     echo ""
     
-    RESULT=$(sozo call --profile $PROFILE ARCADE-StarterpackRegistry quote $STARTERPACK_ID $AMOUNT $HAS_REFERRAL 2>&1)
+    RESULT=$(sozo call --profile $PROFILE $STARTERPACK_ADDRESS quote $STARTERPACK_ID $AMOUNT $HAS_REFERRAL 2>&1)
     
     # Extract the values from the array - split by spaces and filter for 0x values
     VALUES=$(echo "$RESULT" | grep -oP '\[.*\]' | sed 's/\[//g' | sed 's/\]//g' | sed 's/0x0x/0x/g' | tr ' ' '\n' | grep '^0x')
@@ -221,11 +313,11 @@ case $COMMAND in
     TOTAL_COST_HIGH=$(echo "$VALUES" | sed -n '8p')
     PAYMENT_TOKEN=$(echo "$VALUES" | sed -n '9p')
     
-    # Convert hex to decimal (assuming high is 0 for simplicity)
-    BASE_PRICE_DEC=$(printf "%d" $BASE_PRICE_LOW 2>/dev/null || echo "0")
-    REFERRAL_FEE_DEC=$(printf "%d" $REFERRAL_FEE_LOW 2>/dev/null || echo "0")
-    PROTOCOL_FEE_DEC=$(printf "%d" $PROTOCOL_FEE_LOW 2>/dev/null || echo "0")
-    TOTAL_COST_DEC=$(printf "%d" $TOTAL_COST_LOW 2>/dev/null || echo "0")
+    # Convert hex to decimal using Python for arbitrary precision (bash printf overflows at 2^63)
+    BASE_PRICE_DEC=$(python3 -c "print(int('$BASE_PRICE_LOW', 16))" 2>/dev/null || echo "0")
+    REFERRAL_FEE_DEC=$(python3 -c "print(int('$REFERRAL_FEE_LOW', 16))" 2>/dev/null || echo "0")
+    PROTOCOL_FEE_DEC=$(python3 -c "print(int('$PROTOCOL_FEE_LOW', 16))" 2>/dev/null || echo "0")
+    TOTAL_COST_DEC=$(python3 -c "print(int('$TOTAL_COST_LOW', 16))" 2>/dev/null || echo "0")
     
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "                 STARTERPACK QUOTE                  "
