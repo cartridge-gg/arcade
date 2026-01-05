@@ -51,6 +51,7 @@ export const formSchema = z.object({
   preset: z.string().min(2, { message: "Preset is required" }),
   name: z.string().min(2, { message: "Name is required" }),
   description: z.string().min(2, { message: "Description is required" }),
+  studio: z.string().min(2, { message: "Studio is required" }),
   // Assets
   image: z
     .string()

@@ -24,7 +24,8 @@ interface GameCardProps extends VariantProps<typeof gameCardVariants> {
   icon: string;
   cover?: string;
   href: string;
-  verified?: boolean;
+  color?: string;
+  studio?: string;
   className?: string;
 }
 
@@ -33,7 +34,8 @@ export const GameCard = ({
   icon,
   cover,
   href,
-  verified = true,
+  color,
+  studio,
   size,
   className,
 }: GameCardProps) => {
@@ -64,22 +66,27 @@ export const GameCard = ({
             className="rounded-xs"
           />
         </div>
-        <div className="flex flex-col gap-1 min-w-0">
+        <div className="flex flex-col gap-0.5 min-w-0">
           <p className="text-base font-medium text-white truncate tracking-wide">
             {name}
           </p>
-          {verified && (
-            <div className="flex items-center gap-0.5">
+          {studio && (
+            <div className="flex gap-0.5">
               <StudioIcon />
-              <span className="text-xs text-foreground-300">
-                Provable Games
-              </span>
+              <p className="text-xs text-foreground-300 truncate">{studio}</p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      <div
+        className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+        style={{
+          boxShadow: color
+            ? `0 0 20px ${color}40, inset 0 0 0 1px ${color}`
+            : undefined,
+        }}
+      />
     </Link>
   );
 };

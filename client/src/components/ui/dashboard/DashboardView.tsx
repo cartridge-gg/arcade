@@ -30,7 +30,8 @@ export const DashboardView = ({
                 icon={game.icon}
                 cover={game.cover}
                 href={`/game/${getGameSlug(game.name, game.id)}`}
-                verified={game.whitelisted}
+                color={game.color}
+                studio={game.studio}
               />
             ))}
           </div>
@@ -41,7 +42,7 @@ export const DashboardView = ({
         <h2 className="text-xs tracking-wider font-semibold text-foreground-400 mb-3">
           All Games
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
           {allGames.map((game) => (
             <GameCard
               key={game.id}
@@ -50,7 +51,8 @@ export const DashboardView = ({
               icon={game.icon}
               cover={game.cover}
               href={`/game/${getGameSlug(game.name, game.id)}`}
-              verified={game.whitelisted}
+              color={game.color}
+              studio={game.studio}
             />
           ))}
         </div>
@@ -71,7 +73,7 @@ const DashboardLoadingState = () => {
       </section>
       <section>
         <Skeleton className="h-4 w-24 mb-3" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-[160px] lg:h-[180px] rounded-lg" />
           ))}

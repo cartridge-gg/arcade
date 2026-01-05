@@ -5,6 +5,7 @@ interface PropertiesOptions {
   icon?: string;
   banner?: string;
   cover?: string;
+  studio?: string;
 }
 
 export class Properties {
@@ -12,12 +13,14 @@ export class Properties {
   public icon?: string;
   public banner?: string;
   public cover?: string;
+  public studio?: string;
 
   constructor(options?: PropertiesOptions) {
     this.preset = options?.preset;
     this.icon = options?.icon;
     this.banner = options?.banner;
     this.cover = options?.cover;
+    this.studio = options?.studio;
   }
 
   static default() {
@@ -32,6 +35,7 @@ export class Properties {
         icon: json.icon,
         banner: json.banner,
         cover: json.cover,
+        studio: json.studio,
       });
     } catch (error: unknown) {
       console.error("Error parsing properties:", error);
@@ -45,6 +49,7 @@ export class Properties {
     if (this.icon) json.icon = this.icon;
     if (this.banner) json.banner = this.banner;
     if (this.cover) json.cover = this.cover;
+    if (this.studio) json.studio = this.studio;
     return byteArray.byteArrayFromString(JSON.stringify(json));
   }
 
@@ -54,6 +59,7 @@ export class Properties {
       icon: this.icon,
       banner: this.banner,
       cover: this.cover,
+      studio: this.studio,
     });
   }
 }

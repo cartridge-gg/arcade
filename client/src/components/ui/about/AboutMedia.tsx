@@ -69,12 +69,12 @@ export function AboutMedia({ items }: AboutMediaProps) {
             ))}
           </div>
         </div>
-        <div className="relative">
+        <div className="relative w-0 min-w-full overflow-hidden">
           <div
             className="absolute w-11 h-full z-10 right-0 pointer-events-none"
             style={{
               background:
-                "linear-gradient(to right, transparent 0%, transparent 50%, var(--background-100) 100%",
+                "linear-gradient(to right, transparent 0%, transparent 50%, var(--background-100) 100%)",
             }}
           />
           <CarouselContent className="flex gap-4">
@@ -82,7 +82,7 @@ export function AboutMedia({ items }: AboutMediaProps) {
               item.includes("youtu") ? (
                 <CarouselItem
                   key={item}
-                  className="basis-[295px] lg:basis-[600px]"
+                  className="basis-[295px] md:basis-[450px] lg:basis-[600px]"
                 >
                   <Video
                     video={item}
@@ -93,7 +93,7 @@ export function AboutMedia({ items }: AboutMediaProps) {
               ) : (
                 <CarouselItem
                   key={item}
-                  className="basis-[295px] lg:basis-[600px]"
+                  className="basis-[295px] md:basis-[450px] lg:basis-[600px]"
                 >
                   <Image image={item} shift={index === items.length - 1} />
                 </CarouselItem>
@@ -109,7 +109,7 @@ export function AboutMedia({ items }: AboutMediaProps) {
 const Image = ({ image, shift }: { image: string; shift: boolean }) => (
   <div
     className={cn(
-      "rounded-lg overflow-hidden w-[295px] h-[160px] lg:w-[600px] lg:h-[320px]",
+      "rounded-lg overflow-hidden w-[295px] h-[160px] md:w-[450px] md:h-[240px] lg:w-[600px] lg:h-[320px]",
       shift && "pr-4",
     )}
   >
@@ -128,7 +128,7 @@ const Video = ({
 }) => (
   <div
     className={cn(
-      "relative rounded-lg overflow-hidden w-[295px] h-[160px] lg:w-[600px] lg:h-[320px]",
+      "relative rounded-lg overflow-hidden w-[295px] h-[160px] md:w-[450px] md:h-[240px] lg:w-[600px] lg:h-[320px]",
       shift && "pr-4",
     )}
   >

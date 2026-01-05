@@ -52,6 +52,7 @@ export function Register() {
       color: "",
       name: "",
       description: "",
+      studio: "",
       image: "",
       banner: "",
       cover: "",
@@ -111,6 +112,7 @@ export function Register() {
             icon: values.image,
             banner: values.banner,
             cover: values.cover,
+            studio: values.studio,
           });
           const gameSocials = new Socials({
             discord: values.discord,
@@ -248,6 +250,12 @@ export function Register() {
                 name="description"
                 label="Description *"
                 placeholder="A dojo starter game"
+                form={form}
+              />
+              <Field
+                name="studio"
+                label="Studio *"
+                placeholder="Studio Name"
                 form={form}
               />
               <Field
@@ -392,6 +400,7 @@ export const Field = ({
           | "website"
           | "preset"
           | "description"
+          | "studio"
           | "image"
           | "banner"
           | "discord"
@@ -411,10 +420,16 @@ export const Field = ({
               <Textarea
                 placeholder={placeholder}
                 {...field}
+                value={field.value as string}
                 disabled={disabled}
               />
             ) : (
-              <Input placeholder={placeholder} {...field} disabled={disabled} />
+              <Input
+                placeholder={placeholder}
+                {...field}
+                value={field.value as string}
+                disabled={disabled}
+              />
             )}
           </FormControl>
           <FormMessage />

@@ -61,6 +61,7 @@ export function Register({
       preset: edition?.properties?.preset || "",
       name: edition?.name || "",
       description: edition?.description || "",
+      studio: edition?.properties?.studio || "",
       image: edition?.properties.icon || "",
       website: edition?.socials?.website || "",
       github: edition?.socials?.github || "",
@@ -117,6 +118,7 @@ export function Register({
           const properties = new Properties({
             preset: values.preset,
             icon: values.image,
+            studio: values.studio,
           });
           const socials = new Socials({
             website: values.website,
@@ -247,6 +249,12 @@ export function Register({
                 form={form}
               />
               <Field
+                name="studio"
+                label="Studio *"
+                placeholder="Studio Name"
+                form={form}
+              />
+              <Field
                 name="image"
                 label="Image"
                 placeholder="https://dojo.com/icon.png"
@@ -358,6 +366,7 @@ export const Field = ({
           | "policies"
           | "name"
           | "description"
+          | "studio"
           | "image"
           | "website"
           | "github"

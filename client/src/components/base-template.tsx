@@ -85,7 +85,7 @@ export function BaseTemplate({
 
               <div
                 className={cn(
-                  "relative grow h-full flex flex-col rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
+                  "relative grow h-full flex flex-col min-w-0 rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
                   contentClassName,
                 )}
               >

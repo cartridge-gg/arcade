@@ -7,6 +7,8 @@ export interface DashboardGameItem {
   name: string;
   icon: string;
   cover?: string;
+  color: string;
+  studio?: string;
   whitelisted: boolean;
 }
 
@@ -25,6 +27,8 @@ export function useDashboardViewModel(): DashboardViewModel {
       name: game.name,
       icon: game.properties?.icon ?? "",
       cover: game.properties?.cover,
+      color: game.color || "",
+      studio: game.properties?.studio,
       whitelisted: game.whitelisted,
     }));
   }, [games]);

@@ -10,6 +10,16 @@ export enum OrderStatus {
   Canceled = 2,
   Executed = 3,
 }
+export const ArcadeModelsMapping = {
+  Book: "ARCADE-Book",
+  MetadataAttribute: "ARCADE-MetadataAttribute",
+  Moderator: "ARCADE-Moderator",
+  Order: "ARCADE-Order",
+  Listing: "ARCADE-Listing",
+  Offer: "ARCADE-Offer",
+  Sale: "ARCADE-Sale",
+} as const;
+
 export const MetadataAttributeTypedData = [
   {
     name: "identity",

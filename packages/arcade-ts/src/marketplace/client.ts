@@ -16,7 +16,7 @@ import {
 } from "../modules/torii-fetcher";
 import { initArcadeSDK } from "../modules";
 import type { SchemaType } from "../bindings";
-import { ModelsMapping, OrderCategory, OrderStatus } from "../bindings";
+import { ArcadeModelsMapping, OrderCategory, OrderStatus } from "../bindings";
 import { NAMESPACE } from "../constants";
 import { Order, type OrderModel } from "../modules/marketplace/order";
 import { CategoryType, StatusType } from "../classes";
@@ -194,7 +194,7 @@ export async function createMarketplaceClient(
 
     const builders = [
       KeysClause(
-        [ModelsMapping.Order],
+        [ArcadeModelsMapping.Order],
         [undefined, addAddressPadding(checksumCollection), tokenId, undefined],
         "FixedLen",
       ),
@@ -204,7 +204,12 @@ export async function createMarketplaceClient(
       options.status != null ? statusMap[options.status] : undefined;
     if (status !== undefined) {
       builders.push(
-        MemberClause(ModelsMapping.Order, "status", "Eq", status.toString()),
+        MemberClause(
+          ArcadeModelsMapping.Order,
+          "status",
+          "Eq",
+          status.toString(),
+        ),
       );
     }
 
@@ -213,7 +218,7 @@ export async function createMarketplaceClient(
     if (category !== undefined && category !== OrderCategory.None) {
       builders.push(
         MemberClause(
-          ModelsMapping.Order,
+          ArcadeModelsMapping.Order,
           "category",
           "Eq",
           category.toString(),
@@ -227,9 +232,8 @@ export async function createMarketplaceClient(
           ? builders[0].build()
           : AndComposeClause(builders).build(),
       )
-      .withEntityModels([ModelsMapping.Order])
-      .includeHashedKeys()
-      .addOrderBy("expiration", "Asc");
+      .withEntityModels([ArcadeModelsMapping.Order])
+      .includeHashedKeys();
 
     if (options.limit) {
       query.withLimit(options.limit);

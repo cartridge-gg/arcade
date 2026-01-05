@@ -52,6 +52,7 @@ export function Update({ game }: { game: GameModel }) {
       preset: game.properties?.preset || "",
       name: game.name || "",
       description: game.description || "",
+      studio: game.properties?.studio || "",
       image: game.properties.icon || "",
       banner: game.properties.banner || "",
       cover: game.properties.cover || "",
@@ -117,6 +118,7 @@ export function Update({ game }: { game: GameModel }) {
             icon: values.image,
             banner: values.banner,
             cover: values.cover,
+            studio: values.studio,
           });
           const socials = new Socials({
             discord: values.discord,
@@ -198,6 +200,12 @@ export function Update({ game }: { game: GameModel }) {
                 name="description"
                 label="Description *"
                 placeholder="A dojo starter game"
+                form={form}
+              />
+              <Field
+                name="studio"
+                label="Studio *"
+                placeholder="Studio Name"
                 form={form}
               />
               <Field
@@ -347,6 +355,7 @@ export const Field = ({
           | "website"
           | "preset"
           | "description"
+          | "studio"
           | "image"
           | "banner"
           | "discord"
@@ -366,10 +375,16 @@ export const Field = ({
               <Textarea
                 placeholder={placeholder}
                 {...field}
+                value={field.value as string}
                 disabled={disabled}
               />
             ) : (
-              <Input placeholder={placeholder} {...field} disabled={disabled} />
+              <Input
+                placeholder={placeholder}
+                {...field}
+                value={field.value as string}
+                disabled={disabled}
+              />
             )}
           </FormControl>
           <FormMessage />

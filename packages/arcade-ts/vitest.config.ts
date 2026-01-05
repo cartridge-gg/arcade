@@ -12,6 +12,18 @@ export default defineConfig({
       provider: "v8",
     },
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    exclude: ["dist", "www", "src/marketplace/react.test.tsx"],
+    exclude: [
+      "dist",
+      "www",
+      "src/marketplace/react.test.tsx",
+      "src/**/*.integration.test.ts",
+    ],
+    deps: {
+      optimizer: {
+        web: {
+          include: ["@dojoengine/torii-wasm"],
+        },
+      },
+    },
   },
 });

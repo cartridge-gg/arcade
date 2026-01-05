@@ -44,6 +44,7 @@
     "test:ts": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "test:integration": "RUN_INTEGRATION_TESTS=true vitest run --config vitest.integration.config.ts",
     "docs": "cd www && npm run start",
     "docs:build": "cd www && GIT_REVISION_OVERRIDE=${npm_config_git_revision_override} npm run build",
     "docs:build:version": "v=$(npm run info:version -s) && npm run docs:build --git-revision-override=${npm_config_git_revision_override=v$v}",
