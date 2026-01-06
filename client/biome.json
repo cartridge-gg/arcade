@@ -13,7 +13,8 @@
       ".vercel/**",
       "node_modules/**",
       "public/**",
-      "src/*.gen.ts"
+      "src/*.gen.ts",
+      "storybook-static/**"
     ]
   },
   "formatter": {
