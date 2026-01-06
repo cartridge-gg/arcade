@@ -89,3 +89,13 @@ Implementing metadata-based filtering for NFT collections to help users find tok
 - Run tests: `pnpm test`
 - Check performance: `pnpm test:performance`
 - Deploy and monitor for production usage
+
+## Available Skills
+- `/review` - Code review for PRs or staged files
+- `/cairo-check` - Cairo contract analysis and security
+- `/ci-fix` - Diagnose and fix CI failures
+- `/refactor` - Analyze code for refactoring opportunities
+- `/test-gen` - Generate tests for source files
+- `/create-pr` - Create PR with conventional commits
+- `/update-pr` - Respond to PR feedback
+- `/feature` - Develop new features following patterns
