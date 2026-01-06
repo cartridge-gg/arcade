@@ -11,6 +11,7 @@ pub struct StarterpackRegistered {
     pub referral_percentage: u8,
     pub reissuable: bool,
     pub owner: ContractAddress,
+    pub payment_receiver: Option<ContractAddress>,
     pub time: u64,
 }
 
@@ -24,6 +25,7 @@ pub struct StarterpackUpdated {
     pub reissuable: bool,
     pub price: u256,
     pub payment_token: ContractAddress,
+    pub payment_receiver: Option<ContractAddress>,
     pub metadata: ByteArray,
     pub time: u64,
 }

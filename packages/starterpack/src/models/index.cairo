@@ -23,6 +23,7 @@ pub struct Starterpack {
     pub reissuable: bool,
     pub price: u256,
     pub payment_token: ContractAddress,
+    pub payment_receiver: Option<ContractAddress>,
     pub status: Status,
     pub total_issued: u64,
     pub created_at: u64,

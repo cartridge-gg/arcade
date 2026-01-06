@@ -37,6 +37,7 @@ fn test_sp_issue() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -80,6 +81,7 @@ fn test_sp_issue_with_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -127,6 +129,7 @@ fn test_sp_issue_not_reissuable() {
             reissuable: false, // Not reissuable
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -176,6 +179,7 @@ fn test_sp_issue_reissuable() {
             reissuable: true, // Reissuable
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -231,6 +235,7 @@ fn test_sp_issue_paused() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -272,6 +277,7 @@ fn test_sp_referral_reward_tracking() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -319,6 +325,7 @@ fn test_sp_group_reward_tracking() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -367,6 +374,7 @@ fn test_sp_multiple_referrals_accumulation() {
             reissuable: true, // Make it reissuable for multiple purchases
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -424,6 +432,7 @@ fn test_sp_group_multiple_referrals_accumulation() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -490,6 +499,7 @@ fn test_sp_no_referral_tracking_without_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -535,6 +545,7 @@ fn test_sp_issue_with_quantity() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -580,6 +591,7 @@ fn test_sp_quote_with_quantity() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -618,6 +630,7 @@ fn test_sp_quote_with_quantity_and_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -657,6 +670,7 @@ fn test_sp_issue_quantity_with_referrer() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -721,6 +735,7 @@ fn test_sp_issue_quantity_group_rewards() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -772,6 +787,7 @@ fn test_sp_issue_quantity_exceeds_limit_non_reissuable() {
             reissuable: false, // Not reissuable
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 

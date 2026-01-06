@@ -35,6 +35,7 @@ fn test_sp_fees_distribution_no_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -97,6 +98,7 @@ fn test_sp_fees_distribution_with_referrer() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -170,6 +172,7 @@ fn test_sp_quote_calculation() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -212,6 +215,7 @@ fn test_sp_free() {
             reissuable: true,
             price: 0, // Free!
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 

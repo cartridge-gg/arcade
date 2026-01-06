@@ -35,6 +35,7 @@ fn test_sp_update() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -50,6 +51,7 @@ fn test_sp_update() {
             reissuable: true,
             price: new_price,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
         );
 
     // [Assert] Changes applied
@@ -81,6 +83,7 @@ fn test_sp_update_unauthorized() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -95,6 +98,7 @@ fn test_sp_update_unauthorized() {
             reissuable: true,
             price: 1,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
         );
 }
 
@@ -118,6 +122,7 @@ fn test_sp_pause_resume() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -158,6 +163,7 @@ fn test_sp_pause_unauthorized() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -187,6 +193,7 @@ fn test_sp_resume_unauthorized() {
             reissuable: false,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 

@@ -35,6 +35,7 @@ pub trait IStarterpackRegistry<TContractState> {
         reissuable: bool,
         price: u256,
         payment_token: ContractAddress,
+        payment_receiver: Option<ContractAddress>,
         metadata: ByteArray,
     ) -> u32; // returns starterpack_id
 
@@ -46,6 +47,7 @@ pub trait IStarterpackRegistry<TContractState> {
         reissuable: bool,
         price: u256,
         payment_token: ContractAddress,
+        payment_receiver: Option<ContractAddress>,
     );
 
     fn update_metadata(ref self: TContractState, starterpack_id: u32, metadata: ByteArray);
@@ -220,6 +222,7 @@ pub mod StarterpackRegistry {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
+            payment_receiver: Option<ContractAddress>,
             metadata: ByteArray,
         ) -> u32 {
             let world = self.world_storage();
@@ -232,6 +235,7 @@ pub mod StarterpackRegistry {
                     reissuable,
                     price,
                     payment_token,
+                    payment_receiver,
                     metadata,
                 )
         }
@@ -244,6 +248,7 @@ pub mod StarterpackRegistry {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
+            payment_receiver: Option<ContractAddress>,
         ) {
             let world = self.world_storage();
             self
@@ -256,6 +261,7 @@ pub mod StarterpackRegistry {
                     reissuable,
                     price,
                     payment_token,
+                    payment_receiver,
                 );
         }
 
