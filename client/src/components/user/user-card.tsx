@@ -136,34 +136,32 @@ const UserCardInner = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col items-start py-2 px-3 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl",
+          "flex flex-col items-start p-3 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl",
           "lg:border-background-200 lg:hover:border-background-200",
           className,
         )}
       >
         <div
           id="player-label"
-          className="flex items-center self-stretch gap-3 relative"
+          className="flex items-center self-stretch gap-2 relative"
         >
-          <div className="p-3">
+          <div className="-translate-x-1">
             <AchievementPlayerBadge
               icon={Icon}
               variant="default"
-              size="3xl"
-              className="!w-10 !h-10"
+              size="2xl"
+              className="!w-14 !h-14"
             />
           </div>
           <div className="flex-1">
             <div className="flex flex-row justify-between">
-              <div className="flex items-center gap-3">
-                <p className="text-foreground-100 text-[20px] font-semibold">
-                  {usernameStr}
-                </p>
-              </div>
-              <div className="flex items-center gap-1 p-3">
+              <p className="text-foreground-100 text-[16px]/[normal] font-semibold">
+                {usernameStr}
+              </p>
+              <div className="flex items-center gap-1 p-0.5">
                 <div className="flex items-center gap-0.5 bg-translucent-dark-100 rounded-xl">
                   <SparklesIcon variant="solid" size="xs" />
-                  <p className="text-[14px] text-foreground-100">
+                  <p className="text-xs font-normal text-foreground-100">
                     {totalEarnings}
                   </p>
                 </div>
