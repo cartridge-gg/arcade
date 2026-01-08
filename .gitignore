@@ -16,3 +16,4 @@ vite.config.ts.*
 .DS_Store
 packages/*/tsup.config.bundled_*.mjs
 client/storybook-static/
+.claude-modified-files
