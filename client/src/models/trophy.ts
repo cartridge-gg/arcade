@@ -1,4 +1,8 @@
 import { shortString } from "starknet";
+import type { AchievementsPage } from "@dojoengine/grpc";
+
+type GrpcAchievement = AchievementsPage["items"][number];
+type GrpcAchievementTask = GrpcAchievement["tasks"][number];
 
 export interface RawTrophy {
   id: string;
@@ -93,6 +97,35 @@ export class Trophy {
         },
       ],
       data: node.data,
+    };
+  }
+
+  static fromGrpc(achievement: GrpcAchievement): Trophy {
+    const tasks: Task[] = achievement.tasks.map(
+      (task: GrpcAchievementTask) => ({
+        id: task.task_id,
+        total: task.total,
+        description: task.description,
+      }),
+    );
+
+    const firstTaskId = tasks[0]?.id ?? "";
+
+    return {
+      key: `${achievement.id}-${firstTaskId}`,
+      id: achievement.id,
+      hidden: achievement.hidden,
+      index: achievement.index,
+      earning: achievement.points,
+      start:
+        achievement.start === "0" ? 0 : Number.parseInt(achievement.start, 10),
+      end: achievement.end === "0" ? 0 : Number.parseInt(achievement.end, 10),
+      group: achievement.group,
+      icon: achievement.icon,
+      title: achievement.title,
+      description: achievement.description,
+      tasks,
+      data: achievement.data ?? "",
     };
   }
 }
