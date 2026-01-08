@@ -59,13 +59,14 @@ export function useTokenDetailViewModel({
     address: collectionAddress,
     tokenId,
   });
-  const owner = useMemo(
-    () =>
-      balances && balances.length === 1
-        ? addAddressPadding(balances[0].account_address)
-        : "0x0",
-    [balances],
-  );
+  const owner = useMemo(() => {
+    if (balances && balances.length === 1) {
+      return addAddressPadding(balances[0].account_address);
+    }
+    const addr = balances.find((b) => BigInt(b.balance) > 0n)?.account_address;
+
+    return undefined !== addr ? addAddressPadding(addr) : "0x0";
+  }, [balances]);
   const isOwner = useMemo(
     () =>
       undefined !== address &&
