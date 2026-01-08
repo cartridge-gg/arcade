@@ -67,7 +67,7 @@ export const GameCard = ({
           />
         </div>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <p className="text-base font-medium text-white truncate tracking-wide">
+          <p className="text-base font-medium text-foreground-100 truncate tracking-wide">
             {name}
           </p>
           {studio && (

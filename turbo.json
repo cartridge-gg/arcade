@@ -44,6 +44,19 @@
 		"type:check": {
 			"persistent": true,
 			"cache": false
-    }
+    },
+		"storybook": {
+			"dependsOn": ["^build:deps"],
+			"persistent": true,
+			"cache": false
+		},
+		"build-storybook": {
+			"dependsOn": ["^build:deps"],
+			"outputs": ["storybook-static/**"]
+		},
+		"chromatic": {
+			"dependsOn": ["^build:deps"],
+			"cache": false
+		}
 	}
 }
