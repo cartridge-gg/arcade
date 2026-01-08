@@ -136,11 +136,16 @@ const UserCardInner = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col items-start p-3 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl",
-          "lg:border-background-200 lg:hover:border-background-200",
+          "flex flex-col items-start p-3 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl relative",
+          "lg:border-background-200 lg:hover:border-background-200 overflow-hidden",
           className,
         )}
       >
+        {isPlayer && (
+          <div className="absolute top-5 right-5 z-10">
+            <ContextCloser className="rounded-none rounded-bl rounded-tr-2 bg-background-100 hover:bg-background-200 p-2 w-8 h-8 border-r-0 border-t-0" />
+          </div>
+        )}
         <div
           id="player-label"
           className="flex items-center self-stretch gap-2 relative"
@@ -153,12 +158,17 @@ const UserCardInner = React.memo(
               className="!w-14 !h-14"
             />
           </div>
-          <div className="flex-1">
+          <div className="h-full flex-1 flex flex-col justify-between">
             <div className="flex flex-row justify-between">
               <p className="text-foreground-100 text-[16px]/[normal] font-semibold">
                 {usernameStr}
               </p>
-              <div className="flex items-center gap-1 p-0.5">
+              <div
+                className={cn(
+                  "flex items-center gap-1 p-0.5",
+                  isPlayer && "pr-8",
+                )}
+              >
                 <div className="flex items-center gap-0.5 bg-translucent-dark-100 rounded-xl">
                   <SparklesIcon variant="solid" size="xs" />
                   <p className="text-xs font-normal text-foreground-100">
@@ -225,9 +235,24 @@ const UserCardInner = React.memo(
               </div>
             </div>
           </div>
-          {isPlayer && <ContextCloser />}
         </div>
       </div>
+    );
+  },
+);
+
+const CloseButton = React.memo(
+  (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+    return (
+      <button
+        {...props}
+        className={cn(
+          "absolute top-2 right-2 p-1 rounded-md hover:bg-background-200",
+          props.className,
+        )}
+      >
+        <XIcon size="sm" />
+      </button>
     );
   },
 );

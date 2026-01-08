@@ -41,6 +41,7 @@ const lineVariants = cva(
 type ContextCloserBaseProps = {
   // Context to close
   context: string;
+  className?: string;
 };
 
 type ContextCloserProps = Partial<ContextCloserBaseProps> &
@@ -51,7 +52,7 @@ const defaultProps: Partial<ContextCloserProps> = {
 };
 
 export function ContextCloser(props: ContextCloserProps) {
-  const { variant, context } = { ...defaultProps, ...props };
+  const { variant, context, className } = { ...defaultProps, ...props };
   const { manager } = useNavigationContext();
 
   const href = useMemo(() => {
@@ -60,7 +61,7 @@ export function ContextCloser(props: ContextCloserProps) {
   }, [manager, context]);
 
   return (
-    <Link to={href} className={cn(closeVariants({ variant }))}>
+    <Link to={href} className={cn(closeVariants({ variant }), className)}>
       <div className={cn(lineVariants({ variant, direction: "left" }))} />
       <div className={cn(lineVariants({ variant, direction: "right" }))} />
     </Link>
