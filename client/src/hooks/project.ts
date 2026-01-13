@@ -7,6 +7,7 @@ import { useAccount as useSnReactAccount } from "@starknet-react/core";
 
 export const TAB_SEGMENTS = [
   "inventory",
+  "inventoryitems",
   "achievements",
   "leaderboard",
   "guilds",
@@ -18,14 +19,18 @@ export const TAB_SEGMENTS = [
   "holders",
   "predict",
   "positions",
+  "collection",
+  "back",
 ] as const;
+
+export type TabValue = (typeof TAB_SEGMENTS)[number];
 
 interface RouteParams {
   game?: string;
   edition?: string;
   player?: string;
   collection?: string;
-  tab?: string;
+  tab?: TabValue;
   token?: string;
 }
 
@@ -61,6 +66,9 @@ export const parseRouteParams = (pathname: string): RouteParams => {
           params.collection = next;
           index += 1;
         }
+        if (params.tab === "inventory") {
+          params.tab = "inventoryitems";
+        }
         break;
       case "token":
         if (next) {
@@ -70,7 +78,7 @@ export const parseRouteParams = (pathname: string): RouteParams => {
         break;
       default:
         if (!params.tab && TAB_SEGMENTS.includes(segment as any)) {
-          params.tab = segment;
+          params.tab = segment as TabValue;
         }
         break;
     }

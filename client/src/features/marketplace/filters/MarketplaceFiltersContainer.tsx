@@ -13,6 +13,7 @@ export const MarketplaceFiltersContainer = () => {
     setSearchValue,
     onAttributeExpand,
     isSummaryLoading,
+    isInventory,
     ownerInput,
     ownerSuggestions,
     isOwnerAddressInput,
@@ -42,6 +43,7 @@ export const MarketplaceFiltersContainer = () => {
       onSearchChange={setSearchValue}
       onAttributeExpand={onAttributeExpand}
       isSummaryLoading={isSummaryLoading}
+      isInventory={isInventory}
       ownerInput={ownerInput}
       ownerSuggestions={ownerSuggestions}
       isOwnerAddressInput={isOwnerAddressInput}

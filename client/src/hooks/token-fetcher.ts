@@ -5,11 +5,8 @@ import {
   getToriiAssetUrl,
 } from "@cartridge/arcade";
 import { addAddressPadding } from "starknet";
-
-export enum CollectionType {
-  ERC721 = "ERC-721",
-  ERC1155 = "ERC-1155",
-}
+import { CollectionType } from "@/effect/atoms/tokens";
+import { useMounted } from "@/hooks/useMounted";
 
 /**
  * Hook for fetching token balances from multiple Torii endpoints
@@ -343,9 +340,12 @@ export type Collection = {
   address: string;
   name: string;
   type: CollectionType;
-  imageUrl: string;
+  tokenImageUrl: string;
+  tokenBackgroundColor: string | null;
+  iconUrl?: string;
   totalCount: number;
-  project: string;
+  tokenIds: string[];
+  projects: string[];
 };
 
 export type CollectibleMetadata = TokenMetadata & {
@@ -408,44 +408,62 @@ function processNFTCollections(
 
   collectionMap.forEach((nfts, address) => {
     // Get metadata from the first NFT in the collection
-    const firstNFT = nfts[0];
+    const firstNFT = nfts.at(-1) as TokenWithMetadata;
     const metadata = firstNFT.metadata;
 
     let innerMeta = undefined;
     try {
-      innerMeta = JSON.parse(metadata?.metadata as string);
-    } catch (err) {}
+      innerMeta = JSON.parse(metadata?.metadata || "{}");
+    } catch (_error) {}
 
     // Determine collection type (could be enhanced with actual logic)
     // For now, default to ERC721
     const collectionType = CollectionType.ERC721;
 
+    const backgroundColor = formatBackgroundColor(innerMeta?.background_color);
+
     collections.push({
-      address: address,
+      address,
       name: metadata?.name || firstNFT.name || "---",
       type: collectionType,
-      imageUrl: getAssetImage(project, metadata, innerMeta, firstNFT),
+      tokenImageUrl: getAssetImage(innerMeta, project, address, firstNFT),
+      tokenBackgroundColor: backgroundColor,
       totalCount: nfts.length,
-      project: project,
+      tokenIds: nfts.map((nft) => nft.token_id ?? ""),
+      projects: [project],
     });
   });
 
   return collections;
 }
 
+export function formatBackgroundColor(
+  backgroundColor: string | null | undefined,
+): string | null {
+  if (!backgroundColor) {
+    return null;
+  }
+  if (backgroundColor.startsWith("#")) {
+    return backgroundColor;
+  }
+  return `#${backgroundColor}`;
+}
+
 function getAssetImage(
-  project: string,
-  metadata: TokenMetadata | undefined,
   inner: CollectibleMetadata,
+  project: string,
+  contractAddress: string,
   firstNFT: TokenWithMetadata,
 ): string {
-  const image = inner?.image;
-  image?.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+  const image = inner?.image?.replace(
+    "ipfs://",
+    "https://gateway.pinata.cloud/ipfs/",
+  );
   return (
     image ??
     getToriiAssetUrl(
       project,
-      addAddressPadding(metadata?.contract_address ?? "0x0"),
+      addAddressPadding(contractAddress ?? "0x0"),
       addAddressPadding(firstNFT.token_id ?? "0x0"),
     )
   );
@@ -477,7 +495,7 @@ export function useCollectibles(
   const [error, setError] = useState<Error | null>(null);
 
   const fetchCollectibles = async () => {
-    if (!projects.length || !address) {
+    if (!projects.length || !address || BigInt(address) === 0n) {
       setStatus("idle");
       setCollections([]);
       return;
@@ -508,9 +526,11 @@ export function useCollectibles(
             });
 
             // Filter for NFTs only
-            const nftBalances = response.items.filter((item: TokenBalance) =>
-              isNFT(item),
-            );
+            const nftBalances = response.items
+              .filter((item: TokenBalance) => isNFT(item))
+              .sort((a: TokenBalance, b: TokenBalance) => {
+                return (a.token_id ?? "").localeCompare(b.token_id ?? "");
+              });
 
             if (nftBalances.length > 0) {
               // Extract unique identifiers from NFT batch
@@ -561,7 +581,20 @@ export function useCollectibles(
               projects[projectIndex] || "",
             );
 
-            allCollections.push(...projectCollections);
+            // push avoiding duplicates
+            projectCollections.forEach((newCollection) => {
+              const existingIndex = allCollections.findIndex(
+                (collection) => newCollection.address === collection.address,
+              );
+              if (existingIndex < 0) {
+                allCollections.push(newCollection);
+              } else {
+                allCollections[existingIndex].projects = [
+                  ...allCollections[existingIndex].projects,
+                  ...newCollection.projects,
+                ];
+              }
+            });
           }
         });
       }
@@ -577,10 +610,13 @@ export function useCollectibles(
     }
   };
 
+  const mounted = useMounted();
+
   useEffect(() => {
+    if (!mounted) return;
     fetchCollectibles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects.join(","), address]); // Using join to create stable dependency
+  }, [projects.join(","), address, mounted]); // Using join to create stable dependency
 
   const refetch = () => {
     fetchCollectibles();

@@ -27,6 +27,7 @@ pub struct Starterpack {
     pub total_issued: u64,
     pub created_at: u64,
     pub metadata: ByteArray,
+    pub payment_receiver: Option<ContractAddress>,
 }
 
 #[derive(Copy, Drop, Serde)]

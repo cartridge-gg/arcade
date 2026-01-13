@@ -16,7 +16,7 @@ catalogs:
       specifier: github:cartridge-gg/presets#e6a5022
       version: 0.0.1
     '@cartridge/ui':
-      specifier: github:cartridge-gg/ui#a823aea
+      specifier: github:cartridge-gg/ui#1d42129
       version: 0.7.14-alpha.2
     '@dojoengine/core':
       specifier: 1.8.3
@@ -115,7 +115,7 @@ importers:
         version: https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/a823aea(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
       '@dojoengine/grpc':
         specifier: 'catalog:'
         version: 1.8.6(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
@@ -1096,14 +1096,14 @@ packages:
     resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022}
     version: 0.0.1
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/a823aea':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/a823aea}
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129}
     version: 0.7.14-alpha.2
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
       sonner: ^1.4.41
-      starknet: ^8.5.2
+      starknet: ^8.5.4
       viem: ^2.21.32
 
   '@cbor-extract/cbor-extract-darwin-arm64@2.2.0':
@@ -6999,8 +6999,8 @@ packages:
       react:
         optional: true
 
-  vaul@0.9.9:
-    resolution: {integrity: sha512-7afKg48srluhZwIkaU+lgGtFCUsYBSGOl8vcc8N/M3YQlZFlynHD15AE+pwrYdc826o7nrIND4lL9Y6b9WWZZQ==}
+  vaul@1.1.2:
+    resolution: {integrity: sha512-ZFkClGpWyI2WUQjdLJ/BaGuV6AVQiJ3uELGk3OYtP+B6yCO7Cmn9vPFXVJkRaGkOJu3m8bQMgtyzNHixULceQA==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -7204,6 +7204,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -8334,7 +8335,7 @@ snapshots:
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/a823aea(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))':
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))':
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -8371,7 +8372,7 @@ snapshots:
       swr: 2.3.6(react@19.2.1)
       tailwind-merge: 2.6.0
       tailwindcss-animate: 1.0.7(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))
-      vaul: 0.9.9(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      vaul: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       viem: 2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
     transitivePeerDependencies:
       - '@types/react'
@@ -15452,7 +15453,7 @@ snapshots:
       '@types/react': 19.2.7
       react: 19.2.1
 
-  vaul@0.9.9(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  vaul@1.1.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react: 19.2.1

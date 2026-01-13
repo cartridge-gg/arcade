@@ -1,25 +1,25 @@
 import { useMemo } from "react";
 import { useArcade } from "@/hooks/arcade";
-import { useCollections } from "@/hooks/collections";
+import { useInventoryCollections } from "@/hooks/collections";
 import { useAddress } from "@/hooks/address";
 import { useAccount } from "@starknet-react/core";
 import { useMarketplace } from "@/hooks/marketplace";
 import { useRouterState } from "@tanstack/react-router";
-import type ControllerConnector from "@cartridge/connector/controller";
-import { CollectionType } from "@/hooks/collections";
 import { getChecksumAddress } from "starknet";
-import { joinPaths, resizeImage } from "@/lib/helpers";
-import { TAB_SEGMENTS } from "@/hooks/project";
+import { joinPaths } from "@/lib/helpers";
 import { useAccountByAddress, type EnrichedTokenContract } from "@/effect";
-import { StatusType, type EditionModel } from "@cartridge/arcade";
+import { StatusType } from "@cartridge/arcade";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 export interface InventoryCollectionCardView {
   id: string;
   title: string;
   image: string;
+  icon: string;
   totalCount: number;
   listingCount: number;
+  ownedCount: number;
+  backgroundColor?: string;
   href?: string;
   search?: Record<string, string>;
   onClick?: () => void;
@@ -42,18 +42,12 @@ interface UseInventoryCollectionsViewModelArgs {
     | "cleaned-up";
 }
 
-const getCollectionType = (collection: EnrichedTokenContract) => {
-  return collection.contract_type === "ERC721"
-    ? CollectionType.ERC721
-    : CollectionType.ERC1155;
-};
-
 export function useInventoryCollectionsViewModel({
   collections,
   status,
 }: UseInventoryCollectionsViewModelArgs): InventoryCollectionsViewModel {
   const { editions } = useArcade();
-  const { collections: ownedCollections } = useCollections();
+  const { collections: ownedCollections } = useInventoryCollections();
   const { isSelf, address } = useAddress();
   const { connector } = useAccount();
   const { orders } = useMarketplace();
@@ -90,12 +84,8 @@ export function useInventoryCollectionsViewModel({
   }, [collections, ownedAddresses]);
 
   const collectionCards = useMemo(() => {
-    return filteredCollections.map((collection) => {
-      const edition = editions.find(
-        (item: EditionModel) => item.config.project === collection.project,
-      );
-
-      const collectionOrders = orders[collection.contract_address];
+    return filteredCollections.map((contract) => {
+      const collectionOrders = orders[contract.contract_address];
       const listingCount = collectionOrders
         ? Object.values(collectionOrders).reduce((count, tokenOrders) => {
             const filtered = Object.values(tokenOrders).filter((order) => {
@@ -108,73 +98,63 @@ export function useInventoryCollectionsViewModel({
             return filtered.length > 0 ? count + 1 : count;
           }, 0)
         : 0;
-
-      const collectionType = getCollectionType(collection);
+      const collection = ownedCollections.find(
+        (c) => getChecksumAddress(c.address) === contract.contract_address,
+      );
+      const ownedCount = collection?.totalCount || 0;
+      const icon =
+        collection?.iconUrl ||
+        contract.image ||
+        collection?.tokenImageUrl ||
+        "";
+      const image =
+        collection?.tokenImageUrl ||
+        contract.image ||
+        collection?.iconUrl ||
+        "";
+      const backgroundColor =
+        collection?.tokenBackgroundColor ||
+        contract.background_color ||
+        undefined;
 
       const content: InventoryCollectionCardView = {
-        id: collection.contract_address,
-        title: collection.name,
-        image: resizeImage(collection.image, 300, 300) || "",
-        totalCount: Number(collection.totalSupply),
+        id: contract.contract_address,
+        title: contract.name,
+        image,
+        icon,
+        totalCount: Number(contract.totalSupply),
+        ownedCount,
         listingCount,
+        backgroundColor,
       };
 
       const handleClick = async () => {
         trackEvent(events.INVENTORY_COLLECTION_CLICKED, {
-          collection_address: collection.contract_address,
-          collection_name: collection.name,
-          collection_type: collectionType,
-          total_count: Number(collection.totalSupply),
+          collection_address: contract.contract_address,
+          collection_name: contract.name,
+          collection_type: contract.contract_type,
+          total_count: Number(contract.totalSupply),
           listing_count: listingCount,
           is_self: isSelf,
           from_page: location.pathname,
         });
-
-        if (isSelf) {
-          const controller = (connector as ControllerConnector)?.controller;
-          const username = await controller?.username();
-          if (!controller || !username) {
-            console.error("Connector not initialized");
-            return;
-          }
-
-          let subpath: string | undefined;
-          if (collectionType === CollectionType.ERC721) {
-            subpath = "collection";
-          } else if (collectionType === CollectionType.ERC1155) {
-            subpath = "collectible";
-          }
-          if (!subpath) return;
-
-          const preset = edition?.properties.preset;
-          const options = [`ps=${collection.project}`, "closable=true"];
-          if (preset) {
-            options.push(`preset=${preset}`);
-          } else {
-            options.push("preset=cartridge");
-          }
-          const path = `account/${username}/inventory/${subpath}/${collection.contract_address}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-          controller.openProfileAt(path);
-        }
       };
 
       content.onClick = handleClick;
 
-      if (!isSelf) {
-        const segments = location.pathname.split("/").filter(Boolean);
-        const playerIndex = segments.indexOf("player");
-        const baseSegments =
-          playerIndex === -1 ? segments : segments.slice(0, playerIndex);
-        const last = baseSegments[baseSegments.length - 1];
-        if (TAB_SEGMENTS.includes(last as (typeof TAB_SEGMENTS)[number])) {
-          baseSegments.pop();
-        }
-        baseSegments.push("collection", collection.contract_address, "items");
-        content.href = baseSegments.length ? joinPaths(...baseSegments) : "/";
-        if (account?.username) {
-          content.search = { filter: account.username.toLowerCase() };
-        }
+      // possible from -> to locations:
+      // /inventory -> /inventory/collection/$collection
+      // /game/$game/inventory -> /game/$game/inventory/collection/$collection
+      // /player/$player/inventory -> /player/$player/inventory/collection/$collection
+      // /player/$player -> /player/$player/inventory/collection/$collection
+      const segments = location.pathname.split("/").filter(Boolean);
+      const baseSegments = [...segments];
+      const lastSegment = baseSegments.at(-1);
+      if (lastSegment !== "inventory") {
+        baseSegments.push("inventory");
       }
+      baseSegments.push("collection", contract.contract_address);
+      content.href = joinPaths(...baseSegments);
 
       return content;
     });

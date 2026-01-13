@@ -10,6 +10,7 @@ import {
   Button,
   Checkbox,
   Empty,
+  InventoryItemCard,
   MarketplaceSearch,
   Separator,
   Skeleton,
@@ -41,6 +42,8 @@ export interface MarketplaceItemCardProps {
   isConnected: boolean;
   selectionActive: boolean;
   tokenDetailHref: string;
+  isInventory: boolean;
+  backgroundColor?: string;
   onToggleSelectByIndex: (index: number) => void;
   onBuyByIndex: (index: number) => void;
   onInspectByIndex: (index: number) => void;
@@ -70,12 +73,14 @@ interface ItemsViewProps {
   onClearFilters: () => void;
   onResetSelection: () => void;
   isConnected: boolean;
-  onBuySelection: () => void;
+  onBuySelection: (() => void) | undefined;
+  onListSelection: (() => void) | undefined;
+  onUnlistSelection: (() => void) | undefined;
+  onSendSelection: (() => void) | undefined;
   loadingOverlay: {
     isLoading: boolean;
     progress?: { completed: number; total: number };
   };
-
   statusFilter: string;
   listedTokensCount: number;
 }
@@ -97,6 +102,9 @@ export const ItemsView = ({
   onResetSelection,
   isConnected,
   onBuySelection,
+  onListSelection,
+  onUnlistSelection,
+  onSendSelection,
   loadingOverlay,
   statusFilter,
   listedTokensCount,
@@ -170,6 +178,9 @@ export const ItemsView = ({
         isVisible={isConnected && selectionCount > 0}
         selectionCount={selectionCount}
         onBuySelection={onBuySelection}
+        onListSelection={onListSelection}
+        onUnlistSelection={onUnlistSelection}
+        onSendSelection={onSendSelection}
       />
       <FloatingLoadingSpinner
         isLoading={loadingOverlay.isLoading && totalTokensCount > 0}
@@ -205,7 +216,7 @@ const SelectionSummary = ({
   return (
     <div
       className={cn(
-        "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
+        "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-sm",
         !selectionCount && "text-foreground-400",
         showSelection && "cursor-pointer",
       )}
@@ -215,7 +226,7 @@ const SelectionSummary = ({
         <Checkbox
           className="text-foreground-100"
           variant="minus-line"
-          size="sm"
+          size="default"
           checked
         />
       )}
@@ -299,27 +310,62 @@ const SelectionFooter = ({
   isVisible,
   selectionCount,
   onBuySelection,
+  onListSelection,
+  onUnlistSelection,
+  onSendSelection,
 }: {
   isVisible: boolean;
   selectionCount: number;
-  onBuySelection: () => void;
+  onBuySelection?: () => void;
+  onListSelection?: () => void;
+  onUnlistSelection?: () => void;
+  onSendSelection?: () => void;
 }) => {
   return (
     <div
       className={cn(
         "overflow-hidden transition-all duration-500 ease-out",
-        isVisible ? "max-h-36 opacity-100" : "max-h-0 opacity-0",
+        isVisible ? "h-[50px] opacity-100" : "max-h-0 opacity-0",
       )}
     >
       <Separator className="w-full bg-background-200" />
-      <div className="w-full flex justify-end items-center">
-        <Button
-          variant="primary"
-          onClick={onBuySelection}
-          disabled={selectionCount === 0}
-        >
-          {`Buy (${selectionCount})`}
-        </Button>
+      <div className="w-full flex justify-end items-center gap-x-2">
+        {onBuySelection && (
+          <Button
+            variant="primary"
+            onClick={onBuySelection}
+            disabled={selectionCount === 0}
+          >
+            {`Buy (${selectionCount})`}
+          </Button>
+        )}
+        {onListSelection && (
+          <Button
+            variant="primary"
+            onClick={onListSelection}
+            disabled={selectionCount === 0}
+          >
+            {`List (${selectionCount})`}
+          </Button>
+        )}
+        {onUnlistSelection && (
+          <Button
+            variant="primary"
+            onClick={onUnlistSelection}
+            disabled={selectionCount === 0}
+          >
+            {`Unlist (${selectionCount})`}
+          </Button>
+        )}
+        {onSendSelection && (
+          <Button
+            variant="primary"
+            onClick={onSendSelection}
+            disabled={selectionCount === 0}
+          >
+            {`Send (${selectionCount})`}
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -344,6 +390,8 @@ const MarketplaceItemCard = memo(
     price,
     lastSale,
     tokenDetailHref,
+    isInventory,
+    backgroundColor,
   }: MarketplaceItemCardProps) => {
     const fallbackImage = placeholderImage ?? image ?? "";
     const [displayImage, setDisplayImage] = useState<string>(fallbackImage);
@@ -409,24 +457,40 @@ const MarketplaceItemCard = memo(
 
     return (
       <div className="w-full group select-none" onClick={handleContainerClick}>
-        <Link to={tokenDetailHref}>
-          <CollectibleCard
-            title={title}
-            images={[displayImage]}
-            listingCount={listingCount}
-            onClick={handleCardClick}
-            className={
-              selectable || canOpen
-                ? "cursor-pointer"
-                : "cursor-default pointer-events-none"
-            }
-            onSelect={handleSelect}
-            price={price}
-            lastSale={lastSale}
-            selectable={selectable}
-            selected={selected}
-          />
-        </Link>
+        {isInventory && (
+          <Link to={tokenDetailHref} disabled={!canOpen}>
+            <InventoryItemCard
+              title={title}
+              images={image ? [image] : []}
+              listingCount={listingCount}
+              backgroundColor={backgroundColor}
+              selectable={selectable}
+              selected={selected}
+              onSelect={handleSelect}
+              onClick={canOpen || selectable ? () => {} : undefined}
+            />
+          </Link>
+        )}
+        {!isInventory && (
+          <Link to={tokenDetailHref}>
+            <CollectibleCard
+              title={title}
+              images={[displayImage]}
+              listingCount={listingCount}
+              onClick={handleCardClick}
+              className={
+                selectable || canOpen
+                  ? "cursor-pointer"
+                  : "cursor-default pointer-events-none"
+              }
+              onSelect={handleSelect}
+              price={price}
+              lastSale={lastSale}
+              selectable={selectable}
+              selected={selected}
+            />
+          </Link>
+        )}
       </div>
     );
   },

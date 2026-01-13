@@ -46,6 +46,7 @@ export interface CollectionFilterState {
   activeFilters: ActiveFilters;
   statusFilter: StatusFilter;
   ownerFilter?: string;
+  isPlayerAddress?: boolean;
 }
 
 export interface MetadataFilterStore {

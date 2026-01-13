@@ -7,6 +7,7 @@ import {
   unwrapOr,
 } from "@/effect";
 import type { ActiveFilters } from "@/types/metadata-filter.types";
+import { addAddressPadding } from "starknet";
 
 export function useCombinedTokenFilter(
   collectionAddress: string,
@@ -45,10 +46,10 @@ export function useCombinedTokenFilter(
         return { combinedTokenIds: undefined, shouldShowEmpty: true };
       }
       if (statusFilter === "listed" && listedTokenIds.length > 0) {
-        const listedSet = new Set(listedTokenIds);
-        const intersection = [...ownerTokenIds].filter((id) =>
-          listedSet.has(id),
-        );
+        const listedSet = new Set(listedTokenIds.map(addAddressPadding));
+        const intersection = [...ownerTokenIds].filter((id) => {
+          return listedSet.has(addAddressPadding(id));
+        });
         return {
           combinedTokenIds: intersection.length > 0 ? intersection : undefined,
           shouldShowEmpty: intersection.length === 0,

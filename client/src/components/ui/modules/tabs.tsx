@@ -1,6 +1,4 @@
 import {
-  ArcadeMenuButton,
-  ArcadeMenuItem,
   BottomTab,
   ChestIcon,
   cn,
@@ -21,10 +19,13 @@ import {
   UsersIcon,
   LightbulbIcon,
 } from "@cartridge/ui";
+import ArcadeMenuButton from "@/components/ui/modules/menu-button";
+import ArcadeMenuItem from "@/components/ui/modules/menu-item";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import ArcadeTab from "./tab";
 import { useDevice } from "@/hooks/device";
+import type { TabValue } from "@/hooks/project";
 
 const arcadeTabsVariants = cva(
   "flex justify-start items-end w-full p-0 px-4 border-b rounded-none",
@@ -44,20 +45,6 @@ const arcadeTabsVariants = cva(
     },
   },
 );
-
-export type TabValue =
-  | "inventory"
-  | "achievements"
-  | "leaderboard"
-  | "guilds"
-  | "activity"
-  | "metrics"
-  | "about"
-  | "marketplace"
-  | "items"
-  | "holders"
-  | "predict"
-  | "positions";
 
 export interface ArcadeTabsProps
   extends React.HTMLAttributes<HTMLDivElement>,

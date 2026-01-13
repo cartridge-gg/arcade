@@ -47,6 +47,8 @@ const components = {
   ChestIcon: createIcon("ChestIcon"),
   ClockIcon: createIcon("ClockIcon"),
   CollectibleCard: createStubComponent("CollectibleCard"),
+  InventoryCollectionCard: createStubComponent("InventoryCollectionCard"),
+  InventoryItemCard: createStubComponent("InventoryItemCard"),
   CopyIcon: createIcon("CopyIcon"),
   DiscordIcon: createIcon("DiscordIcon"),
   DojoIcon: createIcon("DojoIcon"),

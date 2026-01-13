@@ -1,15 +1,21 @@
 import { Atom } from "@effect-atom/atom-react";
-import { Effect, Array as A, pipe, Order } from "effect";
+import { Effect, Array as A, pipe, Order, Data } from "effect";
 import { getChecksumAddress } from "starknet";
 import { ToriiGrpcClient } from "@dojoengine/react/effect";
 import { toriiRuntime } from "../runtime";
 import { BLACKLISTS, DEFAULT_PROJECT } from "@/constants";
 import { fetchContractImage, fetchTokenImage } from "@/hooks/fetcher-utils";
+import { MetadataHelper } from "@/lib/metadata";
 import { mapResult } from "../utils/result";
 import type {
   Token,
   TokenContract as TokenContractWasm,
 } from "@dojoengine/torii-wasm";
+import { formatBackgroundColor } from "@/hooks/token-fetcher";
+
+class EnrichTokensError extends Data.TaggedError("EnrichTokensError")<{
+  message: string;
+}> {}
 
 export type EnrichedTokenContract = {
   contract_address: string;
@@ -21,8 +27,14 @@ export type EnrichedTokenContract = {
   token_id: string | null;
   project: string;
   image: string;
-  contract_type: string;
+  contract_type: CollectionType;
+  background_color: string | null;
 };
+
+export enum CollectionType {
+  ERC721 = "ERC721",
+  ERC1155 = "ERC1155",
+}
 
 const fetchTokenContractsEffect = Effect.gen(function* () {
   const { client } = yield* ToriiGrpcClient;
@@ -83,33 +95,56 @@ const fetchTokenContractsEffect = Effect.gen(function* () {
     }
   }
 
+  const tokenResults = yield* Effect.tryPromise({
+    try: () =>
+      client.executeSql(`
+        SELECT contract_address, token_id, metadata
+        FROM tokens
+        WHERE token_id is not null
+        GROUP BY contract_address
+      `),
+    catch: (error) =>
+      new EnrichTokensError({
+        message: error instanceof Error ? error.message : String(error),
+      }),
+  });
+
   const enrichedContracts = yield* Effect.all(
     contracts.map((contract) =>
       Effect.gen(function* () {
-        const tokenResult = yield* Effect.tryPromise(() =>
-          client.getTokens({
-            contract_addresses: [contract.contract_address],
-            token_ids: [],
-            attribute_filters: [],
-            pagination: {
-              limit: 1,
-              cursor: undefined,
-              direction: "Forward",
-              order_by: [],
-            },
-          }),
-        );
+        const tokenData = tokenResults.find(
+          (t) => t.contract_address === contract.contract_address,
+        ) as
+          | {
+              contract_address: string;
+              metadata: string;
+              token_id: string;
+            }
+          | undefined;
 
         let metadata = contract.metadata;
         let tokenId: string | null = null;
+        let backgroundColor: string | null =
+          MetadataHelper.getMetadataField(
+            contract.metadata,
+            "background_color",
+          ) ?? null;
 
-        if (tokenResult.items.length > 0) {
-          const t = tokenResult.items[0];
-          if (metadata === "" && t.metadata !== "") {
-            metadata = t.metadata ?? "";
+        if (tokenData) {
+          tokenId = tokenData.token_id || null;
+          if (metadata === "" && tokenData.metadata !== "") {
+            metadata = tokenData.metadata;
           }
-          tokenId = t.token_id ?? null;
+          if (!backgroundColor && tokenData.metadata !== "") {
+            backgroundColor =
+              MetadataHelper.getMetadataField(
+                tokenData.metadata,
+                "background_color",
+              ) ?? null;
+          }
         }
+
+        backgroundColor = formatBackgroundColor(backgroundColor);
 
         const image = yield* Effect.tryPromise(async () => {
           if (!contract.metadata) {
@@ -135,7 +170,8 @@ const fetchTokenContractsEffect = Effect.gen(function* () {
           token_id: tokenId,
           project: DEFAULT_PROJECT,
           image: image ?? "",
-          contract_type: "ERC721",
+          contract_type: CollectionType.ERC721,
+          background_color: backgroundColor,
         } satisfies EnrichedTokenContract;
       }),
     ),

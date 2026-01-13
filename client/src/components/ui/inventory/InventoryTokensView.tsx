@@ -1,6 +1,6 @@
 import { MinusIcon, PlusIcon, Skeleton, TokenCard } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import type { InventoryTokenCardView } from "@/features/inventory/tokens/useInventoryTokensViewModel";
+import type { InventoryTokenCardView } from "@/features/inventory/collections/useInventoryTokensViewModel";
 
 interface InventoryTokensViewProps {
   isLoading: boolean;

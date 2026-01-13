@@ -1,15 +1,14 @@
-import { parseRouteParams, type TAB_SEGMENTS } from "@/hooks/project";
+import { parseRouteParams, type TabValue } from "@/hooks/project";
 import { joinPaths } from "@/lib/helpers";
 import { getChecksumAddress } from "starknet";
-
-export type TabValue = (typeof TAB_SEGMENTS)[number];
 
 export type NavigationContext =
   | "general"
   | "game"
   | "edition"
   | "marketplace"
-  | "player";
+  | "player"
+  | "inventoryitems";
 
 export interface NavigationTab {
   tab: TabValue;
@@ -56,6 +55,9 @@ export class NavigationContextManager {
   }
 
   getActiveContext(): NavigationContext {
+    const segments = this.pathname.split("/").filter(Boolean);
+    if (this.params.collection && segments.includes("inventory"))
+      return "inventoryitems";
     if (this.params.collection) return "marketplace";
     if (this.params.player) return "player";
     if (this.params.edition) return "edition";
@@ -158,13 +160,24 @@ export class NavigationContextManager {
         return ["items", "holders"];
       case "player":
         return ["inventory", "achievements"];
+      case "inventoryitems":
+        return ["back", "collection"];
       default:
         return ["about"];
     }
   }
 
   private generateHref(tab: TabValue): string {
+    if (tab === "back") {
+      return this.generateBackHref(tab);
+    }
+
     const segments = this.pathname.split("/").filter(Boolean);
+
+    if (tab === "collection" && this.params.collection) {
+      return this.generateCollectionHref(this.params.collection);
+    }
+
     const currentTab = this.params.tab;
     const hasTrailingTab =
       currentTab && segments[segments.length - 1] === currentTab;
@@ -184,6 +197,20 @@ export class NavigationContextManager {
     }
 
     return joinPaths(...baseSegments, tab);
+  }
+
+  private generateBackHref(_tab: TabValue): string {
+    const segments = this.pathname.split("/").filter(Boolean);
+    if (segments.length <= 1) {
+      return "/";
+    }
+
+    const lastSegment = segments[segments.length - 1];
+    if (lastSegment === this.params.collection) {
+      return joinPaths(...segments.slice(0, -2));
+    }
+
+    return joinPaths(...segments.slice(0, -1));
   }
 
   generatePlayerHref(playerNameOrAddress: string, tab?: TabValue): string {
@@ -208,7 +235,7 @@ export class NavigationContextManager {
 
     return tab
       ? joinPaths("player", playerName, tab)
-      : joinPaths("player", playerName);
+      : joinPaths("player", playerName, "inventory");
   }
 
   generateTokenDetailHref(collectionAddress: string, tokenId: string): string {

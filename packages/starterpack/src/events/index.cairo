@@ -12,6 +12,7 @@ pub struct StarterpackRegistered {
     pub reissuable: bool,
     pub owner: ContractAddress,
     pub time: u64,
+    pub payment_receiver: Option<ContractAddress>,
 }
 
 #[derive(Drop, Serde)]
@@ -26,6 +27,7 @@ pub struct StarterpackUpdated {
     pub payment_token: ContractAddress,
     pub metadata: ByteArray,
     pub time: u64,
+    pub payment_receiver: Option<ContractAddress>,
 }
 
 #[derive(Copy, Drop, Serde)]

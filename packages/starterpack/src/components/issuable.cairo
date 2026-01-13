@@ -118,9 +118,14 @@ pub mod IssuableComponent {
                 }
 
                 // Calculate and transfer owner payment (base price minus referral fee)
+                // Use payment_receiver if set, otherwise default to owner
                 let owner_payment = base_price - referral_fee_amount;
                 if owner_payment > 0 {
-                    token_dispatcher.transfer_from(payer, starterpack.owner, owner_payment);
+                    let receiver = match starterpack.payment_receiver {
+                        Option::Some(addr) => addr,
+                        Option::None => starterpack.owner,
+                    };
+                    token_dispatcher.transfer_from(payer, receiver, owner_payment);
                 }
             }
 

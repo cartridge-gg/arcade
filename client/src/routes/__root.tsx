@@ -19,18 +19,18 @@ function RootComponent() {
   const segments = pathname.split("/").filter(Boolean);
   const collectionIndex = segments.findIndex((s) => s === "collection");
 
-  const hasOwnTemplate =
-    collectionIndex >= 0 &&
-    (collectionIndex === segments.length - 1 ||
-      collectionIndex < segments.length - 1);
+  const hasOwnTemplate = collectionIndex >= 0;
 
   const { manager } = useNavigationContext();
+
   const { data } = useAccount(manager.getParams().player);
   useEffect(() => {
     if (data) {
       setPlayer((p) => (p !== data.address ? data.address : p));
+    } else {
+      setPlayer(manager.getParams().player || undefined);
     }
-  }, [data, setPlayer]);
+  }, [data, manager, setPlayer]);
 
   return (
     <>

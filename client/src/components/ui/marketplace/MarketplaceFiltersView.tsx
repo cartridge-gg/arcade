@@ -31,6 +31,7 @@ interface MarketplaceFiltersViewProps {
   onSearchChange: (attribute: string, value: string) => void;
   onAttributeExpand: (attribute: string, expanded: boolean) => void;
   isSummaryLoading?: boolean;
+  isInventory: boolean;
   ownerInput: string;
   ownerSuggestions: Account[];
   isOwnerAddressInput: boolean;
@@ -51,6 +52,7 @@ export const MarketplaceFiltersView = memo(
     onSearchChange,
     onAttributeExpand,
     isSummaryLoading,
+    isInventory,
     ownerInput,
     ownerSuggestions,
     isOwnerAddressInput,
@@ -73,15 +75,19 @@ export const MarketplaceFiltersView = memo(
             onClick={onAllClick}
           />
         </div>
-        <MarketplaceHeader label="Owner" />
-        <OwnerFilterSection
-          inputValue={ownerInput}
-          onInputChange={onOwnerInputChange}
-          suggestions={ownerSuggestions}
-          isAddressInput={isOwnerAddressInput}
-          onSelectSuggestion={onOwnerSelectSuggestion}
-          onClear={onClearOwner}
-        />
+        {!isInventory && (
+          <>
+            <MarketplaceHeader label="Owner" />
+            <OwnerFilterSection
+              inputValue={ownerInput}
+              onInputChange={onOwnerInputChange}
+              suggestions={ownerSuggestions}
+              isAddressInput={isOwnerAddressInput}
+              onSelectSuggestion={onOwnerSelectSuggestion}
+              onClear={onClearOwner}
+            />
+          </>
+        )}
         <MarketplaceHeader label="Properties">
           {hasActiveFilters && <MarketplaceHeaderReset onClick={onClearAll} />}
         </MarketplaceHeader>

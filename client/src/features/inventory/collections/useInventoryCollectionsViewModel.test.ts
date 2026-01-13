@@ -24,7 +24,7 @@ vi.mock("@/hooks/collections", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/hooks/collections")>();
   return {
     ...actual,
-    useCollections: () => mockUseCollections(),
+    useInventoryCollections: () => mockUseCollections(),
   };
 });
 

@@ -34,6 +34,7 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
+            payment_receiver: Option<ContractAddress>,
             metadata: ByteArray,
         ) -> u32 {
             // [Setup] Datastore
@@ -54,6 +55,7 @@ pub mod RegistrableComponent {
                 reissuable: reissuable,
                 price: price,
                 payment_token: payment_token,
+                payment_receiver: payment_receiver,
                 metadata: metadata,
                 time: time,
             );
@@ -75,6 +77,7 @@ pub mod RegistrableComponent {
             reissuable: bool,
             price: u256,
             payment_token: ContractAddress,
+            payment_receiver: Option<ContractAddress>,
         ) {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
@@ -92,7 +95,14 @@ pub mod RegistrableComponent {
 
             // [Effect] Update starterpack fields
             starterpack
-                .update(implementation, referral_percentage, reissuable, price, payment_token);
+                .update(
+                    implementation,
+                    referral_percentage,
+                    reissuable,
+                    price,
+                    payment_token,
+                    payment_receiver,
+                );
 
             // [Effect] Store updated starterpack
             store.set_starterpack(@starterpack);

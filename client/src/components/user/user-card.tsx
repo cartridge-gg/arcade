@@ -241,20 +241,4 @@ const UserCardInner = React.memo(
   },
 );
 
-const CloseButton = React.memo(
-  (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
-    return (
-      <button
-        {...props}
-        className={cn(
-          "absolute top-2 right-2 p-1 rounded-md hover:bg-background-200",
-          props.className,
-        )}
-      >
-        <XIcon size="sm" />
-      </button>
-    );
-  },
-);
-
 UserCard.displayName = "UserCard";

@@ -17,7 +17,7 @@ interface MarketplaceItemsTemplateProps {
 export function MarketplaceItemsTemplate({
   children,
 }: MarketplaceItemsTemplateProps) {
-  const { player, game, edition, collection } = useProject();
+  const { player, game, edition, collection, tab } = useProject();
   const { isMobile } = useDevice();
 
   const socials = useMemo(() => {
@@ -43,15 +43,17 @@ export function MarketplaceItemsTemplate({
           "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
       )}
     >
-      <CollectionHeader
-        isDashboard={isDashboard}
-        isMobile={isMobile}
-        arcade={arcade}
-        edition={edition}
-        game={game}
-        socials={socials}
-        collectionAddress={collection ?? "0x0"}
-      />
+      {tab !== "inventoryitems" && (
+        <CollectionHeader
+          isDashboard={isDashboard}
+          isMobile={isMobile}
+          arcade={arcade}
+          edition={edition}
+          game={game}
+          socials={socials}
+          collectionAddress={collection ?? "0x0"}
+        />
+      )}
       <NavigationContainer />
       {children}
     </BaseTemplate>

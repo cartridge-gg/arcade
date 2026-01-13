@@ -6,11 +6,11 @@ import {
   Button,
   cn,
   TabsContent,
-  type TabValue,
   TimesIcon,
   UserAddIcon,
   UserCheckIcon,
 } from "@cartridge/ui";
+import type { TabValue } from "@/hooks/project";
 import { ActivityScene } from "../scenes/activity";
 import { ArcadeTabs } from "../ui/modules/tabs";
 import { Link, useRouterState } from "@tanstack/react-router";

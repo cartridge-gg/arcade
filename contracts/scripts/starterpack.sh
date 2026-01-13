@@ -1,3 +1,6 @@
+# deploy implementation contract
+# starkli invoke 0x041a78e741e5af2fec34b695679bc6891742439f7afb8484ecd7766661ad02bf deployContract 0x1d72385e082b29216a3632623ed4fc7d09cb5b9916cf1272e8a10f2d15eb3a0 0 0 0
+
 #!/bin/bash
 
 # Starterpack management script
@@ -6,7 +9,8 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR/../.." || exit 1
 
-STARKNET_RPC=http://localhost:8001/x/starknet/mainnet/rpc/v0_9
+STARKNET_RPC=http://localhost:8001/x/starknet/sepolia/rpc/v0_9
+#STARKNET_RPC=https://api.cartridge.gg/x/starknet/mainnet/rpc/v0_9
 PROFILE=${PROFILE:-dev}
 
 strip_hex_zeros() {
@@ -23,22 +27,25 @@ COMMAND=$1
 
 case $COMMAND in
   register)
-    # Parameters: implementation referral_percentage reissuable price_low price_high payment_token metadata
-    IMPLEMENTATION=${2:-0x37639cc1b5bfa16f2546a28eb56f0844313529f01f6cde071d3ef930df754af}
+    # Parameters: implementation referral_percentage reissuable price_low price_high payment_token payment_receiver metadata
+    # payment_receiver: 0 for None, or "1 <address>" for Some(address)
+    IMPLEMENTATION=${2:-0x6893e5a519eec64bd5250dc5de9d1a70f90efa1beef94fed0d9b1bcb79d2c9c}
     REFERRAL_PCT=${3:-0x0}
     REISSUABLE=${4:-0x1}
     PRICE_LOW=${5:-1000000000000000000}
     PRICE_HIGH=${6:-0}
     PAYMENT_TOKEN=${7:-0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d}
-    METADATA=${8:-"{\"name\":\"Test Starterpack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Item\",\"description\":\"Test item\",\"image_uri\":\"https://example.com/item.png\"}]}"}
+    PAYMENT_RECEIVER=${8:-0}  # Default: None (0), use "1 <address>" for Some(address)
+    METADATA=${9:-"{\"name\":\"Test Starterpack\",\"description\":\"Test\",\"image_uri\":\"https://example.com/image.png\",\"items\":[{\"name\":\"Item\",\"description\":\"Test item\",\"image_uri\":\"https://example.com/item.png\"}],\"additional_payment_tokens\":[]}"}
     
     sozo execute --profile $PROFILE ARCADE-StarterpackRegistry register \
       $IMPLEMENTATION $REFERRAL_PCT $REISSUABLE $PRICE_LOW $PRICE_HIGH $PAYMENT_TOKEN \
-      str:"$METADATA"
+      $PAYMENT_RECEIVER str:"$METADATA"
     ;;
     
   update)
-    # Parameters: starterpack_id implementation referral_percentage reissuable price_low price_high payment_token
+    # Parameters: starterpack_id implementation referral_percentage reissuable price_low price_high payment_token payment_receiver
+    # payment_receiver: 0 for None, or "1 <address>" for Some(address)
     STARTERPACK_ID=${2:-}
     IMPLEMENTATION=${3:-}
     REFERRAL_PCT=${4:-}
@@ -46,15 +53,16 @@ case $COMMAND in
     PRICE_LOW=${6:-}
     PRICE_HIGH=${7:-}
     PAYMENT_TOKEN=${8:-}
+    PAYMENT_RECEIVER=${9:-0}  # Default: None (0), use "1 <address>" for Some(address)
     
     if [ -z "$STARTERPACK_ID" ] || [ -z "$IMPLEMENTATION" ] || [ -z "$REFERRAL_PCT" ] || [ -z "$REISSUABLE" ] || [ -z "$PRICE_LOW" ] || [ -z "$PRICE_HIGH" ] || [ -z "$PAYMENT_TOKEN" ]; then
       echo "Error: All parameters are required"
-      echo "Usage: $0 update <starterpack_id> <implementation> <referral_percentage> <reissuable> <price_low> <price_high> <payment_token>"
+      echo "Usage: $0 update <starterpack_id> <implementation> <referral_percentage> <reissuable> <price_low> <price_high> <payment_token> [payment_receiver]"
       exit 1
     fi
     
     sozo execute --profile $PROFILE ARCADE-StarterpackRegistry update \
-      $STARTERPACK_ID $IMPLEMENTATION $REFERRAL_PCT $REISSUABLE $PRICE_LOW $PRICE_HIGH $PAYMENT_TOKEN
+      $STARTERPACK_ID $IMPLEMENTATION $REFERRAL_PCT $REISSUABLE $PRICE_LOW $PRICE_HIGH $PAYMENT_TOKEN $PAYMENT_RECEIVER
     ;;
     
   update_metadata)
@@ -293,11 +301,13 @@ case $COMMAND in
     echo "            Example: PROFILE=mainnet $0 quote 0"
     echo ""
     echo "Commands:"
-    echo "  register <implementation> <referral_percentage> <reissuable> <price_low> <price_high> <payment_token> <metadata_json>"
+    echo "  register <implementation> <referral_percentage> <reissuable> <price_low> <price_high> <payment_token> <payment_receiver> <metadata_json>"
     echo "    Register a new starterpack"
+    echo "    payment_receiver: 0 for None (owner receives payment), or '1 <address>' for Some(address)"
     echo ""
-    echo "  update <starterpack_id> <implementation> <referral_percentage> <reissuable> <price_low> <price_high> <payment_token>"
+    echo "  update <starterpack_id> <implementation> <referral_percentage> <reissuable> <price_low> <price_high> <payment_token> [payment_receiver]"
     echo "    Update an existing starterpack"
+    echo "    payment_receiver: 0 for None (owner receives payment), or '1 <address>' for Some(address)"
     echo ""
     echo "  update_metadata <starterpack_id> <metadata_json>"
     echo "    Update metadata for an existing starterpack"

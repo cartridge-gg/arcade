@@ -1,4 +1,4 @@
-import { InventoryContainer } from "@/features/inventory";
+import { InventoryContainer } from "@/features/inventory/collections";
 
 export const InventoryScene = () => {
   return <InventoryContainer />;

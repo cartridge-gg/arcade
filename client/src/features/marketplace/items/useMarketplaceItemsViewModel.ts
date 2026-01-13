@@ -2,7 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
 import type { Token } from "@dojoengine/torii-wasm";
 import type { ListingWithUsd } from "@/effect/atoms/marketplace";
-import { getChecksumAddress, type RpcProvider } from "starknet";
+import {
+  addAddressPadding,
+  getChecksumAddress,
+  type RpcProvider,
+} from "starknet";
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useArcade } from "@/hooks/arcade";
 import { useMarketplace } from "@/hooks/marketplace";
@@ -13,8 +17,17 @@ import {
   useMarketplaceTokens,
   useListedTokens,
   type EnrichedListedToken,
+  ownerTokenIdsAtom,
 } from "@/effect";
+import {
+  useHandleListCallback,
+  useHandleSendCallback,
+  useHandleUnlistCallback,
+} from "@/hooks/marketplace-actions-handlers";
 import { useCollectionOrders, useCombinedTokenFilter } from "./hooks";
+import { useProject } from "@/hooks/project";
+import { useAtomValue } from "@effect-atom/atom-react";
+import { CollectionType } from "@/effect/atoms/tokens";
 
 export const ERC1155_ENTRYPOINT = "balance_of_batch";
 
@@ -50,9 +63,15 @@ interface MarketplaceItemsViewModel {
   connectWallet: () => Promise<void>;
   handleInspect: (token: MarketplaceAsset) => Promise<void>;
   handlePurchase: (tokens: MarketplaceAsset[]) => Promise<void>;
+  handleList: (tokens: MarketplaceAsset[]) => Promise<void>;
+  handleUnlist: (tokens: MarketplaceAsset[]) => Promise<void>;
+  handleSend: (tokens: MarketplaceAsset[]) => Promise<void>;
   sales: ReturnType<typeof useMarketplace>["sales"];
   statusFilter: string;
   listedTokens: EnrichedListedToken[];
+  isERC1155: boolean;
+  isInventory: boolean;
+  ownedTokenIds: string[];
 }
 
 export const getEntrypoints = async (
@@ -89,6 +108,19 @@ export function useMarketplaceItemsViewModel({
   const [search, setSearch] = useState<string>("");
   const [lastSearch, setLastSearch] = useState<string>("");
   const [selection, setSelection] = useState<MarketplaceAsset[]>([]);
+  const { tab } = useProject();
+
+  const ownedTokenIdsResult = useAtomValue(
+    ownerTokenIdsAtom(collectionAddress, address) as any,
+  ) as { _tag: string; value?: Set<string> };
+
+  const ownedTokenIds = useMemo(
+    () =>
+      ownedTokenIdsResult?.value
+        ? Array.from(ownedTokenIdsResult.value).map(addAddressPadding)
+        : [],
+    [ownedTokenIdsResult],
+  );
 
   const { listedTokenIds, getOrdersForToken } =
     useCollectionOrders(collectionAddress);
@@ -129,19 +161,20 @@ export function useMarketplaceItemsViewModel({
     enabled: !!collectionAddress && rawTokens.length > 0,
   });
 
+  const isERC1155 = useMemo(
+    () => collection?.contract_type === CollectionType.ERC1155,
+    [collection],
+  );
+
   const searchFilteredTokens = useMemo(() => {
-    const baseEffectiveTokens = shouldShowEmpty ? [] : rawTokens;
-    const effectiveTokens =
-      statusFilter === "all"
-        ? [...listedTokens, ...baseEffectiveTokens]
-        : baseEffectiveTokens;
+    const effectiveTokens = shouldShowEmpty ? [] : rawTokens;
     if (!search.trim()) return effectiveTokens;
     const searchLower = search.toLowerCase();
     return effectiveTokens.filter((token) => {
       const tokenName = (token.metadata as any)?.name || token.name || "";
       return tokenName.toLowerCase().includes(searchLower);
     });
-  }, [rawTokens, search, shouldShowEmpty, statusFilter, listedTokens]);
+  }, [rawTokens, search, shouldShowEmpty]);
 
   useEffect(() => {
     if (search && search !== lastSearch) {
@@ -299,11 +332,6 @@ export function useMarketplaceItemsViewModel({
         return;
       }
 
-      const entrypoints = await getEntrypoints(
-        provider.provider,
-        contractAddress,
-      );
-      const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
       const subpath = isERC1155 ? "collectible" : "collection";
 
       const project = DEFAULT_PROJECT;
@@ -332,7 +360,46 @@ export function useMarketplaceItemsViewModel({
 
       controller.openProfileAt(path);
     },
-    [connector, isConnected, provider.provider, events, trackEvent, address],
+    [
+      connector,
+      isConnected,
+      provider.provider,
+      events,
+      trackEvent,
+      address,
+      isERC1155,
+    ],
+  );
+
+  const handleListCallback = useHandleListCallback();
+  const handleUnlistCallback = useHandleUnlistCallback();
+  const handleSendCallback = useHandleSendCallback();
+
+  const handleList = useCallback(
+    async (tokens: MarketplaceAsset[]) =>
+      handleListCallback(
+        collectionAddress,
+        tokens.map((token) => token.token_id ?? "").filter(Boolean),
+      ),
+    [collectionAddress, handleListCallback],
+  );
+
+  const handleUnlist = useCallback(
+    async (tokens: MarketplaceAsset[]) =>
+      handleUnlistCallback(
+        collectionAddress,
+        tokens.map((token) => token.token_id ?? "").filter(Boolean),
+      ),
+    [collectionAddress, handleUnlistCallback],
+  );
+
+  const handleSend = useCallback(
+    async (tokens: MarketplaceAsset[]) =>
+      handleSendCallback(
+        collectionAddress,
+        tokens.map((token) => token.token_id ?? "").filter(Boolean),
+      ),
+    [collectionAddress, handleSendCallback],
   );
 
   const collectionSupply = useMemo(() => {
@@ -366,9 +433,15 @@ export function useMarketplaceItemsViewModel({
     connectWallet,
     handleInspect,
     handlePurchase,
+    handleList,
+    handleUnlist,
+    handleSend,
     sales,
     isLoading: isLoadingTokens || Boolean(isOwnerFilterLoading),
     statusFilter,
     listedTokens,
+    isERC1155,
+    isInventory: tab === "inventoryitems",
+    ownedTokenIds,
   };
 }

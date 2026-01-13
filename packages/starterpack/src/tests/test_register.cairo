@@ -36,6 +36,7 @@ fn test_sp_register() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -75,6 +76,7 @@ fn test_sp_register_invalid_referral_percentage() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 }
@@ -99,6 +101,7 @@ fn test_sp_register_multiple_starterpacks() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata.clone(),
         );
 
@@ -111,6 +114,7 @@ fn test_sp_register_multiple_starterpacks() {
             reissuable: false,
             price: PRICE * 2,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
             metadata: metadata,
         );
 
@@ -174,6 +178,7 @@ fn test_sp_not_found_update() {
             reissuable: true,
             price: PRICE,
             payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
         );
 }
 

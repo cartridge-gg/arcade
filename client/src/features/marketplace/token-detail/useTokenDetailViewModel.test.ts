@@ -9,6 +9,7 @@ const mockUseAccount = vi.fn();
 vi.mock("@starknet-react/core", () => ({
   useAccount: () => mockUseAccount(),
   useConnect: () => ({ connector: null }),
+  useDisconnect: () => ({ disconnect: null }),
 }));
 
 const mockCollectionOrders = vi.fn();
@@ -61,6 +62,10 @@ vi.mock("@/collections", () => ({
 
 vi.mock("@tanstack/react-router", () => ({
   useRouterState: () => ({ location: { pathname: "/" } }),
+}));
+
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: () => ({ data: {} }),
 }));
 
 describe("useTokenDetailViewModel", () => {
@@ -148,7 +153,13 @@ describe("useTokenDetailViewModel", () => {
       fetchNextPage: vi.fn(),
     });
     mockCollectionOrders.mockReturnValue({
-      "1": [{ tokenId: 1n, price: "100" } as unknown as OrderModel],
+      "1": [
+        {
+          tokenId: 1n,
+          price: "100",
+          expiration: new Date("2099-01-01T00:00:00").getTime() / 1000,
+        } as unknown as OrderModel,
+      ],
     });
 
     const { result } = renderHook(() =>
@@ -158,7 +169,7 @@ describe("useTokenDetailViewModel", () => {
       }),
     );
 
-    expect(result.current.isListed).toBe(true);
     expect(result.current.orders).toHaveLength(1);
+    expect(result.current.isListed).toBe(true);
   });
 });

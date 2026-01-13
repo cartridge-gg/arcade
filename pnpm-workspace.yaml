@@ -4,7 +4,7 @@ packages:
   - packages/**
 catalog:
   "@cartridge/presets": github:cartridge-gg/presets#e6a5022
-  "@cartridge/ui": github:cartridge-gg/ui#a823aea
+  "@cartridge/ui": github:cartridge-gg/ui#1d42129
   "@cartridge/connector": 0.10.6
   "@cartridge/controller": 0.10.6
   "@starknet-react/core": =5.0.1

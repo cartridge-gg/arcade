@@ -65,6 +65,7 @@ pub impl StarterpackStoreImpl of StarterpackStoreTrait {
             referral_percentage: *starterpack.referral_percentage,
             reissuable: *starterpack.reissuable,
             owner: *starterpack.owner,
+            payment_receiver: *starterpack.payment_receiver,
             time: *starterpack.created_at,
         };
         self.world.emit_event(@event);
@@ -78,6 +79,7 @@ pub impl StarterpackStoreImpl of StarterpackStoreTrait {
             reissuable: *starterpack.reissuable,
             price: *starterpack.price,
             payment_token: *starterpack.payment_token,
+            payment_receiver: *starterpack.payment_receiver,
             metadata: starterpack.metadata.clone(),
             time: time,
         };
