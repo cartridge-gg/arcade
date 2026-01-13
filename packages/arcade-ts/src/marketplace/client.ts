@@ -20,7 +20,7 @@ import { ArcadeModelsMapping, OrderCategory, OrderStatus } from "../bindings";
 import { NAMESPACE } from "../constants";
 import { Order, type OrderModel } from "../modules/marketplace/order";
 import { CategoryType, StatusType } from "../classes";
-import { fetchCollectionTokens } from "./tokens";
+import { fetchCollectionTokens, fetchTokenBalances } from "./tokens";
 import {
   defaultResolveContractImage,
   defaultResolveTokenImage,
@@ -286,11 +286,51 @@ export async function createMarketplaceClient(
       status: StatusType.Placed,
     });
 
-    return baseOrders.filter(
+    const filtered = baseOrders.filter(
       (order) =>
         order.category.value === CategoryType.Sell &&
         order.status.value === StatusType.Placed,
     );
+
+    if (options.verifyOwnership === false || filtered.length === 0) {
+      return filtered;
+    }
+
+    const projectId = ensureProjectId(options.projectId, defaultProject);
+    const checksumCollection = getChecksumAddress(options.collection);
+    const ownerAddresses = [...new Set(filtered.map((o) => o.owner))];
+    const tokenIds = [
+      ...new Set(
+        filtered.map((o) => addAddressPadding(`0x${o.tokenId.toString(16)}`)),
+      ),
+    ];
+
+    const { page, error } = await fetchTokenBalances({
+      project: projectId,
+      contractAddresses: [checksumCollection],
+      accountAddresses: ownerAddresses,
+      tokenIds,
+    });
+
+    if (error || !page) {
+      throw new Error("Failed to verify listing ownership");
+    }
+
+    const ownershipSet = new Set<string>();
+    for (const balance of page.balances) {
+      if (BigInt(balance.balance) > 0n && balance.token_id) {
+        const normalizedOwner = getChecksumAddress(balance.account_address);
+        const normalizedTokenId = BigInt(balance.token_id).toString();
+        ownershipSet.add(`${normalizedOwner}_${normalizedTokenId}`);
+      }
+    }
+
+    return filtered.filter((order) => {
+      const normalizedOwner = getChecksumAddress(order.owner);
+      const normalizedTokenId = BigInt(order.tokenId).toString();
+      const key = `${normalizedOwner}_${normalizedTokenId}`;
+      return ownershipSet.has(key);
+    });
   };
 
   const getToken = async (

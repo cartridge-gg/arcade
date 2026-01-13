@@ -88,6 +88,8 @@ export interface CollectionListingsOptions {
   collection: string;
   tokenId?: string;
   limit?: number;
+  verifyOwnership?: boolean;
+  projectId?: string;
 }
 
 export interface TokenDetailsOptions {
