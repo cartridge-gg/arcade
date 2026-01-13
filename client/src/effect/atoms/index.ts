@@ -121,6 +121,7 @@ export {
   salesAtom,
   collectionOrdersAtom,
   collectionOrdersWithUsdAtom,
+  verifiedCollectionOrdersAtom,
   sortedListedTokenIdsAtom,
   tokenOrdersAtom,
   orderAtom,
@@ -189,4 +190,8 @@ export {
   type SearchResultsView,
 } from "./search";
 
-export { ownerTokenIdsAtom } from "./owner-filter";
+export {
+  ownerTokenIdsAtom,
+  collectionOwnershipAtom,
+  type OwnershipMap,
+} from "./owner-filter";
