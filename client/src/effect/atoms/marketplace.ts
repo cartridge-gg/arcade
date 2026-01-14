@@ -13,8 +13,10 @@ import {
   USDT_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
 import { getCachedChecksumAddress } from "@/lib/shared/marketplace/utils";
+import { addAddressPadding } from "starknet";
 import { arcadeAtom } from "./arcade";
 import { pricesAtom } from "./prices";
+import { collectionOwnershipAtom, type OwnershipMap } from "./owner-filter";
 import type { ArcadeEntityItem, ArcadeEventItem } from "../layers/arcade";
 
 const erc20MetadataByAddress = new Map(
@@ -351,6 +353,73 @@ export const sortedListedTokenIdsAtom = Atom.family(
       tokenPrices.sort((a, b) => a.minUsdPrice - b.minUsdPrice);
 
       return tokenPrices.map((t) => t.tokenId);
+    });
+  },
+);
+
+const extractOwnerAddresses = (
+  listings: { [token: string]: ListingWithUsd[] } | undefined,
+): string[] => {
+  if (!listings) return [];
+  const owners = new Set<string>();
+  for (const tokenListings of Object.values(listings)) {
+    for (const listing of tokenListings) {
+      owners.add(listing.order.owner);
+    }
+  }
+  return Array.from(owners);
+};
+
+const filterListingsByOwnership = (
+  listings: { [token: string]: ListingWithUsd[] },
+  ownershipMap: OwnershipMap,
+): { [token: string]: ListingWithUsd[] } => {
+  return Object.entries(listings).reduce(
+    (acc, [tokenId, tokenListings]) => {
+      const verified = tokenListings.filter((listing) => {
+        const ownerKey = addAddressPadding(listing.order.owner).toLowerCase();
+        const ownerTokens = ownershipMap.get(ownerKey);
+        if (!ownerTokens) return false;
+        const normalizedTokenId = BigInt(listing.order.tokenId).toString(16);
+        return ownerTokens.has(normalizedTokenId);
+      });
+
+      if (verified.length > 0) {
+        acc[tokenId] = verified;
+      }
+      return acc;
+    },
+    {} as { [token: string]: ListingWithUsd[] },
+  );
+};
+
+export const verifiedCollectionOrdersAtom = Atom.family(
+  (contractAddress: string) => {
+    return Atom.make((get) => {
+      const listings = get(collectionOrdersWithUsdAtom(contractAddress));
+      if (!listings || Object.keys(listings).length === 0) {
+        return {};
+      }
+
+      const ownerAddresses = extractOwnerAddresses(listings);
+      if (ownerAddresses.length === 0) {
+        return {};
+      }
+
+      const ownershipAtom = collectionOwnershipAtom(
+        contractAddress,
+        ownerAddresses,
+      );
+      const ownershipResult = get(ownershipAtom as any) as {
+        _tag: string;
+        value?: OwnershipMap;
+      };
+
+      if (ownershipResult._tag !== "Success" || !ownershipResult.value) {
+        return {};
+      }
+
+      return filterListingsByOwnership(listings, ownershipResult.value);
     });
   },
 );

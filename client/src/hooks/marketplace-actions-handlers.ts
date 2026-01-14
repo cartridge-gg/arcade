@@ -78,10 +78,11 @@ export function useHandleBuyCallback(
 
     const eventType = events.MARKETPLACE_PURCHASE_INITIATED;
 
+    const orderIds = orders.map((order) => order.id).join(",");
     trackEvent(eventType, {
       purchase_type: "single",
       items_count: 1,
-      order_ids: orders.map((order) => order.id.toString()),
+      order_ids: orderIds.split(","),
       collection_address: collectionAddress,
       buyer_address: address,
       item_token_ids: tokenId,
@@ -115,9 +116,10 @@ export function useHandleBuyCallback(
     }
 
     options.push(`address=${getChecksumAddress(owner)}`);
-    options.push("purchaseView=true");
     options.push(`tokenIds=${[addAddressPadding(tokenId)].join(",")}`);
-    const path = `account/${username}/inventory/${subpath}/${addAddressPadding(collectionAddress)}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+    options.push(`orders=${orderIds}`);
+
+    const path = `account/${username}/inventory/${subpath}/${addAddressPadding(collectionAddress)}/token/${addAddressPadding(tokenId)}/purchase${options.length > 0 ? `?${options.join("&")}` : ""}`;
 
     controller.openProfileAt(path);
   }, [

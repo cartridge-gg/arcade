@@ -27,6 +27,8 @@ describe("useMarketplaceCollectionTokens", () => {
     getCollectionOrders: vi.fn(),
     listCollectionListings: vi.fn(),
     getToken: vi.fn(),
+    getFees: vi.fn(),
+    getRoyaltyFee: vi.fn(),
   });
 
   beforeEach(() => {

@@ -309,10 +309,11 @@ export function useMarketplaceItemsViewModel({
           ? events.MARKETPLACE_BULK_PURCHASE_INITIATED
           : events.MARKETPLACE_PURCHASE_INITIATED;
 
+      const orderIds = orders.map((listing) => listing.order.id).join(",");
       trackEvent(eventType, {
         purchase_type: tokensToPurchase.length > 1 ? "bulk" : "single",
         items_count: tokensToPurchase.length,
-        order_ids: orders.map((listing) => listing.order.id.toString()),
+        order_ids: orderIds.split(","),
         collection_address: Array.from(contractAddresses)[0],
         buyer_address: address,
         item_token_ids: tokensToPurchase.map(
@@ -353,9 +354,9 @@ export function useMarketplaceItemsViewModel({
       } else {
         const [token] = tokensToPurchase;
         options.push(`address=${getChecksumAddress(token.owner)}`);
-        options.push("purchaseView=true");
         options.push(`tokenIds=${[token.token_id].join(",")}`);
-        path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}${options.length > 0 ? `?${options.join("&")}` : ""}`;
+        options.push(`orders=${orderIds}`);
+        path = `account/${username}/inventory/${subpath}/${contractAddress}/token/${token.token_id}/purchase${options.length > 0 ? `?${options.join("&")}` : ""}`;
       }
 
       controller.openProfileAt(path);
