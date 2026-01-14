@@ -87,7 +87,7 @@ export function GameHeader({
             zIndex: 0,
           }}
         />
-        <div className="flex items-start justify-between pr-9">
+        <div className="flex items-start justify-between lg:pr-9 z-10">
           <div
             className={cn(
               "flex gap-4 items-center overflow-hidden",
@@ -100,7 +100,7 @@ export function GameHeader({
               className="min-w-16 min-h-16"
             />
             <div className="flex flex-col gap-2 overflow-hidden">
-              <p className="font-semibold text-xl/[24px] text-foreground-100 truncate">
+              <p className="font-semibold text-lg/6 lg:text-xl/6 text-foreground-100 truncate">
                 {game?.name || "Dashboard"}
               </p>
               <EditionsContainer />
@@ -112,6 +112,10 @@ export function GameHeader({
             </div>
           ) : null}
         </div>
+        <ContextCloser
+          className="lg:hidden flex top-0 right-0 rounded-none rounded-bl rounded-tr-lg bg-background-125 hover:bg-background-200 p-2 w-8 h-8 border-r-0 border-t-0"
+          context="game"
+        />
       </div>
       <div className="absolute top-5 right-5 z-10">
         <ContextCloser
