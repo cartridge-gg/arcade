@@ -27,6 +27,7 @@ import { UserAvatar } from "./avatar";
 import { getChecksumAddress } from "starknet";
 import { ShareIcon } from "lucide-react";
 import { ContextCloser } from "../ui/modules/context-closer";
+import { useDevice } from "@/hooks/device";
 
 export const UserCard = React.memo(
   React.forwardRef<HTMLAnchorElement, React.HTMLAttributes<HTMLAnchorElement>>(
@@ -68,6 +69,7 @@ const UserCardInner = React.memo(
     const { location } = useRouterState();
     const { games, editions } = useArcade();
     const { isConnected } = useAccount();
+    const { isMobile } = useDevice();
 
     const usernameStr = username?.username ?? "";
 
@@ -136,7 +138,7 @@ const UserCardInner = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col items-start p-3 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl relative",
+          "flex flex-col items-start p-3 lg:p-4 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl relative",
           "lg:border-background-200 lg:hover:border-background-200 overflow-hidden",
           className,
         )}
@@ -154,13 +156,13 @@ const UserCardInner = React.memo(
             <AchievementPlayerBadge
               icon={Icon}
               variant="default"
-              size="2xl"
-              className="!w-14 !h-14"
+              size={isMobile ? "2xl" : "3xl"}
+              className="!w-14 !h-14 lg:!w-16 lg:!h-16"
             />
           </div>
           <div className="h-full flex-1 flex flex-col justify-between">
             <div className="flex flex-row justify-between">
-              <p className="text-foreground-100 text-[16px]/[normal] font-semibold">
+              <p className="text-foreground-100 text-[16px]/[normal] lg:text-xl/6 font-semibold">
                 {usernameStr}
               </p>
               <div
@@ -171,7 +173,7 @@ const UserCardInner = React.memo(
               >
                 <div className="flex items-center gap-0.5 bg-translucent-dark-100 rounded-xl">
                   <SparklesIcon variant="solid" size="xs" />
-                  <p className="text-xs font-normal text-foreground-100">
+                  <p className="text-xs lg:text-sm font-normal text-foreground-100">
                     {totalEarnings}
                   </p>
                 </div>
@@ -188,18 +190,18 @@ const UserCardInner = React.memo(
                   last={2}
                 />
               </div>
-              <div className="flex-1 flex items-center justify-end gap-1">
+              <div className="flex-1 flex items-center justify-end gap-2">
                 <Button
                   variant="tertiary"
                   size="icon"
-                  className="px-[6px] py-1 w-auto h-auto hidden"
+                  className="px-1.5 py-1 w-auto h-auto hidden"
                 >
                   <XIcon size={"sm"} />
                 </Button>
                 <Button
                   variant="tertiary"
                   size="icon"
-                  className="px-[6px] py-1 w-auto h-auto hidden"
+                  className="px-1.5 py-1 w-auto h-auto hidden"
                 >
                   <DiscordIcon size={"sm"} />
                 </Button>
@@ -208,7 +210,7 @@ const UserCardInner = React.memo(
                     <Button
                       variant="tertiary"
                       size="icon"
-                      className="px-[6px] py-1 w-auto h-auto"
+                      className="px-1.5 py-1 w-auto h-auto"
                     >
                       <DotsIcon size={"sm"} />
                     </Button>
