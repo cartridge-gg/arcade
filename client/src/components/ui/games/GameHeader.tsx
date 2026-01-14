@@ -32,7 +32,7 @@ export function GameHeader({
       )}
     >
       <div className="flex flex-col gap-4 border border-background-200 rounded-lg p-4 lg:border-none lg:p-0">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between pr-9">
           <div
             className={cn(
               "flex gap-4 items-center overflow-hidden",
@@ -58,7 +58,12 @@ export function GameHeader({
           ) : null}
         </div>
       </div>
-      <ContextCloser variant={"rounded-muted"} context="game" />
+      <div className="absolute top-5 right-5 z-10">
+        <ContextCloser
+          className="rounded-none rounded-bl rounded-tr-2 bg-background-125 hover:bg-background-200 p-2 w-8 h-8 border-r-0 border-t-0"
+          context="game"
+        />
+      </div>
     </div>
   );
 }
