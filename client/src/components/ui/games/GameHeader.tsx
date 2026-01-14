@@ -64,8 +64,8 @@ export function GameHeader({
     >
       <div
         className={cn(
+          "hidden lg:block", // only show on large screens
           "absolute top-0 left-0 inset-0 bg-no-repeat bg-cover bg-top transition-all duration-100 opacity-[0.16] rounded-lg",
-          // "rounded-tl-xl",
           transitioningOut ? "blur-[256px] grayscale" : "",
           transitioningIn ? "blur-0 grayscale-0" : "",
         )}
@@ -74,7 +74,19 @@ export function GameHeader({
           zIndex: 0,
         }}
       />
-      <div className="flex flex-col gap-4 border border-background-200 rounded-lg p-4 lg:border-none lg:p-0 z-10">
+      <div className="relative flex flex-col gap-4 border border-background-200 rounded-lg p-4 lg:border-none lg:p-0 z-10">
+        <div
+          className={cn(
+            "block: lg:hidden", // only show on mobile screens
+            "absolute top-0 left-0 inset-0 bg-no-repeat bg-cover bg-top transition-all duration-100 opacity-[0.16] rounded-lg",
+            transitioningOut ? "blur-[256px] grayscale" : "",
+            transitioningIn ? "blur-0 grayscale-0" : "",
+          )}
+          style={{
+            backgroundImage: `linear-gradient(to top, var(--background-100) 0%, transparent 100%), url(${currentBanner})`,
+            zIndex: 0,
+          }}
+        />
         <div className="flex items-start justify-between pr-9">
           <div
             className={cn(
