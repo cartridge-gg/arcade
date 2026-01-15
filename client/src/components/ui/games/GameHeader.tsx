@@ -5,7 +5,7 @@ import { GameSocialWebsite } from "@/components/ui/modules/game-social";
 import type { GameModel, EditionModel, Socials } from "@cartridge/arcade";
 import { ContextCloser } from "../modules/context-closer";
 import { useTheme } from "@/hooks/context";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import banner from "@/assets/banner.png";
 
 interface GameHeaderProps {
@@ -29,26 +29,21 @@ export function GameHeader({
   const targetBanner = useMemo(() => cover ?? banner, [cover]);
 
   const [currentBanner, setCurrentBanner] = useState<string>(banner);
-  const [transitioningOut, setTransitioningOut] = useState(false);
-  const [transitioningIn, setTransitioningIn] = useState(false);
+  const [, startTransition] = useTransition();
+  const [isChanging, setIsChanging] = useState(false);
 
   useEffect(() => {
     if (targetBanner !== currentBanner) {
-      setTransitioningOut(true);
+      setIsChanging(true);
 
-      const timeoutOut = setTimeout(() => {
-        setCurrentBanner(targetBanner);
-        setTransitioningOut(false);
-        setTransitioningIn(true);
-
-        const timeoutIn = setTimeout(() => {
-          setTransitioningIn(false);
-        }, 100);
-
-        return () => clearTimeout(timeoutIn);
+      const timeout = setTimeout(() => {
+        startTransition(() => {
+          setCurrentBanner(targetBanner);
+          setIsChanging(false);
+        });
       }, 100);
 
-      return () => clearTimeout(timeoutOut);
+      return () => clearTimeout(timeout);
     }
   }, [targetBanner, currentBanner]);
 
@@ -66,8 +61,7 @@ export function GameHeader({
         className={cn(
           "hidden lg:block", // only show on large screens
           "absolute top-0 left-0 inset-0 bg-no-repeat bg-cover bg-top transition-all duration-100 opacity-[0.16] rounded-lg",
-          transitioningOut ? "blur-[256px] grayscale" : "",
-          transitioningIn ? "blur-0 grayscale-0" : "",
+          isChanging ? "blur-[256px] grayscale" : "blur-0 grayscale-0",
         )}
         style={{
           backgroundImage: `linear-gradient(to top, var(--background-100) 0%, transparent 100%), url(${currentBanner})`,
@@ -79,8 +73,7 @@ export function GameHeader({
           className={cn(
             "block: lg:hidden", // only show on mobile screens
             "absolute top-0 left-0 inset-0 bg-no-repeat bg-cover bg-top transition-all duration-100 opacity-[0.16] rounded-lg",
-            transitioningOut ? "blur-[256px] grayscale" : "",
-            transitioningIn ? "blur-0 grayscale-0" : "",
+            isChanging ? "blur-[256px] grayscale" : "blur-0 grayscale-0",
           )}
           style={{
             backgroundImage: `linear-gradient(to top, var(--background-100) 0%, transparent 100%), url(${currentBanner})`,
