@@ -23,6 +23,7 @@ import type {
 } from "@/features/games/useGamesViewModel";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";
+import { ArcadeIcon, ArcadeIconText } from "../modules/arcade-header";
 
 const CARD_LIST_STYLE = { scrollbarWidth: "none" } as const;
 
@@ -61,6 +62,13 @@ export const GamesView = React.memo(
         onTouchStart={sidebar.handleTouchStart}
         onTouchMove={sidebar.handleTouchMove}
       >
+        <Link
+          className="p-4 bg-background-100 border-b -mb-px border-spacer-100 lg:hidden flex items-center justify-start gap-2 text-primary w-auto"
+          to="/"
+        >
+          <ArcadeIcon className="h-7" />
+          <ArcadeIconText className="h-5" />
+        </Link>
         <UserCard className="bg-background-100 -mb-px lg:hidden" />
         <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
           <SearchInput
