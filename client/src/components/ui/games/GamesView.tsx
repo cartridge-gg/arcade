@@ -69,7 +69,9 @@ export const GamesView = React.memo(
           <ArcadeIcon className="h-7" />
           <ArcadeIconText className="h-5" />
         </Link>
-        <UserCard className="bg-background-100 -mb-px lg:hidden" />
+        <div className="bg-background-100 -mb-px lg:hidden p-4 border-b border-spacer-100">
+          <UserCard className="border border-background-200 rounded-lg" />
+        </div>
         <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
           <SearchInput
             value={search}

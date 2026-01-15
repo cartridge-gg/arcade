@@ -145,7 +145,10 @@ const UserCardInner = React.memo(
       >
         {isPlayer && (
           <div className="absolute top-5 right-5 z-10">
-            <ContextCloser className="rounded-none rounded-bl rounded-tr-2 bg-background-100 hover:bg-background-200 p-2 w-8 h-8 border-r-0 border-t-0" />
+            <ContextCloser
+              context="player"
+              className="flex rounded-none rounded-bl rounded-tr-2 bg-background-100 hover:bg-background-200 p-2 w-8 h-8 border-r-0 border-t-0"
+            />
           </div>
         )}
         <div
@@ -160,7 +163,7 @@ const UserCardInner = React.memo(
               className="!w-14 !h-14 lg:!w-16 lg:!h-16"
             />
           </div>
-          <div className="h-full flex-1 flex flex-col justify-between">
+          <div className="h-full flex-1 flex flex-col justify-between gap-2 lg:gap-0">
             <div className="flex flex-row justify-between">
               <p className="text-foreground-100 text-[16px]/[normal] lg:text-xl/6 font-semibold">
                 {usernameStr}
@@ -180,7 +183,7 @@ const UserCardInner = React.memo(
               </div>
             </div>
 
-            <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-row justify-between">
               <div className="flex items-center font-sans text-foreground-200 gap-1 rounded-md bg-background-200 hover:bg-background-300 shrink-0 px-[6px] py-1">
                 <CopyAddress
                   size="xs"
