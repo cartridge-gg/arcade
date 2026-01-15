@@ -7,7 +7,7 @@ import { NavigationButton } from "@/components/ui/modules/link-item";
 
 export const NavigationView = ({ tabs }: NavigationViewModel) => {
   return (
-    <div className="fixed bottom-0 lg:static flex flex-row gap-4 px-4 pb-2 lg:pb-6 lg:px-0 w-full justify-center lg:w-auto lg:justify-start order-3 lg:order-2">
+    <div className="fixed bottom-0 lg:static flex flex-row gap-4 px-4 pb-2 lg:pb-4 lg:px-0 w-full justify-center lg:w-auto lg:justify-start order-3 lg:order-2">
       {tabs.map((t: TabItem) => (
         <NavigationButton key={t.href} asChild>
           <Link to={t.href} activeOptions={{ exact: t.tab !== "inventory" }}>
