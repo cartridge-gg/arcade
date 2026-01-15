@@ -45,7 +45,6 @@ export interface MarketplaceItemCardProps {
   isInventory: boolean;
   backgroundColor?: string;
   onToggleSelectByIndex: (index: number) => void;
-  onBuyByIndex: (index: number) => void;
   onInspectByIndex: (index: number) => void;
   onConnect: () => Promise<void> | void;
 }
@@ -380,9 +379,6 @@ const MarketplaceItemCard = memo(
     canOpen,
     isConnected,
     onToggleSelectByIndex,
-    onBuyByIndex,
-    onInspectByIndex,
-    onConnect,
     image,
     placeholderImage,
     title,
@@ -434,22 +430,6 @@ const MarketplaceItemCard = memo(
       }
     };
 
-    const handleCardClick = () => {
-      if (selectable && canOpen) {
-        onBuyByIndex(index);
-        return;
-      }
-
-      if (canOpen) {
-        onInspectByIndex(index);
-        return;
-      }
-
-      if (!isConnected) {
-        void onConnect();
-      }
-    };
-
     const handleSelect =
       isConnected && selectable
         ? () => onToggleSelectByIndex(index)
@@ -477,7 +457,6 @@ const MarketplaceItemCard = memo(
               title={title}
               images={[displayImage]}
               listingCount={listingCount}
-              onClick={handleCardClick}
               className={
                 selectable || canOpen
                   ? "cursor-pointer"

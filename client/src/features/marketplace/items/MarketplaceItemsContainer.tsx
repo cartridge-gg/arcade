@@ -123,10 +123,10 @@ export const MarketplaceItemsContainer = ({
     isConnected,
     connectWallet,
     handleInspect,
-    handlePurchase,
     handleList,
     handleUnlist,
     handleSend,
+    handlePurchase,
     sales,
     assets,
     isLoading,
@@ -227,14 +227,6 @@ export const MarketplaceItemsContainer = ({
     [toggleSelection],
   );
 
-  const handleBuyById = useCallback(
-    (index: number) => {
-      const asset = assetsRef.current[index];
-      if (asset) handlePurchase([asset]);
-    },
-    [handlePurchase],
-  );
-
   const handleInspectById = useCallback(
     (index: number) => {
       const asset = assetsRef.current[index];
@@ -291,7 +283,6 @@ export const MarketplaceItemsContainer = ({
         isConnected,
         selectionActive,
         onToggleSelectByIndex: handleToggleSelectById,
-        onBuyByIndex: handleBuyById,
         onInspectByIndex: handleInspectById,
         onConnect: connectWallet,
         isInventory,
@@ -306,7 +297,6 @@ export const MarketplaceItemsContainer = ({
     isConnected,
     connectWallet,
     handleToggleSelectById,
-    handleBuyById,
     handleInspectById,
   ]);
 

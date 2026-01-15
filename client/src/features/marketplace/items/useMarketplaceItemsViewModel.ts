@@ -347,9 +347,7 @@ export function useMarketplaceItemsViewModel({
       let path: string;
 
       if (orders.length > 1) {
-        options.push(
-          `orders=${orders.map((listing) => listing.order.id).join(",")}`,
-        );
+        options.push(`orders=${orderIds}`);
         path = `account/${username}/inventory/${subpath}/${contractAddress}/purchase${options.length > 0 ? `?${options.join("&")}` : ""}`;
       } else {
         const [token] = tokensToPurchase;
