@@ -20,11 +20,18 @@ export function TokenDetailSidebar() {
     useParams({
       strict: false,
     });
-  const { token, collection, controller, owner, collectionHref, ownerHref } =
-    useTokenDetailViewModel({
-      collectionAddress: collectionAddressParam ?? "0x0",
-      tokenId: tokenIdParam ?? "0x0",
-    });
+  const {
+    token,
+    collection,
+    controller,
+    owner,
+    collectionHref,
+    ownerHref,
+    contractHref,
+  } = useTokenDetailViewModel({
+    collectionAddress: collectionAddressParam ?? "0x0",
+    tokenId: tokenIdParam ?? "0x0",
+  });
   const tokenId = token?.token_id;
 
   const tokenIdStr = useMemo(
@@ -44,7 +51,12 @@ export function TokenDetailSidebar() {
   const collectionSupply = collection.total_supply;
 
   return (
-    <div className="w-full lg:min-w-[360px] h-full bg-background-100 border border-background-200 rounded-xl p-6 flex flex-col gap-6">
+    <div
+      className={cn(
+        "w-full lg:min-w-[360px] h-full p-4 flex flex-col gap-6 bg-background-100",
+        "lg:border lg:border-background-200 lg:rounded-xl",
+      )}
+    >
       <div className="">
         <DetailTitle label="Details" />
         <div className="flex flex-col gap-[1px]">
@@ -53,10 +65,12 @@ export function TokenDetailSidebar() {
               <Username username={controller?.username} address={owner} />
             </DetailItem>
           </Link>
-          <DetailItem label="Contract Address">
-            {collectionAddressTrunc}
-          </DetailItem>
-          <DetailItem label="Token ID">
+          <Link to={contractHref} disabled={!contractHref} target="_blank">
+            <DetailItem label="Contract Address" hoverable>
+              {collectionAddressTrunc}
+            </DetailItem>
+          </Link>
+          <DetailItem label="Token ID" copyable>
             {truncateAddress(tokenIdStr)}
           </DetailItem>
           <DetailItem label="Token Standard">{tokenStandard}</DetailItem>
@@ -91,8 +105,13 @@ function DetailTitle({ label }: { label: string }) {
 function DetailItem({
   label,
   hoverable = false,
+  copyable = false,
   children,
-}: React.PropsWithChildren<{ label: React.ReactNode; hoverable?: boolean }>) {
+}: React.PropsWithChildren<{
+  label: React.ReactNode;
+  hoverable?: boolean;
+  copyable?: boolean;
+}>) {
   return (
     <div
       className={cn(
@@ -101,7 +120,12 @@ function DetailItem({
       )}
     >
       <span className="text-foreground-300 text-xs font-sans">{label}</span>
-      <span className="text-foreground-100 text-sm font-medium font-mono">
+      <span
+        className={cn(
+          "text-foreground-100 text-sm font-medium font-mono",
+          copyable && "select-all",
+        )}
+      >
         {children}
       </span>
     </div>

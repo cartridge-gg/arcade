@@ -23,7 +23,6 @@ import type {
 } from "@/features/games/useGamesViewModel";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";
-import { ArcadeIcon, ArcadeIconText } from "../modules/arcade-header";
 
 const CARD_LIST_STYLE = { scrollbarWidth: "none" } as const;
 
@@ -51,9 +50,10 @@ export const GamesView = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border-r border-spacer-100 lg:border lg:border-background-200",
+          "flex flex-col gap-px bg-background-200 overflow-clip",
           "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
-          isMobile && "fixed z-50 top-0 left-0",
+          "lg:border lg:border-background-200 lg:rounded-xl",
+          isMobile && "fixed z-50",
           sidebar.isOpen
             ? "translate-x-0"
             : "-translate-x-full lg:translate-x-0",
@@ -62,13 +62,6 @@ export const GamesView = React.memo(
         onTouchStart={sidebar.handleTouchStart}
         onTouchMove={sidebar.handleTouchMove}
       >
-        <Link
-          className="p-4 bg-background-100 border-b -mb-px border-spacer-100 lg:hidden flex items-center justify-start gap-2 text-primary w-auto"
-          to="/"
-        >
-          <ArcadeIcon className="h-7" />
-          <ArcadeIconText className="h-5" />
-        </Link>
         <div className="bg-background-100 -mb-px lg:hidden p-4 border-b border-spacer-100">
           <UserCard className="border border-background-200 rounded-lg" />
         </div>

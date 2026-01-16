@@ -1,5 +1,6 @@
 import { memo } from "react";
 import {
+  cn,
   MarketplaceFilters,
   MarketplaceHeader,
   MarketplaceHeaderReset,
@@ -61,7 +62,12 @@ export const MarketplaceFiltersView = memo(
     onClearOwner,
   }: MarketplaceFiltersViewProps) => {
     return (
-      <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden rounded-none lg:rounded-xl">
+      <MarketplaceFilters
+        className={cn(
+          "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden",
+          "lg:rounded-xl",
+        )}
+      >
         <MarketplaceHeader label="Status" />
         <div className="flex flex-col gap-2 w-fit">
           <MarketplaceRadialItem

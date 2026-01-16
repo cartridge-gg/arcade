@@ -275,6 +275,22 @@ export const usdPriceMappingAtom = Atom.make((get) => {
   }, {});
 });
 
+const orderWithUsd = (order: OrderModel, usdMapping: UsdPriceMapping) => {
+  const isUsd = isUsdCurrency(order.currency);
+  const usdPricePerUnit = isUsd ? 1 : usdMapping[order.currency];
+  const decimals = getErc20Decimals(order.currency);
+  const normalizedPrice = order.price / 10 ** decimals;
+  return {
+    order,
+    usdPrice: isUsd
+      ? normalizedPrice
+      : usdPricePerUnit
+        ? normalizedPrice * usdPricePerUnit
+        : null,
+    normalizedPrice,
+  };
+};
+
 export const listingsWithUsdAtom = Atom.make((get) => {
   const listings = get(listingsAtom);
   const usdMapping = get(usdPriceMappingAtom);
@@ -286,20 +302,7 @@ export const listingsWithUsdAtom = Atom.make((get) => {
     for (const [token, orders] of Object.entries(tokens)) {
       result[collection][token] = {};
       for (const [orderId, order] of Object.entries(orders)) {
-        const isUsd = isUsdCurrency(order.currency);
-        const usdPricePerUnit = isUsd ? 1 : usdMapping[order.currency];
-        const decimals = getErc20Decimals(order.currency);
-        const normalizedPrice = order.price / 10 ** decimals;
-
-        result[collection][token][orderId] = {
-          order,
-          usdPrice: isUsd
-            ? normalizedPrice
-            : usdPricePerUnit
-              ? normalizedPrice * usdPricePerUnit
-              : null,
-          normalizedPrice,
-        };
+        result[collection][token][orderId] = orderWithUsd(order, usdMapping);
       }
     }
   }
@@ -423,3 +426,10 @@ export const verifiedCollectionOrdersAtom = Atom.family(
     });
   },
 );
+
+export const orderWithUsdAtom = Atom.family((order: OrderModel | null) => {
+  return Atom.make((get) => {
+    const usdMapping = get(usdPriceMappingAtom);
+    return order ? orderWithUsd(order, usdMapping) : null;
+  });
+});

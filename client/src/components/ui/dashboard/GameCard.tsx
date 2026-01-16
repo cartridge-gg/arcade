@@ -47,7 +47,7 @@ export const GameCard = ({
         className,
       )}
       style={{
-        boxShadow: color ? `0 0 0 0 transparent` : undefined,
+        boxShadow: color ? "0 0 0 0 transparent" : undefined,
       }}
       onMouseEnter={(e) => {
         if (color) {

@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { HeaderContainer } from "@/features/header";
 import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
 import { useTheme } from "@/hooks/context";
 import { useDevice } from "@/hooks/device";
+import {
+  ArcadeIcon,
+  ArcadeIconText,
+} from "@/components/ui/modules/arcade-header";
 
 interface BaseTemplateProps {
   children: ReactNode;
@@ -54,7 +59,7 @@ export function BaseTemplate({
 
             <div
               className={cn(
-                "lg:space-y-4 h-full flex flex-col",
+                "h-full flex flex-col",
                 "fixed lg:relative left-0 w-[min(calc(100vw-64px),360px)]",
                 "transition-all duration-300 ease-in-out",
                 !isOpen && isMobile ? "-translate-x-full" : "translate-x-0",
@@ -62,14 +67,23 @@ export function BaseTemplate({
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             >
-              {sidebarContent}
+              <Link
+                to="/"
+                className="lg:hidden p-4 bg-background-100 border-r border-spacer-100 -mb-px border-spacer-100 flex items-center justify-start gap-2 text-primary w-auto h-[66px]"
+              >
+                <ArcadeIcon className="h-5" />
+                <ArcadeIconText className="h-5" />
+              </Link>
+              <div className="border border-r border-spacer-100 border-t-background-200 rounded-none">
+                {sidebarContent}
+              </div>
             </div>
 
             <div
               className={cn(
                 "fixed lg:relative h-full w-full flex flex-col px-0 lg:pb-0",
                 "transition-all duration-300 ease-in-out max-w-[1320px]",
-                "pb-[79px] lg:pb-0",
+                "pb-0",
                 isOpen
                   ? "translate-x-[min(calc(100vw-64px),360px)]"
                   : "translate-x-0",
@@ -85,7 +99,7 @@ export function BaseTemplate({
 
               <div
                 className={cn(
-                  "relative grow h-full flex flex-col min-w-0 rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
+                  "relative grow h-full flex flex-col min-w-0 rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border-t border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
                   contentClassName,
                 )}
               >

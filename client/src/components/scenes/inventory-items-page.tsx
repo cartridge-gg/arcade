@@ -1,10 +1,10 @@
 import { Outlet } from "@tanstack/react-router";
-import { MarketplaceItemsTemplate } from "@/components/marketplace-items-template";
+import { InventoryItemsTemplate } from "@/components/inventory-items-template";
 
 export const InventoryItemsPage = () => {
   return (
-    <MarketplaceItemsTemplate>
+    <InventoryItemsTemplate>
       <Outlet />
-    </MarketplaceItemsTemplate>
+    </InventoryItemsTemplate>
   );
 };

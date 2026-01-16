@@ -40,7 +40,9 @@ function PropertyItem({ property }: { property: TokenProperty }) {
   return (
     <div className="bg-background-200 p-3 flex flex-col gap-2">
       <p className="text-foreground-400 text-xs">{property.name}</p>
-      <p className="text-foreground-100 text-sm font-medium">{val}</p>
+      <p className="text-foreground-100 text-sm font-medium select-all">
+        {val}
+      </p>
     </div>
   );
 }

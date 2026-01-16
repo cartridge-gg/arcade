@@ -1,5 +1,13 @@
 /// <reference types="vite/client" />
 
+import "@tanstack/react-router";
+
+declare module "@tanstack/react-router" {
+  interface StaticDataRouteOption {
+    hasOwnTemplate?: boolean;
+  }
+}
+
 declare module "virtual:pwa-register" {
   export type RegisterSWOptions = {
     immediate?: boolean;

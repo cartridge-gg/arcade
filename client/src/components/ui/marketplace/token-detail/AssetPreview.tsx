@@ -1,23 +1,37 @@
-import { TimesIcon } from "@cartridge/ui";
+import { useMemo, useState } from "react";
+import { ClockIcon, CollectibleTag, TagIcon, TimesIcon } from "@cartridge/ui";
 import { cn } from "@cartridge/ui/utils";
-import { useState } from "react";
 import { createPortal } from "react-dom";
+import { formatExpirationDate } from "@/lib/shared/marketplace/utils";
+import { Tooltip } from "@/components/ui/tooltip";
+import type { OrderModel } from "@cartridge/arcade";
 
 interface AssetPreviewProps {
   image?: string;
   name?: string;
   className?: string;
+  order: OrderModel | null;
 }
 
-export function AssetPreview({ image, name, className }: AssetPreviewProps) {
+export function AssetPreview({
+  image,
+  name,
+  className,
+  order,
+}: AssetPreviewProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const { duration, dateTime } = useMemo(
+    () => formatExpirationDate(order?.expiration, true),
+    [order?.expiration],
+  );
 
   return (
     <>
       <div
         onClick={() => setIsFullscreen(true)}
         className={cn(
-          "w-full flex items-center justify-center bg-[#000000] rounded-xl py-8 cursor-pointer hover:shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] group",
+          "relative w-full flex items-center justify-center bg-[#000000] rounded-xl py-8 cursor-pointer hover:shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] group",
           className,
         )}
       >
@@ -34,6 +48,25 @@ export function AssetPreview({ image, name, className }: AssetPreviewProps) {
             </div>
           )}
         </div>
+
+        {duration && (
+          <div className="absolute bottom-[12px] left-[12px]">
+            <Tooltip content={dateTime}>
+              <CollectibleTag>
+                <ClockIcon size="sm" variant="solid" className="mr-1" />
+                {duration}
+              </CollectibleTag>
+            </Tooltip>
+          </div>
+        )}
+
+        {!!order && (
+          <div className="absolute top-[-2px] right-[12px]">
+            <ListedTag>
+              <TagIcon size="sm" variant="solid" className="text-[#0F1410]" />
+            </ListedTag>
+          </div>
+        )}
       </div>
 
       {isFullscreen &&
@@ -61,3 +94,23 @@ export function AssetPreview({ image, name, className }: AssetPreviewProps) {
     </>
   );
 }
+
+const ListedTag = ({ children }: { children?: React.ReactNode }) => {
+  return (
+    <div className="relative w-fit rounded overflow-hidden flex flex-col select-none">
+      <div className="px-2.5 pt-[5px] pb-[3px] w-full bg-primary-100 flex items-center justify-center min-h-[28px]">
+        {children}
+      </div>
+      <div className="flex justify-between w-full">
+        <div
+          className="h-0 w-0 border-t-[8px] border-t-primary-100 border-r-transparent"
+          style={{ borderRightWidth: "20px" }}
+        />
+        <div
+          className="h-0 w-0 border-t-[8px] border-t-primary-100 border-l-transparent"
+          style={{ borderLeftWidth: "20px" }}
+        />
+      </div>
+    </div>
+  );
+};

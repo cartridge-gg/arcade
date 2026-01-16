@@ -8,4 +8,7 @@ export const Route = createFileRoute(
     filter: search.filter as string | undefined,
   }),
   component: InventoryItemsPage,
+  staticData: {
+    hasOwnTemplate: true,
+  },
 });

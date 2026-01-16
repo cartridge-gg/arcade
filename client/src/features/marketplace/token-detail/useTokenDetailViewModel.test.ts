@@ -33,6 +33,7 @@ const mockUseAccountByAddress = vi.fn();
 vi.mock("@/effect", () => ({
   useMarketplaceTokens: () => mockUseMarketplaceTokens(),
   useAccountByAddress: () => mockUseAccountByAddress(),
+  useAccount: () => ({ data: {} }),
 }));
 
 const mockUseMarketBalancesFetcher = vi.fn();
@@ -50,7 +51,7 @@ vi.mock("@/hooks/useAnalytics", () => ({
 
 vi.mock("@/hooks/arcade", () => ({
   useArcade: () => ({
-    provider: { provider: {} },
+    provider: { provider: { channel: { nodeUrl: "" } } },
     games: [],
     editions: [],
   }),
@@ -62,6 +63,7 @@ vi.mock("@/collections", () => ({
 
 vi.mock("@tanstack/react-router", () => ({
   useRouterState: () => ({ location: { pathname: "/" } }),
+  useSearch: () => ({ data: null, isLoading: false }),
 }));
 
 vi.mock("@tanstack/react-query", () => ({

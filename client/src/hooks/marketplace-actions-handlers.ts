@@ -1,155 +1,322 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
-import { useMarketBalancesFetcher } from "@/hooks/marketplace-balances-fetcher";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
-import { addAddressPadding, getChecksumAddress } from "starknet";
+import { addAddressPadding } from "starknet";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { useArcade } from "@/hooks/arcade";
-import {
-  ERC1155_ENTRYPOINT,
-  getEntrypoints,
-} from "@/features/marketplace/items";
 import type ControllerConnector from "@cartridge/connector/controller";
-import { collectionOrdersAtom } from "@/effect/atoms";
-import { useAtomValue } from "@effect-atom/atom-react";
 import { useConnectionViewModel } from "@/features/connection";
+import { useTokenContracts } from "@/effect/hooks/tokens";
+import { CollectionType } from "@/effect/atoms/tokens";
+import type { OrderModel } from "@cartridge/arcade";
+import { useUsername } from "@/hooks/username";
 
-export function useHandleBuyCallback(
+export type ActionHandlerParams = {
+  project?: string;
+  preset?: string;
+};
+
+export function useHandlePurchaseCallback(
+  presetParams?: ActionHandlerParams,
+): (
   collectionAddress: string,
-  tokenId: string,
-): () => Promise<void> {
-  const { connector } = useConnect();
-  const { address, isConnected } = useAccount();
-  const { onConnect, isConnectDisabled } = useConnectionViewModel();
+  tokenIds: string[],
+  orders: OrderModel[],
+  preset?: string,
+  project?: string,
+) => Promise<void> {
+  const { address } = useAccount();
   const { trackEvent, events } = useAnalytics();
-  const { provider } = useArcade();
 
-  const { balances } = useMarketBalancesFetcher({
-    project: [DEFAULT_PROJECT],
-    address: collectionAddress,
-    tokenId,
-  });
-  const owner = useMemo(
-    () =>
-      balances && balances.length === 1
-        ? addAddressPadding(balances[0].account_address)
-        : "0x0",
-    [balances],
-  );
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
 
-  const collectionOrders = useAtomValue(
-    collectionOrdersAtom(collectionAddress),
-  );
+  return useCallback(
+    async (
+      collectionAddress: string,
+      tokenIds: string[],
+      orders: OrderModel[],
+    ) => {
+      const eventType =
+        orders.length > 1
+          ? events.MARKETPLACE_BULK_PURCHASE_INITIATED
+          : events.MARKETPLACE_PURCHASE_INITIATED;
 
-  const orders = useMemo(() => {
-    if (!collectionOrders || !tokenId) return [];
-
-    const candidates = new Set<string>();
-    candidates.add(tokenId);
-
-    try {
-      if (tokenId.startsWith("0x")) {
-        const numericId = BigInt(tokenId).toString();
-        candidates.add(numericId);
-      } else {
-        candidates.add(`0x${BigInt(tokenId).toString(16)}`);
-      }
-    } catch (error) {
-      candidates.add(BigInt(`0x${tokenId}`).toString());
-    }
-
-    for (const candidate of candidates) {
-      const tokenOrders = collectionOrders[candidate];
-      if (tokenOrders?.length) {
-        return tokenOrders;
-      }
-    }
-
-    return [];
-  }, [collectionOrders, tokenId]);
-
-  const handleBuyCallback = useCallback(async () => {
-    if (!isConnected) {
-      if (isConnectDisabled) {
-        return;
-      }
-      await onConnect();
-    }
-
-    const eventType = events.MARKETPLACE_PURCHASE_INITIATED;
-
-    const orderIds = orders.map((order) => order.id).join(",");
-    trackEvent(eventType, {
-      purchase_type: "single",
-      items_count: 1,
-      order_ids: orderIds.split(","),
-      collection_address: collectionAddress,
-      buyer_address: address,
-      item_token_ids: tokenId,
-    });
-
-    const controller = (connector as ControllerConnector)?.controller;
-    const username = await controller?.username();
-    if (!controller || !username) {
-      console.error("Connector not initialized");
-      trackEvent(events.MARKETPLACE_PURCHASE_FAILED, {
-        error_message: "Connector not initialized",
-        purchase_type: "single",
+      trackEvent(eventType, {
+        purchase_type: orders.length > 1 ? "bulk" : "single",
+        items_count: orders.length,
+        order_ids: orders.map((order) => order.id.toString()),
+        collection_address: collectionAddress,
+        buyer_address: address,
+        item_token_ids: tokenIds,
       });
-      return;
-    }
 
-    const entrypoints = await getEntrypoints(
-      provider.provider,
+      const path = pathBuilder({
+        viewType: "purchase",
+        collectionAddress,
+        tokenIds,
+        orders,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController, trackEvent, events],
+  );
+}
+
+export function useHandlePurchaseViewCallback(
+  presetParams?: ActionHandlerParams,
+): (
+  collectionAddress: string,
+  tokenIds: string[],
+  orders: OrderModel[],
+) => Promise<void> {
+  const { address } = useAccount();
+  const { trackEvent, events } = useAnalytics();
+
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
+
+  return useCallback(
+    async (
+      collectionAddress: string,
+      tokenIds: string[],
+      orders: OrderModel[],
+    ) => {
+      trackEvent(events.MARKETPLACE_PURCHASE_INITIATED, {
+        purchase_type: "single",
+        items_count: 1,
+        order_ids: [orders[0].id.toString()],
+        collection_address: collectionAddress,
+        buyer_address: address,
+        item_token_ids: [tokenIds[0]],
+      });
+
+      const path = pathBuilder({
+        viewType: "purchaseView",
+        collectionAddress,
+        tokenIds,
+        orders,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController, trackEvent, events],
+  );
+}
+
+export function useHandleListCallback(
+  presetParams?: ActionHandlerParams,
+): (collectionAddress: string, tokenIds: string[]) => Promise<void> {
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
+  return useCallback(
+    async (collectionAddress: string, tokenIds: string[]) => {
+      const path = pathBuilder({
+        viewType: "list",
+        collectionAddress,
+        tokenIds,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController],
+  );
+}
+
+export function useHandleListViewCallback(
+  presetParams?: ActionHandlerParams,
+): (collectionAddress: string, tokenIds: string[]) => Promise<void> {
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
+  return useCallback(
+    async (collectionAddress: string, tokenIds: string[]) => {
+      const path = pathBuilder({
+        viewType: "listView",
+        collectionAddress,
+        tokenIds,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController],
+  );
+}
+
+export function useHandleUnlistCallback(
+  presetParams?: ActionHandlerParams,
+): (collectionAddress: string, tokenIds: string[]) => Promise<void> {
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
+  return useCallback(
+    async (collectionAddress: string, tokenIds: string[]) => {
+      const path = pathBuilder({
+        // viewType: "unlist", // TODO: /unlist is not implemented in the controller
+        viewType: "unlistView",
+        collectionAddress,
+        tokenIds,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController],
+  );
+}
+
+export function useHandleUnlistViewCallback(
+  presetParams?: ActionHandlerParams,
+): (collectionAddress: string, tokenIds: string[]) => Promise<void> {
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
+  return useCallback(
+    async (collectionAddress: string, tokenIds: string[]) => {
+      const path = pathBuilder({
+        viewType: "unlistView",
+        collectionAddress,
+        tokenIds,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController],
+  );
+}
+
+export function useHandleSendCallback(
+  presetParams?: ActionHandlerParams,
+): (collectionAddress: string, tokenIds: string[]) => Promise<void> {
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
+  return useCallback(
+    async (collectionAddress: string, tokenIds: string[]) => {
+      const path = pathBuilder({
+        viewType: "send",
+        collectionAddress,
+        tokenIds,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController],
+  );
+}
+
+export function useHandleSendViewCallback(
+  presetParams?: ActionHandlerParams,
+): (collectionAddress: string, tokenIds: string[]) => Promise<void> {
+  const pathBuilder = useControllerPathBuilder(presetParams);
+  const openController = useOpenControllerAtPathCallback();
+  return useCallback(
+    async (collectionAddress: string, tokenIds: string[]) => {
+      const path = pathBuilder({
+        viewType: "sendView",
+        collectionAddress,
+        tokenIds,
+      });
+      return openController(path);
+    },
+    [pathBuilder, openController],
+  );
+}
+
+type ControllerViewType =
+  | "purchaseView"
+  | "listView"
+  | "unlistView"
+  | "sendView"
+  | "purchase"
+  | "list"
+  | "unlist"
+  | "send";
+
+type MakeControllerViewPathParams = {
+  viewType: ControllerViewType;
+  collectionAddress: string;
+  tokenIds: string[];
+  orders?: OrderModel[];
+};
+
+function useControllerPathBuilder(
+  presetParams?: ActionHandlerParams,
+): (params: MakeControllerViewPathParams) => string | undefined {
+  const { trackEvent, events } = useAnalytics();
+
+  const username = useUsername();
+
+  const collections = useTokenContracts();
+
+  const callback = useCallback(
+    ({
+      viewType,
       collectionAddress,
-    );
-    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-    const subpath = isERC1155 ? "collectible" : "collection";
+      tokenIds,
+      orders,
+    }: MakeControllerViewPathParams) => {
+      if (!username) return undefined;
+      if (!collectionAddress) return undefined;
+      if (tokenIds.length === 0) return undefined;
 
-    const project = DEFAULT_PROJECT;
-    const preset = DEFAULT_PRESET;
-    const options = [`ps=${project}`];
-    if (preset) {
-      options.push(`preset=${preset}`);
-    } else {
-      options.push("preset=cartridge");
-    }
+      const collection = collections.data?.find(
+        (collection) => collection.contract_address === collectionAddress,
+      );
+      const isERC1155 = collection
+        ? collection.contract_type === CollectionType.ERC1155
+        : undefined;
+      const subpath = isERC1155 ? "collectible" : "collection";
 
-    options.push(`address=${getChecksumAddress(owner)}`);
-    options.push(`tokenIds=${[addAddressPadding(tokenId)].join(",")}`);
-    options.push(`orders=${orderIds}`);
+      const options = [
+        // `ps=${presetParams?.project ?? DEFAULT_PROJECT}`, // breaks jokers of neon
+        `ps=${DEFAULT_PROJECT}`,
+        `preset=${presetParams?.preset || DEFAULT_PRESET || "cartridge"}`,
+      ];
 
-    const path = `account/${username}/inventory/${subpath}/${addAddressPadding(collectionAddress)}/token/${addAddressPadding(tokenId)}/purchase${options.length > 0 ? `?${options.join("&")}` : ""}`;
+      if (viewType.endsWith("View")) {
+        options.push(`${viewType}=true`);
 
-    controller.openProfileAt(path);
-  }, [
-    address,
-    connector,
-    events,
-    isConnected,
-    isConnectDisabled,
-    provider,
-    tokenId,
-    trackEvent,
-    collectionAddress,
-    orders,
-    owner,
-  ]);
+        if (viewType === "purchaseView") {
+          if (!orders?.length) {
+            trackEvent(events.MARKETPLACE_PURCHASE_FAILED, {
+              error_message: "Missing orders for purchase",
+              purchase_type: tokenIds.length > 1 ? "bulk" : "single",
+            });
+            return undefined;
+          }
+          options.push(`address=${orders[0].owner}`);
+        }
 
-  return handleBuyCallback;
+        const tokenId = addAddressPadding(tokenIds[0]);
+
+        return `account/${username}/inventory/${subpath}/${collectionAddress}/token/${tokenId}?${options.join("&")}`;
+      }
+
+      if (viewType === "purchase") {
+        if (!orders?.length) {
+          trackEvent(events.MARKETPLACE_PURCHASE_FAILED, {
+            error_message: "Missing orders for purchase",
+            purchase_type: tokenIds.length > 1 ? "bulk" : "single",
+          });
+          return undefined;
+        }
+        options.push(
+          `orders=${orders.map((order) => order.id.toString()).join(",")}`,
+        );
+      } else {
+        tokenIds.forEach((tokenId) => {
+          options.push(`tokenIds=${addAddressPadding(tokenId)}`);
+        });
+      }
+
+      return `account/${username}/inventory/${subpath}/${collectionAddress}/${viewType}?${options.join("&")}`;
+    },
+    [username, collections?.status, trackEvent, events, presetParams],
+  );
+
+  return callback;
 }
 
-export function useHandleListCallback(): (
-  collectionAddress: string,
-  tokenIds: string[],
+export function useOpenControllerAtPathCallback(): (
+  path: string | undefined,
 ) => Promise<void> {
   const { connector } = useConnect();
   const { isConnected } = useAccount();
   const { onConnect, isConnectDisabled } = useConnectionViewModel();
-  const { provider } = useArcade();
 
-  const handleListCallback = useCallback(
-    async (collectionAddress: string, tokenIds: string[]) => {
+  const callback = useCallback(
+    async (path: string | undefined) => {
+      if (!path) return;
+
       if (!isConnected) {
         if (isConnectDisabled) {
           return;
@@ -158,169 +325,15 @@ export function useHandleListCallback(): (
       }
 
       const controller = (connector as ControllerConnector)?.controller;
-      const username = await controller?.username();
-      if (!controller || !username) {
+      if (!controller) {
         console.error("Connector not initialized");
         return;
       }
 
-      const entrypoints = await getEntrypoints(
-        provider.provider,
-        collectionAddress,
-      );
-      const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-      const subpath = isERC1155 ? "collectible" : "collection";
-
-      const project = DEFAULT_PROJECT;
-      const preset = DEFAULT_PRESET;
-      const options = [`ps=${project}`];
-      if (preset) {
-        options.push(`preset=${preset}`);
-      } else {
-        options.push("preset=cartridge");
-      }
-
-      let path: string;
-
-      if (tokenIds.length > 1) {
-        tokenIds.forEach((tokenId) => {
-          options.push(`tokenIds=${addAddressPadding(tokenId)}`);
-        });
-        path = `account/${username}/inventory/${subpath}/${collectionAddress}/list?${options.join("&")}`;
-      } else {
-        const [tokenId] = tokenIds;
-        options.push("listView=true");
-        path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-      }
-
       controller.openProfileAt(path);
     },
-    [connector, isConnected, isConnectDisabled, provider],
+    [connector, isConnected, isConnectDisabled],
   );
 
-  return handleListCallback;
-}
-
-export function useHandleUnlistCallback(): (
-  collectionAddress: string,
-  tokenIds: string[],
-) => Promise<void> {
-  const { connector } = useConnect();
-  const { isConnected } = useAccount();
-  const { onConnect, isConnectDisabled } = useConnectionViewModel();
-  const { provider } = useArcade();
-
-  const handleUnlistCallback = useCallback(
-    async (collectionAddress: string, tokenIds: string[]) => {
-      if (!isConnected) {
-        if (isConnectDisabled) {
-          return;
-        }
-        await onConnect();
-      }
-
-      const controller = (connector as ControllerConnector)?.controller;
-      const username = await controller?.username();
-      if (!controller || !username) {
-        console.error("Connector not initialized");
-        return;
-      }
-
-      const entrypoints = await getEntrypoints(
-        provider.provider,
-        collectionAddress,
-      );
-      const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-      const subpath = isERC1155 ? "collectible" : "collection";
-
-      const project = DEFAULT_PROJECT;
-      const preset = DEFAULT_PRESET;
-      const options = [`ps=${project}`];
-      if (preset) {
-        options.push(`preset=${preset}`);
-      } else {
-        options.push("preset=cartridge");
-      }
-
-      let path: string;
-
-      if (tokenIds.length > 1) {
-        tokenIds.forEach((tokenId) => {
-          options.push(`tokenIds=${addAddressPadding(tokenId)}`);
-        });
-        path = `account/${username}/inventory/${subpath}/${collectionAddress}/unlist?${options.join("&")}`;
-      } else {
-        const [tokenId] = tokenIds;
-        options.push("unlistView=true");
-        path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-      }
-
-      controller.openProfileAt(path);
-    },
-    [connector, isConnected, isConnectDisabled, provider],
-  );
-
-  return handleUnlistCallback;
-}
-
-export function useHandleSendCallback(): (
-  collectionAddress: string,
-  tokenIds: string[],
-) => Promise<void> {
-  const { connector } = useConnect();
-  const { isConnected } = useAccount();
-  const { onConnect, isConnectDisabled } = useConnectionViewModel();
-  const { provider } = useArcade();
-
-  const handleSendCallback = useCallback(
-    async (collectionAddress: string, tokenIds: string[]) => {
-      if (!isConnected) {
-        if (isConnectDisabled) {
-          return;
-        }
-        await onConnect();
-      }
-
-      const controller = (connector as ControllerConnector)?.controller;
-      const username = await controller?.username();
-      if (!controller || !username) {
-        console.error("Connector not initialized");
-        return;
-      }
-
-      const entrypoints = await getEntrypoints(
-        provider.provider,
-        collectionAddress,
-      );
-      const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-      const subpath = isERC1155 ? "collectible" : "collection";
-
-      const project = DEFAULT_PROJECT;
-      const preset = DEFAULT_PRESET;
-      const options = [`ps=${project}`];
-      if (preset) {
-        options.push(`preset=${preset}`);
-      } else {
-        options.push("preset=cartridge");
-      }
-
-      let path: string;
-
-      if (tokenIds.length > 1) {
-        tokenIds.forEach((tokenId) => {
-          options.push(`tokenIds=${addAddressPadding(tokenId)}`);
-        });
-        path = `account/${username}/inventory/${subpath}/${collectionAddress}/send?${options.join("&")}`;
-      } else {
-        const [tokenId] = tokenIds;
-        options.push("sendView=true");
-        path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-      }
-
-      controller.openProfileAt(path);
-    },
-    [connector, isConnected, isConnectDisabled, provider],
-  );
-
-  return handleSendCallback;
+  return callback;
 }

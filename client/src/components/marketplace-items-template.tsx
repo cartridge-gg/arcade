@@ -4,11 +4,11 @@ import { cn } from "@cartridge/ui/utils";
 import { useProject } from "@/hooks/project";
 import { useDevice } from "@/hooks/device";
 import { UserCard } from "./user/user-card";
-import arcade from "@/assets/arcade-logo.png";
 import { Socials } from "@cartridge/arcade";
 import { NavigationContainer } from "@/features/navigation";
 import { CollectionHeader } from "./ui/marketplace/items/CollectionHeader";
 import { BaseTemplate } from "./base-template";
+import arcade from "@/assets/arcade-logo.png";
 
 interface MarketplaceItemsTemplateProps {
   children: ReactNode;
@@ -17,7 +17,7 @@ interface MarketplaceItemsTemplateProps {
 export function MarketplaceItemsTemplate({
   children,
 }: MarketplaceItemsTemplateProps) {
-  const { player, game, edition, collection, tab } = useProject();
+  const { player, game, edition, collection } = useProject();
   const { isMobile } = useDevice();
 
   const socials = useMemo(() => {
@@ -43,17 +43,15 @@ export function MarketplaceItemsTemplate({
           "bg-background-125 shadow-[0px_0px_8px_0px_rgba(15,20,16,_0.50)]",
       )}
     >
-      {tab !== "inventoryitems" && (
-        <CollectionHeader
-          isDashboard={isDashboard}
-          isMobile={isMobile}
-          arcade={arcade}
-          edition={edition}
-          game={game}
-          socials={socials}
-          collectionAddress={collection ?? "0x0"}
-        />
-      )}
+      <CollectionHeader
+        isDashboard={isDashboard}
+        isMobile={isMobile}
+        arcade={arcade}
+        edition={edition}
+        game={game}
+        socials={socials}
+        collectionAddress={collection ?? "0x0"}
+      />
       <NavigationContainer />
       {children}
     </BaseTemplate>

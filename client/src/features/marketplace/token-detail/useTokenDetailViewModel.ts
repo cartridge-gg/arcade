@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useRouterState } from "@tanstack/react-router";
 import type { Token } from "@/types/torii";
@@ -11,12 +11,15 @@ import { useAccountByAddress, useMarketplaceTokens } from "@/effect";
 import { collectionOrdersAtom } from "@/effect/atoms";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
+import { VoyagerUrl } from "@cartridge/ui/utils";
+import { getChainId } from "@/lib/helpers";
 import {
-  useHandleBuyCallback,
+  useHandlePurchaseCallback,
   useHandleListCallback,
   useHandleSendCallback,
   useHandleUnlistCallback,
 } from "@/hooks/marketplace-actions-handlers";
+import { useProject } from "@/hooks/project";
 
 interface UseTokenDetailViewModelArgs {
   collectionAddress: string;
@@ -27,6 +30,7 @@ interface TokenDetailViewModel {
   token: Token | undefined;
   collection: ReturnType<typeof useMarketplaceTokens>["collection"];
   orders: OrderModel[];
+  lowestOrder: OrderModel | null;
   isLoading: boolean;
   isOwner: boolean;
   isListed: boolean;
@@ -34,7 +38,8 @@ interface TokenDetailViewModel {
   controller: { address: string; username: string } | null;
   collectionHref: string;
   ownerHref: string;
-  handleBuy: () => Promise<void>;
+  contractHref: string | undefined;
+  handlePurchase: () => Promise<void>;
   handleList: () => Promise<void>;
   handleUnlist: () => Promise<void>;
   handleSend: () => Promise<void>;
@@ -45,7 +50,8 @@ export function useTokenDetailViewModel({
   tokenId,
 }: UseTokenDetailViewModelArgs): TokenDetailViewModel {
   const { address, isConnected } = useAccount();
-  const { games, editions } = useArcade();
+  const { games, editions, provider } = useArcade();
+  const { edition } = useProject();
   const { location } = useRouterState();
 
   const {
@@ -117,11 +123,12 @@ export function useTokenDetailViewModel({
     return [];
   }, [collectionOrders, tokenId]);
 
-  const isListed = useMemo(() => {
-    return (
-      orders.length > 0 && orders[0].expiration > new Date().getTime() / 1000
-    );
-  }, [orders]);
+  const lowestOrder = useMemo(
+    () => (orders.length > 0 ? orders[0] : null),
+    [orders],
+  );
+
+  const isListed = !!lowestOrder;
 
   const isLoading = status === "loading" || status === "idle";
 
@@ -146,17 +153,49 @@ export function useTokenDetailViewModel({
     [navManager, owner],
   );
 
-  const tokenIds = useMemo(() => [tokenId], [tokenId]);
+  const contractHref = useMemo(() => {
+    const chainId = getChainId(provider.provider.channel.nodeUrl);
+    return chainId
+      ? VoyagerUrl(chainId).contract(collectionAddress)
+      : undefined;
+  }, [navManager, collectionAddress]);
 
-  const handleBuyCallback = useHandleBuyCallback(collectionAddress, tokenId);
-  const handleListCallback = useHandleListCallback();
-  const handleUnlistCallback = useHandleUnlistCallback();
-  const handleSendCallback = useHandleSendCallback();
+  const handlerParams = useMemo(
+    () => ({
+      project: edition?.config.project,
+      preset: edition?.properties.preset,
+    }),
+    [edition?.id],
+  );
+
+  const handlePurchaseCallback = useHandlePurchaseCallback(handlerParams);
+  const handleListCallback = useHandleListCallback(handlerParams);
+  const handleUnlistCallback = useHandleUnlistCallback(handlerParams);
+  const handleSendCallback = useHandleSendCallback(handlerParams);
+
+  const handlePurchase = useCallback(async () => {
+    if (lowestOrder) {
+      handlePurchaseCallback(collectionAddress, [tokenId], [lowestOrder]);
+    }
+  }, [handlePurchaseCallback, collectionAddress, tokenId, lowestOrder]);
+
+  const handleList = useCallback(async () => {
+    handleListCallback(collectionAddress, [tokenId]);
+  }, [handleListCallback, collectionAddress, tokenId]);
+
+  const handleUnlist = useCallback(async () => {
+    handleUnlistCallback(collectionAddress, [tokenId]);
+  }, [handleUnlistCallback, collectionAddress, tokenId]);
+
+  const handleSend = useCallback(async () => {
+    handleSendCallback(collectionAddress, [tokenId]);
+  }, [handleSendCallback, collectionAddress, tokenId]);
 
   return {
     token,
     collection,
     orders,
+    lowestOrder,
     isLoading,
     isOwner,
     isListed,
@@ -164,9 +203,10 @@ export function useTokenDetailViewModel({
     controller: controllerName,
     collectionHref,
     ownerHref,
-    handleBuy: handleBuyCallback,
-    handleList: () => handleListCallback(collectionAddress, tokenIds),
-    handleUnlist: () => handleUnlistCallback(collectionAddress, tokenIds),
-    handleSend: () => handleSendCallback(collectionAddress, tokenIds),
+    contractHref,
+    handlePurchase,
+    handleList,
+    handleUnlist,
+    handleSend,
   };
 }

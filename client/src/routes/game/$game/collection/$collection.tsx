@@ -6,4 +6,7 @@ export const Route = createFileRoute("/game/$game/collection/$collection")({
     filter: search.filter as string | undefined,
   }),
   component: MarketplaceItemsPage,
+  staticData: {
+    hasOwnTemplate: true,
+  },
 });

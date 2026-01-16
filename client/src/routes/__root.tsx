@@ -1,9 +1,5 @@
-import { useEffect } from "react";
-import {
-  Outlet,
-  createRootRoute,
-  useRouterState,
-} from "@tanstack/react-router";
+import { useEffect, useMemo } from "react";
+import { Outlet, createRootRoute, useMatches } from "@tanstack/react-router";
 import { Template } from "@/components/template";
 import { SonnerToaster } from "@cartridge/ui";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -12,17 +8,15 @@ import { useArcade } from "@/hooks/arcade";
 import { useAccount } from "@/effect";
 
 function RootComponent() {
-  const router = useRouterState();
+  const matches = useMatches();
+  const hasOwnTemplate = useMemo(
+    () => matches.some((m) => m.staticData?.hasOwnTemplate === true),
+    [matches],
+  );
+
   const { setPlayer } = useArcade();
-  const pathname = router.location.pathname;
-
-  const segments = pathname.split("/").filter(Boolean);
-  const collectionIndex = segments.findIndex((s) => s === "collection");
-
-  const hasOwnTemplate = collectionIndex >= 0;
 
   const { manager } = useNavigationContext();
-
   const { data } = useAccount(manager.getParams().player);
   useEffect(() => {
     if (data) {

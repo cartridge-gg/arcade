@@ -19,17 +19,17 @@ catalogs:
       specifier: github:cartridge-gg/ui#1d42129
       version: 0.7.14-alpha.2
     '@dojoengine/core':
-      specifier: 1.8.7
-      version: 1.8.7
+      specifier: 1.8.8
+      version: 1.8.8
     '@dojoengine/grpc':
       specifier: 1.8.7
       version: 1.8.7
     '@dojoengine/react':
-      specifier: 1.8.9
-      version: 1.8.9
+      specifier: 1.8.10
+      version: 1.8.10
     '@dojoengine/sdk':
-      specifier: 1.8.12
-      version: 1.8.12
+      specifier: 1.8.13
+      version: 1.8.13
     '@dojoengine/torii-client':
       specifier: 1.8.2
       version: 1.8.2
@@ -121,10 +121,10 @@ importers:
         version: 1.8.7(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
       '@dojoengine/react':
         specifier: 'catalog:'
-        version: 1.8.9(c998c8033210fb011698e80132fb45f4)
+        version: 1.8.10(c998c8033210fb011698e80132fb45f4)
       '@dojoengine/sdk':
         specifier: 'catalog:'
-        version: 1.8.12(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
+        version: 1.8.13(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
       '@dojoengine/torii-wasm':
         specifier: 'catalog:'
         version: 1.8.2
@@ -361,13 +361,13 @@ importers:
     dependencies:
       '@dojoengine/core':
         specifier: 'catalog:'
-        version: 1.8.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+        version: 1.8.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@dojoengine/grpc':
         specifier: 'catalog:'
         version: 1.8.7(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
       '@dojoengine/sdk':
         specifier: 'catalog:'
-        version: 1.8.12(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
+        version: 1.8.13(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
       '@dojoengine/torii-client':
         specifier: 'catalog:'
         version: 1.8.2
@@ -439,10 +439,10 @@ importers:
     dependencies:
       '@dojoengine/core':
         specifier: 'catalog:'
-        version: 1.8.7(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
+        version: 1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@dojoengine/sdk':
         specifier: 'catalog:'
-        version: 1.8.12(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
+        version: 1.8.13(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
       starknet:
         specifier: 'catalog:'
         version: 8.5.4
@@ -1243,15 +1243,15 @@ packages:
     resolution: {integrity: sha512-Vd/9EVDiu6PPJt9yAh6roZP6El1xHrdvIVGjyBsHR0RYwNHgL7FJPyIIW4fANJNG6FtyZfvlRPpFI4ZM/lubvw==}
     engines: {node: '>=18'}
 
-  '@dojoengine/core@1.8.7':
-    resolution: {integrity: sha512-qC9xl7a10mFs3Kj2ko+nZPHnzSIkEoSRATUowOp3aQA36BMj8iOqae2gIDYtquzYVJQ3Ieb2Xs1JPI26rzkFSg==}
+  '@dojoengine/core@1.8.8':
+    resolution: {integrity: sha512-q0eqP/DXKfpXzV68nCk84yFM2wNawLiuM1NLiq1+VvhqSFuLBk/iDaAOWSBf634RH5/9z0Lrd8S/ZQbrdVEd6w==}
     hasBin: true
 
   '@dojoengine/grpc@1.8.7':
     resolution: {integrity: sha512-2oiEQf6ADRfE0iBjEKBAyute0CblNKiwmSIXfLpiRI1TFrIVYjSVzJBcTt80c47nTCXabkdGDTVqMWGxFyMetA==}
 
-  '@dojoengine/react@1.8.9':
-    resolution: {integrity: sha512-LIiIj1goHFGR4oLweZHsbm1mbcOhWAa6skgQtr19o280iE7YF8pvE4uNavEnEprI+cs4bqc7bQL+l8VbmCRAXw==}
+  '@dojoengine/react@1.8.10':
+    resolution: {integrity: sha512-NuVpOqmKPLdoQXA+sP/uwu7XHRWZNB7saY6JEAlAeLiFQev/d2egj/hDTUxw/5XX1TfNt+wSstX9OgpIA98fbg==}
     peerDependencies:
       '@effect-atom/atom': ^0.1.22
       '@effect-atom/atom-react': ^0.1.17
@@ -1267,8 +1267,8 @@ packages:
   '@dojoengine/recs@2.0.13':
     resolution: {integrity: sha512-Cgz4Unlnk2FSDoFTYKrJexX/KiSYPMFMxftxQkC+9LUKS5yNGkgFQM7xu4/L1HvpDAenL7NjUmH6ynRAS7Iifw==}
 
-  '@dojoengine/sdk@1.8.12':
-    resolution: {integrity: sha512-erXewlZM4VCystsyJ7b8MJpIzWrwkgRwNy2s6bKRizmhcZdlGsPobHOD7andONw3DEFVaThIP+a1RgrPjkosHg==}
+  '@dojoengine/sdk@1.8.13':
+    resolution: {integrity: sha512-ihq7FpwyOcU5k52OGT2VcLYxWjZfzMcxUwDI3eGcu33uOEJ7nc++livic0dC+WjoHxXWeHf3HjfkvHkE04ZMSw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@tanstack/react-query': ^5.62.16
@@ -8514,7 +8514,7 @@ snapshots:
   '@csstools/css-tokenizer@3.0.4':
     optional: true
 
-  '@dojoengine/core@1.8.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
+  '@dojoengine/core@1.8.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       starknet: 8.5.4
@@ -8524,7 +8524,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@dojoengine/core@1.8.7(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)':
+  '@dojoengine/core@1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       starknet: 8.5.4
@@ -8582,12 +8582,12 @@ snapshots:
       - '@opentelemetry/semantic-conventions'
       - supports-color
 
-  '@dojoengine/react@1.8.9(c998c8033210fb011698e80132fb45f4)':
+  '@dojoengine/react@1.8.10(c998c8033210fb011698e80132fb45f4)':
     dependencies:
-      '@dojoengine/core': 1.8.7(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
+      '@dojoengine/core': 1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@dojoengine/grpc': 1.8.7(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
-      '@dojoengine/sdk': 1.8.12(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@dojoengine/sdk': 1.8.13(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
       '@dojoengine/state': 1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
       '@dojoengine/torii-client': 1.8.2
       '@dojoengine/torii-wasm': 1.8.2
@@ -8654,9 +8654,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.8.12(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
+  '@dojoengine/sdk@1.8.13(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
     dependencies:
-      '@dojoengine/core': 1.8.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@dojoengine/core': 1.8.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@dojoengine/grpc': 1.8.7(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
       '@dojoengine/state': 1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
       '@dojoengine/torii-client': 1.8.2
@@ -8691,9 +8691,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.8.12(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@dojoengine/sdk@1.8.13(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
-      '@dojoengine/core': 1.8.7(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
+      '@dojoengine/core': 1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@dojoengine/grpc': 1.8.7(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
       '@dojoengine/state': 1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
       '@dojoengine/torii-client': 1.8.2
@@ -8728,9 +8728,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.8.12(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
+  '@dojoengine/sdk@1.8.13(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
     dependencies:
-      '@dojoengine/core': 1.8.7(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
+      '@dojoengine/core': 1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@dojoengine/grpc': 1.8.7(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
       '@dojoengine/state': 1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
       '@dojoengine/torii-client': 1.8.2

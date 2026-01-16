@@ -6,4 +6,7 @@ export const Route = createFileRoute("/inventory/collection/$collection")({
     filter: search.filter as string | undefined,
   }),
   component: InventoryItemsPage,
+  staticData: {
+    hasOwnTemplate: true,
+  },
 });

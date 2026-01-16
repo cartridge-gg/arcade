@@ -12,7 +12,6 @@ import {
   Empty,
   InventoryItemCard,
   MarketplaceSearch,
-  Separator,
   Skeleton,
   cn,
 } from "@cartridge/ui";
@@ -46,7 +45,6 @@ export interface MarketplaceItemCardProps {
   backgroundColor?: string;
   onToggleSelectByIndex: (index: number) => void;
   onInspectByIndex: (index: number) => void;
-  onConnect: () => Promise<void> | void;
 }
 
 export interface MarketplaceItemsRow {
@@ -72,7 +70,7 @@ interface ItemsViewProps {
   onClearFilters: () => void;
   onResetSelection: () => void;
   isConnected: boolean;
-  onBuySelection: (() => void) | undefined;
+  onPurchaseSelection: (() => void) | undefined;
   onListSelection: (() => void) | undefined;
   onUnlistSelection: (() => void) | undefined;
   onSendSelection: (() => void) | undefined;
@@ -100,7 +98,7 @@ export const ItemsView = ({
   onClearFilters,
   onResetSelection,
   isConnected,
-  onBuySelection,
+  onPurchaseSelection,
   onListSelection,
   onUnlistSelection,
   onSendSelection,
@@ -109,7 +107,7 @@ export const ItemsView = ({
   listedTokensCount,
 }: ItemsViewProps) => {
   return (
-    <div className="flex flex-col gap-4 h-full w-full overflow-hidden order-3">
+    <div className="relative flex flex-col gap-4 h-full w-full overflow-hidden order-3">
       <div className="min-h-10 w-full flex justify-between items-center relative">
         <div className="flex items-center gap-4">
           <SelectionSummary
@@ -176,7 +174,7 @@ export const ItemsView = ({
       <SelectionFooter
         isVisible={isConnected && selectionCount > 0}
         selectionCount={selectionCount}
-        onBuySelection={onBuySelection}
+        onPurchaseSelection={onPurchaseSelection}
         onListSelection={onListSelection}
         onUnlistSelection={onUnlistSelection}
         onSendSelection={onSendSelection}
@@ -308,14 +306,14 @@ function SelectedCount({
 const SelectionFooter = ({
   isVisible,
   selectionCount,
-  onBuySelection,
+  onPurchaseSelection,
   onListSelection,
   onUnlistSelection,
   onSendSelection,
 }: {
   isVisible: boolean;
   selectionCount: number;
-  onBuySelection?: () => void;
+  onPurchaseSelection?: () => void;
   onListSelection?: () => void;
   onUnlistSelection?: () => void;
   onSendSelection?: () => void;
@@ -323,16 +321,15 @@ const SelectionFooter = ({
   return (
     <div
       className={cn(
-        "overflow-hidden transition-all duration-500 ease-out",
-        isVisible ? "h-[50px] opacity-100" : "max-h-0 opacity-0",
+        "absolute bottom-[0px] transition-all duration-500 ease-out ease-in",
+        isVisible ? "h-[50px] opacity-100 sticky bottom-0" : "h-0 opacity-0",
       )}
     >
-      <Separator className="w-full bg-background-200" />
       <div className="w-full flex justify-end items-center gap-x-2">
-        {onBuySelection && (
+        {onPurchaseSelection && (
           <Button
-            variant="primary"
-            onClick={onBuySelection}
+            variant="secondary"
+            onClick={onPurchaseSelection}
             disabled={selectionCount === 0}
           >
             {`Buy (${selectionCount})`}
@@ -340,7 +337,7 @@ const SelectionFooter = ({
         )}
         {onListSelection && (
           <Button
-            variant="primary"
+            variant="secondary"
             onClick={onListSelection}
             disabled={selectionCount === 0}
           >
@@ -349,7 +346,8 @@ const SelectionFooter = ({
         )}
         {onUnlistSelection && (
           <Button
-            variant="primary"
+            variant="secondary"
+            className="text-destructive-100"
             onClick={onUnlistSelection}
             disabled={selectionCount === 0}
           >
@@ -358,7 +356,7 @@ const SelectionFooter = ({
         )}
         {onSendSelection && (
           <Button
-            variant="primary"
+            variant="secondary"
             onClick={onSendSelection}
             disabled={selectionCount === 0}
           >
@@ -379,6 +377,7 @@ const MarketplaceItemCard = memo(
     canOpen,
     isConnected,
     onToggleSelectByIndex,
+    onInspectByIndex,
     image,
     placeholderImage,
     title,
@@ -430,6 +429,12 @@ const MarketplaceItemCard = memo(
       }
     };
 
+    const handleCardClick = () => {
+      if (canOpen) {
+        onInspectByIndex(index);
+      }
+    };
+
     const handleSelect =
       isConnected && selectable
         ? () => onToggleSelectByIndex(index)
@@ -447,7 +452,7 @@ const MarketplaceItemCard = memo(
               selectable={selectable}
               selected={selected}
               onSelect={handleSelect}
-              onClick={canOpen || selectable ? () => {} : undefined}
+              onClick={canOpen || selectable ? handleCardClick : undefined}
             />
           </Link>
         )}
@@ -457,6 +462,7 @@ const MarketplaceItemCard = memo(
               title={title}
               images={[displayImage]}
               listingCount={listingCount}
+              onClick={handleCardClick}
               className={
                 selectable || canOpen
                   ? "cursor-pointer"
