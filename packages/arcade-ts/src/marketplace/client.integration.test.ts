@@ -130,6 +130,18 @@ describe.skipIf(!runIntegration)("marketplace client integration", () => {
         expect(order.category.value).toBe(CategoryType.Sell);
       });
     }, 30000);
+
+    it("fetches orderids", async () => {
+      const orderIds = [2342, 1306];
+      const orders = await client.getCollectionOrders({
+        collection: TEST_COLLECTION,
+        orderIds,
+      });
+      expect(Array.isArray(orders)).toBe(true);
+
+      const ids = orders.map((o) => o.id);
+      expect(ids).toEqual(orderIds);
+    });
   });
 
   describe("listCollectionListings", () => {

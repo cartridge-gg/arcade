@@ -3,6 +3,7 @@ import {
   ClauseBuilder,
   KeysClause,
   MemberClause,
+  OrComposeClause,
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
 import type { constants } from "starknet";
@@ -197,14 +198,42 @@ export async function createMarketplaceClient(
   ): Promise<OrderModel[]> => {
     const checksumCollection = getChecksumAddress(options.collection);
     const tokenId = normalizeTokenIdForQuery(options.tokenId);
+    const orderIds = options.orderIds ?? [];
 
-    const builders = [
-      KeysClause(
+    let baseClause:
+      | ReturnType<typeof KeysClause>
+      | ReturnType<typeof OrComposeClause>;
+
+    if (orderIds.length > 0) {
+      const orderIdClauses = orderIds.map((id) =>
+        KeysClause(
+          [ArcadeModelsMapping.Order],
+          [
+            id.toString(),
+            addAddressPadding(checksumCollection),
+            tokenId,
+            undefined,
+          ],
+          "FixedLen",
+        ),
+      );
+      baseClause =
+        orderIdClauses.length === 1
+          ? orderIdClauses[0]
+          : OrComposeClause(orderIdClauses);
+    } else {
+      baseClause = KeysClause(
         [ArcadeModelsMapping.Order],
         [undefined, addAddressPadding(checksumCollection), tokenId, undefined],
         "FixedLen",
-      ),
-    ];
+      );
+    }
+
+    const builders: Array<
+      | ReturnType<typeof KeysClause>
+      | ReturnType<typeof MemberClause>
+      | ReturnType<typeof OrComposeClause>
+    > = [baseClause];
 
     const status =
       options.status != null ? statusMap[options.status] : undefined;

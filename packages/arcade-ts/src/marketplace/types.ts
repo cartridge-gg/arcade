@@ -82,6 +82,7 @@ export interface CollectionOrdersOptions {
   status?: OrderModel["status"]["value"];
   category?: OrderModel["category"]["value"];
   limit?: number;
+  orderIds?: number[];
 }
 
 export interface CollectionListingsOptions {
