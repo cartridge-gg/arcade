@@ -28,7 +28,6 @@ export function Template({ children }: TemplateProps) {
     <BaseTemplate
       outerClassName="overflow-y-scroll"
       contentClassName="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden overflow-y-scroll"
-      beforeLayout={<ViewingAsPlayerBannerInformation />}
       sidebarContent={
         <>
           {!isMobile && <UserCard />}
@@ -39,6 +38,7 @@ export function Template({ children }: TemplateProps) {
       }
       headerContent={
         <>
+          <ViewingAsPlayerBannerInformation />
           <GameHeader
             isDashboard={isDashboard}
             isMobile={isMobile}
