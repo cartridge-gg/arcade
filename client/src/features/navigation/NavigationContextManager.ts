@@ -323,6 +323,35 @@ export class NavigationContextManager {
     if (this.params.player && this.params.tab) {
       return joinPaths("player", this.params.player, this.params.tab);
     }
+
+    // Preserve current tab when returning to general context if available
+    if (this.params.tab) {
+      const generalTabs = this.getTabConfigsForContext("general");
+      const currentTab = this.params.tab;
+
+      // If current tab is available in general context, keep it
+      if (generalTabs.includes(currentTab)) {
+        // Check if inventory tab is visible (requires login in general context)
+        if (currentTab === "inventory" && !this.isLoggedIn) {
+          return "/";
+        }
+
+        // Check if predict tab is visible (only in dev mode)
+        const isDev = process.env.NODE_ENV === "development";
+        if (currentTab === "predict" && !isDev) {
+          return "/";
+        }
+
+        // "about" is the default tab for general context
+        const generalDefaultTab = "about";
+        // Don't append the tab if it's the default tab for general context
+        if (currentTab === generalDefaultTab) {
+          return "/";
+        }
+        return joinPaths(currentTab);
+      }
+    }
+
     return "/";
   }
 }

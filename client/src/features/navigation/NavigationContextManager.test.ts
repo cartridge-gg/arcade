@@ -560,4 +560,116 @@ describe("NavigationContextManager", () => {
       expect(inventoryTab?.href).toBe("/game/1/edition/2/inventory");
     });
   });
+
+  describe("removeGameContext", () => {
+    it("preserves tab when closing game context if tab is available in general context", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/marketplace",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/marketplace");
+    });
+
+    it("preserves tab when closing edition context if tab is available in general context", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/edition/2/leaderboard",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/leaderboard");
+    });
+
+    it("returns root when closing to about tab (default for general)", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/edition/2/about",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/");
+    });
+
+    it("returns root when closing from about tab (implicit)", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/edition/2",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/");
+    });
+
+    it("preserves inventory tab when logged in", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/inventory",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: true,
+      });
+
+      expect(manager.removeGameContext()).toBe("/inventory");
+    });
+
+    it("returns root when closing inventory tab and not logged in", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/inventory",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/");
+    });
+
+    it("preserves player tab when in player context within game", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/player/0x123/inventory",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/player/0x123/inventory");
+    });
+
+    it("preserves player achievements tab when in player context within game", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/player/0x123/achievements",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/player/0x123/achievements");
+    });
+
+    it("returns root when closing from game-specific tab", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/activity",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/");
+    });
+
+    it("returns root when closing from items tab (not available in general)", () => {
+      const manager = new NavigationContextManager({
+        pathname: "/game/1/collection/0x123/items",
+        games: mockGames,
+        editions: mockEditions,
+        isLoggedIn: false,
+      });
+
+      expect(manager.removeGameContext()).toBe("/");
+    });
+  });
 });
