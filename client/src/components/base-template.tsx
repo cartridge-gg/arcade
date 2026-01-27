@@ -83,7 +83,7 @@ export function BaseTemplate({
               className={cn(
                 "fixed lg:relative h-full w-full flex flex-col px-0 lg:pb-0",
                 "transition-all duration-300 ease-in-out max-w-[1320px]",
-                "pb-0",
+                "pb-[79px] lg:pb-0",
                 isOpen
                   ? "translate-x-[min(calc(100vw-64px),360px)]"
                   : "translate-x-0",
