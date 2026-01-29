@@ -52,8 +52,8 @@ export const GamesView = React.memo(
         className={cn(
           "flex flex-col gap-px bg-background-200 overflow-clip",
           "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
-          "lg:border lg:border-background-200 lg:rounded-xl",
-          isMobile && "fixed z-50",
+          "lg:border lg:border-background-200 lg:rounded-xl border-r border-spacer-100",
+          isMobile && "fixed z-50 left-0",
           sidebar.isOpen
             ? "translate-x-0"
             : "-translate-x-full lg:translate-x-0",

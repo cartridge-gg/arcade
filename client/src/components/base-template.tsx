@@ -69,14 +69,12 @@ export function BaseTemplate({
             >
               <Link
                 to="/"
-                className="lg:hidden p-4 bg-background-100 border-r border-spacer-100 -mb-px border-spacer-100 flex items-center justify-start gap-2 text-primary w-auto h-[66px]"
+                className="lg:hidden p-4 bg-background-100 border-r border-spacer-100 -mb-px flex items-center justify-start gap-2 text-primary w-auto h-[66px]"
               >
                 <ArcadeIcon className="h-5" />
                 <ArcadeIconText className="h-5" />
               </Link>
-              <div className="border border-r border-spacer-100 border-t-background-200 rounded-none">
-                {sidebarContent}
-              </div>
+              {sidebarContent}
             </div>
 
             <div
