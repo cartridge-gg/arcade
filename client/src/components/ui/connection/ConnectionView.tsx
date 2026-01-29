@@ -50,7 +50,7 @@ export const ConnectionView = ({
         <button
           type="button"
           onClick={onDisconnect}
-          className="p-2 rounded bg-background-100 hover:bg-background-150 border border-background-200"
+          className="p-2 rounded bg-background-100 hover:bg-background-150 outline outline-1 outline-background-200"
         >
           <SignOutIcon size="default" />
         </button>
