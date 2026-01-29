@@ -10,7 +10,7 @@ export interface ArcadeHeaderProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const ArcadeHeader = memo(
-  ({ children, onClick, onLogoClick, ...props }: ArcadeHeaderProps) => {
+  ({ children, onLogoClick, ...props }: ArcadeHeaderProps) => {
     const { isMobile } = useDevice();
 
     return (
@@ -26,19 +26,19 @@ export const ArcadeHeader = memo(
             <SidebarToggle />
           </div>
         ) : (
-          <Link to="/" onClick={onLogoClick}>
+          <Link to="/" onClick={onLogoClick} className="px-6 py-7">
             <div
               className={cn(
                 "flex items-center justify-center gap-2 text-primary w-auto",
               )}
             >
-              <ArcadeIcon className="h-5" />
-              <ArcadeIconText className="h-5" />
+              <ArcadeIcon className="h-8" />
+              <ArcadeIconText className="h-6" />
             </div>
           </Link>
         )}
 
-        <div className="grow flex justify-end items-center gap-2 select-none">
+        <div className="grow flex justify-end items-center gap-2 select-none lg:p-6">
           {children}
         </div>
       </div>
