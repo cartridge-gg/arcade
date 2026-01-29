@@ -38,7 +38,7 @@ export const ArcadeHeader = memo(
           </Link>
         )}
 
-        <div className="grow flex justify-end items-center gap-2 select-none p-6">
+        <div className="grow flex justify-end items-center gap-2 select-none lg:p-6">
           {children}
         </div>
       </div>
