@@ -69,7 +69,7 @@ export function BaseTemplate({
             >
               <Link
                 to="/"
-                className="lg:hidden p-4 bg-background-100 border-r border-spacer-100 -mb-px flex items-center justify-start gap-2 text-primary w-auto h-[66px]"
+                className="lg:hidden p-4 bg-background-100 border-r border-r-spacer-100 border-b border-b-background-200 flex items-center justify-start gap-2 text-primary w-auto h-[66px]"
               >
                 <ArcadeIcon className="h-5" />
                 <ArcadeIconText className="h-5" />
@@ -91,13 +91,13 @@ export function BaseTemplate({
             >
               {headerContent}
 
-              <div className="lg:hidden w-full p-3">
+              <div className="lg:hidden w-full p-3 border-b border-b-background-200">
                 <HeaderContainer />
               </div>
 
               <div
                 className={cn(
-                  "relative grow h-full flex flex-col min-w-0 rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border-t border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
+                  "relative grow h-full flex flex-col min-w-0 rounded-none lg:rounded-xl lg:gap-3 overflow-hidden bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
                   contentClassName,
                 )}
               >
