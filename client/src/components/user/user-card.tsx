@@ -23,7 +23,7 @@ import {
 } from "@cartridge/ui";
 import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "./avatar";
-import { AccountInterface, getChecksumAddress } from "starknet";
+import { type AccountInterface, getChecksumAddress } from "starknet";
 import { ShareIcon } from "lucide-react";
 import { ContextCloser } from "../ui/modules/context-closer";
 import { useDevice } from "@/hooks/device";
