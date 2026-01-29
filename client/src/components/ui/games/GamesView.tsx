@@ -23,6 +23,7 @@ import type {
 } from "@/features/games/useGamesViewModel";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";
+import { useAccount } from "@starknet-react/core";
 
 const CARD_LIST_STYLE = { scrollbarWidth: "none" } as const;
 
@@ -38,6 +39,7 @@ export const GamesView = React.memo(
     sharedContext,
   }: GamesViewProps) => {
     const [search, setSearch] = useState("");
+    const { account } = useAccount();
 
     const filteredGames = useMemo(
       () =>
@@ -62,9 +64,14 @@ export const GamesView = React.memo(
         onTouchStart={sidebar.handleTouchStart}
         onTouchMove={sidebar.handleTouchMove}
       >
-        <div className="bg-background-100 -mb-px lg:hidden p-4 border-b border-spacer-100">
-          <UserCard className="border border-background-200 rounded-lg" />
-        </div>
+        {account && (
+          <div className="bg-background-100 -mb-px lg:hidden p-4 border-b border-spacer-100">
+            <UserCard
+              account={account}
+              className="border border-background-200 rounded-lg"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
           <SearchInput
             value={search}

@@ -23,36 +23,44 @@ import {
 } from "@cartridge/ui";
 import { useAccount } from "@starknet-react/core";
 import { UserAvatar } from "./avatar";
-import { getChecksumAddress } from "starknet";
+import { AccountInterface, getChecksumAddress } from "starknet";
 import { ShareIcon } from "lucide-react";
 import { ContextCloser } from "../ui/modules/context-closer";
 import { useDevice } from "@/hooks/device";
 
 export const UserCard = React.memo(
-  React.forwardRef<HTMLAnchorElement, React.HTMLAttributes<HTMLAnchorElement>>(
-    (props, ref) => {
-      const { account } = useAccount();
-      const { player } = useProject();
+  React.forwardRef<
+    HTMLAnchorElement,
+    React.HTMLAttributes<HTMLAnchorElement> & {
+      account?: AccountInterface;
+    }
+  >((props, ref) => {
+    const { account: externalAccount } = props;
 
-      const isPlayer = useMemo(
-        () =>
-          getChecksumAddress(account?.address ?? "0x0") !==
-          getChecksumAddress(player ?? "0x0"),
-        [account?.address, player],
-      );
+    const { account: internalAccount } = useAccount();
 
-      if (!account && !player) return null;
+    const account = externalAccount ?? internalAccount;
 
-      return (
-        <UserCardInner
-          ref={ref}
-          {...props}
-          address={isPlayer ? (player ?? "0x0") : (account?.address ?? "0x0")}
-          isPlayer={isPlayer}
-        />
-      );
-    },
-  ),
+    const { player } = useProject();
+
+    const isPlayer = useMemo(
+      () =>
+        getChecksumAddress(account?.address ?? "0x0") !==
+        getChecksumAddress(player ?? "0x0"),
+      [account?.address, player],
+    );
+
+    if (!account && !player) return null;
+
+    return (
+      <UserCardInner
+        ref={ref}
+        {...props}
+        address={isPlayer ? (player ?? "0x0") : (account?.address ?? "0x0")}
+        isPlayer={isPlayer}
+      />
+    );
+  }),
 );
 
 const UserCardInner = React.memo(
