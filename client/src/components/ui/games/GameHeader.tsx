@@ -52,7 +52,7 @@ export function GameHeader({
   return (
     <div
       className={cn(
-        "w-full flex flex-col gap-4 lg:p-4 lg:mb-4 lg:border lg:border-background-200 lg:rounded-lg bg-background-125 order-1 lg:order-1",
+        "w-full flex flex-col gap-4 lg:p-4 lg:mb-4 lg:border lg:border-background-200 lg:rounded-lg bg-background-100 order-1",
         isDashboard ? "p-0" : "p-4",
         "relative",
       )}
