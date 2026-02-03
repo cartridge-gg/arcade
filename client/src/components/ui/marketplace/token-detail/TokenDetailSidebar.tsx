@@ -92,7 +92,7 @@ export function TokenDetailSidebar() {
 
 function DetailTitle({ label }: { label: string }) {
   return (
-    <div className="flex flex-row justify-between py-2 px-3">
+    <div className="flex flex-row justify-between py-2">
       <span className="text-foreground-300 text-xs font-sans">{label}</span>
     </div>
   );

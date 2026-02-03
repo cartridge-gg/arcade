@@ -65,7 +65,9 @@ export const MarketplaceFiltersView = memo(
       <MarketplaceFilters
         className={cn(
           "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden",
-          "lg:rounded-xl",
+          "rounded-none lg:rounded-xl",
+          "border-r border-spacer-100 lg:border-background-200",
+          "bg-background-100 lg:bg-background-125 shadow-none",
         )}
       >
         <MarketplaceHeader label="Status" />
