@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { Outlet, createRootRoute, useMatches } from "@tanstack/react-router";
 import { Template } from "@/components/template";
-import { SonnerToaster } from "@cartridge/ui";
+import { ControllerToaster } from "@cartridge/ui";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useNavigationContext } from "@/features/navigation";
 import { useArcade } from "@/hooks/arcade";
@@ -35,9 +35,9 @@ function RootComponent() {
           <Outlet />
         </Template>
       )}
-      <SonnerToaster position="top-center" />
+      <ControllerToaster position="bottom-right" />
       {import.meta.env.DEV ? (
-        <TanStackRouterDevtools position="bottom-right" />
+        <TanStackRouterDevtools position="bottom-left" />
       ) : null}
     </>
   );
