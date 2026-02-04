@@ -44,7 +44,7 @@ export function TokenDetailSidebar() {
     <div
       className={cn(
         "w-full lg:min-w-[360px] h-full p-4 flex flex-col gap-6 bg-background-100",
-        "lg:border lg:border-background-200 lg:rounded-xl",
+        "border-r border-spacer-100 lg:border lg:border-background-200 lg:rounded-xl",
       )}
     >
       <div className="">
