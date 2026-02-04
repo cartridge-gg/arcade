@@ -18,6 +18,7 @@ import {
   useHandleListCallback,
   useHandleSendCallback,
   useHandleUnlistCallback,
+  useHandleUnlistViewCallback,
 } from "@/hooks/marketplace-actions-handlers";
 import { useProject } from "@/hooks/project";
 
@@ -196,7 +197,8 @@ export function useTokenDetailViewModel({
 
   const handlePurchaseCallback = useHandlePurchaseCallback(handlerParams);
   const handleListCallback = useHandleListCallback(handlerParams);
-  const handleUnlistCallback = useHandleUnlistCallback(handlerParams);
+  const handleUnlistCallback = useHandleUnlistCallback();
+  const handleUnlistViewCallback = useHandleUnlistViewCallback(handlerParams);
   const handleSendCallback = useHandleSendCallback(handlerParams);
 
   const handlePurchase = useCallback(async () => {
@@ -210,7 +212,11 @@ export function useTokenDetailViewModel({
   }, [handleListCallback, collectionAddress, tokenId]);
 
   const handleUnlist = useCallback(async () => {
-    handleUnlistCallback(collectionAddress, [tokenId]);
+    if (lowestOrder) {
+      handleUnlistCallback(collectionAddress, [tokenId], [lowestOrder]);
+    } else {
+      handleUnlistViewCallback(collectionAddress, [tokenId]);
+    }
   }, [handleUnlistCallback, collectionAddress, tokenId]);
 
   const handleSend = useCallback(async () => {
