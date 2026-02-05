@@ -3,6 +3,7 @@ import type { OrderModel } from "@cartridge/arcade";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { orderWithUsdAtom } from "@/effect/atoms/marketplace";
 import { PriceFooter } from "../../modules/price-footer";
+import { useControllerCloseAfterToast } from "@/hooks/controller";
 
 interface TokenFooterActionsProps {
   isOwner: boolean;
@@ -76,6 +77,7 @@ export function TokenFooterActions({
   handleSend,
 }: TokenFooterActionsProps) {
   const orderWithUsd = useAtomValue(orderWithUsdAtom(order));
+  useControllerCloseAfterToast();
 
   if (!isOwner && !isListed) {
     return null;

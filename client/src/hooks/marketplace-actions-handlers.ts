@@ -9,7 +9,7 @@ import { useConnectionViewModel } from "@/features/connection";
 import { useTokenContracts } from "@/effect/hooks/tokens";
 import { CollectionType } from "@/effect/atoms/tokens";
 import type { OrderModel } from "@cartridge/arcade";
-import { useUsername } from "@/hooks/username";
+import { useControllerUsername } from "@/hooks/controller";
 import { useArcade } from "./arcade";
 
 export type ActionHandlerParams = {
@@ -258,7 +258,7 @@ function useControllerPathBuilder(
 ): (params: MakeControllerViewPathParams) => string | undefined {
   const { trackEvent, events } = useAnalytics();
 
-  const username = useUsername();
+  const username = useControllerUsername();
 
   const collections = useTokenContracts();
 
