@@ -7,16 +7,16 @@ settings:
 catalogs:
   default:
     '@cartridge/connector':
-      specifier: 0.10.6
-      version: 0.10.6
+      specifier: 0.12.1
+      version: 0.12.1
     '@cartridge/controller':
-      specifier: 0.10.6
-      version: 0.10.6
+      specifier: 0.12.1
+      version: 0.12.1
     '@cartridge/presets':
       specifier: github:cartridge-gg/presets#e6a5022
       version: 0.0.1
     '@cartridge/ui':
-      specifier: github:cartridge-gg/ui#1d42129
+      specifier: github:cartridge-gg/ui#e5405d6
       version: 0.7.14-alpha.2
     '@dojoengine/core':
       specifier: 1.8.8
@@ -103,10 +103,10 @@ importers:
         version: link:../packages/arcade-ts
       '@cartridge/connector':
         specifier: 'catalog:'
-        version: 0.10.6(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+        version: 0.12.1(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@cartridge/controller':
         specifier: 'catalog:'
-        version: 0.10.6(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+        version: 0.12.1(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@cartridge/penpal':
         specifier: ^6.2.3
         version: 6.2.4
@@ -115,7 +115,10 @@ importers:
         version: https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022
       '@cartridge/ui':
         specifier: 'catalog:'
-        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
+        version: https://codeload.github.com/cartridge-gg/ui/tar.gz/e5405d6(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))
+      '@dojoengine/core':
+        specifier: 'catalog:'
+        version: 1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@dojoengine/grpc':
         specifier: 'catalog:'
         version: 1.8.7(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-logs@0.208.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
@@ -246,8 +249,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0(react@19.2.1)
       sonner:
-        specifier: ^1.4.41
-        version: 1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       starknet:
         specifier: 'catalog:'
         version: 8.5.4
@@ -1074,16 +1077,16 @@ packages:
   '@bufbuild/protoplugin@2.9.0':
     resolution: {integrity: sha512-uoiwNVYoTq+AyqaV1L6pBazGx5fXOO89L0NSR9/7hEfo0Y8n9T1jsKGu4mkitLmP3z+8gJREaule1mMuKBPyYw==}
 
-  '@cartridge/connector@0.10.6':
-    resolution: {integrity: sha512-TLNmzyrkYY/H4po7QNzY+nA1d6bP1FcqCCJa+efrzyNzkB8O5CH1+E+qipNsIxn3vG6Xj9h+2cMqSN0UkQSf9g==}
+  '@cartridge/connector@0.12.1':
+    resolution: {integrity: sha512-kAmYyNhYA1oQfxcfHk0zPRaZRfGKLMdxscYBI4K3r3u8Bj/dSjigowvRUcWxK+/PE8RgXWnmr564QE+zi/2/Rg==}
     peerDependencies:
       '@starknet-react/core': ^5.0.1
 
-  '@cartridge/controller-wasm@0.3.9':
-    resolution: {integrity: sha512-GIQ2J5n0pTxbRHwFTNoqsiVjF9qtdl1WU5txbOQv0BmnrS4TpKXXd/WTrGo3l4RFbECHDaPvE1y039U8gDfirw==}
+  '@cartridge/controller-wasm@0.8.0':
+    resolution: {integrity: sha512-wxwrIMceVX/xyfv8z43sF+hCGunQZ6kV/h+VlZn8beDP3rlAEMTaSpjBox1YhKp+xImT4KvxuCSR6+3vVDJFMA==}
 
-  '@cartridge/controller@0.10.6':
-    resolution: {integrity: sha512-ufpNeIcSVWcVqdtA8mTHLvJrNYjxytoGfvYB8RdpJZ7GwKNXoSuUptV/eIgbGdW8CeUst7u+HvrnnlLlP40s0Q==}
+  '@cartridge/controller@0.12.1':
+    resolution: {integrity: sha512-uBsCK0aX5N5NOlZ9iPDow5iTxI55LS62TN2vKdFpJ4bkaT0rZ6QkQvHNZgZY6DWCSiZFMB490VePQmFED8Ybrw==}
 
   '@cartridge/penpal@6.2.4':
     resolution: {integrity: sha512-tdpOnSJJBFMlgLZ1+z9Ho5e6cG5EgMAb1Cmmh1lGT2tmplogU/XPMjLE6CwvKAPDoe6a38iMnbH+ySTAWWIOKA==}
@@ -1096,13 +1099,13 @@ packages:
     resolution: {tarball: https://codeload.github.com/cartridge-gg/presets/tar.gz/e6a5022}
     version: 0.0.1
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129':
-    resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129}
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/e5405d6':
+    resolution: {tarball: https://codeload.github.com/cartridge-gg/ui/tar.gz/e5405d6}
     version: 0.7.14-alpha.2
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
-      sonner: ^1.4.41
+      sonner: ^2.0.7
       starknet: ^8.5.4
       viem: ^2.21.32
 
@@ -3052,6 +3055,9 @@ packages:
   '@starknet-io/get-starknet-core@4.0.7':
     resolution: {integrity: sha512-ocwQTdDvGa+0CvjGygyaTuFkda2R82dofydts8uXr9p0Diy/bmYW1fkuqJfi1nC5M+YcvvuEpl6wFvwXM1og5w==}
 
+  '@starknet-io/get-starknet-wallet-standard@5.0.0-beta.0':
+    resolution: {integrity: sha512-1QBmWnd76KzKwnVlRXLh58wtd1e0P5fyOhs0bCCjivTpGJ2nUPRvTgmzVJStNBcuQ7617UfB5qIyBnkig31TmQ==}
+
   '@starknet-io/types-js@0.7.10':
     resolution: {integrity: sha512-1VtCqX4AHWJlRRSYGSn+4X1mqolI1Tdq62IwzoU2vUuEE72S1OlEeGhpvd6XsdqXcfHmVzYfj8k1XtKBQqwo9w==}
 
@@ -3580,6 +3586,10 @@ packages:
     resolution: {integrity: sha512-DJDQhjKmSNVLKWItoKThJS+CsJQjR9AOBOirBVT1F9YpRyC9oYHE+ZnSf8y8bxUphtKqdQMPVQ2mHohYdRvDVQ==}
     engines: {node: '>=16'}
 
+  '@wallet-standard/features@1.1.0':
+    resolution: {integrity: sha512-hiEivWNztx73s+7iLxsuD1sOJ28xtRix58W7Xnz4XzzA/pF0+aicnWgjOdA10doVDEDZdUuZCIIqG96SFNlDUg==}
+    engines: {node: '>=16'}
+
   '@wallet-standard/wallet@1.1.0':
     resolution: {integrity: sha512-Gt8TnSlDZpAl+RWOOAB/kuvC7RpcdWAlFbHNoi4gsXsfaWa1QCT6LBcfIYTPdOZC9OVZUDwqGuGAcqZejDmHjg==}
     engines: {node: '>=16'}
@@ -3657,6 +3667,7 @@ packages:
 
   '@walletconnect/universal-provider@2.21.7':
     resolution: {integrity: sha512-8PB+vA5VuR9PBqt5Y0xj4JC2doYNPlXLGQt3wJORVF9QC227Mm/8R1CAKpmneeLrUH02LkSRwx+wnN/pPnDiQA==}
+    deprecated: 'Reliability and performance improvements. See: https://github.com/WalletConnect/walletconnect-monorepo/releases'
 
   '@walletconnect/universal-provider@2.21.9':
     resolution: {integrity: sha512-dVA9DWSz9jYe37FW5GSRV5zlY9E7rX1kktcDGI7i1/9oG/z9Pk5UKp5r/DFys4Zjml9wZc46R/jlEgeBXTT06A==}
@@ -5692,6 +5703,14 @@ packages:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
 
+  ox@0.4.4:
+    resolution: {integrity: sha512-oJPEeCDs9iNiPs6J0rTx+Y0KGeCGyCAA3zo94yZhm8G5WpOxrwUtn2Ie/Y8IyARSqqY/j9JTKA3Fc1xs1DvFnw==}
+    peerDependencies:
+      typescript: '>=5.4.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   ox@0.7.1:
     resolution: {integrity: sha512-+k9fY9PRNuAMHRFIUbiK9Nt5seYHHzSQs9Bj+iMETcGtlpS7SmBzcGSVUQO3+nqGLEiNK4598pHNFlVRaZbRsg==}
     peerDependencies:
@@ -6335,8 +6354,8 @@ packages:
   sonic-boom@2.8.0:
     resolution: {integrity: sha512-kuonw1YOYYNOve5iHdSahXPOK49GqwA+LZhI6Wz/l0rP57iKyXXIHaRagOBHAPmGwJC6od2Z9zgvZ5loSgMlVg==}
 
-  sonner@1.7.4:
-    resolution: {integrity: sha512-DIS8z4PfJRbIyfVFDVnK9rO3eYDtse4Omcm6bt0oEr5/jtLgysmjuBl1frJ9E/EQZrFmKx2A8m/s5s9CRXIzhw==}
+  sonner@2.0.7:
+    resolution: {integrity: sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -8220,9 +8239,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@cartridge/connector@0.10.6(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@cartridge/connector@0.12.1(@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(utf-8-validate@5.0.10))(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
-      '@cartridge/controller': 0.10.6(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@cartridge/controller': 0.12.1(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0-beta.0(typescript@5.9.2)(zod@3.25.76)
       '@starknet-react/core': 5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -8252,11 +8272,11 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@cartridge/controller-wasm@0.3.9': {}
+  '@cartridge/controller-wasm@0.8.0': {}
 
-  '@cartridge/controller@0.10.6(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@cartridge/controller@0.12.1(@types/react@19.2.7)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.2.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
-      '@cartridge/controller-wasm': 0.3.9
+      '@cartridge/controller-wasm': 0.8.0
       '@cartridge/penpal': 6.2.4
       '@starknet-io/types-js': 0.9.1
       '@telegram-apps/sdk': 2.11.3
@@ -8307,7 +8327,7 @@ snapshots:
     dependencies:
       '@starknet-io/types-js': 0.7.7
 
-  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/1d42129(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))':
+  '@cartridge/ui@https://codeload.github.com/cartridge-gg/ui/tar.gz/e5405d6(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sonner@2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(starknet@8.5.4)(tailwindcss@3.4.17(ts-node@10.9.1(@swc/core@1.13.19(@swc/helpers@0.5.17))(@swc/wasm@1.13.19)(@types/node@20.19.17)(typescript@5.9.2)))(viem@2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76))':
     dependencies:
       '@cartridge/presets': https://codeload.github.com/cartridge-gg/presets/tar.gz/90a5fe0
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -8339,7 +8359,7 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       react-query: 3.39.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      sonner: 1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      sonner: 2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       starknet: 8.5.4
       swr: 2.3.6(react@19.2.1)
       tailwind-merge: 2.6.0
@@ -10626,6 +10646,16 @@ snapshots:
       '@starknet-io/types-js': 0.7.10
       async-mutex: 0.5.0
 
+  '@starknet-io/get-starknet-wallet-standard@5.0.0-beta.0(typescript@5.9.2)(zod@3.25.76)':
+    dependencies:
+      '@starknet-io/types-js': 0.7.10
+      '@wallet-standard/base': 1.1.0
+      '@wallet-standard/features': 1.1.0
+      ox: 0.4.4(typescript@5.9.2)(zod@3.25.76)
+    transitivePeerDependencies:
+      - typescript
+      - zod
+
   '@starknet-io/types-js@0.7.10': {}
 
   '@starknet-io/types-js@0.7.7': {}
@@ -11369,6 +11399,10 @@ snapshots:
       tinyrainbow: 2.0.0
 
   '@wallet-standard/base@1.1.0': {}
+
+  '@wallet-standard/features@1.1.0':
+    dependencies:
+      '@wallet-standard/base': 1.1.0
 
   '@wallet-standard/wallet@1.1.0':
     dependencies:
@@ -13998,6 +14032,20 @@ snapshots:
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
 
+  ox@0.4.4(typescript@5.9.2)(zod@3.25.76):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.0(typescript@5.9.2)(zod@3.25.76)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.9.2
+    transitivePeerDependencies:
+      - zod
+
   ox@0.7.1(typescript@5.9.2)(zod@3.25.76):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
@@ -14691,7 +14739,7 @@ snapshots:
     dependencies:
       atomic-sleep: 1.0.0
 
-  sonner@1.7.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  sonner@2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
