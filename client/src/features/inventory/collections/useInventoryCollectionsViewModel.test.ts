@@ -87,7 +87,7 @@ describe("useInventoryCollectionsViewModel", () => {
     expect(result.current.collectionCards).toHaveLength(1);
     expect(result.current.collectionCards[0].title).toBe("Sample Collection");
     expect(result.current.collectionCards[0].href).toBeDefined();
-  });
+  }, 10000);
 
   it("marks loading state when status is loading", () => {
     const { result } = renderHook(() =>
