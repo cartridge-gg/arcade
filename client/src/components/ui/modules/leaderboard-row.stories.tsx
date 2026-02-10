@@ -1,6 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { MemoryRouter } from "react-router-dom";
+import type { ComponentType } from "react";
+import {
+  createMemoryHistory,
+  createRouter,
+  RouterProvider,
+  createRootRoute,
+} from "@tanstack/react-router";
 import { LeaderboardRow } from "./leaderboard-row";
+
+const createStoryRouter = (StoryComponent: ComponentType) => {
+  const rootRoute = createRootRoute({
+    component: () => (
+      <div className="w-[500px]">
+        <StoryComponent />
+      </div>
+    ),
+  });
+  return createRouter({
+    routeTree: rootRoute.addChildren([]),
+    history: createMemoryHistory({ initialEntries: ["/"] }),
+  });
+};
 
 const meta = {
   title: "Modules/LeaderboardRow",
@@ -10,13 +30,10 @@ const meta = {
   },
   tags: ["autodocs"],
   decorators: [
-    (Story) => (
-      <MemoryRouter>
-        <div className="w-[500px]">
-          <Story />
-        </div>
-      </MemoryRouter>
-    ),
+    (Story) => {
+      const router = createStoryRouter(Story);
+      return <RouterProvider router={router} />;
+    },
   ],
 } satisfies Meta<typeof LeaderboardRow>;
 
@@ -87,39 +104,4 @@ export const NotFollowing: Story = {
     points: 3100,
     following: false,
   },
-};
-
-export const Leaderboard: Story = {
-  decorators: [
-    (Story) => (
-      <MemoryRouter>
-        <div className="w-[500px] flex flex-col">
-          <LeaderboardRow pins={[]} rank={1} name="champion" points={5000} />
-          <LeaderboardRow pins={[]} rank={2} name="runner_up" points={4500} />
-          <LeaderboardRow
-            pins={[]}
-            rank={3}
-            name="bronze_player"
-            points={4000}
-          />
-          <LeaderboardRow pins={[]} rank={4} name="player_4" points={3500} />
-          <LeaderboardRow
-            pins={[]}
-            rank={5}
-            name="player_5"
-            points={3200}
-            following={true}
-          />
-          <LeaderboardRow
-            pins={[]}
-            rank={15}
-            name="current_user"
-            points={850}
-            highlight={true}
-          />
-        </div>
-      </MemoryRouter>
-    ),
-  ],
-  render: () => null,
 };
