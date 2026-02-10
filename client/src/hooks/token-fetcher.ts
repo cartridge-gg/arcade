@@ -3,6 +3,7 @@ import {
   fetchToriis,
   type ClientCallbackParams,
   getToriiAssetUrl,
+  getProjectCollections,
 } from "@cartridge/arcade";
 import { addAddressPadding } from "starknet";
 import { CollectionType } from "@/effect/atoms/tokens";
@@ -507,6 +508,15 @@ export function useCollectibles(
     setError(null);
 
     try {
+      // Collect all collection addresses for the requested projects
+      const collectionAddresses = projects.flatMap(
+        (project) => getProjectCollections(project) ?? [],
+      );
+      // Deduplicate and pad addresses
+      const uniqueCollectionAddresses = [
+        ...new Set(collectionAddresses.map((addr) => addAddressPadding(addr))),
+      ];
+
       const result = await fetchToriis(projects, {
         client: async ({ client }: ClientCallbackParams) => {
           let iterate = true;
@@ -514,9 +524,9 @@ export function useCollectibles(
           const allNFTs: TokenWithMetadata[] = [];
 
           while (iterate) {
-            // Fetch token balances
+            // Fetch token balances, filtered by collection addresses
             const response: any = await client.getTokenBalances({
-              contract_addresses: [],
+              contract_addresses: uniqueCollectionAddresses,
               account_addresses: [address],
               token_ids: [],
               pagination: {
