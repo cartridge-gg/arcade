@@ -508,10 +508,19 @@ export function useCollectibles(
     setError(null);
 
     try {
-      // Collect all collection addresses for the requested projects
+      // Resolve collection addresses for the requested projects.
+      // If no project has known collections, skip the fetch entirely and
+      // return an empty result — there is nothing to display.
       const collectionAddresses = projects.flatMap(
         (project) => getProjectCollections(project) ?? [],
       );
+
+      if (collectionAddresses.length === 0) {
+        setCollections([]);
+        setStatus("success");
+        return;
+      }
+
       // Deduplicate and pad addresses
       const uniqueCollectionAddresses = [
         ...new Set(collectionAddresses.map((addr) => addAddressPadding(addr))),
