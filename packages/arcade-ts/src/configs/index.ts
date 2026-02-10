@@ -1,3 +1,5 @@
+export * from "./collections";
+
 import { createDojoConfig } from "@dojoengine/core";
 import { constants } from "starknet";
 
