@@ -20,7 +20,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const mockGameIcon = "https://static.cartridge.gg/presets/loot-survivor/icon.png";
+const mockGameIcon =
+  "https://static.cartridge.gg/presets/loot-survivor/icon.png";
 const mockTokenIcon = "https://static.cartridge.gg/presets/credit/icon.svg";
 
 export const Default: Story = {
