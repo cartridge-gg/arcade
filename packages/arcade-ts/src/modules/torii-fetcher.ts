@@ -56,8 +56,10 @@ export interface FetchToriiStreamResult {
   };
 }
 
-function getToriiUrl(project: string): string {
-  return `https://api.cartridge.gg/x/${project}/torii`;
+const ARCADE_MAIN_PROJECT = "arcade-main";
+
+function getToriiUrl(_project: string): string {
+  return `https://api.cartridge.gg/x/${ARCADE_MAIN_PROJECT}/torii`;
 }
 
 async function fetchFromEndpoint(

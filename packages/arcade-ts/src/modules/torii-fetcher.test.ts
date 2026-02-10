@@ -50,7 +50,7 @@ describe("torii-fetcher", () => {
 
     // Verify fetch was called with correct parameters
     expect(global.fetch).toHaveBeenCalledWith(
-      "https://api.cartridge.gg/x/arcade-blobarena/torii/sql",
+      "https://api.cartridge.gg/x/arcade-main/torii/sql",
       expect.objectContaining({
         method: "POST",
         headers: {
