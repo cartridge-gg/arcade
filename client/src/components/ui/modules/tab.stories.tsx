@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Tabs, TabsList } from "@cartridge/ui";
 import { ArcadeTab } from "./tab";
 import { Trophy, Gamepad2, User, Settings } from "lucide-react";

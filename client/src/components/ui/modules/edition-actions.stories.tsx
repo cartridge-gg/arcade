@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { SelectItem } from "@cartridge/ui";
 import EditionActions from "./edition-actions";
 

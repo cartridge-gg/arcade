@@ -1,30 +1,27 @@
-import { Link, useParams } from "@tanstack/react-router";
-import { useTokenDetailViewModel } from "@/features/marketplace/token-detail";
 import { useMemo } from "react";
+import { Link } from "@tanstack/react-router";
+import { useTokenDetailViewModel } from "@/features/marketplace/token-detail";
 import { LayersIcon } from "@/components/ui/icons";
-import { UserAvatar } from "@/components/user/avatar";
+import { useProject } from "@/hooks/project";
 import { cn } from "@/lib/utils";
-
-export const truncateAddress = (
-  address: string,
-  startChars = 6,
-  endChars = 4,
-) => {
-  if (!address) return "";
-  if (address.length <= startChars + endChars) return address;
-  return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
-};
+import { truncateAddress, Username } from "@/components/user/username";
 
 export function TokenDetailSidebar() {
   const { collection: collectionAddressParam, tokenId: tokenIdParam } =
-    useParams({
-      strict: false,
-    });
-  const { token, collection, controller, owner, collectionHref } =
-    useTokenDetailViewModel({
-      collectionAddress: collectionAddressParam ?? "0x0",
-      tokenId: tokenIdParam ?? "0x0",
-    });
+    useProject();
+  const {
+    token,
+    collection,
+    ownerUsername,
+    owner,
+    collectible,
+    collectionHref,
+    ownerHref,
+    contractHref,
+  } = useTokenDetailViewModel({
+    collectionAddress: collectionAddressParam ?? "0x0",
+    tokenId: tokenIdParam ?? "0x0",
+  });
   const tokenId = token?.token_id;
 
   const tokenIdStr = useMemo(
@@ -38,22 +35,38 @@ export function TokenDetailSidebar() {
 
   if (!collection || !tokenId) return null;
 
-  const tokenStandard = collection.contract_type;
+  const tokenStandard =
+    collection.contract_type?.replace("ERC", "ERC-") ?? "Unknown";
   const collectionName = collection.name;
   const collectionSupply = collection.total_supply;
 
   return (
-    <div className="w-full lg:min-w-[360px] h-full bg-background-100 border border-background-200 rounded-xl p-6 flex flex-col gap-6">
+    <div
+      className={cn(
+        "w-full lg:min-w-[360px] h-full p-4 flex flex-col gap-6 bg-background-100",
+        "border-r border-spacer-100 lg:border lg:border-background-200 lg:rounded-xl",
+      )}
+    >
       <div className="">
         <DetailTitle label="Details" />
         <div className="flex flex-col gap-[1px]">
-          <DetailItem label="Owner">
-            <Username username={controller?.username} address={owner} />
-          </DetailItem>
-          <DetailItem label="Contract Address">
-            {collectionAddressTrunc}
-          </DetailItem>
-          <DetailItem label="Token ID">
+          {collectible ? (
+            <DetailItem label="Owners" hoverable>
+              {collectible.ownersCount}
+            </DetailItem>
+          ) : (
+            <Link to={ownerHref}>
+              <DetailItem label="Owner" hoverable>
+                <Username username={ownerUsername} address={owner} />
+              </DetailItem>
+            </Link>
+          )}
+          <Link to={contractHref} disabled={!contractHref} target="_blank">
+            <DetailItem label="Contract Address" hoverable>
+              {collectionAddressTrunc}
+            </DetailItem>
+          </Link>
+          <DetailItem label="Token ID" copyable>
             {truncateAddress(tokenIdStr)}
           </DetailItem>
           <DetailItem label="Token Standard">{tokenStandard}</DetailItem>
@@ -79,7 +92,7 @@ export function TokenDetailSidebar() {
 
 function DetailTitle({ label }: { label: string }) {
   return (
-    <div className="flex flex-row justify-between py-2 px-3">
+    <div className="flex flex-row justify-between py-2">
       <span className="text-foreground-300 text-xs font-sans">{label}</span>
     </div>
   );
@@ -88,8 +101,13 @@ function DetailTitle({ label }: { label: string }) {
 function DetailItem({
   label,
   hoverable = false,
+  copyable = false,
   children,
-}: React.PropsWithChildren<{ label: React.ReactNode; hoverable?: boolean }>) {
+}: React.PropsWithChildren<{
+  label: React.ReactNode;
+  hoverable?: boolean;
+  copyable?: boolean;
+}>) {
   return (
     <div
       className={cn(
@@ -98,7 +116,12 @@ function DetailItem({
       )}
     >
       <span className="text-foreground-300 text-xs font-sans">{label}</span>
-      <span className="text-foreground-100 text-sm font-medium font-mono">
+      <span
+        className={cn(
+          "text-foreground-100 text-sm font-medium font-mono",
+          copyable && "select-all",
+        )}
+      >
         {children}
       </span>
     </div>
@@ -107,7 +130,7 @@ function DetailItem({
 
 function CollectionName({ name, img }: { name: string; img: string }) {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2">
       <img
         src={`${img}?width=28&height=28`}
         className="w-[28px] h-[28px]"
@@ -129,22 +152,6 @@ function CollectionSupply({ supply }: { supply: string }) {
     <span className="flex flex-row rounded-xl bg-translucent-dark-100 py-[4px] px-[6px] items-center">
       <LayersIcon />
       <span className="font-sans ml-1">{supplyStr}</span>
-    </span>
-  );
-}
-
-function Username({
-  username,
-  address,
-}: {
-  username: string | undefined;
-  address: string;
-}) {
-  if (!username) return truncateAddress(address);
-  return (
-    <span className="flex flex-row gap-1 items-center">
-      <UserAvatar username={username} />
-      {truncateAddress(username)}
     </span>
   );
 }

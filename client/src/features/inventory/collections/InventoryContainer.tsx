@@ -2,7 +2,7 @@ import { useTokens } from "@/hooks/tokens";
 import { useTokenContracts } from "@/effect";
 import { InventoryTokensView } from "@/components/ui/inventory/InventoryTokensView";
 import { InventoryCollectionsView } from "@/components/ui/inventory/InventoryCollectionsView";
-import { useInventoryTokensViewModel } from "@/features/inventory/tokens/useInventoryTokensViewModel";
+import { useInventoryTokensViewModel } from "@/features/inventory/collections/useInventoryTokensViewModel";
 import { useInventoryCollectionsViewModel } from "@/features/inventory/collections/useInventoryCollectionsViewModel";
 
 export const InventoryContainer = () => {

@@ -1,11 +1,12 @@
+import React, { useCallback, useMemo } from "react";
+import { Link } from "@tanstack/react-router";
 import { useAccountByAddress } from "@/effect";
 import { usePlayerStats } from "@/hooks/achievements";
 import { useProject } from "@/hooks/project";
-import { useArcade } from "@/hooks/arcade";
 import { useShare } from "@/hooks/useShare";
 import { AnalyticsEvents } from "@/hooks/useAnalytics";
 import { cn } from "@/lib/utils";
-import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
+import { useNavigationManager } from "@/features/navigation/useNavigationManager";
 import {
   AchievementPlayerBadge,
   Button,
@@ -21,38 +22,45 @@ import {
   CopyIcon,
 } from "@cartridge/ui";
 import { useAccount } from "@starknet-react/core";
-import { useRouterState } from "@tanstack/react-router";
-import React, { useCallback, useMemo } from "react";
 import { UserAvatar } from "./avatar";
-import { getChecksumAddress } from "starknet";
+import { type AccountInterface, getChecksumAddress } from "starknet";
 import { ShareIcon } from "lucide-react";
 import { ContextCloser } from "../ui/modules/context-closer";
+import { useDevice } from "@/hooks/device";
 
 export const UserCard = React.memo(
-  React.forwardRef<HTMLAnchorElement, React.HTMLAttributes<HTMLAnchorElement>>(
-    (props, ref) => {
-      const { account } = useAccount();
-      const { player } = useProject();
+  React.forwardRef<
+    HTMLAnchorElement,
+    React.HTMLAttributes<HTMLAnchorElement> & {
+      account?: AccountInterface;
+    }
+  >((props, ref) => {
+    const { account: externalAccount } = props;
 
-      const isPlayer = useMemo(
-        () =>
-          getChecksumAddress(account?.address ?? "0x0") !==
-          getChecksumAddress(player ?? "0x0"),
-        [account?.address, player],
-      );
+    const { account: internalAccount } = useAccount();
 
-      if (!account && !player) return null;
+    const account = externalAccount ?? internalAccount;
 
-      return (
-        <UserCardInner
-          ref={ref}
-          {...props}
-          address={isPlayer ? (player ?? "0x0") : (account?.address ?? "0x0")}
-          isPlayer={isPlayer}
-        />
-      );
-    },
-  ),
+    const { player } = useProject();
+
+    const isPlayer = useMemo(
+      () =>
+        getChecksumAddress(account?.address ?? "0x0") !==
+        getChecksumAddress(player ?? "0x0"),
+      [account?.address, player],
+    );
+
+    if (!account && !player) return null;
+
+    return (
+      <UserCardInner
+        ref={ref}
+        {...props}
+        address={isPlayer ? (player ?? "0x0") : (account?.address ?? "0x0")}
+        isPlayer={isPlayer}
+      />
+    );
+  }),
 );
 
 const UserCardInner = React.memo(
@@ -65,9 +73,7 @@ const UserCardInner = React.memo(
     const { className, address, isPlayer } = props;
 
     const { data: username } = useAccountByAddress(address);
-    const { location } = useRouterState();
-    const { games, editions } = useArcade();
-    const { isConnected } = useAccount();
+    const { isMobile } = useDevice();
 
     const usernameStr = username?.username ?? "";
 
@@ -83,16 +89,7 @@ const UserCardInner = React.memo(
 
     const { earnings: totalEarnings } = usePlayerStats(address);
 
-    const navManager = useMemo(
-      () =>
-        new NavigationContextManager({
-          pathname: location.pathname,
-          games,
-          editions,
-          isLoggedIn: Boolean(isConnected),
-        }),
-      [location.pathname, games, editions, isConnected],
-    );
+    const navManager = useNavigationManager();
 
     const target = useMemo(() => {
       if (!usernameStr && !address) return "/";
@@ -120,14 +117,18 @@ const UserCardInner = React.memo(
 
     const { handleShare, isShareAvailable } = useShare(shareConfig);
 
+    const profileUrl = useMemo(
+      () => `${window.location.origin}/player/${address}`,
+      [address],
+    );
+
     const handleCopyAddress = useCallback(async () => {
-      const profileUrl = `${window.location.origin}/player/${address}`;
       try {
         await navigator.clipboard.writeText(profileUrl);
       } catch (error) {
         console.error("Copy failed:", error);
       }
-    }, [address]);
+    }, [profileUrl]);
 
     if (!usernameStr && !address) {
       return null;
@@ -136,41 +137,54 @@ const UserCardInner = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col items-start py-2 px-3 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl",
-          "lg:border-background-200 lg:hover:border-background-200",
+          "flex flex-col items-start p-3 lg:p-4 gap-2 self-stretch w-full bg-background-100 border-b border-spacer-100 lg:border lg:rounded-xl relative",
+          "lg:border-background-200 lg:hover:border-background-200 overflow-hidden",
           className,
         )}
       >
+        {isPlayer && (
+          <div className="absolute top-5 right-5 z-10">
+            <ContextCloser
+              context="player"
+              className="flex rounded-none rounded-bl rounded-tr-2 bg-background-100 hover:bg-background-200 p-2 w-8 h-8 border-r-0 border-t-0"
+            />
+          </div>
+        )}
         <div
           id="player-label"
-          className="flex items-center self-stretch gap-3 relative"
+          className="flex items-center self-stretch gap-2 relative"
         >
-          <div className="p-3">
+          <div className="-translate-x-1">
             <AchievementPlayerBadge
               icon={Icon}
               variant="default"
-              size="3xl"
-              className="!w-10 !h-10"
+              size={isMobile ? "2xl" : "3xl"}
+              className="!w-14 !h-14 lg:!w-16 lg:!h-16"
             />
           </div>
-          <div className="flex-1">
+          <div className="h-full flex-1 flex flex-col justify-between gap-2 lg:gap-0">
             <div className="flex flex-row justify-between">
-              <div className="flex items-center gap-3">
-                <p className="text-foreground-100 text-[20px] font-semibold">
+              <Link to={profileUrl}>
+                <p className="text-foreground-100 text-[16px]/[normal] lg:text-xl/6 font-semibold">
                   {usernameStr}
                 </p>
-              </div>
-              <div className="flex items-center gap-1 p-3">
+              </Link>
+              <div
+                className={cn(
+                  "flex items-center gap-1 p-0.5",
+                  isPlayer && "pr-8",
+                )}
+              >
                 <div className="flex items-center gap-0.5 bg-translucent-dark-100 rounded-xl">
                   <SparklesIcon variant="solid" size="xs" />
-                  <p className="text-[14px] text-foreground-100">
+                  <p className="text-xs lg:text-sm font-normal text-foreground-100">
                     {totalEarnings}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-row justify-between">
               <div className="flex items-center font-sans text-foreground-200 gap-1 rounded-md bg-background-200 hover:bg-background-300 shrink-0 px-[6px] py-1">
                 <CopyAddress
                   size="xs"
@@ -180,18 +194,18 @@ const UserCardInner = React.memo(
                   last={2}
                 />
               </div>
-              <div className="flex-1 flex items-center justify-end gap-1">
+              <div className="flex-1 flex items-center justify-end gap-2">
                 <Button
                   variant="tertiary"
                   size="icon"
-                  className="px-[6px] py-1 w-auto h-auto hidden"
+                  className="px-1.5 py-1 w-auto h-auto hidden"
                 >
                   <XIcon size={"sm"} />
                 </Button>
                 <Button
                   variant="tertiary"
                   size="icon"
-                  className="px-[6px] py-1 w-auto h-auto hidden"
+                  className="px-1.5 py-1 w-auto h-auto hidden"
                 >
                   <DiscordIcon size={"sm"} />
                 </Button>
@@ -200,7 +214,7 @@ const UserCardInner = React.memo(
                     <Button
                       variant="tertiary"
                       size="icon"
-                      className="px-[6px] py-1 w-auto h-auto"
+                      className="px-1.5 py-1 w-auto h-auto"
                     >
                       <DotsIcon size={"sm"} />
                     </Button>
@@ -227,7 +241,6 @@ const UserCardInner = React.memo(
               </div>
             </div>
           </div>
-          {isPlayer && <ContextCloser />}
         </div>
       </div>
     );

@@ -51,6 +51,56 @@ describe("shared marketplace utils", () => {
         image: "blockie:0x2",
       });
     });
+
+    it("decimals (2,4)", () => {
+      const info = formatPriceInfo("0x2", 87654321, 2);
+      expect(info).toEqual({
+        value: "876543.2100",
+        image: "blockie:0x2",
+      });
+    });
+    it("decimals (2,2)", () => {
+      const info = formatPriceInfo("0x2", 87654321, 2, 2);
+      expect(info).toEqual({
+        value: "876543.21",
+        image: "blockie:0x2",
+      });
+    });
+    it("decimals (6,4)", () => {
+      const info = formatPriceInfo("0x2", 87654321, 6);
+      expect(info).toEqual({
+        value: "87.6543",
+        image: "blockie:0x2",
+      });
+    });
+    it("decimals (6,2)", () => {
+      const info = formatPriceInfo("0x2", 87654321, 6, 2);
+      expect(info).toEqual({
+        value: "87.65",
+        image: "blockie:0x2",
+      });
+    });
+    it("decimals (2,4,trim-2)", () => {
+      const info = formatPriceInfo("0x2", 87654321, 2, 4, true);
+      expect(info).toEqual({
+        value: "876543.21",
+        image: "blockie:0x2",
+      });
+    });
+    it("decimals (2,4,trim-3)", () => {
+      const info = formatPriceInfo("0x2", 876543210, 2, 4, true);
+      expect(info).toEqual({
+        value: "8765432.1",
+        image: "blockie:0x2",
+      });
+    });
+    it("decimals (2,4,trim-4)", () => {
+      const info = formatPriceInfo("0x2", 8765432100, 2, 4, true);
+      expect(info).toEqual({
+        value: "87654321",
+        image: "blockie:0x2",
+      });
+    });
   });
 
   describe("deriveBestPrice", () => {

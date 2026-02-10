@@ -28,6 +28,10 @@ vi.mock("@/hooks/use-metadata-filters", () => ({
   useMetadataFilters: (args: any) => mockUseMetadataFilters(args),
 }));
 
+vi.mock("@/features/navigation/useNavigationManager", () => ({
+  useNavigationManager: () => ({ generatePlayerHref: () => {} }),
+}));
+
 describe("useMarketplaceHoldersViewModel", () => {
   const holders: MockHolder[] = [
     {

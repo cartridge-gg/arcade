@@ -6,18 +6,20 @@ import {
   type MouseEvent,
   type RefObject,
 } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Button,
   Checkbox,
   Empty,
+  InventoryItemCard,
   MarketplaceSearch,
-  Separator,
   Skeleton,
   cn,
 } from "@cartridge/ui";
-import CollectibleCard from "./collectible-card";
+import type { ListingWithUsd } from "@/effect";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
-import { Link } from "@tanstack/react-router";
+import { PriceFooter } from "@/components/ui/modules/price-footer";
+import CollectibleCard from "./collectible-card";
 
 const NOOP = () => {};
 
@@ -32,6 +34,8 @@ export interface MarketplaceItemCardProps {
   title: string;
   image?: string | null;
   placeholderImage?: string;
+  totalSupply: number;
+  tokenBalance: number;
   listingCount: number;
   price: MarketplaceItemPriceInfo | null;
   lastSale: MarketplaceItemPriceInfo | null;
@@ -41,10 +45,10 @@ export interface MarketplaceItemCardProps {
   isConnected: boolean;
   selectionActive: boolean;
   tokenDetailHref: string;
+  isInventory: boolean;
+  backgroundColor?: string;
   onToggleSelectByIndex: (index: number) => void;
-  onBuyByIndex: (index: number) => void;
   onInspectByIndex: (index: number) => void;
-  onConnect: () => Promise<void> | void;
 }
 
 export interface MarketplaceItemsRow {
@@ -70,14 +74,17 @@ interface ItemsViewProps {
   onClearFilters: () => void;
   onResetSelection: () => void;
   isConnected: boolean;
-  onBuySelection: () => void;
+  onPurchaseSelection: (() => void) | undefined;
+  onListSelection: (() => void) | undefined;
+  onUnlistSelection: (() => void) | undefined;
+  onSendSelection: (() => void) | undefined;
   loadingOverlay: {
     isLoading: boolean;
     progress?: { completed: number; total: number };
   };
-
   statusFilter: string;
   listedTokensCount: number;
+  selectionOrders: ListingWithUsd[];
 }
 
 export const ItemsView = ({
@@ -96,13 +103,17 @@ export const ItemsView = ({
   onClearFilters,
   onResetSelection,
   isConnected,
-  onBuySelection,
+  onPurchaseSelection,
+  onListSelection,
+  onUnlistSelection,
+  onSendSelection,
   loadingOverlay,
   statusFilter,
   listedTokensCount,
+  selectionOrders,
 }: ItemsViewProps) => {
   return (
-    <div className="flex flex-col gap-4 h-full w-full overflow-hidden order-3">
+    <div className="relative flex flex-col gap-4 h-full w-full overflow-hidden order-3">
       <div className="min-h-10 w-full flex justify-between items-center relative">
         <div className="flex items-center gap-4">
           <SelectionSummary
@@ -169,7 +180,11 @@ export const ItemsView = ({
       <SelectionFooter
         isVisible={isConnected && selectionCount > 0}
         selectionCount={selectionCount}
-        onBuySelection={onBuySelection}
+        orders={selectionOrders}
+        onPurchaseSelection={onPurchaseSelection}
+        onListSelection={onListSelection}
+        onUnlistSelection={onUnlistSelection}
+        onSendSelection={onSendSelection}
       />
       <FloatingLoadingSpinner
         isLoading={loadingOverlay.isLoading && totalTokensCount > 0}
@@ -205,7 +220,7 @@ const SelectionSummary = ({
   return (
     <div
       className={cn(
-        "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-xs",
+        "h-6 p-0.5 flex items-center gap-1.5 text-foreground-200 text-sm",
         !selectionCount && "text-foreground-400",
         showSelection && "cursor-pointer",
       )}
@@ -215,7 +230,7 @@ const SelectionSummary = ({
         <Checkbox
           className="text-foreground-100"
           variant="minus-line"
-          size="sm"
+          size="default"
           checked
         />
       )}
@@ -298,28 +313,72 @@ function SelectedCount({
 const SelectionFooter = ({
   isVisible,
   selectionCount,
-  onBuySelection,
+  orders,
+  onPurchaseSelection,
+  onListSelection,
+  onUnlistSelection,
+  onSendSelection,
 }: {
   isVisible: boolean;
   selectionCount: number;
-  onBuySelection: () => void;
+  orders: ListingWithUsd[];
+  onPurchaseSelection?: () => void;
+  onListSelection?: () => void;
+  onUnlistSelection?: () => void;
+  onSendSelection?: () => void;
 }) => {
   return (
     <div
       className={cn(
-        "overflow-hidden transition-all duration-500 ease-out",
-        isVisible ? "max-h-36 opacity-100" : "max-h-0 opacity-0",
+        "absolute bottom-[0px] transition-all duration-500 ease-out ease-in",
+        isVisible ? "h-[50px] opacity-100 sticky bottom-0" : "h-0 opacity-0",
       )}
     >
-      <Separator className="w-full bg-background-200" />
-      <div className="w-full flex justify-end items-center">
-        <Button
-          variant="primary"
-          onClick={onBuySelection}
-          disabled={selectionCount === 0}
-        >
-          {`Buy (${selectionCount})`}
-        </Button>
+      <div className="w-full flex justify-end items-center gap-x-2">
+        {orders.length > 0 && (
+          <PriceFooter
+            label="Total"
+            orders={orders}
+            className="flex gap-3 flex-1 w-full"
+          />
+        )}
+        {onPurchaseSelection && (
+          <Button
+            variant="secondary"
+            onClick={onPurchaseSelection}
+            disabled={selectionCount === 0}
+          >
+            {`Buy (${selectionCount})`}
+          </Button>
+        )}
+        {onListSelection && (
+          <Button
+            variant="secondary"
+            onClick={onListSelection}
+            disabled={selectionCount === 0}
+          >
+            {`List (${selectionCount})`}
+          </Button>
+        )}
+        {onUnlistSelection && (
+          <Button
+            variant="secondary"
+            className="text-destructive-100"
+            onClick={onUnlistSelection}
+            disabled={selectionCount === 0}
+          >
+            {`Unlist (${selectionCount})`}
+          </Button>
+        )}
+        {onSendSelection && (
+          <Button
+            variant="secondary"
+            onClick={onSendSelection}
+            disabled={selectionCount === 0}
+          >
+            {`Send (${selectionCount})`}
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -334,16 +393,18 @@ const MarketplaceItemCard = memo(
     canOpen,
     isConnected,
     onToggleSelectByIndex,
-    onBuyByIndex,
     onInspectByIndex,
-    onConnect,
     image,
     placeholderImage,
     title,
+    totalSupply,
+    tokenBalance,
     listingCount,
     price,
     lastSale,
     tokenDetailHref,
+    isInventory,
+    backgroundColor,
   }: MarketplaceItemCardProps) => {
     const fallbackImage = placeholderImage ?? image ?? "";
     const [displayImage, setDisplayImage] = useState<string>(fallbackImage);
@@ -387,18 +448,8 @@ const MarketplaceItemCard = memo(
     };
 
     const handleCardClick = () => {
-      if (selectable && canOpen) {
-        onBuyByIndex(index);
-        return;
-      }
-
       if (canOpen) {
         onInspectByIndex(index);
-        return;
-      }
-
-      if (!isConnected) {
-        void onConnect();
       }
     };
 
@@ -409,24 +460,42 @@ const MarketplaceItemCard = memo(
 
     return (
       <div className="w-full group select-none" onClick={handleContainerClick}>
-        <Link to={tokenDetailHref}>
-          <CollectibleCard
-            title={title}
-            images={[displayImage]}
-            listingCount={listingCount}
-            onClick={handleCardClick}
-            className={
-              selectable || canOpen
-                ? "cursor-pointer"
-                : "cursor-default pointer-events-none"
-            }
-            onSelect={handleSelect}
-            price={price}
-            lastSale={lastSale}
-            selectable={selectable}
-            selected={selected}
-          />
-        </Link>
+        {isInventory && (
+          <Link to={tokenDetailHref} disabled={!canOpen}>
+            <InventoryItemCard
+              title={title}
+              images={image ? [image] : []}
+              listingCount={listingCount}
+              totalCount={tokenBalance}
+              backgroundColor={backgroundColor}
+              selectable={selectable}
+              selected={selected}
+              onSelect={handleSelect}
+              onClick={canOpen || selectable ? handleCardClick : undefined}
+            />
+          </Link>
+        )}
+        {!isInventory && (
+          <Link to={tokenDetailHref}>
+            <CollectibleCard
+              title={title}
+              images={[displayImage]}
+              listingCount={listingCount}
+              totalCount={totalSupply}
+              onClick={handleCardClick}
+              className={
+                selectable || canOpen
+                  ? "cursor-pointer"
+                  : "cursor-default pointer-events-none"
+              }
+              onSelect={handleSelect}
+              price={price}
+              lastSale={lastSale}
+              selectable={selectable}
+              selected={selected}
+            />
+          </Link>
+        )}
       </div>
     );
   },

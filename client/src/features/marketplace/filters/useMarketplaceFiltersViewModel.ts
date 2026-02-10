@@ -39,6 +39,7 @@ export interface MarketplaceFiltersViewModel {
   setSearchValue: (attribute: string, value: string) => void;
   onAttributeExpand: (attribute: string, expanded: boolean) => void;
   isSummaryLoading: boolean;
+  isInventory: boolean;
   ownerInput: string;
   ownerSuggestions: Account[];
   isOwnerAddressInput: boolean;
@@ -48,7 +49,7 @@ export interface MarketplaceFiltersViewModel {
 }
 
 export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
-  const { collection: collectionAddress } = useProject();
+  const { collection: collectionAddress, tab } = useProject();
   const getTokens = useMarketplaceTokensStore((state) => state.getTokens);
   const tokens = getTokens(DEFAULT_PROJECT, collectionAddress ?? "");
   const { trackEvent, events } = useAnalytics();
@@ -60,6 +61,7 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     inputValue: ownerInput,
     setInputValue: setOwnerInput,
     resolvedAddress: ownerAddress,
+    isPlayerAddress,
     isAddressInput: isOwnerAddressInput,
     suggestions: ownerSuggestions,
     clearOwner,
@@ -77,8 +79,8 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
   });
 
   useEffect(() => {
-    setOwnerFilter(ownerAddress ?? undefined);
-  }, [ownerAddress, setOwnerFilter]);
+    setOwnerFilter(ownerAddress ?? undefined, isPlayerAddress);
+  }, [ownerAddress, isPlayerAddress, setOwnerFilter]);
 
   const {
     activeFilters,
@@ -217,6 +219,7 @@ export function useMarketplaceFiltersViewModel(): MarketplaceFiltersViewModel {
     setSearchValue,
     onAttributeExpand,
     isSummaryLoading,
+    isInventory: tab === "inventoryitems",
     ownerInput,
     ownerSuggestions,
     isOwnerAddressInput,

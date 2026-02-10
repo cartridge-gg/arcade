@@ -2,6 +2,7 @@ import { getChecksumAddress } from "starknet";
 import { erc20Metadata } from "@cartridge/presets";
 import makeBlockie from "ethereum-blockies-base64";
 import type { OrderModel } from "@cartridge/arcade";
+import { getDuration } from "@/lib/helpers";
 
 const CHECKSUM_CACHE_KEY = "arcade-checksum-cache";
 let checksumCache: Map<string, string> | null = null;
@@ -58,6 +59,7 @@ export const formatPriceInfo = (
   rawValue: number,
   fallbackDecimals = 0,
   roundingDecimals = 4,
+  trimDecimals = false,
 ): MarketplacePriceInfo => {
   const checksumCurrency = getCachedChecksumAddress(currencyAddress);
   const metadata = erc20MetadataByAddress.get(checksumCurrency);
@@ -66,8 +68,13 @@ export const formatPriceInfo = (
   const decimals = metadata?.decimals ?? fallbackDecimals;
   const normalizedValue = rawValue / 10 ** decimals;
 
+  let value = normalizedValue.toFixed(roundingDecimals);
+  if (trimDecimals) {
+    value = value.replace(/\.?0+$/, "");
+  }
+
   return {
-    value: normalizedValue.toFixed(roundingDecimals),
+    value,
     image,
   };
 };
@@ -143,4 +150,31 @@ export const comparePrices = (
   return (
     normalizePrice(a.currency, a.value) - normalizePrice(b.currency, b.value)
   );
+};
+
+export const formatExpirationDate = (
+  expiration: number | undefined,
+  detailed?: boolean,
+): {
+  duration: string;
+  dateTime: string;
+} => {
+  if (!expiration)
+    return {
+      duration: "",
+      dateTime: "",
+    };
+  const date = new Date(Number(expiration) * 1000);
+  const now = new Date();
+  const diff = date.getTime() - now.getTime();
+  if (diff <= 0) {
+    return {
+      duration: "-",
+      dateTime: "Expired",
+    };
+  }
+  return {
+    duration: getDuration(diff, detailed),
+    dateTime: `${date.toString()}`,
+  };
 };

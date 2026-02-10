@@ -230,8 +230,6 @@ pub impl StoreImpl of StoreTrait {
                 // [Event] Emit quest unlocked
                 self.unlock(definition.rewarder, player_id, condition, interval_id, time);
             }
-            // [Effect] Nullify condition
-            self.set_condition(@conditions);
         }
     }
 

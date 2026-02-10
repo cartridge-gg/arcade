@@ -35,6 +35,8 @@ const collectiblePreviewVariants = cva(
 
 export const CollectiblePreview = ({
   images,
+  totalCount,
+  listingCount,
   variant,
   size,
   className,

@@ -13,8 +13,10 @@ import {
   USDT_CONTRACT_ADDRESS,
 } from "@cartridge/ui/utils";
 import { getCachedChecksumAddress } from "@/lib/shared/marketplace/utils";
+import { addAddressPadding } from "starknet";
 import { arcadeAtom } from "./arcade";
 import { pricesAtom } from "./prices";
+import { collectionOwnershipAtom, type OwnershipMap } from "./owner-filter";
 import type { ArcadeEntityItem, ArcadeEventItem } from "../layers/arcade";
 
 const erc20MetadataByAddress = new Map(
@@ -273,6 +275,25 @@ export const usdPriceMappingAtom = Atom.make((get) => {
   }, {});
 });
 
+const orderWithUsd = (
+  order: OrderModel,
+  usdMapping: UsdPriceMapping,
+): ListingWithUsd => {
+  const isUsd = isUsdCurrency(order.currency);
+  const usdPricePerUnit = isUsd ? 1 : usdMapping[order.currency];
+  const decimals = getErc20Decimals(order.currency);
+  const normalizedPrice = order.price / 10 ** decimals;
+  return {
+    order,
+    usdPrice: isUsd
+      ? normalizedPrice
+      : usdPricePerUnit
+        ? normalizedPrice * usdPricePerUnit
+        : null,
+    normalizedPrice,
+  };
+};
+
 export const listingsWithUsdAtom = Atom.make((get) => {
   const listings = get(listingsAtom);
   const usdMapping = get(usdPriceMappingAtom);
@@ -284,20 +305,7 @@ export const listingsWithUsdAtom = Atom.make((get) => {
     for (const [token, orders] of Object.entries(tokens)) {
       result[collection][token] = {};
       for (const [orderId, order] of Object.entries(orders)) {
-        const isUsd = isUsdCurrency(order.currency);
-        const usdPricePerUnit = isUsd ? 1 : usdMapping[order.currency];
-        const decimals = getErc20Decimals(order.currency);
-        const normalizedPrice = order.price / 10 ** decimals;
-
-        result[collection][token][orderId] = {
-          order,
-          usdPrice: isUsd
-            ? normalizedPrice
-            : usdPricePerUnit
-              ? normalizedPrice * usdPricePerUnit
-              : null,
-          normalizedPrice,
-        };
+        result[collection][token][orderId] = orderWithUsd(order, usdMapping);
       }
     }
   }
@@ -354,3 +362,77 @@ export const sortedListedTokenIdsAtom = Atom.family(
     });
   },
 );
+
+const extractOwnerAddresses = (
+  listings: { [token: string]: ListingWithUsd[] } | undefined,
+): string[] => {
+  if (!listings) return [];
+  const owners = new Set<string>();
+  for (const tokenListings of Object.values(listings)) {
+    for (const listing of tokenListings) {
+      owners.add(listing.order.owner);
+    }
+  }
+  return Array.from(owners);
+};
+
+const filterListingsByOwnership = (
+  listings: { [token: string]: ListingWithUsd[] },
+  ownershipMap: OwnershipMap,
+): { [token: string]: ListingWithUsd[] } => {
+  return Object.entries(listings).reduce(
+    (acc, [tokenId, tokenListings]) => {
+      const verified = tokenListings.filter((listing) => {
+        const ownerKey = addAddressPadding(listing.order.owner).toLowerCase();
+        const ownerTokens = ownershipMap.get(ownerKey);
+        if (!ownerTokens) return false;
+        const normalizedTokenId = BigInt(listing.order.tokenId).toString(16);
+        return ownerTokens.has(normalizedTokenId);
+      });
+
+      if (verified.length > 0) {
+        acc[tokenId] = verified;
+      }
+      return acc;
+    },
+    {} as { [token: string]: ListingWithUsd[] },
+  );
+};
+
+export const verifiedCollectionOrdersAtom = Atom.family(
+  (contractAddress: string) => {
+    return Atom.make((get) => {
+      const listings = get(collectionOrdersWithUsdAtom(contractAddress));
+      if (!listings || Object.keys(listings).length === 0) {
+        return {};
+      }
+
+      const ownerAddresses = extractOwnerAddresses(listings);
+      if (ownerAddresses.length === 0) {
+        return {};
+      }
+
+      const ownershipAtom = collectionOwnershipAtom(
+        contractAddress,
+        ownerAddresses,
+      );
+      const ownershipResult = get(ownershipAtom as any) as {
+        _tag: string;
+        value?: OwnershipMap;
+      };
+
+      if (ownershipResult._tag !== "Success" || !ownershipResult.value) {
+        return {};
+      }
+
+      return filterListingsByOwnership(listings, ownershipResult.value);
+    });
+  },
+);
+
+export const orderWithUsdAtom = Atom.family((order: OrderModel | null) => {
+  return Atom.make((get) => {
+    const usdMapping = get(usdPriceMappingAtom);
+    return order ? orderWithUsd(order, usdMapping) : null;
+  });
+});

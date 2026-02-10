@@ -31,6 +31,7 @@ export function useFilterUrlSync({
   );
   const activeFilters = collectionState?.activeFilters ?? {};
   const ownerFilter = collectionState?.ownerFilter;
+  const isPlayerAddress = collectionState?.isPlayerAddress ?? false;
 
   const hasSyncedFromURL = useRef(false);
   const prevSerializedFilters = useRef<string | null>(null);
@@ -101,7 +102,7 @@ export function useFilterUrlSync({
         nextParams.delete("filters");
       }
 
-      if (ownerFilter) {
+      if (ownerFilter && !isPlayerAddress) {
         nextParams.set("owner", ownerFilter);
       } else {
         nextParams.delete("owner");
@@ -129,6 +130,7 @@ export function useFilterUrlSync({
   }, [
     activeFilters,
     ownerFilter,
+    isPlayerAddress,
     enabled,
     navigate,
     location.pathname,

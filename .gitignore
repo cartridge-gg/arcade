@@ -19,3 +19,5 @@ packages/*/tsup.config.bundled_*.mjs
 # Storybook
 storybook-static/
 *storybook.log
+client/storybook-static/
+.claude-modified-files

@@ -1,10 +1,16 @@
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { HeaderContainer } from "@/features/header";
 import { SceneLayout } from "@/components/scenes/layout";
 import { cn } from "@cartridge/ui/utils";
 import { useSidebar } from "@/hooks/sidebar";
 import { useTheme } from "@/hooks/context";
 import { useDevice } from "@/hooks/device";
+import {
+  ArcadeIcon,
+  ArcadeIconText,
+} from "@/components/ui/modules/arcade-header";
+import { useAccount } from "@starknet-react/core";
 
 interface BaseTemplateProps {
   children: ReactNode;
@@ -27,6 +33,7 @@ export function BaseTemplate({
   const { isOpen, handleTouchMove, handleTouchStart } = useSidebar();
 
   const { isMobile } = useDevice();
+  const { account } = useAccount();
 
   return (
     <>
@@ -54,7 +61,7 @@ export function BaseTemplate({
 
             <div
               className={cn(
-                "lg:space-y-4 h-full flex flex-col",
+                "h-full flex flex-col lg:gap-4",
                 "fixed lg:relative left-0 w-[min(calc(100vw-64px),360px)]",
                 "transition-all duration-300 ease-in-out",
                 !isOpen && isMobile ? "-translate-x-full" : "translate-x-0",
@@ -62,6 +69,17 @@ export function BaseTemplate({
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
             >
+              <Link
+                to="/"
+                className={cn(
+                  "lg:hidden p-4 bg-background-100 border-r border-r-spacer-100 flex items-center justify-start gap-2 text-primary w-auto h-[66px]",
+                  "border-b",
+                  account ? "border-b-spacer-100" : "border-b-background-200",
+                )}
+              >
+                <ArcadeIcon className="h-5" />
+                <ArcadeIconText className="h-5" />
+              </Link>
               {sidebarContent}
             </div>
 
@@ -79,13 +97,13 @@ export function BaseTemplate({
             >
               {headerContent}
 
-              <div className="lg:hidden w-full p-3">
+              <div className="lg:hidden w-full p-3 border-b border-b-background-200">
                 <HeaderContainer />
               </div>
 
               <div
                 className={cn(
-                  "relative grow h-full flex flex-col min-w-0 rounded-none lg:rounded-xl lg:gap-3 overflow-hidden border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
+                  "relative grow h-full flex flex-col min-w-0 rounded-none lg:rounded-xl lg:gap-3 overflow-hidden lg:border border-background-200 bg-background-100 p-3 lg:p-6 order-2 lg:order-3",
                   contentClassName,
                 )}
               >

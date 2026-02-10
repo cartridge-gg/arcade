@@ -22,14 +22,18 @@ export const TokenDetailContainer = ({
     token,
     collection,
     isLoading,
-    isOwner,
     isListed,
+    isOwner,
     owner,
-    handleBuy,
+    ownerUsername,
+    collectible,
+    handlePurchase,
     handleList,
     handleUnlist,
     handleSend,
-    orders,
+    lowestOrder,
+    collectionHref,
+    ownerHref,
   } = useTokenDetailViewModel({ collectionAddress, tokenId });
 
   const properties = useMemo(() => {
@@ -87,13 +91,19 @@ export const TokenDetailContainer = ({
             collectionAddress={collectionAddress}
             tokenId={tokenId}
             owner={owner}
+            ownerUsername={ownerUsername}
             isOwner={isOwner}
+            ownedCount={collectible?.ownedCount ?? null}
+            collectionHref={collectionHref}
+            ownerHref={ownerHref}
             verified
           />
 
           <AssetPreview
             image={tokenImage}
             name={tokenName}
+            order={lowestOrder}
+            tokenSupply={collectible?.tokenSupply ?? null}
             className="h-[360px]"
           />
 
@@ -111,10 +121,10 @@ export const TokenDetailContainer = ({
         </div>
       </div>
       <TokenFooterActions
-        orders={orders}
+        order={lowestOrder}
         isOwner={isOwner}
         isListed={isListed}
-        handleBuy={handleBuy}
+        handlePurchase={handlePurchase}
         handleSend={handleSend}
         handleList={handleList}
         handleUnlist={handleUnlist}

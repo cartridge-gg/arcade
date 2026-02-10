@@ -15,7 +15,7 @@ export const DashboardView = ({
   }
 
   return (
-    <div className="flex flex-col gap-6 py-3">
+    <div className="flex flex-col gap-6">
       {featuredGames.length > 0 && (
         <section>
           <h2 className="text-xs tracking-wider font-semibold text-foreground-400 mb-3">

@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { accountsAtom, type Account } from "@/effect/atoms";
 import { unwrapOr } from "@/effect";
+import { useProject } from "@/hooks/project";
 
 const ADDRESS_REGEX = /^0x[a-fA-F0-9]{64}$/;
 
@@ -13,6 +14,7 @@ export interface UseOwnerFilterReturn {
   inputValue: string;
   setInputValue: (value: string) => void;
   resolvedAddress: string | null;
+  isPlayerAddress: boolean;
   isValidInput: boolean;
   isAddressInput: boolean;
   suggestions: Account[];
@@ -50,11 +52,18 @@ export function useOwnerFilter(): UseOwnerFilterReturn {
     );
   }, [accounts, inputValue, isAddressInput]);
 
+  const { tab, player } = useProject();
+
   const resolvedAddress = useMemo(() => {
     if (isAddressInput) return inputValue;
     if (selectedAccount) return selectedAccount.address;
     return null;
-  }, [isAddressInput, inputValue, selectedAccount]);
+  }, [tab, player, isAddressInput, inputValue, selectedAccount]);
+
+  const playerAddress = useMemo(
+    () => (tab === "inventoryitems" ? (player ?? "0x0") : null),
+    [tab, player],
+  );
 
   const isValidInput = resolvedAddress !== null || inputValue === "";
 
@@ -65,7 +74,8 @@ export function useOwnerFilter(): UseOwnerFilterReturn {
   return {
     inputValue,
     setInputValue,
-    resolvedAddress,
+    resolvedAddress: playerAddress ?? resolvedAddress,
+    isPlayerAddress: Boolean(playerAddress),
     isValidInput,
     isAddressInput,
     suggestions,

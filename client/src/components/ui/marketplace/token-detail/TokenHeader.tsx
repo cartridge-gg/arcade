@@ -2,6 +2,9 @@ import { ShareIcon } from "@/components/ui/icons";
 import { Button, Thumbnail, VerifiedIcon } from "@cartridge/ui";
 import { useShare } from "@/hooks/useShare";
 import { AnalyticsEvents } from "@/hooks/useAnalytics";
+import { Link } from "@tanstack/react-router";
+import { Username } from "@/components/user/username";
+import { useDevice } from "@/hooks/device";
 
 interface TokenHeaderProps {
   name: string;
@@ -10,7 +13,11 @@ interface TokenHeaderProps {
   collectionAddress?: string;
   tokenId?: string;
   owner?: string;
+  ownerUsername?: string | null;
   isOwner: boolean;
+  ownedCount?: number | null;
+  collectionHref?: string;
+  ownerHref?: string;
   verified?: boolean;
 }
 
@@ -21,7 +28,11 @@ export function TokenHeader({
   collectionAddress,
   tokenId,
   owner,
+  ownerUsername,
   isOwner,
+  ownedCount,
+  collectionHref,
+  ownerHref,
   verified = true,
 }: TokenHeaderProps) {
   const { handleShare } = useShare({
@@ -38,11 +49,9 @@ export function TokenHeader({
       },
     },
   });
+  const { isMobile } = useDevice();
 
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
+  const displayOwner = owner && (isMobile || isOwner);
 
   return (
     <div className="flex justify-between gap-4 items-center">
@@ -56,22 +65,32 @@ export function TokenHeader({
           <h1 className="text-foreground-100 text-2xl font-semibold">{name}</h1>
           <div className="flex items-center gap-3">
             {collectionName && (
-              <div className="flex items-center gap-1.5 bg-background-150 rounded px-2 py-1">
-                {verified && (
-                  <VerifiedIcon size="sm" className="text-foreground-300" />
-                )}
-                <span className="text-foreground-300 text-sm font-medium">
-                  {collectionName}
-                </span>
-              </div>
+              <Link to={collectionHref} disabled={!collectionHref}>
+                <div className="flex items-center gap-1.5 bg-background-150 rounded px-2 py-1">
+                  {verified && (
+                    <VerifiedIcon size="sm" className="text-foreground-300" />
+                  )}
+                  <span className="text-foreground-300 text-sm font-medium">
+                    {collectionName}
+                  </span>
+                </div>
+              </Link>
             )}
-            {owner && (
-              <div className="flex items-center gap-1.5 bg-background-150 rounded px-2 py-1">
-                <span className="text-foreground-300 text-sm">Owned by</span>
-                <span className="text-foreground-300 text-sm font-medium">
-                  {isOwner ? "you" : truncateAddress(owner)}
-                </span>
-              </div>
+            {displayOwner && (
+              <Link to={ownerHref} disabled={!ownerHref}>
+                <div className="flex items-center gap-1.5 bg-background-150 rounded px-2 py-1">
+                  {isOwner ? (
+                    <span className="text-foreground-300 text-sm">
+                      {ownedCount ? `You own ${ownedCount}` : "Owned by you"}
+                    </span>
+                  ) : (
+                    <span className="text-foreground-300 text-sm">
+                      Owned by{" "}
+                      <Username username={ownerUsername} address={owner} />
+                    </span>
+                  )}
+                </div>
+              </Link>
             )}
           </div>
         </div>

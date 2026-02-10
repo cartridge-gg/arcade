@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { NavigationButton } from "./link-item";
 import { Home, Gamepad2, Trophy, User } from "lucide-react";
 

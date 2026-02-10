@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { AchievementPlayerHeader } from "./player-header";
 import { Trophy } from "lucide-react";
 

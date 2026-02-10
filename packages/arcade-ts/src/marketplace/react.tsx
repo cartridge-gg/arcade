@@ -18,7 +18,10 @@ import type {
   FetchTokenBalancesResult,
   MarketplaceClient,
   MarketplaceClientConfig,
+  MarketplaceFees,
   NormalizedCollection,
+  RoyaltyFee,
+  RoyaltyFeeOptions,
   TokenDetailsOptions,
   TokenDetails,
 } from "./types";
@@ -494,4 +497,31 @@ export function useMarketplaceTokenBalances(
     ...state,
     refresh,
   };
+}
+
+export function useMarketplaceFees(
+  enabled = true,
+): UseMarketplaceQueryResult<MarketplaceFees | null> {
+  const request = useCallback(
+    (client: MarketplaceClient) => client.getFees(),
+    [],
+  );
+  return useMarketplaceClientQuery(request, enabled);
+}
+
+export function useMarketplaceRoyaltyFee(
+  options: RoyaltyFeeOptions,
+  enabled = true,
+): UseMarketplaceQueryResult<RoyaltyFee | null> {
+  const stableOptions = useStableValue(options);
+  const request = useCallback(
+    (client: MarketplaceClient) => client.getRoyaltyFee(stableOptions),
+    [stableOptions],
+  );
+  const shouldFetch =
+    enabled &&
+    Boolean(stableOptions.collection) &&
+    Boolean(stableOptions.tokenId) &&
+    stableOptions.amount > 0n;
+  return useMarketplaceClientQuery(request, shouldFetch);
 }

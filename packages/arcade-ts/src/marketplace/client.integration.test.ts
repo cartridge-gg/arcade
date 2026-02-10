@@ -130,13 +130,53 @@ describe.skipIf(!runIntegration)("marketplace client integration", () => {
         expect(order.category.value).toBe(CategoryType.Sell);
       });
     }, 30000);
+
+    it("fetches orderids", async () => {
+      const orderIds = [2342, 1306];
+      const orders = await client.getCollectionOrders({
+        collection: TEST_COLLECTION,
+        orderIds,
+      });
+      expect(Array.isArray(orders)).toBe(true);
+
+      const ids = orders.map((o) => o.id);
+      expect(ids).toEqual(orderIds);
+    });
   });
 
   describe("listCollectionListings", () => {
-    it("returns only Sell + Placed orders", async () => {
+    it("returns only Sell + Placed orders with verified ownership by default", async () => {
       const listings = await client.listCollectionListings({
         collection: TEST_COLLECTION,
         limit: 10,
+      });
+
+      expect(Array.isArray(listings)).toBe(true);
+      listings.forEach((listing) => {
+        expect(listing.category.value).toBe(CategoryType.Sell);
+        expect(listing.status.value).toBe(StatusType.Placed);
+      });
+    }, 30000);
+
+    it("skips ownership verification when verifyOwnership is false", async () => {
+      const listings = await client.listCollectionListings({
+        collection: TEST_COLLECTION,
+        limit: 10,
+        verifyOwnership: false,
+      });
+
+      expect(Array.isArray(listings)).toBe(true);
+      listings.forEach((listing) => {
+        expect(listing.category.value).toBe(CategoryType.Sell);
+        expect(listing.status.value).toBe(StatusType.Placed);
+      });
+    }, 30000);
+
+    it("filters listings with explicit ownership verification", async () => {
+      const listings = await client.listCollectionListings({
+        collection: TEST_COLLECTION,
+        limit: 10,
+        verifyOwnership: true,
       });
 
       expect(Array.isArray(listings)).toBe(true);

@@ -4,8 +4,7 @@ import { getChecksumAddress } from "starknet";
 import { useAchievements } from "@/hooks/achievements";
 import { useArcade } from "@/hooks/arcade";
 import type { EditionModel } from "@cartridge/arcade";
-import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
-import { useRouterState } from "@tanstack/react-router";
+import { useNavigationManager } from "@/features/navigation/useNavigationManager";
 
 export interface LeaderboardPin {
   id: string;
@@ -59,8 +58,7 @@ export function useLeaderboardViewModel({
 
   const { achievements, globals, players, usernames, isLoading, isError } =
     useAchievements();
-  const { pins, follows, games, editions } = useArcade();
-  const { location } = useRouterState();
+  const { pins, follows } = useArcade();
 
   const followingSet = useMemo(() => {
     if (!normalizedAddress) return new Set<string>();
@@ -145,16 +143,7 @@ export function useLeaderboardViewModel({
 
   const dataset = edition ? gameData : globalData;
 
-  const navManager = useMemo(
-    () =>
-      new NavigationContextManager({
-        pathname: location.pathname,
-        games,
-        editions,
-        isLoggedIn: Boolean(isConnected),
-      }),
-    [location.pathname, games, editions, isConnected],
-  );
+  const navManager = useNavigationManager();
 
   const getPlayerTarget = useCallback(
     (nameOrAddress: string) => {

@@ -4,11 +4,12 @@ import { cn } from "@cartridge/ui/utils";
 import { useProject } from "@/hooks/project";
 import { useDevice } from "@/hooks/device";
 import { UserCard } from "./user/user-card";
-import arcade from "@/assets/arcade-logo.png";
 import { Socials } from "@cartridge/arcade";
 import { NavigationContainer } from "@/features/navigation";
 import { CollectionHeader } from "./ui/marketplace/items/CollectionHeader";
 import { BaseTemplate } from "./base-template";
+import arcade from "@/assets/arcade-logo.png";
+import { useAccount } from "@starknet-react/core";
 
 interface MarketplaceItemsTemplateProps {
   children: ReactNode;
@@ -19,6 +20,7 @@ export function MarketplaceItemsTemplate({
 }: MarketplaceItemsTemplateProps) {
   const { player, game, edition, collection } = useProject();
   const { isMobile } = useDevice();
+  const { account } = useAccount();
 
   const socials = useMemo(() => {
     return Socials.merge(edition?.socials, game?.socials);
@@ -31,7 +33,12 @@ export function MarketplaceItemsTemplate({
       outerClassName="overflow-y-scroll"
       sidebarContent={
         <>
-          {!isMobile && <UserCard />}
+          <div className="bg-background-100 -mb-px lg:hidden p-4 border-b border-r border-spacer-100">
+            <UserCard
+              account={account}
+              className="border border-background-200 rounded-lg"
+            />
+          </div>
           <div className="flex-1 overflow-hidden">
             <MarketplaceFiltersContainer />
           </div>

@@ -1,5 +1,6 @@
 import { memo } from "react";
 import {
+  cn,
   MarketplaceFilters,
   MarketplaceHeader,
   MarketplaceHeaderReset,
@@ -31,6 +32,7 @@ interface MarketplaceFiltersViewProps {
   onSearchChange: (attribute: string, value: string) => void;
   onAttributeExpand: (attribute: string, expanded: boolean) => void;
   isSummaryLoading?: boolean;
+  isInventory: boolean;
   ownerInput: string;
   ownerSuggestions: Account[];
   isOwnerAddressInput: boolean;
@@ -51,6 +53,7 @@ export const MarketplaceFiltersView = memo(
     onSearchChange,
     onAttributeExpand,
     isSummaryLoading,
+    isInventory,
     ownerInput,
     ownerSuggestions,
     isOwnerAddressInput,
@@ -59,7 +62,14 @@ export const MarketplaceFiltersView = memo(
     onClearOwner,
   }: MarketplaceFiltersViewProps) => {
     return (
-      <MarketplaceFilters className="h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden rounded-none lg:rounded-xl">
+      <MarketplaceFilters
+        className={cn(
+          "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px] overflow-hidden",
+          "rounded-none lg:rounded-xl",
+          "border-r border-spacer-100 lg:border-background-200",
+          "bg-background-100 lg:bg-background-125 shadow-none",
+        )}
+      >
         <MarketplaceHeader label="Status" />
         <div className="flex flex-col gap-2 w-fit">
           <MarketplaceRadialItem
@@ -73,15 +83,19 @@ export const MarketplaceFiltersView = memo(
             onClick={onAllClick}
           />
         </div>
-        <MarketplaceHeader label="Owner" />
-        <OwnerFilterSection
-          inputValue={ownerInput}
-          onInputChange={onOwnerInputChange}
-          suggestions={ownerSuggestions}
-          isAddressInput={isOwnerAddressInput}
-          onSelectSuggestion={onOwnerSelectSuggestion}
-          onClear={onClearOwner}
-        />
+        {!isInventory && (
+          <>
+            <MarketplaceHeader label="Owner" />
+            <OwnerFilterSection
+              inputValue={ownerInput}
+              onInputChange={onOwnerInputChange}
+              suggestions={ownerSuggestions}
+              isAddressInput={isOwnerAddressInput}
+              onSelectSuggestion={onOwnerSelectSuggestion}
+              onClear={onClearOwner}
+            />
+          </>
+        )}
         <MarketplaceHeader label="Properties">
           {hasActiveFilters && <MarketplaceHeaderReset onClick={onClearAll} />}
         </MarketplaceHeader>

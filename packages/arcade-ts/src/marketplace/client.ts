@@ -1,11 +1,13 @@
 import {
   AndComposeClause,
+  ClauseBuilder,
   KeysClause,
   MemberClause,
+  OrComposeClause,
   ToriiQueryBuilder,
 } from "@dojoengine/sdk";
 import type { constants } from "starknet";
-import { addAddressPadding, getChecksumAddress } from "starknet";
+import { addAddressPadding, cairo, getChecksumAddress } from "starknet";
 import type {
   ToriiClient,
   Token as ToriiToken,
@@ -18,9 +20,10 @@ import { initArcadeSDK } from "../modules";
 import type { SchemaType } from "../bindings";
 import { ArcadeModelsMapping, OrderCategory, OrderStatus } from "../bindings";
 import { NAMESPACE } from "../constants";
+import { Book } from "../modules/marketplace/book";
 import { Order, type OrderModel } from "../modules/marketplace/order";
 import { CategoryType, StatusType } from "../classes";
-import { fetchCollectionTokens } from "./tokens";
+import { fetchCollectionTokens, fetchTokenBalances } from "./tokens";
 import {
   defaultResolveContractImage,
   defaultResolveTokenImage,
@@ -33,7 +36,10 @@ import type {
   CollectionSummaryOptions,
   MarketplaceClient,
   MarketplaceClientConfig,
+  MarketplaceFees,
   NormalizedCollection,
+  RoyaltyFee,
+  RoyaltyFeeOptions,
   TokenDetails,
   TokenDetailsOptions,
 } from "./types";
@@ -182,6 +188,7 @@ export async function createMarketplaceClient(
     defaultProject = "arcade-main",
     resolveTokenImage,
     resolveContractImage,
+    provider,
   } = config;
 
   const sdk = await initArcadeSDK(chainId as constants.StarknetChainId);
@@ -191,14 +198,42 @@ export async function createMarketplaceClient(
   ): Promise<OrderModel[]> => {
     const checksumCollection = getChecksumAddress(options.collection);
     const tokenId = normalizeTokenIdForQuery(options.tokenId);
+    const orderIds = options.orderIds ?? [];
 
-    const builders = [
-      KeysClause(
+    let baseClause:
+      | ReturnType<typeof KeysClause>
+      | ReturnType<typeof OrComposeClause>;
+
+    if (orderIds.length > 0) {
+      const orderIdClauses = orderIds.map((id) =>
+        KeysClause(
+          [ArcadeModelsMapping.Order],
+          [
+            id.toString(),
+            addAddressPadding(checksumCollection),
+            tokenId,
+            undefined,
+          ],
+          "FixedLen",
+        ),
+      );
+      baseClause =
+        orderIdClauses.length === 1
+          ? orderIdClauses[0]
+          : OrComposeClause(orderIdClauses);
+    } else {
+      baseClause = KeysClause(
         [ArcadeModelsMapping.Order],
         [undefined, addAddressPadding(checksumCollection), tokenId, undefined],
         "FixedLen",
-      ),
-    ];
+      );
+    }
+
+    const builders: Array<
+      | ReturnType<typeof KeysClause>
+      | ReturnType<typeof MemberClause>
+      | ReturnType<typeof OrComposeClause>
+    > = [baseClause];
 
     const status =
       options.status != null ? statusMap[options.status] : undefined;
@@ -286,11 +321,51 @@ export async function createMarketplaceClient(
       status: StatusType.Placed,
     });
 
-    return baseOrders.filter(
+    const filtered = baseOrders.filter(
       (order) =>
         order.category.value === CategoryType.Sell &&
         order.status.value === StatusType.Placed,
     );
+
+    if (options.verifyOwnership === false || filtered.length === 0) {
+      return filtered;
+    }
+
+    const projectId = ensureProjectId(options.projectId, defaultProject);
+    const checksumCollection = getChecksumAddress(options.collection);
+    const ownerAddresses = [...new Set(filtered.map((o) => o.owner))];
+    const tokenIds = [
+      ...new Set(
+        filtered.map((o) => addAddressPadding(`0x${o.tokenId.toString(16)}`)),
+      ),
+    ];
+
+    const { page, error } = await fetchTokenBalances({
+      project: projectId,
+      contractAddresses: [checksumCollection],
+      accountAddresses: ownerAddresses,
+      tokenIds,
+    });
+
+    if (error || !page) {
+      throw new Error("Failed to verify listing ownership");
+    }
+
+    const ownershipSet = new Set<string>();
+    for (const balance of page.balances) {
+      if (BigInt(balance.balance) > 0n && balance.token_id) {
+        const normalizedOwner = getChecksumAddress(balance.account_address);
+        const normalizedTokenId = BigInt(balance.token_id).toString();
+        ownershipSet.add(`${normalizedOwner}_${normalizedTokenId}`);
+      }
+    }
+
+    return filtered.filter((order) => {
+      const normalizedOwner = getChecksumAddress(order.owner);
+      const normalizedTokenId = BigInt(order.tokenId).toString();
+      const key = `${normalizedOwner}_${normalizedTokenId}`;
+      return ownershipSet.has(key);
+    });
   };
 
   const getToken = async (
@@ -342,6 +417,55 @@ export async function createMarketplaceClient(
     };
   };
 
+  const getFees = async (): Promise<MarketplaceFees | null> => {
+    const clauses = new ClauseBuilder().keys(
+      [`${NAMESPACE}-${Book.getModelName()}`],
+      [],
+    );
+    const query = new ToriiQueryBuilder<SchemaType>()
+      .withClause(clauses.build())
+      .withEntityModels([`${NAMESPACE}-${Book.getModelName()}`])
+      .includeHashedKeys();
+
+    const entities = await sdk.getEntities({ query });
+    const items = entities?.getItems() ?? [];
+
+    for (const entity of items) {
+      const book = Book.parse(entity);
+      if (book.exists()) {
+        return {
+          feeNum: book.fee_num,
+          feeReceiver: book.fee_receiver,
+          feeDenominator: 10000,
+        };
+      }
+    }
+    return null;
+  };
+
+  const getRoyaltyFee = async (
+    options: RoyaltyFeeOptions,
+  ): Promise<RoyaltyFee | null> => {
+    if (!provider) {
+      throw new Error(
+        "Provider required for getRoyaltyFee. Pass provider in config.",
+      );
+    }
+
+    const result = await provider.callContract({
+      contractAddress: options.collection,
+      entrypoint: "royalty_info",
+      calldata: [cairo.uint256(options.tokenId), cairo.uint256(options.amount)],
+    });
+
+    if (!result || result.length < 2) return null;
+
+    return {
+      receiver: getChecksumAddress(result[0]),
+      amount: BigInt(result[1]),
+    };
+  };
+
   return {
     getCollection,
     listCollectionTokens: (options) =>
@@ -354,5 +478,7 @@ export async function createMarketplaceClient(
     getCollectionOrders,
     listCollectionListings,
     getToken,
+    getFees,
+    getRoyaltyFee,
   };
 }

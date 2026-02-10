@@ -11,14 +11,17 @@ export type MarketplaceHolder = {
   address: string;
   balance: number;
   token_ids: string[];
+  balances: number[];
   username?: string;
   ratio: number;
+  href?: string;
 };
 
 type HolderTokenCount = {
   account_address: string;
   token_count: BigInt;
   token_ids: string | null;
+  balances: string | null;
 };
 
 export type TokenBalancesState = {
@@ -54,6 +57,11 @@ const buildHolders = (
       address: getChecksumAddress(i.account_address),
       balance: Number(i.token_count),
       token_ids: i.token_ids ? String(i.token_ids).split(",") : [],
+      balances: i.balances
+        ? String(i.balances)
+            .split(",")
+            .map((b) => Number(BigInt(b)))
+        : [],
       username: usernamesMap.get(getChecksumAddress(i.account_address)),
       ratio:
         totalBalance > 0
@@ -78,7 +86,8 @@ const fetchTokenBalancesStream = (
           client.executeSql(`SELECT
                     account_address,
                     COUNT(*) as token_count,
-                    GROUP_CONCAT(token_id) as token_ids
+                    GROUP_CONCAT(token_id) as token_ids,
+                    GROUP_CONCAT(balance) as balances
                 FROM token_balances
                 WHERE contract_address = '${normalizedAddress}' AND account_address != '0x0000000000000000000000000000000000000000000000000000000000000001'
                   AND balance != '0x0000000000000000000000000000000000000000000000000000000000000000'

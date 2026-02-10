@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import ControllerAction from "./controller-action";
 import { Settings, LogOut, Wallet, Key } from "lucide-react";
 

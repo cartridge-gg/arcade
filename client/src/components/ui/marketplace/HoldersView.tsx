@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Button, Empty, Skeleton } from "@cartridge/ui";
 import { UserAvatar } from "@/components/user/avatar";
 import { FloatingLoadingSpinner } from "@/components/ui/floating-loading-spinner";
@@ -83,22 +84,24 @@ function HolderLine({
   index,
 }: { holder: MarketplaceHolder; index: number }) {
   return (
-    <div className="flex items-center gap-3 bg-background-200 text-foreground-100 font-medium text-sm h-10 w-full">
-      <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-        <p className="w-8 text-foreground-400 font-normal">{index + 1}.</p>
-        <div className="flex items-center gap-1 text-foreground-100 font-normal font-sans">
-          <UserAvatar
-            username={holder.username || holder.address.slice(0, 9) || ""}
-            size="sm"
-          />
-          <p>{holder.username || holder.address.slice(0, 9) || ""}</p>
+    <Link to={holder.href} disabled={!holder.href}>
+      <div className="flex items-center gap-3 bg-background-200 text-foreground-100 font-medium text-sm h-10 w-full hover:bg-background-300">
+        <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+          <p className="w-8 text-foreground-400 font-normal">{index + 1}.</p>
+          <div className="flex items-center gap-1 text-foreground-100 font-normal font-sans">
+            <UserAvatar
+              username={holder.username || holder.address.slice(0, 9) || ""}
+              size="sm"
+            />
+            <p>{holder.username || holder.address.slice(0, 9) || ""}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 w-1/2 px-3 py-1">
+          <p className="w-1/2 text-right">{holder.balance}</p>
+          <p className="w-1/2 text-right">{holder.ratio}%</p>
         </div>
       </div>
-      <div className="flex items-center gap-2 w-1/2 px-3 py-1">
-        <p className="w-1/2 text-right">{holder.balance}</p>
-        <p className="w-1/2 text-right">{holder.ratio}%</p>
-      </div>
-    </div>
+    </Link>
   );
 }
 

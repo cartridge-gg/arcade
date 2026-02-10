@@ -12,18 +12,33 @@ let mockConnectors: any[] = [];
 vi.mock("@starknet-react/core", () => ({
   useAccount: () => mockUseAccount(),
   useConnect: () => ({ connect: mockConnect, connectors: mockConnectors }),
+  useDisconnect: () => ({ disconnect: null }),
 }));
 
 const mockNavigate = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mockNavigate,
+  useRouterState: () => ({ location: { pathname: "" } }),
+  useSearch: () => ({ data: null, isLoading: false }),
+}));
+
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: () => ({ data: {} }),
 }));
 
 const mockGetClassAt = vi.fn();
 
 vi.mock("@/hooks/arcade", () => ({
   useArcade: () => ({ provider: { provider: { getClassAt: mockGetClassAt } } }),
+}));
+
+vi.mock("@/hooks/address", () => ({
+  useAddress: () => ({ address: "0x123", isConnected: true }),
+}));
+
+vi.mock("@/hooks/collectibles", () => ({
+  useCollectibleBalances: () => ({ balances: {} }),
 }));
 
 let mockSales: Record<string, Record<string, any>> = {};
@@ -92,6 +107,7 @@ vi.mock("@/effect", () => ({
     search: "",
   }),
   ownerTokenIdsAtom: () => ({ _tag: "Success", value: new Set() }),
+  useAccount: () => ({ data: {} }),
   DEFAULT_STATUS_FILTER: "all",
 }));
 

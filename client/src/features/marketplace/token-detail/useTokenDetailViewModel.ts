@@ -1,19 +1,25 @@
 import { useCallback, useMemo } from "react";
-import { useAccount, useConnect } from "@starknet-react/core";
-import { useRouterState } from "@tanstack/react-router";
+import { useAccount } from "@starknet-react/core";
 import type { Token } from "@/types/torii";
 import type { OrderModel } from "@cartridge/arcade";
 import { useMarketBalancesFetcher } from "@/hooks/marketplace-balances-fetcher";
-import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
+import { DEFAULT_PROJECT } from "@/constants";
 import { addAddressPadding, getChecksumAddress } from "starknet";
-import { useAnalytics } from "@/hooks/useAnalytics";
 import { useArcade } from "@/hooks/arcade";
-import { ERC1155_ENTRYPOINT, getEntrypoints } from "../items";
-import type ControllerConnector from "@cartridge/connector/controller";
 import { useAccountByAddress, useMarketplaceTokens } from "@/effect";
 import { collectionOrdersAtom } from "@/effect/atoms";
+import { CollectionType } from "@/effect/atoms/tokens";
 import { useAtomValue } from "@effect-atom/atom-react";
-import { NavigationContextManager } from "@/features/navigation/NavigationContextManager";
+import { useNavigationManager } from "@/features/navigation/useNavigationManager";
+import { VoyagerUrl } from "@cartridge/ui/utils";
+import { getChainId } from "@/lib/helpers";
+import {
+  useHandlePurchaseCallback,
+  useHandleListCallback,
+  useHandleSendCallback,
+  useHandleUnlistCallback,
+} from "@/hooks/marketplace-actions-handlers";
+import { useProject } from "@/hooks/project";
 
 interface UseTokenDetailViewModelArgs {
   collectionAddress: string;
@@ -24,13 +30,22 @@ interface TokenDetailViewModel {
   token: Token | undefined;
   collection: ReturnType<typeof useMarketplaceTokens>["collection"];
   orders: OrderModel[];
+  lowestOrder: OrderModel | null;
   isLoading: boolean;
-  isOwner: boolean;
   isListed: boolean;
+  isOwner: boolean;
   owner: string;
-  controller: { address: string; username: string } | null;
+  ownerUsername: string | null;
+  collectible?: {
+    // when ERC-1155
+    tokenSupply: number;
+    ownersCount: number;
+    ownedCount: number;
+  };
   collectionHref: string;
-  handleBuy: () => Promise<void>;
+  ownerHref: string;
+  contractHref: string | undefined;
+  handlePurchase: () => Promise<void>;
   handleList: () => Promise<void>;
   handleUnlist: () => Promise<void>;
   handleSend: () => Promise<void>;
@@ -40,11 +55,9 @@ export function useTokenDetailViewModel({
   collectionAddress,
   tokenId,
 }: UseTokenDetailViewModelArgs): TokenDetailViewModel {
-  const { connector } = useConnect();
-  const { address, isConnected } = useAccount();
-  const { trackEvent, events } = useAnalytics();
-  const { provider, games, editions } = useArcade();
-  const { location } = useRouterState();
+  const { address } = useAccount();
+  const { provider } = useArcade();
+  const { edition } = useProject();
 
   const {
     collection,
@@ -54,18 +67,48 @@ export function useTokenDetailViewModel({
     tokenIds: [tokenId],
   });
 
+  const isERC1155 = useMemo(
+    () => collection?.contract_type === CollectionType.ERC1155,
+    [collection],
+  );
+
   const { balances } = useMarketBalancesFetcher({
     project: [DEFAULT_PROJECT],
     address: collectionAddress,
     tokenId,
   });
-  const owner = useMemo(
-    () =>
-      balances && balances.length === 1
-        ? addAddressPadding(balances[0].account_address)
-        : "0x0",
-    [balances],
-  );
+
+  const collectible = useMemo(() => {
+    if (!isERC1155 || !balances) return undefined;
+    const tokenSupply = balances.reduce(
+      (acc, balance) => acc + Number(BigInt(balance.balance)),
+      0,
+    );
+    const ownersCount = balances.length;
+    const ownedBalance = balances.find(
+      (b) => address && BigInt(b.account_address) === BigInt(address),
+    );
+    const ownedCount = Number(BigInt(ownedBalance?.balance ?? 0));
+    return {
+      tokenSupply,
+      ownersCount,
+      ownedCount,
+    };
+  }, [isERC1155, balances, address]);
+
+  const owner = useMemo(() => {
+    if (collectible) {
+      return collectible.ownedCount > 0
+        ? addAddressPadding(address as string)
+        : "0x0";
+    }
+    if (balances && balances.length === 1) {
+      return addAddressPadding(balances[0].account_address);
+    }
+    const addr = balances.find((b) => BigInt(b.balance) > 0n)?.account_address;
+    return addr ? addAddressPadding(addr) : "0x0";
+  }, [balances, collectible]);
+
   const isOwner = useMemo(
     () =>
       undefined !== address &&
@@ -73,7 +116,8 @@ export function useTokenDetailViewModel({
         getChecksumAddress(addAddressPadding(owner)),
     [address, owner],
   );
-  const { data: controllerName } = useAccountByAddress(owner);
+
+  const ownerUsername = useAccountByAddress(owner)?.data?.username || null;
 
   const token = useMemo(() => {
     if (!rawTokens || rawTokens.length === 0) return undefined;
@@ -93,14 +137,14 @@ export function useTokenDetailViewModel({
     const candidates = new Set<string>();
     candidates.add(tokenId);
 
-    try {
-      if (tokenId.startsWith("0x")) {
+    if (tokenId.startsWith("0x")) {
+      try {
         const numericId = BigInt(tokenId).toString();
         candidates.add(numericId);
-      } else {
-        candidates.add(`0x${BigInt(tokenId).toString(16)}`);
+      } catch (error) {
+        candidates.add(BigInt(`0x${tokenId}`).toString());
       }
-    } catch (error) {
+    } else {
       candidates.add(BigInt(`0x${tokenId}`).toString());
     }
 
@@ -114,195 +158,80 @@ export function useTokenDetailViewModel({
     return [];
   }, [collectionOrders, tokenId]);
 
-  const isListed = useMemo(() => {
-    return orders.length > 0;
-  }, [orders]);
+  const lowestOrder = useMemo(
+    () => (orders.length > 0 ? orders[0] : null),
+    [orders],
+  );
+
+  const isListed = !!lowestOrder;
 
   const isLoading = status === "loading" || status === "idle";
 
-  const navManager = useMemo(
-    () =>
-      new NavigationContextManager({
-        pathname: location.pathname,
-        games,
-        editions,
-        isLoggedIn: Boolean(isConnected),
-      }),
-    [location.pathname, games, editions, isConnected],
-  );
+  const navManager = useNavigationManager();
 
   const collectionHref = useMemo(
     () => navManager.generateCollectionHref(collectionAddress),
     [navManager, collectionAddress],
   );
 
-  const handleBuy = useCallback(async () => {
-    if (!isConnected || !connector) return;
+  const ownerHref = useMemo(
+    () => navManager.generatePlayerHref(owner),
+    [navManager, owner],
+  );
 
-    const eventType = events.MARKETPLACE_PURCHASE_INITIATED;
+  const contractHref = useMemo(() => {
+    const chainId = getChainId(provider.provider.channel.nodeUrl);
+    return chainId
+      ? VoyagerUrl(chainId).contract(collectionAddress)
+      : undefined;
+  }, [navManager, collectionAddress]);
 
-    trackEvent(eventType, {
-      purchase_type: "single",
-      items_count: 1,
-      order_ids: orders.map((order) => order.id.toString()),
-      collection_address: collectionAddress,
-      buyer_address: address,
-      item_token_ids: tokenId,
-    });
+  const handlerParams = useMemo(
+    () => ({
+      project: edition?.config.project,
+      preset: edition?.properties.preset,
+    }),
+    [edition?.id],
+  );
 
-    const controller = (connector as ControllerConnector)?.controller;
-    const username = await controller?.username();
-    if (!controller || !username) {
-      console.error("Connector not initialized");
-      trackEvent(events.MARKETPLACE_PURCHASE_FAILED, {
-        error_message: "Connector not initialized",
-        purchase_type: "single",
-      });
-      return;
+  const handlePurchaseCallback = useHandlePurchaseCallback(handlerParams);
+  const handleListCallback = useHandleListCallback(handlerParams);
+  const handleUnlistCallback = useHandleUnlistCallback(handlerParams);
+  const handleSendCallback = useHandleSendCallback(handlerParams);
+
+  const handlePurchase = useCallback(async () => {
+    if (lowestOrder) {
+      handlePurchaseCallback(collectionAddress, [tokenId], [lowestOrder]);
     }
-
-    const entrypoints = await getEntrypoints(
-      provider.provider,
-      collectionAddress,
-    );
-    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-    const subpath = isERC1155 ? "collectible" : "collection";
-
-    const project = DEFAULT_PROJECT;
-    const preset = DEFAULT_PRESET;
-    const options = [`ps=${project}`];
-    if (preset) {
-      options.push(`preset=${preset}`);
-    } else {
-      options.push("preset=cartridge");
-    }
-
-    options.push(`address=${getChecksumAddress(owner)}`);
-    options.push("purchaseView=true");
-    options.push(`tokenIds=${[addAddressPadding(tokenId)].join(",")}`);
-    const path = `account/${username}/inventory/${subpath}/${addAddressPadding(collectionAddress)}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-
-    controller.openProfileAt(path);
-  }, [
-    address,
-    connector,
-    events,
-    isConnected,
-    provider,
-    tokenId,
-    trackEvent,
-    collectionAddress,
-    orders,
-    owner,
-  ]);
+  }, [handlePurchaseCallback, collectionAddress, tokenId, lowestOrder]);
 
   const handleList = useCallback(async () => {
-    if (!isConnected || !connector) return;
-
-    const controller = (connector as ControllerConnector)?.controller;
-    const username = await controller?.username();
-    if (!controller || !username) {
-      console.error("Connector not initialized");
-      return;
-    }
-
-    const entrypoints = await getEntrypoints(
-      provider.provider,
-      collectionAddress,
-    );
-    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-    const subpath = isERC1155 ? "collectible" : "collection";
-
-    const project = DEFAULT_PROJECT;
-    const preset = DEFAULT_PRESET;
-    const options = [`ps=${project}`];
-    if (preset) {
-      options.push(`preset=${preset}`);
-    } else {
-      options.push("preset=cartridge");
-    }
-
-    options.push("listView=true");
-    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-
-    controller.openProfileAt(path);
-  }, [connector, isConnected, provider, tokenId, collectionAddress]);
+    handleListCallback(collectionAddress, [tokenId]);
+  }, [handleListCallback, collectionAddress, tokenId]);
 
   const handleUnlist = useCallback(async () => {
-    if (!isConnected || !connector) return;
-
-    const controller = (connector as ControllerConnector)?.controller;
-    const username = await controller?.username();
-    if (!controller || !username) {
-      console.error("Connector not initialized");
-      return;
-    }
-
-    const entrypoints = await getEntrypoints(
-      provider.provider,
-      collectionAddress,
-    );
-    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-    const subpath = isERC1155 ? "collectible" : "collection";
-
-    const project = DEFAULT_PROJECT;
-    const preset = DEFAULT_PRESET;
-    const options = [`ps=${project}`];
-    if (preset) {
-      options.push(`preset=${preset}`);
-    } else {
-      options.push("preset=cartridge");
-    }
-
-    options.push("unlistView=true");
-    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-
-    controller.openProfileAt(path);
-  }, [connector, isConnected, provider, tokenId, collectionAddress]);
+    handleUnlistCallback(collectionAddress, [tokenId]);
+  }, [handleUnlistCallback, collectionAddress, tokenId]);
 
   const handleSend = useCallback(async () => {
-    if (!isConnected || !connector) return;
-
-    const controller = (connector as ControllerConnector)?.controller;
-    const username = await controller?.username();
-    if (!controller || !username) {
-      console.error("Connector not initialized");
-      return;
-    }
-
-    const entrypoints = await getEntrypoints(
-      provider.provider,
-      collectionAddress,
-    );
-    const isERC1155 = entrypoints?.includes(ERC1155_ENTRYPOINT);
-    const subpath = isERC1155 ? "collectible" : "collection";
-
-    const project = DEFAULT_PROJECT;
-    const preset = DEFAULT_PRESET;
-    const options = [`ps=${project}`];
-    if (preset) {
-      options.push(`preset=${preset}`);
-    } else {
-      options.push("preset=cartridge");
-    }
-
-    options.push("sendView=true");
-    const path = `account/${username}/inventory/${subpath}/${collectionAddress}/token/${addAddressPadding(tokenId)}${options.length > 0 ? `?${options.join("&")}` : ""}`;
-
-    controller.openProfileAt(path);
-  }, [connector, isConnected, provider, tokenId, collectionAddress]);
+    handleSendCallback(collectionAddress, [tokenId]);
+  }, [handleSendCallback, collectionAddress, tokenId]);
 
   return {
     token,
     collection,
     orders,
+    lowestOrder,
     isLoading,
-    isOwner,
     isListed,
+    isOwner,
     owner,
-    controller: controllerName,
+    ownerUsername,
+    collectible,
     collectionHref,
-    handleBuy,
+    ownerHref,
+    contractHref,
+    handlePurchase,
     handleList,
     handleUnlist,
     handleSend,

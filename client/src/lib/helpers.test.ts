@@ -35,6 +35,14 @@ describe("helpers", () => {
     it("formats values in minutes", () => {
       expect(getDuration(90_000)).toBe("1m");
     });
+
+    it("formats values hours", () => {
+      expect(getDuration(1.5 * 60 * 60 * 1000)).toBe("1h");
+    });
+
+    it("formats values hours, with minutes", () => {
+      expect(getDuration(1.5 * 60 * 60 * 1000, true)).toBe("1h 30m");
+    });
   });
 
   describe("getTime", () => {

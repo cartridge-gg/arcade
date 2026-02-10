@@ -3,7 +3,7 @@ import type {
   TokenBalance,
   TokenContract,
 } from "@dojoengine/torii-wasm/types";
-import type { constants } from "starknet";
+import type { constants, RpcProvider } from "starknet";
 import type { OrderModel } from "../modules/marketplace";
 
 export type AttributeFilterInputValue =
@@ -82,12 +82,15 @@ export interface CollectionOrdersOptions {
   status?: OrderModel["status"]["value"];
   category?: OrderModel["category"]["value"];
   limit?: number;
+  orderIds?: number[];
 }
 
 export interface CollectionListingsOptions {
   collection: string;
   tokenId?: string;
   limit?: number;
+  verifyOwnership?: boolean;
+  projectId?: string;
 }
 
 export interface TokenDetailsOptions {
@@ -110,6 +113,24 @@ export interface MarketplaceClientConfig {
   defaultProject?: string;
   resolveTokenImage?: ResolveTokenImage;
   resolveContractImage?: ResolveContractImage;
+  provider?: RpcProvider;
+}
+
+export interface MarketplaceFees {
+  feeNum: number;
+  feeReceiver: string;
+  feeDenominator: number;
+}
+
+export interface RoyaltyFeeOptions {
+  collection: string;
+  tokenId: string;
+  amount: bigint;
+}
+
+export interface RoyaltyFee {
+  receiver: string;
+  amount: bigint;
 }
 
 export interface MarketplaceClient {
@@ -124,6 +145,8 @@ export interface MarketplaceClient {
     options: CollectionListingsOptions,
   ): Promise<OrderModel[]>;
   getToken(options: TokenDetailsOptions): Promise<TokenDetails | null>;
+  getFees(): Promise<MarketplaceFees | null>;
+  getRoyaltyFee(options: RoyaltyFeeOptions): Promise<RoyaltyFee | null>;
 }
 
 export interface TokenBalancesPage {

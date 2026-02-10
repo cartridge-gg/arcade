@@ -23,6 +23,7 @@ import type {
 } from "@/features/games/useGamesViewModel";
 import arcade from "@/assets/arcade-logo.png";
 import banner from "@/assets/banner.png";
+import { useAccount } from "@starknet-react/core";
 
 const CARD_LIST_STYLE = { scrollbarWidth: "none" } as const;
 
@@ -38,6 +39,7 @@ export const GamesView = React.memo(
     sharedContext,
   }: GamesViewProps) => {
     const [search, setSearch] = useState("");
+    const { account } = useAccount();
 
     const filteredGames = useMemo(
       () =>
@@ -50,9 +52,10 @@ export const GamesView = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col gap-px bg-background-200 overflow-clip lg:rounded-xl border-r border-spacer-100 lg:border lg:border-background-200",
+          "flex flex-col gap-px bg-background-200 overflow-clip",
           "h-full w-[calc(100vw-64px)] max-w-[360px] lg:flex lg:min-w-[360px]",
-          isMobile && "fixed z-50 top-0 left-0",
+          "lg:border lg:border-background-200 lg:rounded-xl border-r border-spacer-100",
+          isMobile && "fixed z-50 left-0",
           sidebar.isOpen
             ? "translate-x-0"
             : "-translate-x-full lg:translate-x-0",
@@ -61,7 +64,14 @@ export const GamesView = React.memo(
         onTouchStart={sidebar.handleTouchStart}
         onTouchMove={sidebar.handleTouchMove}
       >
-        <UserCard className="bg-background-100 -mb-px lg:hidden" />
+        {account && (
+          <div className="bg-background-100 -mb-px lg:hidden p-4 border-b border-spacer-100">
+            <UserCard
+              account={account}
+              className="border border-background-200 rounded-lg"
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-3 bg-background-100 p-4 pb-0 grow overflow-hidden">
           <SearchInput
             value={search}

@@ -25,5 +25,6 @@ export function useAddress() {
     address,
     isSelf,
     isZero,
+    isConnected,
   };
 }

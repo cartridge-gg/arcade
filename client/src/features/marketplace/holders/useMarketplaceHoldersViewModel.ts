@@ -3,6 +3,7 @@ import { useHolders, type MarketplaceHolder } from "@/effect";
 import { useMarketplaceTokensStore } from "@/store";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMetadataFilters } from "@/hooks/use-metadata-filters";
+import { useNavigationManager } from "@/features/navigation/useNavigationManager";
 
 export type { MarketplaceHolder };
 
@@ -47,7 +48,17 @@ export function useMarketplaceHoldersViewModel({
     },
   );
 
-  const holdersArray = holders ?? [];
+  const navManager = useNavigationManager();
+
+  const holdersArray = useMemo(
+    () =>
+      (holders ?? []).map((holder) => ({
+        ...holder,
+        href: navManager.generatePlayerHref(holder.address),
+      })),
+    [holders],
+  );
+
   const hasActiveFilters = useMemo(
     () => Object.keys(activeFilters).length > 0,
     [activeFilters],

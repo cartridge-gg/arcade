@@ -1,13 +1,13 @@
 import { useCallback, useMemo } from "react";
 import { useAtomValue } from "@effect-atom/atom-react";
 import {
-  collectionOrdersWithUsdAtom,
+  verifiedCollectionOrdersAtom,
   type ListingWithUsd,
 } from "@/effect/atoms/marketplace";
 
 export function useCollectionOrders(collectionAddress: string) {
   const collectionOrders = useAtomValue(
-    collectionOrdersWithUsdAtom(collectionAddress || "0x0"),
+    verifiedCollectionOrdersAtom(collectionAddress || "0x0"),
   );
 
   const listedTokenIds = useMemo(() => {

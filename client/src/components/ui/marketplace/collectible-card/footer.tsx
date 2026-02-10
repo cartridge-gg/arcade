@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { Thumbnail } from "@cartridge/ui";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import { formatPriceInfo } from "@/lib/shared/marketplace/utils";
 
 export interface CollectibleCardFooterProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -62,6 +64,10 @@ export function CollectibleCardFooter({
 }
 
 function Price({ price }: { price: { value: string; image: string } }) {
+  const { value } = useMemo(
+    () => formatPriceInfo("0x0", Number(price.value), 0, 2, true),
+    [price.value],
+  );
   return (
     <div className="flex items-center gap-1">
       <Thumbnail
@@ -71,7 +77,7 @@ function Price({ price }: { price: { value: string; image: string } }) {
         rounded
         transdark
       />
-      <p>{Number(price.value).toFixed(2)}</p>
+      <p>{value}</p>
     </div>
   );
 }
