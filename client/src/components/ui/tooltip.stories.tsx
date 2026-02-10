@@ -17,7 +17,9 @@ export const Default: Story = {
   args: {
     content: "This is a tooltip",
     children: (
-      <button type="button" className="px-4 py-2 bg-background-200 rounded">Hover me</button>
+      <button type="button" className="px-4 py-2 bg-background-200 rounded">
+        Hover me
+      </button>
     ),
   },
 };
