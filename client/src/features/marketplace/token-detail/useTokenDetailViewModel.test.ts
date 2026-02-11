@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import type { Token } from "@/types/torii";
-import type { OrderModel } from "@cartridge/arcade";
+import { StatusType, type OrderModel } from "@cartridge/arcade";
 import { useTokenDetailViewModel } from "./useTokenDetailViewModel";
 
 const mockUseAccount = vi.fn();
@@ -160,6 +160,7 @@ describe("useTokenDetailViewModel", () => {
           tokenId: 1n,
           price: "100",
           expiration: new Date("2099-01-01T00:00:00").getTime() / 1000,
+          status: { value: StatusType.Placed },
         } as unknown as OrderModel,
       ],
     });
@@ -173,5 +174,57 @@ describe("useTokenDetailViewModel", () => {
 
     expect(result.current.orders).toHaveLength(1);
     expect(result.current.isListed).toBe(true);
+  });
+
+  it("should not be listed when all orders are canceled", () => {
+    mockCollectionOrders.mockReturnValue({
+      "1": [
+        {
+          id: 10,
+          tokenId: 1n,
+          price: "100",
+          status: { value: StatusType.Canceled },
+        } as unknown as OrderModel,
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useTokenDetailViewModel({
+        collectionAddress: "0xabc",
+        tokenId: "1",
+      }),
+    );
+
+    expect(result.current.isListed).toBe(false);
+    expect(result.current.lowestOrder).toBeNull();
+  });
+
+  it("should select the first active order when mixed with canceled", () => {
+    const canceled = {
+      id: 10,
+      tokenId: 1n,
+      price: "200",
+      status: { value: StatusType.Canceled },
+    } as unknown as OrderModel;
+    const placed = {
+      id: 11,
+      tokenId: 1n,
+      price: "100",
+      status: { value: StatusType.Placed },
+    } as unknown as OrderModel;
+
+    mockCollectionOrders.mockReturnValue({
+      "1": [canceled, placed],
+    });
+
+    const { result } = renderHook(() =>
+      useTokenDetailViewModel({
+        collectionAddress: "0xabc",
+        tokenId: "1",
+      }),
+    );
+
+    expect(result.current.isListed).toBe(true);
+    expect(result.current.lowestOrder).toEqual(placed);
   });
 });
