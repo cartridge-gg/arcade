@@ -13,5 +13,5 @@ export const arcadeAtom = createEntityQueryWithUpdatesAtom(
     typeof createEntityQueryWithUpdatesAtom
   >[1],
   clause,
-  mainnetConfig.manifest.world.address,
+  [mainnetConfig.manifest.world.address],
 );
