@@ -151,19 +151,17 @@ export {
   trophiesAtom,
   trophiesDataAtom,
   type TrophyProject,
-  type TrophyMeta,
   type TrophyItem,
   type Trophy,
-} from "./trophies";
+} from "./trophies-grpc";
 
 export {
   progressionsAtom,
   progressionsDataAtom,
   type ProgressionProject,
-  type ProgressionMeta,
   type ProgressionItem,
   type Progress,
-} from "./progressions";
+} from "./progressions-grpc";
 
 export {
   holdersAtom,
