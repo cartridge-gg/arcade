@@ -15,9 +15,11 @@ export interface ActivityEventView {
   href?: string;
   amount?: string;
   address?: string;
+  username?: string;
   value?: string;
   image?: string;
   action?: "send" | "receive" | "mint";
+  timestamp: number;
   name?: string;
   collection?: string;
   title?: string;
@@ -77,9 +79,11 @@ export function useActivityViewModel({
             href,
             amount: card.amount,
             address: card.address,
+            username: card.username,
             value: card.value,
             image: card.image,
             action: card.action,
+            timestamp: card.timestamp,
           };
         case "collectible":
           return {
@@ -89,8 +93,10 @@ export function useActivityViewModel({
             name: card.name,
             collection: card.collection,
             address: card.address,
+            username: card.username,
             image: card.image,
             action: card.action,
+            timestamp: card.timestamp,
           };
         case "game":
           return {
@@ -101,6 +107,7 @@ export function useActivityViewModel({
             website: card.website,
             image: card.image,
             certified: card.certified,
+            timestamp: card.timestamp,
           };
         case "achievement":
           return {
@@ -112,6 +119,7 @@ export function useActivityViewModel({
             points: card.points,
             website: card.website,
             color: card.color,
+            timestamp: card.timestamp,
           };
       }
     };

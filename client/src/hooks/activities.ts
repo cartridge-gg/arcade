@@ -22,6 +22,7 @@ import { erc20Metadata } from "@cartridge/presets";
 import { getDate } from "@cartridge/ui/utils";
 import { getChainId } from "@/lib/helpers";
 import { getToriiAssetUrl } from "@cartridge/arcade";
+import { useAccounts } from "@/effect";
 
 export interface CardProps {
   variant: "token" | "collectible" | "game" | "achievement";
@@ -32,6 +33,7 @@ export interface CardProps {
   transactionHash: string;
   amount: string;
   address: string;
+  username: string;
   value: string;
   name: string;
   collection: string;
@@ -99,6 +101,8 @@ export const useActivities = () => {
         : "success";
   }, [transfersResult, activitiesResult]);
 
+  const { data: accountsData } = useAccounts();
+
   const erc20s: { [project: string]: CardProps[] } = useMemo(() => {
     const results: { [project: string]: CardProps[] } = {};
     transfers.forEach((item) => {
@@ -117,6 +121,12 @@ export const useActivities = () => {
             (ed) => ed.config.project === item.meta.project,
           );
           const chainId = getChainId(ed?.config.rpc);
+          const userAddress =
+            BigInt(transfer.fromAddress) === BigInt(address)
+              ? transfer.toAddress
+              : transfer.fromAddress;
+          const username =
+            accountsData.get(getChecksumAddress(userAddress)) ?? "";
           const card: CardProps = {
             variant: "token",
             key: `${transfer.transactionHash}-${transfer.eventId}`,
@@ -124,10 +134,8 @@ export const useActivities = () => {
             contractAddress: getChecksumAddress(transfer.contractAddress),
             transactionHash: getChecksumAddress(transfer.transactionHash),
             amount: value,
-            address:
-              BigInt(transfer.fromAddress) === BigInt(player || "0x0")
-                ? getChecksumAddress(transfer.toAddress)
-                : getChecksumAddress(transfer.fromAddress),
+            address: userAddress,
+            username,
             value: "$-",
             image: image || "",
             action:
@@ -178,6 +186,12 @@ export const useActivities = () => {
             addAddressPadding(transfer.contractAddress),
             addAddressPadding(transfer.tokenId),
           );
+          const userAddress =
+            BigInt(transfer.fromAddress) === BigInt(address)
+              ? transfer.toAddress
+              : transfer.fromAddress;
+          const username =
+            accountsData.get(getChecksumAddress(userAddress)) ?? "";
           const card: CardProps = {
             variant: "collectible",
             key: `${transfer.transactionHash}-${transfer.eventId}`,
@@ -187,10 +201,8 @@ export const useActivities = () => {
             name: name || "",
             collection: transfer.name,
             amount: "",
-            address:
-              BigInt(transfer.fromAddress) === BigInt(player || "0x0")
-                ? getChecksumAddress(transfer.toAddress)
-                : getChecksumAddress(transfer.fromAddress),
+            address: userAddress,
+            username,
             value: "",
             image: image,
             action:

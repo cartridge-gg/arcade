@@ -25,7 +25,7 @@ export const ConnectionView = ({
     return (
       <Button
         variant="secondary"
-        className="border border-primary-100 text-primary hover:text-spacer bg-background-100 hover:bg-primary transition-colors text-sm font-medium select-none px-4 py-2.5"
+        className="font-inherit border border-primary-100 text-primary hover:text-spacer bg-background-100 hover:bg-primary transition-colors text-sm font-medium select-none px-4 py-2.5"
         disabled={isConnectDisabled}
         onClick={onConnect}
       >
@@ -38,7 +38,7 @@ export const ConnectionView = ({
     <div className="flex items-center gap-3">
       <Button
         variant="secondary"
-        className="bg-background-100 hover:bg-background-150 px-3 py-2.5 select-none border border-background-200"
+        className="font-mono bg-background-100 hover:bg-background-150 px-3 py-2.5 select-none border border-background-200"
         onClick={onOpenProfile}
       >
         <div className="size-5 flex items-center justify-center">
