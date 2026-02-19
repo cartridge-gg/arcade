@@ -66,90 +66,92 @@ export const ARCADE_MODELS = [
   "ARCADE-Follow",
 ];
 
+export const arcadeFormatters = {
+  models: {
+    "ARCADE-Game": (m: any, ctx: any) => ({
+      type: "game",
+      identifier: ctx.entityId,
+      data: GameModel.from(ctx.entityId, m),
+    }),
+    "ARCADE-Edition": (m: any, ctx: any) => ({
+      type: "edition",
+      identifier: ctx.entityId,
+      data: EditionModel.from(ctx.entityId, m),
+    }),
+    "ARCADE-Access": (m: any, ctx: any) => ({
+      type: "access",
+      identifier: ctx.entityId,
+      data: AccessModel.from(ctx.entityId, m),
+    }),
+    "ARCADE-CollectionEdition": (m: any, ctx: any) => ({
+      type: "collectionEdition",
+      identifier: ctx.entityId,
+      data: CollectionEditionModel.from(ctx.entityId, m),
+    }),
+    "ARCADE-Order": (m: any, ctx: any) => ({
+      type: "order",
+      identifier: ctx.entityId,
+      data: OrderModel.from(ctx.entityId, m as any),
+    }),
+    "ARCADE-Book": (m: any, ctx: any) => ({
+      type: "book",
+      identifier: ctx.entityId,
+      data: BookModel.from(ctx.entityId, m as any),
+    }),
+    "ARCADE-Moderator": (m: any, ctx: any) => ({
+      type: "moderator",
+      identifier: ctx.entityId,
+      data: ModeratorModel.from(ctx.entityId, m as any),
+    }),
+    "ARCADE-Alliance": (m: any, ctx: any) => ({
+      type: "alliance",
+      identifier: ctx.entityId,
+      data: AllianceModel.from(ctx.entityId, m),
+    }),
+    "ARCADE-Guild": (m: any, ctx: any) => ({
+      type: "guild",
+      identifier: ctx.entityId,
+      data: GuildModel.from(ctx.entityId, m),
+    }),
+    "ARCADE-Member": (m: any, ctx: any) => ({
+      type: "member",
+      identifier: ctx.entityId,
+      data: MemberModel.from(ctx.entityId, m),
+    }),
+    "ARCADE-Listing": (m: any, ctx: any) => ({
+      type: "listing",
+      key: ctx.entityId,
+      data: ListingEvent.from(ctx.entityId, m as any),
+    }),
+    "ARCADE-Offer": (m: any, ctx: any) => ({
+      type: "offer",
+      key: ctx.entityId,
+      data: OfferEvent.from(ctx.entityId, m as any),
+    }),
+    "ARCADE-Sale": (m: any, ctx: any) => ({
+      type: "sale",
+      key: ctx.entityId,
+      data: SaleEvent.from(ctx.entityId, m as any),
+    }),
+    "ARCADE-TrophyPinning": (m: any, ctx: any) => ({
+      type: "pin",
+      key: ctx.entityId,
+      data: PinEvent.from(ctx.entityId, m),
+    }),
+    "ARCADE-Follow": (m: any, ctx: any) => ({
+      type: "follow",
+      key: ctx.entityId,
+      data: FollowEvent.from(ctx.entityId, m),
+    }),
+  },
+} as const;
+
 const toriiLayer = makeToriiLayer(
   { manifest: mainnetConfig.manifest, toriiUrl: getToriiUrl(DEFAULT_PROJECT) },
   {
-    autoReconnect: false,
+    autoReconnect: true,
     maxReconnectAttempts: 5,
-    formatters: {
-      models: {
-        "ARCADE-Game": (m, ctx) => ({
-          type: "game",
-          identifier: ctx.entityId,
-          data: GameModel.from(ctx.entityId, m),
-        }),
-        "ARCADE-Edition": (m, ctx) => ({
-          type: "edition",
-          identifier: ctx.entityId,
-          data: EditionModel.from(ctx.entityId, m),
-        }),
-        "ARCADE-Access": (m, ctx) => ({
-          type: "access",
-          identifier: ctx.entityId,
-          data: AccessModel.from(ctx.entityId, m),
-        }),
-        "ARCADE-CollectionEdition": (m, ctx) => ({
-          type: "collectionEdition",
-          identifier: ctx.entityId,
-          data: CollectionEditionModel.from(ctx.entityId, m),
-        }),
-        "ARCADE-Order": (m, ctx) => ({
-          type: "order",
-          identifier: ctx.entityId,
-          data: OrderModel.from(ctx.entityId, m as any),
-        }),
-        "ARCADE-Book": (m, ctx) => ({
-          type: "book",
-          identifier: ctx.entityId,
-          data: BookModel.from(ctx.entityId, m as any),
-        }),
-        "ARCADE-Moderator": (m, ctx) => ({
-          type: "moderator",
-          identifier: ctx.entityId,
-          data: ModeratorModel.from(ctx.entityId, m as any),
-        }),
-        "ARCADE-Alliance": (m, ctx) => ({
-          type: "alliance",
-          identifier: ctx.entityId,
-          data: AllianceModel.from(ctx.entityId, m),
-        }),
-        "ARCADE-Guild": (m, ctx) => ({
-          type: "guild",
-          identifier: ctx.entityId,
-          data: GuildModel.from(ctx.entityId, m),
-        }),
-        "ARCADE-Member": (m, ctx) => ({
-          type: "member",
-          identifier: ctx.entityId,
-          data: MemberModel.from(ctx.entityId, m),
-        }),
-        "ARCADE-Listing": (m, ctx) => ({
-          type: "listing",
-          key: ctx.entityId,
-          data: ListingEvent.from(ctx.entityId, m as any),
-        }),
-        "ARCADE-Offer": (m, ctx) => ({
-          type: "offer",
-          key: ctx.entityId,
-          data: OfferEvent.from(ctx.entityId, m as any),
-        }),
-        "ARCADE-Sale": (m, ctx) => ({
-          type: "sale",
-          key: ctx.entityId,
-          data: SaleEvent.from(ctx.entityId, m as any),
-        }),
-        "ARCADE-TrophyPinning": (m, ctx) => ({
-          type: "pin",
-          key: ctx.entityId,
-          data: PinEvent.from(ctx.entityId, m),
-        }),
-        "ARCADE-Follow": (m, ctx) => ({
-          type: "follow",
-          key: ctx.entityId,
-          data: FollowEvent.from(ctx.entityId, m),
-        }),
-      },
-    },
+    formatters: arcadeFormatters,
   },
 );
 

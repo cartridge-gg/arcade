@@ -102,7 +102,14 @@ export const accountByAddressAtom = Atom.family(
   (address: string | undefined) => {
     if (!address) return nullResultAtom;
 
-    const checksumAddress = getChecksumAddress(address);
+    const checksumAddress = (() => {
+      try {
+        return getChecksumAddress(address);
+      } catch {
+        return null;
+      }
+    })();
+    if (!checksumAddress) return nullResultAtom;
 
     return accountsAtom.pipe(
       Atom.map((result) =>

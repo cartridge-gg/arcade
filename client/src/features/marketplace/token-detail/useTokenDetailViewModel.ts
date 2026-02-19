@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 import type { Token } from "@/types/torii";
-import type { OrderModel } from "@cartridge/arcade";
+import { StatusType, type OrderModel } from "@cartridge/arcade";
 import { useMarketBalancesFetcher } from "@/hooks/marketplace-balances-fetcher";
 import { DEFAULT_PROJECT } from "@/constants";
 import { addAddressPadding, getChecksumAddress } from "starknet";
@@ -159,12 +159,17 @@ export function useTokenDetailViewModel({
     return [];
   }, [collectionOrders, tokenId]);
 
-  const lowestOrder = useMemo(
-    () => (orders.length > 0 ? orders[0] : null),
+  const activeOrders = useMemo(
+    () => orders.filter((order) => order?.status?.value === StatusType.Placed),
     [orders],
   );
 
-  const isListed = !!lowestOrder;
+  const lowestOrder = useMemo(
+    () => (activeOrders.length > 0 ? activeOrders[0] : null),
+    [activeOrders],
+  );
+
+  const isListed = activeOrders.length > 0;
 
   const isLoading = status === "loading" || status === "idle";
 
@@ -217,7 +222,13 @@ export function useTokenDetailViewModel({
     } else {
       handleUnlistViewCallback(collectionAddress, [tokenId]);
     }
-  }, [handleUnlistCallback, collectionAddress, tokenId]);
+  }, [
+    lowestOrder,
+    handleUnlistCallback,
+    handleUnlistViewCallback,
+    collectionAddress,
+    tokenId,
+  ]);
 
   const handleSend = useCallback(async () => {
     handleSendCallback(collectionAddress, [tokenId]);
