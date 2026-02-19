@@ -3,11 +3,18 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useRef,
   useState,
   useEffect,
   type ReactNode,
 } from "react";
+import {
+  useQuery,
+  useQueryClient,
+  type UseQueryOptions,
+  type UseQueryResult,
+  type QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import type {
   CollectionListingsOptions,
   CollectionOrdersOptions,
@@ -29,6 +36,10 @@ import { fetchTokenBalances } from "./tokens";
 import { createMarketplaceClient } from "./client";
 import type { OrderModel } from "../modules/marketplace";
 
+// ============================================================================
+// Marketplace Client Context
+// ============================================================================
+
 export type MarketplaceClientStatus = "idle" | "loading" | "ready" | "error";
 
 export interface MarketplaceClientContextValue {
@@ -44,6 +55,7 @@ const MarketplaceClientContext = createContext<
 
 interface MarketplaceClientProviderBaseProps {
   children: ReactNode;
+  queryClient?: QueryClient;
   onClientReady?: (client: MarketplaceClient) => void;
 }
 
@@ -69,98 +81,10 @@ interface ProviderState {
   error: Error | null;
 }
 
-const READY_STATE: ProviderState = {
-  client: null,
-  status: "ready",
-  error: null,
-};
-
-const hasOwn = Object.prototype.hasOwnProperty;
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (value === null || typeof value !== "object") return false;
-  const proto = Object.getPrototypeOf(value);
-  return proto === Object.prototype || proto === null;
-}
-
-function deepEqual(a: unknown, b: unknown): boolean {
-  if (Object.is(a, b)) {
-    return true;
-  }
-
-  if (typeof a !== typeof b || a == null || b == null) {
-    return false;
-  }
-
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (!deepEqual(a[i], b[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (a instanceof Date && b instanceof Date) {
-    return a.getTime() === b.getTime();
-  }
-
-  if (a instanceof Set && b instanceof Set) {
-    if (a.size !== b.size) return false;
-    for (const item of a) {
-      if (!b.has(item)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (a instanceof Map && b instanceof Map) {
-    if (a.size !== b.size) return false;
-    for (const [key, value] of a) {
-      if (!b.has(key)) {
-        return false;
-      }
-      if (!deepEqual(value, b.get(key))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (isPlainObject(a) && isPlainObject(b)) {
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
-    if (keysA.length !== keysB.length) {
-      return false;
-    }
-    for (const key of keysA) {
-      if (!hasOwn.call(b, key)) {
-        return false;
-      }
-      if (!deepEqual((a as Record<string, unknown>)[key], b[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  return false;
-}
-
-function useStableValue<T>(value: T): T {
-  const ref = useRef(value);
-  if (!deepEqual(value, ref.current)) {
-    ref.current = value;
-  }
-  return ref.current;
-}
-
 export function MarketplaceClientProvider(
   props: MarketplaceClientProviderProps,
 ) {
-  const { children, onClientReady } = props;
+  const { children, queryClient: externalQueryClient, onClientReady } = props;
 
   const [state, setState] = useState<ProviderState>({
     client: props.client ?? null,
@@ -170,7 +94,7 @@ export function MarketplaceClientProvider(
 
   const initialize = useCallback(async () => {
     if ("client" in props && props.client) {
-      setState({ ...READY_STATE, client: props.client });
+      setState({ client: props.client, status: "ready", error: null });
       onClientReady?.(props.client);
       return props.client;
     }
@@ -220,11 +144,22 @@ export function MarketplaceClientProvider(
     [state, refresh],
   );
 
-  return (
+  const content = (
     <MarketplaceClientContext.Provider value={contextValue}>
       {children}
     </MarketplaceClientContext.Provider>
   );
+
+  // If an external QueryClient is provided, wrap with QueryClientProvider
+  if (externalQueryClient) {
+    return (
+      <QueryClientProvider client={externalQueryClient}>
+        {content}
+      </QueryClientProvider>
+    );
+  }
+
+  return content;
 }
 
 export function useMarketplaceClient(): MarketplaceClientContextValue {
@@ -239,289 +174,255 @@ export function useMarketplaceClient(): MarketplaceClientContextValue {
 
 export { MarketplaceClientContext };
 
-type QueryStatus = "idle" | "loading" | "success" | "error";
+// ============================================================================
+// Query key factory
+// ============================================================================
 
-export interface UseMarketplaceQueryResult<TResult> {
-  data: TResult | null;
-  status: QueryStatus;
-  error: Error | null;
-  isFetching: boolean;
-  refresh: () => Promise<TResult | null>;
+export const marketplaceKeys = {
+  all: ["marketplace"] as const,
+  collection: (address: string) =>
+    [...marketplaceKeys.all, "collection", address] as const,
+  collectionTokens: (options: FetchCollectionTokensOptions) =>
+    [
+      ...marketplaceKeys.all,
+      "collectionTokens",
+      options.address,
+      options.project,
+      options.cursor,
+      options.limit,
+      options.tokenIds,
+      options.attributeFilters
+        ? serializeFilters(options.attributeFilters)
+        : undefined,
+    ] as const,
+  collectionOrders: (options: CollectionOrdersOptions) =>
+    [
+      ...marketplaceKeys.all,
+      "collectionOrders",
+      options.collection,
+      options.tokenId,
+      options.status,
+      options.category,
+      options.limit,
+      options.orderIds,
+    ] as const,
+  collectionListings: (options: CollectionListingsOptions) =>
+    [
+      ...marketplaceKeys.all,
+      "collectionListings",
+      options.collection,
+      options.tokenId,
+      options.limit,
+      options.verifyOwnership,
+    ] as const,
+  token: (options: TokenDetailsOptions) =>
+    [
+      ...marketplaceKeys.all,
+      "token",
+      options.collection,
+      options.tokenId,
+      options.projectId,
+    ] as const,
+  fees: () => [...marketplaceKeys.all, "fees"] as const,
+  royaltyFee: (options: RoyaltyFeeOptions) =>
+    [
+      ...marketplaceKeys.all,
+      "royaltyFee",
+      options.collection,
+      options.tokenId,
+      options.amount.toString(),
+    ] as const,
+  tokenBalances: (options: FetchTokenBalancesOptions) =>
+    [
+      ...marketplaceKeys.all,
+      "tokenBalances",
+      options.project,
+      options.contractAddresses,
+      options.accountAddresses,
+      options.tokenIds,
+      options.cursor,
+      options.limit,
+    ] as const,
+};
+
+function serializeFilters(
+  filters: FetchCollectionTokensOptions["attributeFilters"],
+): string {
+  if (!filters) return "";
+  return JSON.stringify(
+    Object.entries(filters)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => [k, v != null ? String(v) : null]),
+  );
 }
 
-function useMarketplaceClientQuery<TResult>(
-  requestFactory: (client: MarketplaceClient) => Promise<TResult>,
-  enabled = true,
-): UseMarketplaceQueryResult<TResult> {
-  const { client, status: clientStatus } = useMarketplaceClient();
-  const fetchIdRef = useRef(0);
-  const [state, setState] = useState<{
-    data: TResult | null;
-    status: QueryStatus;
-    error: Error | null;
-    isFetching: boolean;
-  }>({
-    data: null,
-    status: "idle",
-    error: null,
-    isFetching: false,
-  });
+// ============================================================================
+// TanStack Query hooks
+// ============================================================================
 
-  const execute = useCallback(async () => {
-    if (!enabled || !client || clientStatus !== "ready") {
-      return null;
-    }
-
-    const fetchId = ++fetchIdRef.current;
-    setState((prev) => ({
-      ...prev,
-      status: "loading",
-      isFetching: true,
-      error: null,
-    }));
-
-    try {
-      const result = await requestFactory(client);
-      if (fetchIdRef.current !== fetchId) {
-        return result;
-      }
-      setState({
-        data: result,
-        status: "success",
-        error: null,
-        isFetching: false,
-      });
-      return result;
-    } catch (err) {
-      if (fetchIdRef.current !== fetchId) {
-        return null;
-      }
-      const error = err instanceof Error ? err : new Error(String(err));
-      setState((prev) => ({
-        ...prev,
-        status: "error",
-        error,
-        isFetching: false,
-      }));
-      return null;
-    }
-  }, [enabled, client, clientStatus, requestFactory]);
-
-  useEffect(() => {
-    if (!enabled) {
-      setState({
-        data: null,
-        status: "idle",
-        error: null,
-        isFetching: false,
-      });
-      return;
-    }
-    if (!client || clientStatus !== "ready") {
-      return;
-    }
-    void execute();
-  }, [enabled, client, clientStatus, execute]);
-
-  const refresh = useCallback(() => {
-    if (!enabled) {
-      return Promise.resolve(state.data);
-    }
-    return execute();
-  }, [enabled, execute, state.data]);
-
-  return {
-    ...state,
-    refresh,
-  };
+function ensureClient(client: MarketplaceClient | null): MarketplaceClient {
+  if (!client) throw new Error("MarketplaceClient not ready");
+  return client;
 }
+
+type QueryOptions<T> = Omit<UseQueryOptions<T, Error>, "queryKey" | "queryFn">;
 
 export function useMarketplaceCollection(
   options: CollectionSummaryOptions,
-  enabled = true,
-): UseMarketplaceQueryResult<NormalizedCollection | null> {
-  const stableOptions = useStableValue(options);
+  queryOptions?: QueryOptions<NormalizedCollection | null> & {
+    enabled?: boolean;
+  },
+): UseQueryResult<NormalizedCollection | null, Error> {
+  const { client, status } = useMarketplaceClient();
+  const isReady = status === "ready" && client !== null;
 
-  const request = useCallback(
-    (client: MarketplaceClient) => client.getCollection(stableOptions),
-    [stableOptions],
-  );
-
-  const shouldFetch = enabled && Boolean(stableOptions.address);
-
-  return useMarketplaceClientQuery(request, shouldFetch);
+  return useQuery({
+    queryKey: marketplaceKeys.collection(options.address),
+    queryFn: () => ensureClient(client).getCollection(options),
+    enabled:
+      isReady && Boolean(options.address) && (queryOptions?.enabled ?? true),
+    ...queryOptions,
+  });
 }
 
 export function useMarketplaceCollectionTokens(
   options: FetchCollectionTokensOptions,
-  enabled = true,
-): UseMarketplaceQueryResult<FetchCollectionTokensResult> {
-  const stableOptions = useStableValue(options);
+  queryOptions?: QueryOptions<FetchCollectionTokensResult> & {
+    enabled?: boolean;
+  },
+): UseQueryResult<FetchCollectionTokensResult, Error> {
+  const { client, status } = useMarketplaceClient();
+  const isReady = status === "ready" && client !== null;
 
-  const request = useCallback(
-    (client: MarketplaceClient) => client.listCollectionTokens(stableOptions),
-    [stableOptions],
-  );
-
-  const shouldFetch = enabled && Boolean(stableOptions.address);
-  return useMarketplaceClientQuery(request, shouldFetch);
+  return useQuery({
+    queryKey: marketplaceKeys.collectionTokens(options),
+    queryFn: () => ensureClient(client).listCollectionTokens(options),
+    enabled:
+      isReady && Boolean(options.address) && (queryOptions?.enabled ?? true),
+    ...queryOptions,
+  });
 }
 
 export function useMarketplaceCollectionOrders(
   options: CollectionOrdersOptions,
-  enabled = true,
-): UseMarketplaceQueryResult<OrderModel[]> {
-  const stableOptions = useStableValue(options);
+  queryOptions?: QueryOptions<OrderModel[]> & { enabled?: boolean },
+): UseQueryResult<OrderModel[], Error> {
+  const { client, status } = useMarketplaceClient();
+  const isReady = status === "ready" && client !== null;
 
-  const request = useCallback(
-    (client: MarketplaceClient) => client.getCollectionOrders(stableOptions),
-    [stableOptions],
-  );
-
-  const shouldFetch = enabled && Boolean(stableOptions.collection);
-  return useMarketplaceClientQuery(request, shouldFetch);
+  return useQuery({
+    queryKey: marketplaceKeys.collectionOrders(options),
+    queryFn: () => ensureClient(client).getCollectionOrders(options),
+    enabled:
+      isReady && Boolean(options.collection) && (queryOptions?.enabled ?? true),
+    ...queryOptions,
+  });
 }
 
 export function useMarketplaceCollectionListings(
   options: CollectionListingsOptions,
-  enabled = true,
-): UseMarketplaceQueryResult<OrderModel[]> {
-  const stableOptions = useStableValue(options);
+  queryOptions?: QueryOptions<OrderModel[]> & { enabled?: boolean },
+): UseQueryResult<OrderModel[], Error> {
+  const { client, status } = useMarketplaceClient();
+  const isReady = status === "ready" && client !== null;
 
-  const request = useCallback(
-    (client: MarketplaceClient) => client.listCollectionListings(stableOptions),
-    [stableOptions],
-  );
-
-  const shouldFetch = enabled && Boolean(stableOptions.collection);
-  return useMarketplaceClientQuery(request, shouldFetch);
+  return useQuery({
+    queryKey: marketplaceKeys.collectionListings(options),
+    queryFn: () => ensureClient(client).listCollectionListings(options),
+    enabled:
+      isReady && Boolean(options.collection) && (queryOptions?.enabled ?? true),
+    ...queryOptions,
+  });
 }
 
 export function useMarketplaceToken(
   options: TokenDetailsOptions,
-  enabled = true,
-): UseMarketplaceQueryResult<TokenDetails | null> {
-  const stableOptions = useStableValue(options);
+  queryOptions?: QueryOptions<TokenDetails | null> & { enabled?: boolean },
+): UseQueryResult<TokenDetails | null, Error> {
+  const { client, status } = useMarketplaceClient();
+  const isReady = status === "ready" && client !== null;
 
-  const request = useCallback(
-    (client: MarketplaceClient) => client.getToken(stableOptions),
-    [stableOptions],
-  );
-
-  const shouldFetch =
-    enabled &&
-    Boolean(stableOptions.collection) &&
-    Boolean(stableOptions.tokenId);
-  return useMarketplaceClientQuery(request, shouldFetch);
+  return useQuery({
+    queryKey: marketplaceKeys.token(options),
+    queryFn: () => ensureClient(client).getToken(options),
+    enabled:
+      isReady &&
+      Boolean(options.collection) &&
+      Boolean(options.tokenId) &&
+      (queryOptions?.enabled ?? true),
+    ...queryOptions,
+  });
 }
 
 export function useMarketplaceTokenBalances(
   options: FetchTokenBalancesOptions,
-  enabled = true,
-): UseMarketplaceQueryResult<FetchTokenBalancesResult> {
-  const stableOptions = useStableValue(options);
-  const fetchIdRef = useRef(0);
-  const [state, setState] = useState<{
-    data: FetchTokenBalancesResult | null;
-    status: QueryStatus;
-    error: Error | null;
-    isFetching: boolean;
-  }>({
-    data: null,
-    status: "idle",
-    error: null,
-    isFetching: false,
+  queryOptions?: QueryOptions<FetchTokenBalancesResult> & {
+    enabled?: boolean;
+  },
+): UseQueryResult<FetchTokenBalancesResult, Error> {
+  return useQuery({
+    queryKey: marketplaceKeys.tokenBalances(options),
+    queryFn: () => fetchTokenBalances(options),
+    enabled: queryOptions?.enabled ?? true,
+    ...queryOptions,
   });
-
-  const execute = useCallback(async () => {
-    if (!enabled) {
-      return null;
-    }
-
-    const fetchId = ++fetchIdRef.current;
-    setState((prev) => ({
-      ...prev,
-      status: "loading",
-      isFetching: true,
-      error: null,
-    }));
-
-    try {
-      const result = await fetchTokenBalances(stableOptions);
-      if (fetchIdRef.current !== fetchId) {
-        return result;
-      }
-      setState({
-        data: result,
-        status: "success",
-        error: null,
-        isFetching: false,
-      });
-      return result;
-    } catch (err) {
-      if (fetchIdRef.current !== fetchId) {
-        return null;
-      }
-      const error = err instanceof Error ? err : new Error(String(err));
-      setState((prev) => ({
-        ...prev,
-        status: "error",
-        error,
-        isFetching: false,
-      }));
-      return null;
-    }
-  }, [enabled, stableOptions]);
-
-  useEffect(() => {
-    if (!enabled) {
-      setState({
-        data: null,
-        status: "idle",
-        error: null,
-        isFetching: false,
-      });
-      return;
-    }
-    void execute();
-  }, [enabled, execute]);
-
-  const refresh = useCallback(() => {
-    if (!enabled) {
-      return Promise.resolve(state.data);
-    }
-    return execute();
-  }, [enabled, execute, state.data]);
-
-  return {
-    ...state,
-    refresh,
-  };
 }
 
 export function useMarketplaceFees(
-  enabled = true,
-): UseMarketplaceQueryResult<MarketplaceFees | null> {
-  const request = useCallback(
-    (client: MarketplaceClient) => client.getFees(),
-    [],
-  );
-  return useMarketplaceClientQuery(request, enabled);
+  queryOptions?: QueryOptions<MarketplaceFees | null> & { enabled?: boolean },
+): UseQueryResult<MarketplaceFees | null, Error> {
+  const { client, status } = useMarketplaceClient();
+  const isReady = status === "ready" && client !== null;
+
+  return useQuery({
+    queryKey: marketplaceKeys.fees(),
+    queryFn: () => ensureClient(client).getFees(),
+    enabled: isReady && (queryOptions?.enabled ?? true),
+    ...queryOptions,
+  });
 }
 
 export function useMarketplaceRoyaltyFee(
   options: RoyaltyFeeOptions,
-  enabled = true,
-): UseMarketplaceQueryResult<RoyaltyFee | null> {
-  const stableOptions = useStableValue(options);
-  const request = useCallback(
-    (client: MarketplaceClient) => client.getRoyaltyFee(stableOptions),
-    [stableOptions],
+  queryOptions?: QueryOptions<RoyaltyFee | null> & { enabled?: boolean },
+): UseQueryResult<RoyaltyFee | null, Error> {
+  const { client, status } = useMarketplaceClient();
+  const isReady = status === "ready" && client !== null;
+
+  return useQuery({
+    queryKey: marketplaceKeys.royaltyFee(options),
+    queryFn: () => ensureClient(client).getRoyaltyFee(options),
+    enabled:
+      isReady &&
+      Boolean(options.collection) &&
+      Boolean(options.tokenId) &&
+      options.amount > 0n &&
+      (queryOptions?.enabled ?? true),
+    ...queryOptions,
+  });
+}
+
+// ============================================================================
+// Invalidation helpers
+// ============================================================================
+
+/** Invalidate all marketplace queries */
+export function useInvalidateMarketplace() {
+  const queryClient = useQueryClient();
+  return useCallback(
+    () => queryClient.invalidateQueries({ queryKey: marketplaceKeys.all }),
+    [queryClient],
   );
-  const shouldFetch =
-    enabled &&
-    Boolean(stableOptions.collection) &&
-    Boolean(stableOptions.tokenId) &&
-    stableOptions.amount > 0n;
-  return useMarketplaceClientQuery(request, shouldFetch);
+}
+
+/** Invalidate queries for a specific collection */
+export function useInvalidateCollection(address: string) {
+  const queryClient = useQueryClient();
+  return useCallback(
+    () =>
+      queryClient.invalidateQueries({
+        queryKey: marketplaceKeys.collection(address),
+      }),
+    [queryClient, address],
+  );
 }

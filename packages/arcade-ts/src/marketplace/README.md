@@ -431,25 +431,34 @@ Example: selecting `Rarity: Legendary, Epic` and `Background: Gold` matches toke
 
 ## React Integration
 
+> **Requires `@tanstack/react-query` v5+** as a peer dependency. All hooks return TanStack Query's `UseQueryResult<T, Error>`.
+
 ### Provider Setup
+
+Wrap your app with both a TanStack `QueryClientProvider` and the `MarketplaceClientProvider`:
 
 ```tsx
 import { constants } from "starknet";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   MarketplaceClientProvider,
   useMarketplaceCollectionTokens,
 } from "@cartridge/arcade/marketplace/react";
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <MarketplaceClientProvider
-      config={{
-        chainId: constants.StarknetChainId.SN_MAIN,
-        defaultProject: "arcade-main",
-      }}
-    >
-      <Dashboard />
-    </MarketplaceClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <MarketplaceClientProvider
+        config={{
+          chainId: constants.StarknetChainId.SN_MAIN,
+          defaultProject: "arcade-main",
+        }}
+      >
+        <Dashboard />
+      </MarketplaceClientProvider>
+    </QueryClientProvider>
   );
 }
 ```
@@ -468,19 +477,55 @@ An optional `onClientReady` callback fires when the client becomes available.
 
 ### Hooks
 
-All hooks return `UseMarketplaceQueryResult<T>`:
+All hooks return TanStack Query's `UseQueryResult<T, Error>`:
 
 ```ts
-interface UseMarketplaceQueryResult<T> {
-  data: T | null;
-  status: "idle" | "loading" | "success" | "error";
-  error: Error | null;
-  isFetching: boolean;
-  refresh: () => Promise<T | null>;
-}
+const { data, error, isLoading, isError, isSuccess, isFetching, refetch } = useMarketplaceCollectionTokens({ ... });
 ```
 
-Every hook accepts an optional `enabled` boolean as its last argument to conditionally skip fetching.
+Every hook accepts an optional `queryOptions` object as its second argument for TanStack Query configuration (`enabled`, `staleTime`, `gcTime`, `refetchInterval`, etc.):
+
+```tsx
+const result = useMarketplaceCollectionTokens(
+  { address: "0x...", limit: 20 },
+  { enabled: isReady, staleTime: 30_000 },
+);
+```
+
+### Query Keys
+
+All hooks use a structured `marketplaceKeys` factory for cache management:
+
+```ts
+import { marketplaceKeys } from "@cartridge/arcade/marketplace/react";
+
+// Invalidate all marketplace queries
+queryClient.invalidateQueries({ queryKey: marketplaceKeys.all });
+
+// Invalidate a specific collection
+queryClient.invalidateQueries({ queryKey: marketplaceKeys.collection("0x...") });
+```
+
+### Invalidation Helpers
+
+```tsx
+import {
+  useInvalidateMarketplace,
+  useInvalidateCollection,
+} from "@cartridge/arcade/marketplace/react";
+
+function RefreshButton({ address }: { address: string }) {
+  const invalidateAll = useInvalidateMarketplace();
+  const invalidateCollection = useInvalidateCollection(address);
+
+  return (
+    <>
+      <button onClick={invalidateAll}>Refresh All</button>
+      <button onClick={invalidateCollection}>Refresh Collection</button>
+    </>
+  );
+}
+```
 
 ---
 
@@ -500,7 +545,7 @@ if (status === "error") return <p>Failed to init: {error?.message}</p>;
 #### `useMarketplaceCollection`
 
 ```tsx
-const { data, status, refresh } = useMarketplaceCollection({
+const { data, isLoading, refetch } = useMarketplaceCollection({
   address: "0x04f5...b15f",
   fetchImages: true,
 });
@@ -515,7 +560,7 @@ if (data) {
 #### `useMarketplaceCollectionTokens`
 
 ```tsx
-const { data, status, error, refresh } = useMarketplaceCollectionTokens({
+const { data, isLoading, error, refetch } = useMarketplaceCollectionTokens({
   address: "0x04f5...b15f",
   limit: 20,
   attributeFilters: { rarity: "legendary" },
@@ -559,7 +604,7 @@ const listings = data ?? [];
 ```tsx
 const { data } = useMarketplaceToken(
   { collection: "0x04f5...b15f", tokenId: "42", fetchImages: true },
-  Boolean(tokenId), // enabled
+  { enabled: Boolean(tokenId) },
 );
 
 if (data) {
@@ -719,7 +764,9 @@ React hooks surface errors via the `error` field on the query result.
 | --------------------------------- | ---------------------------------------------------- |
 | `MarketplaceClientContextValue`   | Context value: `{ client, status, error, refresh }`. |
 | `MarketplaceClientStatus`         | `"idle" \| "loading" \| "ready" \| "error"`.         |
-| `UseMarketplaceQueryResult<T>`    | Hook result: `{ data, status, error, isFetching, refresh }`. |
+| `marketplaceKeys`                 | Query key factory for cache management.              |
+
+> Hooks return `UseQueryResult<T, Error>` from `@tanstack/react-query`.
 
 ## See Also
 
