@@ -1,9 +1,7 @@
 import { useTokenContract } from "@/effect";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
-import type { FetchTokenBalancesResult } from "@cartridge/arcade/marketplace";
 import { useMarketplaceTokenBalances } from "@cartridge/arcade/marketplace/react";
-import type { UseQueryResult } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 
@@ -177,7 +175,7 @@ export function useMarketBalancesFetcher({
     collection,
     balances: filteredBalances,
     status: effectiveStatus,
-    isLoading: effectiveStatus === "loading" && !isFetchingNextPage,
+    isLoading: effectiveStatus === "pending" && !isFetchingNextPage,
     isError: effectiveStatus === "error",
     errorMessage: effectiveError ? effectiveError.message : null,
     hasMore: Boolean(nextCursor),
