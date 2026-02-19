@@ -120,6 +120,7 @@ export {
   listingsAtom,
   salesAtom,
   collectionOrdersAtom,
+  collectionOrdersVerifiedAtom,
   collectionOrdersWithUsdAtom,
   verifiedCollectionOrdersAtom,
   sortedListedTokenIdsAtom,

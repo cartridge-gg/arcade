@@ -7,7 +7,7 @@ import { DEFAULT_PROJECT } from "@/constants";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { useArcade } from "@/hooks/arcade";
 import { useAccountByAddress, useMarketplaceTokens } from "@/effect";
-import { collectionOrdersAtom } from "@/effect/atoms";
+import { collectionOrdersVerifiedAtom } from "@/effect/atoms";
 import { CollectionType } from "@/effect/atoms/tokens";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { useNavigationManager } from "@/features/navigation/useNavigationManager";
@@ -129,7 +129,7 @@ export function useTokenDetailViewModel({
   }, [rawTokens, tokenId]);
 
   const collectionOrders = useAtomValue(
-    collectionOrdersAtom(collectionAddress),
+    collectionOrdersVerifiedAtom(collectionAddress),
   );
 
   const orders = useMemo(() => {
