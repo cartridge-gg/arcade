@@ -1,9 +1,7 @@
 import { useTokenContract } from "@/effect";
 import { DEFAULT_PROJECT } from "@/constants";
 import { useMarketplaceTokensStore } from "@/store";
-import type {
-  FetchTokenBalancesResult,
-} from "@cartridge/arcade/marketplace";
+import type { FetchTokenBalancesResult } from "@cartridge/arcade/marketplace";
 import { useMarketplaceTokenBalances } from "@cartridge/arcade/marketplace/react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -72,8 +70,10 @@ export function useMarketBalancesFetcher({
     collection !== null &&
     collection !== undefined;
 
-  const { data, status, error, isFetching } =
-    useMarketplaceTokenBalances(queryOptions, { enabled });
+  const { data, status, error, isFetching } = useMarketplaceTokenBalances(
+    queryOptions,
+    { enabled },
+  );
 
   const projectError = useMemo(() => {
     if (!data) return null;
