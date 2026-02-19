@@ -403,11 +403,49 @@ export async function createMarketplaceClient(
       limit: orderLimit,
     });
 
-    const listings = orders.filter(
+    const now = Date.now() / 1000;
+    const activeSellOrders = orders.filter(
       (order) =>
         order.category.value === CategoryType.Sell &&
-        order.status.value === StatusType.Placed,
+        order.status.value === StatusType.Placed &&
+        order.expiration > now,
     );
+
+    // Verify ownership of active listings
+    let listings = activeSellOrders;
+    if (listings.length > 0 && options.verifyOwnership !== false) {
+      const checksumCollection = getChecksumAddress(collection);
+      const ownerAddresses = [...new Set(listings.map((o) => o.owner))];
+      const ownerTokenIds = [
+        ...new Set(
+          listings.map((o) => addAddressPadding(`0x${o.tokenId.toString(16)}`)),
+        ),
+      ];
+
+      const { page: balancePage } = await fetchTokenBalances({
+        project: projectId,
+        contractAddresses: [checksumCollection],
+        accountAddresses: ownerAddresses,
+        tokenIds: ownerTokenIds,
+      });
+
+      if (balancePage) {
+        const ownershipSet = new Set<string>();
+        for (const balance of balancePage.balances) {
+          if (BigInt(balance.balance) > 0n && balance.token_id) {
+            const normalizedOwner = getChecksumAddress(balance.account_address);
+            const normalizedTokenId = BigInt(balance.token_id).toString();
+            ownershipSet.add(`${normalizedOwner}_${normalizedTokenId}`);
+          }
+        }
+
+        listings = listings.filter((order) => {
+          const normalizedOwner = getChecksumAddress(order.owner);
+          const normalizedTokenId = BigInt(order.tokenId).toString();
+          return ownershipSet.has(`${normalizedOwner}_${normalizedTokenId}`);
+        });
+      }
+    }
 
     return {
       projectId,

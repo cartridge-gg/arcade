@@ -16,6 +16,7 @@ const mockCollectionOrders = vi.fn();
 
 vi.mock("@/effect/atoms", () => ({
   collectionOrdersAtom: () => mockCollectionOrders(),
+  collectionOrdersVerifiedAtom: () => mockCollectionOrders(),
 }));
 
 vi.mock("@effect-atom/atom-react", async (importOriginal) => {

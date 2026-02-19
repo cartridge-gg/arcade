@@ -99,6 +99,8 @@ export interface TokenDetailsOptions {
   projectId?: string;
   fetchImages?: boolean;
   orderLimit?: number;
+  /** Cross-check on-chain ownership for listings. Defaults to true. */
+  verifyOwnership?: boolean;
 }
 
 export interface TokenDetails {

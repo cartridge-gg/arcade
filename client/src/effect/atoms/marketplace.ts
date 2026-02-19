@@ -186,6 +186,64 @@ export const collectionOrdersAtom = Atom.family((contractAddress: string) => {
   });
 });
 
+/**
+ * Like collectionOrdersAtom but cross-checks on-chain token ownership,
+ * filtering out stale listings where the seller transferred the NFT.
+ */
+export const collectionOrdersVerifiedAtom = Atom.family(
+  (contractAddress: string) => {
+    return Atom.make((get) => {
+      const unverified = get(collectionOrdersAtom(contractAddress));
+      if (!unverified || Object.keys(unverified).length === 0) {
+        return {};
+      }
+
+      // Collect all unique owner addresses from orders
+      const ownerAddresses: string[] = [];
+      for (const tokenOrders of Object.values(unverified)) {
+        for (const order of tokenOrders) {
+          ownerAddresses.push(order.owner);
+        }
+      }
+      const uniqueOwners = [...new Set(ownerAddresses)];
+      if (uniqueOwners.length === 0) return {};
+
+      const ownershipAtom = collectionOwnershipAtom(
+        contractAddress,
+        uniqueOwners,
+      );
+      const ownershipResult = get(ownershipAtom as any) as {
+        _tag: string;
+        value?: OwnershipMap;
+      };
+
+      if (ownershipResult._tag !== "Success" || !ownershipResult.value) {
+        return {};
+      }
+
+      const ownershipMap = ownershipResult.value;
+
+      return Object.entries(unverified).reduce(
+        (acc, [tokenId, tokenOrders]) => {
+          const verified = tokenOrders.filter((order) => {
+            const ownerKey = addAddressPadding(order.owner).toLowerCase();
+            const ownerTokens = ownershipMap.get(ownerKey);
+            if (!ownerTokens) return false;
+            const normalizedTokenId = BigInt(order.tokenId).toString(16);
+            return ownerTokens.has(normalizedTokenId);
+          });
+
+          if (verified.length > 0) {
+            acc[tokenId] = verified;
+          }
+          return acc;
+        },
+        {} as { [token: string]: OrderModel[] },
+      );
+    });
+  },
+);
+
 export const tokenOrdersAtom = Atom.family((key: string) => {
   const { contractAddress, tokenId } = JSON.parse(key) as {
     contractAddress: string;
