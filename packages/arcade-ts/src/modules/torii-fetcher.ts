@@ -1,5 +1,5 @@
-import { ToriiGrpcClient } from "@dojoengine/grpc";
-import { ToriiClient } from "@dojoengine/torii-client";
+import type { ToriiGrpcClient } from "@dojoengine/grpc";
+import type { ToriiClient } from "@dojoengine/torii-client";
 
 export interface PaginationOptions {
   limit?: number;
@@ -18,22 +18,17 @@ export interface FetchToriiOptionsBase {
 
 export interface FetchToriiOptionsWithClient<TNative extends boolean = false>
   extends FetchToriiOptionsBase {
+  /**
+   * Dojo client callback transport.
+   * For SQL transport, use `fetchToriisSql` from `./torii-sql-fetcher`.
+   */
   client: (
     params: ClientCallbackParams<TNative>,
   ) => Promise<any> | void | AsyncGenerator<any, void, unknown>;
   native?: TNative;
-  sql?: never;
 }
 
-export interface FetchToriiOptionsWithSQL extends FetchToriiOptionsBase {
-  sql: string;
-  native?: never;
-  client?: never;
-}
-
-export type FetchToriiOptions =
-  | FetchToriiOptionsWithClient<boolean>
-  | FetchToriiOptionsWithSQL;
+export type FetchToriiOptions = FetchToriiOptionsWithClient<boolean>;
 
 export interface FetchToriiResult {
   data: any[];
@@ -58,64 +53,49 @@ export interface FetchToriiStreamResult {
 
 const ARCADE_MAIN_PROJECT = "arcade-main";
 
-function getToriiUrl(_project: string): string {
-  return `https://api.cartridge.gg/x/${ARCADE_MAIN_PROJECT}/torii`;
+function getToriiUrl(project: string): string {
+  const resolvedProject = project || ARCADE_MAIN_PROJECT;
+  return `https://api.cartridge.gg/x/${resolvedProject}/torii`;
 }
 
 async function fetchFromEndpoint(
-  endpoint: string,
+  _endpoint: string,
   toriiUrl: string,
   options: FetchToriiOptions,
   signal: AbortSignal,
 ): Promise<any> {
-  if ("client" in options && options.client) {
-    const cfg = {
-      toriiUrl,
-      worldAddress: "0x0",
-    };
-    const client = options.native
-      ? new ToriiGrpcClient(cfg)
-      : await new ToriiClient(cfg);
-
-    try {
-      return await options.client({
-        client,
-        signal,
-      });
-    } catch (e) {
-      console.error(e);
-      throw new Error((e as Error).toString());
-    }
-    // leave this commented out for now.
-    // TODO: return client instance to free them at the end of caller function
-    // } finally {
-    //   if ('free' in client && typeof client.free === 'function') {
-    //     client.free();
-    //   }
-    // }
+  if (!options.client) {
+    throw new Error(
+      "Client callback is required in fetchToriis options. Use fetchToriisSql for SQL queries.",
+    );
   }
 
-  if ("sql" in options && options.sql) {
-    const response = await fetch(`${toriiUrl}/sql`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: options.sql,
+  const cfg = {
+    toriiUrl,
+    worldAddress: "0x0",
+  };
+  const client = options.native
+    ? new (await import("@dojoengine/grpc")).ToriiGrpcClient(cfg)
+    : await new (await import("@dojoengine/torii-client")).ToriiClient(cfg);
+
+  try {
+    return await options.client({
+      client,
       signal,
     });
-
-    if (!response.ok) {
-      throw new Error(
-        `HTTP error! status: ${response.status}, statusText: ${response.statusText}, endpoint: ${endpoint}`,
-      );
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
     }
-
-    const data = await response.json();
-    return { endpoint, data };
+    throw new Error(String(error));
   }
-
-  throw new Error("Either 'client' or 'sql' must be provided in options");
+  // leave this commented out for now.
+  // TODO: return client instance to free them at the end of caller function
+  // } finally {
+  //   if ('free' in client && typeof client.free === 'function') {
+  //     client.free();
+  //   }
+  // }
 }
 
 export async function fetchToriis(
