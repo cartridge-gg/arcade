@@ -27,6 +27,7 @@ export function Provider({ children }: PropsWithChildren) {
               config={{
                 chainId: constants.StarknetChainId.SN_MAIN,
                 defaultProject: DEFAULT_PROJECT,
+                runtime: "edge",
               }}
             >
               <StarknetProvider>{children}</StarknetProvider>

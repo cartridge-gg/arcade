@@ -308,7 +308,7 @@ export function useMarketplaceItemsViewModel({
 
   const handlePurchaseCallback = useHandlePurchaseCallback(handlerParams);
   const handleListCallback = useHandleListCallback(handlerParams);
-  const handleUnlistCallback = useHandleUnlistCallback(handlerParams);
+  const handleUnlistCallback = useHandleUnlistCallback();
   const handleSendCallback = useHandleSendCallback(handlerParams);
 
   const handlePurchase = useCallback(
@@ -335,6 +335,7 @@ export function useMarketplaceItemsViewModel({
       handleUnlistCallback(
         collectionAddress,
         tokens.map((token) => token.token_id ?? "").filter(Boolean),
+        tokens.map((token) => token.orders[0].order),
       ),
     [collectionAddress, handleUnlistCallback],
   );

@@ -2,6 +2,7 @@ import {
   ActivityCollectibleCard,
   ActivityGameCard,
   ActivityTokenCard,
+  ActivityAchievementCard,
   Button,
   Empty,
   LayoutContent,
@@ -9,7 +10,6 @@ import {
   Skeleton,
   cn,
 } from "@cartridge/ui";
-import ActivityAchievementCard from "@/components/ui/modules/activity-achievement-card";
 import type {
   ActivityDateGroup,
   ActivityEventView,
@@ -99,6 +99,7 @@ const ActivityEvent = ({ event }: { event: ActivityEventView }) => {
             value={event.value ?? ""}
             image={event.image ?? ""}
             action={event.action ?? "receive"}
+            timestamp={event.timestamp}
           />
         </a>
       ) : (
@@ -108,6 +109,7 @@ const ActivityEvent = ({ event }: { event: ActivityEventView }) => {
           value={event.value ?? ""}
           image={event.image ?? ""}
           action={event.action ?? "receive"}
+          timestamp={event.timestamp}
         />
       );
     case "collectible":
@@ -119,6 +121,7 @@ const ActivityEvent = ({ event }: { event: ActivityEventView }) => {
             address={event.address ?? ""}
             image={event.image ?? ""}
             action={event.action ?? "mint"}
+            timestamp={event.timestamp}
           />
         </a>
       ) : (
@@ -128,24 +131,31 @@ const ActivityEvent = ({ event }: { event: ActivityEventView }) => {
           address={event.address ?? ""}
           image={event.image ?? ""}
           action={event.action ?? "mint"}
+          timestamp={event.timestamp}
         />
       );
     case "game":
       return event.href ? (
         <a href={event.href} target="_blank" rel="noreferrer">
           <ActivityGameCard
-            title={event.title ?? ""}
+            action={event.title ?? ""}
+            name={event.name ?? ""}
+            logo={event.image ?? ""}
+            themeColor={event.color ?? ""}
             website={event.website ?? ""}
-            image={event.image ?? ""}
             certified={event.certified ?? false}
+            timestamp={event.timestamp * 1000}
           />
         </a>
       ) : (
         <ActivityGameCard
-          title={event.title ?? ""}
+          action={event.title ?? ""}
+          name={event.name ?? ""}
+          logo={event.image ?? ""}
+          themeColor={event.color ?? ""}
           website={event.website ?? ""}
-          image={event.image ?? ""}
           certified={event.certified ?? false}
+          timestamp={event.timestamp * 1000}
         />
       );
     case "achievement":
@@ -153,11 +163,12 @@ const ActivityEvent = ({ event }: { event: ActivityEventView }) => {
         <ActivityAchievementCard
           title="Achievement"
           image={event.image ?? ""}
-          certified={event.certified ?? false}
           topic={event.title ?? ""}
           points={event.points ?? 0}
+          themeColor={event.color ?? ""}
           website={event.website ?? ""}
-          color={event.color}
+          certified={event.certified ?? false}
+          timestamp={event.timestamp}
         />
       );
     default:

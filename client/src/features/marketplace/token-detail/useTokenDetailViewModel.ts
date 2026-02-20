@@ -1,13 +1,13 @@
 import { useCallback, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 import type { Token } from "@/types/torii";
-import type { OrderModel } from "@cartridge/arcade";
+import { StatusType, type OrderModel } from "@cartridge/arcade";
 import { useMarketBalancesFetcher } from "@/hooks/marketplace-balances-fetcher";
 import { DEFAULT_PROJECT } from "@/constants";
 import { addAddressPadding, getChecksumAddress } from "starknet";
 import { useArcade } from "@/hooks/arcade";
 import { useAccountByAddress, useMarketplaceTokens } from "@/effect";
-import { collectionOrdersAtom } from "@/effect/atoms";
+import { collectionOrdersVerifiedAtom } from "@/effect/atoms";
 import { CollectionType } from "@/effect/atoms/tokens";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { useNavigationManager } from "@/features/navigation/useNavigationManager";
@@ -18,6 +18,7 @@ import {
   useHandleListCallback,
   useHandleSendCallback,
   useHandleUnlistCallback,
+  useHandleUnlistViewCallback,
 } from "@/hooks/marketplace-actions-handlers";
 import { useProject } from "@/hooks/project";
 
@@ -128,7 +129,7 @@ export function useTokenDetailViewModel({
   }, [rawTokens, tokenId]);
 
   const collectionOrders = useAtomValue(
-    collectionOrdersAtom(collectionAddress),
+    collectionOrdersVerifiedAtom(collectionAddress),
   );
 
   const orders = useMemo(() => {
@@ -158,12 +159,17 @@ export function useTokenDetailViewModel({
     return [];
   }, [collectionOrders, tokenId]);
 
-  const lowestOrder = useMemo(
-    () => (orders.length > 0 ? orders[0] : null),
+  const activeOrders = useMemo(
+    () => orders.filter((order) => order?.status?.value === StatusType.Placed),
     [orders],
   );
 
-  const isListed = !!lowestOrder;
+  const lowestOrder = useMemo(
+    () => (activeOrders.length > 0 ? activeOrders[0] : null),
+    [activeOrders],
+  );
+
+  const isListed = activeOrders.length > 0;
 
   const isLoading = status === "loading" || status === "idle";
 
@@ -196,7 +202,8 @@ export function useTokenDetailViewModel({
 
   const handlePurchaseCallback = useHandlePurchaseCallback(handlerParams);
   const handleListCallback = useHandleListCallback(handlerParams);
-  const handleUnlistCallback = useHandleUnlistCallback(handlerParams);
+  const handleUnlistCallback = useHandleUnlistCallback();
+  const handleUnlistViewCallback = useHandleUnlistViewCallback(handlerParams);
   const handleSendCallback = useHandleSendCallback(handlerParams);
 
   const handlePurchase = useCallback(async () => {
@@ -210,8 +217,18 @@ export function useTokenDetailViewModel({
   }, [handleListCallback, collectionAddress, tokenId]);
 
   const handleUnlist = useCallback(async () => {
-    handleUnlistCallback(collectionAddress, [tokenId]);
-  }, [handleUnlistCallback, collectionAddress, tokenId]);
+    if (lowestOrder) {
+      handleUnlistCallback(collectionAddress, [tokenId], [lowestOrder]);
+    } else {
+      handleUnlistViewCallback(collectionAddress, [tokenId]);
+    }
+  }, [
+    lowestOrder,
+    handleUnlistCallback,
+    handleUnlistViewCallback,
+    collectionAddress,
+    tokenId,
+  ]);
 
   const handleSend = useCallback(async () => {
     handleSendCallback(collectionAddress, [tokenId]);

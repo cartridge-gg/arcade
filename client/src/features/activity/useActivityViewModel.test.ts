@@ -18,6 +18,7 @@ describe("useActivityViewModel", () => {
     contractAddress: "0x1",
     transactionHash: "0xabc",
     amount: "10",
+    username: "user",
     address: "0x2",
     value: "5",
     name: "Item",

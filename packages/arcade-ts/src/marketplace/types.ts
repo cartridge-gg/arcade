@@ -5,6 +5,7 @@ import type {
 } from "@dojoengine/torii-wasm/types";
 import type { constants, RpcProvider } from "starknet";
 import type { OrderModel } from "../modules/marketplace";
+import type { MarketplaceRuntimeMode } from "./runtime";
 
 export type AttributeFilterInputValue =
   | string
@@ -99,6 +100,8 @@ export interface TokenDetailsOptions {
   projectId?: string;
   fetchImages?: boolean;
   orderLimit?: number;
+  /** Cross-check on-chain ownership for listings. Defaults to true. */
+  verifyOwnership?: boolean;
 }
 
 export interface TokenDetails {
@@ -114,6 +117,7 @@ export interface MarketplaceClientConfig {
   resolveTokenImage?: ResolveTokenImage;
   resolveContractImage?: ResolveContractImage;
   provider?: RpcProvider;
+  runtime?: MarketplaceRuntimeMode;
 }
 
 export interface MarketplaceFees {

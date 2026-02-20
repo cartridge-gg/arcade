@@ -82,5 +82,8 @@ jobs:
       - name: Build TypeScript packages
         run: pnpm build
 
+      - name: Edge runtime smoke test (arcade-ts)
+        run: pnpm --filter @cartridge/arcade test:edge:smoke
+
       - name: Test TypeScript packages
         run: pnpm test:ts

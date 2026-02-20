@@ -1,14 +1,16 @@
 import { useCallback } from "react";
 import { useAccount, useConnect } from "@starknet-react/core";
+import { getContractByName } from "@dojoengine/core";
 import { DEFAULT_PRESET, DEFAULT_PROJECT } from "@/constants";
-import { addAddressPadding } from "starknet";
+import { addAddressPadding, type Call, CallData } from "starknet";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import type ControllerConnector from "@cartridge/connector/controller";
 import { useConnectionViewModel } from "@/features/connection";
 import { useTokenContracts } from "@/effect/hooks/tokens";
 import { CollectionType } from "@/effect/atoms/tokens";
 import type { OrderModel } from "@cartridge/arcade";
-import { useUsername } from "@/hooks/username";
+import { useControllerUsername } from "@/hooks/controller";
+import { useArcade } from "./arcade";
 
 export type ActionHandlerParams = {
   project?: string;
@@ -21,8 +23,6 @@ export function useHandlePurchaseCallback(
   collectionAddress: string,
   tokenIds: string[],
   orders: OrderModel[],
-  preset?: string,
-  project?: string,
 ) => Promise<void> {
   const { address } = useAccount();
   const { trackEvent, events } = useAnalytics();
@@ -138,22 +138,47 @@ export function useHandleListViewCallback(
   );
 }
 
-export function useHandleUnlistCallback(
-  presetParams?: ActionHandlerParams,
-): (collectionAddress: string, tokenIds: string[]) => Promise<void> {
-  const pathBuilder = useControllerPathBuilder(presetParams);
-  const openController = useOpenControllerAtPathCallback();
+export function useHandleUnlistCallback(): (
+  collectionAddress: string,
+  tokenIds: string[],
+  orders: OrderModel[],
+) => Promise<void> {
+  const { provider } = useArcade();
+  const openController = useOpenControllerExecuteCallback();
   return useCallback(
-    async (collectionAddress: string, tokenIds: string[]) => {
-      const path = pathBuilder({
-        // viewType: "unlist", // TODO: /unlist is not implemented in the controller
-        viewType: "unlistView",
-        collectionAddress,
-        tokenIds,
-      });
-      return openController(path);
+    async (
+      collectionAddress: string,
+      tokenIds: string[],
+      orders: OrderModel[],
+    ) => {
+      // TODO: /unlist is not implemented in the controller
+      // const path = pathBuilder({
+      //   viewType: "unlist",
+      //   collectionAddress,
+      //   tokenIds,
+      // });
+
+      // call the execute endpoint directly
+      const contract = getContractByName(
+        provider.manifest,
+        "ARCADE",
+        "Marketplace",
+      );
+      const contractAddress = contract?.address ?? "0x0";
+      const callData = new CallData(provider.manifest.abis);
+      const calls: Call[] = orders.map((order, index) => ({
+        entrypoint: "cancel",
+        contractAddress,
+        calldata: callData.compile("cancel", [
+          order.id,
+          collectionAddress,
+          `0x${tokenIds[index]}`,
+        ]),
+      }));
+
+      return openController(calls);
     },
-    [pathBuilder, openController],
+    [openController],
   );
 }
 
@@ -233,7 +258,7 @@ function useControllerPathBuilder(
 ): (params: MakeControllerViewPathParams) => string | undefined {
   const { trackEvent, events } = useAnalytics();
 
-  const username = useUsername();
+  const username = useControllerUsername();
 
   const collections = useTokenContracts();
 
@@ -342,6 +367,38 @@ export function useOpenControllerAtPathCallback(): (
       }
 
       controller.openProfileAt(path);
+    },
+    [connector, isConnected, isConnectDisabled],
+  );
+
+  return callback;
+}
+
+export function useOpenControllerExecuteCallback(): (
+  calls: Call[],
+) => Promise<void> {
+  const { connector } = useConnect();
+  const { isConnected } = useAccount();
+  const { onConnect, isConnectDisabled } = useConnectionViewModel();
+
+  const callback = useCallback(
+    async (calls: Call[]) => {
+      if (!calls || calls.length === 0) return;
+
+      if (!isConnected) {
+        if (isConnectDisabled) {
+          return;
+        }
+        await onConnect();
+      }
+
+      const controller = (connector as ControllerConnector)?.controller;
+      if (!controller) {
+        console.error("Connector not initialized");
+        return;
+      }
+
+      controller.openExecute(calls);
     },
     [connector, isConnected, isConnectDisabled],
   );

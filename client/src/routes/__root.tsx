@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from "react";
 import { Outlet, createRootRoute, useMatches } from "@tanstack/react-router";
+import { getChecksumAddress } from "starknet";
 import { Template } from "@/components/template";
-import { SonnerToaster } from "@cartridge/ui";
+import { ControllerToaster } from "@cartridge/ui";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useNavigationContext } from "@/features/navigation";
 import { useArcade } from "@/hooks/arcade";
@@ -22,7 +23,16 @@ function RootComponent() {
     if (data) {
       setPlayer((p) => (p !== data.address ? data.address : p));
     } else {
-      setPlayer(manager.getParams().player || undefined);
+      const param = manager.getParams().player;
+      if (param?.match(/^0x[0-9a-fA-F]+$/)) {
+        try {
+          setPlayer(getChecksumAddress(param));
+        } catch {
+          setPlayer(undefined);
+        }
+      } else {
+        setPlayer(undefined);
+      }
     }
   }, [data, manager, setPlayer]);
 
@@ -35,9 +45,9 @@ function RootComponent() {
           <Outlet />
         </Template>
       )}
-      <SonnerToaster position="top-center" />
+      <ControllerToaster position="bottom-right" />
       {import.meta.env.DEV ? (
-        <TanStackRouterDevtools position="bottom-right" />
+        <TanStackRouterDevtools position="bottom-left" />
       ) : null}
     </>
   );

@@ -4,13 +4,14 @@ export default defineConfig(() => ({
   entry: [
     "src/index.ts",
     "src/marketplace/index.ts",
+    "src/marketplace/edge.ts",
     "src/marketplace/react.tsx",
   ],
   sourcemap: true,
   clean: true,
   format: ["cjs", "esm"],
   globalName: "arcade",
-  external: ["react", "react/jsx-runtime"],
+  external: ["react", "react/jsx-runtime", "@tanstack/react-query"],
   esbuildOptions(options, context) {
     if (context.format === "iife") {
       options.platform = "browser";
