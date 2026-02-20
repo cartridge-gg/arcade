@@ -65,10 +65,9 @@ describe("torii-fetcher", () => {
   });
 
   it("should reject SQL-only options for compatibility safety", async () => {
-    const res = await fetchToriis(
-      ["arcade-blobarena"],
-      { sql: "SELECT 1" } as any,
-    );
+    const res = await fetchToriis(["arcade-blobarena"], {
+      sql: "SELECT 1",
+    } as any);
 
     expect(res.errors).toBeDefined();
     expect(res.metadata?.failedEndpoints).toBe(1);

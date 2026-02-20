@@ -20,7 +20,10 @@ describe("torii-sql-fetcher", () => {
         json: async () => ({ data: [] }),
       });
 
-    const result = await fetchToriisSql(["arcade-blobarena", "arcade-main"], "SELECT 1");
+    const result = await fetchToriisSql(
+      ["arcade-blobarena", "arcade-main"],
+      "SELECT 1",
+    );
 
     expect(result.metadata?.totalEndpoints).toBe(2);
     expect(global.fetch).toHaveBeenNthCalledWith(

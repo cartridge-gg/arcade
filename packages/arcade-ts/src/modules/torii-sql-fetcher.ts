@@ -54,7 +54,12 @@ export async function fetchToriisSql(
     const toriiUrl = getToriiUrl(endpoint);
 
     try {
-      const result = await fetchSqlFromEndpoint(endpoint, toriiUrl, sql, signal);
+      const result = await fetchSqlFromEndpoint(
+        endpoint,
+        toriiUrl,
+        sql,
+        signal,
+      );
       return { success: true as const, data: result, endpoint };
     } catch (error) {
       const err =

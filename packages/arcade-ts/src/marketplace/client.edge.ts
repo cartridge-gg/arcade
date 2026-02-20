@@ -166,10 +166,14 @@ async function verifyListingsOwnership(
   if (!listings.length) return listings;
 
   const collection = addAddressPadding(getChecksumAddress(collectionAddress));
-  const owners = [...new Set(listings.map((order) => getChecksumAddress(order.owner)))];
+  const owners = [
+    ...new Set(listings.map((order) => getChecksumAddress(order.owner))),
+  ];
   if (owners.length === 0) return [];
 
-  const tokenIds = [...new Set(listings.map((order) => BigInt(order.tokenId).toString()))];
+  const tokenIds = [
+    ...new Set(listings.map((order) => BigInt(order.tokenId).toString())),
+  ];
   if (tokenIds.length === 0) return [];
 
   const ownerList = toSqlList(owners.map((owner) => owner.toLowerCase()));
@@ -247,7 +251,9 @@ LIMIT 1`,
     if (fetchImages) {
       const contractImageResolver =
         resolveContractImage ?? defaultResolveContractImage;
-      const maybeImage = await contractImageResolver(contract as any, { projectId });
+      const maybeImage = await contractImageResolver(contract as any, {
+        projectId,
+      });
       if (typeof maybeImage === "string" && maybeImage.length > 0) {
         image = maybeImage;
       }
@@ -256,7 +262,9 @@ LIMIT 1`,
 
     return {
       projectId,
-      address: getChecksumAddress(String(contract.contract_address ?? collection)),
+      address: getChecksumAddress(
+        String(contract.contract_address ?? collection),
+      ),
       contractType:
         String(contract.contract_type ?? contract.type ?? "ERC721") || "ERC721",
       metadata,
@@ -291,8 +299,12 @@ LIMIT 1`,
     ];
 
     if (tokenIds && tokenIds.length > 0) {
-      const values = [...new Set(tokenIds.map((value) => escapeSqlValue(value)))];
-      conditions.push(`token_id IN (${values.map((v) => `'${v}'`).join(", ")})`);
+      const values = [
+        ...new Set(tokenIds.map((value) => escapeSqlValue(value))),
+      ];
+      conditions.push(
+        `token_id IN (${values.map((v) => `'${v}'`).join(", ")})`,
+      );
     }
 
     const sql = `SELECT contract_address, token_id, metadata, name, symbol, decimals
@@ -313,7 +325,8 @@ OFFSET ${Math.max(0, offset)}`;
         tokenMatchesAttributeFilters(token, attributeFilters),
       ) as NormalizedToken[];
 
-      const nextCursor = rows.length >= limit ? String(offset + rows.length) : null;
+      const nextCursor =
+        rows.length >= limit ? String(offset + rows.length) : null;
       return {
         page: {
           tokens: filtered,
@@ -325,7 +338,9 @@ OFFSET ${Math.max(0, offset)}`;
       const err =
         error instanceof Error
           ? error
-          : new Error(typeof error === "string" ? error : "Failed to list tokens");
+          : new Error(
+              typeof error === "string" ? error : "Failed to list tokens",
+            );
       return { page: null, error: { error: err } };
     }
   };
@@ -333,24 +348,33 @@ OFFSET ${Math.max(0, offset)}`;
   const getCollectionOrders = async (
     options: CollectionOrdersOptions,
   ): Promise<OrderModel[]> => {
-    const collection = addAddressPadding(getChecksumAddress(options.collection));
+    const collection = addAddressPadding(
+      getChecksumAddress(options.collection),
+    );
     const tokenId = normalizeTokenIdForQuery(options.tokenId);
     const status =
       options.status != null ? statusValueMap[options.status] : undefined;
     const category =
       options.category != null ? categoryValueMap[options.category] : undefined;
 
-    const conditions = [`lower(collection) = lower('${escapeSqlValue(collection)}')`];
+    const conditions = [
+      `lower(collection) = lower('${escapeSqlValue(collection)}')`,
+    ];
     if (tokenId !== undefined) {
       conditions.push(`token_id = '${escapeSqlValue(tokenId)}'`);
     }
     if (options.orderIds?.length) {
-      conditions.push(`id IN (${options.orderIds.map((id) => Number(id)).join(", ")})`);
+      conditions.push(
+        `id IN (${options.orderIds.map((id) => Number(id)).join(", ")})`,
+      );
     }
     if (status !== undefined) {
       conditions.push(`status = ${status}`);
     }
-    if (category !== undefined && category !== categoryValueMap[CategoryType.None]) {
+    if (
+      category !== undefined &&
+      category !== categoryValueMap[CategoryType.None]
+    ) {
       conditions.push(`category = ${category}`);
     }
 
