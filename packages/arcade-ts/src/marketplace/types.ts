@@ -5,6 +5,7 @@ import type {
 } from "@dojoengine/torii-wasm/types";
 import type { constants, RpcProvider } from "starknet";
 import type { OrderModel } from "../modules/marketplace";
+import type { MarketplaceRuntimeMode } from "./runtime";
 
 export type AttributeFilterInputValue =
   | string
@@ -116,6 +117,7 @@ export interface MarketplaceClientConfig {
   resolveTokenImage?: ResolveTokenImage;
   resolveContractImage?: ResolveContractImage;
   provider?: RpcProvider;
+  runtime?: MarketplaceRuntimeMode;
 }
 
 export interface MarketplaceFees {

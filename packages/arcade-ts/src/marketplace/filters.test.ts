@@ -10,17 +10,17 @@ import {
   type ActiveFilters,
   type TraitMetadataRow,
 } from "./filters";
-import { fetchToriis } from "../modules/torii-fetcher";
+import { fetchToriisSql } from "../modules/torii-sql-fetcher";
 
-vi.mock("../modules/torii-fetcher", () => ({
-  fetchToriis: vi.fn(),
+vi.mock("../modules/torii-sql-fetcher", () => ({
+  fetchToriisSql: vi.fn(),
 }));
 
-const mockedFetchToriis = vi.mocked(fetchToriis);
+const mockedFetchToriisSql = vi.mocked(fetchToriisSql);
 
 describe("marketplace filters helpers", () => {
   beforeEach(() => {
-    mockedFetchToriis.mockReset();
+    mockedFetchToriisSql.mockReset();
   });
 
   it("flattens active filters into trait selections", () => {
@@ -108,7 +108,7 @@ describe("marketplace filters helpers", () => {
   });
 
   it("fetches trait metadata for multiple projects", async () => {
-    mockedFetchToriis.mockResolvedValue({
+    mockedFetchToriisSql.mockResolvedValue({
       data: [
         {
           endpoint: "arcade-main",
@@ -133,12 +133,9 @@ describe("marketplace filters helpers", () => {
       projects: ["arcade-main", "arcade-alt"],
     });
 
-    expect(mockedFetchToriis).toHaveBeenCalledWith(
+    expect(mockedFetchToriisSql).toHaveBeenCalledWith(
       ["arcade-main", "arcade-alt"],
-      expect.objectContaining({
-        client: expect.any(Function),
-        native: true,
-      }),
+      expect.stringContaining("SELECT trait_name, trait_value"),
     );
 
     expect(result.pages).toHaveLength(2);
@@ -155,7 +152,7 @@ describe("marketplace filters helpers", () => {
   });
 
   it("maps errors to missing projects when fetching metadata fails", async () => {
-    mockedFetchToriis.mockResolvedValue({
+    mockedFetchToriisSql.mockResolvedValue({
       data: [],
       errors: [new Error("boom")],
     });
@@ -172,7 +169,7 @@ describe("marketplace filters helpers", () => {
   });
 
   it("preserves all trait_names when multiple traits share the same value", async () => {
-    mockedFetchToriis.mockResolvedValue({
+    mockedFetchToriisSql.mockResolvedValue({
       data: [
         {
           endpoint: "arcade-main",

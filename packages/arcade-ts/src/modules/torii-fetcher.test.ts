@@ -8,57 +8,14 @@ vi.mock("@dojoengine/torii-client", () => ({
   })),
 }));
 
-// Mock global fetch for SQL queries
-global.fetch = vi.fn();
-
 describe("torii-fetcher", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset fetch mock
-    (global.fetch as any).mockReset();
   });
 
   it("should export fetchToriis function", () => {
     expect(fetchToriis).toBeDefined();
     expect(typeof fetchToriis).toBe("function");
-  });
-
-  it("should handle SQL queries", async () => {
-    const mockResponse = {
-      data: [{ id: 1, name: "test" }],
-      count: 1,
-    };
-
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
-
-    const res = await fetchToriis(["arcade-blobarena"], {
-      sql: "SELECT * FROM ARCADE-Edition",
-      pagination: {
-        limit: 10,
-      },
-    });
-
-    expect(res).toBeDefined();
-    expect(res.data).toBeDefined();
-    expect(Array.isArray(res.data)).toBe(true);
-    expect(res.metadata).toBeDefined();
-    expect(res.metadata?.totalEndpoints).toBe(1);
-    expect(res.metadata?.successfulEndpoints).toBe(1);
-
-    // Verify fetch was called with correct parameters
-    expect(global.fetch).toHaveBeenCalledWith(
-      "https://api.cartridge.gg/x/arcade-main/torii/sql",
-      expect.objectContaining({
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: "SELECT * FROM ARCADE-Edition",
-      }),
-    );
   });
 
   it("should handle client callback", async () => {
@@ -79,73 +36,43 @@ describe("torii-fetcher", () => {
   });
 
   it("should handle multiple endpoints", async () => {
-    const mockResponse = { data: [], count: 0 };
-
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      json: async () => mockResponse,
-    });
+    const mockCallback = vi.fn().mockResolvedValue({ data: [], count: 0 });
 
     const res = await fetchToriis(["arcade-blobarena", "arcade-main"], {
-      sql: "SELECT * FROM TestModel LIMIT 5",
+      client: mockCallback,
     });
 
-    expect(res.metadata?.totalEndpoints).toBe(2);
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    const totalEndpoints = res.metadata?.totalEndpoints ?? 0;
+    const successfulEndpoints = res.metadata?.successfulEndpoints ?? 0;
+    const failedEndpoints = res.metadata?.failedEndpoints ?? 0;
+
+    expect(totalEndpoints).toBe(2);
+    expect(successfulEndpoints + failedEndpoints).toBe(2);
+    expect(res.data).toHaveLength(successfulEndpoints);
+    expect(mockCallback).toHaveBeenCalledTimes(successfulEndpoints);
   });
 
-  it("should handle HTTP errors gracefully", async () => {
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      statusText: "Internal Server Error",
-    });
+  it("should return errors when callback throws", async () => {
+    const mockCallback = vi.fn().mockRejectedValueOnce(new Error("boom"));
 
     const res = await fetchToriis(["arcade-blobarena"], {
-      sql: "SELECT * FROM TestModel",
+      client: mockCallback,
     });
 
     expect(res.errors).toBeDefined();
     expect(res.metadata?.failedEndpoints).toBe(1);
-    expect(res.errors?.[0]?.message).toContain("HTTP error! status: 500");
+    expect(res.errors?.[0]?.message).toContain("boom");
   });
 
-  it("should handle network errors gracefully", async () => {
-    (global.fetch as any).mockRejectedValueOnce(new Error("Network error"));
-
-    const res = await fetchToriis(["arcade-blobarena"], {
-      sql: "SELECT * FROM TestModel",
-    });
+  it("should reject SQL-only options for compatibility safety", async () => {
+    const res = await fetchToriis(
+      ["arcade-blobarena"],
+      { sql: "SELECT 1" } as any,
+    );
 
     expect(res.errors).toBeDefined();
     expect(res.metadata?.failedEndpoints).toBe(1);
-  });
-
-  describe("pagination", () => {
-    it("should support pagination options", async () => {
-      const mockResponse = { data: [], cursor: "next-cursor" };
-
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
-
-      const res = await fetchToriis(["arcade-blobarena"], {
-        sql: "SELECT * FROM TestModel",
-        pagination: {
-          limit: 10,
-          cursor: "test-cursor",
-          direction: "Forward",
-        },
-      });
-
-      expect(res).toBeDefined();
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: "SELECT * FROM TestModel",
-        }),
-      );
-    });
+    expect(res.errors?.[0]?.message).toContain("Client callback is required");
+    expect(res.errors?.[0]?.message).toContain("fetchToriisSql");
   });
 });

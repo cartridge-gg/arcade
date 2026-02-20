@@ -4,6 +4,7 @@ export default defineConfig(() => ({
   entry: [
     "src/index.ts",
     "src/marketplace/index.ts",
+    "src/marketplace/edge.ts",
     "src/marketplace/react.tsx",
   ],
   sourcemap: true,

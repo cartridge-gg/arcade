@@ -1,8 +1,7 @@
 import type { Token } from "@dojoengine/torii-wasm/types";
 import { addAddressPadding } from "starknet";
-import { fetchToriis } from "../modules/torii-fetcher";
+import { fetchToriisSql } from "../modules/torii-sql-fetcher";
 import { DEFAULT_PROJECT_ID, parseJsonSafe, resolveProjects } from "./utils";
-import type { ToriiGrpcClient } from "@dojoengine/grpc";
 
 export interface TraitSelection {
   name: string;
@@ -363,12 +362,7 @@ export async function fetchTraitNamesSummary(
 
   const query = buildTraitNamesSummaryQuery(address);
 
-  const response = await fetchToriis(projectIds, {
-    client: async ({ client }) => {
-      return await (client as ToriiGrpcClient).executeSql(query);
-    },
-    native: true,
-  });
+  const response = await fetchToriisSql(projectIds, query);
 
   const pages: TraitNameSummaryPage[] = [];
   const unmatchedProjects = new Set(projectIds);
@@ -455,12 +449,7 @@ export async function fetchTraitValues(
     otherTraitFilters,
   });
 
-  const response = await fetchToriis(projectIds, {
-    client: async ({ client }) => {
-      return await (client as ToriiGrpcClient).executeSql(query);
-    },
-    native: true,
-  });
+  const response = await fetchToriisSql(projectIds, query);
 
   const pages: TraitValuePage[] = [];
   const unmatchedProjects = new Set(projectIds);
@@ -547,12 +536,7 @@ export async function fetchExpandedTraitsMetadata(
     otherTraitFilters,
   });
 
-  const response = await fetchToriis(projectIds, {
-    client: async ({ client }) => {
-      return await (client as ToriiGrpcClient).executeSql(query);
-    },
-    native: true,
-  });
+  const response = await fetchToriisSql(projectIds, query);
 
   const pages: CollectionTraitMetadataPage[] = [];
   const unmatchedProjects = new Set(projectIds);
@@ -621,12 +605,7 @@ export async function fetchCollectionTraitMetadata(
 
   const query = buildTraitMetadataQuery({ address, traits });
 
-  const response = await fetchToriis(projectIds, {
-    client: async ({ client }) => {
-      return await (client as ToriiGrpcClient).executeSql(query);
-    },
-    native: true,
-  });
+  const response = await fetchToriisSql(projectIds, query);
 
   const pages: CollectionTraitMetadataPage[] = [];
   const unmatchedProjects = new Set(projectIds);
