@@ -3,6 +3,7 @@ import {
   aggregateTraitMetadata,
   buildAvailableFilters,
   buildPrecomputedFilters,
+  fetchTraitValues,
   fetchCollectionTraitMetadata,
   filterTokensByMetadata,
   flattenActiveFilters,
@@ -194,5 +195,66 @@ describe("marketplace filters helpers", () => {
     expect(available.Background?.Gold).toBe(50);
     expect(available.Background?.Blue).toBe(20);
     expect(available.Ring?.Gold).toBe(30);
+  });
+
+  it("groups OR trait filters before applying collection scope", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    });
+
+    await fetchCollectionTraitMetadata({
+      address: "0x123",
+      traits: [
+        { name: "Rarity", value: "Legendary" },
+        { name: "Background", value: "Gold" },
+      ],
+      projects: ["arcade-main"],
+    });
+
+    const query = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(query).toMatch(
+      /\(\(trait_name = 'Rarity' AND trait_value = 'Legendary'\) OR \(trait_name = 'Background' AND trait_value = 'Gold'\)\)\s+AND token_id LIKE/,
+    );
+  });
+
+  it("uses unique trait count when multiple values are selected for the same trait", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    });
+
+    await fetchTraitValues({
+      address: "0x123",
+      traitName: "Background",
+      otherTraitFilters: [
+        { name: "Rarity", value: "Legendary" },
+        { name: "Rarity", value: "Epic" },
+      ],
+      projects: ["arcade-main"],
+    });
+
+    const query = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(query).toContain("HAVING COUNT(DISTINCT trait_name) = 1");
+  });
+
+  it("uses exact trait comparisons instead of LIKE wildcards", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    });
+
+    await fetchTraitValues({
+      address: "0x123",
+      traitName: "Background",
+      otherTraitFilters: [{ name: "Rarity", value: "Legendary" }],
+      projects: ["arcade-main"],
+    });
+
+    const query = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(query).toContain("trait_name = 'Rarity'");
+    expect(query).toContain("trait_value = 'Legendary'");
+    expect(query).not.toContain("trait_name LIKE");
+    expect(query).not.toContain("trait_value LIKE");
   });
 });

@@ -70,4 +70,63 @@ describe("createEdgeMarketplaceClient", () => {
       expect.stringContaining("FROM tokens"),
     );
   });
+
+  it("normalizes tokenIds before building SQL IN clause", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.listCollectionTokens({
+      address: "0xabc",
+      tokenIds: ["0x1"],
+      fetchImages: false,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("token_id IN ('1')");
+  });
+
+  it("returns null nextCursor when limit is invalid and no rows are returned", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const result = await client.listCollectionTokens({
+      address: "0xabc",
+      limit: 0,
+      fetchImages: false,
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.page?.nextCursor).toBeNull();
+  });
+
+  it("short-circuits invalid orderIds without issuing malformed SQL", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const orders = await client.getCollectionOrders({
+      collection: "0xabc",
+      orderIds: [Number.NaN as unknown as number],
+    });
+
+    expect(orders).toEqual([]);
+    expect(mockedFetchToriisSql).not.toHaveBeenCalled();
+  });
 });

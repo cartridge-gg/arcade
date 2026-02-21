@@ -22,6 +22,7 @@ import {
   defaultResolveContractImage,
   defaultResolveTokenImage,
   inferImageFromMetadata,
+  normalizeTokenIds,
   normalizeTokens,
   parseJsonSafe,
 } from "./utils";
@@ -89,6 +90,13 @@ const extractRows = (data: any): any[] => {
 
 const toSqlList = (values: string[]): string =>
   values.map((value) => `'${escapeSqlValue(value)}'`).join(", ");
+
+const toPositiveInt = (value: number, fallback: number): number => {
+  if (!Number.isFinite(value)) return fallback;
+  const intValue = Math.floor(value);
+  if (intValue <= 0) return fallback;
+  return intValue;
+};
 
 async function querySql(projectId: string, sql: string): Promise<any[]> {
   const result = await fetchToriisSql([projectId], sql);
@@ -293,14 +301,16 @@ LIMIT 1`,
     const projectId = ensureProjectId(project, defaultProject);
     const collection = addAddressPadding(getChecksumAddress(address));
     const offset = cursor ? Number.parseInt(cursor, 10) || 0 : 0;
+    const effectiveLimit = toPositiveInt(limit, DEFAULT_LIMIT);
+    const normalizedTokenIds = normalizeTokenIds(tokenIds);
 
     const conditions = [
       `lower(contract_address) = lower('${escapeSqlValue(collection)}')`,
     ];
 
-    if (tokenIds && tokenIds.length > 0) {
+    if (normalizedTokenIds.length > 0) {
       const values = [
-        ...new Set(tokenIds.map((value) => escapeSqlValue(value))),
+        ...new Set(normalizedTokenIds.map((value) => escapeSqlValue(value))),
       ];
       conditions.push(
         `token_id IN (${values.map((v) => `'${v}'`).join(", ")})`,
@@ -311,7 +321,7 @@ LIMIT 1`,
 FROM tokens
 WHERE ${conditions.join(" AND ")}
 ORDER BY token_id
-LIMIT ${Math.max(1, Math.floor(limit))}
+LIMIT ${effectiveLimit}
 OFFSET ${Math.max(0, offset)}`;
 
     try {
@@ -326,7 +336,7 @@ OFFSET ${Math.max(0, offset)}`;
       ) as NormalizedToken[];
 
       const nextCursor =
-        rows.length >= limit ? String(offset + rows.length) : null;
+        rows.length >= effectiveLimit ? String(offset + rows.length) : null;
       return {
         page: {
           tokens: filtered,
@@ -357,16 +367,28 @@ OFFSET ${Math.max(0, offset)}`;
     const category =
       options.category != null ? categoryValueMap[options.category] : undefined;
 
+    const normalizedOrderIds = options.orderIds?.length
+      ? [
+          ...new Set(
+            options.orderIds
+              .map((id) => Number(id))
+              .filter((id) => Number.isInteger(id) && id >= 0),
+          ),
+        ]
+      : [];
+
+    if (options.orderIds?.length && normalizedOrderIds.length === 0) {
+      return [];
+    }
+
     const conditions = [
       `lower(collection) = lower('${escapeSqlValue(collection)}')`,
     ];
     if (tokenId !== undefined) {
       conditions.push(`token_id = '${escapeSqlValue(tokenId)}'`);
     }
-    if (options.orderIds?.length) {
-      conditions.push(
-        `id IN (${options.orderIds.map((id) => Number(id)).join(", ")})`,
-      );
+    if (normalizedOrderIds.length) {
+      conditions.push(`id IN (${normalizedOrderIds.join(", ")})`);
     }
     if (status !== undefined) {
       conditions.push(`status = ${status}`);
@@ -378,10 +400,13 @@ OFFSET ${Math.max(0, offset)}`;
       conditions.push(`category = ${category}`);
     }
 
+    const effectiveLimit = options.limit
+      ? toPositiveInt(options.limit, DEFAULT_LIMIT)
+      : undefined;
     const sql = `SELECT id, category, status, expiration, collection, token_id, quantity, price, currency, owner
 FROM "ARCADE-Order"
 WHERE ${conditions.join(" AND ")}
-ORDER BY id DESC${options.limit ? ` LIMIT ${Math.max(1, Math.floor(options.limit))}` : ""}`;
+ORDER BY id DESC${effectiveLimit ? ` LIMIT ${effectiveLimit}` : ""}`;
 
     const rows = await querySql(defaultProject, sql);
     return rows.map(toOrderModel).filter((order) => order.exists());

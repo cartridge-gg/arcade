@@ -112,13 +112,17 @@ const buildTraitWhereClause = (traits: TraitSelection[]): string => {
     return "1 = 1";
   }
 
-  return traits
-    .map(({ name, value }) => {
-      const traitName = escapeSqlValue(name);
-      const traitValue = escapeSqlValue(value);
-      return `(trait_name LIKE '${traitName}' AND trait_value LIKE '${traitValue}')`;
-    })
-    .join(" OR ");
+  const conditions = traits.map(({ name, value }) => {
+    const traitName = escapeSqlValue(name);
+    const traitValue = escapeSqlValue(value);
+    return `(trait_name = '${traitName}' AND trait_value = '${traitValue}')`;
+  });
+
+  return `(${conditions.join(" OR ")})`;
+};
+
+const countDistinctTraitNames = (traits: TraitSelection[]): number => {
+  return new Set(traits.map((trait) => trait.name)).size;
 };
 
 const buildTraitNamesSummaryQuery = (address: string): string => {
@@ -164,6 +168,7 @@ ORDER BY count DESC`;
   }
 
   const whereClause = buildTraitWhereClause(otherTraitFilters);
+  const distinctTraitCount = countDistinctTraitNames(otherTraitFilters);
   return `SELECT trait_value, COUNT(*) as count
 FROM token_attributes
 WHERE trait_name = '${escapedTraitName}'
@@ -173,7 +178,7 @@ WHERE trait_name = '${escapedTraitName}'
     WHERE ${whereClause}
       AND token_id LIKE '${paddedAddress}:%'
     GROUP BY token_id
-    HAVING COUNT(DISTINCT trait_name) = ${otherTraitFilters.length}
+    HAVING COUNT(DISTINCT trait_name) = ${distinctTraitCount}
   )
 GROUP BY trait_value
 ORDER BY count DESC`;
@@ -208,6 +213,7 @@ ORDER BY trait_name, count DESC`;
   }
 
   const whereClause = buildTraitWhereClause(otherTraitFilters);
+  const distinctTraitCount = countDistinctTraitNames(otherTraitFilters);
   return `SELECT trait_name, trait_value, COUNT(*) as count
 FROM token_attributes
 WHERE trait_name IN (${traitNamesCondition})
@@ -217,7 +223,7 @@ WHERE trait_name IN (${traitNamesCondition})
     WHERE ${whereClause}
       AND token_id LIKE '${paddedAddress}:%'
     GROUP BY token_id
-    HAVING COUNT(DISTINCT trait_name) = ${otherTraitFilters.length}
+    HAVING COUNT(DISTINCT trait_name) = ${distinctTraitCount}
   )
 GROUP BY trait_name, trait_value
 ORDER BY trait_name, count DESC`;
@@ -232,8 +238,9 @@ const buildTraitMetadataQuery = ({
 }): string => {
   const paddedAddress = addAddressPadding(address);
   const whereClause = buildTraitWhereClause(traits);
-  const havingClause = traits.length
-    ? `HAVING COUNT(DISTINCT trait_name) = ${traits.length}`
+  const distinctTraitCount = countDistinctTraitNames(traits);
+  const havingClause = distinctTraitCount
+    ? `HAVING COUNT(DISTINCT trait_name) = ${distinctTraitCount}`
     : "";
 
   return `SELECT trait_name, trait_value, COUNT(*) AS count
