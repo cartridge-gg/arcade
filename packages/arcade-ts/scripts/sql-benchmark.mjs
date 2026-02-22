@@ -5,6 +5,7 @@ import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { pathToFileURL } from "node:url";
 import { constants } from "starknet";
+import { resolveBenchmarkHelpers } from "./sql-benchmark-helpers.mjs";
 
 const DEFAULT_COLLECTION =
   "0x046da8955829adf2bda310099a0063451923f02e648cf25a1203aac6335cf0e4";
@@ -134,13 +135,13 @@ const main = async () => {
     runBenchmarkOperation,
     compareBenchmarkReports,
     renderBenchmarkMarkdown,
-  } = marketplace;
+    usingFallbackHelpers,
+  } = resolveBenchmarkHelpers(marketplace);
 
-  if (!createMarketplaceClient) {
-    throw new Error("createMarketplaceClient export was not found");
-  }
-  if (!runBenchmarkOperation) {
-    throw new Error("runBenchmarkOperation export was not found");
+  if (usingFallbackHelpers) {
+    console.warn(
+      "[benchmark] dist module missing benchmark helper exports, using script fallbacks",
+    );
   }
 
   const client = await createMarketplaceClient({
