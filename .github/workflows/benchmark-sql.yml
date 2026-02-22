@@ -1,0 +1,164 @@
+name: benchmark-sql
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "packages/arcade-ts/**"
+      - ".github/workflows/benchmark-sql.yml"
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: "Torii project id"
+        required: false
+        default: "arcade-main"
+      collection_address:
+        description: "Collection contract address"
+        required: false
+        default: "0x046da8955829adf2bda310099a0063451923f02e648cf25a1203aac6335cf0e4"
+      attribute_filters_json:
+        description: "JSON attribute filters for token benchmarks"
+        required: false
+        default: '{"beast id":["trait"]}'
+      trait_name:
+        description: "Trait name for trait-value benchmark query"
+        required: false
+        default: "beast id"
+      warmup:
+        description: "Warmup runs per operation"
+        required: false
+        default: "3"
+      iterations:
+        description: "Measured runs per operation"
+        required: false
+        default: "10"
+      operation_timeout_ms:
+        description: "Per-operation timeout in milliseconds"
+        required: false
+        default: "15000"
+      include_optional_ops:
+        description: "Include optional operations (getCollection, ownership=true, full trait metadata)"
+        required: false
+        default: "false"
+      fail_on_operation_error:
+        description: "Fail workflow when one benchmark operation errors"
+        required: false
+        default: "false"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.5.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Resolve benchmark settings
+        id: settings
+        env:
+          PROJECT_ID_INPUT: ${{ github.event.inputs.project_id }}
+          COLLECTION_INPUT: ${{ github.event.inputs.collection_address }}
+          FILTERS_INPUT: ${{ github.event.inputs.attribute_filters_json }}
+          TRAIT_INPUT: ${{ github.event.inputs.trait_name }}
+          WARMUP_INPUT: ${{ github.event.inputs.warmup }}
+          ITER_INPUT: ${{ github.event.inputs.iterations }}
+          TIMEOUT_INPUT: ${{ github.event.inputs.operation_timeout_ms }}
+          OPTIONAL_OPS_INPUT: ${{ github.event.inputs.include_optional_ops }}
+          FAIL_FAST_INPUT: ${{ github.event.inputs.fail_on_operation_error }}
+        run: |
+          project_id="${PROJECT_ID_INPUT:-arcade-main}"
+          collection_address="${COLLECTION_INPUT:-0x046da8955829adf2bda310099a0063451923f02e648cf25a1203aac6335cf0e4}"
+          attribute_filters_json="${FILTERS_INPUT:-{\"beast id\":[\"trait\"]}}"
+          trait_name="${TRAIT_INPUT:-beast id}"
+          warmup="${WARMUP_INPUT:-3}"
+          iterations="${ITER_INPUT:-10}"
+          operation_timeout_ms="${TIMEOUT_INPUT:-15000}"
+          include_optional_ops="${OPTIONAL_OPS_INPUT:-false}"
+          fail_on_operation_error="${FAIL_FAST_INPUT:-false}"
+
+          mkdir -p .artifacts/sql-benchmark
+
+          echo "project_id=${project_id}" >> "$GITHUB_OUTPUT"
+          echo "collection_address=${collection_address}" >> "$GITHUB_OUTPUT"
+          echo "attribute_filters_json=${attribute_filters_json}" >> "$GITHUB_OUTPUT"
+          echo "trait_name=${trait_name}" >> "$GITHUB_OUTPUT"
+          echo "warmup=${warmup}" >> "$GITHUB_OUTPUT"
+          echo "iterations=${iterations}" >> "$GITHUB_OUTPUT"
+          echo "operation_timeout_ms=${operation_timeout_ms}" >> "$GITHUB_OUTPUT"
+          echo "include_optional_ops=${include_optional_ops}" >> "$GITHUB_OUTPUT"
+          echo "fail_on_operation_error=${fail_on_operation_error}" >> "$GITHUB_OUTPUT"
+
+      - name: Benchmark pull request base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BENCH_PROJECT_ID: ${{ steps.settings.outputs.project_id }}
+          BENCH_COLLECTION_ADDRESS: ${{ steps.settings.outputs.collection_address }}
+          BENCH_ATTRIBUTE_FILTERS_JSON: ${{ steps.settings.outputs.attribute_filters_json }}
+          BENCH_TRAIT_NAME: ${{ steps.settings.outputs.trait_name }}
+          BENCH_WARMUP: ${{ steps.settings.outputs.warmup }}
+          BENCH_ITERATIONS: ${{ steps.settings.outputs.iterations }}
+          BENCH_OPERATION_TIMEOUT_MS: ${{ steps.settings.outputs.operation_timeout_ms }}
+          BENCH_INCLUDE_OPTIONAL_OPS: ${{ steps.settings.outputs.include_optional_ops }}
+          BENCH_FAIL_ON_OPERATION_ERROR: ${{ steps.settings.outputs.fail_on_operation_error }}
+          BENCH_OUTPUT_FILE: .artifacts/sql-benchmark/base.json
+          BENCH_MARKDOWN_FILE: .artifacts/sql-benchmark/base.md
+        run: |
+          rm -rf /tmp/arcade-base
+          git worktree add /tmp/arcade-base "${BASE_SHA}"
+          pnpm --dir /tmp/arcade-base install --frozen-lockfile --ignore-scripts
+          pnpm --dir /tmp/arcade-base --filter @cartridge/arcade build
+          BENCH_ARCADE_DIST_DIR=/tmp/arcade-base/packages/arcade-ts/dist \
+            node packages/arcade-ts/scripts/sql-benchmark.mjs
+
+      - name: Benchmark current head
+        env:
+          BENCH_PROJECT_ID: ${{ steps.settings.outputs.project_id }}
+          BENCH_COLLECTION_ADDRESS: ${{ steps.settings.outputs.collection_address }}
+          BENCH_ATTRIBUTE_FILTERS_JSON: ${{ steps.settings.outputs.attribute_filters_json }}
+          BENCH_TRAIT_NAME: ${{ steps.settings.outputs.trait_name }}
+          BENCH_WARMUP: ${{ steps.settings.outputs.warmup }}
+          BENCH_ITERATIONS: ${{ steps.settings.outputs.iterations }}
+          BENCH_OPERATION_TIMEOUT_MS: ${{ steps.settings.outputs.operation_timeout_ms }}
+          BENCH_INCLUDE_OPTIONAL_OPS: ${{ steps.settings.outputs.include_optional_ops }}
+          BENCH_FAIL_ON_OPERATION_ERROR: ${{ steps.settings.outputs.fail_on_operation_error }}
+          BENCH_OUTPUT_FILE: .artifacts/sql-benchmark/head.json
+          BENCH_MARKDOWN_FILE: .artifacts/sql-benchmark/head.md
+        run: |
+          pnpm --filter @cartridge/arcade build
+          if [ -f .artifacts/sql-benchmark/base.json ]; then
+            export BENCH_BASELINE_FILE=.artifacts/sql-benchmark/base.json
+          fi
+          node packages/arcade-ts/scripts/sql-benchmark.mjs
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-benchmark-${{ github.run_id }}
+          path: .artifacts/sql-benchmark/
+          if-no-files-found: error
+
+      - name: Append benchmark summary
+        run: |
+          {
+            echo "### SQL Benchmark";
+            echo "";
+            cat .artifacts/sql-benchmark/head.md;
+          } >> "$GITHUB_STEP_SUMMARY"
