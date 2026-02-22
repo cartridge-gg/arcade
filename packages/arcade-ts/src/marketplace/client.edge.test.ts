@@ -111,6 +111,106 @@ describe("createEdgeMarketplaceClient", () => {
     expect(result.page?.nextCursor).toBeNull();
   });
 
+  it("uses keyset pagination for token queries and emits keyset cursor", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [
+        {
+          endpoint: "arcade-main",
+          data: [
+            {
+              contract_address: "0xabc",
+              token_id: "2",
+              metadata: JSON.stringify({ name: "Token 2" }),
+            },
+          ],
+        },
+      ],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const result = await client.listCollectionTokens({
+      address: "0xabc",
+      limit: 1,
+      fetchImages: false,
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.page?.nextCursor).toBe("keyset:2");
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).not.toContain("OFFSET");
+  });
+
+  it("applies keyset cursor to token query predicate", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.listCollectionTokens({
+      address: "0xabc",
+      cursor: "keyset:9",
+      limit: 25,
+      fetchImages: false,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("token_id > '9'");
+    expect(sql).not.toContain("OFFSET");
+  });
+
+  it("pushes attribute filters into SQL instead of filtering client-side", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.listCollectionTokens({
+      address: "0xabc",
+      attributeFilters: {
+        rarity: new Set(["legendary", "epic"]),
+        class: new Set(["wizard"]),
+      },
+      fetchImages: false,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("FROM token_attributes");
+    expect(sql).toContain("HAVING COUNT(DISTINCT trait_name) = 2");
+    expect(sql).toContain("trait_name = 'rarity'");
+    expect(sql).toContain("trait_name = 'class'");
+  });
+
+  it("applies default order limit when getCollectionOrders limit is omitted", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.getCollectionOrders({
+      collection: "0xabc",
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("ORDER BY id DESC LIMIT 100");
+  });
+
   it("short-circuits invalid orderIds without issuing malformed SQL", async () => {
     mockedFetchToriisSql.mockResolvedValue({
       data: [{ endpoint: "arcade-main", data: [] }],

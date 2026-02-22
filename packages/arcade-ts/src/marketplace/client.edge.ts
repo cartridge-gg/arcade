@@ -98,6 +98,79 @@ const toPositiveInt = (value: number, fallback: number): number => {
   return intValue;
 };
 
+const KEYSET_CURSOR_PREFIX = "keyset:";
+
+const parseTokenCursor = (
+  cursor?: string | null | undefined,
+): { offset?: number; keysetTokenId?: string } => {
+  if (!cursor) return {};
+  if (cursor.startsWith(KEYSET_CURSOR_PREFIX)) {
+    const tokenId = cursor.slice(KEYSET_CURSOR_PREFIX.length);
+    if (!tokenId) return {};
+    return { keysetTokenId: tokenId };
+  }
+
+  const numericCursor = Number.parseInt(cursor, 10);
+  if (Number.isFinite(numericCursor) && `${numericCursor}` === cursor.trim()) {
+    return { offset: Math.max(0, numericCursor) };
+  }
+
+  return { keysetTokenId: cursor };
+};
+
+const encodeKeysetCursor = (tokenId: string): string =>
+  `${KEYSET_CURSOR_PREFIX}${tokenId}`;
+
+const buildAttributeFilterSqlClause = (
+  collectionAddress: string,
+  filters: FetchCollectionTokensOptions["attributeFilters"],
+): string | null => {
+  if (!filters || Object.keys(filters).length === 0) return null;
+
+  const traitClauses: string[] = [];
+  const distinctTraits = new Set<string>();
+
+  for (const [trait, values] of Object.entries(filters)) {
+    if (values == null) continue;
+    const selectedValues = Array.isArray(values)
+      ? values
+      : Array.from(values as Iterable<string | number | bigint>);
+    const normalizedValues = selectedValues
+      .map((value) => String(value))
+      .filter((value) => value.length > 0);
+    if (normalizedValues.length === 0) continue;
+
+    distinctTraits.add(trait);
+
+    const traitName = escapeSqlValue(trait);
+    if (normalizedValues.length === 1) {
+      traitClauses.push(
+        `(trait_name = '${traitName}' AND trait_value = '${escapeSqlValue(
+          normalizedValues[0],
+        )}')`,
+      );
+      continue;
+    }
+
+    traitClauses.push(
+      `(trait_name = '${traitName}' AND trait_value IN (${toSqlList(
+        normalizedValues,
+      )}))`,
+    );
+  }
+
+  if (traitClauses.length === 0) return null;
+
+  return `token_id IN (
+  SELECT token_id
+  FROM token_attributes
+  WHERE token_id LIKE '${escapeSqlValue(collectionAddress)}:%'
+    AND (${traitClauses.join(" OR ")})
+  GROUP BY token_id
+  HAVING COUNT(DISTINCT trait_name) = ${distinctTraits.size}
+)`;
+};
+
 async function querySql(projectId: string, sql: string): Promise<any[]> {
   const result = await fetchToriisSql([projectId], sql);
   if (result.errors?.length) {
@@ -110,39 +183,6 @@ async function querySql(projectId: string, sql: string): Promise<any[]> {
   }
   return rows;
 }
-
-const tokenMatchesAttributeFilters = (
-  token: { metadata?: any },
-  filters: FetchCollectionTokensOptions["attributeFilters"],
-): boolean => {
-  if (!filters || Object.keys(filters).length === 0) return true;
-  const metadata = parseJsonSafe(token.metadata, token.metadata);
-  const attributes = Array.isArray((metadata as any)?.attributes)
-    ? (metadata as any).attributes
-    : [];
-  if (!attributes.length) return false;
-
-  const traitMap = new Map<string, Set<string>>();
-  for (const attribute of attributes) {
-    const trait = attribute?.trait_type;
-    const value = attribute?.value;
-    if (trait == null || value == null) continue;
-    const traitName = String(trait);
-    if (!traitMap.has(traitName)) traitMap.set(traitName, new Set());
-    traitMap.get(traitName)?.add(String(value));
-  }
-
-  for (const [trait, values] of Object.entries(filters)) {
-    if (values == null) continue;
-    const selected = Array.isArray(values) ? values : Array.from(values as any);
-    const available = traitMap.get(trait);
-    if (!available) return false;
-    const matched = selected.some((value) => available.has(String(value)));
-    if (!matched) return false;
-  }
-
-  return true;
-};
 
 function toOrderModel(row: any): OrderModel {
   const orderLike = {
@@ -296,7 +336,7 @@ LIMIT 1`,
     } = options;
     const projectId = ensureProjectId(project, defaultProject);
     const collection = addAddressPadding(getChecksumAddress(address)).toLowerCase();
-    const offset = cursor ? Number.parseInt(cursor, 10) || 0 : 0;
+    const cursorState = parseTokenCursor(cursor);
     const effectiveLimit = toPositiveInt(limit, DEFAULT_LIMIT);
     const normalizedTokenIds = normalizeTokenIds(tokenIds);
 
@@ -313,12 +353,30 @@ LIMIT 1`,
       );
     }
 
+    if (cursorState.keysetTokenId) {
+      conditions.push(
+        `token_id > '${escapeSqlValue(cursorState.keysetTokenId)}'`,
+      );
+    }
+
+    const traitClause = buildAttributeFilterSqlClause(
+      collection,
+      attributeFilters,
+    );
+    if (traitClause) {
+      conditions.push(traitClause);
+    }
+
     const sql = `SELECT contract_address, token_id, metadata, name, symbol, decimals
 FROM tokens
 WHERE ${conditions.join(" AND ")}
 ORDER BY token_id
-LIMIT ${effectiveLimit}
-OFFSET ${Math.max(0, offset)}`;
+LIMIT ${effectiveLimit}${
+      cursorState.offset != null
+        ? `
+OFFSET ${cursorState.offset}`
+        : ""
+    }`;
 
     try {
       const rows = await querySql(projectId, sql);
@@ -327,15 +385,21 @@ OFFSET ${Math.max(0, offset)}`;
         resolveTokenImage: resolveTokenImage ?? defaultResolveTokenImage,
       });
 
-      const filtered = normalized.filter((token) =>
-        tokenMatchesAttributeFilters(token, attributeFilters),
-      ) as NormalizedToken[];
-
-      const nextCursor =
-        rows.length >= effectiveLimit ? String(offset + rows.length) : null;
+      let nextCursor: string | null = null;
+      if (rows.length >= effectiveLimit) {
+        if (cursorState.offset != null) {
+          nextCursor = String(cursorState.offset + rows.length);
+        } else {
+          const lastRow = rows[rows.length - 1];
+          const lastTokenId = lastRow?.token_id;
+          if (lastTokenId != null) {
+            nextCursor = encodeKeysetCursor(String(lastTokenId));
+          }
+        }
+      }
       return {
         page: {
-          tokens: filtered,
+          tokens: normalized as NormalizedToken[],
           nextCursor,
         },
         error: null,
@@ -393,13 +457,14 @@ OFFSET ${Math.max(0, offset)}`;
       conditions.push(`category = ${category}`);
     }
 
-    const effectiveLimit = options.limit
-      ? toPositiveInt(options.limit, DEFAULT_LIMIT)
-      : undefined;
+    const effectiveLimit = toPositiveInt(
+      options.limit ?? DEFAULT_LIMIT,
+      DEFAULT_LIMIT,
+    );
     const sql = `SELECT id, category, status, expiration, collection, token_id, quantity, price, currency, owner
 FROM "ARCADE-Order"
 WHERE ${conditions.join(" AND ")}
-ORDER BY id DESC${effectiveLimit ? ` LIMIT ${effectiveLimit}` : ""}`;
+ORDER BY id DESC LIMIT ${effectiveLimit}`;
 
     const rows = await querySql(projectIdOverride ?? defaultProject, sql);
     return rows.map(toOrderModel).filter((order) => order.exists());
