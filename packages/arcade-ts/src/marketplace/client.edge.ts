@@ -267,7 +267,9 @@ export async function createEdgeMarketplaceClient(
   ): Promise<NormalizedCollection | null> => {
     const { projectId: projectIdInput, address, fetchImages = true } = options;
     const projectId = ensureProjectId(projectIdInput, defaultProject);
-    const collection = addAddressPadding(getChecksumAddress(address)).toLowerCase();
+    const collection = addAddressPadding(
+      getChecksumAddress(address),
+    ).toLowerCase();
 
     const rows = await querySql(
       projectId,
@@ -335,14 +337,14 @@ LIMIT 1`,
       fetchImages = false,
     } = options;
     const projectId = ensureProjectId(project, defaultProject);
-    const collection = addAddressPadding(getChecksumAddress(address)).toLowerCase();
+    const collection = addAddressPadding(
+      getChecksumAddress(address),
+    ).toLowerCase();
     const cursorState = parseTokenCursor(cursor);
     const effectiveLimit = toPositiveInt(limit, DEFAULT_LIMIT);
     const normalizedTokenIds = normalizeTokenIds(tokenIds);
 
-    const conditions = [
-      `contract_address = '${escapeSqlValue(collection)}'`,
-    ];
+    const conditions = [`contract_address = '${escapeSqlValue(collection)}'`];
 
     if (normalizedTokenIds.length > 0) {
       const values = [
@@ -419,7 +421,9 @@ OFFSET ${cursorState.offset}`
     options: CollectionOrdersOptions,
     projectIdOverride?: string,
   ): Promise<OrderModel[]> => {
-    const collection = addAddressPadding(getChecksumAddress(options.collection)).toLowerCase();
+    const collection = addAddressPadding(
+      getChecksumAddress(options.collection),
+    ).toLowerCase();
     const tokenId = normalizeTokenIdForQuery(options.tokenId);
     const status =
       options.status != null ? statusValueMap[options.status] : undefined;
@@ -474,13 +478,16 @@ ORDER BY id DESC LIMIT ${effectiveLimit}`;
     options: CollectionListingsOptions,
   ): Promise<OrderModel[]> => {
     const projectId = ensureProjectId(options.projectId, defaultProject);
-    const baseOrders = await getCollectionOrders({
-      collection: options.collection,
-      tokenId: options.tokenId,
-      limit: options.limit,
-      category: CategoryType.Sell,
-      status: StatusType.Placed,
-    }, projectId);
+    const baseOrders = await getCollectionOrders(
+      {
+        collection: options.collection,
+        tokenId: options.tokenId,
+        limit: options.limit,
+        category: CategoryType.Sell,
+        status: StatusType.Placed,
+      },
+      projectId,
+    );
 
     const filtered = baseOrders.filter(
       (order) =>
@@ -521,11 +528,14 @@ ORDER BY id DESC LIMIT ${effectiveLimit}`;
     const token = tokenPage.page?.tokens[0];
     if (!token) return null;
 
-    const orders = await getCollectionOrders({
-      collection,
-      tokenId,
-      limit: orderLimit,
-    }, projectId);
+    const orders = await getCollectionOrders(
+      {
+        collection,
+        tokenId,
+        limit: orderLimit,
+      },
+      projectId,
+    );
 
     const now = Date.now() / 1000;
     let listings = orders.filter(
