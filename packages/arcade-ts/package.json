@@ -50,6 +50,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:edge:smoke": "vitest run --config vitest.edge.config.ts",
+    "benchmark:sql": "node ./scripts/sql-benchmark.mjs",
     "test:integration": "RUN_INTEGRATION_TESTS=true vitest run --config vitest.integration.config.ts",
     "docs": "cd www && npm run start",
     "docs:build": "cd www && GIT_REVISION_OVERRIDE=${npm_config_git_revision_override} npm run build",
