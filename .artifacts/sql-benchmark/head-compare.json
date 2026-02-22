@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-02-22T22:12:00.569Z",
+  "projectId": "arcade-main",
+  "collectionAddress": "0x046da8955829adf2bda310099a0063451923f02e648cf25a1203aac6335cf0e4",
+  "warmup": 1,
+  "iterations": 5,
+  "operations": [
+    {
+      "name": "listCollectionTokens:first-page",
+      "samplesMs": [
+        1980.76,
+        1015.37,
+        1811.09,
+        1046.43,
+        2000.73
+      ],
+      "stats": {
+        "count": 5,
+        "minMs": 1015.37,
+        "maxMs": 2000.73,
+        "meanMs": 1570.88,
+        "p50Ms": 1811.09,
+        "p95Ms": 2000.73
+      }
+    },
+    {
+      "name": "listCollectionTokens:next-page",
+      "samplesMs": [
+        1868.71,
+        1031.94,
+        2094.58,
+        763.02,
+        1837.51
+      ],
+      "stats": {
+        "count": 5,
+        "minMs": 763.02,
+        "maxMs": 2094.58,
+        "meanMs": 1519.15,
+        "p50Ms": 1837.51,
+        "p95Ms": 2094.58
+      }
+    },
+    {
+      "name": "listCollectionTokens:attribute-filters",
+      "samplesMs": [
+        217.57,
+        218.38,
+        221.56,
+        225.41,
+        222.8
+      ],
+      "stats": {
+        "count": 5,
+        "minMs": 217.57,
+        "maxMs": 225.41,
+        "meanMs": 221.14,
+        "p50Ms": 221.56,
+        "p95Ms": 225.41
+      }
+    },
+    {
+      "name": "getCollectionOrders",
+      "samplesMs": [
+        345.23,
+        243.88,
+        410.91,
+        243.3,
+        264.79
+      ],
+      "stats": {
+        "count": 5,
+        "minMs": 243.3,
+        "maxMs": 410.91,
+        "meanMs": 301.62,
+        "p50Ms": 264.79,
+        "p95Ms": 410.91
+      }
+    },
+    {
+      "name": "listCollectionListings:verifyOwnership=false",
+      "samplesMs": [
+        358.66,
+        240.85,
+        407.04,
+        235.16,
+        268.87
+      ],
+      "stats": {
+        "count": 5,
+        "minMs": 235.16,
+        "maxMs": 407.04,
+        "meanMs": 302.12,
+        "p50Ms": 268.87,
+        "p95Ms": 407.04
+      }
+    },
+    {
+      "name": "fetchTraitValues:beast id",
+      "samplesMs": [
+        221.09,
+        217.36,
+        216.62,
+        239.19,
+        219.41
+      ],
+      "stats": {
+        "count": 5,
+        "minMs": 216.62,
+        "maxMs": 239.19,
+        "meanMs": 222.73,
+        "p50Ms": 219.41,
+        "p95Ms": 239.19
+      }
+    }
+  ]
+}
