@@ -136,7 +136,9 @@ describe("marketplace filters helpers", () => {
 
     expect(mockedFetchToriisSql).toHaveBeenCalledWith(
       ["arcade-main", "arcade-alt"],
-      expect.stringContaining("SELECT trait_name, trait_value"),
+      expect.stringContaining(
+        "SELECT ta.trait_name, ta.trait_value, COUNT(*) AS count",
+      ),
     );
 
     expect(result.pages).toHaveLength(2);
@@ -197,7 +199,7 @@ describe("marketplace filters helpers", () => {
     expect(available.Ring?.Gold).toBe(30);
   });
 
-  it("groups OR trait filters before applying collection scope", async () => {
+  it("keeps OR trait filters grouped while applying collection scope", async () => {
     mockedFetchToriisSql.mockResolvedValue({
       data: [{ endpoint: "arcade-main", data: [] }],
       errors: [],
@@ -213,8 +215,12 @@ describe("marketplace filters helpers", () => {
     });
 
     const query = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
-    expect(query).toMatch(
-      /\(\(trait_name = 'Rarity' AND trait_value = 'Legendary'\) OR \(trait_name = 'Background' AND trait_value = 'Gold'\)\)\s+AND token_id LIKE/,
+    expect(query).toContain("WITH filtered_tokens AS (");
+    expect(query).toContain(
+      "WHERE token_id LIKE '0x0000000000000000000000000000000000000000000000000000000000000123:%'",
+    );
+    expect(query).toContain(
+      "AND ((trait_name = 'Rarity' AND trait_value = 'Legendary') OR (trait_name = 'Background' AND trait_value = 'Gold'))",
     );
   });
 
