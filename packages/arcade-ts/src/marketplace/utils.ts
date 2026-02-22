@@ -156,10 +156,15 @@ export async function normalizeTokens(
 ): Promise<NormalizedToken[]> {
   const { fetchImages, resolveTokenImage } = options;
   const resolver = resolveTokenImage ?? defaultResolveTokenImage;
+  const checksumByAddress = new Map<string, string>();
 
   const resolved = await Promise.all(
     tokens.map(async (token) => {
-      const checksumAddress = getChecksumAddress(token.contract_address);
+      let checksumAddress = checksumByAddress.get(token.contract_address);
+      if (!checksumAddress) {
+        checksumAddress = getChecksumAddress(token.contract_address);
+        checksumByAddress.set(token.contract_address, checksumAddress);
+      }
       const metadata = parseJsonSafe(token.metadata, token.metadata);
 
       let image: string | undefined;

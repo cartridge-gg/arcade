@@ -397,4 +397,57 @@ describe("createEdgeMarketplaceClient", () => {
 
     expect(ownershipQueries.length).toBeGreaterThan(1);
   });
+
+  it("relies on SQL category and status filtering for verifyOwnership=false listings", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [
+        {
+          endpoint: "arcade-main",
+          data: [
+            {
+              id: 1,
+              category: 2,
+              status: 1,
+              expiration: 9999999999,
+              collection: "0xabc",
+              token_id: 1,
+              quantity: 1,
+              price: 1,
+              currency: "0x1",
+              owner: "0x123",
+            },
+            {
+              id: 2,
+              category: 1,
+              status: 2,
+              expiration: 9999999999,
+              collection: "0xabc",
+              token_id: 2,
+              quantity: 1,
+              price: 1,
+              currency: "0x1",
+              owner: "0x123",
+            },
+          ],
+        },
+      ],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const listings = await client.listCollectionListings({
+      collection: "0xabc",
+      verifyOwnership: false,
+      projectId: "arcade-main",
+    });
+
+    expect(listings).toHaveLength(2);
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("category = 2");
+    expect(sql).toContain("status = 1");
+  });
 });

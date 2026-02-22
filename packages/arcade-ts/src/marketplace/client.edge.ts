@@ -539,17 +539,11 @@ ORDER BY id DESC LIMIT ${effectiveLimit}`;
       projectId,
     );
 
-    const filtered = baseOrders.filter(
-      (order) =>
-        order.category.value === CategoryType.Sell &&
-        order.status.value === StatusType.Placed,
-    );
-
-    if (options.verifyOwnership === false || filtered.length === 0) {
-      return filtered;
+    if (options.verifyOwnership === false || baseOrders.length === 0) {
+      return baseOrders;
     }
 
-    return verifyListingsOwnership(projectId, options.collection, filtered);
+    return verifyListingsOwnership(projectId, options.collection, baseOrders);
   };
 
   const getToken = async (
