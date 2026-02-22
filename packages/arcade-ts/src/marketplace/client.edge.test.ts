@@ -36,6 +36,74 @@ describe("createEdgeMarketplaceClient", () => {
     );
   });
 
+  it("falls back to token sample lookup when contract metadata is missing", async () => {
+    mockedFetchToriisSql
+      .mockResolvedValueOnce({
+        data: [
+          {
+            endpoint: "arcade-main",
+            data: [
+              {
+                contract_address: "0xabc",
+                contract_type: "ERC721",
+                metadata: null,
+                total_supply: "0x2",
+                token_id: null,
+              },
+            ],
+          },
+        ],
+        errors: [],
+      } as any)
+      .mockResolvedValueOnce({
+        data: [
+          {
+            endpoint: "arcade-main",
+            data: [
+              {
+                token_id: "0x2",
+                metadata: JSON.stringify({ name: "Fallback metadata" }),
+              },
+            ],
+          },
+        ],
+        errors: [],
+      } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const collection = await client.getCollection({
+      address: "0xabc",
+      fetchImages: false,
+    });
+
+    expect(collection).not.toBeNull();
+    expect(collection?.tokenIdSample).toBe("0x2");
+    expect(collection?.metadata).toMatchObject({ name: "Fallback metadata" });
+    expect(mockedFetchToriisSql).toHaveBeenCalledTimes(2);
+    expect(mockedFetchToriisSql.mock.calls[1]?.[1]).toContain("FROM tokens");
+  });
+
+  it("returns null instead of throwing when getCollection SQL query fails", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [],
+      errors: [new Error("HTTP error! status: 400")],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await expect(
+      client.getCollection({
+        address: "0xabc",
+        fetchImages: false,
+      }),
+    ).resolves.toBeNull();
+  });
+
   it("lists tokens through SQL transport", async () => {
     mockedFetchToriisSql.mockResolvedValueOnce({
       data: [
@@ -89,6 +157,51 @@ describe("createEdgeMarketplaceClient", () => {
 
     const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
     expect(sql).toContain("token_id IN ('1')");
+  });
+
+  it("canonicalizes equivalent decimal and hex tokenIds and deduplicates them", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.listCollectionTokens({
+      address: "0xabc",
+      tokenIds: ["ff", "0xff", "255"],
+      fetchImages: false,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("'255'");
+    expect(sql).not.toContain("'0xff'");
+    expect(sql).not.toContain("'ff'");
+    expect((sql.match(/'255'/g) ?? []).length).toBe(1);
+  });
+
+  it("chunks large tokenId filters instead of building one unbounded IN list", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.listCollectionTokens({
+      address: "0xabc",
+      tokenIds: Array.from({ length: 450 }, (_, index) => String(index + 1)),
+      fetchImages: false,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    const inClauseCount = (sql.match(/token_id IN \(/g) ?? []).length;
+    expect(inClauseCount).toBeGreaterThan(1);
+    expect(sql).toContain(" OR token_id IN (");
   });
 
   it("returns null nextCursor when limit is invalid and no rows are returned", async () => {
@@ -228,5 +341,60 @@ describe("createEdgeMarketplaceClient", () => {
 
     expect(orders).toEqual([]);
     expect(mockedFetchToriisSql).not.toHaveBeenCalled();
+  });
+
+  it("chunks ownership verification queries for large listing sets", async () => {
+    const orderRows = Array.from({ length: 450 }, (_, index) => ({
+      id: index + 1,
+      category: 2,
+      status: 1,
+      expiration: 9999999999,
+      collection: "0xabc",
+      token_id: index + 1,
+      quantity: 1,
+      price: 1,
+      currency: "0x1",
+      owner: "0x123",
+    }));
+
+    mockedFetchToriisSql.mockImplementation(async (_projects, sql) => {
+      if (sql.includes('FROM "ARCADE-Order"')) {
+        return {
+          data: [{ endpoint: "arcade-main", data: orderRows }],
+          errors: [],
+        } as any;
+      }
+
+      if (sql.includes("FROM token_balances")) {
+        return {
+          data: [{ endpoint: "arcade-main", data: [] }],
+          errors: [],
+        } as any;
+      }
+
+      return {
+        data: [{ endpoint: "arcade-main", data: [] }],
+        errors: [],
+      } as any;
+    });
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const listings = await client.listCollectionListings({
+      collection: "0xabc",
+      limit: 450,
+      verifyOwnership: true,
+      projectId: "arcade-main",
+    });
+
+    expect(listings).toEqual([]);
+
+    const ownershipQueries = mockedFetchToriisSql.mock.calls
+      .map((call) => call[1])
+      .filter((sql) => sql.includes("FROM token_balances"));
+
+    expect(ownershipQueries.length).toBeGreaterThan(1);
   });
 });

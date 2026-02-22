@@ -19,6 +19,7 @@ import type {
   TokenDetailsOptions,
 } from "./types";
 import {
+  canonicalizeTokenId,
   defaultResolveContractImage,
   defaultResolveTokenImage,
   inferImageFromMetadata,
@@ -28,6 +29,7 @@ import {
 } from "./utils";
 
 const DEFAULT_LIMIT = 100;
+const SQL_IN_CHUNK_SIZE = 200;
 
 const statusValueMap: Record<StatusType, number> = {
   [StatusType.None]: 0,
@@ -62,11 +64,7 @@ const asBigInt = (value: unknown): bigint => {
 
 const normalizeTokenIdForQuery = (tokenId?: string): string | undefined => {
   if (!tokenId) return undefined;
-  try {
-    return BigInt(tokenId).toString();
-  } catch (_error) {
-    return tokenId;
-  }
+  return canonicalizeTokenId(tokenId) ?? undefined;
 };
 
 const ensureProjectId = (
@@ -96,6 +94,30 @@ const toPositiveInt = (value: number, fallback: number): number => {
   const intValue = Math.floor(value);
   if (intValue <= 0) return fallback;
   return intValue;
+};
+
+const chunkArray = <T>(values: T[], size: number): T[][] => {
+  if (values.length === 0) return [];
+  if (size <= 0 || values.length <= size) return [values];
+
+  const chunks: T[][] = [];
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+  return chunks;
+};
+
+const buildChunkedInPredicate = (
+  column: string,
+  values: string[],
+  chunkSize = SQL_IN_CHUNK_SIZE,
+): string => {
+  const chunks = chunkArray(values, chunkSize);
+  if (chunks.length === 0) return "1 = 0";
+  if (chunks.length === 1) return `${column} IN (${toSqlList(chunks[0])})`;
+  return `(${chunks
+    .map((chunk) => `${column} IN (${toSqlList(chunk)})`)
+    .join(" OR ")})`;
 };
 
 const KEYSET_CURSOR_PREFIX = "keyset:";
@@ -225,24 +247,31 @@ async function verifyListingsOwnership(
     ...new Set(listings.map((order) => BigInt(order.tokenId).toString())),
   ];
   if (tokenIds.length === 0) return [];
-
-  const ownerList = toSqlList(owners.map((owner) => owner.toLowerCase()));
-  const tokenIdList = toSqlList(tokenIds);
-
-  const sql = `SELECT account_address, token_id
-FROM token_balances
-WHERE contract_address = '${escapeSqlValue(collection)}'
-  AND account_address IN (${ownerList})
-  AND token_id IN (${tokenIdList})
-  AND balance != '0x0000000000000000000000000000000000000000000000000000000000000000'`;
-
-  const rows = await querySql(projectId, sql);
   const ownership = new Set<string>();
 
-  for (const row of rows) {
-    const owner = getChecksumAddress(String(row.account_address));
-    const tokenId = BigInt(String(row.token_id)).toString();
-    ownership.add(`${owner}_${tokenId}`);
+  const ownerChunks = chunkArray(
+    owners.map((owner) => owner.toLowerCase()),
+    SQL_IN_CHUNK_SIZE,
+  );
+  const tokenIdChunks = chunkArray(tokenIds, SQL_IN_CHUNK_SIZE);
+
+  for (const ownerChunk of ownerChunks) {
+    for (const tokenIdChunk of tokenIdChunks) {
+      const sql = `SELECT account_address, token_id
+FROM token_balances
+WHERE contract_address = '${escapeSqlValue(collection)}'
+  AND account_address IN (${toSqlList(ownerChunk)})
+  AND token_id IN (${toSqlList(tokenIdChunk)})
+  AND balance != '0x0000000000000000000000000000000000000000000000000000000000000000'`;
+
+      const rows = await querySql(projectId, sql);
+
+      for (const row of rows) {
+        const owner = getChecksumAddress(String(row.account_address));
+        const tokenId = BigInt(String(row.token_id)).toString();
+        ownership.add(`${owner}_${tokenId}`);
+      }
+    }
   }
 
   return listings.filter((order) => {
@@ -271,57 +300,82 @@ export async function createEdgeMarketplaceClient(
       getChecksumAddress(address),
     ).toLowerCase();
 
-    const rows = await querySql(
-      projectId,
-      `SELECT
-  tc.contract_address,
-  tc.contract_type,
-  tc.type,
-  COALESCE(
-    tc.metadata,
-    (SELECT t.metadata FROM tokens t WHERE t.contract_address = tc.contract_address LIMIT 1)
-  ) AS metadata,
-  tc.total_supply,
-  COALESCE(
-    tc.token_id,
-    (SELECT t.token_id FROM tokens t WHERE t.contract_address = tc.contract_address LIMIT 1)
-  ) AS token_id
-FROM token_contracts tc
-WHERE tc.contract_address = '${escapeSqlValue(collection)}'
-LIMIT 1`,
-    );
-
-    const contract = rows[0];
-    if (!contract) return null;
-
-    const metadata = parseJsonSafe(contract.metadata, contract.metadata);
-    let image: string | undefined;
-
-    if (fetchImages) {
-      const contractImageResolver =
-        resolveContractImage ?? defaultResolveContractImage;
-      const maybeImage = await contractImageResolver(contract as any, {
+    try {
+      const rows = await querySql(
         projectId,
-      });
-      if (typeof maybeImage === "string" && maybeImage.length > 0) {
-        image = maybeImage;
-      }
-      if (!image) image = inferImageFromMetadata(metadata);
-    }
+        `SELECT
+  contract_address,
+  contract_type,
+  type,
+  metadata,
+  total_supply,
+  token_id
+FROM token_contracts
+WHERE contract_address = '${escapeSqlValue(collection)}'
+LIMIT 1`,
+      );
 
-    return {
-      projectId,
-      address: getChecksumAddress(
-        String(contract.contract_address ?? collection),
-      ),
-      contractType:
-        String(contract.contract_type ?? contract.type ?? "ERC721") || "ERC721",
-      metadata,
-      totalSupply: asBigInt(contract.total_supply ?? "0x0"),
-      tokenIdSample: (contract.token_id as string | null | undefined) ?? null,
-      image,
-      raw: contract as any,
-    };
+      const contract = rows[0];
+      if (!contract) return null;
+
+      let tokenSample: { token_id?: string; metadata?: unknown } | undefined;
+      const requiresTokenFallback =
+        contract.metadata == null || contract.token_id == null;
+
+      if (requiresTokenFallback) {
+        try {
+          const tokenRows = await querySql(
+            projectId,
+            `SELECT token_id, metadata
+FROM tokens
+WHERE contract_address = '${escapeSqlValue(collection)}'
+ORDER BY token_id
+LIMIT 1`,
+          );
+          tokenSample = tokenRows[0];
+        } catch (_error) {
+          tokenSample = undefined;
+        }
+      }
+
+      const metadata = parseJsonSafe(
+        contract.metadata ?? tokenSample?.metadata,
+        contract.metadata ?? tokenSample?.metadata ?? null,
+      );
+      let image: string | undefined;
+
+      if (fetchImages) {
+        const contractImageResolver =
+          resolveContractImage ?? defaultResolveContractImage;
+        const maybeImage = await contractImageResolver(contract as any, {
+          projectId,
+        });
+        if (typeof maybeImage === "string" && maybeImage.length > 0) {
+          image = maybeImage;
+        }
+        if (!image) image = inferImageFromMetadata(metadata);
+      }
+
+      return {
+        projectId,
+        address: getChecksumAddress(
+          String(contract.contract_address ?? collection),
+        ),
+        contractType:
+          String(contract.contract_type ?? contract.type ?? "ERC721") ||
+          "ERC721",
+        metadata,
+        totalSupply: asBigInt(contract.total_supply ?? "0x0"),
+        tokenIdSample:
+          (contract.token_id as string | null | undefined) ??
+          (tokenSample?.token_id as string | null | undefined) ??
+          null,
+        image,
+        raw: contract as any,
+      };
+    } catch (_error) {
+      return null;
+    }
   };
 
   const listCollectionTokens = async (
@@ -347,12 +401,8 @@ LIMIT 1`,
     const conditions = [`contract_address = '${escapeSqlValue(collection)}'`];
 
     if (normalizedTokenIds.length > 0) {
-      const values = [
-        ...new Set(normalizedTokenIds.map((value) => escapeSqlValue(value))),
-      ];
-      conditions.push(
-        `token_id IN (${values.map((v) => `'${v}'`).join(", ")})`,
-      );
+      const values = [...new Set(normalizedTokenIds)];
+      conditions.push(buildChunkedInPredicate("token_id", values));
     }
 
     if (cursorState.keysetTokenId) {

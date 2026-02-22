@@ -125,36 +125,44 @@ const countDistinctTraitNames = (traits: TraitSelection[]): number => {
   return new Set(traits.map((trait) => trait.name)).size;
 };
 
-const buildFilteredTokenIdsQuery = (
-  paddedAddress: string,
-  filters: TraitSelection[],
-): string => {
+const buildCollectionTokensCte = (address: string): string => {
+  const paddedAddress = addAddressPadding(address);
+  return `collection_tokens AS (
+  SELECT token_id
+  FROM tokens
+  WHERE contract_address = '${escapeSqlValue(paddedAddress)}'
+)`;
+};
+
+const buildFilteredTokenIdsQuery = (filters: TraitSelection[]): string => {
   if (filters.length === 0) {
-    return `SELECT DISTINCT token_id
-FROM token_attributes
-WHERE token_id LIKE '${paddedAddress}:%'`;
+    return `SELECT ct.token_id
+FROM collection_tokens ct`;
   }
 
   const whereClause = buildTraitWhereClause(filters);
   const distinctTraitCount = countDistinctTraitNames(filters);
-  return `SELECT token_id
-FROM token_attributes
-WHERE token_id LIKE '${paddedAddress}:%'
-  AND ${whereClause}
-GROUP BY token_id
+  return `SELECT ta.token_id
+FROM token_attributes ta
+JOIN collection_tokens ct
+  ON ta.token_id = ct.token_id
+WHERE ${whereClause}
+GROUP BY ta.token_id
 HAVING COUNT(DISTINCT trait_name) = ${distinctTraitCount}`;
 };
 
 const buildTraitNamesSummaryQuery = (address: string): string => {
-  const paddedAddress = addAddressPadding(address);
-  return `SELECT
-  trait_name,
-  COUNT(DISTINCT trait_value) AS value_count,
+  const collectionTokensCte = buildCollectionTokensCte(address);
+  return `WITH ${collectionTokensCte}
+SELECT
+  ta.trait_name,
+  COUNT(DISTINCT ta.trait_value) AS value_count,
   COUNT(*) AS total_count
-FROM token_attributes
-WHERE token_id LIKE '${paddedAddress}:%'
-GROUP BY trait_name
-ORDER BY trait_name`;
+FROM token_attributes ta
+JOIN collection_tokens ct
+  ON ta.token_id = ct.token_id
+GROUP BY ta.trait_name
+ORDER BY ta.trait_name`;
 };
 
 const buildTraitValuesQuery = ({
@@ -166,23 +174,23 @@ const buildTraitValuesQuery = ({
   traitName: string;
   otherTraitFilters?: TraitSelection[];
 }): string => {
-  const paddedAddress = addAddressPadding(address);
+  const collectionTokensCte = buildCollectionTokensCte(address);
   const escapedTraitName = escapeSqlValue(traitName);
 
   if (otherTraitFilters.length === 0) {
-    return `SELECT trait_value, COUNT(*) as count
-FROM token_attributes
-WHERE token_id LIKE '${paddedAddress}:%'
-  AND trait_name = '${escapedTraitName}'
-GROUP BY trait_value
+    return `WITH ${collectionTokensCte}
+SELECT ta.trait_value, COUNT(*) as count
+FROM token_attributes ta
+JOIN collection_tokens ct
+  ON ta.token_id = ct.token_id
+WHERE ta.trait_name = '${escapedTraitName}'
+GROUP BY ta.trait_value
 ORDER BY count DESC`;
   }
 
-  const filteredTokenIds = buildFilteredTokenIdsQuery(
-    paddedAddress,
-    otherTraitFilters,
-  );
-  return `WITH filtered_tokens AS (
+  const filteredTokenIds = buildFilteredTokenIdsQuery(otherTraitFilters);
+  return `WITH ${collectionTokensCte},
+filtered_tokens AS (
   ${filteredTokenIds}
 )
 SELECT ta.trait_value, COUNT(*) AS count
@@ -203,7 +211,7 @@ const buildExpandedTraitsMetadataQuery = ({
   traitNames: string[];
   otherTraitFilters?: TraitSelection[];
 }): string => {
-  const paddedAddress = addAddressPadding(address);
+  const collectionTokensCte = buildCollectionTokensCte(address);
 
   if (traitNames.length === 0) {
     return "SELECT trait_name, trait_value, 0 as count WHERE 1 = 0";
@@ -214,19 +222,19 @@ const buildExpandedTraitsMetadataQuery = ({
     .join(", ");
 
   if (otherTraitFilters.length === 0) {
-    return `SELECT trait_name, trait_value, COUNT(*) as count
-FROM token_attributes
-WHERE token_id LIKE '${paddedAddress}:%'
-  AND trait_name IN (${traitNamesCondition})
-GROUP BY trait_name, trait_value
-ORDER BY trait_name, count DESC`;
+    return `WITH ${collectionTokensCte}
+SELECT ta.trait_name, ta.trait_value, COUNT(*) as count
+FROM token_attributes ta
+JOIN collection_tokens ct
+  ON ta.token_id = ct.token_id
+WHERE ta.trait_name IN (${traitNamesCondition})
+GROUP BY ta.trait_name, ta.trait_value
+ORDER BY ta.trait_name, count DESC`;
   }
 
-  const filteredTokenIds = buildFilteredTokenIdsQuery(
-    paddedAddress,
-    otherTraitFilters,
-  );
-  return `WITH filtered_tokens AS (
+  const filteredTokenIds = buildFilteredTokenIdsQuery(otherTraitFilters);
+  return `WITH ${collectionTokensCte},
+filtered_tokens AS (
   ${filteredTokenIds}
 )
 SELECT ta.trait_name, ta.trait_value, COUNT(*) AS count
@@ -245,9 +253,10 @@ const buildTraitMetadataQuery = ({
   address: string;
   traits: TraitSelection[];
 }): string => {
-  const paddedAddress = addAddressPadding(address);
-  const filteredTokenIds = buildFilteredTokenIdsQuery(paddedAddress, traits);
-  return `WITH filtered_tokens AS (
+  const collectionTokensCte = buildCollectionTokensCte(address);
+  const filteredTokenIds = buildFilteredTokenIdsQuery(traits);
+  return `WITH ${collectionTokensCte},
+filtered_tokens AS (
   ${filteredTokenIds}
 )
 SELECT ta.trait_name, ta.trait_value, COUNT(*) AS count

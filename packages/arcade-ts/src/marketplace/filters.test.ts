@@ -3,6 +3,7 @@ import {
   aggregateTraitMetadata,
   buildAvailableFilters,
   buildPrecomputedFilters,
+  fetchTraitNamesSummary,
   fetchTraitValues,
   fetchCollectionTraitMetadata,
   filterTokensByMetadata,
@@ -215,13 +216,15 @@ describe("marketplace filters helpers", () => {
     });
 
     const query = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
-    expect(query).toContain("WITH filtered_tokens AS (");
+    expect(query).toContain("collection_tokens AS (");
+    expect(query).toContain("FROM tokens");
     expect(query).toContain(
-      "WHERE token_id LIKE '0x0000000000000000000000000000000000000000000000000000000000000123:%'",
+      "WHERE contract_address = '0x0000000000000000000000000000000000000000000000000000000000000123'",
     );
     expect(query).toContain(
-      "AND ((trait_name = 'Rarity' AND trait_value = 'Legendary') OR (trait_name = 'Background' AND trait_value = 'Gold'))",
+      "((trait_name = 'Rarity' AND trait_value = 'Legendary') OR (trait_name = 'Background' AND trait_value = 'Gold'))",
     );
+    expect(query).not.toContain("token_id LIKE");
   });
 
   it("uses unique trait count when multiple values are selected for the same trait", async () => {
@@ -262,5 +265,40 @@ describe("marketplace filters helpers", () => {
     expect(query).toContain("trait_value = 'Legendary'");
     expect(query).not.toContain("trait_name LIKE");
     expect(query).not.toContain("trait_value LIKE");
+  });
+
+  it("scopes trait name summary queries using collection token joins", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    });
+
+    await fetchTraitNamesSummary({
+      address: "0x123",
+      projects: ["arcade-main"],
+    });
+
+    const query = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(query).toContain("collection_tokens AS (");
+    expect(query).toContain("JOIN collection_tokens ct");
+    expect(query).not.toContain("token_id LIKE");
+  });
+
+  it("scopes trait value queries without filters using collection token joins", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    });
+
+    await fetchTraitValues({
+      address: "0x123",
+      traitName: "Background",
+      projects: ["arcade-main"],
+    });
+
+    const query = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(query).toContain("collection_tokens AS (");
+    expect(query).toContain("JOIN collection_tokens ct");
+    expect(query).not.toContain("token_id LIKE");
   });
 });
