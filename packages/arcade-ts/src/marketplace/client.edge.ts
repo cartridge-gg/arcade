@@ -173,7 +173,9 @@ async function verifyListingsOwnership(
 ): Promise<OrderModel[]> {
   if (!listings.length) return listings;
 
-  const collection = addAddressPadding(getChecksumAddress(collectionAddress));
+  const collection = addAddressPadding(
+    getChecksumAddress(collectionAddress),
+  ).toLowerCase();
   const owners = [
     ...new Set(listings.map((order) => getChecksumAddress(order.owner))),
   ];
@@ -187,18 +189,17 @@ async function verifyListingsOwnership(
   const ownerList = toSqlList(owners.map((owner) => owner.toLowerCase()));
   const tokenIdList = toSqlList(tokenIds);
 
-  const sql = `SELECT account_address, token_id, balance
+  const sql = `SELECT account_address, token_id
 FROM token_balances
-WHERE lower(contract_address) = lower('${escapeSqlValue(collection)}')
-  AND lower(account_address) IN (${ownerList})
-  AND token_id IN (${tokenIdList})`;
+WHERE contract_address = '${escapeSqlValue(collection)}'
+  AND account_address IN (${ownerList})
+  AND token_id IN (${tokenIdList})
+  AND balance != '0x0000000000000000000000000000000000000000000000000000000000000000'`;
 
   const rows = await querySql(projectId, sql);
   const ownership = new Set<string>();
 
   for (const row of rows) {
-    const balance = asBigInt(row.balance ?? 0);
-    if (balance <= 0n) continue;
     const owner = getChecksumAddress(String(row.account_address));
     const tokenId = BigInt(String(row.token_id)).toString();
     ownership.add(`${owner}_${tokenId}`);
@@ -226,34 +227,32 @@ export async function createEdgeMarketplaceClient(
   ): Promise<NormalizedCollection | null> => {
     const { projectId: projectIdInput, address, fetchImages = true } = options;
     const projectId = ensureProjectId(projectIdInput, defaultProject);
-    const collection = addAddressPadding(getChecksumAddress(address));
+    const collection = addAddressPadding(getChecksumAddress(address)).toLowerCase();
 
     const rows = await querySql(
       projectId,
-      `SELECT contract_address, contract_type, type, metadata, total_supply, token_id
-FROM token_contracts
-WHERE lower(contract_address) = lower('${escapeSqlValue(collection)}')
+      `SELECT
+  tc.contract_address,
+  tc.contract_type,
+  tc.type,
+  COALESCE(
+    tc.metadata,
+    (SELECT t.metadata FROM tokens t WHERE t.contract_address = tc.contract_address LIMIT 1)
+  ) AS metadata,
+  tc.total_supply,
+  COALESCE(
+    tc.token_id,
+    (SELECT t.token_id FROM tokens t WHERE t.contract_address = tc.contract_address LIMIT 1)
+  ) AS token_id
+FROM token_contracts tc
+WHERE tc.contract_address = '${escapeSqlValue(collection)}'
 LIMIT 1`,
     );
 
     const contract = rows[0];
     if (!contract) return null;
 
-    let tokenSample: any | undefined;
-    let metadataRaw = contract.metadata;
-    if (!metadataRaw) {
-      const tokenRows = await querySql(
-        projectId,
-        `SELECT token_id, metadata
-FROM tokens
-WHERE lower(contract_address) = lower('${escapeSqlValue(collection)}')
-LIMIT 1`,
-      );
-      tokenSample = tokenRows[0];
-      if (tokenSample?.metadata) metadataRaw = tokenSample.metadata;
-    }
-
-    const metadata = parseJsonSafe(metadataRaw, metadataRaw);
+    const metadata = parseJsonSafe(contract.metadata, contract.metadata);
     let image: string | undefined;
 
     if (fetchImages) {
@@ -277,10 +276,7 @@ LIMIT 1`,
         String(contract.contract_type ?? contract.type ?? "ERC721") || "ERC721",
       metadata,
       totalSupply: asBigInt(contract.total_supply ?? "0x0"),
-      tokenIdSample:
-        (contract.token_id as string | null | undefined) ??
-        (tokenSample?.token_id as string | null | undefined) ??
-        null,
+      tokenIdSample: (contract.token_id as string | null | undefined) ?? null,
       image,
       raw: contract as any,
     };
@@ -299,13 +295,13 @@ LIMIT 1`,
       fetchImages = false,
     } = options;
     const projectId = ensureProjectId(project, defaultProject);
-    const collection = addAddressPadding(getChecksumAddress(address));
+    const collection = addAddressPadding(getChecksumAddress(address)).toLowerCase();
     const offset = cursor ? Number.parseInt(cursor, 10) || 0 : 0;
     const effectiveLimit = toPositiveInt(limit, DEFAULT_LIMIT);
     const normalizedTokenIds = normalizeTokenIds(tokenIds);
 
     const conditions = [
-      `lower(contract_address) = lower('${escapeSqlValue(collection)}')`,
+      `contract_address = '${escapeSqlValue(collection)}'`,
     ];
 
     if (normalizedTokenIds.length > 0) {
@@ -357,10 +353,9 @@ OFFSET ${Math.max(0, offset)}`;
 
   const getCollectionOrders = async (
     options: CollectionOrdersOptions,
+    projectIdOverride?: string,
   ): Promise<OrderModel[]> => {
-    const collection = addAddressPadding(
-      getChecksumAddress(options.collection),
-    );
+    const collection = addAddressPadding(getChecksumAddress(options.collection)).toLowerCase();
     const tokenId = normalizeTokenIdForQuery(options.tokenId);
     const status =
       options.status != null ? statusValueMap[options.status] : undefined;
@@ -381,9 +376,7 @@ OFFSET ${Math.max(0, offset)}`;
       return [];
     }
 
-    const conditions = [
-      `lower(collection) = lower('${escapeSqlValue(collection)}')`,
-    ];
+    const conditions = [`collection = '${escapeSqlValue(collection)}'`];
     if (tokenId !== undefined) {
       conditions.push(`token_id = '${escapeSqlValue(tokenId)}'`);
     }
@@ -408,20 +401,21 @@ FROM "ARCADE-Order"
 WHERE ${conditions.join(" AND ")}
 ORDER BY id DESC${effectiveLimit ? ` LIMIT ${effectiveLimit}` : ""}`;
 
-    const rows = await querySql(defaultProject, sql);
+    const rows = await querySql(projectIdOverride ?? defaultProject, sql);
     return rows.map(toOrderModel).filter((order) => order.exists());
   };
 
   const listCollectionListings = async (
     options: CollectionListingsOptions,
   ): Promise<OrderModel[]> => {
+    const projectId = ensureProjectId(options.projectId, defaultProject);
     const baseOrders = await getCollectionOrders({
       collection: options.collection,
       tokenId: options.tokenId,
       limit: options.limit,
       category: CategoryType.Sell,
       status: StatusType.Placed,
-    });
+    }, projectId);
 
     const filtered = baseOrders.filter(
       (order) =>
@@ -433,7 +427,6 @@ ORDER BY id DESC${effectiveLimit ? ` LIMIT ${effectiveLimit}` : ""}`;
       return filtered;
     }
 
-    const projectId = ensureProjectId(options.projectId, defaultProject);
     return verifyListingsOwnership(projectId, options.collection, filtered);
   };
 
@@ -467,7 +460,7 @@ ORDER BY id DESC${effectiveLimit ? ` LIMIT ${effectiveLimit}` : ""}`;
       collection,
       tokenId,
       limit: orderLimit,
-    });
+    }, projectId);
 
     const now = Date.now() / 1000;
     let listings = orders.filter(
