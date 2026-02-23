@@ -18,6 +18,18 @@ const toPositiveInt = (value, fallback) => {
   return parsed;
 };
 
+const toNonNegativeNumber = (value, fallback) => {
+  if (value == null || `${value}`.trim().length === 0) {
+    return fallback;
+  }
+
+  const parsed = Number.parseFloat(String(value));
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+  return parsed;
+};
+
 const toBoolean = (value, fallback = false) => {
   if (value == null || `${value}`.trim().length === 0) {
     return fallback;
@@ -106,9 +118,21 @@ const main = async () => {
     process.env.BENCH_FAIL_ON_OPERATION_ERROR,
     false,
   );
+  const failOnDeferredRegression = toBoolean(
+    process.env.BENCH_FAIL_ON_DEFERRED_REGRESSION,
+    false,
+  );
   const tokenLimit = toPositiveInt(process.env.BENCH_TOKEN_LIMIT, 100);
   const orderLimit = toPositiveInt(process.env.BENCH_ORDER_LIMIT, 100);
   const listingLimit = toPositiveInt(process.env.BENCH_LISTING_LIMIT, 100);
+  const deferredMaxP95DeltaPct = toNonNegativeNumber(
+    process.env.BENCH_DEFERRED_MAX_P95_DELTA_PCT,
+    10,
+  );
+  const eagerMaxP95DeltaPct = toNonNegativeNumber(
+    process.env.BENCH_EAGER_MAX_P95_DELTA_PCT,
+    10,
+  );
   const distDir =
     process.env.BENCH_ARCADE_DIST_DIR || getDefaultDistDir(cwd);
   const outputFile = path.resolve(
@@ -134,6 +158,7 @@ const main = async () => {
     fetchTraitValues,
     runBenchmarkOperation,
     compareBenchmarkReports,
+    evaluateBenchmarkRegressions,
     renderBenchmarkMarkdown,
     usingFallbackHelpers,
   } = resolveBenchmarkHelpers(marketplace);
@@ -212,46 +237,66 @@ const main = async () => {
     );
   }
 
-  const firstPageResult = await runAndRecord(
-    "listCollectionTokens:first-page",
-    async () =>
-      ensureTokenPageResult(
-        client.listCollectionTokens({
-          address: collectionAddress,
-          project: projectId,
-          limit: tokenLimit,
-          fetchImages: false,
-        }),
-      ),
-  );
+  const listingModes = [
+    { label: "eager", includeMetadata: true },
+    { label: "deferred", includeMetadata: false },
+  ];
+  let metadataBatchTokenIds = [];
 
-  const seedCursor = firstPageResult?.page?.nextCursor;
-  if (seedCursor) {
-    await runAndRecord("listCollectionTokens:next-page", async () =>
-      ensureTokenPageResult(
-        client.listCollectionTokens({
-          address: collectionAddress,
-          project: projectId,
-          cursor: seedCursor,
-          limit: tokenLimit,
-          fetchImages: false,
-        }),
-      ),
+  for (const mode of listingModes) {
+    const firstPageResult = await runAndRecord(
+      `listCollectionTokens:first-page:${mode.label}`,
+      async () =>
+        ensureTokenPageResult(
+          client.listCollectionTokens({
+            address: collectionAddress,
+            project: projectId,
+            limit: tokenLimit,
+            includeMetadata: mode.includeMetadata,
+            fetchImages: false,
+          }),
+        ),
     );
-  }
 
-  if (attributeFilters) {
-    await runAndRecord("listCollectionTokens:attribute-filters", async () =>
-      ensureTokenPageResult(
-        client.listCollectionTokens({
-          address: collectionAddress,
-          project: projectId,
-          limit: tokenLimit,
-          attributeFilters,
-          fetchImages: false,
-        }),
-      ),
-    );
+    if (metadataBatchTokenIds.length === 0) {
+      metadataBatchTokenIds = (firstPageResult?.page?.tokens ?? [])
+        .map((token) => String(token?.token_id ?? ""))
+        .filter((tokenId) => tokenId.length > 0)
+        .slice(0, 100);
+    }
+
+    const seedCursor = firstPageResult?.page?.nextCursor;
+    if (seedCursor) {
+      await runAndRecord(`listCollectionTokens:next-page:${mode.label}`, async () =>
+        ensureTokenPageResult(
+          client.listCollectionTokens({
+            address: collectionAddress,
+            project: projectId,
+            cursor: seedCursor,
+            limit: tokenLimit,
+            includeMetadata: mode.includeMetadata,
+            fetchImages: false,
+          }),
+        ),
+      );
+    }
+
+    if (attributeFilters) {
+      await runAndRecord(
+        `listCollectionTokens:attribute-filters:${mode.label}`,
+        async () =>
+          ensureTokenPageResult(
+            client.listCollectionTokens({
+              address: collectionAddress,
+              project: projectId,
+              limit: tokenLimit,
+              includeMetadata: mode.includeMetadata,
+              attributeFilters,
+              fetchImages: false,
+            }),
+          ),
+      );
+    }
   }
 
   await runAndRecord("getCollectionOrders", async () =>
@@ -304,6 +349,21 @@ const main = async () => {
     );
   }
 
+  if (
+    includeOptionalOps &&
+    metadataBatchTokenIds.length >= 100 &&
+    typeof client.getCollectionTokenMetadataBatch === "function"
+  ) {
+    await runAndRecord("getCollectionTokenMetadataBatch:100", async () =>
+      client.getCollectionTokenMetadataBatch({
+        address: collectionAddress,
+        project: projectId,
+        tokenIds: metadataBatchTokenIds.slice(0, 100),
+        fetchImages: false,
+      }),
+    );
+  }
+
   if (operationResults.length === 0) {
     throw new Error("No successful benchmark operations completed");
   }
@@ -323,6 +383,57 @@ const main = async () => {
     baseline && compareBenchmarkReports
       ? compareBenchmarkReports(baseline, report)
       : [];
+
+  const coreThresholds = [
+    {
+      operationName: "listCollectionTokens:first-page:deferred",
+      metric: "p95",
+      maxDeltaPct: deferredMaxP95DeltaPct,
+    },
+    {
+      operationName: "listCollectionTokens:next-page:deferred",
+      metric: "p95",
+      maxDeltaPct: deferredMaxP95DeltaPct,
+    },
+  ];
+  const optionalThresholds = [
+    {
+      operationName: "listCollectionTokens:first-page:eager",
+      metric: "p95",
+      maxDeltaPct: eagerMaxP95DeltaPct,
+    },
+    {
+      operationName: "listCollectionTokens:next-page:eager",
+      metric: "p95",
+      maxDeltaPct: eagerMaxP95DeltaPct,
+    },
+  ];
+
+  const coreViolations =
+    comparison.length > 0
+      ? evaluateBenchmarkRegressions(comparison, coreThresholds)
+      : [];
+  const optionalViolations =
+    comparison.length > 0
+      ? evaluateBenchmarkRegressions(comparison, optionalThresholds)
+      : [];
+
+  for (const violation of coreViolations) {
+    console.warn(
+      `[benchmark] core regression ${violation.name} ${violation.metric}: +${violation.actualDeltaPct}% (threshold ${violation.maxDeltaPct}%)`,
+    );
+  }
+  for (const violation of optionalViolations) {
+    console.warn(
+      `[benchmark] optional regression ${violation.name} ${violation.metric}: +${violation.actualDeltaPct}% (threshold ${violation.maxDeltaPct}%)`,
+    );
+  }
+
+  if (failOnDeferredRegression && coreViolations.length > 0) {
+    throw new Error(
+      `Deferred benchmark regression threshold exceeded (${coreViolations.length} operations)`,
+    );
+  }
 
   const markdown = renderBenchmarkMarkdown(report, comparison);
 

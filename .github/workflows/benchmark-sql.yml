@@ -45,6 +45,18 @@ on:
         description: "Fail workflow when one benchmark operation errors"
         required: false
         default: "false"
+      fail_on_deferred_regression:
+        description: "Fail workflow when deferred benchmark regressions exceed threshold"
+        required: false
+        default: "false"
+      deferred_max_p95_delta_pct:
+        description: "Max allowed deferred p95 delta (%) vs baseline"
+        required: false
+        default: "10"
+      eager_max_p95_delta_pct:
+        description: "Max allowed eager p95 delta (%) vs baseline"
+        required: false
+        default: "10"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -82,6 +94,9 @@ jobs:
           TIMEOUT_INPUT: ${{ github.event.inputs.operation_timeout_ms }}
           OPTIONAL_OPS_INPUT: ${{ github.event.inputs.include_optional_ops }}
           FAIL_FAST_INPUT: ${{ github.event.inputs.fail_on_operation_error }}
+          FAIL_DEFERRED_INPUT: ${{ github.event.inputs.fail_on_deferred_regression }}
+          DEFERRED_DELTA_INPUT: ${{ github.event.inputs.deferred_max_p95_delta_pct }}
+          EAGER_DELTA_INPUT: ${{ github.event.inputs.eager_max_p95_delta_pct }}
         run: |
           project_id="${PROJECT_ID_INPUT:-arcade-main}"
           collection_address="${COLLECTION_INPUT:-0x046da8955829adf2bda310099a0063451923f02e648cf25a1203aac6335cf0e4}"
@@ -92,6 +107,9 @@ jobs:
           operation_timeout_ms="${TIMEOUT_INPUT:-15000}"
           include_optional_ops="${OPTIONAL_OPS_INPUT:-false}"
           fail_on_operation_error="${FAIL_FAST_INPUT:-false}"
+          fail_on_deferred_regression="${FAIL_DEFERRED_INPUT:-false}"
+          deferred_max_p95_delta_pct="${DEFERRED_DELTA_INPUT:-10}"
+          eager_max_p95_delta_pct="${EAGER_DELTA_INPUT:-10}"
 
           mkdir -p .artifacts/sql-benchmark
 
@@ -104,6 +122,9 @@ jobs:
           echo "operation_timeout_ms=${operation_timeout_ms}" >> "$GITHUB_OUTPUT"
           echo "include_optional_ops=${include_optional_ops}" >> "$GITHUB_OUTPUT"
           echo "fail_on_operation_error=${fail_on_operation_error}" >> "$GITHUB_OUTPUT"
+          echo "fail_on_deferred_regression=${fail_on_deferred_regression}" >> "$GITHUB_OUTPUT"
+          echo "deferred_max_p95_delta_pct=${deferred_max_p95_delta_pct}" >> "$GITHUB_OUTPUT"
+          echo "eager_max_p95_delta_pct=${eager_max_p95_delta_pct}" >> "$GITHUB_OUTPUT"
 
       - name: Benchmark pull request base
         if: github.event_name == 'pull_request'
@@ -118,6 +139,9 @@ jobs:
           BENCH_OPERATION_TIMEOUT_MS: ${{ steps.settings.outputs.operation_timeout_ms }}
           BENCH_INCLUDE_OPTIONAL_OPS: ${{ steps.settings.outputs.include_optional_ops }}
           BENCH_FAIL_ON_OPERATION_ERROR: ${{ steps.settings.outputs.fail_on_operation_error }}
+          BENCH_FAIL_ON_DEFERRED_REGRESSION: ${{ steps.settings.outputs.fail_on_deferred_regression }}
+          BENCH_DEFERRED_MAX_P95_DELTA_PCT: ${{ steps.settings.outputs.deferred_max_p95_delta_pct }}
+          BENCH_EAGER_MAX_P95_DELTA_PCT: ${{ steps.settings.outputs.eager_max_p95_delta_pct }}
           BENCH_OUTPUT_FILE: .artifacts/sql-benchmark/base.json
           BENCH_MARKDOWN_FILE: .artifacts/sql-benchmark/base.md
         run: |
@@ -139,6 +163,9 @@ jobs:
           BENCH_OPERATION_TIMEOUT_MS: ${{ steps.settings.outputs.operation_timeout_ms }}
           BENCH_INCLUDE_OPTIONAL_OPS: ${{ steps.settings.outputs.include_optional_ops }}
           BENCH_FAIL_ON_OPERATION_ERROR: ${{ steps.settings.outputs.fail_on_operation_error }}
+          BENCH_FAIL_ON_DEFERRED_REGRESSION: ${{ steps.settings.outputs.fail_on_deferred_regression }}
+          BENCH_DEFERRED_MAX_P95_DELTA_PCT: ${{ steps.settings.outputs.deferred_max_p95_delta_pct }}
+          BENCH_EAGER_MAX_P95_DELTA_PCT: ${{ steps.settings.outputs.eager_max_p95_delta_pct }}
           BENCH_OUTPUT_FILE: .artifacts/sql-benchmark/head.json
           BENCH_MARKDOWN_FILE: .artifacts/sql-benchmark/head.md
         run: |

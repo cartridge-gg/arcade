@@ -15,6 +15,7 @@ describe("sql benchmark helper resolution", () => {
     expect(resolved.createMarketplaceClient).toBeTypeOf("function");
     expect(resolved.runBenchmarkOperation).toBeTypeOf("function");
     expect(resolved.compareBenchmarkReports).toBeTypeOf("function");
+    expect(resolved.evaluateBenchmarkRegressions).toBeTypeOf("function");
     expect(resolved.renderBenchmarkMarkdown).toBeTypeOf("function");
 
     const outcome = await resolved.runBenchmarkOperation({

@@ -3,6 +3,7 @@ import { fetchToriisSql } from "../modules/torii-sql-fetcher";
 import { CategoryType, StatusType } from "../classes";
 import { OrderModel } from "../modules/marketplace/order";
 import type {
+  CollectionTokenMetadataBatchOptions,
   CollectionListingsOptions,
   CollectionOrdersOptions,
   CollectionSummaryOptions,
@@ -119,6 +120,11 @@ const buildChunkedInPredicate = (
     .map((chunk) => `${column} IN (${toSqlList(chunk)})`)
     .join(" OR ")})`;
 };
+
+const buildTokenProjectionSql = (includeMetadata: boolean): string =>
+  includeMetadata
+    ? "contract_address, token_id, metadata, name, symbol, decimals"
+    : "contract_address, token_id, name, symbol, decimals";
 
 const KEYSET_CURSOR_PREFIX = "keyset:";
 
@@ -388,6 +394,7 @@ LIMIT 1`,
       attributeFilters,
       tokenIds,
       limit = DEFAULT_LIMIT,
+      includeMetadata = true,
       fetchImages = false,
     } = options;
     const projectId = ensureProjectId(project, defaultProject);
@@ -419,7 +426,8 @@ LIMIT 1`,
       conditions.push(traitClause);
     }
 
-    const sql = `SELECT contract_address, token_id, metadata, name, symbol, decimals
+    const projection = buildTokenProjectionSql(includeMetadata);
+    const sql = `SELECT ${projection}
 FROM tokens
 WHERE ${conditions.join(" AND ")}
 ORDER BY token_id
@@ -465,6 +473,59 @@ OFFSET ${cursorState.offset}`
             );
       return { page: null, error: { error: err } };
     }
+  };
+
+  const getCollectionTokenMetadataBatch = async (
+    options: CollectionTokenMetadataBatchOptions,
+  ): Promise<NormalizedToken[]> => {
+    const { address, tokenIds, project, fetchImages = false } = options;
+    const projectId = ensureProjectId(project, defaultProject);
+    const collection = addAddressPadding(
+      getChecksumAddress(address),
+    ).toLowerCase();
+    const normalizedTokenIds = [...new Set(normalizeTokenIds(tokenIds))];
+
+    if (normalizedTokenIds.length === 0) {
+      return [];
+    }
+
+    const tokenIdChunks = chunkArray(normalizedTokenIds, SQL_IN_CHUNK_SIZE);
+    const hydratedRows: any[] = [];
+
+    for (const tokenIdChunk of tokenIdChunks) {
+      if (tokenIdChunk.length === 0) continue;
+
+      const sql = `SELECT ${buildTokenProjectionSql(true)}
+FROM tokens
+WHERE contract_address = '${escapeSqlValue(collection)}'
+  AND token_id IN (${toSqlList(tokenIdChunk)})
+ORDER BY token_id`;
+
+      const rows = await querySql(projectId, sql);
+      hydratedRows.push(...rows);
+    }
+
+    const normalizedTokens = await normalizeTokens(
+      hydratedRows as any[],
+      projectId,
+      {
+        fetchImages,
+        resolveTokenImage: resolveTokenImage ?? defaultResolveTokenImage,
+      },
+    );
+
+    const tokensByCanonicalId = new Map<string, NormalizedToken>();
+    for (const token of normalizedTokens as NormalizedToken[]) {
+      const canonicalId = canonicalizeTokenId(String(token.token_id ?? ""));
+      if (!canonicalId) continue;
+      if (!tokensByCanonicalId.has(canonicalId)) {
+        tokensByCanonicalId.set(canonicalId, token);
+      }
+    }
+
+    return normalizedTokenIds
+      .map((tokenId) => tokensByCanonicalId.get(tokenId))
+      .filter((token): token is NormalizedToken => Boolean(token));
   };
 
   const getCollectionOrders = async (
@@ -645,6 +706,7 @@ LIMIT 1`,
   return {
     getCollection,
     listCollectionTokens,
+    getCollectionTokenMetadataBatch,
     getCollectionOrders,
     listCollectionListings,
     getToken,

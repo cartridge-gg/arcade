@@ -139,6 +139,55 @@ describe("createEdgeMarketplaceClient", () => {
     );
   });
 
+  it("includes metadata projection by default when listing tokens", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.listCollectionTokens({
+      address: "0xabc",
+      fetchImages: false,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("SELECT contract_address, token_id, metadata");
+  });
+
+  it("omits metadata projection when includeMetadata is false", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [
+        {
+          endpoint: "arcade-main",
+          data: [{ contract_address: "0xabc", token_id: "0x1" }],
+        },
+      ],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const result = await client.listCollectionTokens({
+      address: "0xabc",
+      includeMetadata: false,
+      fetchImages: true,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain(
+      "SELECT contract_address, token_id, name, symbol, decimals",
+    );
+    expect(sql).not.toContain("metadata");
+    expect(result.error).toBeNull();
+    expect(result.page?.tokens[0]?.image).toContain("/torii/static/");
+  });
+
   it("normalizes tokenIds before building SQL IN clause", async () => {
     mockedFetchToriisSql.mockResolvedValueOnce({
       data: [{ endpoint: "arcade-main", data: [] }],
@@ -202,6 +251,75 @@ describe("createEdgeMarketplaceClient", () => {
     const inClauseCount = (sql.match(/token_id IN \(/g) ?? []).length;
     expect(inClauseCount).toBeGreaterThan(1);
     expect(sql).toContain(" OR token_id IN (");
+  });
+
+  it("hydrates metadata for normalized token ids through batch API", async () => {
+    mockedFetchToriisSql.mockResolvedValueOnce({
+      data: [
+        {
+          endpoint: "arcade-main",
+          data: [
+            {
+              contract_address: "0xabc",
+              token_id: "255",
+              metadata: JSON.stringify({ name: "Token 255" }),
+            },
+          ],
+        },
+      ],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const tokens = await client.getCollectionTokenMetadataBatch({
+      address: "0xabc",
+      tokenIds: ["ff", "0xff", "255"],
+      fetchImages: false,
+    });
+
+    const sql = mockedFetchToriisSql.mock.calls[0]?.[1] ?? "";
+    expect(sql).toContain("FROM tokens");
+    expect(sql).toContain("'255'");
+    expect((sql.match(/'255'/g) ?? []).length).toBe(1);
+    expect(tokens).toHaveLength(1);
+    expect(tokens[0]?.metadata?.name).toBe("Token 255");
+  });
+
+  it("returns empty metadata batch and avoids SQL when token ids are invalid", async () => {
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    const tokens = await client.getCollectionTokenMetadataBatch({
+      address: "0xabc",
+      tokenIds: ["", "   "],
+      fetchImages: false,
+    });
+
+    expect(tokens).toEqual([]);
+    expect(mockedFetchToriisSql).not.toHaveBeenCalled();
+  });
+
+  it("chunks metadata hydration for large token id sets", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [{ endpoint: "arcade-main", data: [] }],
+      errors: [],
+    } as any);
+
+    const client = await createEdgeMarketplaceClient({
+      chainId: constants.StarknetChainId.SN_MAIN,
+    });
+
+    await client.getCollectionTokenMetadataBatch({
+      address: "0xabc",
+      tokenIds: Array.from({ length: 450 }, (_, index) => String(index + 1)),
+      fetchImages: false,
+    });
+
+    expect(mockedFetchToriisSql.mock.calls.length).toBeGreaterThan(1);
   });
 
   it("returns null nextCursor when limit is invalid and no rows are returned", async () => {

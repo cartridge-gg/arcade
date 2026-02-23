@@ -121,6 +121,43 @@ export const fallbackCompareBenchmarkReports = (base, head) => {
   return rows;
 };
 
+const getComparisonDelta = (row, metric) =>
+  metric === "p50" ? row.deltaP50Pct : row.deltaP95Pct;
+
+export const fallbackEvaluateBenchmarkRegressions = (
+  rows,
+  thresholds,
+) => {
+  if (!rows?.length || !thresholds?.length) {
+    return [];
+  }
+
+  const rowsByName = new Map(rows.map((row) => [row.name, row]));
+  const violations = [];
+
+  for (const threshold of thresholds) {
+    const row = rowsByName.get(threshold.operationName);
+    if (!row) continue;
+
+    const maxDeltaPct = Number(threshold.maxDeltaPct);
+    if (!Number.isFinite(maxDeltaPct) || maxDeltaPct < 0) {
+      continue;
+    }
+
+    const actualDeltaPct = getComparisonDelta(row, threshold.metric);
+    if (actualDeltaPct > maxDeltaPct) {
+      violations.push({
+        name: row.name,
+        metric: threshold.metric,
+        maxDeltaPct,
+        actualDeltaPct,
+      });
+    }
+  }
+
+  return violations;
+};
+
 const formatDelta = (value) => {
   const signed = value > 0 ? `+${value}` : `${value}`;
   return `${signed}%`;
@@ -199,12 +236,16 @@ export const resolveBenchmarkHelpers = (marketplace) => {
     marketplace?.runBenchmarkOperation ?? fallbackRunBenchmarkOperation;
   const compareBenchmarkReports =
     marketplace?.compareBenchmarkReports ?? fallbackCompareBenchmarkReports;
+  const evaluateBenchmarkRegressions =
+    marketplace?.evaluateBenchmarkRegressions ??
+    fallbackEvaluateBenchmarkRegressions;
   const renderBenchmarkMarkdown =
     marketplace?.renderBenchmarkMarkdown ?? fallbackRenderBenchmarkMarkdown;
 
   const usingFallbackHelpers =
     !marketplace?.runBenchmarkOperation ||
     !marketplace?.compareBenchmarkReports ||
+    !marketplace?.evaluateBenchmarkRegressions ||
     !marketplace?.renderBenchmarkMarkdown;
 
   return {
@@ -213,6 +254,7 @@ export const resolveBenchmarkHelpers = (marketplace) => {
     fetchTraitValues,
     runBenchmarkOperation,
     compareBenchmarkReports,
+    evaluateBenchmarkRegressions,
     renderBenchmarkMarkdown,
     usingFallbackHelpers,
   };

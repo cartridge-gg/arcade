@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   compareBenchmarkReports,
   computeBenchmarkStats,
+  evaluateBenchmarkRegressions,
   renderBenchmarkMarkdown,
   runBenchmarkOperation,
   type BenchmarkReport,
@@ -155,5 +156,85 @@ describe("marketplace benchmark helpers", () => {
     expect(markdown).toContain("Failed Operations");
     expect(markdown).toContain("getCollection");
     expect(markdown).toContain("status: 400");
+  });
+
+  it("flags deferred operation regressions above configured threshold", () => {
+    const base: BenchmarkReport = {
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      projectId: "arcade-main",
+      collectionAddress: "0x1",
+      warmup: 1,
+      iterations: 3,
+      operations: [
+        {
+          name: "listCollectionTokens:first-page:deferred",
+          samplesMs: [100, 110, 120],
+          stats: computeBenchmarkStats([100, 110, 120]),
+        },
+      ],
+    };
+    const head: BenchmarkReport = {
+      ...base,
+      operations: [
+        {
+          name: "listCollectionTokens:first-page:deferred",
+          samplesMs: [140, 145, 150],
+          stats: computeBenchmarkStats([140, 145, 150]),
+        },
+      ],
+    };
+
+    const rows = compareBenchmarkReports(base, head);
+    const regressions = evaluateBenchmarkRegressions(rows, [
+      {
+        operationName: "listCollectionTokens:first-page:deferred",
+        metric: "p95",
+        maxDeltaPct: 10,
+      },
+    ]);
+
+    expect(regressions).toHaveLength(1);
+    expect(regressions[0]?.name).toBe(
+      "listCollectionTokens:first-page:deferred",
+    );
+    expect(regressions[0]?.actualDeltaPct).toBeGreaterThan(10);
+  });
+
+  it("does not flag deferred operation when delta stays within threshold", () => {
+    const base: BenchmarkReport = {
+      generatedAt: "2026-01-01T00:00:00.000Z",
+      projectId: "arcade-main",
+      collectionAddress: "0x1",
+      warmup: 1,
+      iterations: 3,
+      operations: [
+        {
+          name: "listCollectionTokens:next-page:deferred",
+          samplesMs: [100, 110, 120],
+          stats: computeBenchmarkStats([100, 110, 120]),
+        },
+      ],
+    };
+    const head: BenchmarkReport = {
+      ...base,
+      operations: [
+        {
+          name: "listCollectionTokens:next-page:deferred",
+          samplesMs: [105, 112, 121],
+          stats: computeBenchmarkStats([105, 112, 121]),
+        },
+      ],
+    };
+
+    const rows = compareBenchmarkReports(base, head);
+    const regressions = evaluateBenchmarkRegressions(rows, [
+      {
+        operationName: "listCollectionTokens:next-page:deferred",
+        metric: "p95",
+        maxDeltaPct: 10,
+      },
+    ]);
+
+    expect(regressions).toEqual([]);
   });
 });

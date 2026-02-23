@@ -110,12 +110,57 @@ if (result.error) {
 | `cursor`           | `string \| null`       | No       | Pagination cursor from a previous call.             |
 | `attributeFilters` | `AttributeFilterInput` | No       | Trait filters as `{ trait: value \| values[] }`.    |
 | `tokenIds`         | `string[]`             | No       | Return only specific token IDs.                     |
+| `includeMetadata`  | `boolean`              | No       | Include token metadata payloads (default `true`).   |
 | `fetchImages`      | `boolean`              | No       | Resolve token images.                               |
 | `project`          | `string`               | No       | Override project for this request.                  |
 | `resolveTokenImage`| `ResolveTokenImage`    | No       | Per-call image resolver override.                   |
 | `defaultProjectId` | `string`               | No       | Fallback project identifier.                        |
 
 Returns `Promise<FetchCollectionTokensResult>` — `{ page, error }`.
+
+For high-volume grids, prefer deferred metadata and hydrate selected tokens on demand:
+
+```ts
+const deferredPage = await client.listCollectionTokens({
+  address: "0x04f5...b15f",
+  limit: 100,
+  includeMetadata: false,
+  fetchImages: true,
+});
+
+const tokenIdsToHydrate = (deferredPage.page?.tokens ?? [])
+  .slice(0, 24)
+  .map((token) => String(token.token_id));
+
+const hydrated = await client.getCollectionTokenMetadataBatch({
+  address: "0x04f5...b15f",
+  tokenIds: tokenIdsToHydrate,
+  fetchImages: true,
+});
+```
+
+---
+
+### `getCollectionTokenMetadataBatch`
+
+Hydrates metadata for a targeted set of token IDs in a collection.
+
+```ts
+const tokens = await client.getCollectionTokenMetadataBatch({
+  address: "0x04f5...b15f",
+  tokenIds: ["1", "2", "3"],
+  fetchImages: false,
+});
+```
+
+| Option        | Type      | Required | Description                          |
+| ------------- | --------- | -------- | ------------------------------------ |
+| `address`     | `string`  | Yes      | Contract address of the collection.  |
+| `tokenIds`    | `string[]`| Yes      | Token IDs to hydrate metadata for.   |
+| `project`     | `string`  | No       | Override the default Torii project.  |
+| `fetchImages` | `boolean` | No       | Resolve token image URLs.            |
+
+Returns `Promise<NormalizedToken[]>`.
 
 ---
 

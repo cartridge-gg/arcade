@@ -39,6 +39,19 @@ export interface BenchmarkComparisonRow {
   deltaP95Pct: number;
 }
 
+export interface BenchmarkRegressionThreshold {
+  operationName: string;
+  metric: "p50" | "p95";
+  maxDeltaPct: number;
+}
+
+export interface BenchmarkRegressionViolation {
+  name: string;
+  metric: "p50" | "p95";
+  maxDeltaPct: number;
+  actualDeltaPct: number;
+}
+
 const round = (value: number, precision = 2): number => {
   const factor = 10 ** precision;
   return Math.round(value * factor) / factor;
@@ -106,6 +119,45 @@ export function compareBenchmarkReports(
   }
 
   return rows;
+}
+
+const getComparisonDelta = (
+  row: BenchmarkComparisonRow,
+  metric: "p50" | "p95",
+): number => (metric === "p50" ? row.deltaP50Pct : row.deltaP95Pct);
+
+export function evaluateBenchmarkRegressions(
+  rows: BenchmarkComparisonRow[],
+  thresholds: BenchmarkRegressionThreshold[],
+): BenchmarkRegressionViolation[] {
+  if (rows.length === 0 || thresholds.length === 0) {
+    return [];
+  }
+
+  const rowsByName = new Map(rows.map((row) => [row.name, row]));
+  const violations: BenchmarkRegressionViolation[] = [];
+
+  for (const threshold of thresholds) {
+    const row = rowsByName.get(threshold.operationName);
+    if (!row) continue;
+
+    const maxDeltaPct = Number(threshold.maxDeltaPct);
+    if (!Number.isFinite(maxDeltaPct) || maxDeltaPct < 0) {
+      continue;
+    }
+
+    const actualDeltaPct = getComparisonDelta(row, threshold.metric);
+    if (actualDeltaPct > maxDeltaPct) {
+      violations.push({
+        name: row.name,
+        metric: threshold.metric,
+        maxDeltaPct,
+        actualDeltaPct,
+      });
+    }
+  }
+
+  return violations;
 }
 
 const withTimeout = async <T>(
