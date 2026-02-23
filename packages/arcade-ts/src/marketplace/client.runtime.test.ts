@@ -1,23 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { constants } from "starknet";
 import { createMarketplaceClient } from "./client";
-import { fetchToriisSql } from "../modules/torii-sql-fetcher";
+import { fetchToriis } from "../modules/torii-fetcher";
 
-vi.mock("../modules/torii-sql-fetcher", () => ({
-  fetchToriisSql: vi.fn(),
+vi.mock("../modules/torii-fetcher", () => ({
+  fetchToriis: vi.fn(),
 }));
 
-const mockedFetchToriisSql = vi.mocked(fetchToriisSql);
+vi.mock("../modules/init-sdk", () => ({
+  initArcadeSDK: vi.fn().mockResolvedValue({
+    getEntities: vi.fn().mockResolvedValue({ getItems: () => [] }),
+  }),
+}));
+
+const mockedFetchToriis = vi.mocked(fetchToriis);
 
 describe("createMarketplaceClient runtime routing", () => {
   beforeEach(() => {
-    mockedFetchToriisSql.mockReset();
+    mockedFetchToriis.mockReset();
   });
 
   it("routes edge mode to the edge client implementation", async () => {
-    mockedFetchToriisSql.mockResolvedValue({
-      data: [{ endpoint: "arcade-main", data: [] }],
-      errors: [],
+    mockedFetchToriis.mockResolvedValue({
+      data: [{ items: [], next_cursor: null }],
+      metadata: {
+        totalEndpoints: 1,
+        successfulEndpoints: 1,
+        failedEndpoints: 0,
+      },
     } as any);
 
     const client = await createMarketplaceClient({
@@ -31,9 +41,11 @@ describe("createMarketplaceClient runtime routing", () => {
     });
 
     expect(collection).toBeNull();
-    expect(mockedFetchToriisSql).toHaveBeenCalledWith(
+    expect(mockedFetchToriis).toHaveBeenCalledWith(
       ["arcade-main"],
-      expect.stringContaining("FROM token_contracts"),
+      expect.objectContaining({
+        client: expect.any(Function),
+      }),
     );
   });
 });
