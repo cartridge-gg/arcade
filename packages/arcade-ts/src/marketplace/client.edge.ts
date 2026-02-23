@@ -30,7 +30,6 @@ import {
   defaultResolveTokenImage,
   inferImageFromMetadata,
   normalizeTokenIds,
-  normalizeTokens,
   parseJsonSafe,
 } from "./utils";
 import type {
