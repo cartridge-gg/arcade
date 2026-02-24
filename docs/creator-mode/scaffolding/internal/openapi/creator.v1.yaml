@@ -1,0 +1,305 @@
+openapi: 3.1.0
+info:
+  title: Creator Mode API
+  version: 0.1.0
+servers:
+  - url: https://api.cartridge.gg
+paths:
+  /v1/creator/projects:
+    post:
+      operationId: createCreatorProject
+      tags: [creator]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+  /v1/creator/projects/{projectId}/plan/sessions:
+    post:
+      operationId: createPlanSession
+      tags: [planning]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanSessionResponse'
+  /v1/creator/projects/{projectId}/plan/sessions/{sessionId}/messages:
+    post:
+      operationId: sendPlanMessage
+      tags: [planning]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanMessageRequest'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanMessageResponse'
+  /v1/creator/projects/{projectId}/plan/sessions/{sessionId}/approve:
+    post:
+      operationId: approvePlanSession
+      tags: [planning]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plan_version_id]
+              properties:
+                plan_version_id:
+                  type: string
+      responses:
+        '200':
+          description: Approved
+  /v1/creator/projects/{projectId}/runs:
+    post:
+      operationId: createRun
+      tags: [runs]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRunRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+  /v1/creator/projects/{projectId}/runs/{runId}:
+    get:
+      operationId: getRun
+      tags: [runs]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunResponse'
+  /v1/creator/projects/{projectId}/runs/{runId}/events:
+    get:
+      operationId: streamRunEvents
+      tags: [runs]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '200':
+          description: Server-sent event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /v1/creator/projects/{projectId}/runs/{runId}/cancel:
+    post:
+      operationId: cancelRun
+      tags: [runs]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/RunId'
+      responses:
+        '202':
+          description: Accepted
+  /v1/creator/projects/{projectId}/deployments:
+    post:
+      operationId: createDeployment
+      tags: [deployments]
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeploymentRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentResponse'
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+    RunId:
+      name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    CreateProjectRequest:
+      type: object
+      required: [workspace_id, name, github_owner, template]
+      properties:
+        workspace_id:
+          type: string
+        name:
+          type: string
+        github_owner:
+          type: string
+        template:
+          type: string
+    ProjectResponse:
+      type: object
+      required: [project_id, status, github_repo]
+      properties:
+        project_id:
+          type: string
+        status:
+          type: string
+          enum: [active, provisioning, failed]
+        github_repo:
+          type: string
+          format: uri
+    PlanSessionResponse:
+      type: object
+      required: [session_id, status, latest_plan_version_id]
+      properties:
+        session_id:
+          type: string
+        status:
+          type: string
+        latest_plan_version_id:
+          type: string
+    PlanMessageRequest:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [user]
+        content:
+          type: string
+    PlanMessageResponse:
+      type: object
+      required: [session_status, latest_plan_version_id]
+      properties:
+        session_status:
+          type: string
+        latest_plan_version_id:
+          type: string
+        next_question:
+          type: string
+          nullable: true
+    CreateRunRequest:
+      type: object
+      required: [plan_version_id, harness]
+      properties:
+        plan_version_id:
+          type: string
+        harness:
+          type: string
+          enum: [codex, claude, gemini]
+        target_envs:
+          type: array
+          items:
+            type: string
+            enum: [devnet, sepolia]
+    RunStep:
+      type: object
+      required: [step_key, status, attempt]
+      properties:
+        step_key:
+          type: string
+        status:
+          type: string
+        attempt:
+          type: integer
+          minimum: 0
+        summary:
+          type: string
+    RunResponse:
+      type: object
+      required: [run_id, project_id, status, harness, steps]
+      properties:
+        run_id:
+          type: string
+        project_id:
+          type: string
+        status:
+          type: string
+        harness:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/RunStep'
+    CreateDeploymentRequest:
+      type: object
+      required: [run_id, environment]
+      properties:
+        run_id:
+          type: string
+        environment:
+          type: string
+          enum: [devnet, sepolia]
+    DeploymentResponse:
+      type: object
+      required: [deployment_id, status, environment]
+      properties:
+        deployment_id:
+          type: string
+        status:
+          type: string
+        environment:
+          type: string
+        world_address:
+          type: string
+          nullable: true
+        tx_hashes:
+          type: array
+          items:
+            type: string

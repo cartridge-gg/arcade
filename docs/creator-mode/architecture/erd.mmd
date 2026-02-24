@@ -1,0 +1,124 @@
+erDiagram
+    creator_projects ||--o{ plan_sessions : has
+    plan_sessions ||--o{ plan_versions : versions
+    creator_projects ||--o{ runs : executes
+    plan_versions ||--o{ runs : source
+    runs ||--o{ run_steps : contains
+    runs ||--o{ run_events : emits
+    runs ||--o{ artifacts : produces
+    runs ||--o{ deployments : deploys
+    runs ||--|| sandbox_leases : leased_by
+    creator_projects }o--|| workspace_quotas : constrained_by
+    runs ||--o{ usage_ledger : records
+
+    creator_projects {
+        text id PK
+        text workspace_id
+        text name
+        text github_owner
+        text github_repo
+        text default_branch
+        text status
+        timestamptz created_at
+    }
+
+    plan_sessions {
+        text id PK
+        text project_id FK
+        text status
+        text created_by
+        timestamptz created_at
+    }
+
+    plan_versions {
+        text id PK
+        text session_id FK
+        int version
+        jsonb plan_graph_json
+        jsonb assumptions_json
+        numeric completeness_score
+        timestamptz created_at
+    }
+
+    runs {
+        text id PK
+        text project_id FK
+        text plan_version_id FK
+        text harness
+        text status
+        text[] target_envs
+        timestamptz started_at
+        timestamptz finished_at
+        timestamptz created_at
+    }
+
+    run_steps {
+        text id PK
+        text run_id FK
+        text step_key
+        jsonb depends_on
+        text status
+        int attempt
+        text summary
+        text error_code
+    }
+
+    run_events {
+        text id PK
+        text run_id FK
+        bigint sequence
+        text event_type
+        jsonb payload_json
+        timestamptz created_at
+    }
+
+    artifacts {
+        text id PK
+        text run_id FK
+        text step_id FK
+        text type
+        text uri
+        text checksum
+        jsonb metadata_json
+    }
+
+    deployments {
+        text id PK
+        text run_id FK
+        text environment
+        text status
+        text world_address
+        jsonb tx_hashes_json
+        text manifest_uri
+    }
+
+    sandbox_leases {
+        text id PK
+        text run_id FK
+        text k8s_job_name
+        text pod_name
+        int cpu_limit_millicores
+        int mem_limit_mb
+        timestamptz deadline_ts
+        text status
+    }
+
+    workspace_quotas {
+        text workspace_id PK
+        int max_concurrent_runs
+        int max_run_minutes
+        bigint max_monthly_tokens
+        bigint max_monthly_runtime_minutes
+    }
+
+    usage_ledger {
+        text id PK
+        text workspace_id
+        text run_id FK
+        text provider
+        bigint tokens_in
+        bigint tokens_out
+        bigint runtime_seconds
+        numeric estimated_cost_usd
+        timestamptz created_at
+    }
