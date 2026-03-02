@@ -1,6 +1,6 @@
 // Internal imports
 
-use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
+use openzeppelin::interfaces::token::erc20::IERC20DispatcherTrait;
 use starknet::testing;
 use crate::constants::FEE_DENOMINATOR;
 use crate::tests::mocks::registry::IRegistryDispatcherTrait;

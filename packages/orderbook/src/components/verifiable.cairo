@@ -4,15 +4,15 @@ pub mod VerifiableComponent {
 
     // External imports
 
-    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
-    use openzeppelin::token::common::erc2981::interface::{
-        IERC2981Dispatcher, IERC2981DispatcherTrait, IERC2981_ID,
-    };
-    use openzeppelin::token::erc1155::interface::{
+    use openzeppelin::interfaces::introspection::{ISRC5Dispatcher, ISRC5DispatcherTrait};
+    use openzeppelin::interfaces::token::erc1155::{
         IERC1155Dispatcher, IERC1155DispatcherTrait, IERC1155_ID,
     };
-    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use openzeppelin::token::erc721::interface::{
+    use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use openzeppelin::interfaces::token::erc2981::{
+        IERC2981Dispatcher, IERC2981DispatcherTrait, IERC2981_ID,
+    };
+    use openzeppelin::interfaces::token::erc721::{
         IERC721Dispatcher, IERC721DispatcherTrait, IERC721_ID,
     };
     use starknet::ContractAddress;

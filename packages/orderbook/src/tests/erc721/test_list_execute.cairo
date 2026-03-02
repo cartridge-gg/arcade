@@ -2,8 +2,8 @@
 
 // Internal imports
 
-use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
-use openzeppelin::token::erc721::interface::IERC721DispatcherTrait;
+use openzeppelin::interfaces::token::erc20::IERC20DispatcherTrait;
+use openzeppelin::interfaces::token::erc721::IERC721DispatcherTrait;
 use crate::models::order::OrderAssert;
 
 // Package imports

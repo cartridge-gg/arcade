@@ -6,7 +6,7 @@ pub mod IssuableComponent {
 
     // External imports
 
-    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // Internal imports
@@ -121,10 +121,7 @@ pub mod IssuableComponent {
                 // Use payment_receiver if set, otherwise default to owner
                 let owner_payment = base_price - referral_fee_amount;
                 if owner_payment > 0 {
-                    let receiver = match starterpack.payment_receiver {
-                        Option::Some(addr) => addr,
-                        Option::None => starterpack.owner,
-                    };
+                    let receiver = starterpack.payment_receiver.unwrap_or(starterpack.owner);
                     token_dispatcher.transfer_from(payer, receiver, owner_payment);
                 }
             }
