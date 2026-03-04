@@ -237,3 +237,66 @@ fn test_sp_free() {
     // [Assert] No payment made
     assert_eq!(systems.erc20.balance_of(context.spender), spender_initial, "No payment for free");
 }
+
+#[test]
+fn test_sp_fees_self_referral_ignored() {
+    // [Setup]
+    let (_world, systems, context) = spawn();
+
+    // [Initialize]
+    testing::set_contract_address(OWNER());
+    testing::set_block_timestamp(1);
+
+    // [Register]
+    testing::set_contract_address(context.creator);
+    let metadata = METADATA();
+    let starterpack_id = systems
+        .starterpack
+        .register(
+            implementation: systems.starterpack_impl,
+            referral_percentage: REFERRAL_PERCENTAGE,
+            reissuable: false,
+            price: PRICE,
+            payment_token: systems.erc20.contract_address,
+            payment_receiver: Option::None,
+            metadata: metadata,
+        );
+
+    // [Record] Initial balances
+    let spender_initial = systems.erc20.balance_of(context.spender);
+    let creator_initial = systems.erc20.balance_of(context.creator);
+    let receiver_initial = systems.erc20.balance_of(context.receiver);
+
+    // [Issue] With self as referrer (spender == referrer)
+    testing::set_contract_address(context.spender);
+    let protocol_fee_amount = PRICE * PROTOCOL_FEE.into() / FEE_DENOMINATOR.into();
+    let total_cost = PRICE + protocol_fee_amount;
+    systems.erc20.approve(systems.starterpack.contract_address, total_cost);
+    systems
+        .starterpack
+        .issue(
+            recipient: PLAYER(),
+            starterpack_id: starterpack_id,
+            quantity: 1,
+            referrer: Option::Some(context.spender), // self-referral
+            referrer_group: Option::None,
+        );
+
+    // [Assert] Self-referral is ignored, behaves like no referrer
+    // Spender paid: base price + protocol fee
+    assert_eq!(
+        systems.erc20.balance_of(context.spender), spender_initial - total_cost, "Spender balance",
+    );
+
+    // Creator received: full base price (no referral deducted)
+    assert_eq!(
+        systems.erc20.balance_of(context.creator), creator_initial + PRICE, "Creator balance",
+    );
+
+    // Protocol receiver got: protocol fee only
+    assert_eq!(
+        systems.erc20.balance_of(context.receiver),
+        receiver_initial + protocol_fee_amount,
+        "Protocol receiver balance",
+    );
+}
