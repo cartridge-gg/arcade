@@ -6,11 +6,11 @@ pub mod Collection {
     use collection::interface::{CollectionTrait, MinterDispatcher, MinterDispatcherTrait};
     use collection::types::contract_metadata::ContractMetadata;
     use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::interfaces::token::erc721::IERC721Metadata;
+    use openzeppelin::interfaces::upgrades::IUpgradeable;
     use openzeppelin::introspection::src5::SRC5Component;
-    use openzeppelin::token::erc721::interface::IERC721Metadata;
     use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
     use openzeppelin::upgrades::UpgradeableComponent;
-    use openzeppelin::upgrades::interface::IUpgradeable;
     use starknet::ContractAddress;
 
     component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
