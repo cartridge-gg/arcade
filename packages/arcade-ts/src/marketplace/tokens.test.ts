@@ -97,6 +97,67 @@ describe("fetchCollectionTokens", () => {
     expect(result.error?.error).toBeInstanceOf(Error);
     expect(result.error?.error.message).toBe("network error");
   });
+
+  it("normalizes equivalent decimal and hex token ids to a single Torii filter id", async () => {
+    mockFetchToriis.mockResolvedValueOnce({
+      data: [
+        {
+          items: [],
+          next_cursor: null,
+        },
+      ],
+    } as any);
+
+    await fetchCollectionTokens({
+      address:
+        "0x04f51290f2b0e16524084c27890711c7a955eb276cffec185d6f24f2a620b15f",
+      project: "projectA",
+      tokenIds: ["255", "0xff", "ff"],
+      fetchImages: false,
+    });
+
+    const callArgs = mockFetchToriis.mock.calls[0][1];
+    const clientFn = callArgs.client;
+    expect(typeof clientFn).toBe("function");
+
+    const getTokens = vi.fn().mockResolvedValue({
+      items: [],
+      next_cursor: null,
+    });
+    await (clientFn as (params: any) => Promise<any>)({
+      client: { getTokens },
+    } as any);
+
+    expect(getTokens).toHaveBeenCalledWith(
+      expect.objectContaining({
+        token_ids: [
+          "00000000000000000000000000000000000000000000000000000000000000ff",
+        ],
+      }),
+    );
+  });
+
+  it("omits metadata values when includeMetadata is false", async () => {
+    mockFetchToriis.mockResolvedValueOnce({
+      data: [
+        {
+          items: [sampleToken],
+          next_cursor: null,
+        },
+      ],
+    } as any);
+
+    const result = await fetchCollectionTokens({
+      address:
+        "0x04f51290f2b0e16524084c27890711c7a955eb276cffec185d6f24f2a620b15f",
+      project: "projectA",
+      includeMetadata: false,
+      fetchImages: false,
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.page?.tokens[0]?.metadata).toBeUndefined();
+  });
 });
 
 const sampleBalance = {

@@ -19,6 +19,7 @@ import type {
   TokenBalancesPage,
 } from "./types";
 import {
+  canonicalizeTokenId,
   DEFAULT_PROJECT_ID,
   normalizeAttributeFilters,
   normalizeTokens,
@@ -31,10 +32,29 @@ const DEFAULT_LIMIT = 100;
 
 const normalizeTokenIdsForQuery = (tokenIds?: string[]): string[] => {
   if (!tokenIds || tokenIds.length === 0) return [];
-  return tokenIds
-    .map(addAddressPadding)
-    .map((id) => (id.startsWith("0x") ? id.slice(2) : id))
-    .filter((id) => id.length > 0);
+
+  const normalized = tokenIds
+    .map((tokenId) => canonicalizeTokenId(tokenId))
+    .flatMap((tokenId) => {
+      if (!tokenId) return [];
+
+      try {
+        const hexTokenId = `0x${BigInt(tokenId).toString(16)}`;
+        return [addAddressPadding(hexTokenId).slice(2)];
+      } catch (_error) {
+        try {
+          const padded = addAddressPadding(tokenId);
+          return [padded.startsWith("0x") ? padded.slice(2) : padded];
+        } catch (_paddingError) {
+          const fallback = tokenId.startsWith("0x")
+            ? tokenId.slice(2)
+            : tokenId;
+          return fallback.length > 0 ? [fallback] : [];
+        }
+      }
+    });
+
+  return Array.from(new Set(normalized));
 };
 
 export async function fetchCollectionTokens(
@@ -47,6 +67,7 @@ export async function fetchCollectionTokens(
     attributeFilters,
     tokenIds,
     limit = DEFAULT_LIMIT,
+    includeMetadata = true,
     fetchImages = false,
     resolveTokenImage,
   } = options;
@@ -103,8 +124,15 @@ export async function fetchCollectionTokens(
       resolveTokenImage,
     });
 
+    const pageTokens = includeMetadata
+      ? enriched
+      : enriched.map((token) => ({
+          ...token,
+          metadata: undefined,
+        }));
+
     const page: CollectionTokensPage = {
-      tokens: enriched,
+      tokens: pageTokens,
       nextCursor,
     };
 

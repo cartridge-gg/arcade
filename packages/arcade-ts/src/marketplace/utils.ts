@@ -23,6 +23,11 @@ const IMAGE_CANDIDATE_KEYS = [
   "animation_url",
 ] as const;
 
+const DECIMAL_TOKEN_ID_PATTERN = /^[0-9]+$/;
+const HEX_PREFIXED_TOKEN_ID_PATTERN = /^0x[0-9a-f]+$/i;
+const BARE_HEX_TOKEN_ID_PATTERN = /^[0-9a-f]+$/i;
+const HAS_HEX_ALPHA_PATTERN = /[a-f]/i;
+
 export function ensureArray(
   value: AttributeFilterInputValue,
 ): Array<string | number | bigint> {
@@ -108,16 +113,36 @@ export function resolveProjects(
   return Array.from(new Set(projects.filter(Boolean)));
 }
 
+export function canonicalizeTokenId(tokenId: string): string | null {
+  const normalized = tokenId.trim();
+  if (!normalized) return null;
+
+  try {
+    if (HEX_PREFIXED_TOKEN_ID_PATTERN.test(normalized)) {
+      return BigInt(normalized).toString();
+    }
+
+    if (DECIMAL_TOKEN_ID_PATTERN.test(normalized)) {
+      return BigInt(normalized).toString();
+    }
+
+    if (
+      BARE_HEX_TOKEN_ID_PATTERN.test(normalized) &&
+      HAS_HEX_ALPHA_PATTERN.test(normalized)
+    ) {
+      return BigInt(`0x${normalized}`).toString();
+    }
+
+    return BigInt(normalized).toString();
+  } catch (_error) {
+    return normalized;
+  }
+}
+
 export function normalizeTokenIds(tokenIds?: string[]): string[] {
   if (!tokenIds || tokenIds.length === 0) return [];
   return tokenIds
-    .map((id) => {
-      try {
-        return BigInt(id).toString();
-      } catch (_error) {
-        return id;
-      }
-    })
+    .map((id) => canonicalizeTokenId(id))
     .filter((id): id is string => typeof id === "string" && id.length > 0);
 }
 
@@ -131,10 +156,15 @@ export async function normalizeTokens(
 ): Promise<NormalizedToken[]> {
   const { fetchImages, resolveTokenImage } = options;
   const resolver = resolveTokenImage ?? defaultResolveTokenImage;
+  const checksumByAddress = new Map<string, string>();
 
   const resolved = await Promise.all(
     tokens.map(async (token) => {
-      const checksumAddress = getChecksumAddress(token.contract_address);
+      let checksumAddress = checksumByAddress.get(token.contract_address);
+      if (!checksumAddress) {
+        checksumAddress = getChecksumAddress(token.contract_address);
+        checksumByAddress.set(token.contract_address, checksumAddress);
+      }
       const metadata = parseJsonSafe(token.metadata, token.metadata);
 
       let image: string | undefined;

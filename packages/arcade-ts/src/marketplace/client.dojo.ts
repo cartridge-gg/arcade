@@ -28,9 +28,11 @@ import {
   defaultResolveContractImage,
   defaultResolveTokenImage,
   inferImageFromMetadata,
+  normalizeTokenIds,
   parseJsonSafe,
 } from "./utils";
 import type {
+  CollectionTokenMetadataBatchOptions,
   CollectionListingsOptions,
   CollectionOrdersOptions,
   CollectionSummaryOptions,
@@ -38,6 +40,7 @@ import type {
   MarketplaceClientConfig,
   MarketplaceFees,
   NormalizedCollection,
+  NormalizedToken,
   RoyaltyFee,
   RoyaltyFeeOptions,
   TokenDetails,
@@ -310,6 +313,45 @@ export async function createDojoMarketplaceClient(
     return queryOrders(options);
   };
 
+  const getCollectionTokenMetadataBatch = async (
+    options: CollectionTokenMetadataBatchOptions,
+  ): Promise<NormalizedToken[]> => {
+    const projectId = ensureProjectId(options.project, defaultProject);
+    const normalizedTokenIds = [
+      ...new Set(normalizeTokenIds(options.tokenIds)),
+    ];
+    if (normalizedTokenIds.length === 0) {
+      return [];
+    }
+
+    const { page, error } = await fetchCollectionTokens({
+      address: options.address,
+      project: projectId,
+      tokenIds: normalizedTokenIds,
+      limit: normalizedTokenIds.length,
+      includeMetadata: true,
+      fetchImages: options.fetchImages ?? false,
+      resolveTokenImage: resolveTokenImage ?? defaultResolveTokenImage,
+      defaultProjectId: defaultProject,
+    });
+    if (error) {
+      throw error.error;
+    }
+
+    const tokensById = new Map<string, NormalizedToken>();
+    for (const token of page?.tokens ?? []) {
+      const normalizedId = normalizeTokenIdForQuery(String(token.token_id));
+      if (!normalizedId) continue;
+      if (!tokensById.has(normalizedId)) {
+        tokensById.set(normalizedId, token);
+      }
+    }
+
+    return normalizedTokenIds
+      .map((tokenId) => tokensById.get(tokenId))
+      .filter((token): token is NormalizedToken => Boolean(token));
+  };
+
   const listCollectionListings = async (
     options: CollectionListingsOptions,
   ): Promise<OrderModel[]> => {
@@ -513,6 +555,7 @@ export async function createDojoMarketplaceClient(
         resolveTokenImage: resolveTokenImage ?? defaultResolveTokenImage,
         defaultProjectId: defaultProject,
       }),
+    getCollectionTokenMetadataBatch,
     getCollectionOrders,
     listCollectionListings,
     getToken,
