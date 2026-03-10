@@ -241,7 +241,7 @@ LIMIT 1`,
     if (!contract) return null;
 
     let tokenSample: any | undefined;
-    let metadataRaw = contract.metadata ?? contract.fallback_metadata;
+    const metadataRaw = contract.metadata ?? contract.fallback_metadata;
     if (contract.fallback_token_id || contract.fallback_metadata) {
       tokenSample = {
         token_id: contract.fallback_token_id,
