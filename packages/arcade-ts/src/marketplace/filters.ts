@@ -107,39 +107,41 @@ const escapeSqlValue = (value: string): string => {
   return value.replace(/'/g, "''");
 };
 
+const countDistinctTraitNames = (traits: TraitSelection[]): number => {
+  return new Set(traits.map((trait) => trait.name)).size;
+};
+
 const buildTraitWhereClause = (traits: TraitSelection[]): string => {
   if (!traits.length) {
     return "1 = 1";
   }
 
-  return traits
-    .map(({ name, value }) => {
-      const traitName = escapeSqlValue(name);
-      const traitValue = escapeSqlValue(value);
-      return `(trait_name LIKE '${traitName}' AND trait_value LIKE '${traitValue}')`;
-    })
+  const groups = new Map<string, string[]>();
+
+  for (const { name, value } of traits) {
+    const traitName = escapeSqlValue(name);
+    const traitValue = escapeSqlValue(value);
+    const clause = `(trait_name = '${traitName}' AND trait_value = '${traitValue}')`;
+    const existing = groups.get(traitName);
+    if (existing) {
+      existing.push(clause);
+      continue;
+    }
+    groups.set(traitName, [clause]);
+  }
+
+  return Array.from(groups.values())
+    .map((clauses) => `(${clauses.join(" OR ")})`)
     .join(" OR ");
 };
 
 const buildTraitNamesSummaryQuery = (address: string): string => {
   const paddedAddress = addAddressPadding(address);
-  return `SELECT 
-				trait_name,
-				COUNT(DISTINCT trait_value) as value_count,
-				SUM(cnt) as total_count
-			FROM (
-				SELECT trait_name, trait_value, COUNT(*) as cnt
-				FROM token_attributes
-				WHERE token_id IN (
-					SELECT token_id
-					FROM token_attributes
-					WHERE token_id LIKE '${paddedAddress}:%'
-					GROUP BY token_id
-				)
-				GROUP BY trait_name, trait_value
-			)
-			GROUP BY trait_name
-			ORDER BY trait_name;`;
+  return `SELECT trait_name, COUNT(DISTINCT trait_value) as value_count
+FROM token_attributes
+WHERE token_id LIKE '${paddedAddress}:%'
+GROUP BY trait_name
+ORDER BY trait_name`;
 };
 
 const buildTraitValuesQuery = ({
@@ -153,6 +155,7 @@ const buildTraitValuesQuery = ({
 }): string => {
   const paddedAddress = addAddressPadding(address);
   const escapedTraitName = escapeSqlValue(traitName);
+  const distinctTraitCount = countDistinctTraitNames(otherTraitFilters);
 
   if (otherTraitFilters.length === 0) {
     return `SELECT trait_value, COUNT(*) as count
@@ -170,10 +173,10 @@ WHERE trait_name = '${escapedTraitName}'
   AND token_id IN (
     SELECT token_id
     FROM token_attributes
-    WHERE ${whereClause}
+    WHERE (${whereClause})
       AND token_id LIKE '${paddedAddress}:%'
     GROUP BY token_id
-    HAVING COUNT(DISTINCT trait_name) = ${otherTraitFilters.length}
+    HAVING COUNT(DISTINCT trait_name) = ${distinctTraitCount}
   )
 GROUP BY trait_value
 ORDER BY count DESC`;
@@ -189,6 +192,7 @@ const buildExpandedTraitsMetadataQuery = ({
   otherTraitFilters?: TraitSelection[];
 }): string => {
   const paddedAddress = addAddressPadding(address);
+  const distinctTraitCount = countDistinctTraitNames(otherTraitFilters);
 
   if (traitNames.length === 0) {
     return "SELECT trait_name, trait_value, 0 as count WHERE 1 = 0";
@@ -214,10 +218,10 @@ WHERE trait_name IN (${traitNamesCondition})
   AND token_id IN (
     SELECT token_id
     FROM token_attributes
-    WHERE ${whereClause}
+    WHERE (${whereClause})
       AND token_id LIKE '${paddedAddress}:%'
     GROUP BY token_id
-    HAVING COUNT(DISTINCT trait_name) = ${otherTraitFilters.length}
+    HAVING COUNT(DISTINCT trait_name) = ${distinctTraitCount}
   )
 GROUP BY trait_name, trait_value
 ORDER BY trait_name, count DESC`;
@@ -232,8 +236,9 @@ const buildTraitMetadataQuery = ({
 }): string => {
   const paddedAddress = addAddressPadding(address);
   const whereClause = buildTraitWhereClause(traits);
+  const distinctTraitCount = countDistinctTraitNames(traits);
   const havingClause = traits.length
-    ? `HAVING COUNT(DISTINCT trait_name) = ${traits.length}`
+    ? `HAVING COUNT(DISTINCT trait_name) = ${distinctTraitCount}`
     : "";
 
   return `SELECT trait_name, trait_value, COUNT(*) AS count
@@ -241,7 +246,7 @@ FROM token_attributes
 WHERE token_id IN (
     SELECT token_id
     FROM token_attributes
-    WHERE ${whereClause}
+    WHERE (${whereClause})
       AND token_id LIKE '${paddedAddress}:%'
     GROUP BY token_id
     ${havingClause}
