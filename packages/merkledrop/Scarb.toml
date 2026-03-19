@@ -1,0 +1,22 @@
+[package]
+name = "merkledrop"
+version.workspace = true
+edition.workspace = true
+cairo-version.workspace = true
+
+[dependencies]
+alexandria_merkle_tree.workspace = true
+dojo.workspace = true
+starknet.workspace = true
+
+[dev-dependencies]
+dojo_cairo_test.workspace = true
+cairo_test.workspace = true
+
+[tool.scarb]
+allow-prebuilt-plugins = ["dojo_cairo_macros"]
+
+[lib]
+
+[[target.starknet-contract]]
+build-external-contracts = ["dojo::world::world_contract::world"]
