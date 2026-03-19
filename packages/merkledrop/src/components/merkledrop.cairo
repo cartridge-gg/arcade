@@ -105,6 +105,10 @@ pub mod MerkledropComponent {
             let tree = store.get_merkle_tree(root);
             tree.assert_does_exist();
 
+            // [Check] MerkleTree is not expired
+            let now = starknet::get_block_timestamp();
+            tree.assert_not_expired(now);
+
             // [Check] Caller is the recipient
             let claimer = get_caller_address();
             let recipient = MerkledropImpl::get_recipient(@self, data);
