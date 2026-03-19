@@ -7,8 +7,12 @@ pub trait IMerkleDropImplementation<TContractState> {
     fn get_recipient(self: @TContractState, data: Span<felt252>) -> ContractAddress;
 
     /// Called after a successful claim verification.
-    /// The implementation should distribute rewards to the claimer.
+    /// The implementation should distribute rewards to the recipient.
     fn on_merkledrop_claim(
-        ref self: TContractState, root: felt252, leaf: felt252, claimer: ContractAddress,
+        ref self: TContractState,
+        root: felt252,
+        leaf: felt252,
+        recipient: ContractAddress,
+        data: Span<felt252>,
     );
 }

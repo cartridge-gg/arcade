@@ -1,4 +1,6 @@
+use core::poseidon::poseidon_hash_span;
 use starknet::testing::set_contract_address;
+use crate::tests::mocks::implementation::IHelperDispatcherTrait;
 use crate::tests::mocks::registry::IRegistryDispatcherTrait;
 use crate::tests::setup::setup::spawn;
 
@@ -8,7 +10,7 @@ use crate::tests::setup::setup::spawn;
 fn test_merkledrop_register() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(systems.implementation, data);
+    let root = systems.registry.register(systems.implementation.contract_address, data);
     assert_ne!(root, 0);
 }
 
@@ -16,7 +18,7 @@ fn test_merkledrop_register() {
 fn test_merkledrop_claim() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(systems.implementation, data);
+    let root = systems.registry.register(systems.implementation.contract_address, data);
     set_contract_address(0x1.try_into().unwrap());
     let proofs = [
         907316533554300518970989593361581641884722336105092139183718192455367796082,
@@ -24,6 +26,8 @@ fn test_merkledrop_claim() {
     ]
         .span();
     systems.registry.claim(root, proofs, [0x1].span());
+    let leaf = poseidon_hash_span([0x1].span());
+    systems.implementation.is_claimed(root, leaf);
 }
 
 #[test]
@@ -31,7 +35,7 @@ fn test_merkledrop_claim() {
 fn test_merkledrop_claim_invalid_recipient() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(systems.implementation, data);
+    let root = systems.registry.register(systems.implementation.contract_address, data);
     set_contract_address('RANDOM'.try_into().unwrap());
     let proofs = [
         907316533554300518970989593361581641884722336105092139183718192455367796082,
@@ -46,7 +50,7 @@ fn test_merkledrop_claim_invalid_recipient() {
 fn test_merkledrop_claim_invalid_proof() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(systems.implementation, data);
+    let root = systems.registry.register(systems.implementation.contract_address, data);
     set_contract_address(0x1.try_into().unwrap());
     let proofs = [0, 0].span();
     systems.registry.claim(root, proofs, [0x1].span());

@@ -1,3 +1,8 @@
+#[starknet::interface]
+pub trait IHelper<TContractState> {
+    fn is_claimed(self: @TContractState, root: felt252, leaf: felt252) -> bool;
+}
+
 #[starknet::contract]
 pub mod MerkleDropImplementation {
     use starknet::ContractAddress;
@@ -16,16 +21,18 @@ pub mod MerkleDropImplementation {
         }
 
         fn on_merkledrop_claim(
-            ref self: ContractState, root: felt252, leaf: felt252, claimer: ContractAddress,
+            ref self: ContractState,
+            root: felt252,
+            leaf: felt252,
+            recipient: ContractAddress,
+            data: Span<felt252>,
         ) {
             self.claimed.write((root, leaf), true);
         }
     }
 
-    #[generate_trait]
-    #[abi(per_item)]
-    impl HelperImpl of HelperTrait {
-        #[external(v0)]
+    #[abi(embed_v0)]
+    impl HelperImpl of super::IHelper<ContractState> {
         fn is_claimed(self: @ContractState, root: felt252, leaf: felt252) -> bool {
             self.claimed.read((root, leaf))
         }

@@ -10,13 +10,13 @@ pub mod setup {
     use starknet::{ContractAddress, SyscallResultTrait};
     use crate::events::index as events;
     use crate::models::index as models;
-    use crate::tests::mocks::implementation::MerkleDropImplementation;
-    use crate::tests::mocks::registry::{IRegistryDispatcher, NAMESPACE, Registry};
+    use crate::tests::mocks::implementation::{IHelperDispatcher, MerkleDropImplementation};
+    use crate::tests::mocks::registry::{IRegistryDispatcher, NAME as REGISTRY, NAMESPACE, Registry};
 
     #[derive(Copy, Drop)]
     pub struct Systems {
         pub registry: IRegistryDispatcher,
-        pub implementation: ContractAddress,
+        pub implementation: IHelperDispatcher,
     }
 
     #[inline]
@@ -35,7 +35,7 @@ pub mod setup {
 
     fn setup_contracts() -> Span<ContractDef> {
         [
-            ContractDefTrait::new(@NAMESPACE(), @"Merkledrop")
+            ContractDefTrait::new(@NAMESPACE(), @REGISTRY())
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span()),
         ]
             .span()
@@ -60,10 +60,11 @@ pub mod setup {
         world.sync_perms_and_inits(setup_contracts());
 
         // [Setup] Systems
-        let (merkledrop_address, _) = world.dns(@"Merkledrop").expect('Merkledrop not found');
+        let (merkledrop_address, _) = world.dns(@REGISTRY()).expect('Merkledrop not found');
         let implementation = setup_implementation();
         Systems {
-            registry: IRegistryDispatcher { contract_address: merkledrop_address }, implementation,
+            registry: IRegistryDispatcher { contract_address: merkledrop_address },
+            implementation: IHelperDispatcher { contract_address: implementation },
         }
     }
 }

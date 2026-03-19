@@ -114,7 +114,7 @@ pub mod MerkledropComponent {
             store.set_merkle_claim(@merkle_claim);
 
             // [Interaction] Notify implementation
-            implementation.on_merkledrop_claim(tree_id, leaf, claimer);
+            implementation.on_merkledrop_claim(tree_id, leaf, recipient, data);
         }
     }
 }

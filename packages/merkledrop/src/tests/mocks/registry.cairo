@@ -6,6 +6,10 @@ pub fn NAMESPACE() -> ByteArray {
     "NAMESPACE"
 }
 
+pub fn NAME() -> ByteArray {
+    "Registry"
+}
+
 #[starknet::interface]
 pub trait IRegistry<TContractState> {
     fn register(
