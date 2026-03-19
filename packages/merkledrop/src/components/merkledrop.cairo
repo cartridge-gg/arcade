@@ -7,15 +7,29 @@ pub mod MerkledropComponent {
     use core::poseidon::poseidon_hash_span;
     use dojo::world::WorldStorage;
     use starknet::{ContractAddress, get_caller_address};
-    use crate::interfaces::{
-        IMerkledropImplementationDispatcher as ImplementationDispatcher,
-        IMerkledropImplementationDispatcherTrait,
-    };
     use crate::models::claim::{MerkleClaimAssert, MerkleClaimTrait};
     use crate::models::tree::{MerkleTreeAssert, MerkleTreeTrait};
     use crate::store::{
         MerkleClaimStoreTrait, MerkleProofsStoreTrait, MerkleTreeStoreTrait, StoreTrait,
     };
+
+    pub trait IMerkledropImplementation<TContractState, +HasComponent<TContractState>> {
+        /// Returns the recipient address for a given data.
+        /// The implementation defines the data structure (e.g. hash(claimer, amount)).
+        fn get_recipient(
+            self: @ComponentState<TContractState>, data: Span<felt252>,
+        ) -> ContractAddress;
+
+        /// Called after a successful claim verification.
+        /// The implementation should distribute rewards to the recipient.
+        fn on_merkledrop_claim(
+            ref self: ComponentState<TContractState>,
+            root: felt252,
+            leaf: felt252,
+            recipient: ContractAddress,
+            data: Span<felt252>,
+        );
+    }
 
     // Storage
 
@@ -30,13 +44,12 @@ pub mod MerkledropComponent {
 
     #[generate_trait]
     pub impl InternalImpl<
-        TContractState, +HasComponent<TContractState>,
+        TContractState,
+        +HasComponent<TContractState>,
+        impl MerkledropImpl: IMerkledropImplementation<TContractState>,
     > of InternalTrait<TContractState> {
         fn register(
-            self: @ComponentState<TContractState>,
-            world: WorldStorage,
-            implementation: ContractAddress,
-            data: Span<Span<felt252>>,
+            self: @ComponentState<TContractState>, world: WorldStorage, data: Span<Span<felt252>>,
         ) -> felt252 {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
@@ -54,18 +67,18 @@ pub mod MerkledropComponent {
             existing.assert_does_not_exist();
 
             // [Effect] Create and store MerkleTree
-            let mut merkle_tree = MerkleTreeTrait::new(root, implementation);
+            let now = starknet::get_block_timestamp();
+            let mut merkle_tree = MerkleTreeTrait::new(root, now);
             store.set_merkle_tree(@merkle_tree);
 
             // [Event] Emit proofs for each leaf
-            let implementation = ImplementationDispatcher { contract_address: implementation };
             let mut index = 0;
             while let Some(leaf) = leaves.pop_front() {
                 let proofs = StoredMerkleTreeImpl::<
                     _, PoseidonHasherImpl,
                 >::get_proof(ref tree, index);
                 let span = *data.at(index);
-                let recipient = implementation.get_recipient(span);
+                let recipient = MerkledropImpl::get_recipient(self, span);
                 store.emit_proofs(root, leaf, recipient.into(), proofs, span);
                 index += 1;
             }
@@ -75,9 +88,9 @@ pub mod MerkledropComponent {
         }
 
         fn claim(
-            self: @ComponentState<TContractState>,
+            ref self: ComponentState<TContractState>,
             world: WorldStorage,
-            tree_id: felt252,
+            root: felt252,
             proofs: Span<felt252>,
             data: Span<felt252>,
         ) {
@@ -85,16 +98,15 @@ pub mod MerkledropComponent {
             let store = StoreTrait::new(world);
 
             // [Check] MerkleTree exists
-            let tree = store.get_merkle_tree(tree_id);
+            let tree = store.get_merkle_tree(root);
             tree.assert_does_exist();
 
             // [Check] Caller is the recipient
-            let implementation = ImplementationDispatcher { contract_address: tree.implementation };
             let claimer = get_caller_address();
-            let recipient = implementation.get_recipient(data);
+            let recipient = MerkledropImpl::get_recipient(@self, data);
             assert(recipient == claimer, 'MerkleDrop: not recipient');
 
-            // [Check] Proof is valid (tree_id is the root)
+            // [Check] Proof is valid
             let leaf = poseidon_hash_span(data);
             let mut merkle_tree: MerkleTree<Hasher> = MerkleTreeImpl::<
                 _, PoseidonHasherImpl,
@@ -105,16 +117,16 @@ pub mod MerkledropComponent {
             assert(valid, 'MerkleDrop: invalid proof');
 
             // [Check] Claim not already made
-            let mut merkle_claim = store.get_merkle_claim(tree_id, leaf);
+            let mut merkle_claim = store.get_merkle_claim(root, leaf);
             merkle_claim.assert_not_claimed();
 
-            // [Effect] Mark as claimed
+            // [Effect] Claim merkle drop
             let now = starknet::get_block_timestamp();
             merkle_claim.claim(now);
             store.set_merkle_claim(@merkle_claim);
 
             // [Interaction] Notify implementation
-            implementation.on_merkledrop_claim(tree_id, leaf, recipient, data);
+            MerkledropImpl::on_merkledrop_claim(ref self, root, leaf, recipient, data);
         }
     }
 }

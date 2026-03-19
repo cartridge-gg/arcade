@@ -6,17 +6,13 @@ pub mod setup {
         ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
         spawn_test_world,
     };
-    use starknet::syscalls::deploy_syscall;
-    use starknet::{ContractAddress, SyscallResultTrait};
     use crate::events::index as events;
     use crate::models::index as models;
-    use crate::tests::mocks::implementation::{IHelperDispatcher, MerkleDropImplementation};
     use crate::tests::mocks::registry::{IRegistryDispatcher, NAME as REGISTRY, NAMESPACE, Registry};
 
     #[derive(Copy, Drop)]
     pub struct Systems {
         pub registry: IRegistryDispatcher,
-        pub implementation: IHelperDispatcher,
     }
 
     #[inline]
@@ -41,17 +37,6 @@ pub mod setup {
             .span()
     }
 
-    fn setup_implementation() -> ContractAddress {
-        let (impl_address, _) = deploy_syscall(
-            class_hash: MerkleDropImplementation::TEST_CLASS_HASH,
-            contract_address_salt: 'MERKLEDROP_IMPL',
-            calldata: [].span(),
-            deploy_from_zero: false,
-        )
-            .unwrap_syscall();
-        impl_address
-    }
-
     #[inline]
     pub fn spawn() -> Systems {
         // [Setup] World
@@ -60,11 +45,8 @@ pub mod setup {
         world.sync_perms_and_inits(setup_contracts());
 
         // [Setup] Systems
+        starknet::testing::set_block_timestamp(1);
         let (merkledrop_address, _) = world.dns(@REGISTRY()).expect('Merkledrop not found');
-        let implementation = setup_implementation();
-        Systems {
-            registry: IRegistryDispatcher { contract_address: merkledrop_address },
-            implementation: IHelperDispatcher { contract_address: implementation },
-        }
+        Systems { registry: IRegistryDispatcher { contract_address: merkledrop_address } }
     }
 }

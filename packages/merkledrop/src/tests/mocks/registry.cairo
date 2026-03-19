@@ -1,5 +1,3 @@
-use starknet::ContractAddress;
-
 // Constants
 
 pub fn NAMESPACE() -> ByteArray {
@@ -12,19 +10,20 @@ pub fn NAME() -> ByteArray {
 
 #[starknet::interface]
 pub trait IRegistry<TContractState> {
-    fn register(
-        ref self: TContractState, implementation: ContractAddress, data: Span<Span<felt252>>,
-    ) -> felt252;
+    fn register(ref self: TContractState, data: Span<Span<felt252>>) -> felt252;
     fn claim(
         ref self: TContractState, tree_id: felt252, proofs: Span<felt252>, data: Span<felt252>,
     );
+    fn is_claimed(self: @TContractState, root: felt252, leaf: felt252) -> bool;
 }
 
 #[dojo::contract]
 pub mod Registry {
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
+    use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
     use crate::components::merkledrop::MerkledropComponent;
+    use crate::components::merkledrop::MerkledropComponent::IMerkledropImplementation;
     use super::{IRegistry, NAMESPACE};
 
     // Components
@@ -36,6 +35,7 @@ pub mod Registry {
     pub struct Storage {
         #[substorage(v0)]
         pub merkledrop: MerkledropComponent::Storage,
+        claimed: Map<(felt252, felt252), bool>,
     }
 
     #[event]
@@ -45,13 +45,31 @@ pub mod Registry {
         MerkledropEvent: MerkledropComponent::Event,
     }
 
+    impl MerkledropImpl of IMerkledropImplementation<ContractState> {
+        fn get_recipient(
+            self: @MerkledropComponent::ComponentState<ContractState>, data: Span<felt252>,
+        ) -> ContractAddress {
+            let recipient: felt252 = *data[0];
+            recipient.try_into().unwrap()
+        }
+
+        fn on_merkledrop_claim(
+            ref self: MerkledropComponent::ComponentState<ContractState>,
+            root: felt252,
+            leaf: felt252,
+            recipient: ContractAddress,
+            data: Span<felt252>,
+        ) {
+            let mut contract_state = self.get_contract_mut();
+            contract_state.claimed.write((root, leaf), true);
+        }
+    }
+
     #[abi(embed_v0)]
-    pub impl MerkledropImpl of IRegistry<ContractState> {
-        fn register(
-            ref self: ContractState, implementation: ContractAddress, data: Span<Span<felt252>>,
-        ) -> felt252 {
+    pub impl RegistryImpl of IRegistry<ContractState> {
+        fn register(ref self: ContractState, data: Span<Span<felt252>>) -> felt252 {
             let world = self.world_storage();
-            self.merkledrop.register(world, implementation, data)
+            self.merkledrop.register(world, data)
         }
 
         fn claim(
@@ -59,6 +77,10 @@ pub mod Registry {
         ) {
             let world = self.world_storage();
             self.merkledrop.claim(world, tree_id, proofs, data)
+        }
+
+        fn is_claimed(self: @ContractState, root: felt252, leaf: felt252) -> bool {
+            self.claimed.read((root, leaf))
         }
     }
 

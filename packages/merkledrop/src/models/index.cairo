@@ -1,13 +1,11 @@
 //! Models
 
-use starknet::ContractAddress;
-
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
 pub struct MerkleTree {
     #[key]
     pub root: felt252,
-    pub implementation: ContractAddress,
+    pub time: u64,
 }
 
 #[derive(Copy, Drop, Serde)]

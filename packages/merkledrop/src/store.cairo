@@ -33,8 +33,8 @@ pub impl StoreImpl of StoreTrait {
 #[generate_trait]
 pub impl MerkleTreeStoreImpl of MerkleTreeStoreTrait {
     #[inline]
-    fn get_merkle_tree(self: Store, id: felt252) -> MerkleTree {
-        self.world.read_model(id)
+    fn get_merkle_tree(self: Store, root: felt252) -> MerkleTree {
+        self.world.read_model(root)
     }
 
     #[inline]

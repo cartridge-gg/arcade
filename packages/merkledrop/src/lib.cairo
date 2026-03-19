@@ -1,4 +1,3 @@
-pub mod interfaces;
 pub mod store;
 
 pub mod models {
@@ -19,7 +18,6 @@ pub mod components {
 #[cfg(test)]
 pub mod tests {
     pub mod mocks {
-        pub mod implementation;
         pub mod registry;
     }
     pub mod setup;
