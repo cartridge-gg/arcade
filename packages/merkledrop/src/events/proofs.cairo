@@ -8,8 +8,12 @@ pub use crate::events::index::MerkleProofs;
 pub impl MerkleProofsImpl of MerkleProofsTrait {
     #[inline]
     fn new(
-        root: felt252, proofs: Span<felt252>, data: Span<felt252>, leaf: felt252,
+        root: felt252,
+        leaf: felt252,
+        recipient: felt252,
+        proofs: Span<felt252>,
+        data: Span<felt252>,
     ) -> MerkleProofs {
-        MerkleProofs { root, proofs, data, leaf }
+        MerkleProofs { root, leaf, recipient, proofs, data }
     }
 }

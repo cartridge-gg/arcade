@@ -1,20 +1,12 @@
 #[starknet::component]
 pub mod RegistrableComponent {
-    // Dojo imports
-
     use alexandria_merkle_tree::merkle_tree::poseidon::PoseidonHasherImpl;
     use alexandria_merkle_tree::merkle_tree::{
         Hasher, MerkleTree, MerkleTreeImpl, StoredMerkleTreeImpl,
     };
     use core::poseidon::poseidon_hash_span;
     use dojo::world::WorldStorage;
-
-    // Starknet imports
-
     use starknet::{ContractAddress, get_caller_address};
-
-    // Internal imports
-
     use crate::interfaces::{
         IMerkleDropImplementationDispatcher as ImplementationDispatcher,
         IMerkleDropImplementationDispatcherTrait,
@@ -66,13 +58,15 @@ pub mod RegistrableComponent {
             store.set_merkle_tree(@merkle_tree);
 
             // [Event] Emit proofs for each leaf
+            let implementation = ImplementationDispatcher { contract_address: implementation };
             let mut index = 0;
             while let Some(leaf) = leaves.pop_front() {
                 let proofs = StoredMerkleTreeImpl::<
                     _, PoseidonHasherImpl,
                 >::get_proof(ref tree, index);
                 let span = *data.at(index);
-                store.emit_proofs(root, proofs, span, leaf);
+                let recipient = implementation.get_recipient(span);
+                store.emit_proofs(root, leaf, recipient.into(), proofs, span);
                 index += 1;
             }
 

@@ -64,9 +64,14 @@ pub impl MerkleClaimStoreImpl of MerkleClaimStoreTrait {
 pub impl MerkleProofsStoreImpl of MerkleProofsStoreTrait {
     #[inline]
     fn emit_proofs(
-        mut self: Store, root: felt252, proofs: Span<felt252>, data: Span<felt252>, leaf: felt252,
+        mut self: Store,
+        root: felt252,
+        leaf: felt252,
+        recipient: felt252,
+        proofs: Span<felt252>,
+        data: Span<felt252>,
     ) {
-        let event = MerkleProofsTrait::new(root, proofs, data, leaf);
+        let event = MerkleProofsTrait::new(root, leaf, recipient, proofs, data);
         self.world.emit_event(@event);
     }
 }

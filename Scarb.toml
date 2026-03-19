@@ -6,6 +6,7 @@ members = [
   "packages/starterpack",
   "packages/collection",
   "packages/controller",
+  "packages/merkledrop",
   "packages/leaderboard",
   "packages/orderbook",
   "packages/provider",
@@ -26,6 +27,7 @@ cairo-version = "2.13.1"
 dojo = "1.8.0"
 dojo_cairo_test = "1.8.0"
 graffiti = { git = "https://github.com/bal7hazar/graffiti.git", rev = "e8b0854" }
+alexandria_merkle_tree = "0.7.0"
 openzeppelin = "2.0.0"
 starknet = "2.13.1"
 cairo_test = "2.13.1"

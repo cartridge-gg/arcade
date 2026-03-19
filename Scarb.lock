@@ -11,6 +11,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "alexandria_math"
+version = "0.7.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:2f634a878ad20377041649f0c63ffff8d7f01fe578e3666371dfb15d243b6822"
+
+[[package]]
+name = "alexandria_merkle_tree"
+version = "0.7.0"
+source = "registry+https://scarbs.xyz/"
+checksum = "sha256:de691731e447bc52ad21d73ba0b70349d3f3ffbc3bd0bfc8eae8fef89baf7681"
+dependencies = [
+ "alexandria_math",
+]
+
+[[package]]
 name = "arcade"
 version = "0.0.0"
 dependencies = [
@@ -81,6 +96,15 @@ dependencies = [
  "dojo",
  "dojo_cairo_test",
  "graffiti",
+]
+
+[[package]]
+name = "merkledrop"
+version = "0.0.0"
+dependencies = [
+ "alexandria_merkle_tree",
+ "dojo",
+ "dojo_cairo_test",
 ]
 
 [[package]]
