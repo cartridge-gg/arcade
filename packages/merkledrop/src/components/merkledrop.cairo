@@ -50,7 +50,10 @@ pub mod MerkledropComponent {
         impl MerkledropImpl: IMerkledropImplementation<TContractState>,
     > of InternalTrait<TContractState> {
         fn register(
-            self: @ComponentState<TContractState>, world: WorldStorage, data: Span<Span<felt252>>,
+            self: @ComponentState<TContractState>,
+            world: WorldStorage,
+            data: Span<Span<felt252>>,
+            end: u64,
         ) -> felt252 {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
@@ -68,8 +71,7 @@ pub mod MerkledropComponent {
             existing.assert_does_not_exist();
 
             // [Effect] Create and store MerkleTree
-            let now = starknet::get_block_timestamp();
-            let mut merkle_tree = MerkleTreeTrait::new(root, now);
+            let mut merkle_tree = MerkleTreeTrait::new(root, end);
             store.set_merkle_tree(@merkle_tree);
 
             // [Event] Emit proofs for each leaf

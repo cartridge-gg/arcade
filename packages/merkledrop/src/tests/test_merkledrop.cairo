@@ -9,7 +9,7 @@ use crate::tests::setup::setup::spawn;
 fn test_merkledrop_register() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(data);
+    let root = systems.registry.register(data, 2);
     assert_ne!(root, 0);
 }
 
@@ -17,7 +17,7 @@ fn test_merkledrop_register() {
 fn test_merkledrop_claim() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(data);
+    let root = systems.registry.register(data, 2);
     set_contract_address(0x1.try_into().unwrap());
     let proofs = [
         907316533554300518970989593361581641884722336105092139183718192455367796082,
@@ -34,7 +34,7 @@ fn test_merkledrop_claim() {
 fn test_merkledrop_claim_invalid_recipient() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(data);
+    let root = systems.registry.register(data, 2);
     set_contract_address('RANDOM'.try_into().unwrap());
     let proofs = [
         907316533554300518970989593361581641884722336105092139183718192455367796082,
@@ -49,7 +49,7 @@ fn test_merkledrop_claim_invalid_recipient() {
 fn test_merkledrop_claim_invalid_proof() {
     let systems = spawn();
     let data = [[0x1].span(), [0x2].span(), [0x3].span()].span();
-    let root = systems.registry.register(data);
+    let root = systems.registry.register(data, 2);
     set_contract_address(0x1.try_into().unwrap());
     let proofs = [0, 0].span();
     systems.registry.claim(root, proofs, [0x1].span(), 0x1.try_into().unwrap());

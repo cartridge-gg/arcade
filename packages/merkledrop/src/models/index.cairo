@@ -5,7 +5,7 @@
 pub struct MerkleTree {
     #[key]
     pub root: felt252,
-    pub time: u64,
+    pub end: u64,
 }
 
 #[derive(Copy, Drop, Serde)]

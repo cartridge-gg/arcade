@@ -10,7 +10,7 @@ pub fn NAME() -> ByteArray {
 
 #[starknet::interface]
 pub trait IRegistry<TContractState> {
-    fn register(ref self: TContractState, data: Span<Span<felt252>>) -> felt252;
+    fn register(ref self: TContractState, data: Span<Span<felt252>>, end: u64) -> felt252;
     fn claim(
         ref self: TContractState,
         tree_id: felt252,
@@ -71,9 +71,9 @@ pub mod Registry {
 
     #[abi(embed_v0)]
     pub impl RegistryImpl of IRegistry<ContractState> {
-        fn register(ref self: ContractState, data: Span<Span<felt252>>) -> felt252 {
+        fn register(ref self: ContractState, data: Span<Span<felt252>>, end: u64) -> felt252 {
             let world = self.world_storage();
-            self.merkledrop.register(world, data)
+            self.merkledrop.register(world, data, end)
         }
 
         fn claim(
