@@ -1,5 +1,5 @@
 #[starknet::component]
-pub mod RegistrableComponent {
+pub mod MerkledropComponent {
     use alexandria_merkle_tree::merkle_tree::poseidon::PoseidonHasherImpl;
     use alexandria_merkle_tree::merkle_tree::{
         Hasher, MerkleTree, MerkleTreeImpl, StoredMerkleTreeImpl,

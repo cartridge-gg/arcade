@@ -35,7 +35,7 @@ pub mod setup {
 
     fn setup_contracts() -> Span<ContractDef> {
         [
-            ContractDefTrait::new(@NAMESPACE(), @"Registry")
+            ContractDefTrait::new(@NAMESPACE(), @"Merkledrop")
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span()),
         ]
             .span()
@@ -60,10 +60,10 @@ pub mod setup {
         world.sync_perms_and_inits(setup_contracts());
 
         // [Setup] Systems
-        let (registry_address, _) = world.dns(@"Registry").expect('Registry not found');
+        let (merkledrop_address, _) = world.dns(@"Merkledrop").expect('Merkledrop not found');
         let implementation = setup_implementation();
         Systems {
-            registry: IRegistryDispatcher { contract_address: registry_address }, implementation,
+            registry: IRegistryDispatcher { contract_address: merkledrop_address }, implementation,
         }
     }
 }

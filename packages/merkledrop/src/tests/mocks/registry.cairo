@@ -20,41 +20,41 @@ pub trait IRegistry<TContractState> {
 pub mod Registry {
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
-    use crate::components::registrable::RegistrableComponent;
+    use crate::components::merkledrop::MerkledropComponent;
     use super::{IRegistry, NAMESPACE};
 
     // Components
 
-    component!(path: RegistrableComponent, storage: registrable, event: RegistrableEvent);
-    pub impl InternalImpl = RegistrableComponent::InternalImpl<ContractState>;
+    component!(path: MerkledropComponent, storage: merkledrop, event: MerkledropEvent);
+    pub impl InternalImpl = MerkledropComponent::InternalImpl<ContractState>;
 
     #[storage]
     pub struct Storage {
         #[substorage(v0)]
-        pub registrable: RegistrableComponent::Storage,
+        pub merkledrop: MerkledropComponent::Storage,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
         #[flat]
-        RegistrableEvent: RegistrableComponent::Event,
+        MerkledropEvent: MerkledropComponent::Event,
     }
 
     #[abi(embed_v0)]
-    pub impl RegistryImpl of IRegistry<ContractState> {
+    pub impl MerkledropImpl of IRegistry<ContractState> {
         fn register(
             ref self: ContractState, implementation: ContractAddress, data: Span<Span<felt252>>,
         ) -> felt252 {
             let world = self.world_storage();
-            self.registrable.register(world, implementation, data)
+            self.merkledrop.register(world, implementation, data)
         }
 
         fn claim(
             ref self: ContractState, tree_id: felt252, proofs: Span<felt252>, data: Span<felt252>,
         ) {
             let world = self.world_storage();
-            self.registrable.claim(world, tree_id, proofs, data)
+            self.merkledrop.claim(world, tree_id, proofs, data)
         }
     }
 

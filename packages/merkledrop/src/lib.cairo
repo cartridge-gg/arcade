@@ -13,7 +13,7 @@ pub mod events {
 }
 
 pub mod components {
-    pub mod registrable;
+    pub mod merkledrop;
 }
 
 #[cfg(test)]
