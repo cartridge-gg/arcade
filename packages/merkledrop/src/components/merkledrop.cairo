@@ -8,8 +8,8 @@ pub mod MerkledropComponent {
     use dojo::world::WorldStorage;
     use starknet::{ContractAddress, get_caller_address};
     use crate::interfaces::{
-        IMerkleDropImplementationDispatcher as ImplementationDispatcher,
-        IMerkleDropImplementationDispatcherTrait,
+        IMerkledropImplementationDispatcher as ImplementationDispatcher,
+        IMerkledropImplementationDispatcherTrait,
     };
     use crate::models::claim::{MerkleClaimAssert, MerkleClaimTrait};
     use crate::models::tree::{MerkleTreeAssert, MerkleTreeTrait};

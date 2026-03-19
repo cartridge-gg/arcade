@@ -14,7 +14,7 @@ pub mod MerkleDropImplementation {
     }
 
     #[abi(embed_v0)]
-    impl MerkleDropImpl of crate::interfaces::IMerkleDropImplementation<ContractState> {
+    impl MerkleDropImpl of crate::interfaces::IMerkledropImplementation<ContractState> {
         fn get_recipient(self: @ContractState, data: Span<felt252>) -> ContractAddress {
             let recipient: felt252 = *data[0];
             recipient.try_into().unwrap()
