@@ -4,6 +4,7 @@ pub mod MerkledropComponent {
     use alexandria_merkle_tree::merkle_tree::{
         Hasher, MerkleTree, MerkleTreeImpl, StoredMerkleTreeImpl,
     };
+    use core::num::traits::Zero;
     use core::poseidon::poseidon_hash_span;
     use dojo::world::WorldStorage;
     use starknet::{ContractAddress, get_caller_address};
@@ -26,7 +27,7 @@ pub mod MerkledropComponent {
             ref self: ComponentState<TContractState>,
             root: felt252,
             leaf: felt252,
-            recipient: ContractAddress,
+            receiver: ContractAddress,
             data: Span<felt252>,
         );
     }
@@ -93,6 +94,7 @@ pub mod MerkledropComponent {
             root: felt252,
             proofs: Span<felt252>,
             data: Span<felt252>,
+            receiver: ContractAddress,
         ) {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
@@ -126,7 +128,12 @@ pub mod MerkledropComponent {
             store.set_merkle_claim(@merkle_claim);
 
             // [Interaction] Notify implementation
-            MerkledropImpl::on_merkledrop_claim(ref self, root, leaf, recipient, data);
+            let receiver = if receiver.is_zero() {
+                recipient
+            } else {
+                receiver
+            };
+            MerkledropImpl::on_merkledrop_claim(ref self, root, leaf, receiver, data);
         }
     }
 }

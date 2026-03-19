@@ -24,7 +24,7 @@ fn test_merkledrop_claim() {
         3607669716317214452405727508484314200253059781412795125669234850493457454238,
     ]
         .span();
-    systems.registry.claim(root, proofs, [0x1].span());
+    systems.registry.claim(root, proofs, [0x1].span(), 0x1.try_into().unwrap());
     let leaf = poseidon_hash_span([0x1].span());
     systems.registry.is_claimed(root, leaf);
 }
@@ -41,7 +41,7 @@ fn test_merkledrop_claim_invalid_recipient() {
         3607669716317214452405727508484314200253059781412795125669234850493457454238,
     ]
         .span();
-    systems.registry.claim(root, proofs, [0x1].span());
+    systems.registry.claim(root, proofs, [0x1].span(), 0x1.try_into().unwrap());
 }
 
 #[test]
@@ -52,6 +52,6 @@ fn test_merkledrop_claim_invalid_proof() {
     let root = systems.registry.register(data);
     set_contract_address(0x1.try_into().unwrap());
     let proofs = [0, 0].span();
-    systems.registry.claim(root, proofs, [0x1].span());
+    systems.registry.claim(root, proofs, [0x1].span(), 0x1.try_into().unwrap());
 }
 

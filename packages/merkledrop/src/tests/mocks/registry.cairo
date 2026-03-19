@@ -12,7 +12,11 @@ pub fn NAME() -> ByteArray {
 pub trait IRegistry<TContractState> {
     fn register(ref self: TContractState, data: Span<Span<felt252>>) -> felt252;
     fn claim(
-        ref self: TContractState, tree_id: felt252, proofs: Span<felt252>, data: Span<felt252>,
+        ref self: TContractState,
+        tree_id: felt252,
+        proofs: Span<felt252>,
+        data: Span<felt252>,
+        receiver: starknet::ContractAddress,
     );
     fn is_claimed(self: @TContractState, root: felt252, leaf: felt252) -> bool;
 }
@@ -57,7 +61,7 @@ pub mod Registry {
             ref self: MerkledropComponent::ComponentState<ContractState>,
             root: felt252,
             leaf: felt252,
-            recipient: ContractAddress,
+            receiver: ContractAddress,
             data: Span<felt252>,
         ) {
             let mut contract_state = self.get_contract_mut();
@@ -73,10 +77,14 @@ pub mod Registry {
         }
 
         fn claim(
-            ref self: ContractState, tree_id: felt252, proofs: Span<felt252>, data: Span<felt252>,
+            ref self: ContractState,
+            tree_id: felt252,
+            proofs: Span<felt252>,
+            data: Span<felt252>,
+            receiver: ContractAddress,
         ) {
             let world = self.world_storage();
-            self.merkledrop.claim(world, tree_id, proofs, data)
+            self.merkledrop.claim(world, tree_id, proofs, data, receiver)
         }
 
         fn is_claimed(self: @ContractState, root: felt252, leaf: felt252) -> bool {
