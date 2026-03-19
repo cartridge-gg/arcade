@@ -17,13 +17,14 @@ pub mod MerkledropComponent {
         /// Returns the recipient address for a given data.
         /// The implementation defines the data structure (e.g. hash(claimer, amount)).
         fn get_recipient(
-            self: @ComponentState<TContractState>, data: Span<felt252>,
+            self: @ComponentState<TContractState>, world: WorldStorage, data: Span<felt252>,
         ) -> ContractAddress;
 
         /// Called after a successful claim verification.
         /// The implementation should distribute rewards to the recipient.
         fn on_merkledrop_claim(
             ref self: ComponentState<TContractState>,
+            world: WorldStorage,
             root: felt252,
             leaf: felt252,
             recipient: ContractAddress,
@@ -78,7 +79,7 @@ pub mod MerkledropComponent {
                     _, PoseidonHasherImpl,
                 >::get_proof(ref tree, index);
                 let span = *data.at(index);
-                let recipient = MerkledropImpl::get_recipient(self, span);
+                let recipient = MerkledropImpl::get_recipient(self, world, span);
                 store.emit_proofs(root, leaf, recipient.into(), proofs, span);
                 index += 1;
             }
@@ -103,7 +104,7 @@ pub mod MerkledropComponent {
 
             // [Check] Caller is the recipient
             let claimer = get_caller_address();
-            let recipient = MerkledropImpl::get_recipient(@self, data);
+            let recipient = MerkledropImpl::get_recipient(@self, world, data);
             assert(recipient == claimer, 'MerkleDrop: not recipient');
 
             // [Check] Proof is valid
@@ -126,7 +127,7 @@ pub mod MerkledropComponent {
             store.set_merkle_claim(@merkle_claim);
 
             // [Interaction] Notify implementation
-            MerkledropImpl::on_merkledrop_claim(ref self, root, leaf, recipient, data);
+            MerkledropImpl::on_merkledrop_claim(ref self, world, root, leaf, recipient, data);
         }
     }
 }

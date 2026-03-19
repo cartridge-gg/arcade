@@ -47,7 +47,9 @@ pub mod Registry {
 
     impl MerkledropImpl of IMerkledropImplementation<ContractState> {
         fn get_recipient(
-            self: @MerkledropComponent::ComponentState<ContractState>, data: Span<felt252>,
+            self: @MerkledropComponent::ComponentState<ContractState>,
+            world: WorldStorage,
+            data: Span<felt252>,
         ) -> ContractAddress {
             let recipient: felt252 = *data[0];
             recipient.try_into().unwrap()
@@ -55,6 +57,7 @@ pub mod Registry {
 
         fn on_merkledrop_claim(
             ref self: MerkledropComponent::ComponentState<ContractState>,
+            world: WorldStorage,
             root: felt252,
             leaf: felt252,
             recipient: ContractAddress,
