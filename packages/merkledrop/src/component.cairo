@@ -50,7 +50,7 @@ pub mod Component {
         impl MerkledropImpl: MerkledropTrait<TContractState>,
     > of InternalTrait<TContractState> {
         fn register(
-            self: @ComponentState<TContractState>,
+            ref self: ComponentState<TContractState>,
             world: WorldStorage,
             data: Span<Span<felt252>>,
             end: u64,
@@ -81,7 +81,7 @@ pub mod Component {
                     _, PoseidonHasherImpl,
                 >::get_proof(ref tree, index);
                 let span = *data.at(index);
-                let recipient = MerkledropImpl::get_recipient(self, span);
+                let recipient = MerkledropImpl::get_recipient(@self, span);
                 store.emit_proofs(root, leaf, recipient.into(), proofs, span);
                 index += 1;
             }

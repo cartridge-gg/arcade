@@ -89,7 +89,7 @@ pub mod Component {
         /// group, data).
         /// * `to_store`: Specify if you want to store the achievement definition and completion.
         fn create(
-            self: @ComponentState<TContractState>,
+            ref self: ComponentState<TContractState>,
             mut world: WorldStorage,
             id: felt252,
             start: u64,

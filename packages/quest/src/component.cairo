@@ -130,7 +130,7 @@ pub mod Component {
         /// * `data`: The quest data, not used yet but could have a future use.
         /// * `to_store`: Speicify if you want to store the quest completion.
         fn create(
-            self: @ComponentState<TContractState>,
+            ref self: ComponentState<TContractState>,
             mut world: WorldStorage,
             id: felt252,
             start: u64,
