@@ -1,5 +1,5 @@
-use quest::types::metadata::QuestMetadata;
-use quest::types::task::Task;
+use crate::types::metadata::QuestMetadata;
+use crate::types::task::Task;
 
 pub fn NAMESPACE() -> ByteArray {
     "NAMESPACE"

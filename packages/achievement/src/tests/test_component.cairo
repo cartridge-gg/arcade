@@ -1,11 +1,11 @@
-use achievement::models::completion::CompletionTrait;
-use achievement::models::definition::DefinitionAssert;
-use achievement::store::StoreTrait;
-use achievement::tests::contract::ContractTraitDispatcherTrait;
-use achievement::tests::setup::setup::{PLAYER, spawn};
-use achievement::types::metadata::{AchievementMetadata, MetadataTrait};
-use achievement::types::task::TaskTrait;
 use starknet::testing::set_block_timestamp;
+use crate::models::completion::CompletionTrait;
+use crate::models::definition::DefinitionAssert;
+use crate::store::StoreTrait;
+use crate::tests::contract::ContractTraitDispatcherTrait;
+use crate::tests::setup::setup::{PLAYER, spawn};
+use crate::types::metadata::{AchievementMetadata, MetadataTrait};
+use crate::types::task::TaskTrait;
 
 // Constants
 

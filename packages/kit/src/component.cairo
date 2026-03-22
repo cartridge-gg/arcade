@@ -2,18 +2,18 @@
 pub mod Component {
     use core::num::traits::Zero;
     use dojo::world::{IWorldDispatcherTrait, WorldStorage};
-    use kit::constants::MAX_REFERRAL_FEE;
-    use kit::models::group::KitGroupTrait;
-    use kit::models::issuance::{KitIssuanceAssert, KitIssuanceTrait};
-    use kit::models::kit::{KitAssert, KitTrait as KitModelTrait, errors};
-    use kit::models::referral::KitReferralTrait;
-    use kit::models::voucher::{KitVoucherAssert, KitVoucherTrait};
-    use kit::store::{
+    use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
+    use crate::constants::MAX_REFERRAL_FEE;
+    use crate::models::group::KitGroupTrait;
+    use crate::models::issuance::{KitIssuanceAssert, KitIssuanceTrait};
+    use crate::models::kit::{KitAssert, KitTrait as KitModelTrait, errors};
+    use crate::models::referral::KitReferralTrait;
+    use crate::models::voucher::{KitVoucherAssert, KitVoucherTrait};
+    use crate::store::{
         GroupStoreTrait, IssuanceStoreTrait, KitStoreTrait, ReferralStoreTrait, Store, StoreTrait,
         VoucherStoreTrait,
     };
-    use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // Types
 

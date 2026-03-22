@@ -1,10 +1,10 @@
-use quest::models::completion::CompletionTrait;
-use quest::models::definition::DefinitionAssert;
-use quest::store::StoreTrait;
-use quest::tests::contract::ContractTraitDispatcherTrait;
-use quest::tests::setup::setup::{METADATA, PLAYER, spawn};
-use quest::types::task::TaskTrait;
 use starknet::testing::set_block_timestamp;
+use crate::models::completion::CompletionTrait;
+use crate::models::definition::DefinitionAssert;
+use crate::store::StoreTrait;
+use crate::tests::contract::ContractTraitDispatcherTrait;
+use crate::tests::setup::setup::{METADATA, PLAYER, spawn};
+use crate::types::task::TaskTrait;
 
 const QUEST_ID: felt252 = 'QUEST';
 const QUEST_A_ID: felt252 = 'QUEST-A';

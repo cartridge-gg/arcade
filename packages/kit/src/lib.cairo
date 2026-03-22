@@ -1,5 +1,6 @@
 pub mod component;
 pub mod constants;
+pub mod interface;
 pub mod store;
 
 pub mod types {

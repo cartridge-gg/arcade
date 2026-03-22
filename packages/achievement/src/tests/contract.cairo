@@ -1,7 +1,7 @@
 // Internal imports
 
-use achievement::types::metadata::AchievementMetadata;
-use achievement::types::task::Task;
+use crate::types::metadata::AchievementMetadata;
+use crate::types::task::Task;
 
 pub fn NAMESPACE() -> ByteArray {
     "NAMESPACE"

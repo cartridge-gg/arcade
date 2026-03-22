@@ -1,6 +1,6 @@
 // Internal imports
 
-pub use achievement::events::index::TrophyProgression;
+pub use crate::events::index::TrophyProgression;
 
 // Errors
 

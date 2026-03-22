@@ -2,9 +2,6 @@
 pub mod Component {
     // Imports
 
-    use achievement::store::{Store, StoreTrait};
-    use achievement::types::metadata::AchievementMetadata;
-    use achievement::types::task::Task;
     use dojo::event::EventStorage;
     use dojo::world::WorldStorage;
     use crate::events::creation::{CreationTrait, TrophyCreation};
@@ -14,6 +11,9 @@ pub mod Component {
     use crate::models::association::AssociationTrait;
     use crate::models::completion::{CompletionAssert, CompletionTrait};
     use crate::models::definition::{AchievementDefinition, DefinitionAssert, DefinitionTrait};
+    use crate::store::{Store, StoreTrait};
+    use crate::types::metadata::AchievementMetadata;
+    use crate::types::task::Task;
 
     // Errors
 
