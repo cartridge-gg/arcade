@@ -6,7 +6,7 @@ pub mod IssuableComponent {
 
     // External imports
 
-    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
     // Internal imports
