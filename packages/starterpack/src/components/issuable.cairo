@@ -71,10 +71,7 @@ pub mod IssuableComponent {
 
             if starterpack.conditional {
                 // [Check] Voucher key
-                let voucher_key = match voucher_key {
-                    Option::Some(value) => value,
-                    Option::None => 0,
-                };
+                let voucher_key = voucher_key.unwrap_or_default();
                 VoucherAssert::assert_valid_key(voucher_key);
 
                 // [Check] Voucher
@@ -148,10 +145,7 @@ pub mod IssuableComponent {
                 // Use payment_receiver if set, otherwise default to owner
                 let owner_payment = base_price - referral_fee_amount;
                 if owner_payment > 0 {
-                    let receiver = match starterpack.payment_receiver {
-                        Option::Some(addr) => addr,
-                        Option::None => starterpack.owner,
-                    };
+                    let receiver = starterpack.payment_receiver.unwrap_or(starterpack.owner);
                     token_dispatcher.transfer_from(payer, receiver, owner_payment);
                 }
             }

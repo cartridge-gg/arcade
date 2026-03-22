@@ -3,20 +3,14 @@
 use dojo::event::EventStorage;
 use dojo::model::ModelStorage;
 use dojo::world::WorldStorage;
-use starknet::ContractAddress;
 use crate::events::claimed::{ClaimedTrait, QuestClaimed};
 use crate::events::completed::{CompletedTrait, QuestCompleted};
-use crate::events::creation::{CreationTrait, QuestCreation};
-use crate::events::progression::{ProgressTrait, QuestProgression};
 use crate::events::unlocked::{QuestUnlocked, UnlockedTrait};
-use crate::interfaces::{IQuestRewarderDispatcher, IQuestRewarderDispatcherTrait};
-use crate::models::advancement::{AdvancementTrait, QuestAdvancement};
-use crate::models::association::{AssociationTrait, QuestAssociation};
+use crate::models::advancement::QuestAdvancement;
+use crate::models::association::QuestAssociation;
 use crate::models::completion::{CompletionTrait, QuestCompletion};
-use crate::models::condition::{ConditionTrait, QuestCondition};
+use crate::models::condition::QuestCondition;
 use crate::models::definition::{DefinitionTrait, QuestDefinition};
-use crate::types::metadata::QuestMetadata;
-use crate::types::task::Task;
 
 // Structs
 
@@ -101,151 +95,13 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn create(
-        mut self: Store,
-        id: felt252,
-        rewarder: ContractAddress,
-        start: u64,
-        end: u64,
-        duration: u64,
-        interval: u64,
-        mut tasks: Span<Task>,
-        mut conditions: Span<felt252>,
-        metadata: QuestMetadata,
-        to_store: bool,
-    ) {
-        // [Model] Create quest definition
-        let definition: QuestDefinition = DefinitionTrait::new(
-            id: id,
-            rewarder: rewarder,
-            start: start,
-            end: end,
-            duration: duration,
-            interval: interval,
-            tasks: tasks,
-            conditions: conditions,
-        );
-        // [Event] Emit quest creation
-        let event: QuestCreation = CreationTrait::new(
-            id: id, definition: definition.clone(), metadata: metadata,
-        );
-        self.world.emit_event(@event);
-        // [Check] Skip if storing is not requested
-        if (!to_store) {
-            return;
-        }
-        // [Effect] Store quest definition
-        self.set_definition(@definition);
-        // [Effect] Update associations
-        while let Option::Some(task) = tasks.pop_front() {
-            let mut association = self.get_association(*task.id);
-            association.insert(id);
-            self.set_association(@association);
-        }
-        // [Effect] Update conditions
-        while let Option::Some(condition) = conditions.pop_front() {
-            let mut condition = self.get_condition(*condition);
-            condition.insert(id);
-            self.set_condition(@condition);
-        };
-    }
-
-    #[inline]
-    fn progress(
-        mut self: Store,
-        player_id: felt252,
-        task_id: felt252,
-        count: u128,
-        time: u64,
-        to_store: bool,
-    ) {
-        // [Event] Emit quest progression
-        let event: QuestProgression = ProgressTrait::new(
-            player_id: player_id, task_id: task_id, count: count, time: time,
-        );
-        self.world.emit_event(@event);
-        // [Check] Skip if storing is not requested
-        if (!to_store) {
-            return;
-        }
-        // [Compute] Filter active, unlocked and uncompleted quests
-        let association = self.get_association(task_id);
-        let mut quests = association.quests;
-        let mut definitions: Array<QuestDefinition> = array![];
-        while let Option::Some(quest_id) = quests.pop_front() {
-            // [Check] Quest is active, otherwise save and continue
-            let definition = self.get_definition(quest_id);
-            if (!definition.is_active(time)) {
-                continue;
-            }
-            // [Check] Completion is unlocked, otherwise save and continue
-            let completion = self.get_completion_or_new(player_id, @definition, time);
-            if (!completion.is_unlocked()) {
-                continue;
-            }
-            // [Check] Quest is not already completed, otherwise save and continue
-            if (completion.is_completed()) {
-                continue;
-            }
-            definitions.append(definition);
-        }
-        // [Effect] Update player advancement
-        while let Option::Some(definition) = definitions.pop_front() {
-            // [Effect] Update player quest advancement
-            let quest_id = definition.id;
-            let interval_id = definition.compute_interval_id(time);
-            let mut advancement = self.get_advancement(player_id, quest_id, task_id, interval_id);
-            advancement.add(count);
-            advancement.assess(definition.tasks, time);
-            self.set_advancement(@advancement);
-            // [Check] Task is completed, otherwise save and continue
-            if (!advancement.is_completed()) {
-                continue;
-            }
-            // [Check] Quest is completed, otherwise save and continue
-            let mut completed = true;
-            let mut tasks = definition.tasks;
-            while let Option::Some(task) = tasks.pop_front() {
-                let advancement = self.get_advancement(player_id, quest_id, *task.id, interval_id);
-                completed = completed && advancement.is_completed();
-            }
-            if (!completed) {
-                continue;
-            }
-            // [Effect] Update player quest completion if completed
-            let mut completion = self.get_completion_or_new(player_id, @definition, time);
-            completion.complete(time);
-            self.set_completion(@completion);
-            // [Event] Emit quest completed
-            self.complete(definition.rewarder, player_id, quest_id, interval_id, time);
-            // [Check] Quest unlocks other quests
-            let mut conditions = self.get_condition(quest_id);
-            while let Option::Some(condition) = conditions.quests.pop_front() {
-                // [Effect] Update quest unlock condition for the other quest
-                let definition = self.get_definition(condition);
-                let interval_id = definition.compute_interval_id(time);
-                let mut completion = self.get_completion_or_new(player_id, @definition, time);
-                completion.unlock();
-                self.set_completion(@completion);
-                // [Event] Emit quest unlocked
-                self.unlock(definition.rewarder, player_id, condition, interval_id, time);
-            }
-        }
-    }
-
-    #[inline]
     fn complete(
         mut self: Store,
-        rewarder: ContractAddress,
         player_id: felt252,
         quest_id: felt252,
         interval_id: u64,
         time: u64,
     ) {
-        // [Interaction] Call rewarder
-        let rewarder = IQuestRewarderDispatcher { contract_address: rewarder };
-        let recipient: ContractAddress = player_id.try_into().unwrap();
-        rewarder.on_quest_complete(recipient, quest_id, interval_id);
         // [Event] Emit quest completed
         let event: QuestCompleted = CompletedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);
@@ -254,16 +110,11 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn unlock(
         mut self: Store,
-        rewarder: ContractAddress,
         player_id: felt252,
         quest_id: felt252,
         interval_id: u64,
         time: u64,
     ) {
-        // [Interaction] Call rewarder
-        let rewarder = IQuestRewarderDispatcher { contract_address: rewarder };
-        let recipient: ContractAddress = player_id.try_into().unwrap();
-        rewarder.on_quest_unlock(recipient, quest_id, interval_id);
         // [Event] Emit quest completed
         let event: QuestUnlocked = UnlockedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);
@@ -272,16 +123,11 @@ pub impl StoreImpl of StoreTrait {
     #[inline]
     fn claim(
         mut self: Store,
-        rewarder: ContractAddress,
         player_id: felt252,
         quest_id: felt252,
         interval_id: u64,
         time: u64,
     ) {
-        // [Interaction] Call rewarder
-        let rewarder = IQuestRewarderDispatcher { contract_address: rewarder };
-        let recipient: ContractAddress = player_id.try_into().unwrap();
-        rewarder.on_quest_claim(recipient, quest_id, interval_id);
         // [Event] Emit quest claim
         let event: QuestClaimed = ClaimedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);

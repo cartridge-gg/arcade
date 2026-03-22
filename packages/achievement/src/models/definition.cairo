@@ -22,7 +22,7 @@ pub impl DefinitionImpl of DefinitionTrait {
         DefinitionAssert::assert_valid_tasks(tasks);
         DefinitionAssert::assert_valid_duration(start, end);
         // [Return] AchievementDefinition
-        AchievementDefinition { id: id, rewarder: rewarder, start: start, end: end, tasks: tasks }
+        AchievementDefinition { id: id, start: start, end: end, tasks: tasks }
     }
 
     #[inline]

@@ -1,19 +1,27 @@
 pub mod component;
+pub mod constants;
 pub mod store;
 
+pub mod types {
+    pub mod item;
+    pub mod metadata;
+}
+
 pub mod models {
-    pub mod claim;
+    pub mod group;
     pub mod index;
-    pub mod tree;
+    pub mod issuance;
+    pub mod kit;
+    pub mod referral;
+    pub mod voucher;
 }
 
 pub mod events {
     pub mod index;
-    pub mod proofs;
 }
 
 #[cfg(test)]
-pub mod tests {
+mod tests {
     pub mod contract;
     pub mod setup;
     pub mod test_component;
