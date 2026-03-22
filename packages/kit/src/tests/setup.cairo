@@ -1,11 +1,7 @@
 pub mod setup {
     use dojo::world::{WorldStorage, WorldStorageTrait, world};
     use dojo_cairo_test::{
-        ContractDef,
-        ContractDefTrait,
-        NamespaceDef,
-        TestResource,
-        WorldStorageTestTrait,
+        ContractDef, ContractDefTrait, NamespaceDef, TestResource, WorldStorageTestTrait,
         spawn_test_world,
     };
     use starknet::ContractAddress;

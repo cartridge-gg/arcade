@@ -65,9 +65,7 @@ pub mod setup {
         world.sync_perms_and_inits(setup_contracts());
 
         let (contract_address, _) = world.dns(@"Contract").expect('Contract not found');
-        let systems = Systems {
-            quester: ContractTraitDispatcher { contract_address },
-        };
+        let systems = Systems { quester: ContractTraitDispatcher { contract_address } };
 
         (world, systems)
     }

@@ -36,7 +36,11 @@ pub trait ContractTrait<TContractState> {
         ref self: TContractState, recipient: ContractAddress, kit_id: u32, voucher_key: felt252,
     );
     fn quote(
-        self: @TContractState, kit_id: u32, quantity: u32, has_referrer: bool, client_percentage: u8,
+        self: @TContractState,
+        kit_id: u32,
+        quantity: u32,
+        has_referrer: bool,
+        client_percentage: u8,
     ) -> KitQuote;
     fn get_metadata(self: @TContractState, kit_id: u32) -> ByteArray;
     fn issue(
@@ -57,9 +61,7 @@ pub mod Contract {
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
     use crate::component::Component;
-    use crate::component::Component::KitQuote;
-    use crate::component::Component::KitTrait;
-    use crate::component::Component::KitFeeTrait;
+    use crate::component::Component::{KitFeeTrait, KitQuote, KitTrait};
     use super::{ContractTrait, NAMESPACE};
 
     component!(path: Component, storage: kit, event: KitEvent);
@@ -165,17 +167,18 @@ pub mod Contract {
         }
 
         fn allow(
-            ref self: ContractState,
-            recipient: ContractAddress,
-            kit_id: u32,
-            voucher_key: felt252,
+            ref self: ContractState, recipient: ContractAddress, kit_id: u32, voucher_key: felt252,
         ) {
             let world = self.world_storage();
             self.kit.allow(world, recipient, kit_id, voucher_key);
         }
 
         fn quote(
-            self: @ContractState, kit_id: u32, quantity: u32, has_referrer: bool, client_percentage: u8,
+            self: @ContractState,
+            kit_id: u32,
+            quantity: u32,
+            has_referrer: bool,
+            client_percentage: u8,
         ) -> KitQuote {
             let world = self.world_storage();
             self.kit.quote(world, kit_id, quantity, has_referrer, client_percentage)
@@ -201,7 +204,15 @@ pub mod Contract {
             self
                 .kit
                 .issue(
-                    world, recipient, kit_id, quantity, referrer, referrer_group, client, client_percentage, voucher_key,
+                    world,
+                    recipient,
+                    kit_id,
+                    quantity,
+                    referrer,
+                    referrer_group,
+                    client,
+                    client_percentage,
+                    voucher_key,
                 );
         }
     }

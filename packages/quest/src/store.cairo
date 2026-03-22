@@ -96,11 +96,7 @@ pub impl StoreImpl of StoreTrait {
 
     #[inline]
     fn complete(
-        mut self: Store,
-        player_id: felt252,
-        quest_id: felt252,
-        interval_id: u64,
-        time: u64,
+        mut self: Store, player_id: felt252, quest_id: felt252, interval_id: u64, time: u64,
     ) {
         // [Event] Emit quest completed
         let event: QuestCompleted = CompletedTrait::new(player_id, quest_id, interval_id, time);
@@ -108,26 +104,14 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline]
-    fn unlock(
-        mut self: Store,
-        player_id: felt252,
-        quest_id: felt252,
-        interval_id: u64,
-        time: u64,
-    ) {
+    fn unlock(mut self: Store, player_id: felt252, quest_id: felt252, interval_id: u64, time: u64) {
         // [Event] Emit quest completed
         let event: QuestUnlocked = UnlockedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);
     }
 
     #[inline]
-    fn claim(
-        mut self: Store,
-        player_id: felt252,
-        quest_id: felt252,
-        interval_id: u64,
-        time: u64,
-    ) {
+    fn claim(mut self: Store, player_id: felt252, quest_id: felt252, interval_id: u64, time: u64) {
         // [Event] Emit quest claim
         let event: QuestClaimed = ClaimedTrait::new(player_id, quest_id, interval_id, time);
         self.world.emit_event(@event);

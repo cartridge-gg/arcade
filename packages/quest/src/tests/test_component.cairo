@@ -22,7 +22,9 @@ fn test_questable_create() {
     let (world, systems) = spawn();
     let store = StoreTrait::new(world);
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.quester.create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     let definition = store.get_definition(QUEST_ID);
     definition.assert_does_exist();
@@ -34,7 +36,9 @@ fn test_questable_progress_and_complete() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.quester.create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, COUNT, true);
@@ -72,7 +76,9 @@ fn test_questable_progress_after_end_ignored() {
     let player_id: felt252 = PLAYER().into();
     let end: u64 = 48 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.quester.create(QUEST_ID, REWARDER(), 0, end, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create(QUEST_ID, REWARDER(), 0, end, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(end + 1);
     systems.quester.progress(player_id, TASK_ID, COUNT, true);
@@ -120,7 +126,9 @@ fn test_questable_claim() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.quester.create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -139,7 +147,9 @@ fn test_questable_is_completed() {
     let (_, systems) = spawn();
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.quester.create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     // [Assert] Not completed yet
     assert!(!systems.quester.is_completed(player_id, QUEST_ID, 0));
@@ -158,9 +168,13 @@ fn test_questable_are_completed() {
     let player_id: felt252 = PLAYER().into();
 
     let tasks_a = array![TaskTrait::new('TASK_A', TOTAL, "Task A")].span();
-    systems.quester.create('QUEST_A', REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create('QUEST_A', REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
     let tasks_b = array![TaskTrait::new('TASK_B', TOTAL, "Task B")].span();
-    systems.quester.create('QUEST_B', REWARDER(), 0, 0, 0, 0, tasks_b, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create('QUEST_B', REWARDER(), 0, 0, 0, 0, tasks_b, array![].span(), METADATA(), true);
 
     // [Assert] Neither completed
     assert!(!systems.quester.are_completed(player_id, array!['QUEST_A', 'QUEST_B'], 0));
@@ -180,7 +194,9 @@ fn test_questable_on_completion_hook() {
     let (_, systems) = spawn();
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.quester.create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems
+        .quester
+        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -197,18 +213,7 @@ fn test_questable_conditions() {
     let tasks_a = array![TaskTrait::new(TASK_A_ID, TOTAL, "Task A")].span();
     systems
         .quester
-        .create(
-            QUEST_A_ID,
-            REWARDER(),
-            0,
-            0,
-            0,
-            0,
-            tasks_a,
-            array![].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_A_ID, REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
 
     let tasks_b = array![TaskTrait::new(TASK_B_ID, TOTAL, "Task B")].span();
     systems

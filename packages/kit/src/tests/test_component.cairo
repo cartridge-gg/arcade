@@ -5,7 +5,6 @@ use kit::tests::setup::setup::{CREATOR, METADATA, PAYMENT_TOKEN, PLAYER, Systems
 use starknet::testing::{set_block_timestamp, set_contract_address};
 
 const VOUCHER_KEY: felt252 = 'VOUCHER_KEY';
-
 use starknet::ContractAddress;
 
 fn ZERO() -> ContractAddress {
