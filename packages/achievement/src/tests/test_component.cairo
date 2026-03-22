@@ -212,6 +212,42 @@ fn test_achievable_are_completed() {
     assert!(systems.contract.achievements_completed(player_id, array!['ACH_A', 'ACH_B']));
 }
 
+// Tests - Time limited with delay (start+end combo)
+
+#[test]
+fn test_achievable_time_limited_with_delay() {
+    let (world, systems) = spawn();
+    let store = StoreTrait::new(world);
+    let player_id: felt252 = PLAYER().into();
+    let start: u64 = 4 * ONE_WEEK;
+    let end: u64 = 48 * ONE_WEEK;
+    let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
+    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), start, end, tasks, METADATA(), true);
+
+    // [Progress] Before start — ignored
+    set_block_timestamp(start - 1);
+    systems.contract.progress(player_id, TASK_ID, COUNT, true);
+    let advancement = store.get_advancement(player_id, ACHIEVEMENT_ID, TASK_ID);
+    assert_eq!(advancement.count, 0);
+
+    // [Progress] At start — accepted
+    set_block_timestamp(start);
+    systems.contract.progress(player_id, TASK_ID, COUNT, true);
+    let advancement = store.get_advancement(player_id, ACHIEVEMENT_ID, TASK_ID);
+    assert_eq!(advancement.count, COUNT);
+
+    // [Progress] Complete within window
+    systems.contract.progress(player_id, TASK_ID, COUNT, true);
+    let completion = store.get_completion(player_id, ACHIEVEMENT_ID);
+    assert_eq!(completion.is_completed(), true);
+
+    // [Progress] After end — no effect
+    set_block_timestamp(end + 1);
+    systems.contract.progress(player_id, TASK_ID, COUNT, true);
+    let completion = store.get_completion(player_id, ACHIEVEMENT_ID);
+    assert_eq!(completion.is_completed(), true);
+}
+
 // Tests - Hooks
 
 #[test]
