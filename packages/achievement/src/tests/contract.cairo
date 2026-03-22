@@ -2,7 +2,6 @@
 
 use achievement::types::metadata::AchievementMetadata;
 use achievement::types::task::Task;
-use starknet::ContractAddress;
 
 pub fn NAMESPACE() -> ByteArray {
     "NAMESPACE"
@@ -23,7 +22,6 @@ pub trait ContractTrait<TContractState> {
     fn create(
         ref self: TContractState,
         id: felt252,
-        rewarder: ContractAddress,
         start: u64,
         end: u64,
         tasks: Span<Task>,
@@ -43,7 +41,6 @@ pub mod Contract {
     // Imports
 
     use dojo::world::WorldStorage;
-    use starknet::ContractAddress;
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
     use crate::component::Component;
     use crate::component::Component::AchievementTrait;
@@ -110,16 +107,13 @@ pub mod Contract {
         fn create(
             ref self: ContractState,
             id: felt252,
-            rewarder: ContractAddress,
             start: u64,
             end: u64,
             tasks: Span<Task>,
             metadata: AchievementMetadata,
             to_store: bool,
         ) {
-            self
-                .achievable
-                .create(self.world_storage(), id, rewarder, start, end, tasks, metadata, to_store);
+            self.achievable.create(self.world_storage(), id, start, end, tasks, metadata, to_store);
         }
 
         fn progress(

@@ -1,6 +1,5 @@
 use quest::types::metadata::QuestMetadata;
 use quest::types::task::Task;
-use starknet::ContractAddress;
 
 pub fn NAMESPACE() -> ByteArray {
     "NAMESPACE"
@@ -21,7 +20,6 @@ pub trait ContractTrait<TContractState> {
     fn create(
         ref self: TContractState,
         id: felt252,
-        rewarder: ContractAddress,
         start: u64,
         end: u64,
         duration: u64,
@@ -42,7 +40,6 @@ pub trait ContractTrait<TContractState> {
 #[dojo::contract]
 pub mod Contract {
     use dojo::world::WorldStorage;
-    use starknet::ContractAddress;
     use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
     use crate::component::Component;
     use crate::component::Component::QuestTrait;
@@ -122,7 +119,6 @@ pub mod Contract {
         fn create(
             ref self: ContractState,
             id: felt252,
-            rewarder: ContractAddress,
             start: u64,
             end: u64,
             duration: u64,
@@ -138,7 +134,6 @@ pub mod Contract {
                 .create(
                     world,
                     id,
-                    rewarder,
                     start,
                     end,
                     duration,

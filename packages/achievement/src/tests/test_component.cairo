@@ -2,7 +2,7 @@ use achievement::models::completion::CompletionTrait;
 use achievement::models::definition::DefinitionAssert;
 use achievement::store::StoreTrait;
 use achievement::tests::contract::ContractTraitDispatcherTrait;
-use achievement::tests::setup::setup::{PLAYER, REWARDER, spawn};
+use achievement::tests::setup::setup::{PLAYER, spawn};
 use achievement::types::metadata::{AchievementMetadata, MetadataTrait};
 use achievement::types::task::TaskTrait;
 use starknet::testing::set_block_timestamp;
@@ -26,7 +26,7 @@ fn test_achievable_create() {
     let (world, systems) = spawn();
     let store = StoreTrait::new(world);
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, 0, tasks, METADATA(), true);
     let definition = store.get_definition(ACHIEVEMENT_ID);
     definition.assert_does_exist();
 }
@@ -37,7 +37,7 @@ fn test_achievable_create_time_limited() {
     let store = StoreTrait::new(world);
     let end: u64 = 48 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, end, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, end, tasks, METADATA(), true);
     let definition = store.get_definition(ACHIEVEMENT_ID);
     definition.assert_does_exist();
     assert_eq!(definition.end, end);
@@ -49,7 +49,7 @@ fn test_achievable_create_delayed() {
     let store = StoreTrait::new(world);
     let start: u64 = 4 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), start, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, start, 0, tasks, METADATA(), true);
     let definition = store.get_definition(ACHIEVEMENT_ID);
     definition.assert_does_exist();
     assert_eq!(definition.start, start);
@@ -63,7 +63,7 @@ fn test_achievable_progress_and_complete() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, 0, tasks, METADATA(), true);
 
     // [Progress] First half
     set_block_timestamp(1000);
@@ -84,7 +84,7 @@ fn test_achievable_progress_before_start_ignored() {
     let player_id: felt252 = PLAYER().into();
     let start: u64 = 4 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), start, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, start, 0, tasks, METADATA(), true);
 
     // [Progress] Before start — ignored
     set_block_timestamp(start - 1);
@@ -106,7 +106,7 @@ fn test_achievable_progress_after_end_ignored() {
     let player_id: felt252 = PLAYER().into();
     let end: u64 = 48 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, end, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, end, tasks, METADATA(), true);
 
     // [Progress] Before end — completes
     set_block_timestamp(1000);
@@ -127,7 +127,7 @@ fn test_achievable_cannot_complete_twice() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, 0, tasks, METADATA(), true);
 
     // [Progress] Complete
     set_block_timestamp(1000);
@@ -151,7 +151,7 @@ fn test_achievable_claim() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, 0, tasks, METADATA(), true);
 
     // [Progress] Complete
     set_block_timestamp(1000);
@@ -176,7 +176,7 @@ fn test_achievable_is_completed() {
     let (_, systems) = spawn();
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, 0, tasks, METADATA(), true);
 
     // [Assert] Not completed yet
     assert!(!systems.contract.achievement_completed(player_id, ACHIEVEMENT_ID));
@@ -195,9 +195,9 @@ fn test_achievable_are_completed() {
     let player_id: felt252 = PLAYER().into();
 
     let tasks_a = array![TaskTrait::new('TASK_A', TOTAL, "Task A")].span();
-    systems.contract.create('ACH_A', REWARDER(), 0, 0, tasks_a, METADATA(), true);
+    systems.contract.create('ACH_A', 0, 0, tasks_a, METADATA(), true);
     let tasks_b = array![TaskTrait::new('TASK_B', TOTAL, "Task B")].span();
-    systems.contract.create('ACH_B', REWARDER(), 0, 0, tasks_b, METADATA(), true);
+    systems.contract.create('ACH_B', 0, 0, tasks_b, METADATA(), true);
 
     // [Assert] Neither completed
     assert!(!systems.contract.achievements_completed(player_id, array!['ACH_A', 'ACH_B']));
@@ -222,7 +222,7 @@ fn test_achievable_time_limited_with_delay() {
     let start: u64 = 4 * ONE_WEEK;
     let end: u64 = 48 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), start, end, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, start, end, tasks, METADATA(), true);
 
     // [Progress] Before start — ignored
     set_block_timestamp(start - 1);
@@ -255,7 +255,7 @@ fn test_achievable_on_completion_hook() {
     let (_, systems) = spawn();
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems.contract.create(ACHIEVEMENT_ID, REWARDER(), 0, 0, tasks, METADATA(), true);
+    systems.contract.create(ACHIEVEMENT_ID, 0, 0, tasks, METADATA(), true);
 
     set_block_timestamp(1000);
     systems.contract.progress(player_id, TASK_ID, TOTAL, true);

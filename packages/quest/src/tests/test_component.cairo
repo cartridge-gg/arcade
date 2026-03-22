@@ -2,7 +2,7 @@ use quest::models::completion::CompletionTrait;
 use quest::models::definition::DefinitionAssert;
 use quest::store::StoreTrait;
 use quest::tests::contract::ContractTraitDispatcherTrait;
-use quest::tests::setup::setup::{METADATA, PLAYER, REWARDER, spawn};
+use quest::tests::setup::setup::{METADATA, PLAYER, spawn};
 use quest::types::task::TaskTrait;
 use starknet::testing::set_block_timestamp;
 
@@ -22,9 +22,7 @@ fn test_questable_create() {
     let (world, systems) = spawn();
     let store = StoreTrait::new(world);
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     let definition = store.get_definition(QUEST_ID);
     definition.assert_does_exist();
@@ -36,9 +34,7 @@ fn test_questable_progress_and_complete() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, COUNT, true);
@@ -57,9 +53,7 @@ fn test_questable_progress_before_start_ignored() {
     let player_id: felt252 = PLAYER().into();
     let start: u64 = 4 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), start, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, start, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(start - 1);
     systems.quester.progress(player_id, TASK_ID, COUNT, true);
@@ -76,9 +70,7 @@ fn test_questable_progress_after_end_ignored() {
     let player_id: felt252 = PLAYER().into();
     let end: u64 = 48 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), 0, end, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, 0, end, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(end + 1);
     systems.quester.progress(player_id, TASK_ID, COUNT, true);
@@ -96,18 +88,7 @@ fn test_questable_recurring() {
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
     systems
         .quester
-        .create(
-            QUEST_ID,
-            REWARDER(),
-            0,
-            0,
-            duration,
-            interval,
-            tasks,
-            array![].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_ID, 0, 0, duration, interval, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -126,9 +107,7 @@ fn test_questable_claim() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -147,9 +126,7 @@ fn test_questable_is_completed() {
     let (_, systems) = spawn();
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     // [Assert] Not completed yet
     assert!(!systems.quester.is_completed(player_id, QUEST_ID, 0));
@@ -168,13 +145,9 @@ fn test_questable_are_completed() {
     let player_id: felt252 = PLAYER().into();
 
     let tasks_a = array![TaskTrait::new('TASK_A', TOTAL, "Task A")].span();
-    systems
-        .quester
-        .create('QUEST_A', REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
+    systems.quester.create('QUEST_A', 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
     let tasks_b = array![TaskTrait::new('TASK_B', TOTAL, "Task B")].span();
-    systems
-        .quester
-        .create('QUEST_B', REWARDER(), 0, 0, 0, 0, tasks_b, array![].span(), METADATA(), true);
+    systems.quester.create('QUEST_B', 0, 0, 0, 0, tasks_b, array![].span(), METADATA(), true);
 
     // [Assert] Neither completed
     assert!(!systems.quester.are_completed(player_id, array!['QUEST_A', 'QUEST_B'], 0));
@@ -194,9 +167,7 @@ fn test_questable_on_completion_hook() {
     let (_, systems) = spawn();
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -211,25 +182,12 @@ fn test_questable_conditions() {
     let player_id: felt252 = PLAYER().into();
 
     let tasks_a = array![TaskTrait::new(TASK_A_ID, TOTAL, "Task A")].span();
-    systems
-        .quester
-        .create(QUEST_A_ID, REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_A_ID, 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
 
     let tasks_b = array![TaskTrait::new(TASK_B_ID, TOTAL, "Task B")].span();
     systems
         .quester
-        .create(
-            QUEST_B_ID,
-            REWARDER(),
-            0,
-            0,
-            0,
-            0,
-            tasks_b,
-            array![QUEST_A_ID].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_B_ID, 0, 0, 0, 0, tasks_b, array![QUEST_A_ID].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_B_ID, COUNT, true);
@@ -257,9 +215,7 @@ fn test_questable_time_limited_with_delay() {
     let start: u64 = 4 * ONE_WEEK;
     let end: u64 = 48 * ONE_WEEK;
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), start, end, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, start, end, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(start - 1);
     systems.quester.progress(player_id, TASK_ID, COUNT, true);
@@ -292,18 +248,7 @@ fn test_questable_recurring_multiple_completions() {
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
     systems
         .quester
-        .create(
-            QUEST_ID,
-            REWARDER(),
-            0,
-            0,
-            duration,
-            interval,
-            tasks,
-            array![].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_ID, 0, 0, duration, interval, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -334,18 +279,7 @@ fn test_questable_recurring_claim_multiple() {
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
     systems
         .quester
-        .create(
-            QUEST_ID,
-            REWARDER(),
-            0,
-            0,
-            duration,
-            interval,
-            tasks,
-            array![].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_ID, 0, 0, duration, interval, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -371,18 +305,7 @@ fn test_questable_recurring_with_delay() {
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
     systems
         .quester
-        .create(
-            QUEST_ID,
-            REWARDER(),
-            start,
-            0,
-            duration,
-            interval,
-            tasks,
-            array![].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_ID, start, 0, duration, interval, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(start - 1);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -411,18 +334,7 @@ fn test_questable_recurring_time_limited() {
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
     systems
         .quester
-        .create(
-            QUEST_ID,
-            REWARDER(),
-            0,
-            end,
-            duration,
-            interval,
-            tasks,
-            array![].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_ID, 0, end, duration, interval, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -452,18 +364,7 @@ fn test_questable_recurring_time_limited_with_delay() {
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
     systems
         .quester
-        .create(
-            QUEST_ID,
-            REWARDER(),
-            start,
-            end,
-            duration,
-            interval,
-            tasks,
-            array![].span(),
-            METADATA(),
-            true,
-        );
+        .create(QUEST_ID, start, end, duration, interval, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(start - 1);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -492,9 +393,7 @@ fn test_questable_cannot_complete_twice() {
     let store = StoreTrait::new(world);
     let player_id: felt252 = PLAYER().into();
     let tasks = array![TaskTrait::new(TASK_ID, TOTAL, "Description")].span();
-    systems
-        .quester
-        .create(QUEST_ID, REWARDER(), 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
+    systems.quester.create(QUEST_ID, 0, 0, 0, 0, tasks, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, TASK_ID, TOTAL, true);
@@ -515,19 +414,13 @@ fn test_questable_conditions_linear_chain() {
     let player_id: felt252 = PLAYER().into();
 
     let tasks_a = array![TaskTrait::new('TASK-A1', TOTAL, "Task A")].span();
-    systems
-        .quester
-        .create('A1', REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
+    systems.quester.create('A1', 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
 
     let tasks_b = array![TaskTrait::new('TASK-B1', TOTAL, "Task B")].span();
-    systems
-        .quester
-        .create('B1', REWARDER(), 0, 0, 0, 0, tasks_b, array!['A1'].span(), METADATA(), true);
+    systems.quester.create('B1', 0, 0, 0, 0, tasks_b, array!['A1'].span(), METADATA(), true);
 
     let tasks_c = array![TaskTrait::new('TASK-C1', TOTAL, "Task C")].span();
-    systems
-        .quester
-        .create('C1', REWARDER(), 0, 0, 0, 0, tasks_c, array!['B1'].span(), METADATA(), true);
+    systems.quester.create('C1', 0, 0, 0, 0, tasks_c, array!['B1'].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, 'TASK-B1', COUNT, true);
@@ -557,24 +450,16 @@ fn test_questable_conditions_diamond() {
     let player_id: felt252 = PLAYER().into();
 
     let tasks_a = array![TaskTrait::new('TASK-A2', TOTAL, "Task A")].span();
-    systems
-        .quester
-        .create('A2', REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
+    systems.quester.create('A2', 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
 
     let tasks_b = array![TaskTrait::new('TASK-B2', TOTAL, "Task B")].span();
-    systems
-        .quester
-        .create('B2', REWARDER(), 0, 0, 0, 0, tasks_b, array!['A2'].span(), METADATA(), true);
+    systems.quester.create('B2', 0, 0, 0, 0, tasks_b, array!['A2'].span(), METADATA(), true);
 
     let tasks_c = array![TaskTrait::new('TASK-C2', TOTAL, "Task C")].span();
-    systems
-        .quester
-        .create('C2', REWARDER(), 0, 0, 0, 0, tasks_c, array!['A2'].span(), METADATA(), true);
+    systems.quester.create('C2', 0, 0, 0, 0, tasks_c, array!['A2'].span(), METADATA(), true);
 
     let tasks_d = array![TaskTrait::new('TASK-D2', TOTAL, "Task D")].span();
-    systems
-        .quester
-        .create('D2', REWARDER(), 0, 0, 0, 0, tasks_d, array!['B2', 'C2'].span(), METADATA(), true);
+    systems.quester.create('D2', 0, 0, 0, 0, tasks_d, array!['B2', 'C2'].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, 'TASK-A2', TOTAL, true);
@@ -604,14 +489,10 @@ fn test_questable_conditions_independent() {
     let player_id: felt252 = PLAYER().into();
 
     let tasks_a = array![TaskTrait::new('TASK-A3', TOTAL, "Task A")].span();
-    systems
-        .quester
-        .create('A3', REWARDER(), 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
+    systems.quester.create('A3', 0, 0, 0, 0, tasks_a, array![].span(), METADATA(), true);
 
     let tasks_b = array![TaskTrait::new('TASK-B3', TOTAL, "Task B")].span();
-    systems
-        .quester
-        .create('B3', REWARDER(), 0, 0, 0, 0, tasks_b, array![].span(), METADATA(), true);
+    systems.quester.create('B3', 0, 0, 0, 0, tasks_b, array![].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, 'TASK-A3', TOTAL, true);
@@ -628,31 +509,21 @@ fn test_questable_conditions_tree() {
     let player_id: felt252 = PLAYER().into();
 
     let task_root = array![TaskTrait::new('TASK-ROOT', TOTAL, "Task Root")].span();
-    systems
-        .quester
-        .create('ROOT', REWARDER(), 0, 0, 0, 0, task_root, array![].span(), METADATA(), true);
+    systems.quester.create('ROOT', 0, 0, 0, 0, task_root, array![].span(), METADATA(), true);
 
     let task_left = array![TaskTrait::new('TASK-LEFT', TOTAL, "Task Left")].span();
-    systems
-        .quester
-        .create('LEFT', REWARDER(), 0, 0, 0, 0, task_left, array!['ROOT'].span(), METADATA(), true);
+    systems.quester.create('LEFT', 0, 0, 0, 0, task_left, array!['ROOT'].span(), METADATA(), true);
 
     let task_right = array![TaskTrait::new('TASK-RIGHT', TOTAL, "Task Right")].span();
     systems
         .quester
-        .create(
-            'RIGHT', REWARDER(), 0, 0, 0, 0, task_right, array!['ROOT'].span(), METADATA(), true,
-        );
+        .create('RIGHT', 0, 0, 0, 0, task_right, array!['ROOT'].span(), METADATA(), true);
 
     let task_ll = array![TaskTrait::new('TASK-LL', TOTAL, "Task LL")].span();
-    systems
-        .quester
-        .create('LL', REWARDER(), 0, 0, 0, 0, task_ll, array!['LEFT'].span(), METADATA(), true);
+    systems.quester.create('LL', 0, 0, 0, 0, task_ll, array!['LEFT'].span(), METADATA(), true);
 
     let task_lr = array![TaskTrait::new('TASK-LR', TOTAL, "Task LR")].span();
-    systems
-        .quester
-        .create('LR', REWARDER(), 0, 0, 0, 0, task_lr, array!['LEFT'].span(), METADATA(), true);
+    systems.quester.create('LR', 0, 0, 0, 0, task_lr, array!['LEFT'].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, 'TASK-ROOT', TOTAL, true);
@@ -686,15 +557,13 @@ fn test_questable_conditions_convergent() {
     let player_id: felt252 = PLAYER().into();
 
     let task_a = array![TaskTrait::new('TASK-A4', TOTAL, "Task A")].span();
-    systems.quester.create('A4', REWARDER(), 0, 0, 0, 0, task_a, array![].span(), METADATA(), true);
+    systems.quester.create('A4', 0, 0, 0, 0, task_a, array![].span(), METADATA(), true);
 
     let task_b = array![TaskTrait::new('TASK-B4', TOTAL, "Task B")].span();
-    systems.quester.create('B4', REWARDER(), 0, 0, 0, 0, task_b, array![].span(), METADATA(), true);
+    systems.quester.create('B4', 0, 0, 0, 0, task_b, array![].span(), METADATA(), true);
 
     let task_c = array![TaskTrait::new('TASK-C4', TOTAL, "Task C")].span();
-    systems
-        .quester
-        .create('C4', REWARDER(), 0, 0, 0, 0, task_c, array!['A4', 'B4'].span(), METADATA(), true);
+    systems.quester.create('C4', 0, 0, 0, 0, task_c, array!['A4', 'B4'].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, 'TASK-A4', TOTAL, true);
@@ -717,15 +586,13 @@ fn test_questable_conditions_multiple_parents() {
     let player_id: felt252 = PLAYER().into();
 
     let task_a = array![TaskTrait::new('TASK-A5', TOTAL, "Task A")].span();
-    systems.quester.create('A5', REWARDER(), 0, 0, 0, 0, task_a, array![].span(), METADATA(), true);
+    systems.quester.create('A5', 0, 0, 0, 0, task_a, array![].span(), METADATA(), true);
 
     let task_b = array![TaskTrait::new('TASK-B5', TOTAL, "Task B")].span();
-    systems.quester.create('B5', REWARDER(), 0, 0, 0, 0, task_b, array![].span(), METADATA(), true);
+    systems.quester.create('B5', 0, 0, 0, 0, task_b, array![].span(), METADATA(), true);
 
     let task_c = array![TaskTrait::new('TASK-C5', TOTAL, "Task C")].span();
-    systems
-        .quester
-        .create('C5', REWARDER(), 0, 0, 0, 0, task_c, array!['A5', 'B5'].span(), METADATA(), true);
+    systems.quester.create('C5', 0, 0, 0, 0, task_c, array!['A5', 'B5'].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, 'TASK-A5', TOTAL, true);
@@ -748,22 +615,16 @@ fn test_questable_conditions_single_parent_multiple_children() {
     let player_id: felt252 = PLAYER().into();
 
     let task_a = array![TaskTrait::new('TASK-A6', TOTAL, "Task A")].span();
-    systems.quester.create('A6', REWARDER(), 0, 0, 0, 0, task_a, array![].span(), METADATA(), true);
+    systems.quester.create('A6', 0, 0, 0, 0, task_a, array![].span(), METADATA(), true);
 
     let task_b = array![TaskTrait::new('TASK-B6', TOTAL, "Task B")].span();
-    systems
-        .quester
-        .create('B6', REWARDER(), 0, 0, 0, 0, task_b, array!['A6'].span(), METADATA(), true);
+    systems.quester.create('B6', 0, 0, 0, 0, task_b, array!['A6'].span(), METADATA(), true);
 
     let task_c = array![TaskTrait::new('TASK-C6', TOTAL, "Task C")].span();
-    systems
-        .quester
-        .create('C6', REWARDER(), 0, 0, 0, 0, task_c, array!['A6'].span(), METADATA(), true);
+    systems.quester.create('C6', 0, 0, 0, 0, task_c, array!['A6'].span(), METADATA(), true);
 
     let task_d = array![TaskTrait::new('TASK-D6', TOTAL, "Task D")].span();
-    systems
-        .quester
-        .create('D6', REWARDER(), 0, 0, 0, 0, task_d, array!['A6'].span(), METADATA(), true);
+    systems.quester.create('D6', 0, 0, 0, 0, task_d, array!['A6'].span(), METADATA(), true);
 
     set_block_timestamp(1000);
     systems.quester.progress(player_id, 'TASK-A6', TOTAL, true);

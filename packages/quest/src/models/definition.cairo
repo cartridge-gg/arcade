@@ -1,4 +1,3 @@
-use starknet::ContractAddress;
 pub use crate::models::index::QuestDefinition;
 use crate::types::task::Task;
 
@@ -19,7 +18,6 @@ pub impl DefinitionImpl of DefinitionTrait {
     #[inline]
     fn new(
         id: felt252,
-        rewarder: ContractAddress,
         start: u64,
         end: u64,
         duration: u64,
@@ -29,14 +27,12 @@ pub impl DefinitionImpl of DefinitionTrait {
     ) -> QuestDefinition {
         // [Check] Inputs
         DefinitionAssert::assert_valid_id(id);
-        DefinitionAssert::assert_valid_verifier(rewarder);
         DefinitionAssert::assert_valid_tasks(tasks);
         DefinitionAssert::assert_valid_duration(start, end);
         DefinitionAssert::assert_valid_interval(duration, interval);
         // [Return] QuestDefinition
         QuestDefinition {
             id: id,
-            rewarder: rewarder,
             start: start,
             end: end,
             duration: duration,
@@ -49,14 +45,12 @@ pub impl DefinitionImpl of DefinitionTrait {
     #[inline]
     fn update(
         ref self: QuestDefinition,
-        rewarder: Option<ContractAddress>,
         start: Option<u64>,
         end: Option<u64>,
         duration: Option<u64>,
         interval: Option<u64>,
         tasks: Option<Span<Task>>,
     ) {
-        self.rewarder = rewarder.unwrap_or(self.rewarder);
         self.start = start.unwrap_or(self.start);
         self.end = end.unwrap_or(self.end);
         self.duration = duration.unwrap_or(self.duration);
@@ -66,7 +60,6 @@ pub impl DefinitionImpl of DefinitionTrait {
 
     #[inline]
     fn nullify(ref self: QuestDefinition) {
-        self.rewarder = 0.try_into().unwrap();
         self.start = 0;
         self.end = 0;
         self.duration = 0;
@@ -103,11 +96,6 @@ pub impl DefinitionAssert of AssertTrait {
     #[inline]
     fn assert_valid_id(id: felt252) {
         assert(id != 0, errors::DEFINITION_INVALID_ID);
-    }
-
-    #[inline]
-    fn assert_valid_verifier(verifier: ContractAddress) {
-        assert(verifier != 0.try_into().unwrap(), errors::DEFINITION_INVALID_VERIFIER);
     }
 
     #[inline]
@@ -170,10 +158,9 @@ mod tests {
     #[test]
     fn test_quest_definition_new() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, REWARDER(), START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
+            QUEST_ID, START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
         );
         assert_eq!(quest.id, QUEST_ID);
-        assert_eq!(quest.rewarder, REWARDER());
         assert_eq!(quest.start, START);
         assert_eq!(quest.end, END);
         assert_eq!(quest.duration, DURATION);
@@ -184,39 +171,27 @@ mod tests {
     #[test]
     #[should_panic(expected: ('Quest: invalid id',))]
     fn test_quest_definition_new_invalid_id() {
-        DefinitionTrait::new(0, REWARDER(), START, END, DURATION, INTERVAL, TASKS(), CONDITIONS());
-    }
-
-    #[test]
-    #[should_panic(expected: ('Quest: invalid verifier',))]
-    fn test_quest_definition_new_invalid_verifier() {
-        DefinitionTrait::new(
-            QUEST_ID, 0.try_into().unwrap(), START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
-        );
+        DefinitionTrait::new(0, START, END, DURATION, INTERVAL, TASKS(), CONDITIONS());
     }
 
     #[test]
     #[should_panic(expected: ('Quest: invalid tasks',))]
     fn test_quest_definition_new_invalid_tasks() {
         DefinitionTrait::new(
-            QUEST_ID, REWARDER(), START, END, DURATION, INTERVAL, array![].span(), CONDITIONS(),
+            QUEST_ID, START, END, DURATION, INTERVAL, array![].span(), CONDITIONS(),
         );
     }
 
     #[test]
     #[should_panic(expected: ('Quest: invalid duration',))]
     fn test_quest_definition_new_invalid_duration() {
-        DefinitionTrait::new(
-            QUEST_ID, REWARDER(), START, 1, DURATION, INTERVAL, TASKS(), CONDITIONS(),
-        );
+        DefinitionTrait::new(QUEST_ID, START, 1, DURATION, INTERVAL, TASKS(), CONDITIONS());
     }
 
     #[test]
     #[should_panic(expected: ('Quest: invalid interval',))]
     fn test_quest_compute_interval_id_no_duration() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, 0, INTERVAL, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, START, END, 0, INTERVAL, TASKS(), CONDITIONS());
         assert_eq!(quest.is_active(0), false);
         assert_eq!(quest.is_active(START), false);
         assert_eq!(quest.is_active(START + DURATION - 1), false);
@@ -229,9 +204,7 @@ mod tests {
     // Case 1: Permanent quest (start=0, end=0, duration=0, interval=0)
     #[test]
     fn test_permanent_is_active() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, 0, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, 0, 0, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
         assert_eq!(quest.is_active(1000000), true, "Quest should be active at time 1000000");
         assert_eq!(
@@ -241,9 +214,7 @@ mod tests {
 
     #[test]
     fn test_permanent_compute_interval_id() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, 0, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, 0, 0, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
         assert_eq!(
             quest.compute_interval_id(1000000), 0, "Interval ID should be 0 at time 1000000",
@@ -258,9 +229,7 @@ mod tests {
     // Case 2: Delayed Permanent quest (start>0, end=0, duration=0, interval=0)
     #[test]
     fn test_delayed_permanent_is_active() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, 0, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, START, 0, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
         assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
         assert_eq!(quest.is_active(START), true, "Quest should be active at start time");
@@ -275,9 +244,7 @@ mod tests {
 
     #[test]
     fn test_delayed_permanent_compute_interval_id() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, 0, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, START, 0, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
         assert_eq!(
             quest.compute_interval_id(START + 1000000), 0, "Interval ID should be 0 after start",
@@ -287,9 +254,7 @@ mod tests {
     // Case 3: Time-Limited quest (start=0, end>0, duration=0, interval=0)
     #[test]
     fn test_time_limited_is_active() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, END, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, 0, END, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
         assert_eq!(quest.is_active(END - 1), true, "Quest should be active just before end");
         assert_eq!(quest.is_active(END), false, "Quest should be inactive at end time");
@@ -299,9 +264,7 @@ mod tests {
 
     #[test]
     fn test_time_limited_compute_interval_id() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, END, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, 0, END, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
         assert_eq!(quest.compute_interval_id(END - 1), 0, "Interval ID should be 0 before end");
     }
@@ -309,9 +272,7 @@ mod tests {
     // Case 4: Time-Limited with Delay quest (start>0, end>0, duration=0, interval=0)
     #[test]
     fn test_time_limited_with_delay_is_active() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, START, END, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
         assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
         assert_eq!(quest.is_active(START), true, "Quest should be active at start time");
@@ -324,9 +285,7 @@ mod tests {
 
     #[test]
     fn test_time_limited_with_delay_compute_interval_id() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, 0, 0, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, START, END, 0, 0, TASKS(), CONDITIONS());
         assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
         assert_eq!(quest.compute_interval_id(END - 1), 0, "Interval ID should be 0 before end");
     }
@@ -334,9 +293,7 @@ mod tests {
     // Case 5: Recurring Permanent quest (start=0, end=0, duration>0, interval>0)
     #[test]
     fn test_recurring_permanent_is_active() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, 0, 0, DURATION, INTERVAL, TASKS(), CONDITIONS());
         assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
         assert_eq!(
             quest.is_active(DURATION - 1), true, "Quest should be active just before duration ends",
@@ -365,9 +322,7 @@ mod tests {
 
     #[test]
     fn test_recurring_permanent_compute_interval_id() {
-        let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(),
-        );
+        let quest = DefinitionTrait::new(QUEST_ID, 0, 0, DURATION, INTERVAL, TASKS(), CONDITIONS());
         assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
         assert_eq!(
             quest.compute_interval_id(DURATION - 1),
@@ -395,7 +350,7 @@ mod tests {
     #[test]
     fn test_recurring_permanent_with_delay_is_active() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(),
+            QUEST_ID, START, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(),
         );
         assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
         assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
@@ -430,7 +385,7 @@ mod tests {
     #[test]
     fn test_recurring_permanent_with_delay_compute_interval_id() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(),
+            QUEST_ID, START, 0, DURATION, INTERVAL, TASKS(), CONDITIONS(),
         );
         assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
         assert_eq!(
@@ -459,7 +414,7 @@ mod tests {
     #[test]
     fn test_recurring_time_limited_is_active() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
+            QUEST_ID, 0, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
         );
         assert_eq!(quest.is_active(0), true, "Quest should be active at time 0");
         assert_eq!(
@@ -479,7 +434,7 @@ mod tests {
     #[test]
     fn test_recurring_time_limited_compute_interval_id() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), 0, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
+            QUEST_ID, 0, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
         );
         assert_eq!(quest.compute_interval_id(0), 0, "Interval ID should be 0 at time 0");
         assert_eq!(
@@ -503,7 +458,7 @@ mod tests {
     #[test]
     fn test_recurring_time_limited_with_delay_is_active() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
+            QUEST_ID, START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
         );
         assert_eq!(quest.is_active(0), false, "Quest should be inactive before start");
         assert_eq!(quest.is_active(START - 1), false, "Quest should be inactive just before start");
@@ -535,7 +490,7 @@ mod tests {
     #[test]
     fn test_recurring_time_limited_with_delay_compute_interval_id() {
         let quest = DefinitionTrait::new(
-            QUEST_ID, IMPLEMENTATION(), START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
+            QUEST_ID, START, END, DURATION, INTERVAL, TASKS(), CONDITIONS(),
         );
         assert_eq!(quest.compute_interval_id(START), 0, "Interval ID should be 0 at start");
         assert_eq!(

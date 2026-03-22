@@ -14,10 +14,6 @@ pub mod setup {
         'PLAYER'.try_into().unwrap()
     }
 
-    pub fn REWARDER() -> ContractAddress {
-        'REWARDER'.try_into().unwrap()
-    }
-
     pub fn METADATA() -> QuestMetadata {
         QuestMetadataTrait::new(
             "NAME", "DESCRIPTION", "ICON", 'REGISTRY'.try_into().unwrap(), array![].span(),

@@ -4,7 +4,6 @@ pub mod Component {
 
     use dojo::event::EventStorage;
     use dojo::world::WorldStorage;
-    use starknet::ContractAddress;
     use crate::events::creation::{CreationTrait, QuestCreation};
     use crate::events::progression::{ProgressTrait, QuestProgression};
     use crate::models::advancement::AdvancementTrait;
@@ -117,7 +116,6 @@ pub mod Component {
         /// * `self`: The component state.
         /// * `world`: The world storage.
         /// * `id`: The quest identifier, it should be unique.
-        /// * `rewarder`: The quest rewarder contract address used to reward the player.
         /// * `hidden`: Speicify if you want the quest to be hidden in the controller UI.
         /// * `index`: The quest index which the page of the quest group page.
         /// * `start`: The quest start timestamp, `0` for everlasting quests.
@@ -135,7 +133,6 @@ pub mod Component {
             self: @ComponentState<TContractState>,
             mut world: WorldStorage,
             id: felt252,
-            rewarder: ContractAddress,
             start: u64,
             end: u64,
             duration: u64,
@@ -148,7 +145,6 @@ pub mod Component {
             // [Model] Create quest definition
             let definition = DefinitionTrait::new(
                 id: id,
-                rewarder: rewarder,
                 start: start,
                 end: end,
                 duration: duration,

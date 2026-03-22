@@ -17,10 +17,6 @@ pub mod setup {
         'PLAYER'.try_into().unwrap()
     }
 
-    pub fn REWARDER() -> ContractAddress {
-        'REWARDER'.try_into().unwrap()
-    }
-
     #[derive(Copy, Drop)]
     pub struct Systems {
         pub contract: ContractTraitDispatcher,

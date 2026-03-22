@@ -7,7 +7,6 @@ pub mod Component {
     use achievement::types::task::Task;
     use dojo::event::EventStorage;
     use dojo::world::WorldStorage;
-    use starknet::ContractAddress;
     use crate::events::creation::{CreationTrait, TrophyCreation};
     use crate::events::index::TrophyProgression;
     use crate::events::progress::ProgressTrait;
@@ -83,7 +82,6 @@ pub mod Component {
         /// * `self`: The component state.
         /// * `world`: The world storage.
         /// * `id`: The achievement identifier, it should be unique.
-        /// * `rewarder`: The achievement rewarder contract address used to reward the player.
         /// * `start`: The achievement start timestamp, `0` for everlasting achievements.
         /// * `end`: The achievement end timestamp, `0` for everlasting achievements.
         /// * `tasks`: The achievement tasks (see also `Task` type).
@@ -94,7 +92,6 @@ pub mod Component {
             self: @ComponentState<TContractState>,
             mut world: WorldStorage,
             id: felt252,
-            rewarder: ContractAddress,
             start: u64,
             end: u64,
             mut tasks: Span<Task>,
@@ -126,7 +123,7 @@ pub mod Component {
             // [Model] Create achievement definition
             let store: Store = StoreTrait::new(world);
             let definition: AchievementDefinition = DefinitionTrait::new(
-                id: id, rewarder: rewarder, start: start, end: end, tasks: tasks,
+                id: id, start: start, end: end, tasks: tasks,
             );
             store.set_definition(@definition);
 
