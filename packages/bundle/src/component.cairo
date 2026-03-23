@@ -5,14 +5,14 @@ pub mod Component {
     use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
     use crate::constants::MAX_REFERRAL_FEE;
+    use crate::models::bundle::{BundleAssert, BundleTrait as BundleModelTrait, errors};
     use crate::models::group::BundleGroupTrait;
     use crate::models::issuance::{BundleIssuanceAssert, BundleIssuanceTrait};
-    use crate::models::bundle::{BundleAssert, BundleTrait as BundleModelTrait, errors};
     use crate::models::referral::BundleReferralTrait;
     use crate::models::voucher::{BundleVoucherAssert, BundleVoucherTrait};
     use crate::store::{
-        GroupStoreTrait, IssuanceStoreTrait, BundleStoreTrait, ReferralStoreTrait, Store, StoreTrait,
-        VoucherStoreTrait,
+        BundleStoreTrait, GroupStoreTrait, IssuanceStoreTrait, ReferralStoreTrait, Store,
+        StoreTrait, VoucherStoreTrait,
     };
 
     // Types
@@ -86,7 +86,7 @@ pub mod Component {
             // [Check] Referral percentage is valid
             assert(referral_percentage <= MAX_REFERRAL_FEE, 'Bundle: referral too high');
 
-            // [Effect] Create and store kit
+            // [Effect] Create and store bundle
             let bundle_id = world.dispatcher.uuid();
             let time = get_block_timestamp();
             let bundle = BundleModelTrait::new(
@@ -122,14 +122,14 @@ pub mod Component {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
-            // [Check] Kit exists
+            // [Check] Bundle exists
             let mut bundle = store.get_bundle(bundle_id);
             bundle.assert_does_exist();
 
             // [Check] Referral percentage is valid
             assert(referral_percentage <= MAX_REFERRAL_FEE, 'Bundle: referral too high');
 
-            // [Effect] Update kit
+            // [Effect] Update bundle
             bundle
                 .update(
                     referral_percentage,
@@ -155,7 +155,7 @@ pub mod Component {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
-            // [Check] Kit exists
+            // [Check] Bundle exists
             let mut bundle = store.get_bundle(bundle_id);
             bundle.assert_does_exist();
 
@@ -179,7 +179,7 @@ pub mod Component {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
-            // [Check] Kit exists
+            // [Check] Bundle exists
             let bundle = store.get_bundle(bundle_id);
             bundle.assert_does_exist();
 
@@ -202,7 +202,7 @@ pub mod Component {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
-            // [Check] Kit exists
+            // [Check] Bundle exists
             let bundle = store.get_bundle(bundle_id);
             bundle.assert_does_exist();
 
@@ -224,7 +224,7 @@ pub mod Component {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
-            // [Check] Kit exists and quantity is allowed
+            // [Check] Bundle exists and quantity is allowed
             let mut bundle = store.get_bundle(bundle_id);
             bundle.assert_does_exist();
             bundle.assert_quantity_allowed(quantity);
@@ -333,7 +333,7 @@ pub mod Component {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
-            // [Check] Kit exists
+            // [Check] Bundle exists
             let bundle = store.get_bundle(bundle_id);
             bundle.assert_does_exist();
 

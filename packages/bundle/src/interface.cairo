@@ -2,7 +2,7 @@ use starknet::ContractAddress;
 use crate::component::Component::BundleQuote;
 
 #[starknet::interface]
-pub trait IKit<TState> {
+pub trait IBundle<TState> {
     fn get_metadata(self: @TState, bundle_id: u32) -> ByteArray;
     fn quote(
         self: @TState, bundle_id: u32, quantity: u32, has_referrer: bool, client_percentage: u8,
