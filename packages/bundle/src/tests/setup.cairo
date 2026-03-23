@@ -6,7 +6,7 @@ pub mod setup {
     };
     use starknet::ContractAddress;
     use crate::events::index as events;
-    use crate::models::index as kit_models;
+    use crate::models::index as bundle_models;
     use crate::tests::contract::{Contract, ContractTraitDispatcher, NAME as CONTRACT, NAMESPACE};
 
     pub fn CREATOR() -> ContractAddress {
@@ -22,7 +22,7 @@ pub mod setup {
     }
 
     pub fn METADATA() -> ByteArray {
-        "KIT_METADATA"
+        "BUNDLE_METADATA"
     }
 
     #[derive(Copy, Drop)]
@@ -35,14 +35,14 @@ pub mod setup {
         NamespaceDef {
             namespace: NAMESPACE(),
             resources: [
-                TestResource::Model(kit_models::m_Kit::TEST_CLASS_HASH),
-                TestResource::Model(kit_models::m_KitIssuance::TEST_CLASS_HASH),
-                TestResource::Model(kit_models::m_KitReferral::TEST_CLASS_HASH),
-                TestResource::Model(kit_models::m_KitGroup::TEST_CLASS_HASH),
-                TestResource::Model(kit_models::m_KitVoucher::TEST_CLASS_HASH),
-                TestResource::Event(events::e_KitRegistered::TEST_CLASS_HASH),
-                TestResource::Event(events::e_KitUpdated::TEST_CLASS_HASH),
-                TestResource::Event(events::e_KitIssued::TEST_CLASS_HASH),
+                TestResource::Model(bundle_models::m_Bundle::TEST_CLASS_HASH),
+                TestResource::Model(bundle_models::m_BundleIssuance::TEST_CLASS_HASH),
+                TestResource::Model(bundle_models::m_BundleReferral::TEST_CLASS_HASH),
+                TestResource::Model(bundle_models::m_BundleGroup::TEST_CLASS_HASH),
+                TestResource::Model(bundle_models::m_BundleVoucher::TEST_CLASS_HASH),
+                TestResource::Event(events::e_BundleRegistered::TEST_CLASS_HASH),
+                TestResource::Event(events::e_BundleUpdated::TEST_CLASS_HASH),
+                TestResource::Event(events::e_BundleIssued::TEST_CLASS_HASH),
                 TestResource::Contract(Contract::TEST_CLASS_HASH),
             ]
                 .span(),

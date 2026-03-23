@@ -2,7 +2,7 @@ use starknet::ContractAddress;
 
 #[derive(Clone, Drop, Serde)]
 #[dojo::model]
-pub struct Kit {
+pub struct Bundle {
     #[key]
     pub id: u32,
     pub referral_percentage: u8,
@@ -18,9 +18,9 @@ pub struct Kit {
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
-pub struct KitIssuance {
+pub struct BundleIssuance {
     #[key]
-    pub kit_id: u32,
+    pub bundle_id: u32,
     #[key]
     pub recipient: ContractAddress,
     pub issued_at: u64,
@@ -28,7 +28,7 @@ pub struct KitIssuance {
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
-pub struct KitReferral {
+pub struct BundleReferral {
     #[key]
     pub id: ContractAddress,
     pub total_fees: felt252,
@@ -37,7 +37,7 @@ pub struct KitReferral {
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
-pub struct KitGroup {
+pub struct BundleGroup {
     #[key]
     pub id: felt252,
     pub total_fees: felt252,
@@ -46,9 +46,9 @@ pub struct KitGroup {
 
 #[derive(Copy, Drop, Serde)]
 #[dojo::model]
-pub struct KitVoucher {
+pub struct BundleVoucher {
     #[key]
-    pub kit_id: u32,
+    pub bundle_id: u32,
     #[key]
     pub voucher_key: felt252,
     pub recipient: ContractAddress,

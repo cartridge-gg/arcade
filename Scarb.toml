@@ -7,7 +7,7 @@ members = [
   "packages/collection",
   "packages/controller",
   "packages/leaderboard",
-  "packages/kit",
+  "packages/bundle",
   "packages/merkledrop",
   "packages/orderbook",
   "packages/provider",

@@ -44,6 +44,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bundle"
+version = "0.0.0"
+dependencies = [
+ "dojo",
+ "dojo_cairo_test",
+ "graffiti",
+ "openzeppelin",
+]
+
+[[package]]
 name = "collection"
 version = "0.0.0"
 dependencies = [
@@ -88,16 +98,6 @@ dependencies = [
 name = "graffiti"
 version = "0.1.0"
 source = "git+https://github.com/bal7hazar/graffiti.git?rev=e8b0854#e8b0854798ebbcebde504ea299ed556900564ff2"
-
-[[package]]
-name = "kit"
-version = "0.0.0"
-dependencies = [
- "dojo",
- "dojo_cairo_test",
- "graffiti",
- "openzeppelin",
-]
 
 [[package]]
 name = "leaderboard"

@@ -1,5 +1,5 @@
 use starknet::ContractAddress;
-use crate::component::Component::KitQuote;
+use crate::component::Component::BundleQuote;
 
 pub fn NAMESPACE() -> ByteArray {
     "NAMESPACE"
@@ -23,7 +23,7 @@ pub trait ContractTrait<TContractState> {
     ) -> u32;
     fn update(
         ref self: TContractState,
-        kit_id: u32,
+        bundle_id: u32,
         referral_percentage: u8,
         reissuable: bool,
         price: u256,
@@ -31,22 +31,22 @@ pub trait ContractTrait<TContractState> {
         payment_receiver: ContractAddress,
         allower: ContractAddress,
     );
-    fn update_metadata(ref self: TContractState, kit_id: u32, metadata: ByteArray);
+    fn update_metadata(ref self: TContractState, bundle_id: u32, metadata: ByteArray);
     fn allow(
-        ref self: TContractState, recipient: ContractAddress, kit_id: u32, voucher_key: felt252,
+        ref self: TContractState, recipient: ContractAddress, bundle_id: u32, voucher_key: felt252,
     );
     fn quote(
         self: @TContractState,
-        kit_id: u32,
+        bundle_id: u32,
         quantity: u32,
         has_referrer: bool,
         client_percentage: u8,
-    ) -> KitQuote;
-    fn get_metadata(self: @TContractState, kit_id: u32) -> ByteArray;
+    ) -> BundleQuote;
+    fn get_metadata(self: @TContractState, bundle_id: u32) -> ByteArray;
     fn issue(
         ref self: TContractState,
         recipient: ContractAddress,
-        kit_id: u32,
+        bundle_id: u32,
         quantity: u32,
         referrer: Option<ContractAddress>,
         referrer_group: Option<felt252>,
@@ -61,44 +61,44 @@ pub mod Contract {
     use dojo::world::WorldStorage;
     use starknet::ContractAddress;
     use crate::component::Component;
-    use crate::component::Component::{KitFeeTrait, KitQuote, KitTrait};
+    use crate::component::Component::{BundleFeeTrait, BundleQuote, BundleTrait};
     use super::{ContractTrait, NAMESPACE};
 
-    component!(path: Component, storage: kit, event: KitEvent);
+    component!(path: Component, storage: bundle, event: BundleEvent);
     pub impl InternalImpl = Component::InternalImpl<ContractState>;
 
     #[storage]
     pub struct Storage {
         #[substorage(v0)]
-        pub kit: Component::Storage,
+        pub bundle: Component::Storage,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
         #[flat]
-        KitEvent: Component::Event,
+        BundleEvent: Component::Event,
     }
 
-    impl KitImpl of KitTrait<ContractState> {
+    impl BundleImpl of BundleTrait<ContractState> {
         fn on_issue(
             ref self: Component::ComponentState<ContractState>,
             recipient: ContractAddress,
-            kit_id: u32,
+            bundle_id: u32,
             quantity: u32,
         ) {
             let _ = recipient;
-            let _ = kit_id;
+            let _ = bundle_id;
             let _ = quantity;
         }
 
-        fn supply(self: @Component::ComponentState<ContractState>, kit_id: u32) -> Option<u32> {
-            let _ = kit_id;
+        fn supply(self: @Component::ComponentState<ContractState>, bundle_id: u32) -> Option<u32> {
+            let _ = bundle_id;
             Option::None
         }
     }
 
-    impl KitFeeImpl of KitFeeTrait<ContractState> {
+    impl BundleFeeImpl of BundleFeeTrait<ContractState> {
         fn protocol_fee(
             self: @Component::ComponentState<ContractState>, amount: u256,
         ) -> (ContractAddress, u256) {
@@ -123,7 +123,7 @@ pub mod Contract {
         ) -> u32 {
             let world = self.world_storage();
             self
-                .kit
+                .bundle
                 .register(
                     world,
                     referral_percentage,
@@ -138,7 +138,7 @@ pub mod Contract {
 
         fn update(
             ref self: ContractState,
-            kit_id: u32,
+            bundle_id: u32,
             referral_percentage: u8,
             reissuable: bool,
             price: u256,
@@ -148,10 +148,10 @@ pub mod Contract {
         ) {
             let world = self.world_storage();
             self
-                .kit
+                .bundle
                 .update(
                     world,
-                    kit_id,
+                    bundle_id,
                     referral_percentage,
                     reissuable,
                     price,
@@ -161,38 +161,38 @@ pub mod Contract {
                 );
         }
 
-        fn update_metadata(ref self: ContractState, kit_id: u32, metadata: ByteArray) {
+        fn update_metadata(ref self: ContractState, bundle_id: u32, metadata: ByteArray) {
             let world = self.world_storage();
-            self.kit.update_metadata(world, kit_id, metadata);
+            self.bundle.update_metadata(world, bundle_id, metadata);
         }
 
         fn allow(
-            ref self: ContractState, recipient: ContractAddress, kit_id: u32, voucher_key: felt252,
+            ref self: ContractState, recipient: ContractAddress, bundle_id: u32, voucher_key: felt252,
         ) {
             let world = self.world_storage();
-            self.kit.allow(world, recipient, kit_id, voucher_key);
+            self.bundle.allow(world, recipient, bundle_id, voucher_key);
         }
 
         fn quote(
             self: @ContractState,
-            kit_id: u32,
+            bundle_id: u32,
             quantity: u32,
             has_referrer: bool,
             client_percentage: u8,
-        ) -> KitQuote {
+        ) -> BundleQuote {
             let world = self.world_storage();
-            self.kit.quote(world, kit_id, quantity, has_referrer, client_percentage)
+            self.bundle.quote(world, bundle_id, quantity, has_referrer, client_percentage)
         }
 
-        fn get_metadata(self: @ContractState, kit_id: u32) -> ByteArray {
+        fn get_metadata(self: @ContractState, bundle_id: u32) -> ByteArray {
             let world = self.world_storage();
-            self.kit.get_metadata(world, kit_id)
+            self.bundle.get_metadata(world, bundle_id)
         }
 
         fn issue(
             ref self: ContractState,
             recipient: ContractAddress,
-            kit_id: u32,
+            bundle_id: u32,
             quantity: u32,
             referrer: Option<ContractAddress>,
             referrer_group: Option<felt252>,
@@ -202,11 +202,11 @@ pub mod Contract {
         ) {
             let world = self.world_storage();
             self
-                .kit
+                .bundle
                 .issue(
                     world,
                     recipient,
-                    kit_id,
+                    bundle_id,
                     quantity,
                     referrer,
                     referrer_group,

@@ -1,5 +1,5 @@
 [package]
-name = "kit"
+name = "bundle"
 version.workspace = true
 edition.workspace = true
 

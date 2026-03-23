@@ -1,17 +1,17 @@
 use core::num::traits::Zero;
 use starknet::ContractAddress;
 use crate::constants::FEE_DENOMINATOR;
-use crate::models::index::Kit;
+use crate::models::index::Bundle;
 
 pub mod errors {
-    pub const KIT_QUANTITY_EXCEEDS_LIMIT: felt252 = 'Kit: quantity > 1';
-    pub const KIT_SUPPLY_EXCEEDED: felt252 = 'Kit: supply exceeded';
-    pub const KIT_NOT_FOUND: felt252 = 'Kit: not found';
-    pub const KIT_NOT_ALLOWER: felt252 = 'Kit: not allower';
+    pub const BUNDLE_QUANTITY_EXCEEDS_LIMIT: felt252 = 'Bundle: quantity > 1';
+    pub const BUNDLE_SUPPLY_EXCEEDED: felt252 = 'Bundle: supply exceeded';
+    pub const BUNDLE_NOT_FOUND: felt252 = 'Bundle: not found';
+    pub const BUNDLE_NOT_ALLOWER: felt252 = 'Bundle: not allower';
 }
 
 #[generate_trait]
-pub impl KitImpl of KitTrait {
+pub impl BundleImpl of BundleTrait {
     #[inline]
     fn new(
         id: u32,
@@ -23,8 +23,8 @@ pub impl KitImpl of KitTrait {
         metadata: ByteArray,
         time: u64,
         allower: starknet::ContractAddress,
-    ) -> Kit {
-        Kit {
+    ) -> Bundle {
+        Bundle {
             id,
             referral_percentage,
             reissuable,
@@ -40,7 +40,7 @@ pub impl KitImpl of KitTrait {
 
     #[inline]
     fn update(
-        ref self: Kit,
+        ref self: Bundle,
         referral_percentage: u8,
         reissuable: bool,
         price: u256,
@@ -57,17 +57,17 @@ pub impl KitImpl of KitTrait {
     }
 
     #[inline]
-    fn update_metadata(ref self: Kit, metadata: ByteArray) {
+    fn update_metadata(ref self: Bundle, metadata: ByteArray) {
         self.metadata = metadata;
     }
 
     #[inline]
-    fn issue(ref self: Kit, quantity: u32) {
+    fn issue(ref self: Bundle, quantity: u32) {
         self.total_issued += quantity.into();
     }
 
     #[inline]
-    fn get_referral_fee(self: @Kit, amount: u256, has_referrer: bool) -> u256 {
+    fn get_referral_fee(self: @Bundle, amount: u256, has_referrer: bool) -> u256 {
         if !has_referrer {
             return 0;
         }
@@ -75,14 +75,14 @@ pub impl KitImpl of KitTrait {
     }
 
     #[inline]
-    fn get_client_fee(self: @Kit, amount: u256, client_percentage: u8) -> u256 {
+    fn get_client_fee(self: @Bundle, amount: u256, client_percentage: u8) -> u256 {
         amount * client_percentage.into() / FEE_DENOMINATOR.into()
     }
 
 
     #[inline]
     fn calculate_referral_fee(
-        self: @Kit, amount: u256, referrer: Option<ContractAddress>, payer: ContractAddress,
+        self: @Bundle, amount: u256, referrer: Option<ContractAddress>, payer: ContractAddress,
     ) -> (ContractAddress, u256) {
         let fee = self.get_referral_fee(amount, true);
         let receiver = referrer.unwrap_or(payer);
@@ -94,7 +94,7 @@ pub impl KitImpl of KitTrait {
 
     #[inline]
     fn calculate_client_fee(
-        self: @Kit, amount: u256, client: Option<ContractAddress>, client_percentage: u8,
+        self: @Bundle, amount: u256, client: Option<ContractAddress>, client_percentage: u8,
     ) -> (ContractAddress, u256) {
         let fee = self.get_client_fee(amount, client_percentage);
         let receiver = client.unwrap_or(core::num::traits::Zero::zero());
@@ -106,19 +106,19 @@ pub impl KitImpl of KitTrait {
 }
 
 #[generate_trait]
-pub impl KitAssert of KitAssertTrait {
-    fn assert_quantity_allowed(self: @Kit, quantity: u32) {
+pub impl BundleAssert of BundleAssertTrait {
+    fn assert_quantity_allowed(self: @Bundle, quantity: u32) {
         if !*self.reissuable {
-            assert(quantity == 1, errors::KIT_QUANTITY_EXCEEDS_LIMIT);
+            assert(quantity == 1, errors::BUNDLE_QUANTITY_EXCEEDS_LIMIT);
         }
     }
 
-    fn assert_does_exist(self: @Kit) {
-        assert(*self.created_at != 0, errors::KIT_NOT_FOUND);
+    fn assert_does_exist(self: @Bundle) {
+        assert(*self.created_at != 0, errors::BUNDLE_NOT_FOUND);
     }
 
-    fn assert_is_allower(self: @Kit, caller: starknet::ContractAddress) {
-        assert((*self.allower) == caller, errors::KIT_NOT_ALLOWER);
+    fn assert_is_allower(self: @Bundle, caller: starknet::ContractAddress) {
+        assert((*self.allower) == caller, errors::BUNDLE_NOT_ALLOWER);
     }
 }
 
@@ -126,8 +126,8 @@ pub impl KitAssert of KitAssertTrait {
 mod tests {
     use super::*;
 
-    fn make_kit(referral_percentage: u8) -> Kit {
-        Kit {
+    fn make_bundle(referral_percentage: u8) -> Bundle {
+        Bundle {
             id: 1,
             referral_percentage,
             reissuable: true,
@@ -145,89 +145,89 @@ mod tests {
 
     #[test]
     fn test_get_referral_fee_with_referrer() {
-        let kit = make_kit(10);
-        assert_eq!(kit.get_referral_fee(1000, true), 100); // 10% of 1000
+        let bundle = make_bundle(10);
+        assert_eq!(bundle.get_referral_fee(1000, true), 100); // 10% of 1000
     }
 
     #[test]
     fn test_get_referral_fee_no_referrer() {
-        let kit = make_kit(10);
-        assert_eq!(kit.get_referral_fee(1000, false), 0);
+        let bundle = make_bundle(10);
+        assert_eq!(bundle.get_referral_fee(1000, false), 0);
     }
 
     #[test]
     fn test_get_referral_fee_zero_percentage() {
-        let kit = make_kit(0);
-        assert_eq!(kit.get_referral_fee(1000, true), 0);
+        let bundle = make_bundle(0);
+        assert_eq!(bundle.get_referral_fee(1000, true), 0);
     }
 
     #[test]
     fn test_get_referral_fee_zero_amount() {
-        let kit = make_kit(10);
-        assert_eq!(kit.get_referral_fee(0, true), 0);
+        let bundle = make_bundle(10);
+        assert_eq!(bundle.get_referral_fee(0, true), 0);
     }
 
     #[test]
     fn test_get_referral_fee_max_percentage() {
-        let kit = make_kit(50);
-        assert_eq!(kit.get_referral_fee(1000, true), 500); // 50% of 1000
+        let bundle = make_bundle(50);
+        assert_eq!(bundle.get_referral_fee(1000, true), 500); // 50% of 1000
     }
 
     // Tests - get_client_fee
 
     #[test]
     fn test_get_client_fee() {
-        let kit = make_kit(0);
-        assert_eq!(kit.get_client_fee(1000, 5), 50); // 5% of 1000
+        let bundle = make_bundle(0);
+        assert_eq!(bundle.get_client_fee(1000, 5), 50); // 5% of 1000
     }
 
     #[test]
     fn test_get_client_fee_zero_percentage() {
-        let kit = make_kit(0);
-        assert_eq!(kit.get_client_fee(1000, 0), 0);
+        let bundle = make_bundle(0);
+        assert_eq!(bundle.get_client_fee(1000, 0), 0);
     }
 
     #[test]
     fn test_get_client_fee_zero_amount() {
-        let kit = make_kit(0);
-        assert_eq!(kit.get_client_fee(0, 5), 0);
+        let bundle = make_bundle(0);
+        assert_eq!(bundle.get_client_fee(0, 5), 0);
     }
 
     // Tests - calculate_referral_fee
 
     #[test]
     fn test_calculate_referral_fee_with_referrer() {
-        let kit = make_kit(10);
+        let bundle = make_bundle(10);
         let referrer: ContractAddress = 'REFERRER'.try_into().unwrap();
         let payer: ContractAddress = 'PAYER'.try_into().unwrap();
-        let (receiver, fee) = kit.calculate_referral_fee(1000, Option::Some(referrer), payer);
+        let (receiver, fee) = bundle.calculate_referral_fee(1000, Option::Some(referrer), payer);
         assert_eq!(fee, 100);
         assert_eq!(receiver, referrer);
     }
 
     #[test]
     fn test_calculate_referral_fee_no_referrer() {
-        let kit = make_kit(10);
+        let bundle = make_bundle(10);
         let payer: ContractAddress = 'PAYER'.try_into().unwrap();
-        let (_, fee) = kit.calculate_referral_fee(1000, Option::None, payer);
+        let (_, fee) = bundle.calculate_referral_fee(1000, Option::None, payer);
         assert_eq!(fee, 0);
     }
 
     #[test]
     fn test_calculate_referral_fee_self_referral() {
-        let kit = make_kit(10);
+        let bundle = make_bundle(10);
         let payer: ContractAddress = 'PAYER'.try_into().unwrap();
         // Self-referral: referrer == payer → fee = 0
-        let (_, fee) = kit.calculate_referral_fee(1000, Option::Some(payer), payer);
+        let (_, fee) = bundle.calculate_referral_fee(1000, Option::Some(payer), payer);
         assert_eq!(fee, 0);
     }
 
     #[test]
     fn test_calculate_referral_fee_zero_referrer() {
-        let kit = make_kit(10);
+        let bundle = make_bundle(10);
         let payer: ContractAddress = 'PAYER'.try_into().unwrap();
         let zero: ContractAddress = 0.try_into().unwrap();
-        let (_, fee) = kit.calculate_referral_fee(1000, Option::Some(zero), payer);
+        let (_, fee) = bundle.calculate_referral_fee(1000, Option::Some(zero), payer);
         assert_eq!(fee, 0);
     }
 
@@ -235,33 +235,33 @@ mod tests {
 
     #[test]
     fn test_calculate_client_fee_with_client() {
-        let kit = make_kit(0);
+        let bundle = make_bundle(0);
         let client: ContractAddress = 'CLIENT'.try_into().unwrap();
-        let (receiver, fee) = kit.calculate_client_fee(1000, Option::Some(client), 5);
+        let (receiver, fee) = bundle.calculate_client_fee(1000, Option::Some(client), 5);
         assert_eq!(fee, 50);
         assert_eq!(receiver, client);
     }
 
     #[test]
     fn test_calculate_client_fee_no_client() {
-        let kit = make_kit(0);
-        let (_, fee) = kit.calculate_client_fee(1000, Option::None, 5);
+        let bundle = make_bundle(0);
+        let (_, fee) = bundle.calculate_client_fee(1000, Option::None, 5);
         assert_eq!(fee, 0);
     }
 
     #[test]
     fn test_calculate_client_fee_zero_percentage() {
-        let kit = make_kit(0);
+        let bundle = make_bundle(0);
         let client: ContractAddress = 'CLIENT'.try_into().unwrap();
-        let (_, fee) = kit.calculate_client_fee(1000, Option::Some(client), 0);
+        let (_, fee) = bundle.calculate_client_fee(1000, Option::Some(client), 0);
         assert_eq!(fee, 0);
     }
 
     #[test]
     fn test_calculate_client_fee_zero_client_address() {
-        let kit = make_kit(0);
+        let bundle = make_bundle(0);
         let zero: ContractAddress = 0.try_into().unwrap();
-        let (_, fee) = kit.calculate_client_fee(1000, Option::Some(zero), 5);
+        let (_, fee) = bundle.calculate_client_fee(1000, Option::Some(zero), 5);
         assert_eq!(fee, 0);
     }
 }

@@ -12,7 +12,7 @@ pub mod models {
     pub mod group;
     pub mod index;
     pub mod issuance;
-    pub mod kit;
+    pub mod bundle;
     pub mod referral;
     pub mod voucher;
 }

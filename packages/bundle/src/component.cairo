@@ -5,20 +5,20 @@ pub mod Component {
     use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
     use crate::constants::MAX_REFERRAL_FEE;
-    use crate::models::group::KitGroupTrait;
-    use crate::models::issuance::{KitIssuanceAssert, KitIssuanceTrait};
-    use crate::models::kit::{KitAssert, KitTrait as KitModelTrait, errors};
-    use crate::models::referral::KitReferralTrait;
-    use crate::models::voucher::{KitVoucherAssert, KitVoucherTrait};
+    use crate::models::group::BundleGroupTrait;
+    use crate::models::issuance::{BundleIssuanceAssert, BundleIssuanceTrait};
+    use crate::models::bundle::{BundleAssert, BundleTrait as BundleModelTrait, errors};
+    use crate::models::referral::BundleReferralTrait;
+    use crate::models::voucher::{BundleVoucherAssert, BundleVoucherTrait};
     use crate::store::{
-        GroupStoreTrait, IssuanceStoreTrait, KitStoreTrait, ReferralStoreTrait, Store, StoreTrait,
+        GroupStoreTrait, IssuanceStoreTrait, BundleStoreTrait, ReferralStoreTrait, Store, StoreTrait,
         VoucherStoreTrait,
     };
 
     // Types
 
     #[derive(Drop, Serde)]
-    pub struct KitQuote {
+    pub struct BundleQuote {
         pub base_price: u256,
         pub referral_fee: u256,
         pub client_fee: u256,
@@ -29,19 +29,19 @@ pub mod Component {
 
     // Hooks
 
-    pub trait KitTrait<TContractState> {
+    pub trait BundleTrait<TContractState> {
         fn on_issue(
             ref self: ComponentState<TContractState>,
             recipient: ContractAddress,
-            kit_id: u32,
+            bundle_id: u32,
             quantity: u32,
         );
-        fn supply(self: @ComponentState<TContractState>, kit_id: u32) -> Option<u32>;
+        fn supply(self: @ComponentState<TContractState>, bundle_id: u32) -> Option<u32>;
     }
 
     // Configs
 
-    pub trait KitFeeTrait<TContractState> {
+    pub trait BundleFeeTrait<TContractState> {
         fn protocol_fee(
             self: @ComponentState<TContractState>, amount: u256,
         ) -> (ContractAddress, u256) {
@@ -66,8 +66,8 @@ pub mod Component {
     pub impl InternalImpl<
         TContractState,
         +HasComponent<TContractState>,
-        impl KitImpl: KitTrait<TContractState>,
-        impl KitFeeImpl: KitFeeTrait<TContractState>,
+        impl BundleImpl: BundleTrait<TContractState>,
+        impl BundleFeeImpl: BundleFeeTrait<TContractState>,
     > of InternalTrait<TContractState> {
         fn register(
             self: @ComponentState<TContractState>,
@@ -84,13 +84,13 @@ pub mod Component {
             let store: Store = StoreTrait::new(world);
 
             // [Check] Referral percentage is valid
-            assert(referral_percentage <= MAX_REFERRAL_FEE, 'Kit: referral too high');
+            assert(referral_percentage <= MAX_REFERRAL_FEE, 'Bundle: referral too high');
 
             // [Effect] Create and store kit
-            let kit_id = world.dispatcher.uuid();
+            let bundle_id = world.dispatcher.uuid();
             let time = get_block_timestamp();
-            let kit = KitModelTrait::new(
-                kit_id,
+            let bundle = BundleModelTrait::new(
+                bundle_id,
                 referral_percentage,
                 reissuable,
                 price,
@@ -100,18 +100,18 @@ pub mod Component {
                 time,
                 allower,
             );
-            store.set_kit(@kit);
+            store.set_bundle(@bundle);
 
-            // [Event] Emit kit registered
-            store.registered(@kit);
+            // [Event] Emit bundle registered
+            store.registered(@bundle);
 
-            kit_id
+            bundle_id
         }
 
         fn update(
             self: @ComponentState<TContractState>,
             world: WorldStorage,
-            kit_id: u32,
+            bundle_id: u32,
             referral_percentage: u8,
             reissuable: bool,
             price: u256,
@@ -123,14 +123,14 @@ pub mod Component {
             let store = StoreTrait::new(world);
 
             // [Check] Kit exists
-            let mut kit = store.get_kit(kit_id);
-            kit.assert_does_exist();
+            let mut bundle = store.get_bundle(bundle_id);
+            bundle.assert_does_exist();
 
             // [Check] Referral percentage is valid
-            assert(referral_percentage <= MAX_REFERRAL_FEE, 'Kit: referral too high');
+            assert(referral_percentage <= MAX_REFERRAL_FEE, 'Bundle: referral too high');
 
             // [Effect] Update kit
-            kit
+            bundle
                 .update(
                     referral_percentage,
                     reissuable,
@@ -139,81 +139,81 @@ pub mod Component {
                     payment_receiver,
                     allower,
                 );
-            store.set_kit(@kit);
+            store.set_bundle(@bundle);
 
-            // [Event] Emit kit updated
+            // [Event] Emit bundle updated
             let time = get_block_timestamp();
-            store.updated(@kit, time);
+            store.updated(@bundle, time);
         }
 
         fn update_metadata(
             self: @ComponentState<TContractState>,
             world: WorldStorage,
-            kit_id: u32,
+            bundle_id: u32,
             metadata: ByteArray,
         ) {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
             // [Check] Kit exists
-            let mut kit = store.get_kit(kit_id);
-            kit.assert_does_exist();
+            let mut bundle = store.get_bundle(bundle_id);
+            bundle.assert_does_exist();
 
             // [Effect] Update metadata
-            kit.update_metadata(metadata.clone());
-            store.set_kit(@kit);
+            bundle.update_metadata(metadata.clone());
+            store.set_bundle(@bundle);
 
-            // [Event] Emit kit updated
+            // [Event] Emit bundle updated
             let time = get_block_timestamp();
-            store.updated(@kit, time);
+            store.updated(@bundle, time);
         }
 
         fn quote(
             self: @ComponentState<TContractState>,
             world: WorldStorage,
-            kit_id: u32,
+            bundle_id: u32,
             quantity: u32,
             has_referrer: bool,
             client_percentage: u8,
-        ) -> KitQuote {
+        ) -> BundleQuote {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
             // [Check] Kit exists
-            let kit = store.get_kit(kit_id);
-            kit.assert_does_exist();
+            let bundle = store.get_bundle(bundle_id);
+            bundle.assert_does_exist();
 
             // [Compute] Fees
-            let base_price = kit.price * quantity.into();
-            let payment_token = kit.payment_token;
-            let referral_fee = kit.get_referral_fee(base_price, has_referrer);
-            let client_fee = kit.get_client_fee(base_price, client_percentage);
-            let (_, protocol_fee) = KitFeeImpl::protocol_fee(self, base_price);
+            let base_price = bundle.price * quantity.into();
+            let payment_token = bundle.payment_token;
+            let referral_fee = bundle.get_referral_fee(base_price, has_referrer);
+            let client_fee = bundle.get_client_fee(base_price, client_percentage);
+            let (_, protocol_fee) = BundleFeeImpl::protocol_fee(self, base_price);
             let total_cost = base_price + protocol_fee + client_fee;
 
-            KitQuote {
+            BundleQuote {
                 base_price, referral_fee, client_fee, protocol_fee, total_cost, payment_token,
             }
         }
 
         fn get_metadata(
-            self: @ComponentState<TContractState>, world: WorldStorage, kit_id: u32,
+            self: @ComponentState<TContractState>, world: WorldStorage, bundle_id: u32,
         ) -> ByteArray {
             // [Setup] Datastore
             let mut store = StoreTrait::new(world);
 
             // [Check] Kit exists
-            let kit = store.get_kit(kit_id);
-            kit.assert_does_exist();
+            let bundle = store.get_bundle(bundle_id);
+            bundle.assert_does_exist();
 
-            kit.metadata
+            bundle.metadata
         }
 
         fn issue(
             ref self: ComponentState<TContractState>,
             mut world: WorldStorage,
             recipient: ContractAddress,
-            kit_id: u32,
+            bundle_id: u32,
             quantity: u32,
             referrer: Option<ContractAddress>,
             referrer_group: Option<felt252>,
@@ -225,29 +225,29 @@ pub mod Component {
             let store = StoreTrait::new(world);
 
             // [Check] Kit exists and quantity is allowed
-            let mut kit = store.get_kit(kit_id);
-            kit.assert_does_exist();
-            kit.assert_quantity_allowed(quantity);
+            let mut bundle = store.get_bundle(bundle_id);
+            bundle.assert_does_exist();
+            bundle.assert_quantity_allowed(quantity);
 
             // [Check] Supply limit not exceeded
-            if let Some(supply_limit) = KitImpl::supply(@self, kit_id) {
-                let new_total: u64 = kit.total_issued + quantity.into();
-                assert(new_total <= supply_limit.into(), errors::KIT_SUPPLY_EXCEEDED);
+            if let Some(supply_limit) = BundleImpl::supply(@self, bundle_id) {
+                let new_total: u64 = bundle.total_issued + quantity.into();
+                assert(new_total <= supply_limit.into(), errors::BUNDLE_SUPPLY_EXCEEDED);
             }
 
             // [Check] Not already issued (if non-reissuable)
-            if !kit.reissuable {
-                let issuance = store.get_issuance(kit_id, recipient);
+            if !bundle.reissuable {
+                let issuance = store.get_issuance(bundle_id, recipient);
                 issuance.assert_not_issued();
             }
 
             // [Check] Voucher is valid (if allower is set)
             let time = get_block_timestamp();
-            if kit.allower.is_non_zero() {
+            if bundle.allower.is_non_zero() {
                 let voucher_key = voucher_key.unwrap_or_default();
-                KitVoucherAssert::assert_valid_key(voucher_key);
+                BundleVoucherAssert::assert_valid_key(voucher_key);
 
-                let mut voucher = store.get_voucher(kit_id, voucher_key);
+                let mut voucher = store.get_voucher(bundle_id, voucher_key);
                 voucher.assert_is_recipient(recipient);
                 voucher.assert_not_claimed();
 
@@ -258,8 +258,8 @@ pub mod Component {
 
             // [Compute] Fees
             let payer = get_caller_address();
-            let base_price = kit.price * quantity.into();
-            let payment_token = kit.payment_token;
+            let base_price = bundle.price * quantity.into();
+            let payment_token = bundle.payment_token;
 
             // [Interaction] Transfer payments
             let mut total_amount = base_price;
@@ -267,7 +267,7 @@ pub mod Component {
                 let token_dispatcher = IERC20Dispatcher { contract_address: payment_token };
 
                 // [Interaction] Transfer client fee
-                let (client_address, client_fee) = kit
+                let (client_address, client_fee) = bundle
                     .calculate_client_fee(base_price, client, client_percentage);
                 if client_fee > 0 {
                     token_dispatcher.transfer_from(payer, client_address, client_fee);
@@ -275,14 +275,14 @@ pub mod Component {
                 }
 
                 // [Interaction] Transfer protocol fee
-                let (fee_receiver, protocol_fee) = KitFeeImpl::protocol_fee(@self, base_price);
+                let (fee_receiver, protocol_fee) = BundleFeeImpl::protocol_fee(@self, base_price);
                 if protocol_fee > 0 {
                     token_dispatcher.transfer_from(payer, fee_receiver, protocol_fee);
                     total_amount += protocol_fee;
                 }
 
                 // [Interaction] Transfer referral fee
-                let (referral_address, referral_fee) = kit
+                let (referral_address, referral_fee) = bundle
                     .calculate_referral_fee(base_price, referrer, payer);
                 if referral_fee > 0 {
                     // [Interaction] Transfer referral fee
@@ -304,49 +304,49 @@ pub mod Component {
                 // [Interaction] Transfer remaining to payment receiver
                 let remaining = base_price - referral_fee;
                 if remaining > 0 {
-                    token_dispatcher.transfer_from(payer, kit.payment_receiver, remaining);
+                    token_dispatcher.transfer_from(payer, bundle.payment_receiver, remaining);
                 }
             }
 
             // [Interaction] Notify implementation
-            KitImpl::on_issue(ref self, recipient, kit_id, quantity);
+            BundleImpl::on_issue(ref self, recipient, bundle_id, quantity);
 
             // [Effect] Record issuance
-            let issuance = KitIssuanceTrait::new(kit_id, recipient, time);
+            let issuance = BundleIssuanceTrait::new(bundle_id, recipient, time);
             store.set_issuance(@issuance);
 
             // [Effect] Increment total issued
-            kit.issue(quantity);
-            store.set_kit(@kit);
+            bundle.issue(quantity);
+            store.set_bundle(@bundle);
 
-            // [Event] Emit kit issued
-            store.issued(@kit, @issuance, total_amount, quantity, referrer, referrer_group);
+            // [Event] Emit bundle issued
+            store.issued(@bundle, @issuance, total_amount, quantity, referrer, referrer_group);
         }
 
         fn allow(
             self: @ComponentState<TContractState>,
             mut world: WorldStorage,
             recipient: ContractAddress,
-            kit_id: u32,
+            bundle_id: u32,
             voucher_key: felt252,
         ) {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
 
             // [Check] Kit exists
-            let kit = store.get_kit(kit_id);
-            kit.assert_does_exist();
+            let bundle = store.get_bundle(bundle_id);
+            bundle.assert_does_exist();
 
             // [Check] Caller is the allower
             let caller = get_caller_address();
-            kit.assert_is_allower(caller);
+            bundle.assert_is_allower(caller);
 
             // [Check] Voucher key and recipient are valid
-            KitVoucherAssert::assert_valid_key(voucher_key);
-            KitVoucherAssert::assert_valid_recipient(recipient);
+            BundleVoucherAssert::assert_valid_key(voucher_key);
+            BundleVoucherAssert::assert_valid_recipient(recipient);
 
             // [Check] Voucher not already claimed
-            let mut voucher = store.get_voucher(kit_id, voucher_key);
+            let mut voucher = store.get_voucher(bundle_id, voucher_key);
             voucher.assert_not_claimed();
 
             // [Effect] Allow recipient
