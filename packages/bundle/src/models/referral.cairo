@@ -36,7 +36,7 @@ pub impl BundleReferralAssert of BundleReferralAssertTrait {
 
 #[cfg(test)]
 mod tests {
-    use super::{BundleReferralTrait, BundleReferralAssert};
+    use super::{BundleReferralAssert, BundleReferralTrait};
 
     fn REFERRER() -> starknet::ContractAddress {
         'REFERRER'.try_into().unwrap()

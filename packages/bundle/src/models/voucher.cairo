@@ -65,8 +65,8 @@ pub impl BundleVoucherAssert of AssertTrait {
 
 #[cfg(test)]
 mod tests {
-    use super::{BundleVoucherImpl, BundleVoucherAssert};
     use crate::models::index::BundleVoucher;
+    use super::{BundleVoucherAssert, BundleVoucherImpl};
 
     fn RECIPIENT() -> starknet::ContractAddress {
         'RECIPIENT'.try_into().unwrap()

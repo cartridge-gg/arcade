@@ -20,8 +20,8 @@ pub impl BundleIssuanceAssert of BundleIssuanceAssertTrait {
 
 #[cfg(test)]
 mod tests {
-    use super::{BundleIssuanceTrait, BundleIssuanceAssert};
     use crate::models::index::BundleIssuance;
+    use super::{BundleIssuanceAssert, BundleIssuanceTrait};
 
     fn RECIPIENT() -> starknet::ContractAddress {
         'RECIPIENT'.try_into().unwrap()

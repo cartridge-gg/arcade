@@ -17,6 +17,6 @@ pub trait IBundle<TState> {
         client: Option<ContractAddress>,
         client_percentage: u8,
         voucher_key: Option<felt252>,
+        signature: Option<Span<felt252>>,
     );
-    fn allow(ref self: TState, recipient: ContractAddress, bundle_id: u32, voucher_key: felt252);
 }

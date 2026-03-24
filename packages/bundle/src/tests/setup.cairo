@@ -9,6 +9,7 @@ pub mod setup {
     use starknet::syscalls::deploy_syscall;
     use starknet::{ContractAddress, SyscallResultTrait};
     use crate::events::index as events;
+    use crate::interface::IBundleDispatcher;
     use crate::models::index as bundle_models;
     use crate::tests::contract::{Contract, ContractTraitDispatcher, NAME as CONTRACT, NAMESPACE};
 
@@ -35,6 +36,7 @@ pub mod setup {
     #[derive(Copy, Drop)]
     pub struct Systems {
         pub contract: ContractTraitDispatcher,
+        pub bundle: IBundleDispatcher,
         pub allower: ISRC6Dispatcher,
     }
 
@@ -86,6 +88,7 @@ pub mod setup {
         let (contract_address, _) = world.dns(@CONTRACT()).expect('Contract not found');
         let systems = Systems {
             contract: ContractTraitDispatcher { contract_address },
+            bundle: IBundleDispatcher { contract_address },
             allower: ISRC6Dispatcher { contract_address: allower },
         };
 

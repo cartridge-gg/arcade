@@ -36,7 +36,7 @@ pub impl BundleGroupAssert of BundleGroupAssertTrait {
 
 #[cfg(test)]
 mod tests {
-    use super::{BundleGroupTrait, BundleGroupAssert};
+    use super::{BundleGroupAssert, BundleGroupTrait};
 
     #[test]
     fn test_group_new() {

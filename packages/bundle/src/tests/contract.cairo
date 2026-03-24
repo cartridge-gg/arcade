@@ -1,5 +1,4 @@
 use starknet::ContractAddress;
-use crate::component::Component::BundleQuote;
 
 pub fn NAMESPACE() -> ByteArray {
     "NAMESPACE"
@@ -10,9 +9,9 @@ pub fn NAME() -> ByteArray {
 }
 
 #[starknet::interface]
-pub trait ContractTrait<TContractState> {
+pub trait ContractTrait<TState> {
     fn register(
-        ref self: TContractState,
+        ref self: TState,
         referral_percentage: u8,
         reissuable: bool,
         price: u256,
@@ -22,7 +21,7 @@ pub trait ContractTrait<TContractState> {
         allower: ContractAddress,
     ) -> u32;
     fn update(
-        ref self: TContractState,
+        ref self: TState,
         bundle_id: u32,
         referral_percentage: u8,
         reissuable: bool,
@@ -31,27 +30,7 @@ pub trait ContractTrait<TContractState> {
         payment_receiver: ContractAddress,
         allower: ContractAddress,
     );
-    fn update_metadata(ref self: TContractState, bundle_id: u32, metadata: ByteArray);
-    fn quote(
-        self: @TContractState,
-        bundle_id: u32,
-        quantity: u32,
-        has_referrer: bool,
-        client_percentage: u8,
-    ) -> BundleQuote;
-    fn get_metadata(self: @TContractState, bundle_id: u32) -> ByteArray;
-    fn issue(
-        ref self: TContractState,
-        recipient: ContractAddress,
-        bundle_id: u32,
-        quantity: u32,
-        referrer: Option<ContractAddress>,
-        referrer_group: Option<felt252>,
-        client: Option<ContractAddress>,
-        client_percentage: u8,
-        voucher_key: Option<felt252>,
-        signature: Option<Span<felt252>>,
-    );
+    fn update_metadata(ref self: TState, bundle_id: u32, metadata: ByteArray);
 }
 
 #[dojo::contract]
@@ -60,6 +39,7 @@ pub mod Contract {
     use starknet::ContractAddress;
     use crate::component::Component;
     use crate::component::Component::{BundleFeeTrait, BundleQuote, BundleTrait};
+    use crate::interface::IBundle;
     use super::{ContractTrait, NAMESPACE};
 
     component!(path: Component, storage: bundle, event: BundleEvent);
@@ -163,7 +143,10 @@ pub mod Contract {
             let world = self.world_storage();
             self.bundle.update_metadata(world, bundle_id, metadata);
         }
+    }
 
+    #[abi(embed_v0)]
+    pub impl BundleImpl of IBundle<ContractState> {
         fn quote(
             self: @ContractState,
             bundle_id: u32,

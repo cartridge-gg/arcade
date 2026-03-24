@@ -1,4 +1,5 @@
 use starknet::testing::{set_block_timestamp, set_contract_address};
+use crate::interface::IBundleDispatcherTrait;
 use crate::models::bundle::BundleAssert;
 use crate::store::{BundleStoreTrait, IssuanceStoreTrait, StoreTrait};
 use crate::tests::contract::ContractTraitDispatcherTrait;
@@ -115,7 +116,7 @@ fn test_bundle_register_invalid_referral() {
 #[should_panic(expected: ('Bundle: not found', 'ENTRYPOINT_FAILED'))]
 fn test_bundle_not_found_quote() {
     let (_world, systems) = spawn();
-    let _ = systems.contract.quote(99999, 1, false, 0);
+    let _ = systems.bundle.quote(99999, 1, false, 0);
 }
 
 #[test]
@@ -185,7 +186,7 @@ fn test_bundle_quote() {
             allower: ZERO(),
         );
 
-    let quote = systems.contract.quote(bundle_id, 1, false, 0);
+    let quote = systems.bundle.quote(bundle_id, 1, false, 0);
     let expected_base: u256 = 1000;
     let expected_referral: u256 = 0;
     assert_eq!(quote.base_price, expected_base);
@@ -210,7 +211,7 @@ fn test_bundle_quote_with_referrer() {
             allower: ZERO(),
         );
 
-    let quote = systems.contract.quote(bundle_id, 3, true, 0);
+    let quote = systems.bundle.quote(bundle_id, 3, true, 0);
     let expected_base: u256 = 3000;
     let expected_referral: u256 = 300;
     assert_eq!(quote.base_price, expected_base);
@@ -225,7 +226,7 @@ fn test_bundle_issue() {
 
     set_block_timestamp(2);
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -252,7 +253,7 @@ fn test_bundle_issue_not_reissuable() {
 
     set_block_timestamp(2);
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -267,7 +268,7 @@ fn test_bundle_issue_not_reissuable() {
 
     set_block_timestamp(3);
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -301,7 +302,7 @@ fn test_bundle_issue_reissuable() {
 
     set_block_timestamp(2);
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -316,7 +317,7 @@ fn test_bundle_issue_reissuable() {
 
     set_block_timestamp(3);
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -342,7 +343,7 @@ fn test_bundle_issue_quantity_exceeds_limit() {
     let bundle_id = register_free_bundle(systems, ZERO());
 
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -365,7 +366,7 @@ fn test_bundle_conditional_issue() {
     set_block_timestamp(2);
     set_contract_address(PLAYER());
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -404,7 +405,7 @@ fn test_bundle_quote_no_fees() {
         );
 
     // [Quote] No referrer, no client
-    let quote = systems.contract.quote(bundle_id, 1, false, 0);
+    let quote = systems.bundle.quote(bundle_id, 1, false, 0);
     assert_eq!(quote.base_price, 1000);
     assert_eq!(quote.referral_fee, 0);
     assert_eq!(quote.client_fee, 0);
@@ -433,7 +434,7 @@ fn test_bundle_quote_referral_fee() {
         );
 
     // [Quote] With referrer — referral fee comes from base_price (seller's share)
-    let quote = systems.contract.quote(bundle_id, 1, true, 0);
+    let quote = systems.bundle.quote(bundle_id, 1, true, 0);
     assert_eq!(quote.base_price, 1000);
     // referral_fee = 10% of 1000 = 100
     assert_eq!(quote.referral_fee, 100);
@@ -462,7 +463,7 @@ fn test_bundle_quote_client_fee() {
         );
 
     // [Quote] With client 5% — client fee inflates the price
-    let quote = systems.contract.quote(bundle_id, 1, false, 5);
+    let quote = systems.bundle.quote(bundle_id, 1, false, 5);
     assert_eq!(quote.base_price, 1000);
     assert_eq!(quote.referral_fee, 0);
     // client_fee = 5% of 1000 = 50
@@ -491,7 +492,7 @@ fn test_bundle_quote_all_fees() {
         );
 
     // [Quote] All fees: referrer 10%, client 5%, protocol 5%
-    let quote = systems.contract.quote(bundle_id, 1, true, 5);
+    let quote = systems.bundle.quote(bundle_id, 1, true, 5);
     assert_eq!(quote.base_price, 1000);
     // referral_fee = 10% of 1000 = 100 (from seller's share)
     assert_eq!(quote.referral_fee, 100);
@@ -523,7 +524,7 @@ fn test_bundle_quote_all_fees_with_quantity() {
         );
 
     // [Quote] Quantity 5 with all fees
-    let quote = systems.contract.quote(bundle_id, 5, true, 5);
+    let quote = systems.bundle.quote(bundle_id, 5, true, 5);
     assert_eq!(quote.base_price, 5000);
     assert_eq!(quote.referral_fee, 500);
     assert_eq!(quote.client_fee, 250);
@@ -550,7 +551,7 @@ fn test_bundle_quote_no_referrer_means_zero_referral_fee() {
             allower: ZERO(),
         );
 
-    let quote = systems.contract.quote(bundle_id, 1, false, 0);
+    let quote = systems.bundle.quote(bundle_id, 1, false, 0);
     // referral_fee = 0 even though bundle has 10% configured
     assert_eq!(quote.referral_fee, 0);
     assert_eq!(quote.total_cost, 1050);
@@ -563,7 +564,7 @@ fn test_bundle_quote_zero_price_all_fees_zero() {
 
     let bundle_id = register_free_bundle(systems, ZERO());
 
-    let quote = systems.contract.quote(bundle_id, 1, true, 10);
+    let quote = systems.bundle.quote(bundle_id, 1, true, 10);
     assert_eq!(quote.base_price, 0);
     assert_eq!(quote.referral_fee, 0);
     assert_eq!(quote.client_fee, 0);
@@ -577,7 +578,7 @@ fn test_bundle_quote_zero_price_all_fees_zero() {
 #[should_panic(expected: ('Bundle: not found', 'ENTRYPOINT_FAILED'))]
 fn test_bundle_not_found_metadata() {
     let (_, systems) = spawn();
-    systems.contract.get_metadata(99999);
+    systems.bundle.get_metadata(99999);
 }
 
 // Tests - Update metadata
@@ -609,7 +610,7 @@ fn test_bundle_conditional_issue_wrong_voucher() {
 
     set_contract_address(PLAYER());
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -619,7 +620,9 @@ fn test_bundle_conditional_issue_wrong_voucher() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::Some('WRONG_KEY'),
-            signature: Option::Some(SIG_VK_PLAYER()), // Sig for VOUCHER_KEY, not WRONG_KEY → invalid
+            signature: Option::Some(
+                SIG_VK_PLAYER(),
+            ) // Sig for VOUCHER_KEY, not WRONG_KEY → invalid
         );
 }
 
@@ -633,7 +636,7 @@ fn test_bundle_conditional_issue_without_voucher() {
     set_block_timestamp(2);
     set_contract_address(PLAYER());
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -658,7 +661,7 @@ fn test_bundle_conditional_issue_wrong_recipient_sig() {
     set_block_timestamp(2);
     set_contract_address(CREATOR());
     systems
-        .contract
+        .bundle
         .issue(
             recipient: CREATOR(),
             bundle_id: bundle_id,
@@ -668,7 +671,9 @@ fn test_bundle_conditional_issue_wrong_recipient_sig() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::Some(VOUCHER_KEY),
-            signature: Option::Some(SIG_VK_PLAYER()), // Sig for PLAYER, used with CREATOR → invalid
+            signature: Option::Some(
+                SIG_VK_PLAYER(),
+            ) // Sig for PLAYER, used with CREATOR → invalid
         );
 }
 
@@ -694,7 +699,7 @@ fn test_bundle_conditional_issue_once() {
     set_block_timestamp(2);
     set_contract_address(PLAYER());
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
@@ -709,7 +714,7 @@ fn test_bundle_conditional_issue_once() {
 
     set_block_timestamp(3);
     systems
-        .contract
+        .bundle
         .issue(
             recipient: PLAYER(),
             bundle_id: bundle_id,
