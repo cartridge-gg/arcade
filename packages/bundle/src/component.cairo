@@ -2,8 +2,9 @@
 pub mod Component {
     use core::num::traits::Zero;
     use dojo::world::{IWorldDispatcherTrait, WorldStorage};
+    use openzeppelin::interfaces::accounts::ISRC6Dispatcher;
     use openzeppelin::interfaces::token::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
+    use starknet::{ContractAddress, get_block_timestamp, get_caller_address, get_contract_address};
     use crate::constants::MAX_REFERRAL_FEE;
     use crate::models::bundle::{BundleAssert, BundleTrait as BundleModelTrait, errors};
     use crate::models::group::BundleGroupTrait;
@@ -25,6 +26,7 @@ pub mod Component {
         pub protocol_fee: u256,
         pub total_cost: u256,
         pub payment_token: ContractAddress,
+        pub contract: ContractAddress,
     }
 
     // Hooks
@@ -89,16 +91,18 @@ pub mod Component {
             // [Effect] Create and store bundle
             let bundle_id = world.dispatcher.uuid();
             let time = get_block_timestamp();
+            let this = get_contract_address();
             let bundle = BundleModelTrait::new(
-                bundle_id,
-                referral_percentage,
-                reissuable,
-                price,
-                payment_token,
-                payment_receiver,
-                metadata,
-                time,
-                allower,
+                id: bundle_id,
+                referral_percentage: referral_percentage,
+                reissuable: reissuable,
+                price: price,
+                payment_token: payment_token,
+                payment_receiver: payment_receiver,
+                metadata: metadata,
+                time: time,
+                contract: this,
+                allower: allower,
             );
             store.set_bundle(@bundle);
 
@@ -192,7 +196,13 @@ pub mod Component {
             let total_cost = base_price + protocol_fee + client_fee;
 
             BundleQuote {
-                base_price, referral_fee, client_fee, protocol_fee, total_cost, payment_token,
+                base_price: base_price,
+                referral_fee: referral_fee,
+                client_fee: client_fee,
+                protocol_fee: protocol_fee,
+                total_cost: total_cost,
+                payment_token: payment_token,
+                contract: bundle.contract,
             }
         }
 
@@ -220,6 +230,7 @@ pub mod Component {
             client: Option<ContractAddress>,
             client_percentage: u8,
             voucher_key: Option<felt252>,
+            signature: Option<Span<felt252>>,
         ) {
             // [Setup] Datastore
             let store = StoreTrait::new(world);
@@ -244,15 +255,14 @@ pub mod Component {
             // [Check] Voucher is valid (if allower is set)
             let time = get_block_timestamp();
             if bundle.allower.is_non_zero() {
-                let voucher_key = voucher_key.unwrap_or_default();
-                BundleVoucherAssert::assert_valid_key(voucher_key);
-
-                let mut voucher = store.get_voucher(bundle_id, voucher_key);
-                voucher.assert_is_recipient(recipient);
-                voucher.assert_not_claimed();
-
+                // [Check] Voucher is valid and not claimed
+                let voucher_key = voucher_key.expect('Voucher: key is required');
+                let mut voucher = store.get_voucher(voucher_key);
+                let allower = ISRC6Dispatcher { contract_address: bundle.allower };
+                let caller = get_caller_address();
+                voucher.verify(bundle_id, caller, allower, signature);
                 // [Effect] Claim voucher
-                voucher.claim(time);
+                voucher.claim(caller);
                 store.set_voucher(@voucher);
             }
 
@@ -321,37 +331,6 @@ pub mod Component {
 
             // [Event] Emit bundle issued
             store.issued(@bundle, @issuance, total_amount, quantity, referrer, referrer_group);
-        }
-
-        fn allow(
-            self: @ComponentState<TContractState>,
-            mut world: WorldStorage,
-            recipient: ContractAddress,
-            bundle_id: u32,
-            voucher_key: felt252,
-        ) {
-            // [Setup] Datastore
-            let store = StoreTrait::new(world);
-
-            // [Check] Bundle exists
-            let bundle = store.get_bundle(bundle_id);
-            bundle.assert_does_exist();
-
-            // [Check] Caller is the allower
-            let caller = get_caller_address();
-            bundle.assert_is_allower(caller);
-
-            // [Check] Voucher key and recipient are valid
-            BundleVoucherAssert::assert_valid_key(voucher_key);
-            BundleVoucherAssert::assert_valid_recipient(recipient);
-
-            // [Check] Voucher not already claimed
-            let mut voucher = store.get_voucher(bundle_id, voucher_key);
-            voucher.assert_not_claimed();
-
-            // [Effect] Allow recipient
-            voucher.allow(recipient);
-            store.set_voucher(@voucher);
         }
     }
 }

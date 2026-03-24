@@ -18,11 +18,12 @@ pub impl BundleImpl of BundleTrait {
         referral_percentage: u8,
         reissuable: bool,
         price: u256,
-        payment_token: starknet::ContractAddress,
-        payment_receiver: starknet::ContractAddress,
+        payment_token: ContractAddress,
+        payment_receiver: ContractAddress,
         metadata: ByteArray,
         time: u64,
-        allower: starknet::ContractAddress,
+        contract: ContractAddress,
+        allower: ContractAddress,
     ) -> Bundle {
         Bundle {
             id,
@@ -34,6 +35,7 @@ pub impl BundleImpl of BundleTrait {
             total_issued: 0,
             created_at: time,
             metadata,
+            contract,
             allower,
         }
     }
@@ -44,9 +46,9 @@ pub impl BundleImpl of BundleTrait {
         referral_percentage: u8,
         reissuable: bool,
         price: u256,
-        payment_token: starknet::ContractAddress,
-        payment_receiver: starknet::ContractAddress,
-        allower: starknet::ContractAddress,
+        payment_token: ContractAddress,
+        payment_receiver: ContractAddress,
+        allower: ContractAddress,
     ) {
         self.referral_percentage = referral_percentage;
         self.reissuable = reissuable;
@@ -117,7 +119,7 @@ pub impl BundleAssert of BundleAssertTrait {
         assert(*self.created_at != 0, errors::BUNDLE_NOT_FOUND);
     }
 
-    fn assert_is_allower(self: @Bundle, caller: starknet::ContractAddress) {
+    fn assert_is_allower(self: @Bundle, caller: ContractAddress) {
         assert((*self.allower) == caller, errors::BUNDLE_NOT_ALLOWER);
     }
 }
@@ -137,6 +139,7 @@ mod tests {
             total_issued: 0,
             created_at: 1,
             metadata: "",
+            contract: 0.try_into().unwrap(),
             allower: 0.try_into().unwrap(),
         }
     }

@@ -121,8 +121,8 @@ pub impl GroupStoreImpl of GroupStoreTrait {
 
 #[generate_trait]
 pub impl VoucherStoreImpl of VoucherStoreTrait {
-    fn get_voucher(self: Store, bundle_id: u32, voucher_key: felt252) -> BundleVoucher {
-        self.world.read_model((bundle_id, voucher_key))
+    fn get_voucher(self: Store, voucher_key: felt252) -> BundleVoucher {
+        self.world.read_model(voucher_key)
     }
 
     fn set_voucher(mut self: Store, voucher: @BundleVoucher) {

@@ -17,5 +17,6 @@ cairo_test.workspace = true
 
 [[target.starknet-contract]]
 build-external-contracts = [
-    "dojo::world::world_contract::world",
+  "dojo::world::world_contract::world",
+  "openzeppelin::presets::account::AccountUpgradeable",
 ]

@@ -13,6 +13,7 @@ pub struct Bundle {
     pub total_issued: u64,
     pub created_at: u64,
     pub metadata: ByteArray,
+    pub contract: ContractAddress,
     pub allower: ContractAddress,
 }
 
@@ -48,9 +49,6 @@ pub struct BundleGroup {
 #[dojo::model]
 pub struct BundleVoucher {
     #[key]
-    pub bundle_id: u32,
-    #[key]
-    pub voucher_key: felt252,
+    pub key: felt252,
     pub recipient: ContractAddress,
-    pub claimed_at: u64,
 }

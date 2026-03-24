@@ -32,9 +32,6 @@ pub trait ContractTrait<TContractState> {
         allower: ContractAddress,
     );
     fn update_metadata(ref self: TContractState, bundle_id: u32, metadata: ByteArray);
-    fn allow(
-        ref self: TContractState, recipient: ContractAddress, bundle_id: u32, voucher_key: felt252,
-    );
     fn quote(
         self: @TContractState,
         bundle_id: u32,
@@ -53,6 +50,7 @@ pub trait ContractTrait<TContractState> {
         client: Option<ContractAddress>,
         client_percentage: u8,
         voucher_key: Option<felt252>,
+        signature: Option<Span<felt252>>,
     );
 }
 
@@ -166,13 +164,6 @@ pub mod Contract {
             self.bundle.update_metadata(world, bundle_id, metadata);
         }
 
-        fn allow(
-            ref self: ContractState, recipient: ContractAddress, bundle_id: u32, voucher_key: felt252,
-        ) {
-            let world = self.world_storage();
-            self.bundle.allow(world, recipient, bundle_id, voucher_key);
-        }
-
         fn quote(
             self: @ContractState,
             bundle_id: u32,
@@ -199,6 +190,7 @@ pub mod Contract {
             client: Option<ContractAddress>,
             client_percentage: u8,
             voucher_key: Option<felt252>,
+            signature: Option<Span<felt252>>,
         ) {
             let world = self.world_storage();
             self
@@ -213,6 +205,7 @@ pub mod Contract {
                     client,
                     client_percentage,
                     voucher_key,
+                    signature,
                 );
         }
     }

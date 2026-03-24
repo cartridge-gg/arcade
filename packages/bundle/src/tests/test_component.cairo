@@ -11,6 +11,36 @@ fn ZERO() -> ContractAddress {
     0.try_into().unwrap()
 }
 
+// Pre-computed ECDSA signatures for SNIP-12 Message { bundle_id, voucher_key, recipient }
+// Signed with private key 0x040971f817af8710f6e89f4ebde09bf2d1f45dced7fee9405fad453b42aaac68
+
+// bundle_id=0, voucher_key=VOUCHER_KEY, recipient=PLAYER
+fn SIG_VK_PLAYER() -> Span<felt252> {
+    array![
+        0x10373fba34fb1737d80163d593600ba44f4c4ed8e4330cf8d74ea151ed05b3b,
+        0x740a2451cddaaccdc623f0d598eeb680384328b73a821e78247170da9001278,
+    ]
+        .span()
+}
+
+// bundle_id=0, voucher_key=VOUCHER_KEY, recipient=CREATOR
+fn SIG_VK_CREATOR() -> Span<felt252> {
+    array![
+        0x47a281b27cd5f72ffa6553aee616579846f93f30437bdcaa78cd046ec86385c,
+        0x4cd6b32496f5fcfac79feb3c4116da9b58a9b763a3be3ffda2d3c214ee30d61,
+    ]
+        .span()
+}
+
+// bundle_id=0, voucher_key='WRONG_KEY', recipient=PLAYER
+fn SIG_WK_PLAYER() -> Span<felt252> {
+    array![
+        0x7880eec92f794c9de815adbbe344a40c887d6b986a0b34c94a65d61741dd728,
+        0x4eb36f354b24476d06decd5603df9f87833bbfad6780ad7da36df4965ebd442,
+    ]
+        .span()
+}
+
 fn register_free_bundle(systems: Systems, allower: ContractAddress) -> u32 {
     set_contract_address(CREATOR());
     systems
@@ -205,6 +235,7 @@ fn test_bundle_issue() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::None,
+            signature: Option::None,
         );
 
     let store = StoreTrait::new(world);
@@ -231,6 +262,7 @@ fn test_bundle_issue_not_reissuable() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::None,
+            signature: Option::None,
         );
 
     set_block_timestamp(3);
@@ -245,6 +277,7 @@ fn test_bundle_issue_not_reissuable() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::None,
+            signature: Option::None,
         );
 }
 
@@ -278,6 +311,7 @@ fn test_bundle_issue_reissuable() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::None,
+            signature: Option::None,
         );
 
     set_block_timestamp(3);
@@ -292,6 +326,7 @@ fn test_bundle_issue_reissuable() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::None,
+            signature: Option::None,
         );
 
     let store = StoreTrait::new(world);
@@ -317,17 +352,35 @@ fn test_bundle_issue_quantity_exceeds_limit() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::None,
+            signature: Option::None,
         );
 }
 
 #[test]
-fn test_bundle_conditional_allow_and_issue() {
-    let (_world, systems) = spawn();
+fn test_bundle_conditional_issue() {
+    let (world, systems) = spawn();
     set_block_timestamp(1);
-    let bundle_id = register_free_bundle(systems, CREATOR());
+    let bundle_id = register_free_bundle(systems, systems.allower.contract_address);
 
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
+    set_block_timestamp(2);
+    set_contract_address(PLAYER());
+    systems
+        .contract
+        .issue(
+            recipient: PLAYER(),
+            bundle_id: bundle_id,
+            quantity: 1,
+            referrer: Option::None,
+            referrer_group: Option::None,
+            client: Option::None,
+            client_percentage: 0,
+            voucher_key: Option::Some(VOUCHER_KEY),
+            signature: Option::Some(SIG_VK_PLAYER()),
+        );
+
+    let store = StoreTrait::new(world);
+    let issuance = store.get_issuance(bundle_id, PLAYER());
+    assert_gt!(issuance.issued_at, 0);
 }
 
 // Tests - Quote with fees
@@ -547,15 +600,12 @@ fn test_bundle_update_metadata() {
 // Tests - Conditional wrong voucher key
 
 #[test]
-#[should_panic(expected: ('Voucher: not recipient', 'ENTRYPOINT_FAILED'))]
+#[should_panic(expected: ('Voucher: invalid signature', 'ENTRYPOINT_FAILED'))]
 fn test_bundle_conditional_issue_wrong_voucher() {
     let (_, systems) = spawn();
     set_block_timestamp(1);
 
-    let bundle_id = register_free_bundle(systems, CREATOR());
-
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
+    let bundle_id = register_free_bundle(systems, systems.allower.contract_address);
 
     set_contract_address(PLAYER());
     systems
@@ -569,52 +619,16 @@ fn test_bundle_conditional_issue_wrong_voucher() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::Some('WRONG_KEY'),
+            signature: Option::Some(SIG_VK_PLAYER()), // Sig for VOUCHER_KEY, not WRONG_KEY → invalid
         );
 }
 
 #[test]
-#[should_panic(expected: ('Bundle: not allower', 'ENTRYPOINT_FAILED'))]
-fn test_bundle_conditional_allow_not_allower() {
-    let (_world, systems) = spawn();
-    set_block_timestamp(1);
-    let bundle_id = register_free_bundle(systems, CREATOR());
-
-    // [Allow] From PLAYER who is not the allower — should fail
-    set_contract_address(PLAYER());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
-}
-
-#[test]
-#[should_panic(expected: ('Voucher: invalid key', 'ENTRYPOINT_FAILED'))]
-fn test_bundle_conditional_allow_invalid_key() {
-    let (_world, systems) = spawn();
-    set_block_timestamp(1);
-    let bundle_id = register_free_bundle(systems, CREATOR());
-
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, 0);
-}
-
-#[test]
-#[should_panic(expected: ('Voucher: invalid recipient', 'ENTRYPOINT_FAILED'))]
-fn test_bundle_conditional_allow_invalid_recipient() {
-    let (_world, systems) = spawn();
-    set_block_timestamp(1);
-    let bundle_id = register_free_bundle(systems, CREATOR());
-
-    set_contract_address(CREATOR());
-    systems.contract.allow(0.try_into().unwrap(), bundle_id, VOUCHER_KEY);
-}
-
-#[test]
-#[should_panic(expected: ('Voucher: invalid key', 'ENTRYPOINT_FAILED'))]
+#[should_panic(expected: ('Voucher: key is required', 'ENTRYPOINT_FAILED'))]
 fn test_bundle_conditional_issue_without_voucher() {
     let (_world, systems) = spawn();
     set_block_timestamp(1);
-    let bundle_id = register_free_bundle(systems, CREATOR());
-
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
+    let bundle_id = register_free_bundle(systems, systems.allower.contract_address);
 
     set_block_timestamp(2);
     set_contract_address(PLAYER());
@@ -629,21 +643,20 @@ fn test_bundle_conditional_issue_without_voucher() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::None,
+            signature: Option::Some(array![0x1, 0x2].span()),
         );
 }
 
 #[test]
-#[should_panic(expected: ('Voucher: not recipient', 'ENTRYPOINT_FAILED'))]
-fn test_bundle_conditional_issue_not_recipient() {
+#[should_panic(expected: ('Voucher: invalid signature', 'ENTRYPOINT_FAILED'))]
+fn test_bundle_conditional_issue_wrong_recipient_sig() {
     let (_world, systems) = spawn();
     set_block_timestamp(1);
-    let bundle_id = register_free_bundle(systems, CREATOR());
+    let bundle_id = register_free_bundle(systems, systems.allower.contract_address);
 
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
-
+    // Signature was signed for PLAYER as recipient, but we issue for CREATOR → hash mismatch
     set_block_timestamp(2);
-    set_contract_address(PLAYER());
+    set_contract_address(CREATOR());
     systems
         .contract
         .issue(
@@ -655,6 +668,7 @@ fn test_bundle_conditional_issue_not_recipient() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::Some(VOUCHER_KEY),
+            signature: Option::Some(SIG_VK_PLAYER()), // Sig for PLAYER, used with CREATOR → invalid
         );
 }
 
@@ -674,11 +688,8 @@ fn test_bundle_conditional_issue_once() {
             payment_token: PAYMENT_TOKEN(),
             payment_receiver: CREATOR(),
             metadata: METADATA(),
-            allower: CREATOR(),
+            allower: systems.allower.contract_address,
         );
-
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
 
     set_block_timestamp(2);
     set_contract_address(PLAYER());
@@ -693,6 +704,7 @@ fn test_bundle_conditional_issue_once() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::Some(VOUCHER_KEY),
+            signature: Option::Some(SIG_VK_PLAYER()),
         );
 
     set_block_timestamp(3);
@@ -707,34 +719,6 @@ fn test_bundle_conditional_issue_once() {
             client: Option::None,
             client_percentage: 0,
             voucher_key: Option::Some(VOUCHER_KEY),
+            signature: Option::Some(SIG_VK_PLAYER()),
         );
-}
-
-#[test]
-#[should_panic(expected: ('Voucher: already claimed', 'ENTRYPOINT_FAILED'))]
-fn test_bundle_conditional_allow_already_claimed() {
-    let (_world, systems) = spawn();
-    set_block_timestamp(1);
-    let bundle_id = register_free_bundle(systems, CREATOR());
-
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
-
-    set_block_timestamp(2);
-    set_contract_address(PLAYER());
-    systems
-        .contract
-        .issue(
-            recipient: PLAYER(),
-            bundle_id: bundle_id,
-            quantity: 1,
-            referrer: Option::None,
-            referrer_group: Option::None,
-            client: Option::None,
-            client_percentage: 0,
-            voucher_key: Option::Some(VOUCHER_KEY),
-        );
-
-    set_contract_address(CREATOR());
-    systems.contract.allow(PLAYER(), bundle_id, VOUCHER_KEY);
 }
