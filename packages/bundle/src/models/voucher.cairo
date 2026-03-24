@@ -38,7 +38,9 @@ pub impl BundleVoucherImpl of BundleVoucherTrait {
         let sn_signature = signature.expect(Errors::VOUCHER_SIGNATURE_REQUIRED);
 
         // [Check] Signature validity
-        let message = Message { bundle_id: bundle_id, voucher_key: self.key, recipient: recipient };
+        let message = Message {
+            bundle_id: bundle_id.into(), voucher_key: self.key, recipient: recipient,
+        };
         let hash = message.get_message_hash(allower.contract_address);
         let is_valid = allower.is_valid_signature(hash, sn_signature.into());
         assert(is_valid == starknet::VALIDATED || is_valid == 1, Errors::VOUCHER_INVALID_SIGNATURE);

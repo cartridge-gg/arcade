@@ -3,15 +3,19 @@ use core::poseidon::PoseidonTrait;
 use openzeppelin::utils::snip12::{SNIP12Metadata, StructHash};
 use starknet::ContractAddress;
 
-const MESSAGE_TYPE_HASH: felt252 =
-    0x167C047B875B239F26D56026FCF3631416FD02D0686053AA6AD7DB8BF56669B;
-// const MESSAGE_TYPE_HASH: felt252 = selector!(
-//     "\"Claim\"(\"bundle_id\":\"u32\",\"voucher_key\":\"felt\",\"recipient\":\"ContractAddress\")",
+// selector!(
+//   "\"Claim\"(
+//    \"bundle_id\":\"felt\",
+//    \"voucher_key\":\"felt\",
+//    \"recipient\":\"ContractAddress\"
+//   )"
 // );
+const MESSAGE_TYPE_HASH: felt252 =
+    0x2E32FE07D207F80C6F19335B5F2352FD4A11C40BEC0D1CC57586BD1C67FFCC6;
 
 #[derive(Copy, Drop, Hash)]
 pub struct Message {
-    pub bundle_id: u32,
+    pub bundle_id: felt252,
     pub voucher_key: felt252,
     pub recipient: ContractAddress,
 }

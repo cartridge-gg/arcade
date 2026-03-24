@@ -18,26 +18,24 @@ fn ZERO() -> ContractAddress {
 // bundle_id=0, voucher_key=VOUCHER_KEY, recipient=PLAYER
 fn SIG_VK_PLAYER() -> Span<felt252> {
     array![
-        0x10373fba34fb1737d80163d593600ba44f4c4ed8e4330cf8d74ea151ed05b3b,
-        0x740a2451cddaaccdc623f0d598eeb680384328b73a821e78247170da9001278,
+        0x7eafe3db6d7f274f894d699c53412426f99bccbbc28efb7c52ac2dca98505bc,
+        0x719b725ffecba048d86c832f8d9ceb938312c98f2ac9d81a88b5a236d7eef61,
     ]
         .span()
 }
 
-// bundle_id=0, voucher_key=VOUCHER_KEY, recipient=CREATOR
 fn SIG_VK_CREATOR() -> Span<felt252> {
     array![
-        0x47a281b27cd5f72ffa6553aee616579846f93f30437bdcaa78cd046ec86385c,
-        0x4cd6b32496f5fcfac79feb3c4116da9b58a9b763a3be3ffda2d3c214ee30d61,
+        0x66f375a55372a01dc2fb87bba8fd05c16943499b3e16a9683abd5c46b3a32be,
+        0x29cdd9629227c9a497c81f1e48b23ee92eec150b1476f9f4d27b3524bc310b9,
     ]
         .span()
 }
 
-// bundle_id=0, voucher_key='WRONG_KEY', recipient=PLAYER
 fn SIG_WK_PLAYER() -> Span<felt252> {
     array![
-        0x7880eec92f794c9de815adbbe344a40c887d6b986a0b34c94a65d61741dd728,
-        0x4eb36f354b24476d06decd5603df9f87833bbfad6780ad7da36df4965ebd442,
+        0x26baa57d322e71b2b556a6e814e2fb18b47fb9a91d7975052f5347d1ee7b20d,
+        0x320ba30262c608860e7dc1aa715a910e1d01f79b7d510a9f58c83ca8c922430,
     ]
         .span()
 }
@@ -727,3 +725,4 @@ fn test_bundle_conditional_issue_once() {
             signature: Option::Some(SIG_VK_PLAYER()),
         );
 }
+
