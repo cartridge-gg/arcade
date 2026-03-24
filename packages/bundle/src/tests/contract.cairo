@@ -146,7 +146,7 @@ pub mod Contract {
     }
 
     #[abi(embed_v0)]
-    pub impl BundleImpl of IBundle<ContractState> {
+    pub impl ContractBundleImpl of IBundle<ContractState> {
         fn quote(
             self: @ContractState,
             bundle_id: u32,
