@@ -273,6 +273,8 @@ pub mod Component {
 
             // [Interaction] Transfer payments
             let mut total_amount = base_price;
+            let mut real_referrer: Option<ContractAddress> = None;
+            let mut real_group: Option<felt252> = None;
             if base_price != 0 {
                 let token_dispatcher = IERC20Dispatcher { contract_address: payment_token };
 
@@ -303,11 +305,17 @@ pub mod Component {
                     referral.add(referral_fee);
                     store.set_referral(@referral);
 
+                    // [Effect] Update referrer address
+                    real_referrer = Some(referral_address);
+
                     // [Effect] Track group reward
                     if let Option::Some(group_id) = referrer_group {
                         let mut group = store.get_group_or_new(group_id);
                         group.add(referral_fee);
                         store.set_group(@group);
+
+                        // [Effect] Update group address
+                        real_group = Some(group_id);
                     }
                 }
 
@@ -330,7 +338,7 @@ pub mod Component {
             store.set_bundle(@bundle);
 
             // [Event] Emit bundle issued
-            store.issued(@bundle, @issuance, total_amount, quantity, referrer, referrer_group);
+            store.issued(@bundle, @issuance, total_amount, quantity, real_referrer, real_group);
         }
     }
 }
