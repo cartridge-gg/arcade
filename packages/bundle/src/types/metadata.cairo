@@ -1,6 +1,5 @@
 use graffiti::json::JsonImpl;
 use starknet::ContractAddress;
-use crate::types::condition::{Condition, ConditionTrait};
 use crate::types::item::{Item, ItemTrait};
 
 #[derive(Clone, Drop, Serde)]
@@ -10,7 +9,7 @@ pub struct Metadata {
     pub image_uri: ByteArray,
     pub items: Span<Item>,
     pub tokens: Span<ContractAddress>,
-    pub conditions: Condition,
+    pub conditions: Span<ByteArray>,
 }
 
 pub mod Errors {
@@ -29,7 +28,7 @@ pub impl MetadataImpl of MetadataTrait {
         image_uri: ByteArray,
         items: Span<Item>,
         tokens: Span<ContractAddress>,
-        conditions: Condition,
+        conditions: Span<ByteArray>,
     ) -> Metadata {
         MetadataAssert::assert_valid_name(@name);
         MetadataAssert::assert_valid_description(@description);
@@ -55,7 +54,7 @@ pub impl MetadataImpl of MetadataTrait {
             .add("image_uri", self.image_uri)
             .add_array("items", items.span())
             .add_array("additional_payment_tokens", tokens.span())
-            .add_array("conditions", self.conditions.span())
+            .add_array("conditions", self.conditions)
             .build()
     }
 }
@@ -99,16 +98,14 @@ mod tests {
         let image_uri: ByteArray = "IMAGE_URI";
         let items: Span<Item> = array![ItemTrait::new("NAME", "DESCRIPTION", "IMAGE_URI")].span();
         let tokens: Span<ContractAddress> = array![TOKEN].span();
-        let conditions: Condition = ConditionTrait::new(
-            "social-claim", "TWITTER", "ACCOUNT", "1234",
-        );
+        let conditions: Span<ByteArray> = CONDITIONS();
         let metadata: ByteArray = MetadataImpl::new(
             name, description, image_uri, items, tokens, conditions,
         )
             .jsonify();
         assert_eq!(
             metadata,
-            "{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"image_uri\":\"IMAGE_URI\",\"items\":[{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"image_uri\":\"IMAGE_URI\"}],\"additional_payment_tokens\":[\"362107585870\"],\"conditions\":[\"social-claim\",\"TWITTER\",\"ACCOUNT\",\"1234\"]}",
+            "{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"image_uri\":\"IMAGE_URI\",\"items\":[{\"name\":\"NAME\",\"description\":\"DESCRIPTION\",\"image_uri\":\"IMAGE_URI\"}],\"additional_payment_tokens\":[\"362107585870\"],\"conditions\":[\"CONDITION\",\"1234\"]}",
         );
     }
 
@@ -119,7 +116,7 @@ mod tests {
         let image_uri: ByteArray = "IMAGE_URI";
         let items: Span<Item> = array![ItemTrait::new("NAME", "DESCRIPTION", "IMAGE_URI")].span();
         let tokens: Span<ContractAddress> = array![].span();
-        let conditions: Condition = Default::default();
+        let conditions: Span<ByteArray> = array![].span();
         let metadata: ByteArray = MetadataImpl::new(
             name, description, image_uri, items, tokens, conditions,
         )
@@ -137,7 +134,7 @@ mod tests {
         let image_uri: ByteArray = "IMAGE_URI";
         let items: Span<Item> = array![ItemTrait::new("NAME", "DESCRIPTION", "IMAGE_URI")].span();
         let tokens: Span<ContractAddress> = array![TOKEN].span();
-        let conditions: Condition = Default::default();
+        let conditions: Span<ByteArray> = CONDITIONS();
         MetadataImpl::new("", description, image_uri, items, tokens, conditions).jsonify();
     }
 
@@ -148,7 +145,7 @@ mod tests {
         let image_uri: ByteArray = "IMAGE_URI";
         let items: Span<Item> = array![ItemTrait::new("NAME", "DESCRIPTION", "IMAGE_URI")].span();
         let tokens: Span<ContractAddress> = array![TOKEN].span();
-        let conditions: Condition = Default::default();
+        let conditions: Span<ByteArray> = CONDITIONS();
         MetadataImpl::new(name, "", image_uri, items, tokens, conditions).jsonify();
     }
 
@@ -159,7 +156,7 @@ mod tests {
         let description: ByteArray = "DESCRIPTION";
         let items: Span<Item> = array![ItemTrait::new("NAME", "DESCRIPTION", "IMAGE_URI")].span();
         let tokens: Span<ContractAddress> = array![TOKEN].span();
-        let conditions: Condition = Default::default();
+        let conditions: Span<ByteArray> = CONDITIONS();
         MetadataImpl::new(name, description, "", items, tokens, conditions).jsonify();
     }
 
@@ -171,7 +168,7 @@ mod tests {
         let image_uri: ByteArray = "IMAGE_URI";
         let items: Span<Item> = array![].span();
         let tokens: Span<ContractAddress> = array![TOKEN].span();
-        let conditions: Condition = Default::default();
+        let conditions: Span<ByteArray> = CONDITIONS();
         MetadataImpl::new(name, description, image_uri, items, tokens, conditions).jsonify();
     }
 }

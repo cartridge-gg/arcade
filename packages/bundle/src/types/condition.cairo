@@ -34,6 +34,13 @@ pub impl ConditionImpl of ConditionTrait {
 }
 
 #[generate_trait]
+pub impl Twitter of TwitterTrait {
+    fn new(account: ByteArray, id: ByteArray) -> Condition {
+        ConditionTrait::new("social-claim", "TWITTER", account, id)
+    }
+}
+
+#[generate_trait]
 pub impl ConditionAssert of AssertTrait {
     #[inline]
     fn assert_valid_method(method: @ByteArray) {
