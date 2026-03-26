@@ -4,6 +4,7 @@ pub mod interface;
 pub mod store;
 
 pub mod types {
+    pub mod condition;
     pub mod item;
     pub mod message;
     pub mod metadata;
