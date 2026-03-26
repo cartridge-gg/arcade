@@ -2,8 +2,8 @@
 
 // Internal imports
 
-use openzeppelin::token::erc1155::interface::IERC1155DispatcherTrait;
-use openzeppelin::token::erc20::interface::IERC20DispatcherTrait;
+use openzeppelin::interfaces::token::erc1155::IERC1155DispatcherTrait;
+use openzeppelin::interfaces::token::erc20::IERC20DispatcherTrait;
 use crate::constants;
 
 // Package imports

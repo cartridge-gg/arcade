@@ -7,7 +7,7 @@ pub mod setup {
         spawn_test_world,
     };
     use models::rbac::models::index as rbac_models;
-    use openzeppelin::token::erc20::interface::IERC20Dispatcher;
+    use openzeppelin::interfaces::token::erc20::IERC20Dispatcher;
     use starknet::syscalls::deploy_syscall;
     use starknet::testing::set_contract_address;
     use starknet::{ContractAddress, SyscallResultTrait};

@@ -2,7 +2,6 @@
 
 // Internal imports
 
-use starknet::ContractAddress;
 use crate::types::task::Task;
 
 #[derive(Clone, Drop, Serde)]
@@ -10,7 +9,6 @@ use crate::types::task::Task;
 pub struct AchievementDefinition {
     #[key]
     pub id: felt252,
-    pub rewarder: ContractAddress,
     pub start: u64,
     pub end: u64,
     pub tasks: Span<Task>,

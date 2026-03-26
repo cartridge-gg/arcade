@@ -2,7 +2,7 @@
 
 // Imports
 
-use achievement::types::task::Task;
+use crate::types::task::Task;
 
 #[derive(Clone, Drop, Serde)]
 #[dojo::event]

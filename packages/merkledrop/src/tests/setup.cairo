@@ -8,11 +8,11 @@ pub mod setup {
     };
     use crate::events::index as events;
     use crate::models::index as models;
-    use crate::tests::mocks::registry::{IRegistryDispatcher, NAME as REGISTRY, NAMESPACE, Registry};
+    use crate::tests::contract::{Contract, ContractTraitDispatcher, NAME as CONTRACT, NAMESPACE};
 
     #[derive(Copy, Drop)]
     pub struct Systems {
-        pub registry: IRegistryDispatcher,
+        pub contract: ContractTraitDispatcher,
     }
 
     #[inline]
@@ -23,7 +23,7 @@ pub mod setup {
                 TestResource::Model(models::m_MerkleTree::TEST_CLASS_HASH),
                 TestResource::Model(models::m_MerkleClaim::TEST_CLASS_HASH),
                 TestResource::Event(events::e_MerkleProofs::TEST_CLASS_HASH),
-                TestResource::Contract(Registry::TEST_CLASS_HASH),
+                TestResource::Contract(Contract::TEST_CLASS_HASH),
             ]
                 .span(),
         }
@@ -31,7 +31,7 @@ pub mod setup {
 
     fn setup_contracts() -> Span<ContractDef> {
         [
-            ContractDefTrait::new(@NAMESPACE(), @REGISTRY())
+            ContractDefTrait::new(@NAMESPACE(), @CONTRACT())
                 .with_writer_of([dojo::utils::bytearray_hash(@NAMESPACE())].span()),
         ]
             .span()
@@ -46,7 +46,7 @@ pub mod setup {
 
         // [Setup] Systems
         starknet::testing::set_block_timestamp(1);
-        let (merkledrop_address, _) = world.dns(@REGISTRY()).expect('Merkledrop not found');
-        Systems { registry: IRegistryDispatcher { contract_address: merkledrop_address } }
+        let (merkledrop_address, _) = world.dns(@CONTRACT()).expect('Merkledrop not found');
+        Systems { contract: ContractTraitDispatcher { contract_address: merkledrop_address } }
     }
 }

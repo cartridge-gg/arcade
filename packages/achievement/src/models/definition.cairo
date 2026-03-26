@@ -1,4 +1,3 @@
-use starknet::ContractAddress;
 pub use crate::models::index::AchievementDefinition;
 use crate::types::task::Task;
 
@@ -14,15 +13,13 @@ pub mod errors {
 #[generate_trait]
 pub impl DefinitionImpl of DefinitionTrait {
     #[inline]
-    fn new(
-        id: felt252, rewarder: ContractAddress, start: u64, end: u64, tasks: Span<Task>,
-    ) -> AchievementDefinition {
+    fn new(id: felt252, start: u64, end: u64, tasks: Span<Task>) -> AchievementDefinition {
         // [Check] Inputs
         DefinitionAssert::assert_valid_id(id);
         DefinitionAssert::assert_valid_tasks(tasks);
         DefinitionAssert::assert_valid_duration(start, end);
         // [Return] AchievementDefinition
-        AchievementDefinition { id: id, rewarder: rewarder, start: start, end: end, tasks: tasks }
+        AchievementDefinition { id: id, start: start, end: end, tasks: tasks }
     }
 
     #[inline]

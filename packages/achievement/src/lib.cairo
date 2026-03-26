@@ -1,4 +1,4 @@
-pub mod interfaces;
+pub mod component;
 pub mod store;
 
 pub mod types {
@@ -23,25 +23,10 @@ pub mod events {
     pub mod progress;
 }
 
-pub mod components {
-    pub mod achievable;
-}
-
 #[cfg(test)]
 mod tests {
+    pub mod contract;
     pub mod setup;
-    pub mod test_achievable;
-
-    pub mod cases {
-        pub mod test_delayed_permanent;
-        pub mod test_permanent;
-        pub mod test_time_limited;
-        pub mod test_time_limited_with_delay;
-    }
-
-    pub mod mocks {
-        pub mod achiever;
-        pub mod rewarder;
-    }
+    pub mod test_component;
 }
 
