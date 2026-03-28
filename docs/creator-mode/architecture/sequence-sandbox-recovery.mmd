@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant O as Run Orchestrator
+    participant K as K8s Controller
+    participant DB as Postgres
+    participant OBJ as Object Storage
+
+    O->>K: Launch run job
+    K->>DB: sandbox_lease(status=running)
+    O->>DB: run_step(status=running)
+
+    Note over K: Node preemption/pod eviction
+    K-->>O: pod terminated unexpectedly
+
+    O->>OBJ: fetch latest checkpoint
+    O->>DB: mark failed attempt, increment retry
+    O->>K: relaunch job with resume context
+    K->>DB: sandbox_lease(status=restarted)
+
+    O->>DB: run_step(status=running, attempt+1)
+    O->>OBJ: persist new checkpoint
+    O->>DB: run_step(status=succeeded)
