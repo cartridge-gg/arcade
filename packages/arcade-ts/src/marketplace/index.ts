@@ -4,3 +4,4 @@ export * from "./client";
 export * from "./react";
 export * from "./filters";
 export * from "./runtime";
+export * from "./benchmark";

@@ -50,6 +50,7 @@ export interface FetchCollectionTokensOptions {
   attributeFilters?: AttributeFilterInput;
   tokenIds?: string[];
   limit?: number;
+  includeMetadata?: boolean;
   fetchImages?: boolean;
   resolveTokenImage?: ResolveTokenImage;
   defaultProjectId?: string;
@@ -58,6 +59,13 @@ export interface FetchCollectionTokensOptions {
 export interface FetchCollectionTokensResult {
   page: CollectionTokensPage | null;
   error: CollectionTokensError | null;
+}
+
+export interface CollectionTokenMetadataBatchOptions {
+  address: string;
+  tokenIds: string[];
+  project?: string;
+  fetchImages?: boolean;
 }
 
 export interface NormalizedCollection {
@@ -144,6 +152,9 @@ export interface MarketplaceClient {
   listCollectionTokens(
     options: FetchCollectionTokensOptions,
   ): Promise<FetchCollectionTokensResult>;
+  getCollectionTokenMetadataBatch(
+    options: CollectionTokenMetadataBatchOptions,
+  ): Promise<NormalizedToken[]>;
   getCollectionOrders(options: CollectionOrdersOptions): Promise<OrderModel[]>;
   listCollectionListings(
     options: CollectionListingsOptions,

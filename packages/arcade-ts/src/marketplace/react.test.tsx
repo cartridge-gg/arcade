@@ -36,6 +36,7 @@ describe("useMarketplaceCollectionTokens", () => {
   const createClient = (): MarketplaceClient => ({
     getCollection: vi.fn(),
     listCollectionTokens: vi.fn().mockResolvedValue(mockResult),
+    getCollectionTokenMetadataBatch: vi.fn().mockResolvedValue([]),
     getCollectionOrders: vi.fn(),
     listCollectionListings: vi.fn(),
     getToken: vi.fn(),
