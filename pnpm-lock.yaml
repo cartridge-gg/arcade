@@ -30,9 +30,6 @@ catalogs:
     '@dojoengine/sdk':
       specifier: 1.9.0
       version: 1.9.0
-    '@dojoengine/torii-client':
-      specifier: 1.8.2
-      version: 1.8.2
     '@dojoengine/torii-wasm':
       specifier: 1.8.2
       version: 1.8.2
@@ -390,29 +387,29 @@ importers:
   packages/arcade-ts:
     dependencies:
       '@dojoengine/core':
-        specifier: 'catalog:'
-        version: 1.8.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+        specifier: 2.0.0
+        version: 2.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@dojoengine/grpc':
-        specifier: 'catalog:'
-        version: 1.8.7(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
+        specifier: 2.0.0
+        version: 2.0.0(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(typescript@5.8.3)(zod@3.25.76)
       '@dojoengine/sdk':
-        specifier: 'catalog:'
-        version: 1.9.0(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
+        specifier: 2.0.0
+        version: 2.0.0(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
       '@dojoengine/torii-client':
-        specifier: 'catalog:'
+        specifier: 1.8.2
         version: 1.8.2
       '@dojoengine/torii-wasm':
-        specifier: 'catalog:'
+        specifier: 1.8.2
         version: 1.8.2
       '@starknet-io/types-js':
-        specifier: ^0.9.1
-        version: 0.9.2
+        specifier: 0.10.2
+        version: 0.10.2
       eventemitter3:
         specifier: ^5.0.1
         version: 5.0.1
       starknet:
-        specifier: 'catalog:'
-        version: 8.5.4
+        specifier: 10.0.2
+        version: 10.0.2(typescript@5.8.3)(zod@3.25.76)
     devDependencies:
       '@tanstack/react-query':
         specifier: ^5.85.3
@@ -1283,8 +1280,17 @@ packages:
     resolution: {integrity: sha512-q0eqP/DXKfpXzV68nCk84yFM2wNawLiuM1NLiq1+VvhqSFuLBk/iDaAOWSBf634RH5/9z0Lrd8S/ZQbrdVEd6w==}
     hasBin: true
 
+  '@dojoengine/core@2.0.0':
+    resolution: {integrity: sha512-7m20DoPgrp6y8Gsx+mbOKN057B6PPUw/lGyJkWC/XWBtEnX4hzg3dboUNMSYJxBuGdW4jeHsMZGHIdeEvbQnSw==}
+    engines: {node: '>=22'}
+    hasBin: true
+
   '@dojoengine/grpc@1.8.7':
     resolution: {integrity: sha512-2oiEQf6ADRfE0iBjEKBAyute0CblNKiwmSIXfLpiRI1TFrIVYjSVzJBcTt80c47nTCXabkdGDTVqMWGxFyMetA==}
+
+  '@dojoengine/grpc@2.0.0':
+    resolution: {integrity: sha512-w7NfuobnUMuY8ep5b/BDDD/9J4jY9IoZ6NBuN/RLEfbxwUa5U81+PSCqMUwMuay+gcTjvvAwZ61YlK9KGZ5HLw==}
+    engines: {node: '>=22'}
 
   '@dojoengine/react@1.8.11':
     resolution: {integrity: sha512-37HkLyi+oGzLtTOMZDRRCVX7q1eP9REP12HjZy3cB3R72JHfGAhEiPvAkkLnKcI0aqHcoZ+vONTuTBCahWFAxw==}
@@ -1314,10 +1320,27 @@ packages:
       react-dom: ^19.0.0
       starknet: ^8.1.2
 
+  '@dojoengine/sdk@2.0.0':
+    resolution: {integrity: sha512-aoG2bY9PRp4gM+Kczy5xzXizpYioNTLN5Evs0QaweizVLV4VsBCx5lE+l7xzaIHn4Rqswx1FvQHBMYrZcGJCpQ==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@tanstack/react-query': ^5.62.16
+      '@types/react': ^19.0.0
+      '@types/react-dom': ^19.0.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
+      starknet: 10.0.2
+
   '@dojoengine/state@1.8.5':
     resolution: {integrity: sha512-RkuKUfRUTgX+d4cmPILOP5su46/53GtPKxaZBiM8FtDek7ssKAEs45iPQCz+Dqsmr8HD98mCFMjE2DyusZhz6w==}
     peerDependencies:
       starknet: ^8.1.2
+
+  '@dojoengine/state@2.0.0':
+    resolution: {integrity: sha512-xvSRZh0irqwF7Kqh/tajMWlCo/z68rdrQg481QWwFRk3pDaf7pBGKaPY3mvsMjGyi99HApHY5r20DuMwX/gZKA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      starknet: 10.0.2
 
   '@dojoengine/torii-client@1.8.2':
     resolution: {integrity: sha512-A1aJFkBXgEcr5oObIMeiYsfkPd2VOFHdSARZ6D2IIc0BARz7rMa395yPbj5s4ZkTvhmdsovna/IJvSk0r4pFUA==}
@@ -1329,6 +1352,12 @@ packages:
     resolution: {integrity: sha512-lqIB1gsGGvzUpXfNymohds6NLlghLimDG9v3nFKyp4rjs2/HnIzeDIlzPgeYPfTslfoRE6FFAOsick2YT5Hzcg==}
     peerDependencies:
       starknet: ^8.1.2
+
+  '@dojoengine/utils@2.0.0':
+    resolution: {integrity: sha512-D/6wB/k+ihzBBLmiWOTGMUDq4hSrAyEJv1E0WYH/L6YsMAwmKj3EErbYIdCwfpwOSE01QhDaH7gbyZgeAHFTpA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      starknet: 10.0.2
 
   '@edge-runtime/format@2.2.1':
     resolution: {integrity: sha512-JQTRVuiusQLNNLe2W9tnzBlV/GvSVcozLl4XZHk5swnRZ/v6jp8TqR8P7sqmJsQqblDZ3EztcWmLDbhRje/+8g==}
@@ -2070,11 +2099,23 @@ packages:
       '@types/react': ^19.0.0
       react: ^19.0.0
 
+  '@module-federation/error-codes@0.12.0':
+    resolution: {integrity: sha512-DEXQjopcBuGzp/NA9OVtASO0uZ6grVK5TIe0PjrbDRyZDxVaYQXKrISxBLOE+3nSIELE98tYpfxptm8WC9A8zA==}
+
+  '@module-federation/runtime-core@0.12.0':
+    resolution: {integrity: sha512-373zBM54196KHURs/O8lry9trCAM3PPidvsF4YdrtahNc8YaQynml0mE3zdZeBnqP6H0/4OpPqMMjACI80Ht8w==}
+
   '@module-federation/runtime@0.1.21':
     resolution: {integrity: sha512-/p4BhZ0SnjJuiL0wwu+FebFgIUJ9vM+oCY7CyprUHImyi/Y23ulI61WNWMVrKQGgdMoXQDQCL8RH4EnrVP2ZFw==}
 
+  '@module-federation/runtime@0.12.0':
+    resolution: {integrity: sha512-Cz9/7+gSvrdencwA8LXUMKnZdu0/flyN+yk6t3pkxfhvPJi3W65ZcalAKyOgyk2x8rEYrRSyEXu+/2DIFgrzmA==}
+
   '@module-federation/sdk@0.1.21':
     resolution: {integrity: sha512-r7xPiAm+O4e+8Zvw+8b4ToeD0D0VJD004nHmt+Y8r/l98J2eA6di72Vn1FeyjtQbCrFtiMw3ts/dlqtcmIBipw==}
+
+  '@module-federation/sdk@0.12.0':
+    resolution: {integrity: sha512-vh3GcG90fxjbkMghK7iSWcMayi/y8U5DxI6mhEFuz11St3y1UgQO2TZYephL8nISFBld7DdiqAkimx+6Hb3hjQ==}
 
   '@msgpack/msgpack@3.1.2':
     resolution: {integrity: sha512-JEW4DEtBzfe8HvUYecLU9e6+XJnKDlUAIve8FvPzF3Kzs6Xo/KuZkZJsDH0wJXl/qEZbeeE7edxDNY3kMs39hQ==}
@@ -3117,8 +3158,34 @@ packages:
   '@starknet-io/get-starknet-core@4.0.7':
     resolution: {integrity: sha512-ocwQTdDvGa+0CvjGygyaTuFkda2R82dofydts8uXr9p0Diy/bmYW1fkuqJfi1nC5M+YcvvuEpl6wFvwXM1og5w==}
 
+  '@starknet-io/get-starknet-core@5.0.0':
+    resolution: {integrity: sha512-FVKYeNGHWG978482ZdCf7VQMoMn0xxHS0mWYbNB6zwkpo2yForHJwN4/EIHQkd2xp2mfAD1VcIHSZ4SLWGV1zw==}
+
+  '@starknet-io/get-starknet-discovery@5.0.0':
+    resolution: {integrity: sha512-b40ZfhbisiEonxWLe/naOraZvNc1hfhy4TEs0TP/cYppfECDhBKncvvFTGu++/rm+xV3SjmSzwNQGQmIn5DMLQ==}
+
+  '@starknet-io/get-starknet-modal@5.0.0':
+    resolution: {integrity: sha512-NBuFCm8gpKGLqYS2ChTYO8T5m9dV0x9K00gzy6tUY+fE47XZGO4dzGbawY5RsJQnl2CF97MlpkEQuBDCablPVw==}
+    peerDependencies:
+      react: ^19.0.0
+
+  '@starknet-io/get-starknet-virtual-wallet@5.0.0':
+    resolution: {integrity: sha512-ne9Svr0tHj7a5OJOvC82ewth/GJTa78Gal/iiiRzQmvIDpZcu+nzrPAi350RKEtErxjG5rZSPv2DLz7VBClN0Q==}
+
+  '@starknet-io/get-starknet-wallet-standard@5.0.0':
+    resolution: {integrity: sha512-isDNGDlp16W24HE4IuweYXLDRZN0JbsDnazAieeKXE87Mn+jqhsjgTsMxcwWTjX7v906Bjz39FiDjGUddnr36g==}
+
   '@starknet-io/get-starknet-wallet-standard@5.0.0-beta.0':
     resolution: {integrity: sha512-1QBmWnd76KzKwnVlRXLh58wtd1e0P5fyOhs0bCCjivTpGJ2nUPRvTgmzVJStNBcuQ7617UfB5qIyBnkig31TmQ==}
+
+  '@starknet-io/get-starknet-wallets@5.0.0':
+    resolution: {integrity: sha512-fuywFgoal4Al2KdFQCNTYgioK0ubu3cP+mM6OxE8ti78Nmd9ySlh78LwdKNXIp2Alq4kaQ5XMf6HMgkStCWhkw==}
+
+  '@starknet-io/types-js@0.10.0':
+    resolution: {integrity: sha512-7ALSydz6pq3YIOpq5a7OkkxqwJciMc9Nlph0OGjhcC3xX0xH30XgizmziLyYVN10oO9+BJk8M9KbJjpzdbtRSw==}
+
+  '@starknet-io/types-js@0.10.2':
+    resolution: {integrity: sha512-AtUFPYdmo9DqVus++aBSoY9W13/2PZmillPr8/mXZjc+V0iYJ/QTmkTsbw+es2mnLeLhYWSymW9ivQzyyyKdog==}
 
   '@starknet-io/types-js@0.7.10':
     resolution: {integrity: sha512-1VtCqX4AHWJlRRSYGSn+4X1mqolI1Tdq62IwzoU2vUuEE72S1OlEeGhpvd6XsdqXcfHmVzYfj8k1XtKBQqwo9w==}
@@ -3144,6 +3211,29 @@ packages:
       get-starknet-core: ^4.0.0
       react: ^19.0.0
       starknet: ^8.1.2
+
+  '@starknet-start/chains@1.0.7':
+    resolution: {integrity: sha512-q1lrzBX0ovsr1f7NZCd93WUbcoyora9HB+68BML0YGiBZYvzXsoBsqrr+IQBhgOJJ3BvCLwLh3Awfw1pfvqaZw==}
+
+  '@starknet-start/explorers@1.0.7':
+    resolution: {integrity: sha512-7ofXMgIRj6FcmDb5ZwoZPNabkeYEJNr1+gnO/XrxVNFlx6YCuK8Bdhj/fDI+9eewj3cb3ZCFw9+qwdi3kbp33A==}
+
+  '@starknet-start/providers@1.0.7':
+    resolution: {integrity: sha512-m0muVgOoFkSJtkrGcJp3XpT9bJEmv8hAYiK7FdnMU/O5F8nxOPuP6eKiyCiWMZdgm17CcB3d1p+/0+24bj6KwQ==}
+
+  '@starknet-start/query@1.0.7':
+    resolution: {integrity: sha512-jtqX4A9UXoYHOp4pbw7KVoNzhPbgXCnsOSwtFBgc4pz58Z1bAdi/5nx+iqhF97Mv33sSuGgXiN4RqXzx4TpyMw==}
+    peerDependencies:
+      starknet: ^9.4.2
+
+  '@starknet-start/react@1.0.8':
+    resolution: {integrity: sha512-tJy6KHtQPiEXI15Krh55TFDLT3ip0UG2pHyuySslhtKNFVG2e9nfLNb2Qgh/vp5eWA9I5zSEdHhoqndekhKgnQ==}
+    peerDependencies:
+      '@starknet-io/get-starknet-core': '>=5.0.0'
+      '@starknet-io/get-starknet-modal': '>=5.0.0'
+      '@starknet-io/get-starknet-wallet-standard': ^5.0.0
+      react: ^19.0.0
+      starknet: '>=9.0.0'
 
   '@storybook/addon-docs@10.2.8':
     resolution: {integrity: sha512-cEoWqQrLzrxOwZFee5zrD4cYrdEWKV80POb7jUZO0r5vfl2DuslIr3n/+RfLT52runCV4aZcFEfOfP/IWHNPxg==}
@@ -5715,8 +5805,8 @@ packages:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
 
-  lossless-json@4.2.0:
-    resolution: {integrity: sha512-bsHH3x+7acZfqokfn9Ks/ej96yF/z6oGGw1aBmXesq4r3fAjhdG4uYuqzDgZMk5g1CZUd5w3kwwIp9K1LOYUiA==}
+  lossless-json@4.3.0:
+    resolution: {integrity: sha512-ToxOC+SsduRmdSuoLZLYAr5zy1Qu7l5XhmPWM3zefCZ5IcrzW/h108qbJUKfOlDlhvhjUK84+8PSVX0kxnit0g==}
 
   loupe@3.2.1:
     resolution: {integrity: sha512-CdzqowRJCeLU72bHvWqwRBBlLcMEtIvGrlvef74kMnV2AolS9Y8xUv1I0U/MNAWMhBlKIoyuEgoJ0t/bbwHbLQ==}
@@ -6072,8 +6162,8 @@ packages:
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
 
-  pako@2.1.0:
-    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+  pako@2.2.0:
+    resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -6726,8 +6816,16 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
+  starknet@10.0.2:
+    resolution: {integrity: sha512-bXdmvHiQ60XpwPb5mNOPfGg4MS+ppLiHj83yvhNnc+kDGyuYUUrnfZEU9O53/WFU8nP9XUtn0RwJpf47aafyKA==}
+    engines: {node: '>=22'}
+
   starknet@8.5.4:
     resolution: {integrity: sha512-nlD6C+98lxRdSPX9jT+Z+/Hw8o5IhBMCY2gauWjnvU/fd4Y9kWxfgIo2mRGCW1oq9aeQAJasoebbmXlKBhcOPA==}
+    engines: {node: '>=22'}
+
+  starknet@9.4.2:
+    resolution: {integrity: sha512-NFtg077DjddHUSh8sLZ5uB149LEF4NR90FuJ0oF7+zhce7l0oG9Ubqr3H4+jHm/ghHtV+yjlv1UhEoo4SBfILA==}
     engines: {node: '>=22'}
 
   std-env@3.9.0:
@@ -8907,16 +9005,6 @@ snapshots:
   '@csstools/css-tokenizer@3.0.4':
     optional: true
 
-  '@dojoengine/core@1.8.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
-      starknet: 8.5.4
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - bufferutil
-      - typescript
-      - utf-8-validate
-
   '@dojoengine/core@1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)':
     dependencies:
       '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -8927,9 +9015,19 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@dojoengine/grpc@1.8.7(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)':
+  '@dojoengine/core@2.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)':
     dependencies:
-      '@effect/opentelemetry': 0.59.1(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/api@1.9.0)(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(effect@3.19.7)
+      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      starknet: 10.0.2(typescript@5.8.3)(zod@3.25.76)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+
+  '@dojoengine/grpc@1.8.7':
+    dependencies:
+      '@effect/opentelemetry': 0.59.1(@opentelemetry/api@1.9.0)(effect@3.19.7)
       '@grpc/grpc-js': 1.14.0
       '@opentelemetry/api': 1.9.0
       '@protobuf-ts/grpcweb-transport': 2.11.1
@@ -8974,6 +9072,32 @@ snapshots:
       - '@opentelemetry/sdk-trace-web'
       - '@opentelemetry/semantic-conventions'
       - supports-color
+
+  '@dojoengine/grpc@2.0.0(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(typescript@5.8.3)(zod@3.25.76)':
+    dependencies:
+      '@effect/opentelemetry': 0.59.1(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/api@1.9.0)(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(effect@3.19.7)
+      '@grpc/grpc-js': 1.14.0
+      '@opentelemetry/api': 1.9.0
+      '@protobuf-ts/grpcweb-transport': 2.11.1
+      '@protobuf-ts/plugin': 2.11.1
+      '@protobuf-ts/runtime': 2.11.1
+      '@protobuf-ts/runtime-rpc': 2.11.1
+      effect: 3.19.7
+      google-protobuf: 3.21.4
+      grpc-web: 1.5.0
+      starknet: 10.0.2(typescript@5.8.3)(zod@3.25.76)
+    transitivePeerDependencies:
+      - '@effect/platform'
+      - '@opentelemetry/resources'
+      - '@opentelemetry/sdk-logs'
+      - '@opentelemetry/sdk-metrics'
+      - '@opentelemetry/sdk-trace-base'
+      - '@opentelemetry/sdk-trace-node'
+      - '@opentelemetry/sdk-trace-web'
+      - '@opentelemetry/semantic-conventions'
+      - supports-color
+      - typescript
+      - zod
 
   '@dojoengine/react@1.8.11(c998c8033210fb011698e80132fb45f4)':
     dependencies:
@@ -9035,9 +9159,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/recs@2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
+  '@dojoengine/recs@2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)':
     dependencies:
-      '@latticexyz/schema-type': 2.0.12(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@latticexyz/schema-type': 2.0.12(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@latticexyz/utils': 2.0.12
       mobx: 6.13.7
       rxjs: 7.5.5
@@ -9047,40 +9171,15 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/sdk@1.9.0(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
+  '@dojoengine/recs@2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
-      '@dojoengine/core': 1.8.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@dojoengine/grpc': 1.8.7(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
-      '@dojoengine/state': 1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
-      '@dojoengine/torii-client': 1.8.2
-      '@dojoengine/torii-wasm': 1.8.2
-      '@dojoengine/utils': 1.8.4(bufferutil@4.0.9)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@starknet-react/chains': 5.0.1
-      '@starknet-react/core': 5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      '@tanstack/react-query': 5.90.2(react@19.2.1)
-      '@types/react': 19.2.7
-      '@types/react-dom': 19.2.3(@types/react@19.2.7)
-      effect: 3.19.7
-      immer: 10.1.3
-      neverthrow: 8.2.0
-      react: 19.2.1
-      react-dom: 19.2.1(react@19.2.1)
-      starknet: 8.5.4
-      zustand: 4.5.7(@types/react@19.2.7)(immer@10.1.3)(react@19.2.1)
+      '@latticexyz/schema-type': 2.0.12(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@latticexyz/utils': 2.0.12
+      mobx: 6.13.7
+      rxjs: 7.5.5
     transitivePeerDependencies:
-      - '@effect/platform'
-      - '@opentelemetry/resources'
-      - '@opentelemetry/sdk-logs'
-      - '@opentelemetry/sdk-metrics'
-      - '@opentelemetry/sdk-trace-base'
-      - '@opentelemetry/sdk-trace-node'
-      - '@opentelemetry/sdk-trace-web'
-      - '@opentelemetry/semantic-conventions'
       - bufferutil
-      - get-starknet-core
-      - supports-color
       - typescript
-      - use-sync-external-store
       - utf-8-validate
       - zod
 
@@ -9124,7 +9223,7 @@ snapshots:
   '@dojoengine/sdk@1.9.0(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
     dependencies:
       '@dojoengine/core': 1.8.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
-      '@dojoengine/grpc': 1.8.7(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)
+      '@dojoengine/grpc': 1.8.7
       '@dojoengine/state': 1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)
       '@dojoengine/torii-client': 1.8.2
       '@dojoengine/torii-wasm': 1.8.2
@@ -9158,17 +9257,41 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@dojoengine/state@1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
+  '@dojoengine/sdk@2.0.0(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(@tanstack/react-query@5.90.2(react@19.2.1))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(bufferutil@4.0.9)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
-      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@dojoengine/core': 2.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@dojoengine/grpc': 2.0.0(@effect/platform@0.93.4(effect@3.19.7))(@opentelemetry/resources@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-node@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-web@2.2.0(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.38.0)(typescript@5.8.3)(zod@3.25.76)
+      '@dojoengine/state': 2.0.0(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)
       '@dojoengine/torii-client': 1.8.2
+      '@dojoengine/torii-wasm': 1.8.2
+      '@dojoengine/utils': 2.0.0(bufferutil@4.0.9)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-core': 5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-modal': 5.0.0(bufferutil@4.0.9)(react@19.2.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-start/chains': 1.0.7
+      '@starknet-start/providers': 1.0.7(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-start/react': 1.0.8(@starknet-io/get-starknet-core@5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(@starknet-io/get-starknet-modal@5.0.0(bufferutil@4.0.9)(react@19.2.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(@starknet-io/get-starknet-wallet-standard@5.0.0(typescript@5.8.3)(zod@3.25.76))(bufferutil@4.0.9)(react@19.2.1)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@tanstack/react-query': 5.90.2(react@19.2.1)
+      '@types/react': 19.2.7
+      '@types/react-dom': 19.2.3(@types/react@19.2.7)
+      effect: 3.19.7
       immer: 10.1.3
-      starknet: 8.5.4
-      zustand: 5.0.8(@types/react@19.2.7)(immer@10.1.3)(react@19.2.1)(use-sync-external-store@1.5.0(react@19.2.1))
+      neverthrow: 8.2.0
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+      starknet: 10.0.2(typescript@5.8.3)(zod@3.25.76)
+      zustand: 4.5.7(@types/react@19.2.7)(immer@10.1.3)(react@19.2.1)
     transitivePeerDependencies:
-      - '@types/react'
+      - '@effect/platform'
+      - '@opentelemetry/resources'
+      - '@opentelemetry/sdk-logs'
+      - '@opentelemetry/sdk-metrics'
+      - '@opentelemetry/sdk-trace-base'
+      - '@opentelemetry/sdk-trace-node'
+      - '@opentelemetry/sdk-trace-web'
+      - '@opentelemetry/semantic-conventions'
       - bufferutil
-      - react
+      - supports-color
       - typescript
       - use-sync-external-store
       - utf-8-validate
@@ -9176,7 +9299,7 @@ snapshots:
 
   '@dojoengine/state@1.8.5(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)':
     dependencies:
-      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@dojoengine/torii-client': 1.8.2
       immer: 10.1.3
       starknet: 8.5.4
@@ -9206,28 +9329,31 @@ snapshots:
       - utf-8-validate
       - zod
 
+  '@dojoengine/state@2.0.0(@types/react@19.2.7)(bufferutil@4.0.9)(react@19.2.1)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.2.1))(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@dojoengine/torii-client': 1.8.2
+      immer: 10.1.3
+      starknet: 10.0.2(typescript@5.8.3)(zod@3.25.76)
+      zustand: 5.0.8(@types/react@19.2.7)(immer@10.1.3)(react@19.2.1)(use-sync-external-store@1.5.0(react@19.2.1))
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - react
+      - typescript
+      - use-sync-external-store
+      - utf-8-validate
+      - zod
+
   '@dojoengine/torii-client@1.8.2':
     dependencies:
       '@dojoengine/torii-wasm': 1.8.2
 
   '@dojoengine/torii-wasm@1.8.2': {}
 
-  '@dojoengine/utils@1.8.4(bufferutil@4.0.9)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
-      '@latticexyz/utils': 2.2.23
-      mathjs: 12.4.3
-      micro-starknet: 0.2.3
-      starknet: 8.5.4
-    transitivePeerDependencies:
-      - bufferutil
-      - typescript
-      - utf-8-validate
-      - zod
-
   '@dojoengine/utils@1.8.4(bufferutil@4.0.9)(starknet@8.5.4)(typescript@5.9.2)(utf-8-validate@5.0.10)':
     dependencies:
-      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
       '@latticexyz/utils': 2.2.23
       mathjs: 12.4.3
       micro-starknet: 0.2.3
@@ -9245,6 +9371,19 @@ snapshots:
       mathjs: 12.4.3
       micro-starknet: 0.2.3
       starknet: 8.5.4
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@dojoengine/utils@2.0.0(bufferutil@4.0.9)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@dojoengine/recs': 2.0.13(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@latticexyz/utils': 2.2.23
+      mathjs: 12.4.3
+      micro-starknet: 0.2.3
+      starknet: 10.0.2(typescript@5.8.3)(zod@3.25.76)
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -9310,6 +9449,12 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-node': 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-web': 2.2.0(@opentelemetry/api@1.9.0)
+
+  '@effect/opentelemetry@0.59.1(@opentelemetry/api@1.9.0)(effect@3.19.7)':
+    dependencies:
+      effect: 3.19.7
+    optionalDependencies:
+      '@opentelemetry/api': 1.9.0
 
   '@effect/platform@0.93.4(effect@3.19.7)':
     dependencies:
@@ -9734,6 +9879,16 @@ snapshots:
       - utf-8-validate
       - zod
 
+  '@latticexyz/schema-type@2.0.12(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)':
+    dependencies:
+      abitype: 1.0.0(typescript@5.9.2)
+      viem: 2.9.20(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
   '@latticexyz/schema-type@2.0.12(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
       abitype: 1.0.0(typescript@5.9.2)(zod@3.25.76)
@@ -9796,11 +9951,26 @@ snapshots:
       '@types/react': 19.2.7
       react: 19.2.1
 
+  '@module-federation/error-codes@0.12.0': {}
+
+  '@module-federation/runtime-core@0.12.0':
+    dependencies:
+      '@module-federation/error-codes': 0.12.0
+      '@module-federation/sdk': 0.12.0
+
   '@module-federation/runtime@0.1.21':
     dependencies:
       '@module-federation/sdk': 0.1.21
 
+  '@module-federation/runtime@0.12.0':
+    dependencies:
+      '@module-federation/error-codes': 0.12.0
+      '@module-federation/runtime-core': 0.12.0
+      '@module-federation/sdk': 0.12.0
+
   '@module-federation/sdk@0.1.21': {}
+
+  '@module-federation/sdk@0.12.0': {}
 
   '@msgpack/msgpack@3.1.2': {}
 
@@ -11046,6 +11216,67 @@ snapshots:
       '@starknet-io/types-js': 0.7.10
       async-mutex: 0.5.0
 
+  '@starknet-io/get-starknet-core@5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@starknet-io/get-starknet-discovery': 5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-virtual-wallet': 5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallets': 5.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@starknet-io/get-starknet-discovery@5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@starknet-io/get-starknet-virtual-wallet': 5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/types-js': 0.7.10
+      '@wallet-standard/base': 1.1.0
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@starknet-io/get-starknet-modal@5.0.0(bufferutil@4.0.9)(react@19.2.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@starknet-io/get-starknet-discovery': 5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallets': 5.0.0
+      react: 19.2.1
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@starknet-io/get-starknet-virtual-wallet@5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@module-federation/runtime': 0.12.0
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/types-js': 0.7.10
+      '@wallet-standard/base': 1.1.0
+      '@wallet-standard/features': 1.1.0
+      async-mutex: 0.5.0
+      viem: 2.37.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@starknet-io/get-starknet-wallet-standard@5.0.0(typescript@5.8.3)(zod@3.25.76)':
+    dependencies:
+      '@starknet-io/types-js': 0.7.10
+      '@wallet-standard/base': 1.1.0
+      '@wallet-standard/features': 1.1.0
+      ox: 0.4.4(typescript@5.8.3)(zod@3.25.76)
+    transitivePeerDependencies:
+      - typescript
+      - zod
+
   '@starknet-io/get-starknet-wallet-standard@5.0.0-beta.0(typescript@5.9.2)(zod@3.25.76)':
     dependencies:
       '@starknet-io/types-js': 0.7.10
@@ -11055,6 +11286,12 @@ snapshots:
     transitivePeerDependencies:
       - typescript
       - zod
+
+  '@starknet-io/get-starknet-wallets@5.0.0': {}
+
+  '@starknet-io/types-js@0.10.0': {}
+
+  '@starknet-io/types-js@0.10.2': {}
 
   '@starknet-io/types-js@0.7.10': {}
 
@@ -11068,23 +11305,6 @@ snapshots:
 
   '@starknet-react/chains@5.0.1': {}
 
-  '@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.8.3)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@starknet-io/types-js': 0.7.10
-      '@starknet-react/chains': 5.0.1
-      '@tanstack/react-query': 5.90.2(react@19.2.1)
-      abi-wan-kanabi: 2.2.4
-      eventemitter3: 5.0.1
-      get-starknet-core: 4.0.0
-      react: 19.2.1
-      starknet: 8.5.4
-      viem: 2.37.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - bufferutil
-      - typescript
-      - utf-8-validate
-
   '@starknet-react/core@5.0.1(bufferutil@4.0.9)(get-starknet-core@4.0.0)(react@19.2.1)(starknet@8.5.4)(typescript@5.9.2)(utf-8-validate@5.0.10)':
     dependencies:
       '@starknet-io/types-js': 0.7.10
@@ -11096,6 +11316,58 @@ snapshots:
       react: 19.2.1
       starknet: 8.5.4
       viem: 2.37.8(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10)(zod@3.25.76)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+
+  '@starknet-start/chains@1.0.7': {}
+
+  '@starknet-start/explorers@1.0.7':
+    dependencies:
+      '@starknet-start/chains': 1.0.7
+
+  '@starknet-start/providers@1.0.7(typescript@5.8.3)(zod@3.25.76)':
+    dependencies:
+      '@starknet-start/chains': 1.0.7
+      starknet: 9.4.2(typescript@5.8.3)(zod@3.25.76)
+    transitivePeerDependencies:
+      - typescript
+      - zod
+
+  '@starknet-start/query@1.0.7(bufferutil@4.0.9)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@starknet-io/get-starknet-core': 5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/types-js': 0.10.2
+      '@starknet-start/chains': 1.0.7
+      abi-wan-kanabi: 2.2.4
+      starknet: 10.0.2(typescript@5.8.3)(zod@3.25.76)
+      viem: 2.37.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@starknet-start/react@1.0.8(@starknet-io/get-starknet-core@5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(@starknet-io/get-starknet-modal@5.0.0(bufferutil@4.0.9)(react@19.2.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))(@starknet-io/get-starknet-wallet-standard@5.0.0(typescript@5.8.3)(zod@3.25.76))(bufferutil@4.0.9)(react@19.2.1)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@starknet-io/get-starknet-core': 5.0.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-modal': 5.0.0(bufferutil@4.0.9)(react@19.2.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/types-js': 0.10.2
+      '@starknet-start/chains': 1.0.7
+      '@starknet-start/explorers': 1.0.7
+      '@starknet-start/providers': 1.0.7(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-start/query': 1.0.7(bufferutil@4.0.9)(starknet@10.0.2(typescript@5.8.3)(zod@3.25.76))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      '@tanstack/react-query': 5.90.2(react@19.2.1)
+      abi-wan-kanabi: 2.2.4
+      eventemitter3: 5.0.1
+      lossless-json: 4.3.0
+      react: 19.2.1
+      starknet: 10.0.2(typescript@5.8.3)(zod@3.25.76)
+      viem: 2.37.8(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       zod: 3.25.76
     transitivePeerDependencies:
       - bufferutil
@@ -12652,6 +12924,10 @@ snapshots:
     optionalDependencies:
       typescript: 5.8.3
       zod: 3.25.76
+
+  abitype@1.0.0(typescript@5.9.2):
+    optionalDependencies:
+      typescript: 5.9.2
 
   abitype@1.0.0(typescript@5.9.2)(zod@3.25.76):
     optionalDependencies:
@@ -14465,7 +14741,7 @@ snapshots:
     dependencies:
       js-tokens: 4.0.0
 
-  lossless-json@4.2.0: {}
+  lossless-json@4.3.0: {}
 
   loupe@3.2.1: {}
 
@@ -14753,6 +15029,20 @@ snapshots:
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
 
+  ox@0.4.4(typescript@5.8.3)(zod@3.25.76):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.1.0(typescript@5.8.3)(zod@3.25.76)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.8.3
+    transitivePeerDependencies:
+      - zod
+
   ox@0.4.4(typescript@5.9.2)(zod@3.25.76):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
@@ -14870,7 +15160,7 @@ snapshots:
 
   package-json-from-dist@1.0.1: {}
 
-  pako@2.1.0: {}
+  pako@2.2.0: {}
 
   parent-module@1.0.1:
     dependencies:
@@ -15521,6 +15811,21 @@ snapshots:
 
   stackback@0.0.2: {}
 
+  starknet@10.0.2(typescript@5.8.3)(zod@3.25.76):
+    dependencies:
+      '@noble/curves': 1.7.0
+      '@noble/hashes': 1.6.1
+      '@scure/base': 1.2.6
+      '@scure/starknet': 1.1.0
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/starknet-types-0101': '@starknet-io/types-js@0.10.2'
+      '@starknet-io/starknet-types-09': '@starknet-io/types-js@0.9.2'
+      abi-wan-kanabi: 2.2.4
+      lossless-json: 4.3.0
+    transitivePeerDependencies:
+      - typescript
+      - zod
+
   starknet@8.5.4:
     dependencies:
       '@noble/curves': 1.7.0
@@ -15530,9 +15835,26 @@ snapshots:
       '@starknet-io/starknet-types-08': '@starknet-io/types-js@0.8.4'
       '@starknet-io/starknet-types-09': '@starknet-io/types-js@0.9.2'
       abi-wan-kanabi: 2.2.4
-      lossless-json: 4.2.0
-      pako: 2.1.0
+      lossless-json: 4.3.0
+      pako: 2.2.0
       ts-mixer: 6.0.4
+
+  starknet@9.4.2(typescript@5.8.3)(zod@3.25.76):
+    dependencies:
+      '@noble/curves': 1.7.0
+      '@noble/hashes': 1.6.1
+      '@scure/base': 1.2.6
+      '@scure/starknet': 1.1.0
+      '@starknet-io/get-starknet-wallet-standard': 5.0.0(typescript@5.8.3)(zod@3.25.76)
+      '@starknet-io/starknet-types-010': '@starknet-io/types-js@0.10.0'
+      '@starknet-io/starknet-types-09': '@starknet-io/types-js@0.9.2'
+      abi-wan-kanabi: 2.2.4
+      lossless-json: 4.3.0
+      pako: 2.2.0
+      ts-mixer: 6.0.4
+    transitivePeerDependencies:
+      - typescript
+      - zod
 
   std-env@3.9.0: {}
 
@@ -16312,6 +16634,23 @@ snapshots:
       ws: 8.13.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.8.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
+  viem@2.9.20(bufferutil@4.0.9)(typescript@5.9.2)(utf-8-validate@5.0.10):
+    dependencies:
+      '@adraffy/ens-normalize': 1.10.0
+      '@noble/curves': 1.2.0
+      '@noble/hashes': 1.3.2
+      '@scure/bip32': 1.3.2
+      '@scure/bip39': 1.2.1
+      abitype: 1.0.0(typescript@5.9.2)
+      isows: 1.0.3(ws@8.13.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      ws: 8.13.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      typescript: 5.9.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
