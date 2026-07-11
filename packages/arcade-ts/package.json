@@ -1,6 +1,9 @@
 {
   "name": "@cartridge/arcade",
   "version": "0.0.0",
+  "engines": {
+    "node": ">=22"
+  },
   "description": "Cartridge Arcade SDK",
   "license": "MIT",
   "repository": {
@@ -50,6 +53,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:edge:smoke": "vitest run --config vitest.edge.config.ts",
+    "test:pack": "node scripts/test-packed-consumers.mjs",
     "test:integration": "RUN_INTEGRATION_TESTS=true vitest run --config vitest.integration.config.ts",
     "docs": "cd www && npm run start",
     "docs:build": "cd www && GIT_REVISION_OVERRIDE=${npm_config_git_revision_override} npm run build",
@@ -71,18 +75,18 @@
   "keywords": [],
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",
   "dependencies": {
-    "@dojoengine/core": "catalog:",
-    "@dojoengine/grpc": "catalog:",
-    "@dojoengine/sdk": "catalog:",
-    "@dojoengine/torii-client": "catalog:",
-    "@dojoengine/torii-wasm": "catalog:",
-    "@starknet-io/types-js": "^0.9.1",
+    "@dojoengine/core": "2.0.0",
+    "@dojoengine/grpc": "2.0.0",
+    "@dojoengine/sdk": "2.0.0",
+    "@dojoengine/torii-client": "1.8.2",
+    "@dojoengine/torii-wasm": "1.8.2",
+    "@starknet-io/types-js": "0.10.2",
     "eventemitter3": "^5.0.1",
-    "starknet": "catalog:"
+    "starknet": "10.0.2"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.0.0",
-    "react": "^18.0.0 || ^19.0.0-0"
+    "react": "^19.0.0"
   },
   "devDependencies": {
     "@tanstack/react-query": "^5.85.3",

@@ -17,6 +17,11 @@ export const getMarketplacePolicies = (
 ) => {
   const config = configs[chainId];
   const contract = getContractByName(config.manifest, NAMESPACE, CONTRACT_NAME);
+
+  if (!contract) {
+    throw new Error(`Missing ${NAMESPACE}-${CONTRACT_NAME} contract`);
+  }
+
   return {
     contracts: {
       [contract.address]: {

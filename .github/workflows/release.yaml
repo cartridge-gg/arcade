@@ -10,6 +10,9 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,37 +25,44 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: "24.x"
           registry-url: "https://registry.npmjs.org/"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Install NPM Package
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: pnpm install
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+
+      - name: Validate release version
+        run: node .github/scripts/assert-release-version.mjs "$RELEASE_VERSION"
+        env:
+          RELEASE_VERSION: ${{ github.event.client_payload.version }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build NPM Package
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: pnpm run build
+        run: pnpm --filter @cartridge/arcade build
+
+      - name: Test packed Arcade consumers
+        run: pnpm --filter @cartridge/arcade test:pack
 
       - name: Prepare NPM Package
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: |
-          pnpm pkg set name=@cartridge/arcade
-          pnpm pkg set version=${{ github.event.client_payload.version }}
-          pnpm pkg set files='["*.js", "*.wasm", "*.d.ts"]'
-          pnpm pkg set main=arcade.js
-          pnpm pkg set types=arcade.d.ts
-          pnpm pkg set repository=https://github.com/cartridge-gg/arcade
-          pnpm pkg set license=MIT
+        run: pnpm pkg set "version=$RELEASE_VERSION"
+        env:
+          RELEASE_VERSION: ${{ github.event.client_payload.version }}
 
       - name: Publish to NPM
         if: ${{ !github.event.client_payload.dry_run }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: pnpm publish --no-git-checks --access public --tag ${{ github.event.client_payload.tag }}
+        run: pnpm publish --no-git-checks --access public --tag "$RELEASE_TAG"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+          RELEASE_TAG: ${{ github.event.client_payload.tag }}
 
       - name: Create GitHub Release
         if: ${{ !github.event.client_payload.dry_run }}

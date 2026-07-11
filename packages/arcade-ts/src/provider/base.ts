@@ -64,6 +64,9 @@ const DojoProviderBaseCtor =
   DojoProvider as unknown as DojoProviderConstructorLike;
 
 export class BaseProvider extends DojoProviderBaseCtor {
+  declare manifest: DojoProviderInstanceLike["manifest"] & {
+    abis: readonly Record<string, unknown>[];
+  };
   protected readonly namespace: string;
   protected readonly toriiCtor: ToriiClientCtor;
 
