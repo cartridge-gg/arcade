@@ -186,7 +186,10 @@ export async function defaultResolveTokenImage(
     return undefined;
   }
 
-  const url = `https://api.cartridge.gg/x/${projectId}/torii/static/${addAddressPadding(token.contract_address)}/${addAddressPadding(token.token_id)}/image`;
+  const contractAddress = getChecksumAddress(
+    token.contract_address,
+  ).toLowerCase();
+  const url = `https://api.cartridge.gg/x/${projectId}/torii/static/${contractAddress}/${addAddressPadding(token.token_id)}/image`;
   return fetchImage ? fetchToriiStatic(url) : url;
 }
 
@@ -197,6 +200,9 @@ export async function defaultResolveContractImage(
   const { projectId } = context;
   if (!contract.contract_address) return undefined;
 
-  const url = `https://api.cartridge.gg/x/${projectId}/torii/static/${addAddressPadding(contract.contract_address)}/image`;
+  const contractAddress = getChecksumAddress(
+    contract.contract_address,
+  ).toLowerCase();
+  const url = `https://api.cartridge.gg/x/${projectId}/torii/static/${contractAddress}/image`;
   return fetchToriiStatic(url);
 }

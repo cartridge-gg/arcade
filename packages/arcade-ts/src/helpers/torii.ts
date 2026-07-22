@@ -1,3 +1,5 @@
+import { getChecksumAddress } from "starknet";
+
 const TORII_SLOT_BASE = "https://api.cartridge.gg";
 
 export function getToriiUrl(project: string): string {
@@ -27,6 +29,8 @@ export function getToriiAssetUrl(
   contractAddress: string,
   tokenId?: string,
 ): string {
-  const base = `${getToriiUrl(project)}/static/${contractAddress}`;
+  const normalizedContractAddress =
+    getChecksumAddress(contractAddress).toLowerCase();
+  const base = `${getToriiUrl(project)}/static/${normalizedContractAddress}`;
   return tokenId ? `${base}/${tokenId}/image` : `${base}/image`;
 }
