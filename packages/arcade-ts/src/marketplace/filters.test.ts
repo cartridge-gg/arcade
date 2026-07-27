@@ -4,6 +4,8 @@ import {
   buildAvailableFilters,
   buildPrecomputedFilters,
   fetchCollectionTraitMetadata,
+  fetchTraitNamesSummary,
+  fetchTraitValues,
   filterTokensByMetadata,
   flattenActiveFilters,
   tokenMatchesFilters,
@@ -194,5 +196,72 @@ describe("marketplace filters helpers", () => {
     expect(available.Background?.Gold).toBe(50);
     expect(available.Background?.Blue).toBe(20);
     expect(available.Ring?.Gold).toBe(30);
+  });
+
+  it("builds grouped exact-match SQL for multi-select trait filters", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [],
+      errors: [],
+    });
+
+    await fetchCollectionTraitMetadata({
+      address: "0x123",
+      projects: ["arcade-main"],
+      traits: [
+        { name: "Color", value: "Red" },
+        { name: "Color", value: "Blue" },
+        { name: "Background", value: "Gold" },
+      ],
+    });
+
+    const [, sql] = mockedFetchToriisSql.mock.calls[0]!;
+    expect(sql).toContain(
+      "((trait_name = 'Color' AND trait_value = 'Red') OR (trait_name = 'Color' AND trait_value = 'Blue'))",
+    );
+    expect(sql).toContain(
+      "((trait_name = 'Background' AND trait_value = 'Gold'))",
+    );
+    expect(sql).toContain("HAVING COUNT(DISTINCT trait_name) = 2");
+    expect(sql).not.toContain("trait_name LIKE");
+    expect(sql).not.toContain("trait_value LIKE");
+  });
+
+  it("keeps the collection prefix filter outside the OR groups", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [],
+      errors: [],
+    });
+
+    await fetchTraitValues({
+      address: "0x123",
+      traitName: "Color",
+      projects: ["arcade-main"],
+      otherTraitFilters: [
+        { name: "Color", value: "Red" },
+        { name: "Background", value: "Gold" },
+      ],
+    });
+
+    const [, sql] = mockedFetchToriisSql.mock.calls[0]!;
+    expect(sql).toContain(
+      "WHERE (((trait_name = 'Color' AND trait_value = 'Red')) OR ((trait_name = 'Background' AND trait_value = 'Gold')))\n      AND token_id LIKE",
+    );
+  });
+
+  it("uses the simplified trait-name summary query", async () => {
+    mockedFetchToriisSql.mockResolvedValue({
+      data: [],
+      errors: [],
+    });
+
+    await fetchTraitNamesSummary({
+      address: "0x123",
+      projects: ["arcade-main"],
+    });
+
+    const [, sql] = mockedFetchToriisSql.mock.calls[0]!;
+    expect(sql).toContain("FROM token_attributes");
+    expect(sql).not.toContain("token_id IN (");
+    expect(sql).not.toContain("SUM(cnt)");
   });
 });
