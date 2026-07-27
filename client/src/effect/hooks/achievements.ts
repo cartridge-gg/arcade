@@ -5,17 +5,15 @@ import {
   type TrophyProject,
   type TrophyItem,
   type Trophy,
-} from "../atoms/trophies";
+} from "../atoms/trophies-grpc";
 import {
   progressionsDataAtom,
   type ProgressionProject,
   type ProgressionItem,
   type Progress,
-} from "../atoms/progressions";
+} from "../atoms/progressions-grpc";
 import { editionsAtom } from "../atoms/registry";
 import { unwrapOr } from "../utils/result";
-import { getSelectorFromTag } from "@/models";
-import { TROPHY, PROGRESS } from "@/constants";
 import type { Progressions, Trophies } from "@/lib/achievements";
 
 const useTrophyProjects = (): TrophyProject[] => {
@@ -27,7 +25,6 @@ const useTrophyProjects = (): TrophyProject[] => {
       editions.map((e) => ({
         project: e.config.project,
         namespace: e.namespace as string,
-        model: getSelectorFromTag(e.namespace as string, TROPHY),
       })),
     [editions],
   );
@@ -42,7 +39,6 @@ const useProgressionProjects = (): ProgressionProject[] => {
       editions.map((e) => ({
         project: e.config.project,
         namespace: e.namespace as string,
-        model: getSelectorFromTag(e.namespace as string, PROGRESS),
       })),
     [editions],
   );
