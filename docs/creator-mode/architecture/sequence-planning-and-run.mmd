@@ -1,0 +1,52 @@
+sequenceDiagram
+    participant U as User
+    participant UI as Creator UI
+    participant API as Creator API (Go)
+    participant P as Planner Service
+    participant O as Run Orchestrator
+    participant K as K8s Sandbox Controller
+    participant H as Harness Adapter
+    participant GH as GitHub
+    participant DB as Postgres
+
+    U->>UI: Create project
+    UI->>API: POST /v1/creator/projects
+    API->>GH: Provision repo from template
+    API->>DB: Insert creator_projects
+    API-->>UI: project_id + repo URL
+
+    U->>UI: Start planning session
+    UI->>API: POST /plan/sessions
+    API->>P: create session
+    P->>DB: insert plan_session + plan_version
+    API-->>UI: session_id
+
+    loop Clarification loop
+      U->>UI: answer clarification
+      UI->>API: POST /messages
+      API->>P: process message
+      P->>DB: persist next plan_version
+      API-->>UI: next question or ready
+    end
+
+    U->>UI: Approve plan
+    UI->>API: POST /approve
+    API->>DB: mark session approved
+
+    U->>UI: Execute run (select harness)
+    UI->>API: POST /runs
+    API->>O: enqueue run
+    O->>DB: insert run + steps
+    O->>K: launch job
+    K->>DB: create sandbox_lease
+
+    O->>H: execute step
+    H-->>O: progress + usage
+    O->>GH: commit changes + open PR
+    O->>DB: persist events, steps, usage
+    API-->>UI: SSE events stream
+
+    O->>O: build/test/deploy devnet+sepolia
+    O->>DB: deployment records + artifacts
+    O-->>API: run succeeded
+    API-->>UI: final state + outputs

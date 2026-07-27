@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: creator-run-{{ .RunID }}
+  labels:
+    app: creator-mode
+    creator.run_id: "{{ .RunID }}"
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 600
+  activeDeadlineSeconds: 7200
+  template:
+    metadata:
+      labels:
+        app: creator-mode
+        creator.run_id: "{{ .RunID }}"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: runner
+          image: ghcr.io/cartridge-gg/creator-runner:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: RUN_ID
+              value: "{{ .RunID }}"
+            - name: PROJECT_ID
+              value: "{{ .ProjectID }}"
+            - name: HARNESS
+              value: "{{ .Harness }}"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+              ephemeral-storage: "5Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+              ephemeral-storage: "20Gi"
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+      volumes:
+        - name: workspace
+          emptyDir:
+            sizeLimit: 20Gi
