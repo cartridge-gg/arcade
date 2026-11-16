@@ -4,6 +4,19 @@
   "git": {
     "deploymentEnabled": true
   },
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "play.cartridge.gg"
+        }
+      ],
+      "destination": "https://dangoderby.com/",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/ingest/static/:path(.*)",
